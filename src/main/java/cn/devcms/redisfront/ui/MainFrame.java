@@ -42,6 +42,7 @@ public class MainFrame extends JXFrame {
 //                "[fill]",
 //                // rows
 //                "[fill]"));
+        setMinimumSize(new Dimension(960,600));
         container.setLayout(new BorderLayout());
         mainSplitPane = new JSplitPane();
         mainLeftForm = new MainLeftForm();
@@ -75,6 +76,8 @@ public class MainFrame extends JXFrame {
                 menuC.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
+                        settingDialog.setMinimumSize(new Dimension(500,400));
+                        settingDialog.setResizable(false);
                         settingDialog.setLocationRelativeTo(MainFrame.this);
                         settingDialog.pack();
                         settingDialog.setVisible(true);
