@@ -26,7 +26,7 @@ public class RedisFrontApplication {
 
 
         SwingUtilities.invokeLater(() -> {
-            FlatLightLaf.setup(new FlatDarkLaf());
+            FlatLightLaf.setup(new FlatLightLaf());
             FlatInspector.install( "ctrl shift alt X" );
             FlatUIDefaultsInspector.install( "ctrl shift alt Y" );
             MainFrame frame = new MainFrame();
