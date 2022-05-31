@@ -32,6 +32,7 @@ public class MainLeftForm {
         tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, TABBED_PANE_TAB_TYPE_CARD);
         tabPanel.addTab(null, new FlatSVGIcon("icons/icon_home.svg"), null);
         tabPanel.addTab(null, new FlatSVGIcon("icons/icon_db.svg"), null);
+        tabPanel.addTab(null, new FlatSVGIcon("icons/icon_command.svg"), null);
         tabPanel.addTab(null, new FlatSVGIcon("icons/icon_dashboard.svg"), null);
 
     }
