@@ -1,10 +1,12 @@
 package cn.devcms.redisfront;
 
-import cn.devcms.redisfront.ui.MainFrame;
-import com.formdev.flatlaf.FlatDarkLaf;
+import cn.devcms.redisfront.ui.frame.MainFrame;
+import cn.devcms.redisfront.utils.DemoPrefs;
+import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.extras.FlatInspector;
 import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
+import com.formdev.flatlaf.intellijthemes.FlatDraculaIJTheme;
 import com.formdev.flatlaf.util.SystemInfo;
 
 import javax.swing.*;
@@ -24,9 +26,10 @@ public class RedisFrontApplication {
         if( RedisFrontApplication.screenshotsMode && !SystemInfo.isJava_9_orLater && System.getProperty( "flatlaf.uiScale" ) == null )
             System.setProperty( "flatlaf.uiScale", "2x" );
 
+        FlatLaf.registerCustomDefaultsSource( "cn.devcms.redisfront" );
 
         SwingUtilities.invokeLater(() -> {
-            FlatLightLaf.setup(new FlatLightLaf());
+            FlatLightLaf.setup(new FlatDraculaIJTheme());
             FlatInspector.install( "ctrl shift alt X" );
             FlatUIDefaultsInspector.install( "ctrl shift alt Y" );
             MainFrame frame = new MainFrame();

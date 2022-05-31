@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class Config {
+public class ConfigInfo {
 
     private String fontName;
     private String fontSize;

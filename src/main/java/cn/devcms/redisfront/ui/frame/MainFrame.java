@@ -1,4 +1,4 @@
-package cn.devcms.redisfront.ui;
+package cn.devcms.redisfront.ui.frame;
 
 import cn.devcms.redisfront.ui.dialog.AddConnectDialog;
 import cn.devcms.redisfront.ui.dialog.SettingDialog;

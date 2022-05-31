@@ -3,7 +3,7 @@
   <grid id="cbd77" binding="contentPane" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="10" left="10" bottom="10" right="10"/>
     <constraints>
-      <xy x="48" y="54" width="526" height="297"/>
+      <xy x="48" y="54" width="625" height="297"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -57,7 +57,7 @@
         <properties/>
         <border type="none"/>
         <children>
-          <grid id="ccd44" binding="themePanel" custom-create="true" layout-manager="GridLayoutManager" row-count="1" column-count="6" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="ccd44" binding="themePanel" custom-create="true" layout-manager="GridLayoutManager" row-count="1" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -65,34 +65,18 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="2a418" class="javax.swing.JLabel">
-                <constraints>
-                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text value="类型"/>
-                </properties>
-              </component>
-              <component id="9d86" class="javax.swing.JComboBox" binding="comboBox3" default-binding="true">
-                <constraints>
-                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                    <minimum-size width="180" height="-1"/>
-                  </grid>
-                </constraints>
-                <properties/>
-              </component>
               <component id="a3ef2" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <text value="风格"/>
                 </properties>
               </component>
-              <component id="19ccf" class="javax.swing.JComboBox" binding="comboBox4" default-binding="true">
+              <component id="19ccf" class="javax.swing.JComboBox" binding="themeNameComboBox" custom-create="true">
                 <constraints>
-                  <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                    <minimum-size width="180" height="-1"/>
+                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                    <minimum-size width="380" height="-1"/>
                   </grid>
                 </constraints>
                 <properties/>
@@ -104,7 +88,7 @@
               </hspacer>
               <hspacer id="f7bd9">
                 <constraints>
-                  <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
               </hspacer>
             </children>
@@ -177,7 +161,7 @@
                   <text value="字体"/>
                 </properties>
               </component>
-              <component id="aca43" class="javax.swing.JComboBox" binding="comboBox1" default-binding="true">
+              <component id="aca43" class="javax.swing.JComboBox" binding="fontNameComboBox">
                 <constraints>
                   <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false">
                     <minimum-size width="180" height="-1"/>
@@ -193,7 +177,7 @@
                   <text value="字号"/>
                 </properties>
               </component>
-              <component id="ab57f" class="javax.swing.JComboBox" binding="comboBox2" default-binding="true">
+              <component id="ab57f" class="javax.swing.JComboBox" binding="fontSizeComboBox">
                 <constraints>
                   <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false">
                     <minimum-size width="180" height="-1"/>
