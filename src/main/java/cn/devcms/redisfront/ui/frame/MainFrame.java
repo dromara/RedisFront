@@ -9,6 +9,7 @@ import com.formdev.flatlaf.extras.FlatDesktop;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.FlatSVGUtils;
 import com.formdev.flatlaf.extras.components.FlatButton;
+import com.formdev.flatlaf.util.SystemInfo;
 import org.jdesktop.swingx.JXFrame;
 
 import javax.swing.*;
@@ -42,7 +43,7 @@ public class MainFrame extends JXFrame {
 //                "[fill]",
 //                // rows
 //                "[fill]"));
-        setMinimumSize(new Dimension(960,600));
+
         container.setLayout(new BorderLayout());
         mainSplitPane = new JSplitPane();
         mainLeftForm = new MainLeftForm();

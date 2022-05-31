@@ -1,19 +1,16 @@
 package cn.devcms.redisfront;
 
 import cn.devcms.redisfront.ui.frame.MainFrame;
-import cn.devcms.redisfront.utils.DemoPrefs;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.extras.FlatInspector;
 import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
-import com.formdev.flatlaf.intellijthemes.FlatDraculaIJTheme;
 import com.formdev.flatlaf.util.SystemInfo;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class RedisFrontApplication {
-
-    static boolean screenshotsMode = Boolean.parseBoolean( System.getProperty( "flatlaf.demo.screenshotsMode" ) );
 
     public static void main(String[] args) {
 
@@ -23,16 +20,23 @@ public class RedisFrontApplication {
             System.setProperty("apple.awt.application.appearance", "system");
         }
 
-        if( RedisFrontApplication.screenshotsMode && !SystemInfo.isJava_9_orLater && System.getProperty( "flatlaf.uiScale" ) == null )
-            System.setProperty( "flatlaf.uiScale", "2x" );
+        if (SystemInfo.isLinux) {
+            JFrame.setDefaultLookAndFeelDecorated(true);
+            JDialog.setDefaultLookAndFeelDecorated(true);
+        }
 
-        FlatLaf.registerCustomDefaultsSource( "cn.devcms.redisfront" );
+        if (!SystemInfo.isJava_9_orLater && System.getProperty("flatlaf.uiScale") == null)
+            System.setProperty("flatlaf.uiScale", "2x");
+
+        FlatLaf.registerCustomDefaultsSource("cn.devcms.redisfront");
+
 
         SwingUtilities.invokeLater(() -> {
-            FlatLightLaf.setup(new FlatDraculaIJTheme());
-            FlatInspector.install( "ctrl shift alt X" );
-            FlatUIDefaultsInspector.install( "ctrl shift alt Y" );
+            FlatLightLaf.setup(new FlatLightLaf());
+            FlatInspector.install("ctrl shift alt X");
+            FlatUIDefaultsInspector.install("ctrl shift alt Y");
             MainFrame frame = new MainFrame();
+            frame.setMinimumSize(new Dimension(960, 600));
             frame.pack();
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);

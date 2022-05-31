@@ -1,4 +1,4 @@
-package cn.devcms.redisfront.ui.theme;
+package cn.devcms.redisfront.model;
 
 
 import java.io.File;
