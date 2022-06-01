@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 import static com.formdev.flatlaf.FlatClientProperties.*;
@@ -14,6 +15,8 @@ public class MainLeftForm {
     private JButton addBtn;
     private JLabel iconBtn;
     private JButton refreshBtn;
+
+    private HomeForm homeForm;
 
 
     public JPanel getContentPanel() {
@@ -28,12 +31,19 @@ public class MainLeftForm {
         refreshBtn = new JButton();
         refreshBtn.setIcon(new FlatSVGIcon("icons/refresh.svg"));
         tabPanel = new JTabbedPane();
+
         tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.TOP);
+        tabPanel.putClientProperty(TABBED_PANE_SHOW_TAB_SEPARATORS, true);
+        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, TABBED_PANE_ALIGN_LEADING);
         tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, TABBED_PANE_TAB_TYPE_CARD);
-        tabPanel.addTab(null, new FlatSVGIcon("icons/icon_home.svg"), null);
-        tabPanel.addTab(null, new FlatSVGIcon("icons/icon_db.svg"), null);
-        tabPanel.addTab(null, new FlatSVGIcon("icons/icon_command.svg"), null);
-        tabPanel.addTab(null, new FlatSVGIcon("icons/icon_dashboard.svg"), null);
+
+        JLabel label = new JLabel(new FlatSVGIcon("icons/icon_home.svg"), JLabel.CENTER);
+        label.setBorder(new EmptyBorder(10, 0, 10, 0));
+//        tabPanel.putClientProperty(TABBED_PANE_LEADING_COMPONENT, label);
+        tabPanel.addTab(null, new FlatSVGIcon("icons/icon_home.svg"), new HomeForm(tabPanel).$$$getRootComponent$$$());
+        tabPanel.addTab(null, new FlatSVGIcon("icons/icon_db.svg"), new JPanel());
+        tabPanel.addTab(null, new FlatSVGIcon("icons/icon_command.svg"), new JPanel());
+        tabPanel.addTab(null, new FlatSVGIcon("icons/icon_dashboard.svg"), new JPanel());
 
     }
 

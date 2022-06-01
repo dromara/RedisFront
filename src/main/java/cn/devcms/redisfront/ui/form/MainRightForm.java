@@ -10,13 +10,14 @@ public class MainRightForm {
     private JPanel contentPanel;
     private JTabbedPane tabbedPane1;
 
+    private HomeForm homeForm;
+
     public JPanel getContentPanel() {
         return contentPanel;
     }
 
 
     private void createUIComponents() {
-        contentPanel = new JPanel();
         contentPanel.setLayout(new MigLayout(
                 "fill,insets panel,hidemode 3",
                 // columns

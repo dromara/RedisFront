@@ -13,6 +13,7 @@ import com.formdev.flatlaf.util.SystemInfo;
 import org.jdesktop.swingx.JXFrame;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -47,6 +48,7 @@ public class MainFrame extends JXFrame {
         container.setLayout(new BorderLayout());
         mainSplitPane = new JSplitPane();
         mainLeftForm = new MainLeftForm();
+        mainSplitPane.setBorder(new EmptyBorder(-1,0,0,0));
         mainSplitPane.setLeftComponent(mainLeftForm.getContentPanel());
         mainRightForm = new MainRightForm();
         mainSplitPane.setRightComponent(mainRightForm.getContentPanel());
