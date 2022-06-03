@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="cn.devcms.redisfront.ui.form.CommandForm">
+  <grid id="27dc6" binding="panel1" default-binding="true" layout-manager="FlowLayout" hgap="0" vgap="100" flow-align="1">
+    <constraints>
+      <xy x="20" y="20" width="500" height="2038"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <component id="2af54" class="javax.swing.JButton" binding="button1" default-binding="true">
+        <constraints/>
+        <properties>
+          <text value="Button"/>
+        </properties>
+      </component>
+    </children>
+  </grid>
+</form>

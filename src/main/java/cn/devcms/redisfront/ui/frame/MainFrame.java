@@ -1,31 +1,26 @@
+
 package cn.devcms.redisfront.ui.frame;
 
 import cn.devcms.redisfront.ui.dialog.AddConnectDialog;
 import cn.devcms.redisfront.ui.dialog.SettingDialog;
-import cn.devcms.redisfront.ui.form.ControlBar;
-import cn.devcms.redisfront.ui.form.MainLeftForm;
-import cn.devcms.redisfront.ui.form.MainRightForm;
+import cn.devcms.redisfront.ui.form.MainForm;
 import com.formdev.flatlaf.extras.FlatDesktop;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.FlatSVGUtils;
 import com.formdev.flatlaf.extras.components.FlatButton;
-import com.formdev.flatlaf.util.SystemInfo;
 import org.jdesktop.swingx.JXFrame;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class MainFrame extends JXFrame {
-    JSplitPane mainSplitPane;
-    MainRightForm mainRightForm;
-    MainLeftForm mainLeftForm;
+    MainForm mainForm;
 
     SettingDialog settingDialog;
 
-    ControlBar controlBar;
 
     public MainFrame() {
         super(" RedisFront ", true);
@@ -38,24 +33,10 @@ public class MainFrame extends JXFrame {
 
     private void initComponents() {
         Container container = getContentPane();
-//        container.setLayout(new MigLayout(
-//                "fill,insets panel,hidemode 3",
-//                // columns
-//                "[fill]",
-//                // rows
-//                "[fill]"));
-
         container.setLayout(new BorderLayout());
-        mainSplitPane = new JSplitPane();
-        mainLeftForm = new MainLeftForm();
-        mainSplitPane.setBorder(new EmptyBorder(-1,0,0,0));
-        mainSplitPane.setLeftComponent(mainLeftForm.getContentPanel());
-        mainRightForm = new MainRightForm();
-        mainSplitPane.setRightComponent(mainRightForm.getContentPanel());
-        mainSplitPane.getLeftComponent().setMinimumSize(new Dimension());
-        mainSplitPane.setDividerSize(0);
+        mainForm = new MainForm(this);
         settingDialog = new SettingDialog(this);
-        container.add(mainSplitPane, BorderLayout.CENTER);
+        container.add(mainForm.$$$getRootComponent$$$(), BorderLayout.CENTER);
     }
 
 
@@ -64,14 +45,25 @@ public class MainFrame extends JXFrame {
             {
                 JMenu menuA = new JMenu("文件");
                 menuA.setMnemonic('F');
-                JMenuItem add = new JMenuItem("新建连接");
+                JMenuItem add = new JMenuItem("新建连接",KeyEvent.VK_A);
+                add.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK));
                 add.addActionListener(e -> {
-                    AddConnectDialog dialog = new AddConnectDialog(MainFrame.this);
+                    AddConnectDialog dialog = new AddConnectDialog(cn.devcms.redisfront.ui.frame.MainFrame.this);
+                    dialog.setLocationRelativeTo(null);
+                    dialog.pack();
+                    dialog.setVisible(true);
+                    mainForm.addAction();
+                });
+                menuA.add(add);
+                JMenuItem open = new JMenuItem("打开连接",KeyEvent.VK_S);
+                open.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
+                open.addActionListener(e -> {
+                    AddConnectDialog dialog = new AddConnectDialog(cn.devcms.redisfront.ui.frame.MainFrame.this);
                     dialog.setLocationRelativeTo(null);
                     dialog.pack();
                     dialog.setVisible(true);
                 });
-                menuA.add(add);
+                menuA.add(open);
                 add(menuA);
                 JMenu menuB = new JMenu("编辑");
                 add(menuB);
@@ -79,9 +71,9 @@ public class MainFrame extends JXFrame {
                 menuC.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        settingDialog.setMinimumSize(new Dimension(500,400));
+                        settingDialog.setMinimumSize(new Dimension(500, 400));
                         settingDialog.setResizable(false);
-                        settingDialog.setLocationRelativeTo(MainFrame.this);
+                        settingDialog.setLocationRelativeTo(cn.devcms.redisfront.ui.frame.MainFrame.this);
                         settingDialog.pack();
                         settingDialog.setVisible(true);
                     }
@@ -96,7 +88,7 @@ public class MainFrame extends JXFrame {
                 giteeBtn.setFocusable(false);
                 giteeBtn.setToolTipText(" 去码云给个star吧 :) ");
                 giteeBtn.setRolloverIcon(new FlatSVGIcon("icons/gitee_red.svg"));
-                giteeBtn.addActionListener(e -> JOptionPane.showMessageDialog(MainFrame.this, "Hello User! How are you?", "User", JOptionPane.INFORMATION_MESSAGE));
+                giteeBtn.addActionListener(e -> JOptionPane.showMessageDialog(cn.devcms.redisfront.ui.frame.MainFrame.this, "Hello User! How are you?", "User", JOptionPane.INFORMATION_MESSAGE));
                 add(giteeBtn);
             }
         });
