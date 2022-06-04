@@ -4,6 +4,7 @@ package cn.devcms.redisfront.ui.frame;
 import cn.devcms.redisfront.ui.dialog.AddConnectDialog;
 import cn.devcms.redisfront.ui.dialog.SettingDialog;
 import cn.devcms.redisfront.ui.form.MainForm;
+import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatDesktop;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.FlatSVGUtils;
@@ -15,6 +16,9 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class MainFrame extends JXFrame {
     MainForm mainForm;
@@ -43,32 +47,47 @@ public class MainFrame extends JXFrame {
     private void menuBarInit() {
         setJMenuBar(new JMenuBar() {
             {
-                JMenu menuA = new JMenu("文件");
-                menuA.setMnemonic('F');
-                JMenuItem add = new JMenuItem("新建连接",KeyEvent.VK_A);
-                add.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK));
-                add.addActionListener(e -> {
+                JMenu fileMenu = new JMenu("文件");
+                fileMenu.setMnemonic('F');
+                //新建连接
+                JMenuItem addConnectMenu = new JMenuItem("新建连接", KeyEvent.VK_A);
+                addConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK));
+                addConnectMenu.addActionListener(e -> {
                     AddConnectDialog dialog = new AddConnectDialog(cn.devcms.redisfront.ui.frame.MainFrame.this);
                     dialog.setLocationRelativeTo(null);
                     dialog.pack();
                     dialog.setVisible(true);
                     mainForm.addAction();
                 });
-                menuA.add(add);
-                JMenuItem open = new JMenuItem("打开连接",KeyEvent.VK_S);
-                open.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
-                open.addActionListener(e -> {
+                fileMenu.add(addConnectMenu);
+                //打开连接
+                JMenuItem openConnectMenu = new JMenuItem("打开连接", KeyEvent.VK_S);
+                openConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
+                openConnectMenu.addActionListener(e -> {
                     AddConnectDialog dialog = new AddConnectDialog(cn.devcms.redisfront.ui.frame.MainFrame.this);
                     dialog.setLocationRelativeTo(null);
                     dialog.pack();
                     dialog.setVisible(true);
                 });
-                menuA.add(open);
-                add(menuA);
-                JMenu menuB = new JMenu("编辑");
-                add(menuB);
-                JMenu menuC = new JMenu("设置");
-                menuC.addMouseListener(new MouseAdapter() {
+                fileMenu.add(openConnectMenu);
+                //配置菜单
+                fileMenu.add(new JSeparator());
+                JMenuItem importConfigMenu = new JMenuItem("加载配置");
+                fileMenu.add(importConfigMenu);
+                JMenuItem exportConfigMenu = new JMenuItem("导出配置");
+                fileMenu.add(exportConfigMenu);
+                //退出程序
+                fileMenu.add(new JSeparator());
+                JMenuItem exitMenu = new JMenuItem("退出程序");
+                fileMenu.add(exitMenu);
+
+                add(fileMenu);
+                JMenu editMenu = new JMenu("编辑");
+                fileMenu.setMnemonic('E');
+                add(editMenu);
+                JMenu settingMenu = new JMenu("设置");
+                fileMenu.setMnemonic('S');
+                settingMenu.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
                         settingDialog.setMinimumSize(new Dimension(500, 400));
@@ -78,18 +97,50 @@ public class MainFrame extends JXFrame {
                         settingDialog.setVisible(true);
                     }
                 });
-                add(menuC);
-                JMenu menuD = new JMenu("关于");
-                add(menuD);
+                add(settingMenu);
+                JMenu aboutMenu = new JMenu("关于");
+                fileMenu.setMnemonic('A');
+                aboutMenu.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        JLabel titleLabel = new JLabel("RedisFront");
+                        titleLabel.putClientProperty(FlatClientProperties.STYLE_CLASS, "h1");
+                        String link = "https://gitee.com/westboy/redis-front";
+                        JLabel linkLabel = new JLabel("<html><a href=\"#\">" + link + "</a></html>");
+                        linkLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                        linkLabel.addMouseListener(new MouseAdapter() {
+                            @Override
+                            public void mouseClicked(MouseEvent e) {
+                                try {
+                                    Desktop.getDesktop().browse(new URI(link));
+                                } catch (IOException | URISyntaxException ex) {
+                                    JOptionPane.showMessageDialog(linkLabel, "Failed to open '" + link + "' in browser.", "About",
+                                            JOptionPane.PLAIN_MESSAGE);
+                                }
+                            }
+                        });
+                        JOptionPane.showMessageDialog(MainFrame.this, new Object[]{titleLabel, "一款 Redis GUI 工具", " ", linkLabel,}, "关于",
+                                JOptionPane.PLAIN_MESSAGE);
+                    }
+                });
+                add(aboutMenu);
+
                 add(Box.createGlue());
-                FlatButton giteeBtn = new FlatButton();
-                giteeBtn.setIcon(new FlatSVGIcon("icons/gitee.svg"));
-                giteeBtn.setButtonType(FlatButton.ButtonType.toolBarButton);
-                giteeBtn.setFocusable(false);
-                giteeBtn.setToolTipText(" 去码云给个star吧 :) ");
-                giteeBtn.setRolloverIcon(new FlatSVGIcon("icons/gitee_red.svg"));
-                giteeBtn.addActionListener(e -> JOptionPane.showMessageDialog(cn.devcms.redisfront.ui.frame.MainFrame.this, "Hello User! How are you?", "User", JOptionPane.INFORMATION_MESSAGE));
-                add(giteeBtn);
+
+                FlatButton gitBtn = new FlatButton();
+                gitBtn.setIcon(new FlatSVGIcon("icons/gitee.svg"));
+                gitBtn.setButtonType(FlatButton.ButtonType.toolBarButton);
+                gitBtn.setFocusable(false);
+                gitBtn.setToolTipText(" 去码云给个star吧 :) ");
+                gitBtn.setRolloverIcon(new FlatSVGIcon("icons/gitee_red.svg"));
+                gitBtn.addActionListener(e -> {
+                    try {
+                        Desktop.getDesktop().browse(new URI("https://gitee.com/westboy/redis-front"));
+                    } catch (IOException | URISyntaxException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                });
+                add(gitBtn);
             }
         });
 

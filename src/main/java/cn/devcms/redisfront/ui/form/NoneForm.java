@@ -10,7 +10,7 @@ import java.awt.*;
  *
  * @author Jin
  */
-public class HomeForm {
+public class NoneForm {
     private JPanel contentPanel;
     private JLabel logoLabel;
     private JLabel newLabel;
@@ -18,7 +18,7 @@ public class HomeForm {
     private JLabel newKeyLabel;
     private JLabel openKeyLabel;
 
-    public HomeForm() {
+    public NoneForm() {
         $$$setupUI$$$();
         newLabel.putClientProperty("FlatLaf.styleClass", "h3");
         newKeyLabel.putClientProperty("FlatLaf.styleClass", "h3");

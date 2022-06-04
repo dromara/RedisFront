@@ -1,6 +1,7 @@
 package cn.devcms.redisfront.utils;
 
 import cn.devcms.redisfront.RedisFrontApplication;
+import cn.devcms.redisfront.func.Fn;
 import cn.devcms.redisfront.model.ThemeInfo;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatPropertiesLaf;
