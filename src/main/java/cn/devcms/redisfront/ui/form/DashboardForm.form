@@ -7,12 +7,6 @@
     </constraints>
     <properties/>
     <border type="none"/>
-    <children>
-      <vspacer id="5e93f">
-        <constraints>
-          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-        </constraints>
-      </vspacer>
-    </children>
+    <children/>
   </grid>
 </form>
