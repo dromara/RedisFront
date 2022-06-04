@@ -12,7 +12,6 @@ import static com.formdev.flatlaf.FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPA
 
 public class DatabaseDetailComponent extends JPanel {
     private final JTabbedPane contentPanel;
-    private final CommandForm commandForm;
     private final DashboardForm dashboardForm;
     private final DatabaseForm databaseForm;
 
@@ -28,10 +27,8 @@ public class DatabaseDetailComponent extends JPanel {
 
         dashboardForm = new DashboardForm();
         databaseForm = new DatabaseForm();
-        commandForm = new CommandForm();
-
-        contentPanel.addTab("数据库", new FlatSVGIcon("icons/db_key.svg"), dashboardForm.$$$getRootComponent$$$());
-        contentPanel.addTab("命令行", new FlatSVGIcon("icons/db_cli.svg"), new RedisCommandComponent());
+        contentPanel.addTab("数据", new FlatSVGIcon("icons/db_key.svg"), dashboardForm.$$$getRootComponent$$$());
+        contentPanel.addTab("命令", new FlatSVGIcon("icons/db_cli.svg"), new RedisCommandComponent());
         contentPanel.addTab("信息", new FlatSVGIcon("icons/db_report.svg"), databaseForm.$$$getRootComponent$$$());
         contentPanel.addTab("日志", new FlatSVGIcon("icons/db_log.svg"), new JPanel());
 
