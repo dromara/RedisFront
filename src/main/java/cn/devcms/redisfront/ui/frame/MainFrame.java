@@ -25,7 +25,6 @@ public class MainFrame extends JXFrame {
 
     SettingDialog settingDialog;
 
-
     public MainFrame() {
         super(" RedisFront ", true);
         setIconImages(FlatSVGUtils.createWindowIconImages("/svg/redis.svg"));
@@ -145,6 +144,4 @@ public class MainFrame extends JXFrame {
         });
 
     }
-
-
 }

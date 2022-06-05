@@ -1,6 +1,6 @@
 package cn.devcms.redisfront.ui.form;
 
-import cn.devcms.redisfront.ui.component.DatabaseDetailComponent;
+import cn.devcms.redisfront.ui.component.RedisDetailComponent;
 import cn.devcms.redisfront.ui.dialog.AddConnectDialog;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
@@ -32,7 +32,7 @@ public class MainForm {
     }
 
     public void addAction() {
-        tabPanel.addTab("127.0.0.1", new FlatSVGIcon("icons/icon_db5.svg"), new DatabaseDetailComponent());
+        tabPanel.addTab("127.0.0.1", new FlatSVGIcon("icons/icon_db5.svg"), new RedisDetailComponent());
         tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
         contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
 
