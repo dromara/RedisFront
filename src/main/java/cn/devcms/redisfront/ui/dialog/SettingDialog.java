@@ -1,7 +1,7 @@
 package cn.devcms.redisfront.ui.dialog;
 
 import cn.devcms.redisfront.model.ThemeInfo;
-import cn.devcms.redisfront.utils.ThemeUtil;
+import cn.devcms.redisfront.util.ThemeUtil;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 

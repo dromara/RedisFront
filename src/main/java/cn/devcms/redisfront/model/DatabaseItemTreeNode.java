@@ -1,7 +1,7 @@
-package cn.devcms.redisfront.core.tree;
+package cn.devcms.redisfront.model;
 
-import cn.devcms.redisfront.core.constant.ItemTreeTypeEnum;
-import cn.devcms.redisfront.core.constant.ItemValueTypeEnum;
+import cn.devcms.redisfront.constant.ItemTreeTypeEnum;
+import cn.devcms.redisfront.constant.ItemValueTypeEnum;
 import lombok.Data;
 
 import javax.swing.tree.DefaultMutableTreeNode;

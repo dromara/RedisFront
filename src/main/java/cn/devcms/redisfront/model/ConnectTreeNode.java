@@ -1,4 +1,4 @@
-package cn.devcms.redisfront.core.tree;
+package cn.devcms.redisfront.model;
 
 import lombok.Data;
 

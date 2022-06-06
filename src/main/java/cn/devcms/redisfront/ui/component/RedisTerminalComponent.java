@@ -58,8 +58,8 @@ public class RedisTerminalComponent extends JDesktopPane {
         public void run() {
             while (true) {
                 KeyStroke keyStroke = terminal.pollInput();
-                System.out.println(keyStroke);
                 if (keyStroke != null) {
+                    System.out.println(keyStroke);
                     switch (keyStroke.getKeyType()) {
                         case ArrowDown:
                             if (terminal.getTerminalSize().getRows() > cursorPosition[0].getRow() + 1) {

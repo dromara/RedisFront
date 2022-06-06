@@ -1,4 +1,4 @@
-package cn.devcms.redisfront.utils;
+package cn.devcms.redisfront.util;
 
 import javax.swing.*;
 import java.awt.*;
