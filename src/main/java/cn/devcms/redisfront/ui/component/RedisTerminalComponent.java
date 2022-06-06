@@ -11,7 +11,7 @@ import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.io.IOException;
 
-public class RedisCliComponent extends JDesktopPane {
+public class RedisTerminalComponent extends JDesktopPane {
 
 
     private final SwingTerminal terminal;
@@ -19,7 +19,7 @@ public class RedisCliComponent extends JDesktopPane {
     private final Thread thread;
 
 
-    public RedisCliComponent() throws IOException {
+    public RedisTerminalComponent() throws IOException {
         setLayout(new BorderLayout());
         setBorder(new EmptyBorder(10, 10, 10, 10));
 

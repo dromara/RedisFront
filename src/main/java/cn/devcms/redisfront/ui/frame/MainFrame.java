@@ -81,9 +81,9 @@ public class MainFrame extends JXFrame {
                 fileMenu.add(exitMenu);
 
                 add(fileMenu);
-                JMenu editMenu = new JMenu("编辑");
-                fileMenu.setMnemonic('E');
-                add(editMenu);
+//                JMenu editMenu = new JMenu("编辑");
+//                fileMenu.setMnemonic('E');
+//                add(editMenu);
                 JMenu settingMenu = new JMenu("设置");
                 fileMenu.setMnemonic('S');
                 settingMenu.addMouseListener(new MouseAdapter() {
@@ -123,9 +123,7 @@ public class MainFrame extends JXFrame {
                     }
                 });
                 add(aboutMenu);
-
                 add(Box.createGlue());
-
                 FlatButton gitBtn = new FlatButton();
                 gitBtn.setIcon(new FlatSVGIcon("icons/gitee.svg"));
                 gitBtn.setButtonType(FlatButton.ButtonType.toolBarButton);
