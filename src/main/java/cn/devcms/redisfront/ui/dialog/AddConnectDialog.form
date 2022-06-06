@@ -148,7 +148,7 @@
             </constraints>
             <properties/>
           </component>
-          <component id="dbabd" class="javax.swing.JRadioButton" binding="SSLTLSRadioButton" default-binding="true">
+          <component id="dbabd" class="javax.swing.JRadioButton" binding="enableSSL" custom-create="true">
             <constraints>
               <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -156,7 +156,7 @@
               <text value="SSL/TLS"/>
             </properties>
           </component>
-          <component id="c9b7a" class="javax.swing.JRadioButton" binding="SSH通道RadioButton" default-binding="true">
+          <component id="c9b7a" class="javax.swing.JRadioButton" binding="enableSSH" custom-create="true">
             <constraints>
               <grid row="5" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -164,7 +164,7 @@
               <text value="SSH通道"/>
             </properties>
           </component>
-          <component id="bfca0" class="javax.swing.JLabel">
+          <component id="bfca0" class="javax.swing.JLabel" binding="publicKeyLabel" custom-create="true">
             <constraints>
               <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -172,7 +172,7 @@
               <text value="公钥"/>
             </properties>
           </component>
-          <component id="d4763" class="javax.swing.JTextField" binding="textField5" default-binding="true">
+          <component id="d4763" class="javax.swing.JTextField" binding="publicKeyTxt" custom-create="true">
             <constraints>
               <grid row="6" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="150" height="-1"/>
@@ -180,7 +180,7 @@
             </constraints>
             <properties/>
           </component>
-          <component id="4ed73" class="javax.swing.JTextField" binding="textField6" default-binding="true">
+          <component id="4ed73" class="javax.swing.JTextField" binding="privateKeyTxt" custom-create="true">
             <constraints>
               <grid row="7" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="150" height="-1"/>
@@ -188,7 +188,7 @@
             </constraints>
             <properties/>
           </component>
-          <component id="7b654" class="javax.swing.JTextField" binding="textField7" default-binding="true">
+          <component id="7b654" class="javax.swing.JTextField" binding="grantTxt" custom-create="true">
             <constraints>
               <grid row="8" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="150" height="-1"/>
@@ -196,7 +196,7 @@
             </constraints>
             <properties/>
           </component>
-          <component id="245ab" class="javax.swing.JLabel">
+          <component id="245ab" class="javax.swing.JLabel" binding="privateKeyLabel" custom-create="true">
             <constraints>
               <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -204,7 +204,7 @@
               <text value="私钥"/>
             </properties>
           </component>
-          <component id="2f44b" class="javax.swing.JLabel">
+          <component id="2f44b" class="javax.swing.JLabel" binding="grantLabel" custom-create="true">
             <constraints>
               <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -212,7 +212,7 @@
               <text value="授权"/>
             </properties>
           </component>
-          <component id="9d235" class="javax.swing.JCheckBox" binding="打开严格模式CheckBox" default-binding="true">
+          <component id="9d235" class="javax.swing.JCheckBox" binding="打开严格模式CheckBox" custom-create="true" default-binding="true">
             <constraints>
               <grid row="9" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -220,7 +220,7 @@
               <text value="打开严格模式"/>
             </properties>
           </component>
-          <component id="b5e83" class="javax.swing.JButton" binding="选择文件Button1" default-binding="true">
+          <component id="b5e83" class="javax.swing.JButton" binding="privateKeyBtn" custom-create="true">
             <constraints>
               <grid row="7" column="3" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
                 <maximum-size width="100" height="-1"/>
@@ -230,7 +230,7 @@
               <text value="选择文件"/>
             </properties>
           </component>
-          <component id="4d5d8" class="javax.swing.JButton" binding="选择文件Button2" default-binding="true">
+          <component id="4d5d8" class="javax.swing.JButton" binding="grantBtn" custom-create="true">
             <constraints>
               <grid row="8" column="3" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
                 <maximum-size width="100" height="-1"/>
@@ -262,7 +262,7 @@
             </constraints>
             <properties/>
           </component>
-          <component id="2f335" class="javax.swing.JButton" binding="选择文件Button" default-binding="true">
+          <component id="2f335" class="javax.swing.JButton" binding="publicKeyBtn" custom-create="true">
             <constraints>
               <grid row="6" column="3" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
                 <maximum-size width="100" height="-1"/>
