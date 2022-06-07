@@ -18,7 +18,7 @@ public class MainForm {
     private JPanel contentPanel;
     private JTabbedPane tabPanel;
     private final JFrame frame;
-    private final None noneForm;
+    private final NoneForm noneForm;
 
     public JPanel getContentPanel() {
         return contentPanel;
@@ -26,7 +26,7 @@ public class MainForm {
 
     public MainForm(JFrame frame) {
         this.frame = frame;
-        noneForm = new None();
+        noneForm = new NoneForm();
         contentPanel.add(noneForm.getContentPanel(), BorderLayout.CENTER);
 
     }

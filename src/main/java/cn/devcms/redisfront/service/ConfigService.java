@@ -2,6 +2,8 @@ package cn.devcms.redisfront.service;
 
 import cn.devcms.redisfront.model.ConfigInfo;
 
+import java.io.File;
+
 /**
  * ConnectService
  *
@@ -11,6 +13,10 @@ public interface ConfigService {
 
     ConfigInfo loadConfig();
 
-    void saveConfig(ConfigInfo configInfo);
+    void persistenceConfig(ConfigInfo configInfo);
+
+    ConfigInfo importConfig(String filePath);
+
+    void exportConfig(ConfigInfo configInfo, File file);
 
 }

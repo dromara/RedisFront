@@ -9,7 +9,7 @@ import javax.swing.*;
  *
  * @author Jin
  */
-public class None {
+public class NoneForm {
     private JPanel contentPanel;
     private JLabel logoLabel;
     private JLabel newLabel;
@@ -21,7 +21,7 @@ public class None {
         return contentPanel;
     }
 
-    public None() {
+    public NoneForm() {
         newLabel.putClientProperty("FlatLaf.styleClass", "h3");
         newKeyLabel.putClientProperty("FlatLaf.styleClass", "h3");
         openLabel.putClientProperty("FlatLaf.styleClass", "h3");
