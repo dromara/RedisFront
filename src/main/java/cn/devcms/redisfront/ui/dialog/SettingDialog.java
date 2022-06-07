@@ -1,7 +1,7 @@
 package cn.devcms.redisfront.ui.dialog;
 
-import cn.devcms.redisfront.model.ThemeInfo;
-import cn.devcms.redisfront.util.ThemeUtil;
+
+import cn.devcms.redisfront.common.util.ThemeUtil;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 
@@ -21,7 +21,7 @@ public class SettingDialog extends JDialog {
     private JPanel redisPanel;
     private JComboBox<String> fontSizeComboBox;
     private JComboBox<String> fontNameComboBox;
-    private JComboBox<ThemeInfo> themeNameComboBox;
+    private JComboBox<ThemeUtil.ThemeInfo> themeNameComboBox;
     private JTextField textField1;
     private JTextField textField2;
 
@@ -57,25 +57,25 @@ public class SettingDialog extends JDialog {
     }
 
     private void initThemeNameComboBox() {
-        themeNameComboBox.addItem(new ThemeInfo("FlatLaf Light", null, false, null, null, null, null, null, FlatLightLaf.class.getName()));
-        themeNameComboBox.addItem(new ThemeInfo("FlatLaf Dark", null, true, null, null, null, null, null, FlatDarkLaf.class.getName()));
+        themeNameComboBox.addItem(new ThemeUtil.ThemeInfo("FlatLaf Light", null, false, null, null, null, null, null, FlatLightLaf.class.getName()));
+        themeNameComboBox.addItem(new ThemeUtil.ThemeInfo("FlatLaf Dark", null, true, null, null, null, null, null, FlatDarkLaf.class.getName()));
         boolean addMaterialTag = true;
         for (int i = 0; i < ThemeUtil.bundledThemes.size(); i++) {
             if (i == 0) {
-                themeNameComboBox.addItem(new ThemeInfo("****** IntelliJ Theme ******", null, false, null, null, null, null, null, null));
+                themeNameComboBox.addItem(new ThemeUtil.ThemeInfo("****** IntelliJ Theme ******", null, false, null, null, null, null, null, null));
             }
 
-            ThemeInfo themeInfo = ThemeUtil.bundledThemes.get(i);
+            ThemeUtil.ThemeInfo themeInfo = ThemeUtil.bundledThemes.get(i);
 
             if (themeInfo.name().startsWith("Material") && addMaterialTag) {
-                themeNameComboBox.addItem(new ThemeInfo("****** Material Theme ******", null, false, null, null, null, null, null, null));
+                themeNameComboBox.addItem(new ThemeUtil.ThemeInfo("****** Material Theme ******", null, false, null, null, null, null, null, null));
                 addMaterialTag = false;
             }
             themeNameComboBox.addItem(themeInfo);
         }
         themeNameComboBox.addActionListener(e -> {
             JComboBox<?> selected = (JComboBox<?>) e.getSource();
-            EventQueue.invokeLater(() -> ThemeUtil.setTheme(this, (ThemeInfo) selected.getSelectedItem()));
+            EventQueue.invokeLater(() -> ThemeUtil.setTheme(this, (ThemeUtil.ThemeInfo) selected.getSelectedItem()));
         });
 
     }
@@ -91,7 +91,7 @@ public class SettingDialog extends JDialog {
         themeNameComboBox = new JComboBox<>() {
             @Override
             public void setSelectedItem(Object item) {
-                ThemeInfo themeInfo = (ThemeInfo) item;
+                ThemeUtil.ThemeInfo themeInfo = (ThemeUtil.ThemeInfo) item;
                 if (themeInfo.name().startsWith("**")) {
                     return;
                 }
@@ -103,7 +103,7 @@ public class SettingDialog extends JDialog {
                     @Override
                     public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                         super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                        ThemeInfo themeInfo = (ThemeInfo) value;
+                        ThemeUtil.ThemeInfo themeInfo = (ThemeUtil.ThemeInfo) value;
                         if (themeInfo.name().startsWith("Material Theme UI Lite /")) {
                             setText(themeInfo.name().replace("Material Theme UI Lite /", ""));
                         }

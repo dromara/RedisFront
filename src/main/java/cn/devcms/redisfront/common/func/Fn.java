@@ -1,4 +1,4 @@
-package cn.devcms.redisfront.func;
+package cn.devcms.redisfront.common.func;
 
 import com.formdev.flatlaf.FlatLaf;
 

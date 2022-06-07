@@ -78,7 +78,9 @@ public class MainForm {
         JButton newBtn = new JButton(null, new FlatSVGIcon("icons/new.svg"));
         newBtn.setToolTipText("新建连接");
         newBtn.addActionListener(e -> {
-            AddConnectDialog addConnectDialog = new AddConnectDialog(root);
+            AddConnectDialog addConnectDialog = new AddConnectDialog(root, (connectInfo -> {
+                System.out.println(connectInfo);
+            }));
             addConnectDialog.pack();
             addConnectDialog.setVisible(true);
         });
@@ -86,7 +88,9 @@ public class MainForm {
         JButton openBtn = new JButton(null, new FlatSVGIcon("icons/open.svg"));
         openBtn.setToolTipText("打开连接");
         openBtn.addActionListener(e -> {
-            AddConnectDialog addConnectDialog = new AddConnectDialog(root);
+            AddConnectDialog addConnectDialog = new AddConnectDialog(root, (connectInfo -> {
+                System.out.println(connectInfo);
+            }));
             addConnectDialog.pack();
             addConnectDialog.setVisible(true);
         });

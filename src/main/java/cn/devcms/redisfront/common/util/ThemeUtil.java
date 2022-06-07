@@ -1,7 +1,6 @@
-package cn.devcms.redisfront.util;
+package cn.devcms.redisfront.common.util;
 
 import cn.devcms.redisfront.RedisFrontApplication;
-import cn.devcms.redisfront.model.ThemeInfo;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatPropertiesLaf;
 import com.formdev.flatlaf.IntelliJTheme;
@@ -11,10 +10,7 @@ import com.formdev.flatlaf.util.LoggingFacade;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +69,13 @@ public class ThemeUtil {
     }
 
 
-
+    public record ThemeInfo(String name, String resourceName, boolean dark, String license, String licenseFile,
+                            String sourceCodeUrl, String sourceCodePath, File themeFile, String lafClassName) {
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
 
     @SuppressWarnings("unchecked")
     static void loadBundledThemes() {

@@ -5,6 +5,7 @@ import cn.devcms.redisfront.ui.dialog.AddConnectDialog;
 import cn.devcms.redisfront.ui.dialog.SettingDialog;
 import cn.devcms.redisfront.ui.form.MainForm;
 import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatDesktop;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.FlatSVGUtils;
@@ -13,9 +14,7 @@ import org.jdesktop.swingx.JXFrame;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -23,7 +22,6 @@ import java.net.URISyntaxException;
 public class MainFrame extends JXFrame {
     MainForm mainForm;
 
-    SettingDialog settingDialog;
 
     public MainFrame() {
         super(" RedisFront ", true);
@@ -38,7 +36,6 @@ public class MainFrame extends JXFrame {
         Container container = getContentPane();
         container.setLayout(new BorderLayout());
         mainForm = new MainForm(this);
-        settingDialog = new SettingDialog(this);
         container.add(mainForm.$$$getRootComponent$$$(), BorderLayout.CENTER);
     }
 
@@ -52,21 +49,27 @@ public class MainFrame extends JXFrame {
                 JMenuItem addConnectMenu = new JMenuItem("新建连接", KeyEvent.VK_A);
                 addConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK));
                 addConnectMenu.addActionListener(e -> {
-                    AddConnectDialog dialog = new AddConnectDialog(cn.devcms.redisfront.ui.frame.MainFrame.this);
-                    dialog.setLocationRelativeTo(null);
-                    dialog.pack();
-                    dialog.setVisible(true);
-                    mainForm.addAction();
+                    AddConnectDialog addConnectDialog = new AddConnectDialog(MainFrame.this, (connectInfo -> {
+                        mainForm.addAction();
+                        System.out.println(connectInfo);
+                    }));
+                    addConnectDialog.setMinimumSize(new Dimension(400, 300));
+                    addConnectDialog.setLocationRelativeTo(MainFrame.this);
+                    addConnectDialog.pack();
+                    addConnectDialog.setVisible(true);
                 });
                 fileMenu.add(addConnectMenu);
                 //打开连接
                 JMenuItem openConnectMenu = new JMenuItem("打开连接", KeyEvent.VK_S);
                 openConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
                 openConnectMenu.addActionListener(e -> {
-                    AddConnectDialog dialog = new AddConnectDialog(cn.devcms.redisfront.ui.frame.MainFrame.this);
-                    dialog.setLocationRelativeTo(null);
-                    dialog.pack();
-                    dialog.setVisible(true);
+                    AddConnectDialog addConnectDialog = new AddConnectDialog(MainFrame.this, (connectInfo -> {
+                        mainForm.addAction();
+                        System.out.println(connectInfo);
+                    }));
+                    addConnectDialog.setLocationRelativeTo(null);
+                    addConnectDialog.pack();
+                    addConnectDialog.setVisible(true);
                 });
                 fileMenu.add(openConnectMenu);
                 //配置菜单
@@ -78,8 +81,10 @@ public class MainFrame extends JXFrame {
                 //退出程序
                 fileMenu.add(new JSeparator());
                 JMenuItem exitMenu = new JMenuItem("退出程序");
-                fileMenu.add(exitMenu);
+                exitMenu.addActionListener(e -> {
 
+                });
+                fileMenu.add(exitMenu);
                 add(fileMenu);
 //                JMenu editMenu = new JMenu("编辑");
 //                fileMenu.setMnemonic('E');
@@ -89,9 +94,10 @@ public class MainFrame extends JXFrame {
                 settingMenu.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
+                        SettingDialog settingDialog = new SettingDialog(MainFrame.this);
                         settingDialog.setMinimumSize(new Dimension(500, 400));
                         settingDialog.setResizable(false);
-                        settingDialog.setLocationRelativeTo(cn.devcms.redisfront.ui.frame.MainFrame.this);
+                        settingDialog.setLocationRelativeTo(MainFrame.this);
                         settingDialog.pack();
                         settingDialog.setVisible(true);
                     }
@@ -140,6 +146,7 @@ public class MainFrame extends JXFrame {
                 add(gitBtn);
             }
         });
-
     }
+
+
 }
