@@ -2,6 +2,7 @@
 package cn.devcms.redisfront.ui.frame;
 
 import cn.devcms.redisfront.ui.dialog.AddConnectDialog;
+import cn.devcms.redisfront.ui.dialog.OpenConnectDialog;
 import cn.devcms.redisfront.ui.dialog.SettingDialog;
 import cn.devcms.redisfront.ui.form.MainForm;
 import com.formdev.flatlaf.FlatClientProperties;
@@ -53,8 +54,6 @@ public class MainFrame extends JXFrame {
                         mainForm.addAction();
                         System.out.println(connectInfo);
                     }));
-                    addConnectDialog.setMinimumSize(new Dimension(400, 300));
-                    addConnectDialog.setLocationRelativeTo(MainFrame.this);
                     addConnectDialog.pack();
                     addConnectDialog.setVisible(true);
                 });
@@ -63,11 +62,7 @@ public class MainFrame extends JXFrame {
                 JMenuItem openConnectMenu = new JMenuItem("打开连接", KeyEvent.VK_S);
                 openConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
                 openConnectMenu.addActionListener(e -> {
-                    AddConnectDialog addConnectDialog = new AddConnectDialog(MainFrame.this, (connectInfo -> {
-                        mainForm.addAction();
-                        System.out.println(connectInfo);
-                    }));
-                    addConnectDialog.setLocationRelativeTo(null);
+                    OpenConnectDialog addConnectDialog = new OpenConnectDialog(MainFrame.this);
                     addConnectDialog.pack();
                     addConnectDialog.setVisible(true);
                 });

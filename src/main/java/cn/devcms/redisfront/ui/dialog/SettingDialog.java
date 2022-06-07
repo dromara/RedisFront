@@ -1,6 +1,7 @@
 package cn.devcms.redisfront.ui.dialog;
 
 
+import cn.devcms.redisfront.common.base.BaseDialog;
 import cn.devcms.redisfront.common.util.ThemeUtil;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
@@ -12,7 +13,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-public class SettingDialog extends JDialog {
+public class SettingDialog extends BaseDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;

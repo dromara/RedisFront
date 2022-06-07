@@ -16,15 +16,12 @@ import static com.formdev.flatlaf.FlatClientProperties.*;
 public class MainForm {
     private JPanel contentPanel;
     private JTabbedPane tabPanel;
-    private JButton addBtn;
-    private JLabel iconBtn;
-    private JButton refreshBtn;
-    private final JFrame root;
+    private final JFrame frame;
 
     private final NoneForm noneForm;
 
-    public MainForm(JFrame root) {
-        this.root = root;
+    public MainForm(JFrame frame) {
+        this.frame = frame;
         $$$setupUI$$$();
         noneForm = new NoneForm();
         contentPanel.add(noneForm.$$$getRootComponent$$$(), BorderLayout.CENTER);
@@ -40,13 +37,6 @@ public class MainForm {
 
     private void createUIComponents() {
         contentPanel = new JPanel();
-        iconBtn = new JLabel();
-        iconBtn.setIcon(new FlatSVGIcon("icons/Project.svg"));
-        addBtn = new JButton();
-        addBtn.setIcon(new FlatSVGIcon("icons/add.svg"));
-        refreshBtn = new JButton();
-        refreshBtn.setIcon(new FlatSVGIcon("icons/refresh.svg"));
-
         tabPanel = new JTabbedPane();
         tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.LEFT);
         tabPanel.putClientProperty(TABBED_PANE_SHOW_TAB_SEPARATORS, true);
@@ -78,9 +68,7 @@ public class MainForm {
         JButton newBtn = new JButton(null, new FlatSVGIcon("icons/new.svg"));
         newBtn.setToolTipText("新建连接");
         newBtn.addActionListener(e -> {
-            AddConnectDialog addConnectDialog = new AddConnectDialog(root, (connectInfo -> {
-                System.out.println(connectInfo);
-            }));
+            AddConnectDialog addConnectDialog = new AddConnectDialog(frame, (System.out::println));
             addConnectDialog.pack();
             addConnectDialog.setVisible(true);
         });
@@ -88,9 +76,7 @@ public class MainForm {
         JButton openBtn = new JButton(null, new FlatSVGIcon("icons/open.svg"));
         openBtn.setToolTipText("打开连接");
         openBtn.addActionListener(e -> {
-            AddConnectDialog addConnectDialog = new AddConnectDialog(root, (connectInfo -> {
-                System.out.println(connectInfo);
-            }));
+            AddConnectDialog addConnectDialog = new AddConnectDialog(frame, (System.out::println));
             addConnectDialog.pack();
             addConnectDialog.setVisible(true);
         });

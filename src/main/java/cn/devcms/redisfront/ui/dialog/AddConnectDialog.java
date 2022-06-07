@@ -1,5 +1,6 @@
 package cn.devcms.redisfront.ui.dialog;
 
+import cn.devcms.redisfront.common.base.BaseDialog;
 import cn.devcms.redisfront.model.ConnectInfo;
 import com.formdev.flatlaf.util.StringUtils;
 
@@ -12,7 +13,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.function.Consumer;
 
-public class AddConnectDialog extends JDialog {
+public class AddConnectDialog extends BaseDialog<ConnectInfo> {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -39,16 +40,15 @@ public class AddConnectDialog extends JDialog {
 
     private JPanel SSL;
 
-    private Consumer<ConnectInfo> _callback;
-
 
     public AddConnectDialog(Frame owner, Consumer<ConnectInfo> callback) {
-        super(owner);
-        _callback = callback;
+        super(owner, callback);
+        setTitle("新建连接");
+        setModal(true);
+        setResizable(false);
+        setMinimumSize(new Dimension(400, 350));
         $$$setupUI$$$();
         setContentPane(contentPane);
-        setModal(true);
-        setTitle("新建连接");
         getRootPane().setDefaultButton(buttonOK);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
@@ -58,13 +58,13 @@ public class AddConnectDialog extends JDialog {
         });
         contentPane.registerKeyboardAction(e -> dispose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         initComponentListener();
-
     }
 
     private void initComponentListener() {
 
         buttonOK.addActionListener(this::onOK);
         buttonCancel.addActionListener(this::onCancel);
+
         showPasswordCheckBox.addActionListener(e -> {
             if (showPasswordCheckBox.isSelected()) {
                 passwordField.setEchoChar((char) 0);
@@ -89,8 +89,25 @@ public class AddConnectDialog extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setFileFilter(new FileNameExtensionFilter("", ".pem,.cert"));
+                fileChooser.setFileFilter(new FileNameExtensionFilter("密钥文件", ".pem", ".cert"));
                 fileChooser.showDialog(AddConnectDialog.this, "选择私钥文件");
+            }
+        });
+        publicKeyFileBtn.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setFileFilter(new FileNameExtensionFilter("公钥文件", ".pem", ".cert"));
+                fileChooser.showDialog(AddConnectDialog.this, "选择公钥文件");
+            }
+        });
+
+        grantFileBtn.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setFileFilter(new FileNameExtensionFilter("授权文件", ".pem", ".cert"));
+                fileChooser.showDialog(AddConnectDialog.this, "选择授权文件");
             }
         });
     }
@@ -118,7 +135,7 @@ public class AddConnectDialog extends JDialog {
         if (passwordField.getPassword().length > 0) {
             connectInfo.setPassword(String.valueOf(passwordField.getPassword()));
         }
-        _callback.accept(connectInfo);
+        callback.accept(connectInfo);
         dispose();
     }
 
