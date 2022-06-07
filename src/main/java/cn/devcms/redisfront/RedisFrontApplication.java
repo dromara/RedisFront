@@ -1,11 +1,10 @@
 package cn.devcms.redisfront;
 
-import cn.devcms.redisfront.ui.frame.MainFrame;
+import cn.devcms.redisfront.ui.MainFrame;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.extras.FlatInspector;
 import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
-import com.formdev.flatlaf.util.LoggingFacade;
 import com.formdev.flatlaf.util.SystemInfo;
 
 import javax.swing.*;

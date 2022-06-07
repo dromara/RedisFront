@@ -1,4 +1,4 @@
-package cn.devcms.redisfront.ui.component;
+package cn.devcms.redisfront.component;
 
 import cn.devcms.redisfront.ui.form.DashboardForm;
 import cn.devcms.redisfront.ui.form.DatabaseForm;
@@ -11,14 +11,14 @@ import java.awt.*;
 
 import static com.formdev.flatlaf.FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS;
 
-public class RedisTabbedComponent extends JPanel {
+public class TabbedComponent extends JPanel {
     private final JTabbedPane contentPanel;
     private final DashboardForm dashboardForm;
     private final DatabaseForm databaseForm;
 
 
     @SneakyThrows
-    public RedisTabbedComponent() {
+    public TabbedComponent() {
         setLayout(new BorderLayout());
         contentPanel = new JTabbedPane();
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.CENTER);
@@ -29,15 +29,15 @@ public class RedisTabbedComponent extends JPanel {
 
         dashboardForm = new DashboardForm();
         databaseForm = new DatabaseForm();
-        contentPanel.addTab("数据", new FlatSVGIcon("icons/db_key.svg"), dashboardForm.$$$getRootComponent$$$());
-        contentPanel.addTab("命令", new FlatSVGIcon("icons/db_cli.svg"), new RedisTerminalComponent());
-        contentPanel.addTab("信息", new FlatSVGIcon("icons/db_report.svg"), databaseForm.$$$getRootComponent$$$());
+        contentPanel.addTab("数据", new FlatSVGIcon("icons/db_key.svg"), dashboardForm.getContentPanel());
+        contentPanel.addTab("命令", new FlatSVGIcon("icons/db_cli.svg"), new TerminalComponent());
+        contentPanel.addTab("信息", new FlatSVGIcon("icons/db_report.svg"), databaseForm.getContentPanel());
         contentPanel.addTab("日志", new FlatSVGIcon("icons/db_log.svg"), new JPanel());
         contentPanel.addChangeListener(e -> {
             JTabbedPane tabbedPane = (JTabbedPane) e.getSource();
             Component component = tabbedPane.getSelectedComponent();
-            if (component instanceof RedisTerminalComponent redisTerminalComponent) {
-                redisTerminalComponent.pollInputStart();
+            if (component instanceof TerminalComponent terminalComponent) {
+                terminalComponent.pollInputStart();
             }
 
         });

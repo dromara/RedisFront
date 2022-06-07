@@ -1,12 +1,11 @@
 
-package cn.devcms.redisfront.ui.frame;
+package cn.devcms.redisfront.ui;
 
 import cn.devcms.redisfront.ui.dialog.AddConnectDialog;
 import cn.devcms.redisfront.ui.dialog.OpenConnectDialog;
 import cn.devcms.redisfront.ui.dialog.SettingDialog;
 import cn.devcms.redisfront.ui.form.MainForm;
 import com.formdev.flatlaf.FlatClientProperties;
-import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatDesktop;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.FlatSVGUtils;
@@ -15,7 +14,9 @@ import org.jdesktop.swingx.JXFrame;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -37,7 +38,7 @@ public class MainFrame extends JXFrame {
         Container container = getContentPane();
         container.setLayout(new BorderLayout());
         mainForm = new MainForm(this);
-        container.add(mainForm.$$$getRootComponent$$$(), BorderLayout.CENTER);
+        container.add(mainForm.getContentPanel(), BorderLayout.CENTER);
     }
 
 
@@ -54,6 +55,8 @@ public class MainFrame extends JXFrame {
                         mainForm.addAction();
                         System.out.println(connectInfo);
                     }));
+                    addConnectDialog.setResizable(false);
+                    addConnectDialog.setLocationRelativeTo(MainFrame.this);
                     addConnectDialog.pack();
                     addConnectDialog.setVisible(true);
                 });
@@ -62,9 +65,11 @@ public class MainFrame extends JXFrame {
                 JMenuItem openConnectMenu = new JMenuItem("打开连接", KeyEvent.VK_S);
                 openConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
                 openConnectMenu.addActionListener(e -> {
-                    OpenConnectDialog addConnectDialog = new OpenConnectDialog(MainFrame.this);
-                    addConnectDialog.pack();
-                    addConnectDialog.setVisible(true);
+                    OpenConnectDialog openConnectDialog = new OpenConnectDialog(MainFrame.this);
+                    openConnectDialog.setResizable(false);
+                    openConnectDialog.setLocationRelativeTo(MainFrame.this);
+                    openConnectDialog.pack();
+                    openConnectDialog.setVisible(true);
                 });
                 fileMenu.add(openConnectMenu);
                 //配置菜单
@@ -77,7 +82,8 @@ public class MainFrame extends JXFrame {
                 fileMenu.add(new JSeparator());
                 JMenuItem exitMenu = new JMenuItem("退出程序");
                 exitMenu.addActionListener(e -> {
-
+                    MainFrame.this.dispose();
+                    System.exit(0);
                 });
                 fileMenu.add(exitMenu);
                 add(fileMenu);

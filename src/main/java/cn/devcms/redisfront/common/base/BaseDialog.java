@@ -18,11 +18,9 @@ public class BaseDialog<T> extends JDialog {
     public BaseDialog(Frame owner, Consumer<T> callback) {
         super(owner);
         this.callback = callback;
-        setLocationRelativeTo(owner);
     }
 
     public BaseDialog(Frame owner) {
         super(owner);
-        setLocationRelativeTo(owner);
     }
 }

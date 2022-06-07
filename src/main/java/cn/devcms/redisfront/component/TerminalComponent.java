@@ -1,4 +1,4 @@
-package cn.devcms.redisfront.ui.component;
+package cn.devcms.redisfront.component;
 
 import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.input.KeyStroke;
@@ -11,7 +11,7 @@ import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.io.IOException;
 
-public class RedisTerminalComponent extends JDesktopPane {
+public class TerminalComponent extends JDesktopPane {
 
 
     private final SwingTerminal terminal;
@@ -19,7 +19,7 @@ public class RedisTerminalComponent extends JDesktopPane {
     private final Thread thread;
 
 
-    public RedisTerminalComponent() throws IOException {
+    public TerminalComponent() throws IOException {
         setLayout(new BorderLayout());
         setBorder(new EmptyBorder(10, 10, 10, 10));
 
