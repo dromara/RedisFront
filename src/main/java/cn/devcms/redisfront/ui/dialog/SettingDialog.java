@@ -48,9 +48,6 @@ public class SettingDialog extends BaseDialog {
             }
         });
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
-        String themeSelectId = PrefUtil.getState().get(Constant.KEY_THEME_SELECT_INDEX, "0");
-        themeNameComboBox.setSelectedIndex(Integer.parseInt(themeSelectId));
     }
 
 
@@ -95,6 +92,7 @@ public class SettingDialog extends BaseDialog {
             });
         });
 
+        themeNameComboBox.setSelectedIndex(Integer.parseInt(PrefUtil.getState().get(Constant.KEY_THEME_SELECT_INDEX, "0")));
     }
 
 
