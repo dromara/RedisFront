@@ -8,7 +8,5 @@ package cn.devcms.redisfront.service;
 public interface ConnectService {
 
 
-    void openConnect();
-
 
 }

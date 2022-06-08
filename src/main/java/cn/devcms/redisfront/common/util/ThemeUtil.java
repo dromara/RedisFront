@@ -1,9 +1,8 @@
 package cn.devcms.redisfront.common.util;
 
 import cn.devcms.redisfront.RedisFrontApplication;
-import com.formdev.flatlaf.FlatLaf;
-import com.formdev.flatlaf.FlatPropertiesLaf;
-import com.formdev.flatlaf.IntelliJTheme;
+import cn.devcms.redisfront.common.constant.Constant;
+import com.formdev.flatlaf.*;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.json.Json;
 import com.formdev.flatlaf.util.LoggingFacade;
@@ -32,7 +31,7 @@ public class ThemeUtil {
         loadBundledThemes();
     }
 
-    public static void setTheme(Component c, ThemeInfo themeInfo) {
+    public static void changeTheme(Component c, ThemeInfo themeInfo) {
         if (themeInfo == null)
             return;
         if (themeInfo.lafClassName() != null) {
@@ -45,7 +44,7 @@ public class ThemeUtil {
                 UIManager.setLookAndFeel(themeInfo.lafClassName());
             } catch (Exception ex) {
                 LoggingFacade.INSTANCE.logSevere(null, ex);
-                DialogUtil.showInformationDialog(c, "Failed to create '" + themeInfo.lafClassName() + "'.", ex);
+                MsgUtil.showInformationDialog(c, "Failed to create '" + themeInfo.lafClassName() + "'.", ex);
             }
         } else if (themeInfo.themeFile() != null) {
             FlatAnimatedLafChange.showSnapshot();
@@ -57,15 +56,32 @@ public class ThemeUtil {
 
             } catch (Exception ex) {
                 LoggingFacade.INSTANCE.logSevere(null, ex);
-                DialogUtil.showInformationDialog(c, "Failed to load '" + themeInfo.themeFile() + "'.", ex);
+                MsgUtil.showInformationDialog(c, "Failed to load '" + themeInfo.themeFile() + "'.", ex);
             }
         } else {
             FlatAnimatedLafChange.showSnapshot();
-
             IntelliJTheme.setup(ThemeUtil.class.getResourceAsStream(THEMES_PACKAGE + themeInfo.resourceName()));
         }
         FlatLaf.updateUI();
         FlatAnimatedLafChange.hideSnapshotWithAnimation();
+    }
+
+    public static void setupTheme(String[] args) {
+        try {
+            if (args.length > 0) {
+                UIManager.setLookAndFeel(args[0]);
+            } else {
+                String theme = PrefUtil.getState().get(Constant.KEY_THEME, FlatDarculaLaf.class.getName());
+                if (theme.startsWith("R_")) {
+                    IntelliJTheme.setup(ThemeUtil.class.getResourceAsStream(THEMES_PACKAGE + theme.replace("R_", "")));
+                } else {
+                    UIManager.setLookAndFeel(theme);
+                }
+            }
+        } catch (Throwable ex) {
+            LoggingFacade.INSTANCE.logSevere(null, ex);
+            FlatLightLaf.setup();
+        }
     }
 
 

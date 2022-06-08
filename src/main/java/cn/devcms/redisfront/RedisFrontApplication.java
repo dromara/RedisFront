@@ -1,14 +1,16 @@
 package cn.devcms.redisfront;
 
+import cn.devcms.redisfront.common.util.PrefUtil;
+import cn.devcms.redisfront.common.util.ThemeUtil;
 import cn.devcms.redisfront.ui.MainFrame;
 import com.formdev.flatlaf.FlatLaf;
-import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.extras.FlatInspector;
 import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
 import com.formdev.flatlaf.util.SystemInfo;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
 import java.util.Collections;
 
 public class RedisFrontApplication {
@@ -32,11 +34,21 @@ public class RedisFrontApplication {
         FlatLaf.registerCustomDefaultsSource("cn.devcms.redisfront");
         FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", "#d81e06"));
 
+
+
         SwingUtilities.invokeLater(() -> {
-            FlatLightLaf.setup(new FlatLightLaf());
+
+            PrefUtil.init("/redis-front");
+            ThemeUtil.setupTheme(args);
+
             FlatInspector.install("ctrl shift alt X");
             FlatUIDefaultsInspector.install("ctrl shift alt Y");
+
             MainFrame frame = new MainFrame();
+            frame.addWindowListener(new WindowAdapter() {
+
+            });
+
             frame.setMinimumSize(new Dimension(1200, 800));
             frame.pack();
             frame.setLocationRelativeTo(null);

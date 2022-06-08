@@ -8,8 +8,7 @@ import java.awt.*;
  *
  * @author Jin
  */
-public class DialogUtil {
-
+public class MsgUtil {
 
     public static void showInformationDialog(Component c, String message) {
         JOptionPane.showMessageDialog(SwingUtilities.windowForComponent(c),
