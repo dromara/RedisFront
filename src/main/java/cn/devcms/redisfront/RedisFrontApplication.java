@@ -12,10 +12,20 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.util.Collections;
+import java.util.Locale;
 
 public class RedisFrontApplication {
 
     public static void main(String[] args) {
+
+        GraphicsEnvironment ge;
+
+        ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+
+        String[] names = ge.getAvailableFontFamilyNames();
+
+        String[] name = ge.getAvailableFontFamilyNames(Locale.CHINA);
+        String[] nam2 = ge.getAvailableFontFamilyNames(Locale.ENGLISH);
 
         if (SystemInfo.isMacOS) {
             System.setProperty("apple.laf.useScreenMenuBar", "true");

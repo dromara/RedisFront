@@ -5,18 +5,20 @@ import cn.devcms.redisfront.common.base.BaseDialog;
 import cn.devcms.redisfront.common.constant.Constant;
 import cn.devcms.redisfront.common.util.PrefUtil;
 import cn.devcms.redisfront.common.util.ThemeUtil;
-import com.formdev.flatlaf.FlatDarculaLaf;
-import com.formdev.flatlaf.FlatDarkLaf;
-import com.formdev.flatlaf.FlatIntelliJLaf;
-import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.*;
+import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
+import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.StringUtils;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class SettingDialog extends BaseDialog {
     private JPanel contentPane;
@@ -37,6 +39,8 @@ public class SettingDialog extends BaseDialog {
         setTitle("设置");
         setContentPane(contentPane);
         initThemeNameComboBox();
+        initFontComboBox();
+        initFontSizeComboBox();
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
         buttonOK.addActionListener(e -> onOK());
@@ -50,15 +54,40 @@ public class SettingDialog extends BaseDialog {
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
+    private void initFontSizeComboBox() {
+        ArrayList<String> fontSizes = new ArrayList<>(Arrays.asList(
+                "10", "11", "12", "14", "16", "18", "20", "24", "28"));
+        for (String fontSize : fontSizes) {
+            fontSizeComboBox.addItem(fontSize);
+        }
+        fontSizeComboBox.addActionListener(e -> {
+            String fontSizeStr = (String) fontNameComboBox.getSelectedItem();
+            Font font = UIManager.getFont("defaultFont");
+            Font newFont = font.deriveFont((float) Integer.parseInt(fontSizeStr));
+            UIManager.put("defaultFont", newFont);
+            FlatLaf.updateUI();
+        });
 
-    private void onOK() {
-        // 在此处添加您的代码
-        dispose();
     }
 
-    private void onCancel() {
-        // 必要时在此处添加您的代码
-        dispose();
+    private void initFontComboBox() {
+        ArrayList<String> families = new ArrayList<>(Arrays.asList(
+                "Arial", "Cantarell", "Comic Sans MS", "Courier New", "DejaVu Sans",
+                "Dialog", "Liberation Sans", "Monospaced", "Noto Sans", "Roboto",
+                "SansSerif", "Segoe UI", "Serif", "Tahoma", "Ubuntu", "Verdana"));
+        for (String family : families) {
+            fontNameComboBox.addItem(family);
+        }
+        fontNameComboBox.addActionListener(e -> {
+            String fontFamily = (String) fontNameComboBox.getSelectedItem();
+            FlatAnimatedLafChange.showSnapshot();
+            Font font = UIManager.getFont("defaultFont");
+            Font newFont = StyleContext.getDefaultStyleContext().getFont(fontFamily, font.getStyle(), font.getSize());
+            newFont = FlatUIUtils.nonUIResource(newFont);
+            UIManager.put("defaultFont", newFont);
+            FlatLaf.updateUI();
+            FlatAnimatedLafChange.hideSnapshotWithAnimation();
+        });
     }
 
     private void initThemeNameComboBox() {
@@ -95,6 +124,15 @@ public class SettingDialog extends BaseDialog {
         themeNameComboBox.setSelectedIndex(Integer.parseInt(PrefUtil.getState().get(Constant.KEY_THEME_SELECT_INDEX, "0")));
     }
 
+    private void onOK() {
+        // 在此处添加您的代码
+        dispose();
+    }
+
+    private void onCancel() {
+        // 必要时在此处添加您的代码
+        dispose();
+    }
 
     private void createUIComponents() {
         themePanel = new JPanel();
