@@ -61,7 +61,7 @@ public class SettingDialog extends BaseDialog {
             fontSizeComboBox.addItem(fontSize);
         }
         fontSizeComboBox.addActionListener(e -> {
-            String fontSizeStr = (String) fontNameComboBox.getSelectedItem();
+            String fontSizeStr = (String) fontSizeComboBox.getSelectedItem();
             Font font = UIManager.getFont("defaultFont");
             Font newFont = font.deriveFont((float) Integer.parseInt(fontSizeStr));
             UIManager.put("defaultFont", newFont);
