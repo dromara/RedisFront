@@ -7,6 +7,7 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatInspector;
 import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
 import com.formdev.flatlaf.util.SystemInfo;
+import redis.clients.jedis.JedisPool;
 
 import javax.swing.*;
 import java.awt.*;

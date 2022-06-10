@@ -1,7 +1,8 @@
 package cn.devcms.redisfront.ui.dialog;
 
-import cn.devcms.redisfront.common.base.BaseDialog;
+import cn.devcms.redisfront.common.base.RFDialog;
 import cn.devcms.redisfront.model.ConnectInfo;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.StringUtils;
 
 import javax.swing.*;
@@ -11,7 +12,7 @@ import java.awt.event.*;
 import java.io.File;
 import java.util.function.Consumer;
 
-public class AddConnectDialog extends BaseDialog<ConnectInfo> {
+public class AddConnectDialog extends RFDialog<ConnectInfo> {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -45,6 +46,7 @@ public class AddConnectDialog extends BaseDialog<ConnectInfo> {
     private JButton sshPrivateKeyBtn;
     private JCheckBox showShhPassword;
     private JPanel basicPanel;
+    private JButton testBtn;
 
 
     public AddConnectDialog(Frame owner, Consumer<ConnectInfo> callback) {
@@ -178,5 +180,8 @@ public class AddConnectDialog extends BaseDialog<ConnectInfo> {
         portField.setValue(6379);
         hostField = new JTextField();
         hostField.setText("127.0.0.1");
+        testBtn = new JButton();
+        testBtn.setText("测试连接");
+        testBtn.setIcon(new FlatSVGIcon("svg/testBtn.svg"));
     }
 }

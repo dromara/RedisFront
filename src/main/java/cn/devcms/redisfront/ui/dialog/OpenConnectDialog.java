@@ -1,14 +1,12 @@
 package cn.devcms.redisfront.ui.dialog;
 
-import cn.devcms.redisfront.common.base.BaseDialog;
-import cn.devcms.redisfront.model.ConnectInfo;
+import cn.devcms.redisfront.common.base.RFDialog;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.function.Consumer;
 
-public class OpenConnectDialog extends BaseDialog<Void> {
+public class OpenConnectDialog extends RFDialog<Void> {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;

@@ -1,7 +1,5 @@
 package cn.devcms.redisfront.common.base;
 
-import cn.devcms.redisfront.model.ConnectInfo;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.function.Consumer;
@@ -11,17 +9,17 @@ import java.util.function.Consumer;
  *
  * @author Jin
  */
-public class BaseDialog<T> extends JDialog {
+public class RFDialog<T> extends JDialog {
 
 
     protected Consumer<T> callback;
 
-    public BaseDialog(Frame owner, Consumer<T> callback) {
+    public RFDialog(Frame owner, Consumer<T> callback) {
         super(owner);
         this.callback = callback;
     }
 
-    public BaseDialog(Frame owner) {
+    public RFDialog(Frame owner) {
         super(owner);
     }
 }

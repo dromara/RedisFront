@@ -1,7 +1,7 @@
 package cn.devcms.redisfront.ui.dialog;
 
 
-import cn.devcms.redisfront.common.base.BaseDialog;
+import cn.devcms.redisfront.common.base.RFDialog;
 import cn.devcms.redisfront.common.constant.Constant;
 import cn.devcms.redisfront.common.util.PrefUtil;
 import cn.devcms.redisfront.common.util.ThemeUtil;
@@ -20,7 +20,7 @@ import java.awt.event.WindowEvent;
 import java.util.*;
 import java.util.List;
 
-public class SettingDialog extends BaseDialog<Void> {
+public class SettingDialog extends RFDialog<Void> {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
