@@ -19,6 +19,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class SettingDialog extends BaseDialog {
     private JPanel contentPane;
@@ -65,19 +66,30 @@ public class SettingDialog extends BaseDialog {
             Font font = UIManager.getFont("defaultFont");
             Font newFont = font.deriveFont((float) Integer.parseInt(fontSizeStr));
             UIManager.put("defaultFont", newFont);
+            PrefUtil.getState().put(Constant.KEY_FONT_SIZE, fontSizeStr);
             FlatLaf.updateUI();
         });
-
+        fontSizeComboBox.setSelectedItem(PrefUtil.getState().get(Constant.KEY_FONT_NAME, String.valueOf(UIManager.getFont("defaultFont").getSize())));
     }
 
     private void initFontComboBox() {
-        ArrayList<String> families = new ArrayList<>(Arrays.asList(
-                "Arial", "Cantarell", "Comic Sans MS", "Courier New", "DejaVu Sans",
-                "Dialog", "Liberation Sans", "Monospaced", "Noto Sans", "Roboto",
-                "SansSerif", "Segoe UI", "Serif", "Tahoma", "Ubuntu", "Verdana"));
-        for (String family : families) {
-            fontNameComboBox.addItem(family);
-        }
+        Long startTime = System.currentTimeMillis();
+        GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        List<String> families = List.of(graphicsEnvironment.getAvailableFontFamilyNames());
+        families.stream().parallel().forEach(fontNameComboBox::addItem);
+        System.out.println(System.currentTimeMillis() - startTime);
+        fontNameComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                Font font = UIManager.getFont("defaultFont");
+                Font newFont = StyleContext.getDefaultStyleContext().getFont((String) value, font.getStyle(), font.getSize());
+                newFont = FlatUIUtils.nonUIResource(newFont);
+                setFont(newFont);
+                return this;
+            }
+        });
+        System.out.println(System.currentTimeMillis() - startTime);
         fontNameComboBox.addActionListener(e -> {
             String fontFamily = (String) fontNameComboBox.getSelectedItem();
             FlatAnimatedLafChange.showSnapshot();
@@ -87,7 +99,10 @@ public class SettingDialog extends BaseDialog {
             UIManager.put("defaultFont", newFont);
             FlatLaf.updateUI();
             FlatAnimatedLafChange.hideSnapshotWithAnimation();
+            PrefUtil.getState().put(Constant.KEY_FONT_NAME, fontFamily);
         });
+        fontNameComboBox.setSelectedItem(PrefUtil.getState().get(Constant.KEY_FONT_NAME, UIManager.getFont("defaultFont").getFontName()));
+        System.out.println(System.currentTimeMillis() - startTime);
     }
 
     private void initThemeNameComboBox() {

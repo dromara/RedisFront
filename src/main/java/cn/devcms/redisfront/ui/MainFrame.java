@@ -97,7 +97,6 @@ public class MainFrame extends JXFrame {
                     public void mouseClicked(MouseEvent e) {
                         SettingDialog settingDialog = new SettingDialog(MainFrame.this);
                         settingDialog.setMinimumSize(new Dimension(500, 400));
-                        settingDialog.setResizable(false);
                         settingDialog.setLocationRelativeTo(MainFrame.this);
                         settingDialog.pack();
                         settingDialog.setVisible(true);
