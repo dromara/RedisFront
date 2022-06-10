@@ -21,16 +21,17 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-public class MainFrame extends JXFrame {
+public class RedisFrontFrame extends JXFrame {
     MainForm mainForm;
 
 
-    public MainFrame() {
+    public RedisFrontFrame() {
         super(" RedisFront ", true);
         setIconImages(FlatSVGUtils.createWindowIconImages("/svg/redis.svg"));
         UIManager.put("TitlePane.unifiedBackground", false);
         menuBarInit();
         initComponents();
+        FlatDesktop.setAboutHandler(this::aboutActionPerformed);
         FlatDesktop.setQuitHandler(FlatDesktop.QuitResponse::performQuit);
     }
 
@@ -51,12 +52,12 @@ public class MainFrame extends JXFrame {
                 JMenuItem addConnectMenu = new JMenuItem("新建连接", KeyEvent.VK_A);
                 addConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK));
                 addConnectMenu.addActionListener(e -> {
-                    AddConnectDialog addConnectDialog = new AddConnectDialog(MainFrame.this, (connectInfo -> {
+                    AddConnectDialog addConnectDialog = new AddConnectDialog(RedisFrontFrame.this, (connectInfo -> {
                         mainForm.addAction();
                         System.out.println(connectInfo);
                     }));
                     addConnectDialog.setResizable(false);
-                    addConnectDialog.setLocationRelativeTo(MainFrame.this);
+                    addConnectDialog.setLocationRelativeTo(RedisFrontFrame.this);
                     addConnectDialog.pack();
                     addConnectDialog.setVisible(true);
                 });
@@ -65,9 +66,9 @@ public class MainFrame extends JXFrame {
                 JMenuItem openConnectMenu = new JMenuItem("打开连接", KeyEvent.VK_S);
                 openConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
                 openConnectMenu.addActionListener(e -> {
-                    OpenConnectDialog openConnectDialog = new OpenConnectDialog(MainFrame.this);
+                    OpenConnectDialog openConnectDialog = new OpenConnectDialog(RedisFrontFrame.this);
                     openConnectDialog.setResizable(false);
-                    openConnectDialog.setLocationRelativeTo(MainFrame.this);
+                    openConnectDialog.setLocationRelativeTo(RedisFrontFrame.this);
                     openConnectDialog.pack();
                     openConnectDialog.setVisible(true);
                 });
@@ -82,7 +83,7 @@ public class MainFrame extends JXFrame {
                 fileMenu.add(new JSeparator());
                 JMenuItem exitMenu = new JMenuItem("退出程序");
                 exitMenu.addActionListener(e -> {
-                    MainFrame.this.dispose();
+                    RedisFrontFrame.this.dispose();
                     System.exit(0);
                 });
                 fileMenu.add(exitMenu);
@@ -95,9 +96,9 @@ public class MainFrame extends JXFrame {
                 settingMenu.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        SettingDialog settingDialog = new SettingDialog(MainFrame.this);
+                        SettingDialog settingDialog = new SettingDialog(RedisFrontFrame.this);
                         settingDialog.setMinimumSize(new Dimension(500, 400));
-                        settingDialog.setLocationRelativeTo(MainFrame.this);
+                        settingDialog.setLocationRelativeTo(RedisFrontFrame.this);
                         settingDialog.pack();
                         settingDialog.setVisible(true);
                     }
@@ -108,24 +109,7 @@ public class MainFrame extends JXFrame {
                 aboutMenu.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        JLabel titleLabel = new JLabel("RedisFront");
-                        titleLabel.putClientProperty(FlatClientProperties.STYLE_CLASS, "h1");
-                        String link = "https://gitee.com/westboy/redis-front";
-                        JLabel linkLabel = new JLabel("<html><a href=\"#\">" + link + "</a></html>");
-                        linkLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                        linkLabel.addMouseListener(new MouseAdapter() {
-                            @Override
-                            public void mouseClicked(MouseEvent e) {
-                                try {
-                                    Desktop.getDesktop().browse(new URI(link));
-                                } catch (IOException | URISyntaxException ex) {
-                                    JOptionPane.showMessageDialog(linkLabel, "Failed to open '" + link + "' in browser.", "About",
-                                            JOptionPane.PLAIN_MESSAGE);
-                                }
-                            }
-                        });
-                        JOptionPane.showMessageDialog(MainFrame.this, new Object[]{titleLabel, "一款 Redis GUI 工具", " ", linkLabel,}, "关于",
-                                JOptionPane.PLAIN_MESSAGE);
+                        aboutActionPerformed();
                     }
                 });
                 add(aboutMenu);
@@ -148,5 +132,26 @@ public class MainFrame extends JXFrame {
         });
     }
 
+
+    private void aboutActionPerformed() {
+        JLabel titleLabel = new JLabel("RedisFront");
+        titleLabel.putClientProperty(FlatClientProperties.STYLE_CLASS, "h1");
+        String link = "https://gitee.com/westboy/redis-front";
+        JLabel linkLabel = new JLabel("<html><a href=\"#\">" + link + "</a></html>");
+        linkLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        linkLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                try {
+                    Desktop.getDesktop().browse(new URI(link));
+                } catch (IOException | URISyntaxException ex) {
+                    JOptionPane.showMessageDialog(linkLabel, "Failed to open '" + link + "' in browser.", "About",
+                            JOptionPane.PLAIN_MESSAGE);
+                }
+            }
+        });
+        JOptionPane.showMessageDialog(RedisFrontFrame.this, new Object[]{titleLabel, "一款 Redis GUI 工具", " ", linkLabel,}, "关于",
+                JOptionPane.PLAIN_MESSAGE);
+    }
 
 }

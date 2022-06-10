@@ -13,6 +13,7 @@ import java.util.function.Consumer;
  */
 public class BaseDialog<T> extends JDialog {
 
+
     protected Consumer<T> callback;
 
     public BaseDialog(Frame owner, Consumer<T> callback) {

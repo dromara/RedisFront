@@ -2,7 +2,7 @@ package cn.devcms.redisfront;
 
 import cn.devcms.redisfront.common.util.PrefUtil;
 import cn.devcms.redisfront.common.util.ThemeUtil;
-import cn.devcms.redisfront.ui.MainFrame;
+import cn.devcms.redisfront.ui.RedisFrontFrame;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatInspector;
 import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
@@ -54,7 +54,7 @@ public class RedisFrontApplication {
             FlatInspector.install("ctrl shift alt X");
             FlatUIDefaultsInspector.install("ctrl shift alt Y");
 
-            MainFrame frame = new MainFrame();
+            RedisFrontFrame frame = new RedisFrontFrame();
             frame.addWindowListener(new WindowAdapter() {
 
             });
