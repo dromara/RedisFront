@@ -18,15 +18,6 @@ public class RedisFrontApplication {
 
     public static void main(String[] args) {
 
-        GraphicsEnvironment ge;
-
-        ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-
-        String[] names = ge.getAvailableFontFamilyNames();
-
-        String[] name = ge.getAvailableFontFamilyNames(Locale.CHINA);
-        String[] nam2 = ge.getAvailableFontFamilyNames(Locale.ENGLISH);
-
         if (SystemInfo.isMacOS) {
             System.setProperty("apple.laf.useScreenMenuBar", "true");
             System.setProperty("apple.awt.application.name", "RedisFront");
@@ -43,7 +34,6 @@ public class RedisFrontApplication {
 
         FlatLaf.registerCustomDefaultsSource("cn.devcms.redisfront");
         FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", "#d81e06"));
-
 
 
         SwingUtilities.invokeLater(() -> {

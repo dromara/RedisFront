@@ -16,7 +16,6 @@ public class TabbedComponent extends JPanel {
     private final DashboardForm dashboardForm;
     private final DatabaseForm databaseForm;
 
-
     @SneakyThrows
     public TabbedComponent() {
         setLayout(new BorderLayout());

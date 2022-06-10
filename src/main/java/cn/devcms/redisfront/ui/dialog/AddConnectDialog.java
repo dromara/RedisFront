@@ -7,10 +7,7 @@ import com.formdev.flatlaf.util.StringUtils;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.util.function.Consumer;
 
@@ -38,8 +35,16 @@ public class AddConnectDialog extends BaseDialog<ConnectInfo> {
     private JLabel userLabel;
     private JLabel portLabel;
     private JPasswordField passwordField;
-
-    private JPanel SSL;
+    private JPanel sshPanel;
+    private JTextField sshHostField;
+    private JSpinner sshPortField;
+    private JTextField sshUserField;
+    private JCheckBox enableSshPrivateKey;
+    private JTextField sshPasswordField;
+    private JTextField sshPrivateKeyFile;
+    private JButton sshPrivateKeyBtn;
+    private JCheckBox showShhPassword;
+    private JPanel basicPanel;
 
 
     public AddConnectDialog(Frame owner, Consumer<ConnectInfo> callback) {
@@ -75,23 +80,30 @@ public class AddConnectDialog extends BaseDialog<ConnectInfo> {
 
         enableSSLBtn.addActionListener(e -> {
             enableSSHBtn.setSelected(false);
+            sshPanel.setVisible(false);
             sslPanel.setVisible(enableSSLBtn.isSelected());
             if (enableSSLBtn.isSelected()) {
-                setSize(new Dimension(400, 370));
+                setSize(new Dimension(400, 380));
             } else {
-                setSize(new Dimension(400, 260));
+                setSize(new Dimension(400, 280));
             }
         });
 
         enableSSHBtn.addActionListener(e -> {
             enableSSLBtn.setSelected(false);
             sslPanel.setVisible(false);
+            sshPanel.setVisible(enableSSHBtn.isSelected());
+            if (enableSSHBtn.isSelected()) {
+                setSize(new Dimension(400, 400));
+            } else {
+                setSize(new Dimension(400, 280));
+            }
         });
 
 
-        privateKeyFileBtn.addActionListener(new AbstractAction() {
+        privateKeyFileBtn.addMouseListener(new MouseAdapter() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void mouseClicked(MouseEvent e) {
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setFileFilter(new FileNameExtensionFilter("密钥文件", "pem", "crt"));
                 fileChooser.showDialog(AddConnectDialog.this, "选择私钥文件");
@@ -99,9 +111,9 @@ public class AddConnectDialog extends BaseDialog<ConnectInfo> {
                 privateKeyField.setText(file.getAbsolutePath());
             }
         });
-        publicKeyFileBtn.addActionListener(new AbstractAction() {
+        publicKeyFileBtn.addMouseListener(new MouseAdapter() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void mouseClicked(MouseEvent e) {
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setFileFilter(new FileNameExtensionFilter("公钥文件", "pem", "crt"));
                 fileChooser.showDialog(AddConnectDialog.this, "选择公钥文件");
@@ -110,9 +122,9 @@ public class AddConnectDialog extends BaseDialog<ConnectInfo> {
             }
         });
 
-        grantFileBtn.addActionListener(new AbstractAction() {
+        grantFileBtn.addMouseListener(new MouseAdapter() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void mouseClicked(MouseEvent e) {
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setFileFilter(new FileNameExtensionFilter("授权文件", "pem", "crt"));
                 fileChooser.showDialog(AddConnectDialog.this, "选择授权文件");
@@ -153,6 +165,8 @@ public class AddConnectDialog extends BaseDialog<ConnectInfo> {
     private void createUIComponents() {
         sslPanel = new JPanel();
         sslPanel.setVisible(false);
+        sshPanel = new JPanel();
+        sshPanel.setVisible(false);
         enableSSLBtn = new JRadioButton();
         enableSSLBtn.setSelected(false);
         enableSSHBtn = new JRadioButton();
