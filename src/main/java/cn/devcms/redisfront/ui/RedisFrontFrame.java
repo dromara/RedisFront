@@ -51,27 +51,15 @@ public class RedisFrontFrame extends JXFrame {
                 //新建连接
                 JMenuItem addConnectMenu = new JMenuItem("新建连接", KeyEvent.VK_A);
                 addConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK));
-                addConnectMenu.addActionListener(e -> {
-                    AddConnectDialog addConnectDialog = new AddConnectDialog(RedisFrontFrame.this, (connectInfo -> {
-                        mainContentForm.addAction();
-                        System.out.println(connectInfo);
-                    }));
-                    addConnectDialog.setResizable(false);
-                    addConnectDialog.setLocationRelativeTo(RedisFrontFrame.this);
-                    addConnectDialog.pack();
-                    addConnectDialog.setVisible(true);
-                });
+                addConnectMenu.addActionListener(e -> AddConnectDialog.showAddConnectDialog(RedisFrontFrame.this, (connectInfo -> {
+                    mainContentForm.addAction();
+                    System.out.println(connectInfo);
+                })));
                 fileMenu.add(addConnectMenu);
                 //打开连接
                 JMenuItem openConnectMenu = new JMenuItem("打开连接", KeyEvent.VK_S);
                 openConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
-                openConnectMenu.addActionListener(e -> {
-                    OpenConnectDialog openConnectDialog = new OpenConnectDialog(RedisFrontFrame.this);
-                    openConnectDialog.setResizable(false);
-                    openConnectDialog.setLocationRelativeTo(RedisFrontFrame.this);
-                    openConnectDialog.pack();
-                    openConnectDialog.setVisible(true);
-                });
+                openConnectMenu.addActionListener(e -> OpenConnectDialog.showOpenConnectDialog(RedisFrontFrame.this));
                 fileMenu.add(openConnectMenu);
                 //配置菜单
                 fileMenu.add(new JSeparator());
@@ -88,9 +76,6 @@ public class RedisFrontFrame extends JXFrame {
                 });
                 fileMenu.add(exitMenu);
                 add(fileMenu);
-//                JMenu editMenu = new JMenu("编辑");
-//                fileMenu.setMnemonic('E');
-//                add(editMenu);
                 JMenu settingMenu = new JMenu("设置");
                 fileMenu.setMnemonic('S');
                 settingMenu.addMouseListener(new MouseAdapter() {

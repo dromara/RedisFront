@@ -2,6 +2,7 @@ package cn.devcms.redisfront.ui.dialog;
 
 import cn.devcms.redisfront.common.base.RFDialog;
 import cn.devcms.redisfront.model.ConnectInfo;
+import cn.devcms.redisfront.ui.RedisFrontFrame;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.StringUtils;
 
@@ -48,6 +49,13 @@ public class AddConnectDialog extends RFDialog<ConnectInfo> {
     private JPanel basicPanel;
     private JButton testBtn;
 
+    public static void showAddConnectDialog(Frame owner, Consumer<ConnectInfo> callback) {
+        AddConnectDialog addConnectDialog = new AddConnectDialog(owner, callback);
+        addConnectDialog.setResizable(false);
+        addConnectDialog.setLocationRelativeTo(owner);
+        addConnectDialog.pack();
+        addConnectDialog.setVisible(true);
+    }
 
     public AddConnectDialog(Frame owner, Consumer<ConnectInfo> callback) {
         super(owner, callback);

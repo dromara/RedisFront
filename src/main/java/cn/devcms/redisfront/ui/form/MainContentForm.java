@@ -76,28 +76,17 @@ public class MainContentForm {
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new FlowLayout());
         JButton newBtn = new JButton(null, new FlatSVGIcon("icons/new.svg"));
-        //新建连接
+        //new add connect
         newBtn.setToolTipText("新建连接");
-        newBtn.addActionListener(e -> {
-            AddConnectDialog addConnectDialog = new AddConnectDialog(frame, (System.out::println));
-            addConnectDialog.setResizable(false);
-            addConnectDialog.setLocationRelativeTo(frame);
-            addConnectDialog.pack();
-            addConnectDialog.setVisible(true);
-        });
+        newBtn.addActionListener(e -> AddConnectDialog.showAddConnectDialog(frame, (System.out::println)));
         jPanel.add(newBtn);
 
-        //打开连接
+        //open connect
         JButton openBtn = new JButton(null, new FlatSVGIcon("icons/open.svg"));
         openBtn.setToolTipText("打开连接");
-        openBtn.addActionListener(e -> {
-            OpenConnectDialog openConnectDialog = new OpenConnectDialog(frame);
-            openConnectDialog.setResizable(false);
-            openConnectDialog.setLocationRelativeTo(frame);
-            openConnectDialog.pack();
-            openConnectDialog.setVisible(true);
-        });
+        openBtn.addActionListener(e -> OpenConnectDialog.showOpenConnectDialog(frame));
         jPanel.add(openBtn);
+
         toolBar.add(jPanel, BorderLayout.SOUTH);
         tabPanel.putClientProperty(TABBED_PANE_TRAILING_COMPONENT, toolBar);
     }
