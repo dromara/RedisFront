@@ -1,4 +1,4 @@
-package cn.devcms.redisfront.component;
+package cn.devcms.redisfront.ui.component;
 
 import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.input.KeyStroke;

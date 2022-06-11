@@ -1,7 +1,7 @@
-package cn.devcms.redisfront.component;
+package cn.devcms.redisfront.ui.component;
 
-import cn.devcms.redisfront.ui.form.DashboardForm;
-import cn.devcms.redisfront.ui.form.DatabaseForm;
+import cn.devcms.redisfront.ui.form._DashboardForm;
+import cn.devcms.redisfront.ui.form._DatabaseForm;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import lombok.SneakyThrows;
@@ -13,8 +13,8 @@ import static com.formdev.flatlaf.FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPA
 
 public class TabbedComponent extends JPanel {
     private final JTabbedPane contentPanel;
-    private final DashboardForm dashboardForm;
-    private final DatabaseForm databaseForm;
+    private final _DashboardForm dashboardForm;
+    private final _DatabaseForm databaseForm;
 
     @SneakyThrows
     public TabbedComponent() {
@@ -26,8 +26,8 @@ public class TabbedComponent extends JPanel {
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_CARD);
 
-        dashboardForm = new DashboardForm();
-        databaseForm = new DatabaseForm();
+        dashboardForm = new _DashboardForm();
+        databaseForm = new _DatabaseForm();
         contentPanel.addTab("数据", new FlatSVGIcon("icons/db_key.svg"), dashboardForm.getContentPanel());
         contentPanel.addTab("命令", new FlatSVGIcon("icons/db_cli.svg"), new TerminalComponent());
         contentPanel.addTab("信息", new FlatSVGIcon("icons/db_report.svg"), databaseForm.getContentPanel());

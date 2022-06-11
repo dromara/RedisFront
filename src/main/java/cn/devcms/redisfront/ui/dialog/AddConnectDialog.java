@@ -85,7 +85,7 @@ public class AddConnectDialog extends RFDialog<ConnectInfo> {
             sshPanel.setVisible(false);
             sslPanel.setVisible(enableSSLBtn.isSelected());
             if (enableSSLBtn.isSelected()) {
-                setSize(new Dimension(400, 380));
+                setSize(new Dimension(400, 400));
             } else {
                 setSize(new Dimension(400, 280));
             }
@@ -96,7 +96,7 @@ public class AddConnectDialog extends RFDialog<ConnectInfo> {
             sslPanel.setVisible(false);
             sshPanel.setVisible(enableSSHBtn.isSelected());
             if (enableSSHBtn.isSelected()) {
-                setSize(new Dimension(400, 400));
+                setSize(new Dimension(400, 420));
             } else {
                 setSize(new Dimension(400, 280));
             }

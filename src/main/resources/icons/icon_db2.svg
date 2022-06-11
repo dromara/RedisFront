@@ -2,13 +2,6 @@
         "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg t="1654245611300" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"
      p-id="18325" width="16" height="16">
-    <defs>
-        <style type="text/css">@font-face { font-family: feedback-iconfont; src:
-            url("//at.alicdn.com/t/font_1031158_u69w8yhxdu.woff2?t=1630033759944") format("woff2"),
-            url("//at.alicdn.com/t/font_1031158_u69w8yhxdu.woff?t=1630033759944") format("woff"),
-            url("//at.alicdn.com/t/font_1031158_u69w8yhxdu.ttf?t=1630033759944") format("truetype"); }
-        </style>
-    </defs>
     <path d="M896 761.429333v128c0 70.656-166.229333 128-371.2 128s-371.2-57.344-371.2-128v-110.933333C223.488 818.176 357.802667 844.8 512 844.8c175.957333 0 326.058667-34.645333 384-83.370667z"
           fill="#FED766" p-id="18326"></path>
     <path d="M192.426667 771.242667C267.52 800.512 382.805333 819.2 512 819.2c226.218667 0 409.6-57.344 409.6-128 0-19.456-13.909333-37.973333-38.826667-54.442667C807.68 607.488 692.394667 588.8 563.2 588.8c-226.218667 0-409.6 57.344-409.6 128 0 19.456 13.909333 37.973333 38.826667 54.442667z"

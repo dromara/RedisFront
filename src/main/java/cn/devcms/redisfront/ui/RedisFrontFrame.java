@@ -4,7 +4,7 @@ package cn.devcms.redisfront.ui;
 import cn.devcms.redisfront.ui.dialog.AddConnectDialog;
 import cn.devcms.redisfront.ui.dialog.OpenConnectDialog;
 import cn.devcms.redisfront.ui.dialog.SettingDialog;
-import cn.devcms.redisfront.ui.form.MainForm;
+import cn.devcms.redisfront.ui.form.MainContentForm;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatDesktop;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
@@ -22,7 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 public class RedisFrontFrame extends JXFrame {
-    MainForm mainForm;
+    MainContentForm mainContentForm;
 
 
     public RedisFrontFrame() {
@@ -38,8 +38,8 @@ public class RedisFrontFrame extends JXFrame {
     private void initComponents() {
         Container container = getContentPane();
         container.setLayout(new BorderLayout());
-        mainForm = new MainForm(this);
-        container.add(mainForm.getContentPanel(), BorderLayout.CENTER);
+        mainContentForm = new MainContentForm(this);
+        container.add(mainContentForm.getContentPanel(), BorderLayout.CENTER);
     }
 
 
@@ -53,7 +53,7 @@ public class RedisFrontFrame extends JXFrame {
                 addConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK));
                 addConnectMenu.addActionListener(e -> {
                     AddConnectDialog addConnectDialog = new AddConnectDialog(RedisFrontFrame.this, (connectInfo -> {
-                        mainForm.addAction();
+                        mainContentForm.addAction();
                         System.out.println(connectInfo);
                     }));
                     addConnectDialog.setResizable(false);

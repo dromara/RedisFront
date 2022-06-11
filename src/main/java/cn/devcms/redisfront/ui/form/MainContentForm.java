@@ -1,6 +1,6 @@
 package cn.devcms.redisfront.ui.form;
 
-import cn.devcms.redisfront.component.TabbedComponent;
+import cn.devcms.redisfront.ui.component.TabbedComponent;
 import cn.devcms.redisfront.ui.dialog.AddConnectDialog;
 import cn.devcms.redisfront.ui.dialog.OpenConnectDialog;
 import com.formdev.flatlaf.FlatClientProperties;
@@ -14,19 +14,19 @@ import java.util.function.BiConsumer;
 
 import static com.formdev.flatlaf.FlatClientProperties.*;
 
-public class MainForm {
+public class MainContentForm {
     private JPanel contentPanel;
     private JTabbedPane tabPanel;
     private final JFrame frame;
-    private final NoneForm noneForm;
+    private final _NoneForm noneForm;
 
     public JPanel getContentPanel() {
         return contentPanel;
     }
 
-    public MainForm(JFrame frame) {
+    public MainContentForm(JFrame frame) {
         this.frame = frame;
-        noneForm = new NoneForm();
+        noneForm = new _NoneForm();
         contentPanel.add(noneForm.getContentPanel(), BorderLayout.CENTER);
 
     }

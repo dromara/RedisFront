@@ -2,13 +2,6 @@
         "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg t="1654013348995" class="icon" viewBox="0 0 1218 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"
      p-id="127208" width="16" height="16" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <defs>
-        <style type="text/css">@font-face { font-family: feedback-iconfont; src:
-            url("//at.alicdn.com/t/font_1031158_u69w8yhxdu.woff2?t=1630033759944") format("woff2"),
-            url("//at.alicdn.com/t/font_1031158_u69w8yhxdu.woff?t=1630033759944") format("woff"),
-            url("//at.alicdn.com/t/font_1031158_u69w8yhxdu.ttf?t=1630033759944") format("truetype"); }
-        </style>
-    </defs>
     <path d="M1169.592417 975.469194V145.592417c0-53.383886-43.677725-97.061611-97.061611-97.061611H145.592417c-53.383886 0-97.061611 43.677725-97.061611 97.061611v829.876777h1121.061611z"
           fill="#FFFFFF" p-id="127209"></path>
     <path d="M1193.85782 975.469194V145.592417c0-66.899716-54.427299-121.327014-121.327014-121.327014H145.592417C78.692701 24.265403 24.265403 78.692701 24.265403 145.592417v854.14218h1169.592417v-24.265403z m-1121.061611 0V145.592417c0-40.139829 32.656379-72.796209 72.796208-72.796208h926.938389c40.139829 0 72.796209 32.656379 72.796208 72.796208v829.876777l24.265403-24.265403H48.530806l24.265403 24.265403z"

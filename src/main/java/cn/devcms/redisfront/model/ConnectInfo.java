@@ -27,7 +27,10 @@ public class ConnectInfo {
 
     @Data
     public static class SSHConfig {
-
+        private String privateKeyPath;
+        private String user;
+        private Integer port;
+        private String password;
     }
 
 }

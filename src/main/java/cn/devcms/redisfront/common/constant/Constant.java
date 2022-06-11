@@ -17,4 +17,6 @@ public class Constant {
 
     public static final String KEY_KEY_SEPARATOR = "keySeparator";
 
+    public static final String KEY_KEY_MAX_LOAD_NUM = "keyMaxLoadNum";
+
 }

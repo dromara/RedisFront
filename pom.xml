@@ -1,68 +1,89 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>cn.devcms</groupId>
     <artifactId>RedisFront</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <flatlaf.version>2.3</flatlaf.version>
+        <hutool.version>5.8.2</hutool.version>
+        <jedis.version>4.2.3</jedis.version>
+        <lanterna.version>3.1.1</lanterna.version>
     </properties>
-    
-        <dependencies>
+
+    <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.24</version>
             <scope>provided</scope>
         </dependency>
+        <!--flatlaf -->
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf</artifactId>
-            <version>2.3</version>
+            <version>${flatlaf.version}</version>
         </dependency>
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf-swingx</artifactId>
-            <version>2.3</version>
+            <version>${flatlaf.version}</version>
         </dependency>
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf-intellij-themes</artifactId>
-            <version>2.3</version>
+            <version>${flatlaf.version}</version>
         </dependency>
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf-extras</artifactId>
-            <version>2.3</version>
-        </dependency>
-        <dependency>
-            <groupId>com.miglayout</groupId>
-            <artifactId>miglayout-swing</artifactId>
-            <version>11.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.jgoodies</groupId>
-            <artifactId>jgoodies-forms</artifactId>
-            <version>1.9.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.googlecode.lanterna</groupId>
-            <artifactId>lanterna</artifactId>
-            <version>3.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
-            <version>4.2.3</version>
+            <version>${flatlaf.version}</version>
         </dependency>
         <dependency>
             <groupId>at.swimmesberger</groupId>
             <artifactId>swingx-core</artifactId>
             <version>1.6.8</version>
         </dependency>
+        <dependency>
+            <groupId>com.jgoodies</groupId>
+            <artifactId>jgoodies-forms</artifactId>
+            <version>1.9.0</version>
+        </dependency>
+        <!--lanterna-->
+        <dependency>
+            <groupId>com.googlecode.lanterna</groupId>
+            <artifactId>lanterna</artifactId>
+            <version>${lanterna.version}</version>
+        </dependency>
+        <!--Jedis -->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>${jedis.version}</version>
+        </dependency>
+        <!--HuTool -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-extra</artifactId>
+            <version>${hutool.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-json</artifactId>
+            <version>${hutool.version}</version>
+        </dependency>
+        <!--jsch -->
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.55</version>
+        </dependency>
     </dependencies>
-    
+
 </project>

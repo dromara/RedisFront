@@ -1,9 +1,8 @@
 package cn.devcms.redisfront.ui.form;
 
 import javax.swing.*;
-import java.awt.*;
 
-public class DashboardForm {
+public class _DashboardForm {
     private JPanel contentPanel;
 
     public JPanel getContentPanel() {
