@@ -40,11 +40,20 @@ public class MainContentForm {
 
     private void createUIComponents() {
         contentPanel = new JPanel();
+        UIManager.put("TabbedPane.closeHoverForeground", Color.red);
+        UIManager.put("TabbedPane.closePressedForeground", Color.red);
+        UIManager.put("TabbedPane.closeHoverBackground", new Color(0, true));
+        UIManager.put("TabbedPane.closeIcon", new FlatTabbedPaneCloseIcon());
         tabPanel = new JTabbedPane();
+
         tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.LEFT);
-        tabPanel.putClientProperty(TABBED_PANE_SHOW_TAB_SEPARATORS, true);
-        tabPanel.putClientProperty(TABBED_PANE_TAB_CLOSABLE, true);
-        tabPanel.putClientProperty(TABBED_PANE_TAB_CLOSE_TOOLTIPTEXT, "关闭连接");
+        //SHOW LINE
+        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, true);
+        //SHOW CLOSE BUTTON
+        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSABLE, true);
+        //SHOW CLOSE BUTTON
+        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_TOOLTIPTEXT, "关闭连接");
+        //SHOW CLOSE BUTTON Callback
         tabPanel.putClientProperty("JTabbedPane.tabCloseCallback", (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
             tabPanel.remove(tabIndex);
             if (tabbedPane.getTabCount() == 0) {
@@ -52,15 +61,13 @@ public class MainContentForm {
             }
         });
 
-        UIManager.put("TabbedPane.closeHoverForeground", Color.red);
-        UIManager.put("TabbedPane.closePressedForeground", Color.red);
-        UIManager.put("TabbedPane.closeHoverBackground", new Color(0, true));
-        UIManager.put("TabbedPane.closeIcon", new FlatTabbedPaneCloseIcon());
+        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, SwingConstants.LEADING);
 
-        tabPanel.putClientProperty(TABBED_PANE_TAB_ALIGNMENT, SwingConstants.LEADING);
-        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, TABBED_PANE_ALIGN_LEADING);
-        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, TABBED_PANE_TAB_TYPE_UNDERLINED);
+        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_LEADING);
+        //SHOW CLOSE BUTTON
+        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
 
+        //BUTTOM GROUP
         JLabel label = new JLabel(new FlatSVGIcon("icons/icon_home.svg"), JLabel.CENTER);
         label.setBorder(new EmptyBorder(10, 0, 10, 0));
         JToolBar toolBar = new JToolBar();
@@ -69,6 +76,7 @@ public class MainContentForm {
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new FlowLayout());
         JButton newBtn = new JButton(null, new FlatSVGIcon("icons/new.svg"));
+        //新建连接
         newBtn.setToolTipText("新建连接");
         newBtn.addActionListener(e -> {
             AddConnectDialog addConnectDialog = new AddConnectDialog(frame, (System.out::println));
@@ -78,6 +86,8 @@ public class MainContentForm {
             addConnectDialog.setVisible(true);
         });
         jPanel.add(newBtn);
+
+        //打开连接
         JButton openBtn = new JButton(null, new FlatSVGIcon("icons/open.svg"));
         openBtn.setToolTipText("打开连接");
         openBtn.addActionListener(e -> {
