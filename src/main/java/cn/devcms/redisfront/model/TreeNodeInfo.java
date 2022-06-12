@@ -9,7 +9,7 @@ import lombok.Data;
  * @author Jin
  */
 @Data
-public class NodeInfo {
+public class TreeNodeInfo {
     private String title;
     private String icon;
     private NodeTypeEnum nodeTypeEnum;

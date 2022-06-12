@@ -6,6 +6,7 @@ import cn.devcms.redisfront.ui.dialog.OpenConnectDialog;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.icons.FlatTabbedPaneCloseIcon;
+import lombok.val;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -68,21 +69,21 @@ public class MainContentForm {
         tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
 
         //BUTTOM GROUP
-        JLabel label = new JLabel(new FlatSVGIcon("icons/icon_home.svg"), JLabel.CENTER);
+        var label = new JLabel(new FlatSVGIcon("icons/icon_home.svg"), JLabel.CENTER);
         label.setBorder(new EmptyBorder(10, 0, 10, 0));
-        JToolBar toolBar = new JToolBar();
+        var  toolBar = new JToolBar();
         toolBar.setBorder(new EmptyBorder(0, 10, 10, 10));
         toolBar.setLayout(new BorderLayout());
-        JPanel jPanel = new JPanel();
+        var  jPanel = new JPanel();
         jPanel.setLayout(new FlowLayout());
-        JButton newBtn = new JButton(null, new FlatSVGIcon("icons/new.svg"));
+        var  newBtn = new JButton(null, new FlatSVGIcon("icons/new.svg"));
         //new add connect
         newBtn.setToolTipText("新建连接");
         newBtn.addActionListener(e -> AddConnectDialog.showAddConnectDialog(frame, (System.out::println)));
         jPanel.add(newBtn);
 
         //open connect
-        JButton openBtn = new JButton(null, new FlatSVGIcon("icons/open.svg"));
+        var  openBtn = new JButton(null, new FlatSVGIcon("icons/open.svg"));
         openBtn.setToolTipText("打开连接");
         openBtn.addActionListener(e -> OpenConnectDialog.showOpenConnectDialog(frame));
         jPanel.add(openBtn);

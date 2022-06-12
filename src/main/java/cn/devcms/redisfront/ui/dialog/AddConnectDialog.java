@@ -1,8 +1,9 @@
 package cn.devcms.redisfront.ui.dialog;
 
 import cn.devcms.redisfront.common.base.RFDialog;
+import cn.devcms.redisfront.common.enums.ConnectEnum;
+import cn.devcms.redisfront.common.func.Fn;
 import cn.devcms.redisfront.model.ConnectInfo;
-import cn.devcms.redisfront.ui.RedisFrontFrame;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.StringUtils;
 
@@ -42,7 +43,7 @@ public class AddConnectDialog extends RFDialog<ConnectInfo> {
     private JSpinner sshPortField;
     private JTextField sshUserField;
     private JCheckBox enableSshPrivateKey;
-    private JTextField sshPasswordField;
+    private JPasswordField sshPasswordField;
     private JTextField sshPrivateKeyFile;
     private JButton sshPrivateKeyBtn;
     private JCheckBox showShhPassword;
@@ -50,7 +51,7 @@ public class AddConnectDialog extends RFDialog<ConnectInfo> {
     private JButton testBtn;
 
     public static void showAddConnectDialog(Frame owner, Consumer<ConnectInfo> callback) {
-        AddConnectDialog addConnectDialog = new AddConnectDialog(owner, callback);
+        var addConnectDialog = new AddConnectDialog(owner, callback);
         addConnectDialog.setResizable(false);
         addConnectDialog.setLocationRelativeTo(owner);
         addConnectDialog.pack();
@@ -77,8 +78,8 @@ public class AddConnectDialog extends RFDialog<ConnectInfo> {
 
     private void initComponentListener() {
 
-        buttonOK.addActionListener(this::onOK);
-        buttonCancel.addActionListener(this::onCancel);
+        buttonOK.addActionListener(this::submitActionPerformed);
+        buttonCancel.addActionListener(this::cancelActionPerformed);
 
         showPasswordCheckBox.addActionListener(e -> {
             if (showPasswordCheckBox.isSelected()) {
@@ -114,7 +115,7 @@ public class AddConnectDialog extends RFDialog<ConnectInfo> {
         privateKeyFileBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                JFileChooser fileChooser = new JFileChooser();
+                var fileChooser = new JFileChooser();
                 fileChooser.setFileFilter(new FileNameExtensionFilter("密钥文件", "pem", "crt"));
                 fileChooser.showDialog(AddConnectDialog.this, "选择私钥文件");
                 File file = fileChooser.getSelectedFile();
@@ -124,7 +125,7 @@ public class AddConnectDialog extends RFDialog<ConnectInfo> {
         publicKeyFileBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                JFileChooser fileChooser = new JFileChooser();
+                var fileChooser = new JFileChooser();
                 fileChooser.setFileFilter(new FileNameExtensionFilter("公钥文件", "pem", "crt"));
                 fileChooser.showDialog(AddConnectDialog.this, "选择公钥文件");
                 File file = fileChooser.getSelectedFile();
@@ -135,21 +136,33 @@ public class AddConnectDialog extends RFDialog<ConnectInfo> {
         grantFileBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                JFileChooser fileChooser = new JFileChooser();
+                var fileChooser = new JFileChooser();
                 fileChooser.setFileFilter(new FileNameExtensionFilter("授权文件", "pem", "crt"));
                 fileChooser.showDialog(AddConnectDialog.this, "选择授权文件");
                 File file = fileChooser.getSelectedFile();
                 grantField.setText(file.getAbsolutePath());
             }
         });
+
+        sshPrivateKeyBtn.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                var fileChooser = new JFileChooser();
+                fileChooser.setFileFilter(new FileNameExtensionFilter("私钥文件", "pem", "crt"));
+                fileChooser.showDialog(AddConnectDialog.this, "选择私钥文件");
+                File file = fileChooser.getSelectedFile();
+                sshPrivateKeyFile.setText(file.getAbsolutePath());
+            }
+        });
     }
 
-    private void onCancel(ActionEvent actionEvent) {
+    private void cancelActionPerformed(ActionEvent actionEvent) {
         dispose();
     }
 
 
-    private void onOK(ActionEvent actionEvent) {
+    private void submitActionPerformed(ActionEvent actionEvent) {
+
         if (StringUtils.isEmpty(titleField.getText())) {
             titleField.requestFocus();
             return;
@@ -159,15 +172,63 @@ public class AddConnectDialog extends RFDialog<ConnectInfo> {
             return;
         }
 
-        ConnectInfo connectInfo = new ConnectInfo();
-        connectInfo.setTitle(titleField.getText());
-        connectInfo.setHost(hostField.getText());
-        connectInfo.setPort((Integer) portField.getValue());
-        connectInfo.setActive(true);
-        if (passwordField.getPassword().length > 0) {
-            connectInfo.setPassword(String.valueOf(passwordField.getPassword()));
+        if (enableSSHBtn.isSelected()) {
+            //valid sshHostField
+            if (Fn.isEmpty(sshHostField.getText())) {
+                sshHostField.requestFocus();
+                return;
+            }
+            //valid sshUserField
+            if (Fn.isEmpty(sshUserField.getText())) {
+                sshUserField.requestFocus();
+                return;
+            }
+            //valid enableSshPrivateKey
+            if (enableSshPrivateKey.isSelected()) {
+                if (Fn.isEmpty(sshPrivateKeyFile.getText())) {
+                    sshPrivateKeyFile.requestFocus();
+                    return;
+                }
+            }
+
+            var sshConfig = new ConnectInfo.SSHConfig(
+                    sshPrivateKeyFile.getText(),
+                    sshUserField.getText(),
+                    (Integer) sshPortField.getValue(),
+                    new String(sshPasswordField.getPassword()));
+
+            callback.accept(
+                    new ConnectInfo(titleField.getText(),
+                            userField.getText(),
+                            (Integer) portField.getValue(),
+                            String.valueOf(passwordField.getPassword()),
+                            ConnectEnum.SSH,
+                            true,
+                            sshConfig)
+            );
+        } else if (enableSSLBtn.isSelected()) {
+
+            callback.accept(
+                    new ConnectInfo(titleField.getText(),
+                            userField.getText(),
+                            (Integer) portField.getValue(),
+                            String.valueOf(passwordField.getPassword()),
+                            ConnectEnum.SSL,
+                            true,
+                            null,
+                            null)
+            );
+        } else {
+            callback.accept(
+                    new ConnectInfo(titleField.getText(),
+                            userField.getText(),
+                            (Integer) portField.getValue(),
+                            String.valueOf(passwordField.getPassword()),
+                            ConnectEnum.NORMAL,
+                            true)
+            );
         }
-        callback.accept(connectInfo);
+
         dispose();
     }
 
@@ -190,6 +251,8 @@ public class AddConnectDialog extends RFDialog<ConnectInfo> {
         hostField.setText("127.0.0.1");
         testBtn = new JButton();
         testBtn.setText("测试连接");
-        testBtn.setIcon(new FlatSVGIcon("svg/testBtn.svg"));
+        testBtn.setIcon(new FlatSVGIcon("icons/lan-connect.svg"));
+        sshPortField = new JSpinner();
+        sshPortField.setValue(22);
     }
 }

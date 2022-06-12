@@ -32,15 +32,6 @@ public class Fn {
         FlatLaf.revalidateAndRepaintAllFramesAndDialogs();
     }
 
-    public static void removeAllComponents(JPanel panel) {
-        Component[] components = panel.getComponents();
-        if (components != null && components.length > 0) {
-            for (Component component : components) {
-                panel.remove(component);
-            }
-        }
-    }
-
     public static boolean isNotEmpty(Collection<?> collection) {
         return CollectionUtil.isNotEmpty(collection);
     }
@@ -68,6 +59,14 @@ public class Fn {
 
     public static boolean isEmpty(Collection<?> collection) {
         return CollectionUtil.isEmpty(collection);
+    }
+
+    public static <T> boolean isEmpty(T[] array) {
+        return ArrayUtil.isEmpty(array);
+    }
+
+    public static <T> T[] isEmpty(T[] array, T[] defaultValue) {
+        return ArrayUtil.isEmpty(array) ? defaultValue : array;
     }
 
     public static boolean isEmpty(Map<?, ?> map) {

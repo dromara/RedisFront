@@ -6,6 +6,7 @@ import com.formdev.flatlaf.*;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.json.Json;
 import com.formdev.flatlaf.util.LoggingFacade;
+import lombok.val;
 
 import javax.swing.*;
 import java.awt.*;
@@ -96,7 +97,7 @@ public class ThemeUtil {
     @SuppressWarnings("unchecked")
     static void loadBundledThemes() {
         Map<String, Object> json;
-        try (Reader reader = new InputStreamReader(Objects.requireNonNull(RedisFrontApplication.class.getResourceAsStream("themes.json")), StandardCharsets.UTF_8)) {
+        try (var  reader = new InputStreamReader(Objects.requireNonNull(RedisFrontApplication.class.getResourceAsStream("themes.json")), StandardCharsets.UTF_8)) {
             json = (Map<String, Object>) Json.parse(reader);
         } catch (IOException ex) {
             LoggingFacade.INSTANCE.logSevere(null, ex);
@@ -104,14 +105,14 @@ public class ThemeUtil {
         }
 
         for (Map.Entry<String, Object> e : json.entrySet()) {
-            String resourceName = e.getKey();
-            Map<String, String> value = (Map<String, String>) e.getValue();
-            String name = value.get("name");
-            boolean dark = Boolean.parseBoolean(value.get("dark"));
-            String license = value.get("license");
-            String licenseFile = value.get("licenseFile");
-            String sourceCodeUrl = value.get("sourceCodeUrl");
-            String sourceCodePath = value.get("sourceCodePath");
+            var resourceName = e.getKey();
+            var  value = (Map<String, String>) e.getValue();
+            var  name = value.get("name");
+            var  dark = Boolean.parseBoolean(value.get("dark"));
+            var  license = value.get("license");
+            var  licenseFile = value.get("licenseFile");
+            var  sourceCodeUrl = value.get("sourceCodeUrl");
+            var  sourceCodePath = value.get("sourceCodePath");
             bundledThemes.add(new ThemeInfo(name, resourceName, dark, license, licenseFile, sourceCodeUrl, sourceCodePath, null, null));
         }
     }

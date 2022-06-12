@@ -10,6 +10,7 @@ import com.formdev.flatlaf.extras.FlatDesktop;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.FlatSVGUtils;
 import com.formdev.flatlaf.extras.components.FlatButton;
+import lombok.val;
 import org.jdesktop.swingx.JXFrame;
 
 import javax.swing.*;
@@ -36,7 +37,7 @@ public class RedisFrontFrame extends JXFrame {
     }
 
     private void initComponents() {
-        Container container = getContentPane();
+        var  container = getContentPane();
         container.setLayout(new BorderLayout());
         mainContentForm = new MainContentForm(this);
         container.add(mainContentForm.getContentPanel(), BorderLayout.CENTER);
@@ -46,10 +47,10 @@ public class RedisFrontFrame extends JXFrame {
     private void menuBarInit() {
         setJMenuBar(new JMenuBar() {
             {
-                JMenu fileMenu = new JMenu("文件");
+                var  fileMenu = new JMenu("文件");
                 fileMenu.setMnemonic('F');
                 //新建连接
-                JMenuItem addConnectMenu = new JMenuItem("新建连接", KeyEvent.VK_A);
+                var  addConnectMenu = new JMenuItem("新建连接", KeyEvent.VK_A);
                 addConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK));
                 addConnectMenu.addActionListener(e -> AddConnectDialog.showAddConnectDialog(RedisFrontFrame.this, (connectInfo -> {
                     mainContentForm.addAction();
@@ -57,39 +58,36 @@ public class RedisFrontFrame extends JXFrame {
                 })));
                 fileMenu.add(addConnectMenu);
                 //打开连接
-                JMenuItem openConnectMenu = new JMenuItem("打开连接", KeyEvent.VK_S);
+                var  openConnectMenu = new JMenuItem("打开连接", KeyEvent.VK_S);
                 openConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
                 openConnectMenu.addActionListener(e -> OpenConnectDialog.showOpenConnectDialog(RedisFrontFrame.this));
                 fileMenu.add(openConnectMenu);
                 //配置菜单
                 fileMenu.add(new JSeparator());
-                JMenuItem importConfigMenu = new JMenuItem("加载配置");
+                var  importConfigMenu = new JMenuItem("加载配置");
                 fileMenu.add(importConfigMenu);
-                JMenuItem exportConfigMenu = new JMenuItem("导出配置");
+                var  exportConfigMenu = new JMenuItem("导出配置");
                 fileMenu.add(exportConfigMenu);
                 //退出程序
                 fileMenu.add(new JSeparator());
-                JMenuItem exitMenu = new JMenuItem("退出程序");
+                var  exitMenu = new JMenuItem("退出程序");
                 exitMenu.addActionListener(e -> {
                     RedisFrontFrame.this.dispose();
                     System.exit(0);
                 });
                 fileMenu.add(exitMenu);
                 add(fileMenu);
-                JMenu settingMenu = new JMenu("设置");
+                var  settingMenu = new JMenu("设置");
                 fileMenu.setMnemonic('S');
                 settingMenu.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        SettingDialog settingDialog = new SettingDialog(RedisFrontFrame.this);
-                        settingDialog.setMinimumSize(new Dimension(500, 400));
-                        settingDialog.setLocationRelativeTo(RedisFrontFrame.this);
-                        settingDialog.pack();
-                        settingDialog.setVisible(true);
+                       SettingDialog.showSettingDialog(RedisFrontFrame.this);
+
                     }
                 });
                 add(settingMenu);
-                JMenu aboutMenu = new JMenu("关于");
+                var  aboutMenu = new JMenu("关于");
                 fileMenu.setMnemonic('A');
                 aboutMenu.addMouseListener(new MouseAdapter() {
                     @Override
@@ -99,7 +97,7 @@ public class RedisFrontFrame extends JXFrame {
                 });
                 add(aboutMenu);
                 add(Box.createGlue());
-                FlatButton gitBtn = new FlatButton();
+                var gitBtn = new FlatButton();
                 gitBtn.setIcon(new FlatSVGIcon("icons/gitee.svg"));
                 gitBtn.setButtonType(FlatButton.ButtonType.toolBarButton);
                 gitBtn.setFocusable(false);
@@ -119,10 +117,10 @@ public class RedisFrontFrame extends JXFrame {
 
 
     private void aboutActionPerformed() {
-        JLabel titleLabel = new JLabel("RedisFront");
+        var  titleLabel = new JLabel("RedisFront");
         titleLabel.putClientProperty(FlatClientProperties.STYLE_CLASS, "h1");
-        String link = "https://gitee.com/westboy/redis-front";
-        JLabel linkLabel = new JLabel("<html><a href=\"#\">" + link + "</a></html>");
+        var link = "https://gitee.com/westboy/redis-front";
+        var  linkLabel = new JLabel("<html><a href=\"#\">" + link + "</a></html>");
         linkLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         linkLabel.addMouseListener(new MouseAdapter() {
             @Override

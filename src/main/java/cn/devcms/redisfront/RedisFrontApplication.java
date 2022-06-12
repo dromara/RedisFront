@@ -7,18 +7,14 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatInspector;
 import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
 import com.formdev.flatlaf.util.SystemInfo;
-import redis.clients.jedis.JedisPool;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
 import java.util.Collections;
-import java.util.Locale;
 
 public class RedisFrontApplication {
 
     public static void main(String[] args) {
-
         if (SystemInfo.isMacOS) {
             System.setProperty("apple.laf.useScreenMenuBar", "true");
             System.setProperty("apple.awt.application.name", "RedisFront");
@@ -45,12 +41,8 @@ public class RedisFrontApplication {
             FlatInspector.install("ctrl shift alt X");
             FlatUIDefaultsInspector.install("ctrl shift alt Y");
 
-            RedisFrontFrame frame = new RedisFrontFrame();
-            frame.addWindowListener(new WindowAdapter() {
-
-            });
-
-            frame.setMinimumSize(new Dimension(1200, 800));
+            var frame = new RedisFrontFrame();
+            frame.setMinimumSize(new Dimension(1024, 768));
             frame.pack();
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);

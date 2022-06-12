@@ -2,6 +2,7 @@ package cn.devcms.redisfront.ui.dialog;
 
 import cn.devcms.redisfront.common.base.RFDialog;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import lombok.val;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -21,7 +22,7 @@ public class OpenConnectDialog extends RFDialog<Void> {
     private JButton addConnectBtn;
 
     public static void showOpenConnectDialog(Frame owner) {
-        OpenConnectDialog openConnectDialog = new OpenConnectDialog(owner);
+        var openConnectDialog = new OpenConnectDialog(owner);
         openConnectDialog.setSize(new Dimension(500, 280));
         openConnectDialog.setLocationRelativeTo(owner);
         openConnectDialog.pack();
@@ -97,6 +98,6 @@ public class OpenConnectDialog extends RFDialog<Void> {
             dispose();
             AddConnectDialog.showAddConnectDialog((Frame) getOwner(), (System.out::println));
         });
-        addConnectBtn.setIcon(new FlatSVGIcon("icons/add.svg"));
+        addConnectBtn.setIcon(new FlatSVGIcon("icons/connection.svg"));
     }
 }

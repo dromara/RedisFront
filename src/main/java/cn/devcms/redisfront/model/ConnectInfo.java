@@ -1,36 +1,43 @@
 package cn.devcms.redisfront.model;
 
 import cn.devcms.redisfront.common.enums.ConnectEnum;
-import lombok.Data;
 
 /**
  * ConnectInfo
  *
  * @author Jin
  */
-@Data
-public class ConnectInfo {
-    private String title;
-    private String host;
-    private Integer port;
-    private String password;
-    private ConnectEnum connectMode;
-    private Boolean active;
+public record ConnectInfo(String title,
+                          String host,
+                          Integer port,
+                          String password,
+                          ConnectEnum connectMode,
+                          Boolean active,
+                          SSLConfig sslConfig,
+                          SSHConfig sshConfig
 
-    @Data
-    public static class SSLConfig {
-        private String privateKeyFilePath;
-        private String publicKeyFilePath;
-        private String grantFilePath;
-        private Boolean enableStrictMode;
+) {
+
+    public ConnectInfo(String title, String host, Integer port, String password, ConnectEnum connectMode, Boolean active) {
+        this(title, host, port, password, connectMode, active, null, null);
     }
 
-    @Data
-    public static class SSHConfig {
-        private String privateKeyPath;
-        private String user;
-        private Integer port;
-        private String password;
+    public ConnectInfo(String title, String host, Integer port, String password, ConnectEnum connectMode, Boolean active, SSHConfig sshConfig) {
+        this(title, host, port, password, connectMode, active, null, sshConfig);
+    }
+
+    public ConnectInfo(String title, String host, Integer port, String password, ConnectEnum connectMode, Boolean active, SSLConfig sslConfig) {
+        this(title, host, port, password, connectMode, active, sslConfig, null);
+    }
+
+    public record SSHConfig(String privateKeyPath, String user, Integer port, String password) {
+
+    }
+
+
+    public record SSLConfig(String privateKeyFilePath, String publicKeyFilePath, String grantFilePath,
+                            Boolean enableStrictMode) {
+
     }
 
 }
