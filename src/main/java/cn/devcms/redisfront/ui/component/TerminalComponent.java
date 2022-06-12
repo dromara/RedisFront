@@ -1,174 +1,101 @@
 package cn.devcms.redisfront.ui.component;
 
-import com.googlecode.lanterna.TerminalPosition;
-import com.googlecode.lanterna.input.KeyStroke;
-import com.googlecode.lanterna.terminal.swing.*;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 import java.awt.*;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
-import java.io.IOException;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
-public class TerminalComponent extends JDesktopPane {
+public class TerminalComponent extends JPanel implements KeyListener, CaretListener {
+    private final JTextArea terminal;
+    private final StringBuffer textBuffer = new StringBuffer();
+    private int currentDot = -1;
+    private int currentKeyCode = 0;
+    private boolean allowInputFlag = false;
+    private boolean consumeFlag = false;
 
-
-    private final SwingTerminal terminal;
-    private final JScrollBar scrollBar;
-    private final Thread thread;
-
-
-    public TerminalComponent() throws IOException {
+    public TerminalComponent() {
         setLayout(new BorderLayout());
         setBorder(new EmptyBorder(10, 10, 10, 10));
-
-        scrollBar = new JScrollBar();
-        scrollBar.setMinimum(0);
-        scrollBar.setMaximum(20);
-        scrollBar.setValue(0);
-        scrollBar.setVisibleAmount(20);
-        scrollBar.addAdjustmentListener(new ScrollbarListener());
-        add(scrollBar, BorderLayout.EAST);
-
-        terminal = new SwingTerminal(TerminalEmulatorDeviceConfiguration.getDefault().withLineBufferScrollbackSize(500), SwingTerminalFontConfiguration.getDefault(), TerminalEmulatorColorConfiguration.getDefault(), new ScrollController());
-        terminal.addResizeListener((terminal, newSize) -> {
-            try {
-                terminal.setCursorPosition(0, 0);
-                terminal.flush();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-        terminal.setFocusable(true);
-        add(terminal, BorderLayout.CENTER);
-
-
-        thread = new Thread(inputRunnable);
+        terminal = new JTextArea();
+        add(new JScrollPane(terminal), BorderLayout.CENTER);
+        terminal.requestFocus();
+        terminal.setCaretColor(Color.WHITE);
+        terminal.setForeground(Color.WHITE);
+        terminal.setBackground(Color.BLACK);
+        terminal.addKeyListener(this);
+        terminal.addCaretListener(this);
+        terminalInit();
     }
 
-    public void pollInputStart() {
-        thread.start();
+    private void terminalInit() {
+        this.append("\n");
+        this.append("connection 127.0.0.1:6379 redis server success...");
+        this.append("\n");
+        this.append("\n");
+        this.append("127.0.0.1:6379[11]>");
     }
 
-    Runnable inputRunnable = new Runnable() {
-        final TerminalPosition[] cursorPosition = {new TerminalPosition(0, 0)};
 
-        @Override
-        public void run() {
-            while (true) {
-                KeyStroke keyStroke = terminal.pollInput();
-                if (keyStroke != null) {
-                    System.out.println(keyStroke);
-                    switch (keyStroke.getKeyType()) {
-                        case ArrowDown:
-                            if (terminal.getTerminalSize().getRows() > cursorPosition[0].getRow() + 1) {
-                                cursorPosition[0] = cursorPosition[0].withRelativeRow(1);
-                                terminal.setCursorPosition(cursorPosition[0].getColumn(), cursorPosition[0].getRow());
-                            }
-                            break;
-                        case ArrowUp:
-                            if (cursorPosition[0].getRow() > 0) {
-                                cursorPosition[0] = cursorPosition[0].withRelativeRow(-1);
-                                terminal.setCursorPosition(cursorPosition[0].getColumn(), cursorPosition[0].getRow());
-                            }
-                            break;
-                        case ArrowRight:
-                            if (cursorPosition[0].getColumn() + 1 < terminal.getTerminalSize().getColumns()) {
-                                cursorPosition[0] = cursorPosition[0].withRelativeColumn(1);
-                                terminal.setCursorPosition(cursorPosition[0].getColumn(), cursorPosition[0].getRow());
-                            }
-                            break;
-                        case ArrowLeft:
-                            if (cursorPosition[0].getColumn() > 0) {
-                                cursorPosition[0] = cursorPosition[0].withRelativeColumn(-1);
-                                terminal.setCursorPosition(cursorPosition[0].getColumn(), cursorPosition[0].getRow());
-                            }
-                            break;
-                        case Backspace:
-                            break;
-                        case Enter:
-                            terminal.putCharacter('\n');
-                            break;
-                        case Character:
-                            terminal.putCharacter(keyStroke.getCharacter());
-                            break;
-                        default:
-                    }
-                    terminal.flush();
-                }
+    private void append(String message) {
+        terminal.append(message);
+        textBuffer.append(message);
+    }
 
-            }
+    @Override
+    public void keyTyped(KeyEvent e) {
+        if (consumeFlag) {
+            e.consume();
+            return;
         }
-    };
-
-    private class ScrollController implements TerminalScrollController {
-        private int scrollValue;
-
-        @Override
-        public void updateModel(final int totalSize, final int screenHeight) {
-            if (!SwingUtilities.isEventDispatchThread()) {
-                SwingUtilities.invokeLater(() -> updateModel(totalSize, screenHeight));
-                return;
+        if (currentKeyCode == KeyEvent.VK_ENTER) {
+            var subStartLength = textBuffer.length();
+            var subEndLength = terminal.getText().length() - 1;
+            if (subStartLength < subEndLength) {
+                String input = terminal.getText().substring(subStartLength, subEndLength);
+                textBuffer.append(input);
+                textBuffer.append("\n");
+                this.append(input);
+                this.append("\n");
+            } else {
+                textBuffer.append("\n");
+                this.append("\n");
             }
-
-            int value = scrollBar.getValue();
-            int maximum = scrollBar.getMaximum();
-            int visibleAmount = scrollBar.getVisibleAmount();
-
-            if (maximum != totalSize) {
-                int lastMaximum = maximum;
-                maximum = Math.max(totalSize, screenHeight);
-                if (lastMaximum < maximum && lastMaximum - visibleAmount - value == 0) {
-                    value = scrollBar.getValue() + (maximum - lastMaximum);
-                }
-            }
-            if (value + screenHeight > maximum) {
-                value = maximum - screenHeight;
-            }
-            if (visibleAmount != screenHeight) {
-                if (visibleAmount > screenHeight) {
-                    value += visibleAmount - screenHeight;
-                }
-                visibleAmount = screenHeight;
-            }
-            if (value > maximum - visibleAmount) {
-                value = maximum - visibleAmount;
-            }
-            if (value < 0) {
-                value = 0;
-            }
-
-            this.scrollValue = value;
-
-            if (scrollBar.getMaximum() != maximum) {
-                scrollBar.setMaximum(maximum);
-            }
-            if (scrollBar.getVisibleAmount() != visibleAmount) {
-                scrollBar.setVisibleAmount(visibleAmount);
-            }
-            if (scrollBar.getValue() != value) {
-                scrollBar.setValue(value);
-            }
-
-        }
-
-        @Override
-        public int getScrollingOffset() {
-            return scrollValue;
+            this.append("127.0.0.1:6379[11]>");
         }
     }
 
-    private class ScrollbarListener implements AdjustmentListener {
-        @Override
-        public synchronized void adjustmentValueChanged(AdjustmentEvent e) {
-            terminal.repaint();
+    @Override
+    public void keyPressed(KeyEvent e) {
+        currentKeyCode = e.getKeyCode();
+        if (allowInputFlag) {
+            consumeFlag = false;
+        }
+        if (
+                (currentKeyCode == KeyEvent.VK_BACK_SPACE || currentKeyCode == KeyEvent.VK_ENTER || currentKeyCode == KeyEvent.VK_UP || currentKeyCode == KeyEvent.VK_LEFT) && currentDot == textBuffer.length()
+        ) {
+            e.consume();
+            consumeFlag = true;
         }
     }
 
-    public SwingTerminal getTerminal() {
-        return terminal;
+    @Override
+    public void keyReleased(KeyEvent e) {
+        if (consumeFlag) {
+            e.consume();
+        }
     }
 
+    public void caretUpdate(CaretEvent e) {
+        currentDot = e.getDot();
+        allowInputFlag = currentDot >= textBuffer.length();
+        var pos = terminal.getText().length();
+        if (currentDot < pos) {
+            terminal.setCaretPosition(pos);
+        }
+    }
 
 }
+

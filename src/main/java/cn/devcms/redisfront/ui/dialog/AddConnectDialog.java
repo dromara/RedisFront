@@ -11,7 +11,6 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
 import java.util.function.Consumer;
 
 public class AddConnectDialog extends RFDialog<ConnectInfo> {
@@ -118,8 +117,10 @@ public class AddConnectDialog extends RFDialog<ConnectInfo> {
                 var fileChooser = new JFileChooser();
                 fileChooser.setFileFilter(new FileNameExtensionFilter("密钥文件", "pem", "crt"));
                 fileChooser.showDialog(AddConnectDialog.this, "选择私钥文件");
-                File file = fileChooser.getSelectedFile();
-                privateKeyField.setText(file.getAbsolutePath());
+                var selectedFile = fileChooser.getSelectedFile();
+                if (Fn.isNotNull(selectedFile)) {
+                    privateKeyField.setText(selectedFile.getAbsolutePath());
+                }
             }
         });
         publicKeyFileBtn.addMouseListener(new MouseAdapter() {
@@ -128,8 +129,10 @@ public class AddConnectDialog extends RFDialog<ConnectInfo> {
                 var fileChooser = new JFileChooser();
                 fileChooser.setFileFilter(new FileNameExtensionFilter("公钥文件", "pem", "crt"));
                 fileChooser.showDialog(AddConnectDialog.this, "选择公钥文件");
-                File file = fileChooser.getSelectedFile();
-                publicKeyField.setText(file.getAbsolutePath());
+                var selectedFile = fileChooser.getSelectedFile();
+                if (Fn.isNotNull(selectedFile)) {
+                    publicKeyField.setText(selectedFile.getAbsolutePath());
+                }
             }
         });
 
@@ -139,8 +142,10 @@ public class AddConnectDialog extends RFDialog<ConnectInfo> {
                 var fileChooser = new JFileChooser();
                 fileChooser.setFileFilter(new FileNameExtensionFilter("授权文件", "pem", "crt"));
                 fileChooser.showDialog(AddConnectDialog.this, "选择授权文件");
-                File file = fileChooser.getSelectedFile();
-                grantField.setText(file.getAbsolutePath());
+                var selectedFile = fileChooser.getSelectedFile();
+                if (Fn.isNotNull(selectedFile)) {
+                    grantField.setText(selectedFile.getAbsolutePath());
+                }
             }
         });
 
@@ -150,8 +155,10 @@ public class AddConnectDialog extends RFDialog<ConnectInfo> {
                 var fileChooser = new JFileChooser();
                 fileChooser.setFileFilter(new FileNameExtensionFilter("私钥文件", "pem", "crt"));
                 fileChooser.showDialog(AddConnectDialog.this, "选择私钥文件");
-                File file = fileChooser.getSelectedFile();
-                sshPrivateKeyFile.setText(file.getAbsolutePath());
+                var selectedFile = fileChooser.getSelectedFile();
+                if (Fn.isNotNull(selectedFile)) {
+                    sshPrivateKeyFile.setText(selectedFile.getAbsolutePath());
+                }
             }
         });
     }
@@ -172,6 +179,7 @@ public class AddConnectDialog extends RFDialog<ConnectInfo> {
             return;
         }
 
+        //SSH Connection
         if (enableSSHBtn.isSelected()) {
             //valid sshHostField
             if (Fn.isEmpty(sshHostField.getText())) {
@@ -190,7 +198,7 @@ public class AddConnectDialog extends RFDialog<ConnectInfo> {
                     return;
                 }
             }
-
+            //sshConfig
             var sshConfig = new ConnectInfo.SSHConfig(
                     sshPrivateKeyFile.getText(),
                     sshUserField.getText(),
@@ -206,8 +214,14 @@ public class AddConnectDialog extends RFDialog<ConnectInfo> {
                             true,
                             sshConfig)
             );
-        } else if (enableSSLBtn.isSelected()) {
 
+        } else if (enableSSLBtn.isSelected()) {
+            var sshConfig = new ConnectInfo.SSLConfig(
+                    privateKeyField.getText(),
+                    publicKeyField.getText(),
+                    grantField.getText(),
+                    enableStrictMode.isSelected()
+            );
             callback.accept(
                     new ConnectInfo(titleField.getText(),
                             userField.getText(),
@@ -215,8 +229,7 @@ public class AddConnectDialog extends RFDialog<ConnectInfo> {
                             String.valueOf(passwordField.getPassword()),
                             ConnectEnum.SSL,
                             true,
-                            null,
-                            null)
+                            sshConfig)
             );
         } else {
             callback.accept(
@@ -228,7 +241,6 @@ public class AddConnectDialog extends RFDialog<ConnectInfo> {
                             true)
             );
         }
-
         dispose();
     }
 

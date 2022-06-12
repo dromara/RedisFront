@@ -12,14 +12,13 @@ import java.awt.*;
 import static com.formdev.flatlaf.FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS;
 
 public class TabbedComponent extends JPanel {
-    private final JTabbedPane contentPanel;
     private final _DashboardForm dashboardForm;
     private final _DatabaseForm databaseForm;
 
     @SneakyThrows
     public TabbedComponent() {
         setLayout(new BorderLayout());
-        contentPanel = new JTabbedPane();
+        var contentPanel = new JTabbedPane();
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.CENTER);
         contentPanel.putClientProperty(TABBED_PANE_SHOW_TAB_SEPARATORS, true);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_TRAILING);
@@ -33,14 +32,14 @@ public class TabbedComponent extends JPanel {
         contentPanel.addTab("信息", new FlatSVGIcon("icons/db_report.svg"), databaseForm.getContentPanel());
         contentPanel.addTab("日志", new FlatSVGIcon("icons/db_log.svg"), new JPanel());
         contentPanel.addChangeListener(e -> {
-            JTabbedPane tabbedPane = (JTabbedPane) e.getSource();
-            Component component = tabbedPane.getSelectedComponent();
+            var tabbedPane = (JTabbedPane) e.getSource();
+            var component = tabbedPane.getSelectedComponent();
             if (component instanceof TerminalComponent terminalComponent) {
-                terminalComponent.pollInputStart();
-            }
 
+            }
         });
         add(contentPanel, BorderLayout.CENTER);
     }
+
 
 }

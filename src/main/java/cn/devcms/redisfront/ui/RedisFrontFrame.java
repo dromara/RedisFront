@@ -10,7 +10,6 @@ import com.formdev.flatlaf.extras.FlatDesktop;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.FlatSVGUtils;
 import com.formdev.flatlaf.extras.components.FlatButton;
-import lombok.val;
 import org.jdesktop.swingx.JXFrame;
 
 import javax.swing.*;
@@ -53,7 +52,7 @@ public class RedisFrontFrame extends JXFrame {
                 var  addConnectMenu = new JMenuItem("新建连接", KeyEvent.VK_A);
                 addConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK));
                 addConnectMenu.addActionListener(e -> AddConnectDialog.showAddConnectDialog(RedisFrontFrame.this, (connectInfo -> {
-                    mainContentForm.addAction();
+                    mainContentForm.addActionPerformed();
                     System.out.println(connectInfo);
                 })));
                 fileMenu.add(addConnectMenu);
