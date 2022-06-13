@@ -1,44 +1,36 @@
 package cn.devcms.redisfront.ui.component;
 
 import cn.devcms.redisfront.common.base.AbstractTerminalComponent;
+import cn.devcms.redisfront.common.enums.ConnectEnum;
+import cn.devcms.redisfront.common.util.TelnetUtil;
+import cn.devcms.redisfront.model.ConnectInfo;
 
 public class TerminalComponent extends AbstractTerminalComponent {
-    private final String host;
-    private final String port;
-
     private final String database;
 
     public TerminalComponent(String host, String port, String database) {
-        this.host = host;
-        this.port = port;
         this.database = database;
         super.printConnectedSuccessMessage();
     }
 
     public TerminalComponent() {
-        this.host = "127.0.0.1";
-        this.port = "6379";
         this.database = "0";
         super.printConnectedSuccessMessage();
     }
 
     @Override
     protected void inputProcessHandler(String input) {
-        print(input);
+        String s = TelnetUtil.exec(connectInfo(), input);
+        print(s);
     }
 
     @Override
-    protected String getHost() {
-        return host;
+    protected ConnectInfo connectInfo() {
+        return new ConnectInfo("a", "127.0.0.1", 63378, "", ConnectEnum.NORMAL, true);
     }
 
     @Override
-    protected String getPort() {
-        return port;
-    }
-
-    @Override
-    protected String getDatabaseName() {
+    protected String databaseName() {
         return database;
     }
 

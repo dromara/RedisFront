@@ -1,6 +1,7 @@
 package cn.devcms.redisfront.common.base;
 
 import cn.devcms.redisfront.common.func.Fn;
+import cn.devcms.redisfront.model.ConnectInfo;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -33,28 +34,26 @@ public abstract class AbstractTerminalComponent extends JPanel implements KeyLis
 
     protected abstract void inputProcessHandler(String input);
 
-    protected abstract String getHost();
+    protected abstract ConnectInfo connectInfo();
 
-    protected abstract String getPort();
-
-    protected abstract String getDatabaseName();
+    protected abstract String databaseName();
 
     protected void println(String message) {
         terminal.append(message);
         terminal.append("\n");
-        lastSelectionStart = terminal.getSelectionStart();
+        lastSelectionStart = terminal.getSelectionEnd();
     }
 
     protected void print(String message) {
         terminal.append(message);
-        lastSelectionStart = terminal.getSelectionStart();
+        lastSelectionStart = terminal.getSelectionEnd();
     }
 
     protected void printConnectedSuccessMessage() {
         this.println("");
-        this.println("connection ".concat(getHost()).concat(":").concat(getPort()) + " redis server success...");
+        this.println("connection ".concat(connectInfo().host()).concat(":") + connectInfo().port() + " redis server success...");
         this.println("");
-        this.print(getHost().concat(":").concat(getPort()).concat(Fn.equal("0", getDatabaseName()) ? "" : "[" + getDatabaseName() + "]").concat(">"));
+        this.print(connectInfo().host().concat(":").concat(String.valueOf(connectInfo().port())).concat(Fn.equal("0", databaseName()) ? "" : "[" + databaseName() + "]").concat(">"));
     }
 
     @Override
@@ -66,32 +65,27 @@ public abstract class AbstractTerminalComponent extends JPanel implements KeyLis
         if (currentKeyCode == KeyEvent.VK_ENTER && e.getKeyChar() == '\n') {
             var subStartLength = lastSelectionStart;
             var subEndLength = terminal.getSelectionEnd() - 1;
-            var text = terminal.getText();
             if (subStartLength < subEndLength) {
                 String input = terminal.getText().substring(subStartLength, subEndLength);
                 this.inputProcessHandler(input);
             }
             this.print("\n");
-            this.print(getHost().concat(":").concat(getPort()).concat(Fn.equal("0", getDatabaseName()) ? "" : "[" + getDatabaseName() + "]").concat(">"));
-        } else {
-            this.print(String.valueOf(e.getKeyChar()));
+            this.print(connectInfo().host().concat(":").concat(connectInfo().port().toString()).concat(Fn.equal("0", databaseName()) ? "" : "[" + databaseName() + "]").concat(">"));
+        } else if (currentKeyCode == KeyEvent.VK_ENTER && e.getKeyChar() != '\n') {
+            e.consume();
+            terminal.setText(terminal.getText().concat(String.valueOf(e.getKeyChar())));
         }
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
         currentKeyCode = e.getKeyCode();
-        if (allowInputFlag) {
-            consumeFlag = false;
-        }
-        if (
-                (currentKeyCode == KeyEvent.VK_BACK_SPACE
-                        || currentKeyCode == KeyEvent.VK_ENTER
-                        || currentKeyCode == KeyEvent.VK_UP
-                        || currentKeyCode == KeyEvent.VK_LEFT) && currentDot == lastSelectionStart
-        ) {
+        if ((currentKeyCode == KeyEvent.VK_BACK_SPACE || currentKeyCode == KeyEvent.VK_ENTER || currentKeyCode == KeyEvent.VK_UP || currentKeyCode == KeyEvent.VK_DOWN || currentKeyCode == KeyEvent.VK_LEFT) && currentDot <= lastSelectionStart) {
             e.consume();
             consumeFlag = true;
+        }
+        if (allowInputFlag) {
+            consumeFlag = false;
         }
     }
 
@@ -104,11 +98,7 @@ public abstract class AbstractTerminalComponent extends JPanel implements KeyLis
 
     public void caretUpdate(CaretEvent e) {
         currentDot = e.getDot();
-        allowInputFlag = currentDot >= lastSelectionStart;
-        var pos = terminal.getText().length();
-        if (currentDot < pos) {
-            terminal.setCaretPosition(pos);
-        }
+        allowInputFlag = (currentDot >= lastSelectionStart);
     }
 
 }
