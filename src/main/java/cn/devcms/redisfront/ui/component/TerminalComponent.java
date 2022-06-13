@@ -24,7 +24,7 @@ public class TerminalComponent extends AbstractTerminalComponent {
 
     @Override
     protected void inputProcessHandler(String input) {
-        this.println(input);
+        print(input);
     }
 
     @Override
@@ -41,7 +41,6 @@ public class TerminalComponent extends AbstractTerminalComponent {
     protected String getDatabaseName() {
         return database;
     }
-
 
 }
 

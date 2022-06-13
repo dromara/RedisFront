@@ -63,14 +63,18 @@ public abstract class AbstractTerminalComponent extends JPanel implements KeyLis
             e.consume();
             return;
         }
-        if (currentKeyCode == KeyEvent.VK_ENTER) {
+        if (currentKeyCode == KeyEvent.VK_ENTER && e.getKeyChar() == '\n') {
             var subStartLength = lastSelectionStart;
             var subEndLength = terminal.getSelectionEnd() - 1;
+            var text = terminal.getText();
             if (subStartLength < subEndLength) {
                 String input = terminal.getText().substring(subStartLength, subEndLength);
                 this.inputProcessHandler(input);
             }
+            this.print("\n");
             this.print(getHost().concat(":").concat(getPort()).concat(Fn.equal("0", getDatabaseName()) ? "" : "[" + getDatabaseName() + "]").concat(">"));
+        } else {
+            this.print(String.valueOf(e.getKeyChar()));
         }
     }
 
