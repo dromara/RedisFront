@@ -9,17 +9,15 @@ import java.util.function.Consumer;
  *
  * @author Jin
  */
-public class RFDialog<T> extends JDialog {
-
-
+public abstract class AbstractDialog<T> extends JDialog {
     protected Consumer<T> callback;
 
-    public RFDialog(Frame owner, Consumer<T> callback) {
+    public AbstractDialog(Frame owner, Consumer<T> callback) {
         super(owner);
         this.callback = callback;
     }
 
-    public RFDialog(Frame owner) {
+    public AbstractDialog(Frame owner) {
         super(owner);
     }
 }

@@ -1,6 +1,6 @@
 package cn.devcms.redisfront.ui.dialog;
 
-import cn.devcms.redisfront.common.base.RFDialog;
+import cn.devcms.redisfront.common.base.AbstractDialog;
 import cn.devcms.redisfront.common.enums.ConnectEnum;
 import cn.devcms.redisfront.common.func.Fn;
 import cn.devcms.redisfront.model.ConnectInfo;
@@ -13,7 +13,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.function.Consumer;
 
-public class AddConnectDialog extends RFDialog<ConnectInfo> {
+public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;

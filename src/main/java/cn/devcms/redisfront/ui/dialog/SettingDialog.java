@@ -1,17 +1,14 @@
 package cn.devcms.redisfront.ui.dialog;
 
 
-import cn.devcms.redisfront.common.base.RFDialog;
+import cn.devcms.redisfront.common.base.AbstractDialog;
 import cn.devcms.redisfront.common.constant.Constant;
 import cn.devcms.redisfront.common.util.PrefUtil;
 import cn.devcms.redisfront.common.util.ThemeUtil;
-import cn.devcms.redisfront.model.ConnectInfo;
-import cn.devcms.redisfront.ui.RedisFrontFrame;
 import com.formdev.flatlaf.*;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.StringUtils;
-import lombok.val;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -22,9 +19,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.*;
 import java.util.List;
-import java.util.function.Consumer;
 
-public class SettingDialog extends RFDialog<Void> {
+public class SettingDialog extends AbstractDialog<Void> {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;

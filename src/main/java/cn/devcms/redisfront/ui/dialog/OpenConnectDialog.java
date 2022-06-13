@@ -1,20 +1,15 @@
 package cn.devcms.redisfront.ui.dialog;
 
-import cn.devcms.redisfront.common.base.RFDialog;
+import cn.devcms.redisfront.common.base.AbstractDialog;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
-import lombok.val;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
 import java.awt.*;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
 import java.awt.event.*;
 
-public class OpenConnectDialog extends RFDialog<Void> {
+public class OpenConnectDialog extends AbstractDialog<Void> {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -55,6 +50,16 @@ public class OpenConnectDialog extends RFDialog<Void> {
         connectTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
             {
                 setHorizontalAlignment(SwingConstants.CENTER);
+            }
+        });
+        connectTable.setComponentPopupMenu(new JPopupMenu() {
+            {
+                var openConnectMenu = new JMenuItem("打开链接");
+                add(openConnectMenu);
+                var editConnectMenu = new JMenuItem("编辑链接");
+                add(editConnectMenu);
+                var deleteConnectMenu = new JMenuItem("删除链接");
+                add(deleteConnectMenu);
             }
         });
         connectTable.setModel(new DefaultTableModel(new Object[][]{
