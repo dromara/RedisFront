@@ -4,7 +4,6 @@ import cn.devcms.redisfront.ui.form._DashboardForm;
 import cn.devcms.redisfront.ui.form._DatabaseForm;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
-import lombok.SneakyThrows;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,7 +14,6 @@ public class TabbedComponent extends JPanel {
     private final _DashboardForm dashboardForm;
     private final _DatabaseForm databaseForm;
 
-    @SneakyThrows
     public TabbedComponent() {
         setLayout(new BorderLayout());
         var contentPanel = new JTabbedPane();

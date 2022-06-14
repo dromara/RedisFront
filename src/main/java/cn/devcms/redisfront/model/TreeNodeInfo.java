@@ -1,17 +1,12 @@
 package cn.devcms.redisfront.model;
 
 import cn.devcms.redisfront.common.enums.NodeTypeEnum;
-import lombok.Data;
 
 /**
  * NodeInfo
  *
  * @author Jin
  */
-@Data
-public class TreeNodeInfo {
-    private String title;
-    private String icon;
-    private NodeTypeEnum nodeTypeEnum;
-    private String key;
+
+public record TreeNodeInfo(String title, String icon, NodeTypeEnum nodeTypeEnum, String key) {
 }

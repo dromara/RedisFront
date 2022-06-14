@@ -211,8 +211,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                             (Integer) portField.getValue(),
                             String.valueOf(passwordField.getPassword()),
                             ConnectEnum.SSH,
-                            true,
-                            sshConfig)
+                                sshConfig)
             );
 
         } else if (enableSSLBtn.isSelected()) {
@@ -228,8 +227,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                             (Integer) portField.getValue(),
                             String.valueOf(passwordField.getPassword()),
                             ConnectEnum.SSL,
-                            true,
-                            sshConfig)
+                             sshConfig)
             );
         } else {
             callback.accept(
@@ -237,8 +235,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                             userField.getText(),
                             (Integer) portField.getValue(),
                             String.valueOf(passwordField.getPassword()),
-                            ConnectEnum.NORMAL,
-                            true)
+                            ConnectEnum.NORMAL)
             );
         }
         dispose();

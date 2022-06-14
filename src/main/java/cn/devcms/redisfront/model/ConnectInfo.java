@@ -12,22 +12,21 @@ public record ConnectInfo(String title,
                           Integer port,
                           String password,
                           ConnectEnum connectMode,
-                          Boolean active,
                           SSLConfig sslConfig,
                           SSHConfig sshConfig
 
 ) {
 
-    public ConnectInfo(String title, String host, Integer port, String password, ConnectEnum connectMode, Boolean active) {
-        this(title, host, port, password, connectMode, active, null, null);
+    public ConnectInfo(String title, String host, Integer port, String password, ConnectEnum connectMode) {
+        this(title, host, port, password, connectMode, null, null);
     }
 
-    public ConnectInfo(String title, String host, Integer port, String password, ConnectEnum connectMode, Boolean active, SSHConfig sshConfig) {
-        this(title, host, port, password, connectMode, active, null, sshConfig);
+    public ConnectInfo(String title, String host, Integer port, String password, ConnectEnum connectMode, SSHConfig sshConfig) {
+        this(title, host, port, password, connectMode,  null, sshConfig);
     }
 
-    public ConnectInfo(String title, String host, Integer port, String password, ConnectEnum connectMode, Boolean active, SSLConfig sslConfig) {
-        this(title, host, port, password, connectMode, active, sslConfig, null);
+    public ConnectInfo(String title, String host, Integer port, String password, ConnectEnum connectMode, SSLConfig sslConfig) {
+        this(title, host, port, password, connectMode,sslConfig, null);
     }
 
     public record SSHConfig(String privateKeyPath, String user, Integer port, String password) {

@@ -18,12 +18,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.24</version>
-            <scope>provided</scope>
-        </dependency>
         <!--flatlaf -->
         <dependency>
             <groupId>com.formdev</groupId>
@@ -54,12 +48,6 @@
             <groupId>com.jgoodies</groupId>
             <artifactId>jgoodies-forms</artifactId>
             <version>1.9.0</version>
-        </dependency>
-        <!--lanterna-->
-        <dependency>
-            <groupId>com.googlecode.lanterna</groupId>
-            <artifactId>lanterna</artifactId>
-            <version>${lanterna.version}</version>
         </dependency>
         <!--Jedis -->
         <dependency>

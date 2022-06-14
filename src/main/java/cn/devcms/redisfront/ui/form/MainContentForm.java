@@ -1,5 +1,7 @@
 package cn.devcms.redisfront.ui.form;
 
+import cn.devcms.redisfront.common.util.ContextUtil;
+import cn.devcms.redisfront.model.ConnectInfo;
 import cn.devcms.redisfront.ui.component.TabbedComponent;
 import cn.devcms.redisfront.ui.dialog.AddConnectDialog;
 import cn.devcms.redisfront.ui.dialog.OpenConnectDialog;
@@ -29,10 +31,14 @@ public class MainContentForm {
 
     }
 
-    public void addActionPerformed() {
-        tabPanel.addTab("127.0.0.1", new FlatSVGIcon("icons/icon_db5.svg"), new TabbedComponent());
+    public void addActionPerformed(ConnectInfo connectInfo) {
+        tabPanel.addTab(connectInfo.title(), new FlatSVGIcon("icons/icon_db5.svg"), new TabbedComponent());
         tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
         contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
+
+        //设置连接上下文
+        ContextUtil.putConnectInfo(tabPanel.getSelectedIndex(), connectInfo);
+        ContextUtil.setOpenedServerTableId(tabPanel.getSelectedIndex());
     }
 
     private void createUIComponents() {
@@ -51,6 +57,8 @@ public class MainContentForm {
         //SHOW CLOSE BUTTON Callback
         tabPanel.putClientProperty("JTabbedPane.tabCloseCallback", (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
             tabPanel.remove(tabIndex);
+            //设置连接上下文
+            ContextUtil.removeConnectInfo(tabPanel.getSelectedIndex());
             if (tabbedPane.getTabCount() == 0) {
                 contentPanel.add(noneForm.getContentPanel(), BorderLayout.CENTER, 0);
             }

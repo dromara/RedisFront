@@ -52,8 +52,7 @@ public class RedisFrontFrame extends JXFrame {
                 var  addConnectMenu = new JMenuItem("新建连接", KeyEvent.VK_A);
                 addConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK));
                 addConnectMenu.addActionListener(e -> AddConnectDialog.showAddConnectDialog(RedisFrontFrame.this, (connectInfo -> {
-                    mainContentForm.addActionPerformed();
-                    System.out.println(connectInfo);
+                    mainContentForm.addActionPerformed(connectInfo);
                 })));
                 fileMenu.add(addConnectMenu);
                 //打开连接
