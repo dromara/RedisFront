@@ -14,6 +14,8 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.function.BiConsumer;
 
+import static com.formdev.flatlaf.FlatClientProperties.TABBED_PANE_SCROLL_BUTTONS_PLACEMENT;
+
 public class MainContentForm {
     private JPanel contentPanel;
     private JTabbedPane tabPanel;
@@ -52,6 +54,8 @@ public class MainContentForm {
         tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, true);
         //SHOW CLOSE BUTTON
         tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSABLE, true);
+
+        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_SCROLL_BUTTONS_PLACEMENT, null);
         //SHOW CLOSE BUTTON
         tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_TOOLTIPTEXT, "关闭连接");
         //SHOW CLOSE BUTTON Callback

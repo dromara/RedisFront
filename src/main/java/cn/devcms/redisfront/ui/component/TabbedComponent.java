@@ -18,10 +18,10 @@ public class TabbedComponent extends JPanel {
         setLayout(new BorderLayout());
         var contentPanel = new JTabbedPane();
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.CENTER);
-        contentPanel.putClientProperty(TABBED_PANE_SHOW_TAB_SEPARATORS, true);
+        contentPanel.putClientProperty(TABBED_PANE_SHOW_TAB_SEPARATORS, false);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_TRAILING);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
-        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_CARD);
+        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
 
         dashboardForm = new _DashboardForm();
         databaseForm = new _DatabaseForm();
