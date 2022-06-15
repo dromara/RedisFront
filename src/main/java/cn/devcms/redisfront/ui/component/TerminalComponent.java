@@ -2,8 +2,10 @@ package cn.devcms.redisfront.ui.component;
 
 import cn.devcms.redisfront.common.base.AbstractTerminalComponent;
 import cn.devcms.redisfront.common.enums.ConnectEnum;
-import cn.devcms.redisfront.common.util.TelnetUtil;
+import cn.devcms.redisfront.common.util.RedisUtil;
 import cn.devcms.redisfront.model.ConnectInfo;
+
+import java.util.List;
 
 public class TerminalComponent extends AbstractTerminalComponent {
     private final String database;
@@ -20,13 +22,35 @@ public class TerminalComponent extends AbstractTerminalComponent {
 
     @Override
     protected void inputProcessHandler(String input) {
-        String s = TelnetUtil.exec(connectInfo(), input);
-        print(s);
+        try {
+            Object s = RedisUtil.sendCommand(connectInfo(), false, input);
+            String formatStr = format(s, "");
+            print(formatStr);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String format(Object s, String space) {
+        StringBuilder sb = new StringBuilder();
+        if (s instanceof List<?> list) {
+            for (int i = 0; i < list.size(); i++) {
+                Object item = list.get(i);
+                if (item instanceof List itemList) {
+                    sb.append(space).append(i + 1).append(")").append(format(itemList, "\t")).append("\n");
+                } else {
+                    sb.append(space).append(i + 1).append(")").append(item).append("\n");
+                }
+            }
+        } else {
+            sb.append(s);
+        }
+        return sb.toString();
     }
 
     @Override
     protected ConnectInfo connectInfo() {
-        return new ConnectInfo("a", "127.0.0.1", 63378, "", ConnectEnum.NORMAL);
+        return new ConnectInfo("a", "127.0.0.1", 6379, null, null, 11, false, ConnectEnum.NORMAL);
     }
 
     @Override

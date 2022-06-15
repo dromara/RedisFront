@@ -30,7 +30,6 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     private JButton privateKeyFileBtn;
     private JTextField grantField;
     private JButton grantFileBtn;
-    private JCheckBox enableStrictMode;
     private JPanel sslPanel;
     private JLabel passwordLabel;
     private JLabel hostLabel;
@@ -48,6 +47,8 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     private JCheckBox showShhPassword;
     private JPanel basicPanel;
     private JButton testBtn;
+    private JPasswordField sslPasswordField;
+    private JCheckBox showSslPassword;
 
     public static void showAddConnectDialog(Frame owner, Consumer<ConnectInfo> callback) {
         var addConnectDialog = new AddConnectDialog(owner, callback);
@@ -81,6 +82,14 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         buttonCancel.addActionListener(this::cancelActionPerformed);
 
         showPasswordCheckBox.addActionListener(e -> {
+            if (showPasswordCheckBox.isSelected()) {
+                passwordField.setEchoChar((char) 0);
+            } else {
+                passwordField.setEchoChar('*');
+            }
+        });
+
+        showSslPassword.addActionListener(e -> {
             if (showPasswordCheckBox.isSelected()) {
                 passwordField.setEchoChar((char) 0);
             } else {
@@ -206,12 +215,16 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                     new String(sshPasswordField.getPassword()));
 
             callback.accept(
-                    new ConnectInfo(titleField.getText(),
-                            userField.getText(),
+                    new ConnectInfo(
+                            titleField.getText(),
+                            hostField.getText(),
                             (Integer) portField.getValue(),
+                            userField.getText(),
                             String.valueOf(passwordField.getPassword()),
+                            0,
+                            enableSSLBtn.isSelected(),
                             ConnectEnum.SSH,
-                                sshConfig)
+                            sshConfig)
             );
 
         } else if (enableSSLBtn.isSelected()) {
@@ -219,22 +232,28 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                     privateKeyField.getText(),
                     publicKeyField.getText(),
                     grantField.getText(),
-                    enableStrictMode.isSelected()
+                    String.valueOf(sslPasswordField.getPassword())
             );
             callback.accept(
                     new ConnectInfo(titleField.getText(),
-                            userField.getText(),
+                            hostField.getText(),
                             (Integer) portField.getValue(),
+                            userField.getText(),
                             String.valueOf(passwordField.getPassword()),
-                            ConnectEnum.SSL,
-                             sshConfig)
+                            0,
+                            enableSSLBtn.isSelected(),
+                            ConnectEnum.NORMAL,
+                            sshConfig)
             );
         } else {
             callback.accept(
                     new ConnectInfo(titleField.getText(),
-                            userField.getText(),
+                            hostField.getText(),
                             (Integer) portField.getValue(),
+                            userField.getText(),
                             String.valueOf(passwordField.getPassword()),
+                            0,
+                            enableSSLBtn.isSelected(),
                             ConnectEnum.NORMAL)
             );
         }
@@ -253,6 +272,8 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         enableSSHBtn.setSelected(false);
         passwordField = new JPasswordField();
         passwordField.setEchoChar('*');
+        sslPasswordField = new JPasswordField();
+        sslPasswordField.setEchoChar('*');
         portField = new JSpinner();
         portField.setEditor(new JSpinner.NumberEditor(portField, "####"));
         portField.setValue(6379);

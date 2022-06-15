@@ -7,6 +7,5 @@ package cn.devcms.redisfront.common.enums;
  */
 public enum ConnectEnum {
     NORMAL,
-    SSL,
     SSH
 }
