@@ -80,7 +80,7 @@ public class MainContentForm {
         //new add connect
         var newBtn = new JButton(null, new FlatSVGIcon("icons/new_conn.svg"));
         newBtn.setToolTipText("新建连接");
-        newBtn.addActionListener(e -> AddConnectDialog.showAddConnectDialog(owner, (System.out::println)));
+        newBtn.addActionListener(e -> AddConnectDialog.showAddConnectDialog(owner, (this::addActionPerformed)));
         jPanel.add(newBtn);
         //open connect
         var openBtn = new JButton(null, new FlatSVGIcon("icons/open_conn.svg"));

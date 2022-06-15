@@ -4,6 +4,8 @@ import cn.devcms.redisfront.ui.form._DashboardForm;
 import cn.devcms.redisfront.ui.form._DatabaseForm;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.formdev.flatlaf.extras.components.FlatLabel;
+import com.formdev.flatlaf.extras.components.FlatToolBar;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,12 +25,47 @@ public class TabbedComponent extends JPanel {
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
 
+        var leftToolBar = new FlatToolBar();
+        var leftToolBarLayout = new FlowLayout();
+        leftToolBarLayout.setAlignment(FlowLayout.CENTER);
+        leftToolBar.setLayout(leftToolBarLayout);
+
+        var hostInfo = new FlatLabel();
+        hostInfo.setText("127.0.0.1:6379");
+        hostInfo.setIcon(new FlatSVGIcon("icons/host.svg"));
+        leftToolBar.add(hostInfo);
+
+        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_LEADING_COMPONENT, leftToolBar);
+
+        var rightToolBar = new FlatToolBar();
+        var rightToolBarLayout = new FlowLayout();
+        rightToolBarLayout.setAlignment(FlowLayout.CENTER);
+        rightToolBar.setLayout(rightToolBarLayout);
+
+        var keysInfo = new FlatLabel();
+        keysInfo.setMaximumSize(new Dimension(10, -1));
+        keysInfo.setText("60001");
+        keysInfo.setIcon(new FlatSVGIcon("icons/key.svg"));
+        rightToolBar.add(keysInfo);
+
+        var cupInfo = new FlatLabel();
+        cupInfo.setText("100%");
+        cupInfo.setIcon(new FlatSVGIcon("icons/CPU.svg"));
+        rightToolBar.add(cupInfo);
+
+        var memoryInfo = new FlatLabel();
+        memoryInfo.setMaximumSize(new Dimension(10, -1));
+        memoryInfo.setText("825.26K");
+        memoryInfo.setIcon(new FlatSVGIcon("icons/memory.svg"));
+        rightToolBar.add(memoryInfo);
+
+        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, rightToolBar);
+
         dashboardForm = new _DashboardForm();
         databaseForm = new _DatabaseForm();
-        contentPanel.addTab("数据", new FlatSVGIcon("icons/db_key.svg"), dashboardForm.getContentPanel());
-        contentPanel.addTab("命令", new FlatSVGIcon("icons/db_cli.svg"), new TerminalComponent());
-        contentPanel.addTab("信息", new FlatSVGIcon("icons/db_report.svg"), databaseForm.getContentPanel());
-        contentPanel.addTab("日志", new FlatSVGIcon("icons/db_log.svg"), new JPanel());
+        contentPanel.addTab("数据", new FlatSVGIcon("icons/db_key2.svg"), dashboardForm.getContentPanel());
+        contentPanel.addTab("命令", new FlatSVGIcon("icons/db_cli2.svg"), new TerminalComponent());
+        contentPanel.addTab("信息", new FlatSVGIcon("icons/db_report2.svg"), databaseForm.getContentPanel());
         contentPanel.addChangeListener(e -> {
             var tabbedPane = (JTabbedPane) e.getSource();
             var component = tabbedPane.getSelectedComponent();

@@ -4,6 +4,7 @@ import javax.swing.*;
 
 public class _DashboardForm {
     private JPanel contentPanel;
+    private JButton button1;
 
     public JPanel getContentPanel() {
         return contentPanel;
