@@ -7,6 +7,7 @@ import cn.devcms.redisfront.model.ConnectInfo;
 import redis.clients.jedis.*;
 import redis.clients.jedis.util.SafeEncoder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,11 +22,11 @@ public class RedisUtil {
         var connection = new Connection(new HostAndPort(connect.host(), connect.port()), createJedisClientConfig(connect));
         try (connection) {
             if (connection.ping()) {
-                var commandList = new java.util.ArrayList<>(List.of(inputText.split(" ")));
+                var commandList = new ArrayList<>(List.of(inputText.split(" ")));
                 var command = Arrays.stream(Protocol.Command.values())
                         .filter(e -> Fn.equal(e.name(), commandList.get(0).toUpperCase()))
                         .findAny()
-                        .orElse(null);
+                        .orElseThrow(() -> new Throwable("ERR unknown command '" + inputText + "'"));
                 commandList.remove(0);
                 if (enableCluster) {
                     return connection.executeCommand(new ClusterCommandArguments(command).addObjects(commandList));
@@ -34,8 +35,7 @@ public class RedisUtil {
             } else {
                 return "连接失败！";
             }
-
-        } catch (Exception e) {
+        } catch (Throwable e) {
             return e.getMessage();
         }
     }

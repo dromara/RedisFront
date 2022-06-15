@@ -37,9 +37,9 @@ public class TerminalComponent extends AbstractTerminalComponent {
             for (int i = 0; i < list.size(); i++) {
                 Object item = list.get(i);
                 if (item instanceof List itemList) {
-                    sb.append(space).append(i + 1).append(")").append(format(itemList, "\t")).append("\n");
+                    sb.append(space).append(i + 1).append(" ) ").append("\n").append(format(itemList, "  ")).append("\n");
                 } else {
-                    sb.append(space).append(i + 1).append(")").append(item).append("\n");
+                    sb.append(space).append(i + 1).append(" ) ").append(space).append(item).append("\n");
                 }
             }
         } else {
@@ -50,7 +50,7 @@ public class TerminalComponent extends AbstractTerminalComponent {
 
     @Override
     protected ConnectInfo connectInfo() {
-        return new ConnectInfo("a", "127.0.0.1", 6379, null, null, 11, false, ConnectEnum.NORMAL);
+        return new ConnectInfo("a", "127.0.0.1", 6379, null, null, 1, false, ConnectEnum.NORMAL);
     }
 
     @Override
