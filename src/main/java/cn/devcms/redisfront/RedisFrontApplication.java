@@ -1,24 +1,16 @@
 package cn.devcms.redisfront;
 
-import cn.devcms.redisfront.common.enums.ConnectEnum;
 import cn.devcms.redisfront.common.util.PrefUtil;
-import cn.devcms.redisfront.common.util.RedisUtil;
 import cn.devcms.redisfront.common.util.ThemeUtil;
-import cn.devcms.redisfront.model.ConnectInfo;
 import cn.devcms.redisfront.ui.RedisFrontFrame;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatInspector;
 import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
 import com.formdev.flatlaf.util.SystemInfo;
-import redis.clients.jedis.*;
-import redis.clients.jedis.util.SafeEncoder;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class RedisFrontApplication {
 
