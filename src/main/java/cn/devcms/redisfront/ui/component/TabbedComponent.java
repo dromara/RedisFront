@@ -8,6 +8,7 @@ import com.formdev.flatlaf.extras.components.FlatLabel;
 import com.formdev.flatlaf.extras.components.FlatToolBar;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 
 import static com.formdev.flatlaf.FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS;
@@ -24,7 +25,6 @@ public class TabbedComponent extends JPanel {
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_TRAILING);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
-
         var leftToolBar = new FlatToolBar();
         var leftToolBarLayout = new FlowLayout();
         leftToolBarLayout.setAlignment(FlowLayout.CENTER);

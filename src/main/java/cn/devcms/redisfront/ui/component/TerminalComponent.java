@@ -50,7 +50,7 @@ public class TerminalComponent extends AbstractTerminalComponent {
 
     @Override
     protected ConnectInfo connectInfo() {
-        return new ConnectInfo("a", "127.0.0.1", 6379, null, null, 1, false, ConnectEnum.NORMAL);
+        return new ConnectInfo("a", "127.0.0.1", 6379, null, null, 11, false, ConnectEnum.NORMAL);
     }
 
     @Override
