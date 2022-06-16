@@ -43,7 +43,6 @@ public class TabbedComponent extends JPanel {
         rightToolBar.setLayout(rightToolBarLayout);
 
         var keysInfo = new FlatLabel();
-        keysInfo.setMaximumSize(new Dimension(10, -1));
         keysInfo.setText("60001");
         keysInfo.setIcon(new FlatSVGIcon("icons/key.svg"));
         rightToolBar.add(keysInfo);
@@ -54,7 +53,6 @@ public class TabbedComponent extends JPanel {
         rightToolBar.add(cupInfo);
 
         var memoryInfo = new FlatLabel();
-        memoryInfo.setMaximumSize(new Dimension(10, -1));
         memoryInfo.setText("825.26K");
         memoryInfo.setIcon(new FlatSVGIcon("icons/memory.svg"));
         rightToolBar.add(memoryInfo);
