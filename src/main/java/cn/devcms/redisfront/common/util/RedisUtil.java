@@ -40,21 +40,6 @@ public class RedisUtil {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-
-        var object = RedisUtil.sendCommand(new ConnectInfo("A",
-                        "127.0.0.1",
-                        6379,
-                        null,
-                        null,
-                        11,
-                        false,
-                        ConnectEnum.NORMAL),
-                false,
-                "SSCAN handing_oauth:client_id_to_access:test 0 COUNT 100");
-        System.out.println();
-        System.out.println();
-    }
 
     private static DefaultJedisClientConfig createJedisClientConfig(ConnectInfo connect) throws Exception {
         if (connect.ssl()) {

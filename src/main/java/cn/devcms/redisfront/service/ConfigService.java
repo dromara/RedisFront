@@ -1,8 +1,9 @@
 package cn.devcms.redisfront.service;
 
-import cn.devcms.redisfront.model.ConfigInfo;
+import cn.devcms.redisfront.model.ConnectInfo;
 
-import java.io.File;
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * ConnectService
@@ -11,12 +12,13 @@ import java.io.File;
  */
 public interface ConfigService {
 
-    ConfigInfo loadConfig();
 
-    void persistenceConfig(ConfigInfo configInfo);
+    List<ConnectInfo> getConnectList(String name);
 
-    ConfigInfo importConfig(String filePath);
+    ConnectInfo getConnectDetail(Serializable id);
 
-    void exportConfig(ConfigInfo configInfo, File file);
+    Boolean save(ConnectInfo connectInfo);
+
+    Boolean update(ConnectInfo connectInfo);
 
 }

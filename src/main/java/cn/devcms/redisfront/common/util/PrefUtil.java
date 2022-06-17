@@ -1,11 +1,5 @@
 package cn.devcms.redisfront.common.util;
 
-import cn.devcms.redisfront.common.constant.Constant;
-import com.formdev.flatlaf.FlatDarculaLaf;
-import com.formdev.flatlaf.FlatLightLaf;
-import com.formdev.flatlaf.util.LoggingFacade;
-
-import javax.swing.*;
 import java.util.prefs.Preferences;
 
 /**

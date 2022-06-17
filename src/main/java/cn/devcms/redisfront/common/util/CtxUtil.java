@@ -9,7 +9,7 @@ import java.util.LinkedHashMap;
  *
  * @author Jin
  */
-public class ContextUtil {
+public class CtxUtil {
 
     private final static LinkedHashMap<Object, ConnectInfo> connected = new LinkedHashMap<>();
     private static Integer openedServerTableId = 0;
@@ -33,11 +33,11 @@ public class ContextUtil {
     }
 
     public static void setOpenedServerTableId(Integer openedServerTableId) {
-        ContextUtil.openedServerTableId = openedServerTableId;
+        CtxUtil.openedServerTableId = openedServerTableId;
     }
 
     public static void setSelectedNode(String selectedNode) {
-        ContextUtil.selectedNode = selectedNode;
+        CtxUtil.selectedNode = selectedNode;
     }
 
     public static String getSelectedNode() {

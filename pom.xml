@@ -66,11 +66,16 @@
             <artifactId>hutool-json</artifactId>
             <version>${hutool.version}</version>
         </dependency>
-        <!--jsch -->
         <dependency>
             <groupId>com.jcraft</groupId>
             <artifactId>jsch</artifactId>
             <version>0.1.55</version>
+        </dependency>
+        <!--derby -->
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+            <version>10.15.2.0</version>
         </dependency>
         <!--jsch -->
         <dependency>

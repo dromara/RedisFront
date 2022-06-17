@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 
 public class TelnetUtil {
 
-    public static String exec(ConnectInfo connect, String command) {
+    public static String sendCommand(ConnectInfo connect, String command) {
         try {
             var telnetClient = new TelnetClient("vt200");
             telnetClient.setConnectTimeout(5000);
