@@ -35,14 +35,12 @@ public class MainContentForm {
         tabPanel.addTab(connectInfo.title(), new FlatSVGIcon("icons/icon_db5.svg"), new TabbedComponent());
         tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
         contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
-
-        //设置连接上下文
-        CtxUtil.putConnectInfo(tabPanel.getSelectedIndex(), connectInfo);
-        CtxUtil.setOpenedServerTableId(tabPanel.getSelectedIndex());
     }
 
     private void createUIComponents() {
         UIManager.put("TabbedPane.closeHoverForeground", Color.red);
+        UIManager.put("TabbedPane.selectHighlight", Color.red);
+        UIManager.put("*.selectionBackground", Color.red);
         UIManager.put("TabbedPane.closePressedForeground", Color.red);
         UIManager.put("TabbedPane.closeHoverBackground", new Color(0, true));
         UIManager.put("TabbedPane.closeIcon", new FlatTabbedPaneCloseIcon());
@@ -59,8 +57,6 @@ public class MainContentForm {
         //SHOW CLOSE BUTTON Callback
         tabPanel.putClientProperty("JTabbedPane.tabCloseCallback", (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
             tabPanel.remove(tabIndex);
-            //设置连接上下文
-            CtxUtil.removeConnectInfo(tabPanel.getSelectedIndex());
             if (tabbedPane.getTabCount() == 0) {
                 contentPanel.add(noneForm.getContentPanel(), BorderLayout.CENTER, 0);
             }

@@ -1,1 +1,0 @@
-insert into rf_connection(title, host, port, username, password, ssl, connectMode, sslConfig, sshConfig) value(1111111,DSADSADSA,222,DSADSAD,DSADSADSAD,null,NORMAL,null,null)

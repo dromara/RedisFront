@@ -1,6 +1,5 @@
 package cn.devcms.redisfront.common.util;
 
-import cn.devcms.redisfront.common.enums.ConnectEnum;
 import cn.devcms.redisfront.common.func.Fn;
 import cn.devcms.redisfront.common.ssl.SocketFactory;
 import cn.devcms.redisfront.model.ConnectInfo;
