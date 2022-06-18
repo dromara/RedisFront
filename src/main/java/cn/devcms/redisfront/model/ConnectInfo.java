@@ -190,7 +190,7 @@ public class ConnectInfo implements Serializable {
     }
 
     public String user() {
-        return username;
+        return Fn.isEmpty(username) ? null : username;
     }
 
     public ConnectInfo setUsername(String username) {
@@ -199,7 +199,7 @@ public class ConnectInfo implements Serializable {
     }
 
     public String password() {
-        return password;
+        return Fn.isEmpty(password) ? null : password;
     }
 
     public ConnectInfo setPassword(String password) {
@@ -208,7 +208,7 @@ public class ConnectInfo implements Serializable {
     }
 
     public Integer database() {
-        return database;
+        return Fn.isNull(database) ? 0 : database;
     }
 
     public ConnectInfo setDatabase(Integer database) {

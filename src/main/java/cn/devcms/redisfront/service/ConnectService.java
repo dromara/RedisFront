@@ -72,8 +72,8 @@ public interface ConnectService {
                 "title, " +
                 "host, " +
                 "port, " +
-                "username, " +
-                "password, " +
+                (Fn.isNotEmpty(connectInfo.user()) ? "username, " : "") +
+                (Fn.isNotEmpty(connectInfo.password()) ? "password, " : "") +
                 "ssl, " +
                 "connect_mode, " +
                 "ssl_config, " +
@@ -86,10 +86,8 @@ public interface ConnectService {
                 "'," +
                 connectInfo.port() +
                 ",'" +
-                connectInfo.user() +
-                "','" +
-                connectInfo.password() +
-                "','" +
+                (Fn.isNotEmpty(connectInfo.user()) ? connectInfo.user() + "','" : "") +
+                (Fn.isNotEmpty(connectInfo.password()) ? connectInfo.password() + "','" : "") +
                 connectInfo.ssl() +
                 "','" +
                 connectInfo.connectMode().name() +

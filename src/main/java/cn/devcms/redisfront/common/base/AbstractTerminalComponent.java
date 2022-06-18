@@ -70,7 +70,6 @@ public abstract class AbstractTerminalComponent extends JPanel implements KeyLis
                 if(Fn.isNotEmpty(input)) {
                     this.inputProcessHandler(input.trim());
                 }
-
             }
             this.print("\n");
             this.print(connectInfo().host().concat(":").concat(connectInfo().port().toString()).concat(Fn.equal("0", databaseName()) ? "" : "[" + databaseName() + "]").concat(">"));

@@ -27,7 +27,7 @@ public class TerminalComponent extends AbstractTerminalComponent {
             String formatStr = format(s, "");
             print(formatStr);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            print(e.getMessage());
         }
     }
 

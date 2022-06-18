@@ -2,11 +2,10 @@ package cn.devcms.redisfront.ui.component;
 
 import cn.devcms.redisfront.model.ConnectInfo;
 
-import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.util.List;
 
-public class ConnectListComponent extends DefaultTableModel {
+public class ConnectTableModelComponent extends DefaultTableModel {
 
     private final Class<?>[] columnTypes = new Class<?>[]{
             Integer.class, String.class, String.class, Integer.class, String.class, String.class
@@ -15,7 +14,7 @@ public class ConnectListComponent extends DefaultTableModel {
             false, false, false, false, false, false
     };
 
-    public ConnectListComponent(List<ConnectInfo> dataList, String... columNames) {
+    public ConnectTableModelComponent(List<ConnectInfo> dataList, String... columNames) {
         var dataVector = new Object[dataList.size()][6];
         for (var i = 0; i < dataList.size(); i++) {
             dataVector[i][0] = dataList.get(i).id();

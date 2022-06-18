@@ -28,8 +28,9 @@ public class RedisFrontApplication {
             JDialog.setDefaultLookAndFeelDecorated(true);
         }
 
-        if (!SystemInfo.isJava_9_orLater && System.getProperty("flatlaf.uiScale") == null)
+        if (!SystemInfo.isJava_9_orLater && System.getProperty("flatlaf.uiScale") == null) {
             System.setProperty("flatlaf.uiScale", "2x");
+        }
 
         FlatLaf.registerCustomDefaultsSource("cn.devcms.redisfront");
         FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", "#d81e06"));

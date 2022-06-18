@@ -3,7 +3,7 @@ package cn.devcms.redisfront.ui.form;
 import cn.devcms.redisfront.common.func.Fn;
 import cn.devcms.redisfront.model.ConnectInfo;
 import cn.devcms.redisfront.service.ConnectService;
-import cn.devcms.redisfront.ui.component.TabbedComponent;
+import cn.devcms.redisfront.ui.component.DatabaseTabbedComponent;
 import cn.devcms.redisfront.ui.dialog.AddConnectDialog;
 import cn.devcms.redisfront.ui.dialog.OpenConnectDialog;
 import com.formdev.flatlaf.FlatClientProperties;
@@ -40,7 +40,7 @@ public class MainContentForm {
             ConnectService.service.update(connectInfo);
         }
         //添加到tab面板
-        tabPanel.addTab(connectInfo.title(), new FlatSVGIcon("icons/icon_db5.svg"), new TabbedComponent());
+        tabPanel.addTab(connectInfo.title(), new FlatSVGIcon("icons/icon_db5.svg"), new DatabaseTabbedComponent(connectInfo));
         tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
         contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
     }
