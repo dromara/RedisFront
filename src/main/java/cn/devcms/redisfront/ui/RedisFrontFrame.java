@@ -1,6 +1,7 @@
 
 package cn.devcms.redisfront.ui;
 
+import cn.devcms.redisfront.service.ConnectService;
 import cn.devcms.redisfront.ui.dialog.AddConnectDialog;
 import cn.devcms.redisfront.ui.dialog.OpenConnectDialog;
 import cn.devcms.redisfront.ui.dialog.SettingDialog;
@@ -36,7 +37,7 @@ public class RedisFrontFrame extends JXFrame {
     }
 
     private void initComponents() {
-        var  container = getContentPane();
+        var container = getContentPane();
         container.setLayout(new BorderLayout());
         mainContentForm = new MainContentForm(this);
         container.add(mainContentForm.getContentPanel(), BorderLayout.CENTER);
@@ -46,44 +47,55 @@ public class RedisFrontFrame extends JXFrame {
     private void menuBarInit() {
         setJMenuBar(new JMenuBar() {
             {
-                var  fileMenu = new JMenu("文件");
+                var fileMenu = new JMenu("文件");
                 fileMenu.setMnemonic('F');
                 //新建连接
-                var  addConnectMenu = new JMenuItem("新建连接", KeyEvent.VK_A);
+                var addConnectMenu = new JMenuItem("新建连接", KeyEvent.VK_A);
                 addConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK));
                 addConnectMenu.addActionListener(e -> AddConnectDialog.showAddConnectDialog(RedisFrontFrame.this, (connectInfo -> mainContentForm.addActionPerformed(connectInfo))));
                 fileMenu.add(addConnectMenu);
                 //打开连接
-                var  openConnectMenu = new JMenuItem("打开连接", KeyEvent.VK_S);
+                var openConnectMenu = new JMenuItem("打开连接", KeyEvent.VK_S);
                 openConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
-                openConnectMenu.addActionListener(e -> OpenConnectDialog.showOpenConnectDialog(RedisFrontFrame.this));
+                openConnectMenu.addActionListener(e -> OpenConnectDialog.showOpenConnectDialog(RedisFrontFrame.this,
+                        //打开连接回调
+                        (mainContentForm::addActionPerformed),
+                        //编辑连接回调
+                        (connectInfo -> AddConnectDialog.showEditConnectDialog(
+                                RedisFrontFrame.this,
+                                connectInfo,
+                                (mainContentForm::addActionPerformed)
+                        )),
+                        //删除连接回调
+                        (connectInfo -> ConnectService.service.delete(connectInfo.id())))
+                );
                 fileMenu.add(openConnectMenu);
                 //配置菜单
                 fileMenu.add(new JSeparator());
-                var  importConfigMenu = new JMenuItem("加载配置");
+                var importConfigMenu = new JMenuItem("加载配置");
                 fileMenu.add(importConfigMenu);
-                var  exportConfigMenu = new JMenuItem("导出配置");
+                var exportConfigMenu = new JMenuItem("导出配置");
                 fileMenu.add(exportConfigMenu);
                 //退出程序
                 fileMenu.add(new JSeparator());
-                var  exitMenu = new JMenuItem("退出程序");
+                var exitMenu = new JMenuItem("退出程序");
                 exitMenu.addActionListener(e -> {
                     RedisFrontFrame.this.dispose();
                     System.exit(0);
                 });
                 fileMenu.add(exitMenu);
                 add(fileMenu);
-                var  settingMenu = new JMenu("设置");
+                var settingMenu = new JMenu("设置");
                 fileMenu.setMnemonic('S');
                 settingMenu.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                       SettingDialog.showSettingDialog(RedisFrontFrame.this);
+                        SettingDialog.showSettingDialog(RedisFrontFrame.this);
 
                     }
                 });
                 add(settingMenu);
-                var  aboutMenu = new JMenu("关于");
+                var aboutMenu = new JMenu("关于");
                 fileMenu.setMnemonic('A');
                 aboutMenu.addMouseListener(new MouseAdapter() {
                     @Override
@@ -113,10 +125,10 @@ public class RedisFrontFrame extends JXFrame {
 
 
     private void aboutActionPerformed() {
-        var  titleLabel = new JLabel("RedisFront");
+        var titleLabel = new JLabel("RedisFront");
         titleLabel.putClientProperty(FlatClientProperties.STYLE_CLASS, "h1");
         var link = "https://gitee.com/westboy/redis-front";
-        var  linkLabel = new JLabel("<html><a href=\"#\">" + link + "</a></html>");
+        var linkLabel = new JLabel("<html><a href=\"#\">" + link + "</a></html>");
         linkLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         linkLabel.addMouseListener(new MouseAdapter() {
             @Override

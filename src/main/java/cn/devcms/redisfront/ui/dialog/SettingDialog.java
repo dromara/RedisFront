@@ -3,6 +3,7 @@ package cn.devcms.redisfront.ui.dialog;
 
 import cn.devcms.redisfront.common.base.AbstractDialog;
 import cn.devcms.redisfront.common.constant.Constant;
+import cn.devcms.redisfront.common.func.Fn;
 import cn.devcms.redisfront.common.util.PrefUtil;
 import cn.devcms.redisfront.common.util.ThemeUtil;
 import com.formdev.flatlaf.*;
@@ -17,8 +18,8 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 public class SettingDialog extends AbstractDialog<Void> {
     private JPanel contentPane;
@@ -33,8 +34,12 @@ public class SettingDialog extends AbstractDialog<Void> {
     private JTextField textField1;
     private JTextField textField2;
 
+    private static SettingDialog settingDialog;
+
     public static void showSettingDialog(Frame owner) {
-        var settingDialog = new SettingDialog(owner);
+        if (settingDialog == null) {
+            settingDialog = new SettingDialog(owner);
+        }
         settingDialog.setMinimumSize(new Dimension(500, 400));
         settingDialog.setLocationRelativeTo(owner);
         settingDialog.pack();
@@ -45,9 +50,6 @@ public class SettingDialog extends AbstractDialog<Void> {
         super(owner);
         setTitle("设置");
         setContentPane(contentPane);
-        initThemeNameComboBox();
-        initFontComboBox();
-        initFontSizeComboBox();
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
         buttonOK.addActionListener(e -> onOK());
@@ -59,24 +61,34 @@ public class SettingDialog extends AbstractDialog<Void> {
             }
         });
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        initThemeNameComboBox();
+        initFontComboBox();
+        initFontSizeComboBox();
     }
 
     private void initFontSizeComboBox() {
         ArrayList<String> fontSizes = new ArrayList<>(Arrays.asList(
-                "10", "11", "12", "14", "16", "18"));
+                "10", "11", "12", "13", "14", "15", "16", "17", "18"));
         for (String fontSize : fontSizes) {
             fontSizeComboBox.addItem(fontSize);
         }
         fontSizeComboBox.addActionListener(e -> {
             String fontSizeStr = (String) fontSizeComboBox.getSelectedItem();
+            if (Fn.equal(fontSizeStr, PrefUtil.getState().get(Constant.KEY_FONT_SIZE, getDefaultFontSize()))) {
+                return;
+            }
             Font font = UIManager.getFont("defaultFont");
-            assert fontSizeStr != null;
             Font newFont = font.deriveFont((float) Integer.parseInt(fontSizeStr));
             UIManager.put("defaultFont", newFont);
             PrefUtil.getState().put(Constant.KEY_FONT_SIZE, fontSizeStr);
             FlatLaf.updateUI();
         });
-        fontSizeComboBox.setSelectedItem(PrefUtil.getState().get(Constant.KEY_FONT_NAME, String.valueOf(UIManager.getFont("defaultFont").getSize())));
+        fontSizeComboBox.setSelectedItem(PrefUtil.getState().get(Constant.KEY_FONT_SIZE, getDefaultFontSize()));
+    }
+
+    //获取默认字体大小
+    private String getDefaultFontSize() {
+        return String.valueOf(UIManager.getFont("defaultFont").getSize());
     }
 
     private void initFontComboBox() {
@@ -102,6 +114,10 @@ public class SettingDialog extends AbstractDialog<Void> {
         });
         fontNameComboBox.addActionListener(e -> {
             String fontFamily = (String) fontNameComboBox.getSelectedItem();
+            if (Fn.equal(fontFamily, PrefUtil.getState().get(Constant.KEY_FONT_NAME, getDefaultFontFamily()))) {
+                return;
+            }
+            PrefUtil.getState().put(Constant.KEY_FONT_NAME, fontFamily);
             FlatAnimatedLafChange.showSnapshot();
             Font font = UIManager.getFont("defaultFont");
             Font newFont = StyleContext.getDefaultStyleContext().getFont(fontFamily, font.getStyle(), font.getSize());
@@ -109,10 +125,15 @@ public class SettingDialog extends AbstractDialog<Void> {
             UIManager.put("defaultFont", newFont);
             FlatLaf.updateUI();
             FlatAnimatedLafChange.hideSnapshotWithAnimation();
-            PrefUtil.getState().put(Constant.KEY_FONT_NAME, fontFamily);
         });
-        fontNameComboBox.setSelectedItem(PrefUtil.getState().get(Constant.KEY_FONT_NAME, UIManager.getFont("defaultFont").getFontName()));
+        fontNameComboBox.setSelectedItem(PrefUtil.getState().get(Constant.KEY_FONT_NAME, getDefaultFontFamily()));
     }
+
+    //获取默认字体大小
+    private String getDefaultFontFamily() {
+        return String.valueOf(UIManager.getFont("defaultFont").getFontName());
+    }
+
 
     private void initThemeNameComboBox() {
         themeNameComboBox.addItem(new ThemeUtil.ThemeInfo(FlatLightLaf.NAME, null, false, null, null, null, null, null, FlatLightLaf.class.getName()));
@@ -136,13 +157,14 @@ public class SettingDialog extends AbstractDialog<Void> {
 
         themeNameComboBox.addActionListener(e -> {
             JComboBox<?> selected = (JComboBox<?>) e.getSource();
-            EventQueue.invokeLater(() -> {
-                ThemeUtil.ThemeInfo themeInfo = (ThemeUtil.ThemeInfo) selected.getSelectedItem();
-                assert themeInfo != null;
-                ThemeUtil.changeTheme(this, themeInfo);
-                PrefUtil.getState().put(Constant.KEY_THEME, StringUtils.isEmpty(themeInfo.lafClassName()) ? "R_" + themeInfo.resourceName() : themeInfo.lafClassName());
-                PrefUtil.getState().put(Constant.KEY_THEME_SELECT_INDEX, String.valueOf(themeNameComboBox.getSelectedIndex()));
-            });
+            ThemeUtil.ThemeInfo themeInfo = (ThemeUtil.ThemeInfo) selected.getSelectedItem();
+            String themeName = StringUtils.isEmpty(Objects.requireNonNull(themeInfo).lafClassName()) ? "R_" + themeInfo.resourceName() : themeInfo.lafClassName();
+            if (Fn.equal(themeName, PrefUtil.getState().get(Constant.KEY_THEME, FlatDarculaLaf.class.getName()))) {
+                return;
+            }
+            ThemeUtil.changeTheme(this, themeInfo);
+            PrefUtil.getState().put(Constant.KEY_THEME, themeName);
+            PrefUtil.getState().put(Constant.KEY_THEME_SELECT_INDEX, String.valueOf(themeNameComboBox.getSelectedIndex()));
         });
 
         themeNameComboBox.setSelectedIndex(Integer.parseInt(PrefUtil.getState().get(Constant.KEY_THEME_SELECT_INDEX, "0")));

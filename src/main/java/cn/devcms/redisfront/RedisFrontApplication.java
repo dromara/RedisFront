@@ -1,7 +1,9 @@
 package cn.devcms.redisfront;
 
+import cn.devcms.redisfront.common.constant.Constant;
 import cn.devcms.redisfront.common.util.PrefUtil;
 import cn.devcms.redisfront.common.util.ThemeUtil;
+import cn.devcms.redisfront.service.ConnectService;
 import cn.devcms.redisfront.ui.RedisFrontFrame;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatInspector;
@@ -36,6 +38,11 @@ public class RedisFrontApplication {
 
             PrefUtil.init("/redis-front");
             ThemeUtil.setupTheme(args);
+
+            if (PrefUtil.getState().getBoolean(Constant.KEY_APP_DATABASE_INIT, true)) {
+                ConnectService.service.initDatabase();
+                PrefUtil.getState().put(Constant.KEY_APP_DATABASE_INIT, Boolean.FALSE.toString());
+            }
 
             FlatInspector.install("ctrl shift alt X");
             FlatUIDefaultsInspector.install("ctrl shift alt Y");

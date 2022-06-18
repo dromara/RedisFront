@@ -19,4 +19,5 @@ public class Constant {
 
     public static final String KEY_KEY_MAX_LOAD_NUM = "keyMaxLoadNum";
 
+    public static final String KEY_APP_DATABASE_INIT = "appDatabaseInit";
 }

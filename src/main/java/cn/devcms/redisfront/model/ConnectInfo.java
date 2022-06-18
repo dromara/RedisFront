@@ -79,6 +79,9 @@ public class ConnectInfo implements Serializable {
         }
     }
 
+    public ConnectInfo() {
+    }
+
     public ConnectInfo(String title, String host, Integer port, String username, String password, Integer database, Boolean ssl, ConnectEnum connectMode, SSLConfig sslConfig, SSHConfig sshConfig) {
         this.title = title;
         this.host = host;

@@ -49,7 +49,11 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     private JButton testBtn;
     private JPasswordField sslPasswordField;
     private JCheckBox showSslPassword;
+    private Integer id;
 
+    /***
+     * 打开添加连接窗口
+     */
     public static void showAddConnectDialog(Frame owner, Consumer<ConnectInfo> callback) {
         var addConnectDialog = new AddConnectDialog(owner, callback);
         addConnectDialog.setResizable(false);
@@ -58,8 +62,28 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         addConnectDialog.setVisible(true);
     }
 
+    /**
+     * 打开编辑连接窗口
+     *
+     */
+    public static void showEditConnectDialog(Frame owner, ConnectInfo connectInfo, Consumer<ConnectInfo> callback) {
+        var addConnectDialog = new AddConnectDialog(owner, callback);
+        //数据初始化
+        addConnectDialog.componentsDataInit(connectInfo);
+        addConnectDialog.setResizable(false);
+        addConnectDialog.setLocationRelativeTo(owner);
+        addConnectDialog.pack();
+        addConnectDialog.setVisible(true);
+    }
+
+    public static void updateTableData() {
+
+    }
+
+
     public AddConnectDialog(Frame owner, Consumer<ConnectInfo> callback) {
         super(owner, callback);
+
         setTitle("新建连接");
         setModal(true);
         setResizable(false);
@@ -67,6 +91,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         setContentPane(contentPane);
         getRootPane().setDefaultButton(buttonOK);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        this.id = 0;
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 dispose();
@@ -225,6 +250,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                             enableSSLBtn.isSelected(),
                             ConnectEnum.SSH,
                             sshConfig)
+                            .setId(id)
             );
 
         } else if (enableSSLBtn.isSelected()) {
@@ -244,6 +270,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                             enableSSLBtn.isSelected(),
                             ConnectEnum.NORMAL,
                             sshConfig)
+                            .setId(id)
             );
         } else {
             callback.accept(
@@ -255,11 +282,27 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                             0,
                             enableSSLBtn.isSelected(),
                             ConnectEnum.NORMAL)
+                            .setId(id)
             );
         }
         dispose();
     }
 
+    /**
+     * 数据初始化
+     *
+     * @param connectInfo
+     */
+    public void componentsDataInit(ConnectInfo connectInfo) {
+        this.id = connectInfo.id();
+        this.titleField.setText(connectInfo.title());
+        this.hostField.setText(connectInfo.host());
+        this.portField.setValue(connectInfo.port());
+        this.userField.setText(connectInfo.user());
+        this.passwordField.setText(connectInfo.password());
+        this.enableSSLBtn.setSelected(connectInfo.ssl());
+        this.enableSSHBtn.setSelected(ConnectEnum.SSH.equals(connectInfo.connectMode()));
+    }
 
     private void createUIComponents() {
         sslPanel = new JPanel();

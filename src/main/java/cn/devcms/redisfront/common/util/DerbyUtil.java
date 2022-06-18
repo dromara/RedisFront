@@ -27,11 +27,11 @@ public class DerbyUtil {
         return DriverManager.getConnection("jdbc:derby:" + userDir + File.separator + "redis-front" + File.separator + "data;create=true");
     }
 
-    public <T> List<T> querySql(String sql, Class<T> clazz) {
+    public List<Map<String, Object>> querySql(String sql) {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        List<T> resultList = new ArrayList<>();
+        List<Map<String, Object>> resultList = new ArrayList<>();
         try {
             conn = getConnection();
             ps = conn.prepareStatement(sql);
@@ -43,8 +43,7 @@ public class DerbyUtil {
                     for (int i = 1; i <= md.getColumnCount(); i++) {
                         rowData.put(md.getColumnName(i).toLowerCase(), rs.getObject(i));
                     }
-                    var obj = BeanUtil.mapToBean(rowData, clazz, true);
-                    resultList.add(obj);
+                    resultList.add(rowData);
                 }
             }
         } catch (Exception e) {

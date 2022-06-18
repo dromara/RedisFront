@@ -1,7 +1,8 @@
 package cn.devcms.redisfront.ui.form;
 
-import cn.devcms.redisfront.common.util.CtxUtil;
+import cn.devcms.redisfront.common.func.Fn;
 import cn.devcms.redisfront.model.ConnectInfo;
+import cn.devcms.redisfront.service.ConnectService;
 import cn.devcms.redisfront.ui.component.TabbedComponent;
 import cn.devcms.redisfront.ui.dialog.AddConnectDialog;
 import cn.devcms.redisfront.ui.dialog.OpenConnectDialog;
@@ -32,6 +33,13 @@ public class MainContentForm {
     }
 
     public void addActionPerformed(ConnectInfo connectInfo) {
+        //存数据库
+        if (Fn.equal(connectInfo.id(), 0)) {
+            ConnectService.service.save(connectInfo);
+        } else {
+            ConnectService.service.update(connectInfo);
+        }
+        //添加到tab面板
         tabPanel.addTab(connectInfo.title(), new FlatSVGIcon("icons/icon_db5.svg"), new TabbedComponent());
         tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
         contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
@@ -73,12 +81,26 @@ public class MainContentForm {
 
         var newBtn = new JButton(null, new FlatSVGIcon("icons/new_conn.svg"));
         newBtn.setToolTipText("新建连接");
-        newBtn.addActionListener(e -> AddConnectDialog.showAddConnectDialog(owner, (this::addActionPerformed)));
+        newBtn.addActionListener(e -> AddConnectDialog.showAddConnectDialog(owner,
+                //打开连接回调
+                (this::addActionPerformed)
+        ));
         jPanel.add(newBtn);
 
         var openBtn = new JButton(null, new FlatSVGIcon("icons/open_conn.svg"));
         openBtn.setToolTipText("打开连接");
-        openBtn.addActionListener(e -> OpenConnectDialog.showOpenConnectDialog(owner));
+        openBtn.addActionListener(e -> OpenConnectDialog.showOpenConnectDialog(
+                owner,
+                //打开连接回调
+                (this::addActionPerformed),
+                //编辑连接回调
+                (connectInfo -> AddConnectDialog.showEditConnectDialog(
+                        owner,
+                        connectInfo,
+                        (this::addActionPerformed)
+                )),
+                //删除连接回调
+                (connectInfo -> ConnectService.service.delete(connectInfo.id()))));
         jPanel.add(openBtn);
         toolBar.add(jPanel, BorderLayout.SOUTH);
         tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, toolBar);
