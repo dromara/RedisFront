@@ -11,6 +11,8 @@ import com.formdev.flatlaf.extras.components.FlatToolBar;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.util.Map;
 
 import static com.formdev.flatlaf.FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS;
@@ -80,7 +82,14 @@ public class TabbedComponent extends JPanel {
         });
         add(contentPanel, BorderLayout.CENTER);
 
-        var timer = new Timer(1000, (e) -> {
+        contentPanel.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                super.focusLost(e);
+            }
+        });
+
+        var timer = new Timer(2000, (e) -> {
             Long keysCount = RedisService.service.getKeyCount(connectInfo);
             keysInfo.setText(keysCount.toString());
 

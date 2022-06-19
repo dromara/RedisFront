@@ -34,7 +34,7 @@ public interface ConnectService {
 
     default String buildUpdateSql(ConnectInfo connectInfo) {
         return "update rf_connect" +
-                "set " +
+                " set " +
                 "title ='" +
                 connectInfo.title() +
                 "'," +
@@ -53,13 +53,13 @@ public interface ConnectService {
                 "ssl ='" +
                 connectInfo.ssl() +
                 "'," +
-                "connectMode ='" +
+                "connect_mode ='" +
                 connectInfo.connectMode().name() +
                 "'," +
-                "sslConfig ='" +
+                "ssl_config ='" +
                 (Fn.isNull(connectInfo.sshConfig()) ? "" : connectInfo.sshConfig()) +
                 "'," +
-                "sshConfig ='" +
+                "ssh_config ='" +
                 (Fn.isNull(connectInfo.sshConfig()) ? "" : connectInfo.sshConfig()) +
                 "' where id =" +
                 connectInfo.id();
