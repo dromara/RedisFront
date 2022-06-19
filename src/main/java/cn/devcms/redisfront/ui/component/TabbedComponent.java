@@ -31,6 +31,8 @@ public class TabbedComponent extends JPanel {
         leftToolBarLayout.setAlignment(FlowLayout.CENTER);
         leftToolBar.setLayout(leftToolBarLayout);
 
+        leftToolBar.setPreferredSize(new Dimension(50,-1));
+
         //host info
         var hostInfo = new FlatLabel();
         hostInfo.setText(connectInfo.host() + ":" + connectInfo.port());
@@ -43,6 +45,8 @@ public class TabbedComponent extends JPanel {
         var rightToolBarLayout = new FlowLayout();
         rightToolBarLayout.setAlignment(FlowLayout.CENTER);
         rightToolBar.setLayout(rightToolBarLayout);
+
+        rightToolBar.setPreferredSize(new Dimension(50,-1));
 
         //keysInfo
         var keysInfo = new FlatLabel();
