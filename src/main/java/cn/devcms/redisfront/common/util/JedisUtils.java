@@ -4,6 +4,7 @@
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 //import redis.clients.jedis.Jedis;
+//import redis.clients.jedis.JedisCluster;
 //import redis.clients.jedis.JedisPool;
 //import redis.clients.jedis.JedisPoolConfig;
 //
@@ -32,7 +33,7 @@
 //                poolConfig.setMaxIdle(200);
 //                poolConfig.setMaxWait(Duration.ofMillis(10000));
 //                poolConfig.setTestOnBorrow(true);
-//
+//                JedisCluster
 //                pool = new JedisPool(poolConfig, ip, port, 2000,user,password,ssl);
 //                maps.put(key, pool);
 //            } catch (Exception e) {

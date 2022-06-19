@@ -5,7 +5,7 @@ import cn.devcms.redisfront.common.func.Fn;
 import cn.devcms.redisfront.common.util.MsgUtil;
 import cn.devcms.redisfront.model.ConnectInfo;
 import cn.devcms.redisfront.service.ConnectService;
-import cn.devcms.redisfront.ui.component.ConnectTableModelComponent;
+import cn.devcms.redisfront.ui.component.TableModelComponent;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 import javax.swing.*;
@@ -113,7 +113,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                     if (Fn.isNotNull(connectInfo)) {
                         delActionCallback.accept(connectInfo);
                     }
-                    ((ConnectTableModelComponent) connectTable.getModel()).removeRow(row);
+                    ((TableModelComponent) connectTable.getModel()).removeRow(row);
                     connectTable.revalidate();
                 });
                 add(deleteConnectMenu);
@@ -121,7 +121,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         });
         //查询数据连接列表
         List<ConnectInfo> connectInfoList = ConnectService.service.getAllConnectList();
-        connectTable.setModel(new ConnectTableModelComponent(connectInfoList, "编号", "名称", "地址", "端口", "SSL", "连接模式"));
+        connectTable.setModel(new TableModelComponent(connectInfoList, "编号", "名称", "地址", "端口", "SSL", "连接模式"));
     }
 
     private void onOK() {

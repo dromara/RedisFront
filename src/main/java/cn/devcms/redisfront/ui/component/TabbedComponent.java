@@ -1,23 +1,23 @@
 package cn.devcms.redisfront.ui.component;
 
 import cn.devcms.redisfront.model.ConnectInfo;
+import cn.devcms.redisfront.service.RedisService;
 import cn.devcms.redisfront.ui.form._DashboardForm;
 import cn.devcms.redisfront.ui.form._DatabaseForm;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.components.FlatLabel;
 import com.formdev.flatlaf.extras.components.FlatToolBar;
-import redis.clients.jedis.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Set;
+import java.util.Map;
 
 import static com.formdev.flatlaf.FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS;
 
-public class DatabaseTabbedComponent extends JPanel {
+public class TabbedComponent extends JPanel {
 
-    public DatabaseTabbedComponent(ConnectInfo connectInfo) {
+    public TabbedComponent(ConnectInfo connectInfo) {
         setLayout(new BorderLayout());
         var contentPanel = new JTabbedPane();
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.CENTER);
@@ -31,24 +31,6 @@ public class DatabaseTabbedComponent extends JPanel {
         leftToolBarLayout.setAlignment(FlowLayout.CENTER);
         leftToolBar.setLayout(leftToolBarLayout);
 
-        JedisClientConfig jedisClientConfig = DefaultJedisClientConfig
-                .builder()
-                .database(connectInfo.database())
-                .user(connectInfo.user())
-                .password(connectInfo.password())
-                .build();
-        Jedis jedis = new Jedis(connectInfo.host(), connectInfo.port(), jedisClientConfig);
-        String string = jedis.clusterNodes();
-        String clientInfo = jedis.info();
-        String clusterInfo = jedis.clusterInfo();
-        System.out.println(clientInfo);
-        java.util.List<String> list = jedis.aclCat();
-        JedisCluster jedisCluster = new JedisCluster(Set.of(new HostAndPort(connectInfo.host(), connectInfo.port())), connectInfo.user(), connectInfo.password());
-        for (int i = 0; i <= 2000; i++) {
-            jedisCluster.set("AAAAAAAA" + i, "ssdfFDSF4DS56123");
-        }
-        String s = jedis.get("AAAAAAAA");
-        jedis.del("AAAAAAAA");
         //host info
         var hostInfo = new FlatLabel();
         hostInfo.setText(connectInfo.host() + ":" + connectInfo.port());
@@ -64,19 +46,19 @@ public class DatabaseTabbedComponent extends JPanel {
 
         //keysInfo
         var keysInfo = new FlatLabel();
-        keysInfo.setText("60001");
+        keysInfo.setText("0");
         keysInfo.setIcon(new FlatSVGIcon("icons/key.svg"));
         rightToolBar.add(keysInfo);
 
         //cupInfo
         var cupInfo = new FlatLabel();
-        cupInfo.setText("100%");
-        cupInfo.setIcon(new FlatSVGIcon("icons/CPU.svg"));
+        cupInfo.setText("0");
+        cupInfo.setIcon(new FlatSVGIcon("icons/process.svg"));
         rightToolBar.add(cupInfo);
 
         //memoryInfo
         var memoryInfo = new FlatLabel();
-        memoryInfo.setText("825.26K");
+        memoryInfo.setText("0.0");
         memoryInfo.setIcon(new FlatSVGIcon("icons/memory.svg"));
         rightToolBar.add(memoryInfo);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, rightToolBar);
@@ -93,6 +75,20 @@ public class DatabaseTabbedComponent extends JPanel {
             }
         });
         add(contentPanel, BorderLayout.CENTER);
+
+        var timer = new Timer(1000, (e) -> {
+            Long keysCount = RedisService.service.getKeyCount(connectInfo);
+            keysInfo.setText(keysCount.toString());
+
+            Map<String, Object> stats = RedisService.service.getStatInfo(connectInfo);
+            cupInfo.setText((String) stats.get("instantaneous_ops_per_sec"));
+            cupInfo.setToolTipText("每秒命令数：" + stats.get("instantaneous_ops_per_sec"));
+
+            Map<String, Object> memory = RedisService.service.getMemoryInfo(connectInfo);
+            memoryInfo.setText((String) memory.get("used_memory_human"));
+            memoryInfo.setToolTipText("内存占用：" + (String) memory.get("used_memory_human"));
+        });
+        timer.start();
     }
 
 
