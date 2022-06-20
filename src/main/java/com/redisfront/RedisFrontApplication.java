@@ -12,6 +12,7 @@ import com.formdev.flatlaf.util.SystemInfo;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.util.Collections;
 
 public class RedisFrontApplication {
@@ -35,7 +36,10 @@ public class RedisFrontApplication {
         FlatLaf.registerCustomDefaultsSource("cn.devcms.redisfront");
         FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", "#d81e06"));
 
-        System.setProperty("LOG_FILE", System.getProperty("user.home"));
+        String dataPath = System.getProperty("user.home") + File.separator + "redis-front";
+        System.setProperty("LOG_FILE", dataPath + File.separator + "logs" + File.separator + "redis-front.log");
+        System.setProperty("derby.stream.error.file", dataPath + File.separator + "derby" + File.separator + "derby.log");
+
 
         SwingUtilities.invokeLater(() -> {
 

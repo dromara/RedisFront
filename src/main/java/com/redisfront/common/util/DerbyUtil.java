@@ -15,20 +15,13 @@ import java.util.Map;
 public class DerbyUtil {
     private static final Logger log = LoggerFactory.getLogger(DerbyUtil.class.getName());
 
-    private static final String userDir = System.getProperty("user.home");
-
-    static {
-        System.setProperty("derby.stream.error.file", userDir + File.separator + "redis-front" + File.separator + "/derby/derby.log");
-        log.info("Derby 日志配置成功 - " + userDir);
-    }
-
     public static DerbyUtil newInstance() {
         return new DerbyUtil();
     }
 
     public Connection getConnection() throws ClassNotFoundException, SQLException {
         Class.forName("org.apache.derby.iapi.jdbc.InternalDriver");
-        return DriverManager.getConnection("jdbc:derby:" + userDir + File.separator + "redis-front" + File.separator + "derby" + File.separator + "data;create=true");
+        return DriverManager.getConnection("jdbc:derby:" + System.getProperty("user.home") + File.separator + "redis-front" + File.separator + "derby" + File.separator + "data;create=true");
     }
 
     public List<Map<String, Object>> querySql(String sql) {
