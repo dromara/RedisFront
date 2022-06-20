@@ -25,14 +25,10 @@ public class DerbyUtil {
     }
 
     public List<Map<String, Object>> querySql(String sql) {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
         List<Map<String, Object>> resultList = new ArrayList<>();
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
+        try (var conn = getConnection();
+             var ps = conn.prepareStatement(sql);
+             var rs = ps.executeQuery()) {
             if (rs != null) {
                 var md = rs.getMetaData();
                 while (rs.next()) {
@@ -45,26 +41,16 @@ public class DerbyUtil {
             }
         } catch (Exception e) {
             log.error(e.getMessage());
-        } finally {
-            IoUtil.close(rs);
-            IoUtil.close(ps);
-            IoUtil.close(conn);
         }
         return resultList;
     }
 
     public boolean exec(String sql) {
-        Statement stmt = null;
-        Connection conn = null;
-        try {
-            conn = getConnection();
-            stmt = conn.createStatement();
+        try (var conn = getConnection();
+             var stmt = conn.createStatement()) {
             return stmt.execute(sql);
         } catch (SQLException | ClassNotFoundException e) {
             log.error(e.getMessage());
-        } finally {
-            IoUtil.close(stmt);
-            IoUtil.close(conn);
         }
         return false;
     }
