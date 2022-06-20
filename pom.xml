@@ -105,7 +105,7 @@
             <artifactId>uiDesigner</artifactId>
             <version>1.0.0</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/forms_rt.jar</systemPath>
+            <systemPath>${pom.basedir}/lib/forms_rt.jar</systemPath>
         </dependency>
         <!--logback-->
         <dependency>
