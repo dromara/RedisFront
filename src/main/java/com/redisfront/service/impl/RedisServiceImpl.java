@@ -22,7 +22,7 @@ public class RedisServiceImpl implements RedisService {
     public ClusterPipeline getClusterPipeline(ConnectInfo connectInfo) {
         Set<HostAndPort> clusterNodes = getClusterNodes(connectInfo)
                 .stream()
-                .map(e -> new HostAndPort(e.host(), e.port()))
+                .map(e -> new HostAndPort(connectInfo.host(), e.port()))
                 .collect(Collectors.toSet());
         ClusterConnectionProvider clusterConnectionProvider = new ClusterConnectionProvider(clusterNodes, getJedisClientConfig(connectInfo));
         return new ClusterPipeline(clusterConnectionProvider);
@@ -32,7 +32,7 @@ public class RedisServiceImpl implements RedisService {
     public JedisCluster getJedisCluster(ConnectInfo connectInfo) {
         Set<HostAndPort> clusterNodes = getClusterNodes(connectInfo)
                 .stream()
-                .map(e -> new HostAndPort(e.host(), e.port()))
+                .map(e -> new HostAndPort(connectInfo.host(), e.port()))
                 .collect(Collectors.toSet());
         return new JedisCluster(clusterNodes, getJedisClientConfig(connectInfo));
     }
@@ -143,18 +143,30 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public Long getKeyCount(ConnectInfo connectInfo) {
         if (isClusterMode(connectInfo)) {
-            try (JedisCluster jedisCluster = getJedisCluster(connectInfo)) {
-                return jedisCluster.dbSize();
-            }
-        } else {
-            Map<String, Object> keySpace = RedisService.service.getKeySpace(connectInfo);
-            return keySpace.values()
+            var clusterNodes = getClusterNodes(connectInfo);
+            return clusterNodes
                     .stream()
-                    .map(s -> s.toString().split(",")[0])
-                    .map(s -> Long.parseLong(s.replace("keys=", "")))
+                    .map(clusterNode -> {
+                        try (var jedis = new Jedis(connectInfo.host(), clusterNode.port(), getJedisClientConfig(connectInfo))) {
+                            return strToMap(jedis.info("keyspace"));
+                        }
+                    })
+                    .map(this::countKeys)
                     .reduce(Long::sum)
                     .orElse(0L);
+        } else {
+            var keySpace = RedisService.service.getKeySpace(connectInfo);
+            return countKeys(keySpace);
         }
+    }
+
+    private Long countKeys(Map<String, Object> keySpace) {
+        return keySpace.values()
+                .stream()
+                .map(s -> s.toString().split(",")[0])
+                .map(s -> Long.parseLong(s.replace("keys=", "")))
+                .reduce(Long::sum)
+                .orElse(0L);
     }
 
 }

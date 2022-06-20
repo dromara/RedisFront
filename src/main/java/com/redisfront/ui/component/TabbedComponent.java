@@ -33,7 +33,7 @@ public class TabbedComponent extends JPanel {
         leftToolBarLayout.setAlignment(FlowLayout.CENTER);
         leftToolBar.setLayout(leftToolBarLayout);
 
-        leftToolBar.setPreferredSize(new Dimension(50,-1));
+        leftToolBar.setPreferredSize(new Dimension(50, -1));
 
         //host info
         var hostInfo = new FlatLabel();
@@ -48,7 +48,7 @@ public class TabbedComponent extends JPanel {
         rightToolBarLayout.setAlignment(FlowLayout.CENTER);
         rightToolBar.setLayout(rightToolBarLayout);
 
-        rightToolBar.setPreferredSize(new Dimension(50,-1));
+        rightToolBar.setPreferredSize(new Dimension(50, -1));
 
         //keysInfo
         var keysInfo = new FlatLabel();
@@ -88,8 +88,7 @@ public class TabbedComponent extends JPanel {
                 super.focusLost(e);
             }
         });
-
-        var timer = new Timer(2000, (e) -> {
+        new Thread(() -> new Timer(5000, (e) -> {
             Long keysCount = RedisService.service.getKeyCount(connectInfo);
             keysInfo.setText(keysCount.toString());
 
@@ -100,8 +99,7 @@ public class TabbedComponent extends JPanel {
             Map<String, Object> memory = RedisService.service.getMemoryInfo(connectInfo);
             memoryInfo.setText((String) memory.get("used_memory_human"));
             memoryInfo.setToolTipText("内存占用：" + (String) memory.get("used_memory_human"));
-        });
-        timer.start();
+        }).start()).start();
     }
 
 
