@@ -105,7 +105,13 @@
             <artifactId>uiDesigner</artifactId>
             <version>1.0.0</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/lib/forms_rt.jar</systemPath>
+            <systemPath>${project.basedir}/lib/forms_rt.jar</systemPath>
+        </dependency>
+        <!--logback-->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.11</version>
         </dependency>
     </dependencies>
 

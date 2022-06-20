@@ -2,6 +2,8 @@ package com.redisfront.common.util;
 
 
 import cn.hutool.core.io.IoUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.sql.*;
@@ -9,12 +11,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 public class DerbyUtil {
-    private final Logger log = Logger.getLogger(DerbyUtil.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(DerbyUtil.class.getName());
 
-    private final String userDir = System.getProperty("user.home");
+    private static final String userDir = System.getProperty("user.home");
+
+    static {
+        System.setProperty("derby.stream.error.file", userDir + File.separator + "redis-front" + File.separator + "/derby.log");
+        System.out.println("Derby 日志配置成功 - " + userDir);
+    }
 
     public static DerbyUtil newInstance() {
         return new DerbyUtil();
@@ -45,7 +51,7 @@ public class DerbyUtil {
                 }
             }
         } catch (Exception e) {
-            log.warning(e.getMessage());
+            log.error(e.getMessage());
         } finally {
             IoUtil.close(rs);
             IoUtil.close(ps);
@@ -62,7 +68,7 @@ public class DerbyUtil {
             stmt = conn.createStatement();
             return stmt.execute(sql);
         } catch (SQLException | ClassNotFoundException e) {
-            log.warning(e.getMessage());
+            log.error(e.getMessage());
         } finally {
             IoUtil.close(stmt);
             IoUtil.close(conn);
