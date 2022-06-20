@@ -12,7 +12,7 @@ public class ClusterNode {
     private String state;
     private String slot;
     private String host;
-    private String port;
+    private Integer port;
 
     public String id() {
         return id;
@@ -104,11 +104,11 @@ public class ClusterNode {
         return this;
     }
 
-    public String port() {
+    public Integer port() {
         return port;
     }
 
-    public ClusterNode setPort(String port) {
+    public ClusterNode setPort(Integer port) {
         this.port = port;
         return this;
     }

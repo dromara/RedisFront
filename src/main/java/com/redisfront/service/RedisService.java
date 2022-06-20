@@ -4,8 +4,10 @@ import com.redisfront.common.func.Fn;
 import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.impl.RedisServiceImpl;
+import redis.clients.jedis.ClusterPipeline;
 import redis.clients.jedis.DefaultJedisClientConfig;
 import redis.clients.jedis.JedisClientConfig;
+import redis.clients.jedis.JedisCluster;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +17,12 @@ public interface RedisService {
 
     RedisService service = new RedisServiceImpl();
 
+    ClusterPipeline getClusterPipeline(ConnectInfo connectInfo);
+
+    JedisCluster getJedisCluster(ConnectInfo connectInfo);
+
     List<ClusterNode> getClusterNodes(ConnectInfo connectInfo);
+
 
     Map<String, Object> getClusterInfo(ConnectInfo connectInfo);
 

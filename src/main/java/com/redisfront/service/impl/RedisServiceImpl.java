@@ -4,14 +4,38 @@ import com.redisfront.common.func.Fn;
 import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisService;
-import redis.clients.jedis.*;
+import redis.clients.jedis.ClusterPipeline;
+import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.providers.ClusterConnectionProvider;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class RedisServiceImpl implements RedisService {
 
+    @Override
+    public ClusterPipeline getClusterPipeline(ConnectInfo connectInfo) {
+        Set<HostAndPort> clusterNodes = getClusterNodes(connectInfo)
+                .stream()
+                .map(e -> new HostAndPort(e.host(), e.port()))
+                .collect(Collectors.toSet());
+        ClusterConnectionProvider clusterConnectionProvider = new ClusterConnectionProvider(clusterNodes, getJedisClientConfig(connectInfo));
+        return new ClusterPipeline(clusterConnectionProvider);
+    }
+
+    @Override
+    public JedisCluster getJedisCluster(ConnectInfo connectInfo) {
+        Set<HostAndPort> clusterNodes = getClusterNodes(connectInfo)
+                .stream()
+                .map(e -> new HostAndPort(e.host(), e.port()))
+                .collect(Collectors.toSet());
+        return new JedisCluster(clusterNodes, getJedisClientConfig(connectInfo));
+    }
 
     @Override
     public List<ClusterNode> getClusterNodes(ConnectInfo connectInfo) {
@@ -37,7 +61,7 @@ public class RedisServiceImpl implements RedisService {
                         .setState(v[7])
                         .setSlot(v.length == 9 ? v[8] : null)
                         .setHost(v[1].split("@")[0].split(":")[0])
-                        .setPort(v[1].split("@")[0].split(":")[1]);
+                        .setPort(Integer.valueOf(v[1].split("@")[0].split(":")[1]));
                 clusterNodes.add(clusterNode);
             }
         }
@@ -119,9 +143,8 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public Long getKeyCount(ConnectInfo connectInfo) {
         if (isClusterMode(connectInfo)) {
-            try (var jedis = new Jedis(connectInfo.host(), connectInfo.port(), getJedisClientConfig(connectInfo))) {
-                Object o = jedis.getConnection().executeCommand(new ClusterCommandArguments(Protocol.Command.DBSIZE));
-                return (Long) o;
+            try (JedisCluster jedisCluster = getJedisCluster(connectInfo)) {
+                return jedisCluster.dbSize();
             }
         } else {
             Map<String, Object> keySpace = RedisService.service.getKeySpace(connectInfo);
