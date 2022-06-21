@@ -1,5 +1,6 @@
 package com.redisfront.service;
 
+import com.redisfront.common.enums.RedisModeEnum;
 import com.redisfront.common.func.Fn;
 import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
@@ -19,25 +20,99 @@ public interface RedisService {
 
     ClusterPipeline getClusterPipeline(ConnectInfo connectInfo);
 
+    /**
+     * 获取 JedisCluster
+     *
+     * @param connectInfo
+     * @return
+     */
     JedisCluster getJedisCluster(ConnectInfo connectInfo);
 
+    /**
+     * redis ping
+     *
+     * @param connectInfo
+     * @return
+     */
+    Boolean ping(ConnectInfo connectInfo);
+
+    /**
+     * 获取 redisMode
+     *
+     * @param connectInfo
+     * @return
+     */
+    RedisModeEnum getRedisModeEnum(ConnectInfo connectInfo);
+
+    /**
+     * 获取集群节点
+     *
+     * @param connectInfo
+     * @return
+     */
     List<ClusterNode> getClusterNodes(ConnectInfo connectInfo);
 
 
+    /**
+     * 获取集群信息
+     *
+     * @param connectInfo
+     * @return
+     */
     Map<String, Object> getClusterInfo(ConnectInfo connectInfo);
 
+    /**
+     * 获取info
+     *
+     * @param connectInfo
+     * @return
+     */
     Map<String, Object> getInfo(ConnectInfo connectInfo);
 
+    /**
+     * 获取cpu info
+     *
+     * @param connectInfo
+     * @return
+     */
     Map<String, Object> getCpuInfo(ConnectInfo connectInfo);
 
+    /**
+     * 获取memory info
+     *
+     * @param connectInfo
+     * @return
+     */
     Map<String, Object> getMemoryInfo(ConnectInfo connectInfo);
 
+    /**
+     * 获取 server info
+     *
+     * @param connectInfo
+     * @return
+     */
     Map<String, Object> getServerInfo(ConnectInfo connectInfo);
 
+    /**
+     * 获取单机 KeySpace
+     *
+     * @param connectInfo
+     * @return
+     */
     Map<String, Object> getKeySpace(ConnectInfo connectInfo);
 
+    /**
+     * 获取 client info
+     * @param connectInfo
+     * @return
+     */
     Map<String, Object> getClientInfo(ConnectInfo connectInfo);
 
+    /**
+     * 
+     * @param connectInfo
+     * @return
+     */
     Map<String, Object> getStatInfo(ConnectInfo connectInfo);
 
     Boolean isClusterMode(ConnectInfo connectInfo);

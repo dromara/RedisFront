@@ -26,7 +26,17 @@ public class _DatabaseForm {
      */
     private void $$$setupUI$$$() {
         contentPanel = new JPanel();
-        contentPanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        contentPanel.setLayout(new BorderLayout(0, 0));
+        final JSplitPane splitPane1 = new JSplitPane();
+        contentPanel.add(splitPane1, BorderLayout.CENTER);
+        final JPanel panel1 = new JPanel();
+        panel1.setLayout(new BorderLayout(0, 0));
+        splitPane1.setLeftComponent(panel1);
+        final JPanel panel2 = new JPanel();
+        panel2.setLayout(new BorderLayout(0, 0));
+        splitPane1.setRightComponent(panel2);
+        final JToolBar toolBar1 = new JToolBar();
+        panel2.add(toolBar1, BorderLayout.WEST);
     }
 
     /**
@@ -35,4 +45,5 @@ public class _DatabaseForm {
     public JComponent $$$getRootComponent$$$() {
         return contentPanel;
     }
+
 }

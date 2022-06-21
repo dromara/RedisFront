@@ -1,16 +1,16 @@
 
 package com.redisfront.ui;
 
-import com.redisfront.service.ConnectService;
-import com.redisfront.ui.dialog.AddConnectDialog;
-import com.redisfront.ui.dialog.OpenConnectDialog;
-import com.redisfront.ui.dialog.SettingDialog;
-import com.redisfront.ui.form.MainContentForm;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatDesktop;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.FlatSVGUtils;
 import com.formdev.flatlaf.extras.components.FlatButton;
+import com.redisfront.service.ConnectService;
+import com.redisfront.ui.dialog.AddConnectDialog;
+import com.redisfront.ui.dialog.OpenConnectDialog;
+import com.redisfront.ui.dialog.SettingDialog;
+import com.redisfront.ui.form.MainContentForm;
 import org.jdesktop.swingx.JXFrame;
 
 import javax.swing.*;
@@ -35,6 +35,7 @@ public class RedisFrontFrame extends JXFrame {
         FlatDesktop.setAboutHandler(this::aboutActionPerformed);
         FlatDesktop.setQuitHandler(FlatDesktop.QuitResponse::performQuit);
     }
+
 
     private void initComponents() {
         var container = getContentPane();

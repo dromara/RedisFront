@@ -1,6 +1,7 @@
 package com.redisfront.model;
 
 import com.redisfront.common.enums.ConnectEnum;
+import com.redisfront.common.enums.RedisModeEnum;
 import com.redisfront.common.func.Fn;
 
 import java.io.Serializable;
@@ -11,6 +12,20 @@ import java.io.Serializable;
  * @author Jin
  */
 public class ConnectInfo implements Serializable {
+
+    private int id;
+    private String title;
+    private String host;
+    private Integer port;
+    private String username;
+    private String password;
+    private Integer database;
+    private Boolean ssl;
+    private ConnectEnum connectMode;
+
+    private RedisModeEnum redisModeEnum;
+    private SSLConfig sslConfig;
+    private SSHConfig sshConfig;
 
     public ConnectInfo(String title, String host, Integer port, String username, String password, Integer database, Boolean ssl, ConnectEnum connectMode) {
         this(title, host, port, username, password, database, ssl, connectMode, null, null);
@@ -150,18 +165,6 @@ public class ConnectInfo implements Serializable {
         }
     }
 
-    private int id;
-    private String title;
-    private String host;
-    private Integer port;
-    private String username;
-    private String password;
-    private Integer database;
-    private Boolean ssl;
-    private ConnectEnum connectMode;
-    private SSLConfig sslConfig;
-    private SSHConfig sshConfig;
-
     public String title() {
         return title;
     }
@@ -258,6 +261,19 @@ public class ConnectInfo implements Serializable {
 
     public ConnectInfo setId(int id) {
         this.id = id;
+        return this;
+    }
+
+    public String username() {
+        return username;
+    }
+
+    public RedisModeEnum redisModeEnum() {
+        return redisModeEnum;
+    }
+
+    public ConnectInfo setRedisModeEnum(RedisModeEnum redisModeEnum) {
+        this.redisModeEnum = redisModeEnum;
         return this;
     }
 }

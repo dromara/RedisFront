@@ -1,5 +1,6 @@
 package com.redisfront.service.impl;
 
+import com.redisfront.common.enums.RedisModeEnum;
 import com.redisfront.common.func.Fn;
 import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
@@ -35,6 +36,20 @@ public class RedisServiceImpl implements RedisService {
                 .map(e -> new HostAndPort(connectInfo.host(), e.port()))
                 .collect(Collectors.toSet());
         return new JedisCluster(clusterNodes, getJedisClientConfig(connectInfo));
+    }
+
+    @Override
+    public Boolean ping(ConnectInfo connectInfo) {
+        try (var jedis = new Jedis(connectInfo.host(), connectInfo.port(), getJedisClientConfig(connectInfo))) {
+            return Fn.equal(jedis.ping(), "PONG");
+        }
+    }
+
+    @Override
+    public RedisModeEnum getRedisModeEnum(ConnectInfo connectInfo) {
+        Map<String, Object> server = getServerInfo(connectInfo);
+        String redisMode = (String) server.get("redis_mode");
+        return RedisModeEnum.valueOf(redisMode.toUpperCase());
     }
 
     @Override

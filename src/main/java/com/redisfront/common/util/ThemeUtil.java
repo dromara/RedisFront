@@ -1,5 +1,6 @@
 package com.redisfront.common.util;
 
+import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.redisfront.RedisFrontApplication;
 import com.redisfront.common.constant.Constant;
 import com.formdev.flatlaf.*;
@@ -8,6 +9,7 @@ import com.formdev.flatlaf.json.Json;
 import com.formdev.flatlaf.util.LoggingFacade;
 
 import javax.swing.*;
+import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,7 +44,6 @@ public class ThemeUtil {
                 return;
 
             FlatAnimatedLafChange.showSnapshot();
-
             try {
                 UIManager.setLookAndFeel(themeInfo.lafClassName());
             } catch (Exception ex) {
@@ -58,7 +59,6 @@ public class ThemeUtil {
                     FlatLaf.setup(IntelliJTheme.createLaf(new FileInputStream(themeInfo.themeFile())));
 
             } catch (Exception ex) {
-                LoggingFacade.INSTANCE.logSevere(null, ex);
                 MsgUtil.showInformationDialog(c, "Failed to load '" + themeInfo.themeFile() + "'.", ex);
             }
         } else {
@@ -67,6 +67,14 @@ public class ThemeUtil {
         }
         FlatLaf.updateUI();
         FlatAnimatedLafChange.hideSnapshotWithAnimation();
+    }
+
+    public static void fontInit() {
+        var font = UIManager.getFont("defaultFont");
+        var fontSizeStr = PrefUtil.getState().get(Constant.KEY_FONT_SIZE, String.valueOf(font.getSize()));
+        var fontNameStr = PrefUtil.getState().get(Constant.KEY_FONT_NAME, font.getFontName());
+        var newFont = StyleContext.getDefaultStyleContext().getFont(fontNameStr, font.getStyle(), Integer.parseInt(fontSizeStr));
+        UIManager.put("defaultFont", FlatUIUtils.nonUIResource(newFont));
     }
 
     public static void setupTheme(String[] args) {
@@ -81,6 +89,7 @@ public class ThemeUtil {
                     UIManager.setLookAndFeel(theme);
                 }
             }
+            fontInit();
         } catch (Throwable ex) {
             LoggingFacade.INSTANCE.logSevere(null, ex);
             FlatLightLaf.setup();

@@ -33,19 +33,20 @@ public class RedisFrontApplication {
             System.setProperty("flatlaf.uiScale", "2x");
         }
 
-        FlatLaf.registerCustomDefaultsSource("cn.devcms.redisfront");
+        FlatLaf.registerCustomDefaultsSource("com.redisfront");
         FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", "#d81e06"));
 
+        //log file init
         String dataPath = System.getProperty("user.home") + File.separator + "redis-front";
         System.setProperty("LOG_FILE", dataPath + File.separator + "logs" + File.separator + "redis-front.log");
         System.setProperty("derby.stream.error.file", dataPath + File.separator + "derby" + File.separator + "derby.log");
-
 
         SwingUtilities.invokeLater(() -> {
 
             PrefUtil.init("/redis-front");
             ThemeUtil.setupTheme(args);
 
+            //数据库初始化
             if (PrefUtil.getState().getBoolean(Constant.KEY_APP_DATABASE_INIT, true)) {
                 ConnectService.service.initDatabase();
                 PrefUtil.getState().put(Constant.KEY_APP_DATABASE_INIT, Boolean.FALSE.toString());
