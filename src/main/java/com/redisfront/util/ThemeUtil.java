@@ -48,7 +48,7 @@ public class ThemeUtil {
                 UIManager.setLookAndFeel(themeInfo.lafClassName());
             } catch (Exception ex) {
                 LoggingFacade.INSTANCE.logSevere(null, ex);
-                MsgUtil.showInformationDialog(c, "Failed to create '" + themeInfo.lafClassName() + "'.", ex);
+                MsgUtil.showInformationDialog("Failed to create '" + themeInfo.lafClassName() + "'.", ex);
             }
         } else if (themeInfo.themeFile() != null) {
             FlatAnimatedLafChange.showSnapshot();
@@ -59,7 +59,7 @@ public class ThemeUtil {
                     FlatLaf.setup(IntelliJTheme.createLaf(new FileInputStream(themeInfo.themeFile())));
 
             } catch (Exception ex) {
-                MsgUtil.showInformationDialog(c, "Failed to load '" + themeInfo.themeFile() + "'.", ex);
+                MsgUtil.showInformationDialog("Failed to load '" + themeInfo.themeFile() + "'.", ex);
             }
         } else {
             FlatAnimatedLafChange.showSnapshot();

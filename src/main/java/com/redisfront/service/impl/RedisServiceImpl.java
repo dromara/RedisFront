@@ -5,6 +5,8 @@ import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisService;
 import com.redisfront.util.Fn;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.ClusterPipeline;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
@@ -18,6 +20,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class RedisServiceImpl implements RedisService {
+
+    private static final Logger log = LoggerFactory.getLogger(RedisServiceImpl.class);
 
     @Override
     public ClusterPipeline getClusterPipeline(ConnectInfo connectInfo) {
@@ -35,6 +39,7 @@ public class RedisServiceImpl implements RedisService {
                 .stream()
                 .map(e -> new HostAndPort(connectInfo.host(), e.port()))
                 .collect(Collectors.toSet());
+        log.info("获取到Redis [ {}:{} ] 集群节点 - {}", connectInfo.host(), connectInfo.port(), clusterNodes);
         return new JedisCluster(clusterNodes, getJedisClientConfig(connectInfo));
     }
 
@@ -49,6 +54,7 @@ public class RedisServiceImpl implements RedisService {
     public RedisModeEnum getRedisModeEnum(ConnectInfo connectInfo) {
         Map<String, Object> server = getServerInfo(connectInfo);
         String redisMode = (String) server.get("redis_mode");
+        log.info("获取到Redis [ {}:{} ] 服务类型 - {}", connectInfo.host(), connectInfo.port(), redisMode);
         return RedisModeEnum.valueOf(redisMode.toUpperCase());
     }
 
@@ -87,6 +93,7 @@ public class RedisServiceImpl implements RedisService {
     public Map<String, Object> getClusterInfo(ConnectInfo connectInfo) {
         try (var jedis = new Jedis(connectInfo.host(), connectInfo.port(), getJedisClientConfig(connectInfo))) {
             var clusterInfo = jedis.clusterInfo();
+            log.info("获取到Redis [ {}:{} ] ClusterInfo - {}", connectInfo.host(), connectInfo.port(), clusterInfo);
             return strToMap(clusterInfo);
         }
     }
@@ -95,6 +102,7 @@ public class RedisServiceImpl implements RedisService {
     public Map<String, Object> getInfo(ConnectInfo connectInfo) {
         try (var jedis = new Jedis(connectInfo.host(), connectInfo.port(), getJedisClientConfig(connectInfo))) {
             var info = jedis.info();
+            log.info("获取到Redis [ {}:{} ] Info - {}", connectInfo.host(), connectInfo.port(), info);
             return strToMap(info);
         }
     }
@@ -103,6 +111,7 @@ public class RedisServiceImpl implements RedisService {
     public Map<String, Object> getCpuInfo(ConnectInfo connectInfo) {
         try (var jedis = new Jedis(connectInfo.host(), connectInfo.port(), getJedisClientConfig(connectInfo))) {
             var cpuInfo = jedis.info("cpu");
+            log.info("获取到Redis [ {}:{} ] cpuInfo - {}", connectInfo.host(), connectInfo.port(), cpuInfo);
             return strToMap(cpuInfo);
         }
     }
@@ -111,6 +120,7 @@ public class RedisServiceImpl implements RedisService {
     public Map<String, Object> getMemoryInfo(ConnectInfo connectInfo) {
         try (var jedis = new Jedis(connectInfo.host(), connectInfo.port(), getJedisClientConfig(connectInfo))) {
             var memoryInfo = jedis.info("memory");
+            log.info("获取到Redis [ {}:{} ] memoryInfo - {}", connectInfo.host(), connectInfo.port(), memoryInfo);
             return strToMap(memoryInfo);
         }
     }
@@ -119,6 +129,7 @@ public class RedisServiceImpl implements RedisService {
     public Map<String, Object> getServerInfo(ConnectInfo connectInfo) {
         try (var jedis = new Jedis(connectInfo.host(), connectInfo.port(), getJedisClientConfig(connectInfo))) {
             var server = jedis.info("server");
+            log.info("获取到Redis [ {}:{} ] serverInfo - {}", connectInfo.host(), connectInfo.port(), server);
             return strToMap(server);
         }
     }
@@ -126,8 +137,9 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public Map<String, Object> getKeySpace(ConnectInfo connectInfo) {
         try (var jedis = new Jedis(connectInfo.host(), connectInfo.port(), getJedisClientConfig(connectInfo))) {
-            var server = jedis.info("keyspace");
-            return strToMap(server);
+            var keyspace = jedis.info("keyspace");
+            log.info("获取到Redis [ {}:{} ] keyspace - {}", connectInfo.host(), connectInfo.port(), keyspace);
+            return strToMap(keyspace);
         }
     }
 
@@ -135,6 +147,7 @@ public class RedisServiceImpl implements RedisService {
     public Map<String, Object> getClientInfo(ConnectInfo connectInfo) {
         try (var jedis = new Jedis(connectInfo.host(), connectInfo.port(), getJedisClientConfig(connectInfo))) {
             var clientInfo = jedis.clientInfo();
+            log.info("获取到Redis [ {}:{} ] clientInfo - {}", connectInfo.host(), connectInfo.port(), clientInfo);
             return strToMap(clientInfo);
         }
     }
@@ -143,6 +156,7 @@ public class RedisServiceImpl implements RedisService {
     public Map<String, Object> getStatInfo(ConnectInfo connectInfo) {
         try (var jedis = new Jedis(connectInfo.host(), connectInfo.port(), getJedisClientConfig(connectInfo))) {
             var statInfo = jedis.info("stats");
+            log.info("获取到Redis [ {}:{} ] statInfo - {}", connectInfo.host(), connectInfo.port(), statInfo);
             return strToMap(statInfo);
         }
     }

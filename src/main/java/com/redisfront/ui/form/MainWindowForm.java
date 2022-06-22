@@ -5,10 +5,11 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.icons.FlatTabbedPaneCloseIcon;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.ConnectService;
-import com.redisfront.ui.component.TabbedComponent;
+import com.redisfront.ui.component.MainTabbedPanel;
 import com.redisfront.ui.dialog.AddConnectDialog;
 import com.redisfront.ui.dialog.OpenConnectDialog;
 import com.redisfront.util.Fn;
+import com.redisfront.util.MsgUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -18,7 +19,6 @@ import java.util.function.BiConsumer;
 public class MainWindowForm {
     private JPanel contentPanel;
     private JTabbedPane tabPanel;
-
     private static MainWindowForm mainWindowForm;
 
     public static MainWindowForm getInstance() {
@@ -34,20 +34,22 @@ public class MainWindowForm {
 
     public MainWindowForm() {
         $$$setupUI$$$();
-        contentPanel.add(_NoneForm.getInstance().getContentPanel(), BorderLayout.CENTER);
+        contentPanel.add(MainNoneForm.getInstance().getContentPanel(), BorderLayout.CENTER);
     }
 
     public void addActionPerformed(ConnectInfo connectInfo) {
+
+        //添加到tab面板
+        this.tabPanel.addTab(connectInfo.title(), new FlatSVGIcon("icons/icon_db5.svg"), MainTabbedPanel.newInstance(connectInfo));
+        this.tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
+        this.contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
+
         //存数据库
         if (Fn.equal(connectInfo.id(), 0)) {
             ConnectService.service.save(connectInfo);
         } else {
             ConnectService.service.update(connectInfo);
         }
-        //添加到tab面板
-        tabPanel.addTab(connectInfo.title(), new FlatSVGIcon("icons/icon_db5.svg"), new TabbedComponent(connectInfo));
-        tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
-        contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
     }
 
     private void createUIComponents() {
@@ -71,7 +73,7 @@ public class MainWindowForm {
         tabPanel.putClientProperty("JTabbedPane.tabCloseCallback", (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
             tabPanel.remove(tabIndex);
             if (tabbedPane.getTabCount() == 0) {
-                contentPanel.add(_NoneForm.getInstance().getContentPanel(), BorderLayout.CENTER, 0);
+                contentPanel.add(MainNoneForm.getInstance().getContentPanel(), BorderLayout.CENTER, 0);
             }
         });
         tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, SwingConstants.LEADING);
@@ -95,15 +97,10 @@ public class MainWindowForm {
         var openBtn = new JButton(null, new FlatSVGIcon("icons/open_conn.svg"));
         openBtn.setToolTipText("打开连接");
         openBtn.addActionListener(e -> OpenConnectDialog.showOpenConnectDialog(
-
                 //打开连接回调
                 (this::addActionPerformed),
                 //编辑连接回调
-                (connectInfo -> AddConnectDialog.showEditConnectDialog(
-
-                        connectInfo,
-                        (this::addActionPerformed)
-                )),
+                (connectInfo -> AddConnectDialog.showEditConnectDialog(connectInfo, (this::addActionPerformed))),
                 //删除连接回调
                 (connectInfo -> ConnectService.service.delete(connectInfo.id()))));
         jPanel.add(openBtn);

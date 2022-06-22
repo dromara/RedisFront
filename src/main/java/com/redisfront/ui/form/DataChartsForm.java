@@ -5,26 +5,14 @@ import com.redisfront.ui.component.TextEditorComponent;
 import javax.swing.*;
 import java.awt.*;
 
-public class _DashboardForm {
+public class DataChartsForm {
+
     private JPanel contentPanel;
-
-    public static _DashboardForm dashboardForm;
-
-    public static _DashboardForm getInstance() {
-        if (dashboardForm == null) {
-            dashboardForm = new _DashboardForm();
-        }
-        return dashboardForm;
-    }
-
-    public JPanel getContentPanel() {
-        return contentPanel;
-    }
 
     private void createUIComponents() {
         contentPanel = new JPanel();
         contentPanel.setLayout(new BorderLayout());
-        contentPanel.add(TextEditorComponent.getInstance());
+        contentPanel.add(TextEditorComponent.newInstance());
     }
 
     {

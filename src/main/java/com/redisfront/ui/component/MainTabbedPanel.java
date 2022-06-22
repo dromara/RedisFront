@@ -1,23 +1,29 @@
 package com.redisfront.ui.component;
 
+import cn.hutool.core.util.StrUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.components.FlatLabel;
 import com.formdev.flatlaf.extras.components.FlatToolBar;
+import com.redisfront.constant.RedisModeEnum;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisService;
-import com.redisfront.ui.form._DashboardForm;
-import com.redisfront.ui.form._DatabaseForm;
+import com.redisfront.ui.form.DataSearchForm;
+import com.redisfront.util.MsgUtil;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
-public class TabbedComponent extends JPanel {
+public class MainTabbedPanel extends JPanel {
+    public static MainTabbedPanel newInstance(ConnectInfo connectInfo) {
+        return new MainTabbedPanel(connectInfo);
+    }
 
-    public TabbedComponent(ConnectInfo connectInfo) {
+    public MainTabbedPanel(ConnectInfo connectInfo) {
         setLayout(new BorderLayout());
         var contentPanel = new JTabbedPane();
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.CENTER);
@@ -35,7 +41,7 @@ public class TabbedComponent extends JPanel {
 
         //host info
         var hostInfo = new FlatLabel();
-        hostInfo.setText(connectInfo.host() + ":" + connectInfo.port());
+        hostInfo.setText(connectInfo.host() + ":" + connectInfo.port() + " - " + getRedisMode(connectInfo));
         hostInfo.setIcon(new FlatSVGIcon("icons/host.svg"));
         leftToolBar.add(hostInfo);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_LEADING_COMPONENT, leftToolBar);
@@ -67,27 +73,30 @@ public class TabbedComponent extends JPanel {
         rightToolBar.add(memoryInfo);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, rightToolBar);
 
-        contentPanel.addTab("数据", new FlatSVGIcon("icons/db_key2.svg"), _DashboardForm.getInstance().getContentPanel());
-        contentPanel.addTab("命令", new FlatSVGIcon("icons/db_cli2.svg"), TerminalComponent.getInstance().init(connectInfo));
-        contentPanel.addTab("信息", new FlatSVGIcon("icons/db_report2.svg"), _DatabaseForm.getInstance().getContentPanel());
+        contentPanel.addTab("数据", new FlatSVGIcon("icons/db_key2.svg"), DataSplitPanel.newInstance(connectInfo));
+        contentPanel.addTab("命令", new FlatSVGIcon("icons/db_cli2.svg"), TerminalComponent.newInstance(connectInfo));
+        contentPanel.addTab("信息", new FlatSVGIcon("icons/db_report2.svg"), new DataSearchForm().getContentPanel());
 
+        //tab 切换事件
         contentPanel.addChangeListener(e -> {
             var tabbedPane = (JTabbedPane) e.getSource();
             var component = tabbedPane.getSelectedComponent();
+            if (component instanceof TerminalComponent terminalComponent) {
+                terminalComponent.ping();
+            }
+
+            if (component instanceof DataSplitPanel dataSplitPanel) {
+                dataSplitPanel.ping();
+            }
+
 
         });
         add(contentPanel, BorderLayout.CENTER);
 
-        contentPanel.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusLost(FocusEvent e) {
-                super.focusLost(e);
-            }
-        });
-        new Thread(() -> new Timer(5000, (e) -> {
+        ScheduledExecutorService serviceStartPerSecond = Executors.newSingleThreadScheduledExecutor();
+        serviceStartPerSecond.scheduleAtFixedRate(() -> {
             Long keysCount = RedisService.service.getKeyCount(connectInfo);
             keysInfo.setText(keysCount.toString());
-
             Map<String, Object> stats = RedisService.service.getStatInfo(connectInfo);
             cupInfo.setText((String) stats.get("instantaneous_ops_per_sec"));
             cupInfo.setToolTipText("每秒命令数：" + stats.get("instantaneous_ops_per_sec"));
@@ -95,7 +104,18 @@ public class TabbedComponent extends JPanel {
             Map<String, Object> memory = RedisService.service.getMemoryInfo(connectInfo);
             memoryInfo.setText((String) memory.get("used_memory_human"));
             memoryInfo.setToolTipText("内存占用：" + memory.get("used_memory_human"));
-        }).start()).start();
+        }, 0, 5, TimeUnit.SECONDS);
+    }
+
+
+    private String getRedisMode(ConnectInfo connectInfo) {
+        try {
+            RedisModeEnum redisModeEnum = RedisService.service.getRedisModeEnum(connectInfo);
+            return StrUtil.upperFirstAndAddPre(redisModeEnum.name().toLowerCase(), "");
+        } catch (Exception e) {
+            MsgUtil.showErrorDialog("Redis Connect Error", e);
+        }
+        return "none";
     }
 
 

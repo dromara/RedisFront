@@ -109,7 +109,7 @@
                   <text value="分隔符"/>
                 </properties>
               </component>
-              <component id="176ca" class="javax.swing.JTextField" binding="textField1" default-binding="true">
+              <component id="176ca" class="javax.swing.JTextField" binding="keySeparator">
                 <constraints>
                   <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                     <preferred-size width="150" height="-1"/>
@@ -125,7 +125,7 @@
                   <text value="key加载数"/>
                 </properties>
               </component>
-              <component id="ce72b" class="javax.swing.JTextField" binding="textField2" default-binding="true">
+              <component id="ce72b" class="javax.swing.JTextField" binding="keyMaxLoadNum">
                 <constraints>
                   <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                     <preferred-size width="150" height="-1"/>

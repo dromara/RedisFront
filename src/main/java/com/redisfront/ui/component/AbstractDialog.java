@@ -1,4 +1,4 @@
-package com.redisfront.ui.base;
+package com.redisfront.ui.component;
 
 import javax.swing.*;
 import java.awt.*;

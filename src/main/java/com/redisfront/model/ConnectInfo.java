@@ -22,7 +22,6 @@ public class ConnectInfo implements Serializable {
     private Integer database;
     private Boolean ssl;
     private ConnectEnum connectMode;
-
     private RedisModeEnum redisModeEnum;
     private SSLConfig sslConfig;
     private SSHConfig sshConfig;
@@ -275,5 +274,24 @@ public class ConnectInfo implements Serializable {
     public ConnectInfo setRedisModeEnum(RedisModeEnum redisModeEnum) {
         this.redisModeEnum = redisModeEnum;
         return this;
+    }
+
+
+    @Override
+    public String toString() {
+        return "ConnectInfo{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", host='" + host + '\'' +
+                ", port=" + port +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", database=" + database +
+                ", ssl=" + ssl +
+                ", connectMode=" + connectMode +
+                ", redisModeEnum=" + redisModeEnum +
+                ", sslConfig=" + sslConfig +
+                ", sshConfig=" + sshConfig +
+                '}';
     }
 }

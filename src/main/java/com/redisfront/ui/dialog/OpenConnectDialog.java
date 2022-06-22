@@ -7,8 +7,8 @@ import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.RedisFrontApplication;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.ConnectService;
-import com.redisfront.ui.base.AbstractDialog;
-import com.redisfront.ui.component.ConnectTableModel;
+import com.redisfront.ui.component.AbstractDialog;
+import com.redisfront.model.ConnectTableModel;
 import com.redisfront.util.MsgUtil;
 import com.redisfront.util.Fn;
 
@@ -82,7 +82,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                 openConnectMenu.addActionListener(e -> {
                     var row = connectTable.getSelectedRow();
                     if (row == -1) {
-                        MsgUtil.showInformationDialog(this, "未选中打开行或列");
+                        MsgUtil.showInformationDialog("未选中打开行或列");
                         return;
                     }
                     var id = connectTable.getValueAt(row, 0);
@@ -96,7 +96,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                 editConnectMenu.addActionListener(e -> {
                     var row = connectTable.getSelectedRow();
                     if (row == -1) {
-                        MsgUtil.showInformationDialog(this, "未选中编辑行或列");
+                        MsgUtil.showInformationDialog("未选中编辑行或列");
                         return;
                     }
                     var id = connectTable.getValueAt(row, 0);
@@ -110,7 +110,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                 deleteConnectMenu.addActionListener(e -> {
                     int row = connectTable.getSelectedRow();
                     if (row == -1) {
-                        MsgUtil.showInformationDialog(this, "未选中删除行或列");
+                        MsgUtil.showInformationDialog("未选中删除行或列");
                         return;
                     }
                     var id = connectTable.getValueAt(row, 0);
@@ -132,7 +132,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
     private void onOK() {
         var row = connectTable.getSelectedRow();
         if (row == -1) {
-            MsgUtil.showInformationDialog(this, "未选中编辑行或列");
+            MsgUtil.showInformationDialog("未选中编辑行或列");
             return;
         }
         var id = connectTable.getValueAt(row, 0);

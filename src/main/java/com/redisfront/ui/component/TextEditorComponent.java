@@ -19,13 +19,8 @@ public class TextEditorComponent extends JPanel {
     private final RSyntaxTextArea textArea;
     private final RTextScrollPane scrollPane;
 
-    private static TextEditorComponent textEditorComponent;
-
-    public static TextEditorComponent getInstance() {
-        if (textEditorComponent == null) {
-            textEditorComponent = new TextEditorComponent();
-        }
-        return textEditorComponent;
+    public static TextEditorComponent newInstance() {
+        return new TextEditorComponent();
     }
 
     public RSyntaxTextArea textArea() {

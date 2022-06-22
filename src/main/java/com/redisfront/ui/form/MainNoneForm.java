@@ -14,7 +14,7 @@ import java.awt.*;
  *
  * @author Jin
  */
-public class _NoneForm {
+public class MainNoneForm {
     private JPanel contentPanel;
     private JLabel logoLabel;
     private JLabel newLabel;
@@ -22,11 +22,11 @@ public class _NoneForm {
     private JLabel newKeyLabel;
     private JLabel openKeyLabel;
 
-    private static _NoneForm noneForm;
+    private static MainNoneForm noneForm;
 
-    public static _NoneForm getInstance() {
+    public static MainNoneForm getInstance() {
         if (Fn.isNull(noneForm)) {
-            noneForm = new _NoneForm();
+            noneForm = new MainNoneForm();
         }
         return noneForm;
     }
@@ -35,7 +35,7 @@ public class _NoneForm {
         return contentPanel;
     }
 
-    public _NoneForm() {
+    public MainNoneForm() {
         $$$setupUI$$$();
         newLabel.putClientProperty("FlatLaf.styleClass", "h3");
         newKeyLabel.putClientProperty("FlatLaf.styleClass", "h3");

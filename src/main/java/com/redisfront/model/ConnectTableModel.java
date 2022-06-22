@@ -1,6 +1,4 @@
-package com.redisfront.ui.component;
-
-import com.redisfront.model.ConnectInfo;
+package com.redisfront.model;
 
 import javax.swing.table.DefaultTableModel;
 import java.util.List;
@@ -29,7 +27,6 @@ public class ConnectTableModel extends DefaultTableModel {
         }
         this.setDataVector(dataVector, columNames);
     }
-
 
 
     @Override

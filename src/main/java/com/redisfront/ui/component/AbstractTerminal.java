@@ -1,4 +1,4 @@
-package com.redisfront.ui.base;
+package com.redisfront.ui.component;
 
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.util.Fn;
@@ -11,15 +11,15 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-public abstract class AbstractTerminalComponent extends JPanel implements KeyListener, CaretListener {
-    private final JTextArea terminal;
+public abstract class AbstractTerminal extends JPanel implements KeyListener, CaretListener {
+    protected final JTextArea terminal;
     private int lastSelectionStart = 0;
     private int currentDot = -1;
     private int currentKeyCode = 0;
     private boolean allowInputFlag = false;
     private boolean consumeFlag = false;
 
-    public AbstractTerminalComponent() {
+    public AbstractTerminal() {
         setLayout(new BorderLayout());
         setBorder(new EmptyBorder(10, 10, 10, 10));
         terminal = new JTextArea();

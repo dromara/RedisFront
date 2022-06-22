@@ -1,27 +1,44 @@
 package com.redisfront.ui.component;
 
+import cn.hutool.core.date.DateUtil;
 import com.redisfront.constant.ConnectEnum;
 import com.redisfront.model.ConnectInfo;
-import com.redisfront.ui.base.AbstractTerminalComponent;
+import com.redisfront.service.RedisService;
 import com.redisfront.util.RedisUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.List;
 
-public class TerminalComponent extends AbstractTerminalComponent {
-    private ConnectInfo connectInfo;
-    private static TerminalComponent terminalComponent;
+public class TerminalComponent extends AbstractTerminal {
+    private static final Logger log = LoggerFactory.getLogger(TerminalComponent.class);
+    private final ConnectInfo connectInfo;
 
-    public static TerminalComponent getInstance() {
-        if (terminalComponent == null) {
-            terminalComponent = new TerminalComponent();
-        }
-        return terminalComponent;
+
+    public static TerminalComponent newInstance(ConnectInfo connectInfo) {
+        return new TerminalComponent(connectInfo);
     }
 
-    public TerminalComponent init(ConnectInfo connectInfo) {
+    public TerminalComponent(ConnectInfo connectInfo) {
         this.connectInfo = connectInfo;
-        super.printConnectedSuccessMessage();
-        return this;
+        terminal.setEnabled(false);
+    }
+
+    public void ping() {
+        try {
+            if (RedisService.service.ping(connectInfo)) {
+                if (!terminal.isEnabled()) {
+                    terminal.setEnabled(true);
+                    super.printConnectedSuccessMessage();
+                }
+            } else {
+                println(DateUtil.formatDateTime(new Date()) + " - ".concat("redis PING faild!"));
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            println(DateUtil.formatDateTime(new Date()) + " - ".concat(e.getMessage()));
+        }
     }
 
     @Override

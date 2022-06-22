@@ -10,10 +10,10 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.RedisFrontApplication;
 import com.redisfront.constant.Constant;
-import com.redisfront.ui.base.AbstractDialog;
+import com.redisfront.ui.component.AbstractDialog;
+import com.redisfront.util.Fn;
 import com.redisfront.util.PrefUtil;
 import com.redisfront.util.ThemeUtil;
-import com.redisfront.util.Fn;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -35,8 +35,8 @@ public class SettingDialog extends AbstractDialog<Void> {
     private JComboBox<String> fontSizeComboBox;
     private JComboBox<String> fontNameComboBox;
     private JComboBox<ThemeUtil.ThemeInfo> themeNameComboBox;
-    private JTextField textField1;
-    private JTextField textField2;
+    private JTextField keySeparator;
+    private JTextField keyMaxLoadNum;
 
     public static void showSettingDialog() {
         var settingDialog = new SettingDialog(RedisFrontApplication.frame);
@@ -65,6 +65,8 @@ public class SettingDialog extends AbstractDialog<Void> {
         initThemeNameComboBox();
         initFontComboBox();
         initFontSizeComboBox();
+        keySeparator.setText(PrefUtil.getState().get(Constant.KEY_KEY_SEPARATOR, ":"));
+        keyMaxLoadNum.setText(PrefUtil.getState().get(Constant.KEY_KEY_MAX_LOAD_NUM, "5000"));
     }
 
     private void initFontSizeComboBox() {
@@ -78,12 +80,7 @@ public class SettingDialog extends AbstractDialog<Void> {
             if (Fn.equal(fontSizeStr, PrefUtil.getState().get(Constant.KEY_FONT_SIZE, getDefaultFontSize()))) {
                 return;
             }
-            Font font = UIManager.getFont("defaultFont");
-            assert fontSizeStr != null;
-            Font newFont = font.deriveFont(Float.parseFloat(fontSizeStr));
-            UIManager.put("defaultFont", newFont);
-            PrefUtil.getState().put(Constant.KEY_FONT_SIZE, fontSizeStr);
-            FlatLaf.updateUI();
+            this.updateFontSizeHandler(fontSizeStr);
         });
         fontSizeComboBox.setSelectedItem(PrefUtil.getState().get(Constant.KEY_FONT_SIZE, getDefaultFontSize()));
     }
@@ -94,6 +91,7 @@ public class SettingDialog extends AbstractDialog<Void> {
     }
 
     private void initFontComboBox() {
+        //获取系统全部字体
         GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
         List<String> availableFontFamilyNames = List.of(graphicsEnvironment.getAvailableFontFamilyNames());
         Set<String> families = new HashSet<>(Arrays.asList(
@@ -101,8 +99,10 @@ public class SettingDialog extends AbstractDialog<Void> {
                 "Dialog", "Liberation Sans", "Monospaced", "Microsoft YaHei UI", "Noto Sans", "Roboto",
                 "SansSerif", "Segoe UI", "Serif", "Tahoma", "Ubuntu", "Verdana"));
         families.add(UIManager.getFont("defaultFont").getFontName());
+        //移除列表中不存在的字体
         families.removeIf(f -> !availableFontFamilyNames.contains(f));
         families.parallelStream().forEach(fontNameComboBox::addItem);
+        //列表文字样式渲染
         fontNameComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -119,14 +119,7 @@ public class SettingDialog extends AbstractDialog<Void> {
             if (Fn.equal(fontFamily, PrefUtil.getState().get(Constant.KEY_FONT_NAME, getDefaultFontFamily()))) {
                 return;
             }
-            PrefUtil.getState().put(Constant.KEY_FONT_NAME, fontFamily);
-            FlatAnimatedLafChange.showSnapshot();
-            Font font = UIManager.getFont("defaultFont");
-            Font newFont = StyleContext.getDefaultStyleContext().getFont(fontFamily, font.getStyle(), font.getSize());
-            newFont = FlatUIUtils.nonUIResource(newFont);
-            UIManager.put("defaultFont", newFont);
-            FlatLaf.updateUI();
-            FlatAnimatedLafChange.hideSnapshotWithAnimation();
+            this.updateFontNameHandler(fontFamily);
         });
         fontNameComboBox.setSelectedItem(PrefUtil.getState().get(Constant.KEY_FONT_NAME, getDefaultFontFamily()));
     }
@@ -165,20 +158,47 @@ public class SettingDialog extends AbstractDialog<Void> {
                 return;
             }
             ThemeUtil.changeTheme(this, themeInfo);
-            PrefUtil.getState().put(Constant.KEY_THEME, themeName);
-            PrefUtil.getState().put(Constant.KEY_THEME_SELECT_INDEX, String.valueOf(themeNameComboBox.getSelectedIndex()));
         });
 
         themeNameComboBox.setSelectedIndex(Integer.parseInt(PrefUtil.getState().get(Constant.KEY_THEME_SELECT_INDEX, "0")));
     }
 
+    private void updateFontSizeHandler(String fontSize) {
+        Font font = UIManager.getFont("defaultFont");
+        Font newFont = font.deriveFont(Float.parseFloat(fontSize));
+        UIManager.put("defaultFont", newFont);
+        FlatLaf.updateUI();
+    }
+
+    private void updateFontNameHandler(String fontFamily) {
+        FlatAnimatedLafChange.showSnapshot();
+        Font font = UIManager.getFont("defaultFont");
+        Font newFont = StyleContext.getDefaultStyleContext().getFont(fontFamily, font.getStyle(), font.getSize());
+        newFont = FlatUIUtils.nonUIResource(newFont);
+        UIManager.put("defaultFont", newFont);
+        FlatLaf.updateUI();
+        FlatAnimatedLafChange.hideSnapshotWithAnimation();
+    }
+
     private void onOK() {
-        // 在此处添加您的代码
+
+        PrefUtil.getState().put(Constant.KEY_KEY_SEPARATOR, keySeparator.getText());
+        PrefUtil.getState().put(Constant.KEY_KEY_MAX_LOAD_NUM, keyMaxLoadNum.getText());
+        //风格
+        ThemeUtil.ThemeInfo themeInfo = (ThemeUtil.ThemeInfo) themeNameComboBox.getSelectedItem();
+        String themeName = StringUtils.isEmpty(Objects.requireNonNull(themeInfo).lafClassName()) ? "R_" + themeInfo.resourceName() : themeInfo.lafClassName();
+        PrefUtil.getState().put(Constant.KEY_THEME, themeName);
+        PrefUtil.getState().put(Constant.KEY_THEME_SELECT_INDEX, String.valueOf(themeNameComboBox.getSelectedIndex()));
+        //字体名称
+        String fontFamily = (String) fontNameComboBox.getSelectedItem();
+        PrefUtil.getState().put(Constant.KEY_FONT_NAME, fontFamily);
+        //字体大小
+        String fontSizeStr = (String) fontSizeComboBox.getSelectedItem();
+        PrefUtil.getState().put(Constant.KEY_FONT_SIZE, fontSizeStr);
         dispose();
     }
 
     private void onCancel() {
-        // 必要时在此处添加您的代码
         dispose();
     }
 
@@ -196,6 +216,7 @@ public class SettingDialog extends AbstractDialog<Void> {
                 if (themeInfo == null) {
                     return;
                 }
+                //忽略分类符号
                 if (themeInfo.name().startsWith("**")) {
                     return;
                 }
@@ -266,13 +287,13 @@ public class SettingDialog extends AbstractDialog<Void> {
         final JLabel label2 = new JLabel();
         label2.setText("分隔符");
         redisPanel.add(label2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        textField1 = new JTextField();
-        redisPanel.add(textField1, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        keySeparator = new JTextField();
+        redisPanel.add(keySeparator, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final JLabel label3 = new JLabel();
         label3.setText("key加载数");
         redisPanel.add(label3, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        textField2 = new JTextField();
-        redisPanel.add(textField2, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        keyMaxLoadNum = new JTextField();
+        redisPanel.add(keyMaxLoadNum, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final Spacer spacer4 = new Spacer();
         redisPanel.add(spacer4, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final Spacer spacer5 = new Spacer();

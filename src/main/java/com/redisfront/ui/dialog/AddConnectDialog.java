@@ -1,14 +1,14 @@
 package com.redisfront.ui.dialog;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.formdev.flatlaf.util.StringUtils;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.RedisFrontApplication;
 import com.redisfront.constant.ConnectEnum;
-import com.redisfront.ui.base.AbstractDialog;
 import com.redisfront.model.ConnectInfo;
-import com.formdev.flatlaf.extras.FlatSVGIcon;
-import com.formdev.flatlaf.util.StringUtils;
+import com.redisfront.ui.component.AbstractDialog;
 import com.redisfront.util.Fn;
 
 import javax.swing.*;
@@ -84,21 +84,23 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         super(owner, callback);
 
         $$$setupUI$$$();
-        setTitle("新建连接");
-        setModal(true);
-        setResizable(false);
-        setMinimumSize(new Dimension(400, 260));
-        setContentPane(contentPane);
-        getRootPane().setDefaultButton(buttonOK);
+        this.setTitle("新建连接");
+        this.setModal(true);
+        this.setResizable(true);
+        this.setMinimumSize(new Dimension(400, 280));
+        this.setContentPane(contentPane);
+        this.getRootPane().setDefaultButton(buttonOK);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         this.id = 0;
-        addWindowListener(new WindowAdapter() {
+        this.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 dispose();
             }
         });
-        contentPane.registerKeyboardAction(e -> dispose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-        initComponentListener();
+        this.contentPane.registerKeyboardAction(e -> dispose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        this.sshPrivateKeyFile.setVisible(enableSshPrivateKey.isSelected());
+        this.sshPrivateKeyBtn.setVisible(enableSshPrivateKey.isSelected());
+        this.initComponentListener();
     }
 
     private void initComponentListener() {
@@ -116,10 +118,20 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
 
         showSslPassword.addActionListener(e -> {
             if (showPasswordCheckBox.isSelected()) {
-                passwordField.setEchoChar((char) 0);
+                sslPasswordField.setEchoChar((char) 0);
             } else {
-                passwordField.setEchoChar('*');
+                sslPasswordField.setEchoChar('*');
             }
+        });
+
+        enableSshPrivateKey.addActionListener(e -> {
+            if (enableSshPrivateKey.isSelected()) {
+                setSize(new Dimension(getWidth(), getHeight() + 20));
+            } else {
+                setSize(new Dimension(getWidth(), getHeight() - 20));
+            }
+            sshPrivateKeyFile.setVisible(enableSshPrivateKey.isSelected());
+            sshPrivateKeyBtn.setVisible(enableSshPrivateKey.isSelected());
         });
 
         enableSSLBtn.addActionListener(e -> {
@@ -127,9 +139,9 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
             sshPanel.setVisible(false);
             sslPanel.setVisible(enableSSLBtn.isSelected());
             if (enableSSLBtn.isSelected()) {
-                setSize(new Dimension(400, 400));
+                setSize(new Dimension(getWidth(), getHeight() + 120));
             } else {
-                setSize(new Dimension(400, 280));
+                setSize(new Dimension(getWidth(), getHeight() - 120));
             }
         });
 
@@ -138,9 +150,9 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
             sslPanel.setVisible(false);
             sshPanel.setVisible(enableSSHBtn.isSelected());
             if (enableSSHBtn.isSelected()) {
-                setSize(new Dimension(400, 420));
+                setSize(new Dimension(getWidth(), getHeight() + 120));
             } else {
-                setSize(new Dimension(400, 280));
+                setSize(new Dimension(getWidth(), getHeight() - 120));
             }
         });
 
