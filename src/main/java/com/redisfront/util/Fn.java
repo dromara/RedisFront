@@ -1,4 +1,4 @@
-package com.redisfront.common.func;
+package com.redisfront.util;
 
 
 import cn.hutool.core.bean.BeanUtil;
@@ -44,7 +44,6 @@ public class Fn {
     public static boolean isNotEmpty(final Object array) {
         return ArrayUtil.isNotEmpty(array);
     }
-
 
     public static boolean isNotNull(Object obj) {
         return ObjectUtil.isNotNull(obj);

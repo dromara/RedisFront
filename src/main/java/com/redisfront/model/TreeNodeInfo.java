@@ -1,6 +1,6 @@
 package com.redisfront.model;
 
-import com.redisfront.common.enums.NodeTypeEnum;
+import com.redisfront.constant.NodeTypeEnum;
 
 /**
  * NodeInfo

@@ -1,10 +1,10 @@
 package com.redisfront.service.impl;
 
-import com.redisfront.common.enums.RedisModeEnum;
-import com.redisfront.common.func.Fn;
+import com.redisfront.constant.RedisModeEnum;
 import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisService;
+import com.redisfront.util.Fn;
 import redis.clients.jedis.ClusterPipeline;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;

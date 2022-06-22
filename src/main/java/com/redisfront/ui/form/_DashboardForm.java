@@ -8,6 +8,15 @@ import java.awt.*;
 public class _DashboardForm {
     private JPanel contentPanel;
 
+    public static _DashboardForm dashboardForm;
+
+    public static _DashboardForm getInstance() {
+        if (dashboardForm == null) {
+            dashboardForm = new _DashboardForm();
+        }
+        return dashboardForm;
+    }
+
     public JPanel getContentPanel() {
         return contentPanel;
     }
@@ -15,9 +24,7 @@ public class _DashboardForm {
     private void createUIComponents() {
         contentPanel = new JPanel();
         contentPanel.setLayout(new BorderLayout());
-        TextEditorComponent textArea = new TextEditorComponent();
-
-        contentPanel.add(textArea);
+        contentPanel.add(TextEditorComponent.getInstance());
     }
 
     {

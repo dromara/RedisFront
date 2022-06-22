@@ -1,18 +1,19 @@
 package com.redisfront.ui.dialog;
 
 
-import com.intellij.uiDesigner.core.GridConstraints;
-import com.intellij.uiDesigner.core.GridLayoutManager;
-import com.intellij.uiDesigner.core.Spacer;
-import com.redisfront.common.base.AbstractDialog;
-import com.redisfront.common.constant.Constant;
-import com.redisfront.common.func.Fn;
-import com.redisfront.common.util.PrefUtil;
-import com.redisfront.common.util.ThemeUtil;
 import com.formdev.flatlaf.*;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.StringUtils;
+import com.intellij.uiDesigner.core.GridConstraints;
+import com.intellij.uiDesigner.core.GridLayoutManager;
+import com.intellij.uiDesigner.core.Spacer;
+import com.redisfront.RedisFrontApplication;
+import com.redisfront.constant.Constant;
+import com.redisfront.ui.base.AbstractDialog;
+import com.redisfront.util.PrefUtil;
+import com.redisfront.util.ThemeUtil;
+import com.redisfront.util.Fn;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -37,14 +38,10 @@ public class SettingDialog extends AbstractDialog<Void> {
     private JTextField textField1;
     private JTextField textField2;
 
-    private static SettingDialog settingDialog;
-
-    public static void showSettingDialog(Frame owner) {
-        if (settingDialog == null) {
-            settingDialog = new SettingDialog(owner);
-        }
+    public static void showSettingDialog() {
+        var settingDialog = new SettingDialog(RedisFrontApplication.frame);
         settingDialog.setMinimumSize(new Dimension(500, 400));
-        settingDialog.setLocationRelativeTo(owner);
+        settingDialog.setLocationRelativeTo(RedisFrontApplication.frame);
         settingDialog.pack();
         settingDialog.setVisible(true);
     }

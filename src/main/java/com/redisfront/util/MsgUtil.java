@@ -1,4 +1,4 @@
-package com.redisfront.common.util;
+package com.redisfront.util;
 
 import javax.swing.*;
 import java.awt.*;

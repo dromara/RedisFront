@@ -3,12 +3,13 @@ package com.redisfront.ui.dialog;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import com.redisfront.common.base.AbstractDialog;
-import com.redisfront.common.enums.ConnectEnum;
-import com.redisfront.common.func.Fn;
+import com.redisfront.RedisFrontApplication;
+import com.redisfront.constant.ConnectEnum;
+import com.redisfront.ui.base.AbstractDialog;
 import com.redisfront.model.ConnectInfo;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.StringUtils;
+import com.redisfront.util.Fn;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -57,10 +58,10 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     /***
      * 打开添加连接窗口
      */
-    public static void showAddConnectDialog(Frame owner, Consumer<ConnectInfo> callback) {
-        var addConnectDialog = new AddConnectDialog(owner, callback);
+    public static void showAddConnectDialog(Consumer<ConnectInfo> callback) {
+        var addConnectDialog = new AddConnectDialog(RedisFrontApplication.frame, callback);
         addConnectDialog.setResizable(false);
-        addConnectDialog.setLocationRelativeTo(owner);
+        addConnectDialog.setLocationRelativeTo(RedisFrontApplication.frame);
         addConnectDialog.pack();
         addConnectDialog.setVisible(true);
     }
@@ -68,18 +69,14 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     /**
      * 打开编辑连接窗口
      */
-    public static void showEditConnectDialog(Frame owner, ConnectInfo connectInfo, Consumer<ConnectInfo> callback) {
-        var addConnectDialog = new AddConnectDialog(owner, callback);
+    public static void showEditConnectDialog(ConnectInfo connectInfo, Consumer<ConnectInfo> callback) {
+        var addConnectDialog = new AddConnectDialog(RedisFrontApplication.frame, callback);
         //数据初始化
         addConnectDialog.componentsDataInit(connectInfo);
         addConnectDialog.setResizable(false);
-        addConnectDialog.setLocationRelativeTo(owner);
+        addConnectDialog.setLocationRelativeTo(RedisFrontApplication.frame);
         addConnectDialog.pack();
         addConnectDialog.setVisible(true);
-    }
-
-    public static void updateTableData() {
-
     }
 
 
@@ -293,8 +290,6 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
 
     /**
      * 数据初始化
-     *
-     * @param connectInfo
      */
     public void componentsDataInit(ConnectInfo connectInfo) {
         this.id = connectInfo.id();

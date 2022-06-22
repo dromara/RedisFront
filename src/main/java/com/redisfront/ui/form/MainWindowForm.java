@@ -1,36 +1,40 @@
 package com.redisfront.ui.form;
 
-import com.redisfront.common.func.Fn;
+import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.formdev.flatlaf.icons.FlatTabbedPaneCloseIcon;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.ConnectService;
 import com.redisfront.ui.component.TabbedComponent;
 import com.redisfront.ui.dialog.AddConnectDialog;
 import com.redisfront.ui.dialog.OpenConnectDialog;
-import com.formdev.flatlaf.FlatClientProperties;
-import com.formdev.flatlaf.extras.FlatSVGIcon;
-import com.formdev.flatlaf.icons.FlatTabbedPaneCloseIcon;
+import com.redisfront.util.Fn;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.function.BiConsumer;
 
-public class MainContentForm {
+public class MainWindowForm {
     private JPanel contentPanel;
     private JTabbedPane tabPanel;
-    private final JFrame owner;
-    private final _NoneForm noneForm;
+
+    private static MainWindowForm mainWindowForm;
+
+    public static MainWindowForm getInstance() {
+        if (Fn.isNull(mainWindowForm)) {
+            mainWindowForm = new MainWindowForm();
+        }
+        return mainWindowForm;
+    }
 
     public JPanel getContentPanel() {
         return contentPanel;
     }
 
-    public MainContentForm(JFrame frame) {
-        owner = frame;
-        noneForm = new _NoneForm();
+    public MainWindowForm() {
         $$$setupUI$$$();
-        contentPanel.add(noneForm.getContentPanel(), BorderLayout.CENTER);
-
+        contentPanel.add(_NoneForm.getInstance().getContentPanel(), BorderLayout.CENTER);
     }
 
     public void addActionPerformed(ConnectInfo connectInfo) {
@@ -67,7 +71,7 @@ public class MainContentForm {
         tabPanel.putClientProperty("JTabbedPane.tabCloseCallback", (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
             tabPanel.remove(tabIndex);
             if (tabbedPane.getTabCount() == 0) {
-                contentPanel.add(noneForm.getContentPanel(), BorderLayout.CENTER, 0);
+                contentPanel.add(_NoneForm.getInstance().getContentPanel(), BorderLayout.CENTER, 0);
             }
         });
         tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, SwingConstants.LEADING);
@@ -82,7 +86,7 @@ public class MainContentForm {
 
         var newBtn = new JButton(null, new FlatSVGIcon("icons/new_conn.svg"));
         newBtn.setToolTipText("新建连接");
-        newBtn.addActionListener(e -> AddConnectDialog.showAddConnectDialog(owner,
+        newBtn.addActionListener(e -> AddConnectDialog.showAddConnectDialog(
                 //打开连接回调
                 (this::addActionPerformed)
         ));
@@ -91,12 +95,12 @@ public class MainContentForm {
         var openBtn = new JButton(null, new FlatSVGIcon("icons/open_conn.svg"));
         openBtn.setToolTipText("打开连接");
         openBtn.addActionListener(e -> OpenConnectDialog.showOpenConnectDialog(
-                owner,
+
                 //打开连接回调
                 (this::addActionPerformed),
                 //编辑连接回调
                 (connectInfo -> AddConnectDialog.showEditConnectDialog(
-                        owner,
+
                         connectInfo,
                         (this::addActionPerformed)
                 )),

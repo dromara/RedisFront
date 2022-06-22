@@ -1,10 +1,10 @@
 package com.redisfront.service;
 
-import com.redisfront.common.enums.RedisModeEnum;
-import com.redisfront.common.func.Fn;
+import com.redisfront.constant.RedisModeEnum;
 import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.impl.RedisServiceImpl;
+import com.redisfront.util.Fn;
 import redis.clients.jedis.ClusterPipeline;
 import redis.clients.jedis.DefaultJedisClientConfig;
 import redis.clients.jedis.JedisClientConfig;
@@ -103,13 +103,13 @@ public interface RedisService {
 
     /**
      * 获取 client info
+     *
      * @param connectInfo
      * @return
      */
     Map<String, Object> getClientInfo(ConnectInfo connectInfo);
 
     /**
-     * 
      * @param connectInfo
      * @return
      */

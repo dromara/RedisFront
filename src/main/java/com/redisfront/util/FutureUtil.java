@@ -1,4 +1,4 @@
-package com.redisfront.common.util;
+package com.redisfront.util;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;

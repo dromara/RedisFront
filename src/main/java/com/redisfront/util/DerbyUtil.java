@@ -1,7 +1,7 @@
-package com.redisfront.common.util;
+package com.redisfront.util;
 
 
-import cn.hutool.core.io.IoUtil;
+import com.redisfront.constant.Constant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,21 +13,27 @@ import java.util.List;
 import java.util.Map;
 
 public class DerbyUtil {
-    private static final Logger log = LoggerFactory.getLogger(DerbyUtil.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(DerbyUtil.class);
+    private static Connection conn;
 
-    public static DerbyUtil newInstance() {
+    public static DerbyUtil getInstance() {
         return new DerbyUtil();
     }
 
-    public Connection getConnection() throws ClassNotFoundException, SQLException {
-        Class.forName("org.apache.derby.iapi.jdbc.InternalDriver");
-        return DriverManager.getConnection("jdbc:derby:" + System.getProperty("user.home") + File.separator + "redis-front" + File.separator + "derby" + File.separator + "data;create=true");
+    public static void init() {
+        try {
+            System.setProperty("derby.stream.error.file", Constant.DATA_PATH + File.separator + "derby" + File.separator + "derby.log");
+            Class.forName("org.apache.derby.iapi.jdbc.InternalDriver");
+            conn = DriverManager.getConnection("jdbc:derby:" + System.getProperty("user.home") + File.separator + "redis-front" + File.separator + "derby" + File.separator + "data;create=true");
+            log.info("derby 初始化成功！");
+        } catch (ClassNotFoundException | SQLException e) {
+            log.error(e.getMessage());
+        }
     }
 
     public List<Map<String, Object>> querySql(String sql) {
         List<Map<String, Object>> resultList = new ArrayList<>();
-        try (var conn = getConnection();
-             var ps = conn.prepareStatement(sql);
+        try (var ps = conn.prepareStatement(sql);
              var rs = ps.executeQuery()) {
             if (rs != null) {
                 var md = rs.getMetaData();
@@ -46,10 +52,9 @@ public class DerbyUtil {
     }
 
     public boolean exec(String sql) {
-        try (var conn = getConnection();
-             var stmt = conn.createStatement()) {
+        try (var stmt = conn.createStatement()) {
             return stmt.execute(sql);
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             log.error(e.getMessage());
         }
         return false;

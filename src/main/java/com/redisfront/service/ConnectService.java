@@ -1,9 +1,9 @@
 package com.redisfront.service;
 
-import com.redisfront.common.enums.ConnectEnum;
-import com.redisfront.common.func.Fn;
+import com.redisfront.constant.ConnectEnum;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.impl.ConnectServiceImpl;
+import com.redisfront.util.Fn;
 
 import java.util.List;
 import java.util.Map;

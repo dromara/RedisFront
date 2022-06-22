@@ -1,4 +1,4 @@
-package com.redisfront.common.util;
+package com.redisfront.util;
 
 /**
  * ContextUtil

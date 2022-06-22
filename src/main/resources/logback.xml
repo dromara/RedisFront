@@ -21,6 +21,6 @@
         <appender-ref ref="FILE"/>
     </root>
 
-    <logger name="com.redisfront" level="DEBUG"/>
+    <logger name="com.redisfront" level="INFO"/>
 
 </configuration>

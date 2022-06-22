@@ -1,8 +1,8 @@
 package com.redisfront.model;
 
-import com.redisfront.common.enums.ConnectEnum;
-import com.redisfront.common.enums.RedisModeEnum;
-import com.redisfront.common.func.Fn;
+import com.redisfront.constant.RedisModeEnum;
+import com.redisfront.constant.ConnectEnum;
+import com.redisfront.util.Fn;
 
 import java.io.Serializable;
 

@@ -1,4 +1,4 @@
-package com.redisfront.common.ssl;
+package com.redisfront.util;
 
 import cn.hutool.core.io.resource.ClassPathResource;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -21,7 +21,7 @@ import java.security.Security;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-public class SocketFactory {
+public class SslUtil {
 
     public static SSLSocketFactory getSocketFactory(final String caCrtFile, final String crtFile, final String keyFile, final String password) throws Exception {
         InputStream caInputStream = null;

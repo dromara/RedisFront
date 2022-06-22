@@ -1,15 +1,16 @@
 package com.redisfront.ui.dialog;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import com.redisfront.common.base.AbstractDialog;
-import com.redisfront.common.func.Fn;
-import com.redisfront.common.util.MsgUtil;
+import com.redisfront.RedisFrontApplication;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.ConnectService;
-import com.redisfront.ui.component.TableModelComponent;
-import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.redisfront.ui.base.AbstractDialog;
+import com.redisfront.ui.component.ConnectTableModel;
+import com.redisfront.util.MsgUtil;
+import com.redisfront.util.Fn;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -33,10 +34,10 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
 
     protected Consumer<ConnectInfo> delActionCallback;
 
-    public static void showOpenConnectDialog(Frame owner, Consumer<ConnectInfo> openActionCallback, Consumer<ConnectInfo> editActionCallback, Consumer<ConnectInfo> delActionCallback) {
-        var openConnectDialog = new OpenConnectDialog(owner, openActionCallback, editActionCallback, delActionCallback);
+    public static void showOpenConnectDialog(Consumer<ConnectInfo> openActionCallback, Consumer<ConnectInfo> editActionCallback, Consumer<ConnectInfo> delActionCallback) {
+        var openConnectDialog = new OpenConnectDialog(RedisFrontApplication.frame, openActionCallback, editActionCallback, delActionCallback);
         openConnectDialog.setSize(new Dimension(500, 280));
-        openConnectDialog.setLocationRelativeTo(owner);
+        openConnectDialog.setLocationRelativeTo(RedisFrontApplication.frame);
         openConnectDialog.pack();
         openConnectDialog.setVisible(true);
     }
@@ -117,7 +118,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                     if (Fn.isNotNull(connectInfo)) {
                         delActionCallback.accept(connectInfo);
                     }
-                    ((TableModelComponent) connectTable.getModel()).removeRow(row);
+                    ((ConnectTableModel) connectTable.getModel()).removeRow(row);
                     connectTable.revalidate();
                 });
                 add(deleteConnectMenu);
@@ -125,11 +126,20 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         });
         //查询数据连接列表
         List<ConnectInfo> connectInfoList = ConnectService.service.getAllConnectList();
-        connectTable.setModel(new TableModelComponent(connectInfoList, "编号", "名称", "地址", "端口", "SSL", "连接模式"));
+        connectTable.setModel(new ConnectTableModel(connectInfoList, "编号", "名称", "地址", "端口", "SSL", "连接模式"));
     }
 
     private void onOK() {
+        var row = connectTable.getSelectedRow();
+        if (row == -1) {
+            MsgUtil.showInformationDialog(this, "未选中编辑行或列");
+            return;
+        }
+        var id = connectTable.getValueAt(row, 0);
+        var connectInfo = ConnectService.service.getConnect(id);
         dispose();
+        openActionCallback.accept(connectInfo);
+
     }
 
     private void onCancel() {
@@ -140,7 +150,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         addConnectBtn = new JButton();
         addConnectBtn.addActionListener(e -> {
             dispose();
-            AddConnectDialog.showAddConnectDialog((Frame) getOwner(), openActionCallback);
+            AddConnectDialog.showAddConnectDialog(openActionCallback);
         });
         addConnectBtn.setIcon(new FlatSVGIcon("icons/connection.svg"));
     }

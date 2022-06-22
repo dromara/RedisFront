@@ -1,4 +1,4 @@
-package com.redisfront.common.enums;
+package com.redisfront.constant;
 
 /**
  * KeyTypeEnum
@@ -11,5 +11,7 @@ public enum KeyTypeEnum {
     HASH,
     SET,
     ZSET,
-    JSON
+    JSON,
+
+    STREAM
 }

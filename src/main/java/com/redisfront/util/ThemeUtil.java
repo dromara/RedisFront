@@ -1,8 +1,8 @@
-package com.redisfront.common.util;
+package com.redisfront.util;
 
 import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.redisfront.RedisFrontApplication;
-import com.redisfront.common.constant.Constant;
+import com.redisfront.constant.Constant;
 import com.formdev.flatlaf.*;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.json.Json;

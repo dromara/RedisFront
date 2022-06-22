@@ -6,6 +6,15 @@ import java.awt.*;
 public class _DatabaseForm {
     private JPanel contentPanel;
 
+    public static _DatabaseForm dashboardForm;
+
+    public static _DatabaseForm getInstance() {
+        if (dashboardForm == null) {
+            dashboardForm = new _DatabaseForm();
+        }
+        return dashboardForm;
+    }
+
     public JPanel getContentPanel() {
         return contentPanel;
     }

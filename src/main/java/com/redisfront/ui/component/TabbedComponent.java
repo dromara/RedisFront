@@ -1,13 +1,13 @@
 package com.redisfront.ui.component;
 
-import com.redisfront.model.ConnectInfo;
-import com.redisfront.service.RedisService;
-import com.redisfront.ui.form._DashboardForm;
-import com.redisfront.ui.form._DatabaseForm;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.components.FlatLabel;
 import com.formdev.flatlaf.extras.components.FlatToolBar;
+import com.redisfront.model.ConnectInfo;
+import com.redisfront.service.RedisService;
+import com.redisfront.ui.form._DashboardForm;
+import com.redisfront.ui.form._DatabaseForm;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,15 +15,13 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.Map;
 
-import static com.formdev.flatlaf.FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS;
-
 public class TabbedComponent extends JPanel {
 
     public TabbedComponent(ConnectInfo connectInfo) {
         setLayout(new BorderLayout());
         var contentPanel = new JTabbedPane();
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.CENTER);
-        contentPanel.putClientProperty(TABBED_PANE_SHOW_TAB_SEPARATORS, false);
+        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, false);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_TRAILING);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
@@ -69,16 +67,14 @@ public class TabbedComponent extends JPanel {
         rightToolBar.add(memoryInfo);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, rightToolBar);
 
-        contentPanel.addTab("数据", new FlatSVGIcon("icons/db_key2.svg"), new _DashboardForm().getContentPanel());
-        contentPanel.addTab("命令", new FlatSVGIcon("icons/db_cli2.svg"), new TerminalComponent());
-        contentPanel.addTab("信息", new FlatSVGIcon("icons/db_report2.svg"), new _DatabaseForm().getContentPanel());
+        contentPanel.addTab("数据", new FlatSVGIcon("icons/db_key2.svg"), _DashboardForm.getInstance().getContentPanel());
+        contentPanel.addTab("命令", new FlatSVGIcon("icons/db_cli2.svg"), TerminalComponent.getInstance().init(connectInfo));
+        contentPanel.addTab("信息", new FlatSVGIcon("icons/db_report2.svg"), _DatabaseForm.getInstance().getContentPanel());
 
         contentPanel.addChangeListener(e -> {
             var tabbedPane = (JTabbedPane) e.getSource();
             var component = tabbedPane.getSelectedComponent();
-            if (component instanceof TerminalComponent terminalComponent) {
 
-            }
         });
         add(contentPanel, BorderLayout.CENTER);
 
@@ -98,7 +94,7 @@ public class TabbedComponent extends JPanel {
 
             Map<String, Object> memory = RedisService.service.getMemoryInfo(connectInfo);
             memoryInfo.setText((String) memory.get("used_memory_human"));
-            memoryInfo.setToolTipText("内存占用：" + (String) memory.get("used_memory_human"));
+            memoryInfo.setToolTipText("内存占用：" + memory.get("used_memory_human"));
         }).start()).start();
     }
 

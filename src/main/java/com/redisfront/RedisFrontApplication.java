@@ -1,14 +1,15 @@
 package com.redisfront;
 
-import com.redisfront.common.constant.Constant;
-import com.redisfront.common.util.PrefUtil;
-import com.redisfront.common.util.ThemeUtil;
-import com.redisfront.service.ConnectService;
-import com.redisfront.ui.RedisFrontFrame;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatInspector;
 import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
 import com.formdev.flatlaf.util.SystemInfo;
+import com.redisfront.constant.Constant;
+import com.redisfront.service.ConnectService;
+import com.redisfront.ui.frame.RedisFrontFrame;
+import com.redisfront.util.DerbyUtil;
+import com.redisfront.util.PrefUtil;
+import com.redisfront.util.ThemeUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,6 +17,8 @@ import java.io.File;
 import java.util.Collections;
 
 public class RedisFrontApplication {
+
+    public static RedisFrontFrame frame;
 
     public static void main(String[] args) {
         if (SystemInfo.isMacOS) {
@@ -36,10 +39,9 @@ public class RedisFrontApplication {
         FlatLaf.registerCustomDefaultsSource("com.redisfront");
         FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", "#d81e06"));
 
-        //log file init
-        String dataPath = System.getProperty("user.home") + File.separator + "redis-front";
-        System.setProperty("LOG_FILE", dataPath + File.separator + "logs" + File.separator + "redis-front.log");
-        System.setProperty("derby.stream.error.file", dataPath + File.separator + "derby" + File.separator + "derby.log");
+        System.setProperty("LOG_FILE", Constant.DATA_PATH + File.separator + "logs" + File.separator + "redis-front.log");
+
+        DerbyUtil.init();
 
         SwingUtilities.invokeLater(() -> {
 
@@ -55,7 +57,7 @@ public class RedisFrontApplication {
             FlatInspector.install("ctrl shift alt X");
             FlatUIDefaultsInspector.install("ctrl shift alt Y");
 
-            var frame = new RedisFrontFrame();
+            frame = new RedisFrontFrame();
             frame.setMinimumSize(new Dimension(1024, 768));
             frame.pack();
             frame.setLocationRelativeTo(null);

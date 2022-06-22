@@ -1,4 +1,4 @@
-package com.redisfront.common.enums;
+package com.redisfront.constant;
 
 public enum RedisModeEnum {
     STANDALONE,

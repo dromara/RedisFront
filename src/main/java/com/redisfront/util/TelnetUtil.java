@@ -1,8 +1,7 @@
-package com.redisfront.common.util;
+package com.redisfront.util;
 
-import com.redisfront.common.func.Fn;
-import com.redisfront.model.ConnectInfo;
 import cn.hutool.core.io.IoUtil;
+import com.redisfront.model.ConnectInfo;
 import org.apache.commons.net.telnet.TelnetClient;
 
 import java.io.PrintStream;

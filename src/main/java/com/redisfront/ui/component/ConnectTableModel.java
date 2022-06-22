@@ -5,16 +5,19 @@ import com.redisfront.model.ConnectInfo;
 import javax.swing.table.DefaultTableModel;
 import java.util.List;
 
-public class TableModelComponent extends DefaultTableModel {
+/**
+ * Redis Connection TableModel
+ */
+public class ConnectTableModel extends DefaultTableModel {
 
     private final Class<?>[] columnTypes = new Class<?>[]{
-            Integer.class, String.class, String.class, Integer.class, String.class, String.class
+            String.class, String.class, String.class, String.class, String.class, String.class
     };
     private final boolean[] columnEditable = new boolean[]{
             false, false, false, false, false, false
     };
 
-    public TableModelComponent(List<ConnectInfo> dataList, String... columNames) {
+    public ConnectTableModel(List<ConnectInfo> dataList, String... columNames) {
         var dataVector = new Object[dataList.size()][6];
         for (var i = 0; i < dataList.size(); i++) {
             dataVector[i][0] = dataList.get(i).id();
@@ -26,6 +29,7 @@ public class TableModelComponent extends DefaultTableModel {
         }
         this.setDataVector(dataVector, columNames);
     }
+
 
 
     @Override

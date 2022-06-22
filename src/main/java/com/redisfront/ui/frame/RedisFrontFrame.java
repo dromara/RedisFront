@@ -1,5 +1,5 @@
 
-package com.redisfront.ui;
+package com.redisfront.ui.frame;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatDesktop;
@@ -10,7 +10,7 @@ import com.redisfront.service.ConnectService;
 import com.redisfront.ui.dialog.AddConnectDialog;
 import com.redisfront.ui.dialog.OpenConnectDialog;
 import com.redisfront.ui.dialog.SettingDialog;
-import com.redisfront.ui.form.MainContentForm;
+import com.redisfront.ui.form.MainWindowForm;
 import org.jdesktop.swingx.JXFrame;
 
 import javax.swing.*;
@@ -23,8 +23,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 public class RedisFrontFrame extends JXFrame {
-    MainContentForm mainContentForm;
-
 
     public RedisFrontFrame() {
         super(" RedisFront ", true);
@@ -36,12 +34,10 @@ public class RedisFrontFrame extends JXFrame {
         FlatDesktop.setQuitHandler(FlatDesktop.QuitResponse::performQuit);
     }
 
-
     private void initComponents() {
         var container = getContentPane();
         container.setLayout(new BorderLayout());
-        mainContentForm = new MainContentForm(this);
-        container.add(mainContentForm.getContentPanel(), BorderLayout.CENTER);
+        container.add(MainWindowForm.getInstance().getContentPanel(), BorderLayout.CENTER);
     }
 
 
@@ -53,19 +49,18 @@ public class RedisFrontFrame extends JXFrame {
                 //新建连接
                 var addConnectMenu = new JMenuItem("新建连接", KeyEvent.VK_A);
                 addConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK));
-                addConnectMenu.addActionListener(e -> AddConnectDialog.showAddConnectDialog(RedisFrontFrame.this, (connectInfo -> mainContentForm.addActionPerformed(connectInfo))));
+                addConnectMenu.addActionListener(e -> AddConnectDialog.showAddConnectDialog(MainWindowForm.getInstance()::addActionPerformed));
                 fileMenu.add(addConnectMenu);
                 //打开连接
                 var openConnectMenu = new JMenuItem("打开连接", KeyEvent.VK_S);
                 openConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
-                openConnectMenu.addActionListener(e -> OpenConnectDialog.showOpenConnectDialog(RedisFrontFrame.this,
+                openConnectMenu.addActionListener(e -> OpenConnectDialog.showOpenConnectDialog(
                         //打开连接回调
-                        (mainContentForm::addActionPerformed),
+                        (MainWindowForm.getInstance()::addActionPerformed),
                         //编辑连接回调
                         (connectInfo -> AddConnectDialog.showEditConnectDialog(
-                                RedisFrontFrame.this,
                                 connectInfo,
-                                (mainContentForm::addActionPerformed)
+                                (MainWindowForm.getInstance()::addActionPerformed)
                         )),
                         //删除连接回调
                         (connectInfo -> ConnectService.service.delete(connectInfo.id())))
@@ -91,8 +86,7 @@ public class RedisFrontFrame extends JXFrame {
                 settingMenu.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        SettingDialog.showSettingDialog(RedisFrontFrame.this);
-
+                        SettingDialog.showSettingDialog();
                     }
                 });
                 add(settingMenu);

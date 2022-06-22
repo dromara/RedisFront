@@ -4,6 +4,7 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
+import com.redisfront.util.Fn;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,6 +21,15 @@ public class _NoneForm {
     private JLabel openLabel;
     private JLabel newKeyLabel;
     private JLabel openKeyLabel;
+
+    private static _NoneForm noneForm;
+
+    public static _NoneForm getInstance() {
+        if (Fn.isNull(noneForm)) {
+            noneForm = new _NoneForm();
+        }
+        return noneForm;
+    }
 
     public JPanel getContentPanel() {
         return contentPanel;

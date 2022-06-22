@@ -1,23 +1,27 @@
 package com.redisfront.ui.component;
 
-import com.redisfront.common.base.AbstractTerminalComponent;
-import com.redisfront.common.enums.ConnectEnum;
-import com.redisfront.common.util.RedisUtil;
+import com.redisfront.constant.ConnectEnum;
 import com.redisfront.model.ConnectInfo;
+import com.redisfront.ui.base.AbstractTerminalComponent;
+import com.redisfront.util.RedisUtil;
 
 import java.util.List;
 
 public class TerminalComponent extends AbstractTerminalComponent {
-    private final String database;
+    private ConnectInfo connectInfo;
+    private static TerminalComponent terminalComponent;
 
-    public TerminalComponent(String host, String port, String database) {
-        this.database = database;
-        super.printConnectedSuccessMessage();
+    public static TerminalComponent getInstance() {
+        if (terminalComponent == null) {
+            terminalComponent = new TerminalComponent();
+        }
+        return terminalComponent;
     }
 
-    public TerminalComponent() {
-        this.database = "0";
+    public TerminalComponent init(ConnectInfo connectInfo) {
+        this.connectInfo = connectInfo;
         super.printConnectedSuccessMessage();
+        return this;
     }
 
     @Override
@@ -55,7 +59,7 @@ public class TerminalComponent extends AbstractTerminalComponent {
 
     @Override
     protected String databaseName() {
-        return database;
+        return String.valueOf(connectInfo.database());
     }
 
 }

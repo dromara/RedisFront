@@ -1,7 +1,5 @@
-package com.redisfront.common.util;
+package com.redisfront.util;
 
-import com.redisfront.common.func.Fn;
-import com.redisfront.common.ssl.SocketFactory;
 import com.redisfront.model.ConnectInfo;
 import redis.clients.jedis.*;
 import redis.clients.jedis.util.SafeEncoder;
@@ -43,7 +41,7 @@ public class RedisUtil {
     private static DefaultJedisClientConfig createJedisClientConfig(ConnectInfo connect) throws Exception {
         if (connect.ssl()) {
             if (Fn.isNotNull(connect.sslConfig())) {
-                var sslSocketFactory = SocketFactory.getSocketFactory(connect.sslConfig().publicKeyFilePath(), connect.sslConfig().grantFilePath(), connect.sslConfig().privateKeyFilePath(), connect.sslConfig().password());
+                var sslSocketFactory = SslUtil.getSocketFactory(connect.sslConfig().publicKeyFilePath(), connect.sslConfig().grantFilePath(), connect.sslConfig().privateKeyFilePath(), connect.sslConfig().password());
                 return DefaultJedisClientConfig
                         .builder()
                         .password(connect.password())

@@ -1,7 +1,7 @@
-package com.redisfront.common.base;
+package com.redisfront.ui.base;
 
-import com.redisfront.common.func.Fn;
 import com.redisfront.model.ConnectInfo;
+import com.redisfront.util.Fn;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -67,7 +67,7 @@ public abstract class AbstractTerminalComponent extends JPanel implements KeyLis
             var subEndLength = terminal.getSelectionEnd() - 1;
             if ((subStartLength < subEndLength)) {
                 String input = terminal.getText().substring(subStartLength, subEndLength);
-                if(Fn.isNotEmpty(input)) {
+                if (Fn.isNotEmpty(input)) {
                     this.inputProcessHandler(input.trim());
                 }
             }
