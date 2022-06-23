@@ -5,10 +5,7 @@ import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.impl.RedisServiceImpl;
 import com.redisfront.util.Fn;
-import redis.clients.jedis.ClusterPipeline;
-import redis.clients.jedis.DefaultJedisClientConfig;
-import redis.clients.jedis.JedisClientConfig;
-import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +24,14 @@ public interface RedisService {
      * @return
      */
     JedisCluster getJedisCluster(ConnectInfo connectInfo);
+
+    /**
+     * 获取 JedisCluster
+     *
+     * @param connectInfo
+     * @return
+     */
+    Jedis getJedis(ConnectInfo connectInfo);
 
     /**
      * redis ping

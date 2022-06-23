@@ -42,7 +42,7 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="3fc8c" class="javax.swing.JTextField" binding="textField1" default-binding="true">
+              <component id="3fc8c" class="javax.swing.JTextField" binding="searchTextField" custom-create="true">
                 <constraints border-constraint="Center"/>
                 <properties/>
               </component>
@@ -55,7 +55,7 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="2fb53" class="javax.swing.JTree" binding="keyTree">
+          <component id="2fb53" class="javax.swing.JTree" binding="keyTree" custom-create="true">
             <constraints border-constraint="Center"/>
             <properties/>
           </component>

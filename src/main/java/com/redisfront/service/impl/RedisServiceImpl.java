@@ -44,6 +44,11 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
+    public Jedis getJedis(ConnectInfo connectInfo) {
+        return new Jedis(connectInfo.host(), connectInfo.port(), getJedisClientConfig(connectInfo));
+    }
+
+    @Override
     public Boolean ping(ConnectInfo connectInfo) {
         try (var jedis = new Jedis(connectInfo.host(), connectInfo.port(), getJedisClientConfig(connectInfo))) {
             return Fn.equal(jedis.ping(), "PONG");

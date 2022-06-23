@@ -14,6 +14,8 @@ import com.redisfront.util.MsgUtil;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.function.BiConsumer;
 
 public class MainWindowForm {
@@ -70,12 +72,23 @@ public class MainWindowForm {
         //SHOW CLOSE BUTTON
         tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_TOOLTIPTEXT, "关闭连接");
         //SHOW CLOSE BUTTON Callback
-        tabPanel.putClientProperty("JTabbedPane.tabCloseCallback", (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
+        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
             tabPanel.remove(tabIndex);
             if (tabbedPane.getTabCount() == 0) {
                 contentPanel.add(MainNoneForm.getInstance().getContentPanel(), BorderLayout.CENTER, 0);
             }
         });
+
+        tabPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                if (MouseEvent.BUTTON3 == e.getButton()) {
+
+                }
+            }
+        });
+
         tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, SwingConstants.LEADING);
         tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_LEADING);
         tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
@@ -131,4 +144,5 @@ public class MainWindowForm {
     public JComponent $$$getRootComponent$$$() {
         return contentPanel;
     }
+
 }

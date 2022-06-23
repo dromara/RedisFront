@@ -13,6 +13,8 @@ import com.redisfront.util.MsgUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -73,9 +75,9 @@ public class MainTabbedPanel extends JPanel {
         rightToolBar.add(memoryInfo);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, rightToolBar);
 
-        contentPanel.addTab("数据", new FlatSVGIcon("icons/db_key2.svg"), DataSplitPanel.newInstance(connectInfo));
-        contentPanel.addTab("命令", new FlatSVGIcon("icons/db_cli2.svg"), TerminalComponent.newInstance(connectInfo));
-        contentPanel.addTab("信息", new FlatSVGIcon("icons/db_report2.svg"), new DataSearchForm().getContentPanel());
+        contentPanel.addTab("数据", new FlatSVGIcon("icons/db_key2.svg"), DataSplitPanel.newInstance(connectInfo), "数据界面");
+        contentPanel.addTab("命令", new FlatSVGIcon("icons/db_cli2.svg"), TerminalComponent.newInstance(connectInfo), "命令界面");
+        contentPanel.addTab("信息", new FlatSVGIcon("icons/db_report2.svg"), DataSearchForm.newInstance().getContentPanel(), "信息界面");
 
         //tab 切换事件
         contentPanel.addChangeListener(e -> {
@@ -88,11 +90,13 @@ public class MainTabbedPanel extends JPanel {
             if (component instanceof DataSplitPanel dataSplitPanel) {
                 dataSplitPanel.ping();
             }
-
-
         });
-        add(contentPanel, BorderLayout.CENTER);
 
+        add(contentPanel, BorderLayout.CENTER);
+        threadInit(connectInfo, keysInfo, cupInfo, memoryInfo);
+    }
+
+    private void threadInit(ConnectInfo connectInfo, FlatLabel keysInfo, FlatLabel cupInfo, FlatLabel memoryInfo) {
         ScheduledExecutorService serviceStartPerSecond = Executors.newSingleThreadScheduledExecutor();
         serviceStartPerSecond.scheduleAtFixedRate(() -> {
             Long keysCount = RedisService.service.getKeyCount(connectInfo);

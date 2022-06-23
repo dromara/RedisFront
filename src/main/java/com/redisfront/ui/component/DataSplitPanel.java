@@ -4,6 +4,7 @@ import com.formdev.flatlaf.extras.components.FlatTextPane;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisService;
 import com.redisfront.ui.form.DataSearchForm;
+import com.redisfront.ui.form.DataViewForm;
 import com.redisfront.util.MsgUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,9 @@ public class DataSplitPanel extends JSplitPane {
     }
 
     public void init() {
-        setLeftComponent(DataSearchForm.newInstance().getContentPanel());
+        DataSearchForm searchForm = DataSearchForm.newInstance();
+        DataViewForm viewForm = DataViewForm.newInstance();
+        setLeftComponent(searchForm.getContentPanel());
         setRightComponent(new FlatTextPane());
     }
 

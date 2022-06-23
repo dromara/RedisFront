@@ -2,23 +2,21 @@ package com.redisfront.model;
 
 import com.redisfront.constant.NodeTypeEnum;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+
 /**
  * NodeInfo
  *
  * @author Jin
  */
 
-public class TreeNodeInfo {
+public class TreeNodeInfo extends DefaultMutableTreeNode {
 
     private String title;
-    private String icon;
-    private NodeTypeEnum nodeTypeEnum;
     private String key;
 
-    public TreeNodeInfo(String title, String icon, NodeTypeEnum nodeTypeEnum, String key) {
+    public TreeNodeInfo(String title, String key) {
         this.title = title;
-        this.icon = icon;
-        this.nodeTypeEnum = nodeTypeEnum;
         this.key = key;
     }
 
@@ -31,23 +29,6 @@ public class TreeNodeInfo {
         return this;
     }
 
-    public String icon() {
-        return icon;
-    }
-
-    public TreeNodeInfo setIcon(String icon) {
-        this.icon = icon;
-        return this;
-    }
-
-    public NodeTypeEnum nodeTypeEnum() {
-        return nodeTypeEnum;
-    }
-
-    public TreeNodeInfo setNodeTypeEnum(NodeTypeEnum nodeTypeEnum) {
-        this.nodeTypeEnum = nodeTypeEnum;
-        return this;
-    }
 
     public String key() {
         return key;
@@ -57,4 +38,20 @@ public class TreeNodeInfo {
         this.key = key;
         return this;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TreeNodeInfo that = (TreeNodeInfo) o;
+
+        return key.equals(that.key);
+    }
+
+    @Override
+    public int hashCode() {
+        return key.hashCode();
+    }
+
 }
