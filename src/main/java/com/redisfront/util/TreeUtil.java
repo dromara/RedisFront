@@ -1,10 +1,12 @@
 package com.redisfront.util;
 
-import com.redisfront.constant.NodeTypeEnum;
 import com.redisfront.model.TreeNodeInfo;
 
+import javax.swing.tree.DefaultTreeModel;
 import java.io.Serial;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * TreeUtil
@@ -13,11 +15,21 @@ import java.util.*;
  */
 public class TreeUtil {
 
-    public static List<TreeNodeInfo> toTreeNodeInfoList(Set<String> rows, String delim) {
-        StringTreeMap stringTreeMap = toStringTreeMap(rows,  delim);
-        return convertTreeNodeInfo(stringTreeMap);
+    public static DefaultTreeModel toTreeModel(Set<String> rows, String delim) {
+        var rootNode = new TreeNodeInfo();
+        var stringTreeMap = toStringTreeMap(rows, delim);
+        var treeNodeInfos = convertTreeNodeInfoList(stringTreeMap, "");
+        treeNodeInfos.forEach(rootNode::add);
+        return new DefaultTreeModel(rootNode);
     }
 
+    /**
+     * 字符串集合转 StringTreeMap
+     *
+     * @param rows  字符串集合
+     * @param delim 分隔符
+     * @return StringTreeMap
+     */
     public static StringTreeMap toStringTreeMap(Set<String> rows, String delim) {
         var root = new StringTreeMap();
         rows.stream().parallel().forEach(row -> {
@@ -34,11 +46,19 @@ public class TreeUtil {
         return root;
     }
 
-    public static List<TreeNodeInfo> convertTreeNodeInfo(StringTreeMap m) {
-        List<TreeNodeInfo> treeNodeInfos = new ArrayList<>();
+
+    /**
+     * 递归转换TreeNode集合
+     *
+     * @param m StringTreeMap
+     * @return Set<TreeNodeInfo>
+     */
+    public static Set<TreeNodeInfo> convertTreeNodeInfoList(StringTreeMap m, String parentKey) {
+        Set<TreeNodeInfo> treeNodeInfos = new HashSet<>();
         m.entrySet().stream().parallel().forEach(treeMapEntry -> {
-            var treeNodeInfo = new TreeNodeInfo(treeMapEntry.getKey(), treeMapEntry.getKey());
-            convertTreeNodeInfo(treeMapEntry.getValue()).stream().parallel().forEach(treeNodeInfo::add);
+            var fullKey = (Fn.isEmpty(parentKey) ? "" : parentKey.concat(":")) + treeMapEntry.getKey();
+            var treeNodeInfo = new TreeNodeInfo(treeMapEntry.getKey(), fullKey);
+            convertTreeNodeInfoList(treeMapEntry.getValue(), fullKey).stream().parallel().forEach(treeNodeInfo::add);
             treeNodeInfos.add(treeNodeInfo);
         });
         return treeNodeInfos;

@@ -1,7 +1,5 @@
 package com.redisfront.model;
 
-import com.redisfront.constant.NodeTypeEnum;
-
 import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
@@ -14,6 +12,9 @@ public class TreeNodeInfo extends DefaultMutableTreeNode {
 
     private String title;
     private String key;
+
+    public TreeNodeInfo() {
+    }
 
     public TreeNodeInfo(String title, String key) {
         this.title = title;
@@ -50,8 +51,7 @@ public class TreeNodeInfo extends DefaultMutableTreeNode {
     }
 
     @Override
-    public int hashCode() {
-        return key.hashCode();
+    public String toString() {
+        return title;
     }
-
 }

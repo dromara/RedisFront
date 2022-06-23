@@ -4,7 +4,6 @@ import cn.hutool.core.lang.Assert;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
-import com.redisfront.constant.NodeTypeEnum;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.model.TreeNodeInfo;
 import com.redisfront.service.RedisService;
@@ -13,17 +12,20 @@ import com.redisfront.util.TreeUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class DataSearchForm {
     private JPanel contentPanel;
     private JTree keyTree;
-    private JComboBox comboBox1;
     private JTextField searchTextField;
-    private JComboBox databaseComboBox;
+    private JComboBox<Integer> databaseComboBox;
     private JButton addBtn;
     private JPanel treePanel;
     private JButton refreshBtn;
@@ -60,26 +62,15 @@ public class DataSearchForm {
 
 
     public void init() {
-        Assert.isNull(connectInfo, () -> new RuntimeException("connectInfo 不能为空"));
-        Assert.isNull(nodeClickCallback, () -> new RuntimeException("nodeClickCallback 不能为空"));
+        Assert.notNull(connectInfo, () -> new RuntimeException("connectInfo 不能为空"));
+        Assert.notNull(nodeClickCallback, () -> new RuntimeException("nodeClickCallback 不能为空"));
         try (var jedis = RedisService.service.getJedis(this.connectInfo)) {
             Set<String> keySet = jedis.keys("*");
-            TreeUtil.toTreeNodeInfoList(keySet, ":");
-
+            DefaultTreeModel treeModel = TreeUtil.toTreeModel(keySet, ":");
+            keyTree.setModel(treeModel);
         } catch (Exception e) {
             MsgUtil.showErrorDialog("Redis Error", e);
         }
-    }
-
-    Set<TreeNodeInfo> strToTree(Set<String> keySet, String name) {
-        return keySet
-                .stream()
-                .parallel()
-                .filter(s -> s.contains(name))
-                .map(s -> s.split(name))
-                .map(s -> new TreeNodeInfo(s[0], s[0]))
-                .peek(treeNodeInfo -> strToTree(keySet, treeNodeInfo.key().concat(":")).forEach(treeNodeInfo::add))
-                .collect(Collectors.toSet());
     }
 
 
@@ -106,8 +97,7 @@ public class DataSearchForm {
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new BorderLayout(0, 0));
         panel1.add(panel2, BorderLayout.NORTH);
-        comboBox1 = new JComboBox();
-        panel2.add(comboBox1, BorderLayout.WEST);
+        panel2.add(databaseComboBox, BorderLayout.WEST);
         addBtn.setHorizontalAlignment(0);
         addBtn.setHorizontalTextPosition(11);
         addBtn.setText("新增");
@@ -120,7 +110,9 @@ public class DataSearchForm {
         panel3.add(searchTextField, BorderLayout.CENTER);
         treePanel.setLayout(new BorderLayout(0, 0));
         contentPanel.add(treePanel, BorderLayout.CENTER);
-        treePanel.add(keyTree, BorderLayout.CENTER);
+        final JScrollPane scrollPane1 = new JScrollPane();
+        treePanel.add(scrollPane1, BorderLayout.CENTER);
+        scrollPane1.setViewportView(keyTree);
     }
 
     /**
@@ -137,16 +129,24 @@ public class DataSearchForm {
         addBtn = new JButton();
         refreshBtn = new JButton();
         refreshBtn.setIcon(new FlatSVGIcon("icons/refresh.svg"));
-        databaseComboBox = new JComboBox();
+        databaseComboBox = new JComboBox<>();
+        ArrayList<Integer> dbList = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 16));
+        for (Integer db : dbList) {
+            databaseComboBox.addItem(db);
+        }
+        databaseComboBox.addActionListener(e -> {
+            Integer db = (Integer) databaseComboBox.getSelectedItem();
+            this.connectInfo.setDatabase(db);
+            this.init();
+        });
         treePanel = new JPanel();
         treePanel.setBorder(new EmptyBorder(3, 2, 2, 2));
         searchTextField = new JTextField();
-        searchTextField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search keys...");
+        searchTextField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入关键字...");
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, new JButton(new FlatSearchIcon()));
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
-
         keyTree = new JTree();
-
+        keyTree.setRootVisible(false);
         keyTree.setBorder(new EmptyBorder(5, 5, 5, 5));
 
     }

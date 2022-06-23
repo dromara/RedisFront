@@ -17,7 +17,7 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="fafaa" class="javax.swing.JComboBox" binding="comboBox1" default-binding="true">
+              <component id="fafaa" class="javax.swing.JComboBox" binding="databaseComboBox" custom-create="true">
                 <constraints border-constraint="West"/>
                 <properties/>
               </component>
@@ -55,10 +55,17 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="2fb53" class="javax.swing.JTree" binding="keyTree" custom-create="true">
+          <scrollpane id="96925">
             <constraints border-constraint="Center"/>
             <properties/>
-          </component>
+            <border type="none"/>
+            <children>
+              <component id="2fb53" class="javax.swing.JTree" binding="keyTree" custom-create="true">
+                <constraints/>
+                <properties/>
+              </component>
+            </children>
+          </scrollpane>
         </children>
       </grid>
     </children>

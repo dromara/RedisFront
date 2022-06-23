@@ -3,7 +3,6 @@ package com.redisfront.util;
 import com.redisfront.model.TreeNodeInfo;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -18,7 +17,7 @@ public class TreeUtilTest {
         rows.add("1:2:3.4");
         rows.add("1:2.2");
         rows.add("8");
-        List<TreeNodeInfo> treeNodeInfos = TreeUtil.convertTreeNodeInfo(TreeUtil.toStringTreeMap(rows, ":"));
+        Set<TreeNodeInfo> treeNodeInfos = TreeUtil.convertTreeNodeInfoList(TreeUtil.toStringTreeMap(rows, ":"), "");
         System.out.println();
     }
 

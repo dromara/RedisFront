@@ -14,6 +14,7 @@
         <flatlaf.version>2.3</flatlaf.version>
         <hutool.version>5.8.3</hutool.version>
         <jedis.version>4.2.3</jedis.version>
+        <fifesoft.version>3.2.0</fifesoft.version>
     </properties>
 
     <dependencies>
@@ -92,12 +93,12 @@
         <dependency>
             <groupId>com.fifesoft</groupId>
             <artifactId>rsyntaxtextarea</artifactId>
-            <version>3.2.0</version>
+            <version>${fifesoft.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fifesoft</groupId>
             <artifactId>rstaui</artifactId>
-            <version>3.2.0</version>
+            <version>${fifesoft.version}</version>
         </dependency>
         <!--intellij uiDesigner-->
         <dependency>
