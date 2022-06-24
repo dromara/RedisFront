@@ -4,9 +4,11 @@ import com.redisfront.model.TreeNodeInfo;
 
 import javax.swing.tree.DefaultTreeModel;
 import java.io.Serial;
-import java.util.HashSet;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 /**
  * TreeUtil
@@ -18,8 +20,8 @@ public class TreeUtil {
     public static DefaultTreeModel toTreeModel(Set<String> rows, String delim) {
         var rootNode = new TreeNodeInfo();
         var stringTreeMap = toStringTreeMap(rows, delim);
-        var treeNodeInfos = convertTreeNodeInfoList(stringTreeMap, "");
-        treeNodeInfos.forEach(rootNode::add);
+        var treeNodeInfos = convertTreeNodeInfoSet(stringTreeMap, "");
+        treeNodeInfos.stream().parallel().forEach(rootNode::add);
         return new DefaultTreeModel(rootNode);
     }
 
@@ -50,23 +52,31 @@ public class TreeUtil {
     /**
      * 递归转换TreeNode集合
      *
-     * @param m StringTreeMap
+     * @param stringTreeMap StringTreeMap
      * @return Set<TreeNodeInfo>
      */
-    public static Set<TreeNodeInfo> convertTreeNodeInfoList(StringTreeMap m, String parentKey) {
-        Set<TreeNodeInfo> treeNodeInfos = new HashSet<>();
-        m.entrySet().stream().parallel().forEach(treeMapEntry -> {
-            var fullKey = (Fn.isEmpty(parentKey) ? "" : parentKey.concat(":")) + treeMapEntry.getKey();
-            var treeNodeInfo = new TreeNodeInfo(treeMapEntry.getKey(), fullKey);
-            convertTreeNodeInfoList(treeMapEntry.getValue(), fullKey).stream().parallel().forEach(treeNodeInfo::add);
-            treeNodeInfos.add(treeNodeInfo);
-        });
-        return treeNodeInfos;
+    public static Set<TreeNodeInfo> convertTreeNodeInfoSet(StringTreeMap stringTreeMap, String parentKey) {
+        return stringTreeMap.entrySet().stream().parallel().map(treeMapEntry -> {
+            //完整的KeyName
+            var fullKeyName = (Fn.isEmpty(parentKey) ? "" : parentKey.concat(":")).concat(treeMapEntry.getKey());
+            var treeNodeInfo = new TreeNodeInfo(treeMapEntry.getKey(), fullKeyName);
+            //递归查找下级
+            convertTreeNodeInfoSet(treeMapEntry.getValue(), fullKeyName)
+                    .stream()
+                    .parallel()
+                    .forEach(treeNodeInfo::add);
+            return treeNodeInfo;
+        }).sorted().collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     static class StringTreeMap extends TreeMap<String, StringTreeMap> {
         @Serial
         private static final long serialVersionUID = 1L;
+
+        @Override
+        public Comparator<? super String> comparator() {
+            return Comparator.reverseOrder();
+        }
     }
 
 

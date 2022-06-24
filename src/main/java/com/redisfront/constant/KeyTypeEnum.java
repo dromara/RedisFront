@@ -12,6 +12,5 @@ public enum KeyTypeEnum {
     SET,
     ZSET,
     JSON,
-
     STREAM
 }

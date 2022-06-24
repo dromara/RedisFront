@@ -101,7 +101,7 @@ public class SettingDialog extends AbstractDialog<Void> {
         families.add(UIManager.getFont("defaultFont").getFontName());
         //移除列表中不存在的字体
         families.removeIf(f -> !availableFontFamilyNames.contains(f));
-        families.parallelStream().forEach(fontNameComboBox::addItem);
+        families.forEach(fontNameComboBox::addItem);
         //列表文字样式渲染
         fontNameComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override

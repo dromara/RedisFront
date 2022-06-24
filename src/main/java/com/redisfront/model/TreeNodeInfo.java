@@ -1,6 +1,7 @@
 package com.redisfront.model;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.util.Locale;
 
 /**
  * NodeInfo
@@ -8,7 +9,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
  * @author Jin
  */
 
-public class TreeNodeInfo extends DefaultMutableTreeNode {
+public class TreeNodeInfo extends DefaultMutableTreeNode implements Comparable<TreeNodeInfo> {
 
     private String title;
     private String key;
@@ -47,11 +48,17 @@ public class TreeNodeInfo extends DefaultMutableTreeNode {
 
         TreeNodeInfo that = (TreeNodeInfo) o;
 
-        return key.equals(that.key);
+        return title.equals(that.title);
     }
 
     @Override
     public String toString() {
         return title;
+    }
+
+
+    @Override
+    public int compareTo(TreeNodeInfo treeNodeInfo) {
+        return treeNodeInfo.title.compareTo(title);
     }
 }

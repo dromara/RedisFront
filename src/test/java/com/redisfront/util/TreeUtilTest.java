@@ -17,7 +17,7 @@ public class TreeUtilTest {
         rows.add("1:2:3.4");
         rows.add("1:2.2");
         rows.add("8");
-        Set<TreeNodeInfo> treeNodeInfos = TreeUtil.convertTreeNodeInfoList(TreeUtil.toStringTreeMap(rows, ":"), "");
+        Set<TreeNodeInfo> treeNodeInfos = TreeUtil.convertTreeNodeInfoSet(TreeUtil.toStringTreeMap(rows, ":"), "");
         System.out.println();
     }
 
