@@ -82,7 +82,7 @@ public class ThemeUtil {
             if (args.length > 0) {
                 UIManager.setLookAndFeel(args[0]);
             } else {
-                String theme = PrefUtil.getState().get(Constant.KEY_THEME, FlatMaterialOceanicContrastIJTheme.NAME);
+                String theme = PrefUtil.getState().get(Constant.KEY_THEME, FlatMaterialOceanicContrastIJTheme.class.getName());
                 if (theme.startsWith("R_")) {
                     IntelliJTheme.setup(ThemeUtil.class.getResourceAsStream(THEMES_PACKAGE + theme.replace("R_", "")));
                 } else {
