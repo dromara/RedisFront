@@ -207,6 +207,10 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                 }
             }
         });
+
+        testBtn.addActionListener(e -> {
+
+        });
     }
 
     private void cancelActionPerformed(ActionEvent actionEvent) {

@@ -5,6 +5,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.util.Fn;
+import com.redisfront.util.LocaleUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,6 +23,9 @@ public class MainNoneForm {
     private JLabel newKeyLabel;
     private JLabel openKeyLabel;
 
+    private   LocaleUtil.BundleInfo NEW_LABEL = LocaleUtil.get("MainNoneForm.NewLabel");
+    private   LocaleUtil.BundleInfo OPEN_LABEL = LocaleUtil.get("MainNoneForm.OpenLabel");
+
     private static MainNoneForm noneForm;
 
     public static MainNoneForm getInstance() {
@@ -38,8 +42,10 @@ public class MainNoneForm {
     public MainNoneForm() {
         $$$setupUI$$$();
         newLabel.putClientProperty("FlatLaf.styleClass", "h3");
+        newLabel.setText(NEW_LABEL.title());
         newKeyLabel.putClientProperty("FlatLaf.styleClass", "h3");
         openLabel.putClientProperty("FlatLaf.styleClass", "h3");
+        openLabel.setText(OPEN_LABEL.title());
         openKeyLabel.putClientProperty("FlatLaf.styleClass", "h3");
     }
 

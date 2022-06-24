@@ -23,5 +23,7 @@ public class Constant {
 
     public static final String KEY_APP_DATABASE_INIT = "appDatabaseInit";
 
+    public static final String KEY_LANGUAGE = "language";
+
     public static final String DATA_PATH = System.getProperty("user.home") + File.separator + "redis-front";
 }

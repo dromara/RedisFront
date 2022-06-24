@@ -100,13 +100,11 @@
             <artifactId>rstaui</artifactId>
             <version>${fifesoft.version}</version>
         </dependency>
-        <!--intellij uiDesigner-->
+        <!--intellij -->
         <dependency>
             <groupId>com.intellij</groupId>
-            <artifactId>uiDesigner</artifactId>
-            <version>1.0.0</version>
-            <scope>system</scope>
-            <systemPath>${pom.basedir}/lib/forms_rt.jar</systemPath>
+            <artifactId>forms_rt</artifactId>
+            <version>7.0.3</version>
         </dependency>
         <!--logback-->
         <dependency>

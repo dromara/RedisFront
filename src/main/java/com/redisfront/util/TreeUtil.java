@@ -21,7 +21,7 @@ public class TreeUtil {
         var rootNode = new TreeNodeInfo();
         var stringTreeMap = toStringTreeMap(rows, delim);
         var treeNodeInfos = convertTreeNodeInfoSet(stringTreeMap, "");
-        treeNodeInfos.stream().parallel().forEach(rootNode::add);
+        treeNodeInfos.stream().sorted().forEach(rootNode::add);
         return new DefaultTreeModel(rootNode);
     }
 
@@ -66,7 +66,7 @@ public class TreeUtil {
                     .parallel()
                     .forEach(treeNodeInfo::add);
             return treeNodeInfo;
-        }).sorted().collect(Collectors.toCollection(LinkedHashSet::new));
+        }).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     static class StringTreeMap extends TreeMap<String, StringTreeMap> {

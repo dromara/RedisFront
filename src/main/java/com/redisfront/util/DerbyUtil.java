@@ -20,7 +20,7 @@ public class DerbyUtil {
         return new DerbyUtil();
     }
 
-    public static void init() {
+    public static void init() throws Exception {
         try {
             System.setProperty("derby.stream.error.file", Constant.DATA_PATH + File.separator + "derby" + File.separator + "derby.log");
             Class.forName("org.apache.derby.iapi.jdbc.InternalDriver");
@@ -28,6 +28,7 @@ public class DerbyUtil {
             log.info("derby 初始化成功！");
         } catch (ClassNotFoundException | SQLException e) {
             log.error(e.getMessage());
+            throw new Exception(e);
         }
     }
 

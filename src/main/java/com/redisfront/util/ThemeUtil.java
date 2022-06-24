@@ -1,5 +1,6 @@
 package com.redisfront.util;
 
+import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialOceanicContrastIJTheme;
 import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.redisfront.RedisFrontApplication;
 import com.redisfront.constant.Constant;
@@ -10,7 +11,6 @@ import com.formdev.flatlaf.util.LoggingFacade;
 
 import javax.swing.*;
 import javax.swing.text.StyleContext;
-import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -36,7 +36,7 @@ public class ThemeUtil {
         loadBundledThemes();
     }
 
-    public static void changeTheme(Component c, ThemeInfo themeInfo) {
+    public static void changeTheme(ThemeInfo themeInfo) {
         if (themeInfo == null)
             return;
         if (themeInfo.lafClassName() != null) {
@@ -82,7 +82,7 @@ public class ThemeUtil {
             if (args.length > 0) {
                 UIManager.setLookAndFeel(args[0]);
             } else {
-                String theme = PrefUtil.getState().get(Constant.KEY_THEME, FlatDarculaLaf.class.getName());
+                String theme = PrefUtil.getState().get(Constant.KEY_THEME, FlatMaterialOceanicContrastIJTheme.NAME);
                 if (theme.startsWith("R_")) {
                     IntelliJTheme.setup(ThemeUtil.class.getResourceAsStream(THEMES_PACKAGE + theme.replace("R_", "")));
                 } else {

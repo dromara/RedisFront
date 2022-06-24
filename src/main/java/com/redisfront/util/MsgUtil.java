@@ -3,7 +3,6 @@ package com.redisfront.util;
 import com.redisfront.RedisFrontApplication;
 
 import javax.swing.*;
-import java.awt.*;
 
 /**
  * DialogUtil
@@ -28,6 +27,13 @@ public class MsgUtil {
         JOptionPane.showMessageDialog(SwingUtilities.windowForComponent(RedisFrontApplication.frame),
                 message + "\n\n" + ex.getMessage(),
                 "RedisFront", JOptionPane.ERROR_MESSAGE);
+    }
+
+
+    public static int showConfirmDialog(String message,int optionType) {
+        return JOptionPane.showConfirmDialog(SwingUtilities.windowForComponent(RedisFrontApplication.frame),
+                message,
+                "RedisFront", optionType, JOptionPane.INFORMATION_MESSAGE);
     }
 
 }
