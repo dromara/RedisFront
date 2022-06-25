@@ -38,9 +38,9 @@ public class RedisFrontApplication {
 
         FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", "#d81e06"));
 
-        System.setProperty("LOG_FILE", Constant.LOG_FILE_PATH);
+        System.setProperty(Constant.LOG_FILE, Constant.LOG_FILE_PATH);
 
-        PrefUtil.init("/redis-front");
+        PrefUtil.init(Constant.ROOT_PATH);
 
         SwingUtilities.invokeLater(() -> {
 

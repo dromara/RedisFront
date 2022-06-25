@@ -1,8 +1,6 @@
 package com.redisfront.ui.dialog;
 
 
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.swing.DesktopUtil;
 import com.formdev.flatlaf.*;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.ui.FlatUIUtils;
@@ -24,9 +22,6 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 import java.util.*;
 
@@ -267,30 +262,15 @@ public class SettingDialog extends AbstractDialog<Void> {
         String oldLanguage = PrefUtil.getState().get(Constant.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
         assert newLanguage != null;
         if (Fn.notEqual(newLanguage.getValue(), oldLanguage)) {
+            Locale.setDefault(Locale.forLanguageTag((String) newLanguage.getValue()));
             PrefUtil.getState().put(Constant.KEY_LANGUAGE, (String) newLanguage.getValue());
             var res = MsgUtil.showConfirmDialog("语言已变更，重启后生效！\n 是否立即重启？", JOptionPane.YES_NO_OPTION);
             if (res == 0) {
-                String exePath = System.getProperty("exe.path");
-                if (Fn.isNotEmpty(exePath)) {
-                    File file = Arrays.stream(FileUtil.ls(exePath)).filter(this::checkRunFile).findAny().orElseThrow();
-                    log.info(file.getName());
-                    DesktopUtil.open(file);
-                } else {
-                    URL url = SettingDialog.class.getProtectionDomain().getCodeSource().getLocation();
-                    if (!Fn.endsWith(url.toString(), "/")) {
-                        DesktopUtil.open(new File(url.getFile()));
-                    }
-                }
                 RedisFrontApplication.frame.dispose();
                 System.exit(0);
             }
         }
         dispose();
-    }
-
-    private boolean checkRunFile(File file) {
-        String[] suffix = new String[]{"exe", "dmg", "rpm"};
-        return file.isFile() && Arrays.stream(suffix).anyMatch((s) -> Fn.equal(FileUtil.getType(file), s));
     }
 
     private void onCancel() {
