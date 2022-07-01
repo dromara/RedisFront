@@ -192,7 +192,7 @@ public class ConnectInfo implements Serializable {
     }
 
     public String user() {
-        return Fn.isEmpty(username) ? null : username;
+        return Fn.isEmpty(username) ? null : Fn.equal(username.toLowerCase(), "null") ? "" : username;
     }
 
     public ConnectInfo setUsername(String username) {
@@ -201,7 +201,7 @@ public class ConnectInfo implements Serializable {
     }
 
     public String password() {
-        return Fn.isEmpty(password) ? null : password;
+        return Fn.isEmpty(password) ? null : Fn.equal(password.toLowerCase(), "null") ? "" : password;
     }
 
     public ConnectInfo setPassword(String password) {
