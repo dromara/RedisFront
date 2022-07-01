@@ -4,7 +4,11 @@ import com.redisfront.ui.component.TextEditorComponent;
 
 import javax.swing.*;
 import java.awt.*;
-
+/**
+ * DataChartsForm
+ *
+ * @author Jin
+ */
 public class DataChartsForm {
 
     private JPanel contentPanel;

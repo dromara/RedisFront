@@ -13,8 +13,6 @@ import com.redisfront.util.MsgUtil;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -99,7 +97,7 @@ public class MainTabbedPanel extends JPanel {
     private void threadInit(ConnectInfo connectInfo, FlatLabel keysInfo, FlatLabel cupInfo, FlatLabel memoryInfo) {
         ScheduledExecutorService serviceStartPerSecond = Executors.newSingleThreadScheduledExecutor();
         serviceStartPerSecond.scheduleAtFixedRate(() -> {
-            Long keysCount = RedisService.service.getKeyCount(connectInfo);
+            Long keysCount = RedisService.service.countDatabaseKey(connectInfo);
             keysInfo.setText(keysCount.toString());
             Map<String, Object> stats = RedisService.service.getStatInfo(connectInfo);
             cupInfo.setText((String) stats.get("instantaneous_ops_per_sec"));

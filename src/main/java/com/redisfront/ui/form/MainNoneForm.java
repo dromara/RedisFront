@@ -11,7 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * ConnectForm
+ * MainNoneForm
  *
  * @author Jin
  */
@@ -23,8 +23,8 @@ public class MainNoneForm {
     private JLabel newKeyLabel;
     private JLabel openKeyLabel;
 
-    private   LocaleUtil.BundleInfo NEW_LABEL = LocaleUtil.get("MainNoneForm.NewLabel");
-    private   LocaleUtil.BundleInfo OPEN_LABEL = LocaleUtil.get("MainNoneForm.OpenLabel");
+    private static final LocaleUtil.BundleInfo NEW_LABEL = LocaleUtil.get("MainNoneForm.NewLabel");
+    private static final LocaleUtil.BundleInfo OPEN_LABEL = LocaleUtil.get("MainNoneForm.OpenLabel");
 
     private static MainNoneForm noneForm;
 

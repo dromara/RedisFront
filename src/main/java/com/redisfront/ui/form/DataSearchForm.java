@@ -6,19 +6,25 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.model.TreeNodeInfo;
-import com.redisfront.service.RedisService;
-import com.redisfront.util.MsgUtil;
+import com.redisfront.util.LettuceUtil;
 import com.redisfront.util.TreeUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.JTextComponent;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * DataSearchForm
+ *
+ * @author Jin
+ */
 public class DataSearchForm {
     private JPanel contentPanel;
     private JTree keyTree;
@@ -62,13 +68,13 @@ public class DataSearchForm {
     public void init() {
         Assert.notNull(connectInfo, () -> new RuntimeException("connectInfo 不能为空"));
         Assert.notNull(nodeClickCallback, () -> new RuntimeException("nodeClickCallback 不能为空"));
-        try (var jedis = RedisService.service.getJedis(this.connectInfo)) {
-            Set<String> keySet = jedis.keys("*");
-            DefaultTreeModel treeModel = TreeUtil.toTreeModel(keySet, ":");
+
+        LettuceUtil.run(connectInfo, redisCommands -> {
+            var list = redisCommands.keys("*");
+            var treeModel = TreeUtil.toTreeModel(new HashSet<>(list), ":");
             keyTree.setModel(treeModel);
-        } catch (Exception e) {
-            MsgUtil.showErrorDialog("Redis Error", e);
-        }
+        });
+
     }
 
 
@@ -128,12 +134,12 @@ public class DataSearchForm {
         refreshBtn = new JButton();
         refreshBtn.setIcon(new FlatSVGIcon("icons/refresh.svg"));
         databaseComboBox = new JComboBox<>();
-        ArrayList<Integer> dbList = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 16));
-        for (Integer db : dbList) {
+        var dbList = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 16));
+        for (var db : dbList) {
             databaseComboBox.addItem(db);
         }
         databaseComboBox.addActionListener(e -> {
-            Integer db = (Integer) databaseComboBox.getSelectedItem();
+            var db = (Integer) databaseComboBox.getSelectedItem();
             this.connectInfo.setDatabase(db);
             this.init();
         });
@@ -141,8 +147,22 @@ public class DataSearchForm {
         treePanel.setBorder(new EmptyBorder(3, 2, 2, 2));
         searchTextField = new JTextField();
         searchTextField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入关键字...");
-        searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, new JButton(new FlatSearchIcon()));
+
+        var searchBtn = new JButton(new FlatSearchIcon());
+        searchBtn.addActionListener(actionEvent -> LettuceUtil.run(connectInfo, redisCommands -> {
+            var list = redisCommands.keys(searchTextField.getText());
+            var treeModel = TreeUtil.toTreeModel(new HashSet<>(list), ":");
+            keyTree.setModel(treeModel);
+        }));
+        searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchBtn);
+
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> LettuceUtil.run(connectInfo, redisCommands -> {
+            var list = redisCommands.keys("*");
+            var treeModel = TreeUtil.toTreeModel(new HashSet<>(list), ":");
+            keyTree.setModel(treeModel);
+        }));
+
         keyTree = new JTree();
         keyTree.setRootVisible(false);
         keyTree.setBorder(new EmptyBorder(5, 5, 5, 5));

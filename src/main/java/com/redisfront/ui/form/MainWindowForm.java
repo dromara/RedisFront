@@ -17,7 +17,11 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.function.BiConsumer;
-
+/**
+ * MainWindowForm
+ *
+ * @author Jin
+ */
 public class MainWindowForm {
     private JPanel contentPanel;
     private JTabbedPane tabPanel;

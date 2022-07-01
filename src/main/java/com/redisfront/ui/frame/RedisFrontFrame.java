@@ -8,7 +8,11 @@ import org.jdesktop.swingx.JXFrame;
 
 import javax.swing.*;
 import java.awt.*;
-
+/**
+ * RedisFrontFrame
+ *
+ * @author Jin
+ */
 public class RedisFrontFrame extends JXFrame {
 
     public RedisFrontFrame() {

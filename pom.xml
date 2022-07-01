@@ -18,6 +18,18 @@
     </properties>
 
     <dependencies>
+        <!--lettuce redis -->
+        <dependency>
+            <groupId>io.lettuce</groupId>
+            <artifactId>lettuce-core</artifactId>
+            <version>6.1.8.RELEASE</version>
+        </dependency>
+        <!--GSON -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.9.0</version>
+        </dependency>
         <!--flatlaf -->
         <dependency>
             <groupId>com.formdev</groupId>
@@ -54,6 +66,7 @@
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
             <version>${jedis.version}</version>
+            <scope>provided</scope>
         </dependency>
         <!--HuTool -->
         <dependency>

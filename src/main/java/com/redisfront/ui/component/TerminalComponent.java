@@ -4,12 +4,11 @@ import cn.hutool.core.date.DateUtil;
 import com.redisfront.constant.ConnectEnum;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisService;
-import com.redisfront.util.RedisUtil;
+import com.redisfront.util.TelnetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
-import java.util.List;
 
 public class TerminalComponent extends AbstractTerminal {
     private static final Logger log = LoggerFactory.getLogger(TerminalComponent.class);
@@ -44,30 +43,14 @@ public class TerminalComponent extends AbstractTerminal {
     @Override
     protected void inputProcessHandler(String input) {
         try {
-            Object s = RedisUtil.sendCommand(connectInfo(), false, input);
-            String formatStr = format(s, "");
-            print(formatStr);
+            String str = TelnetUtil.sendCommand(connectInfo(),  input);
+            println(str);
         } catch (Exception e) {
             print(e.getMessage());
         }
     }
 
-    private String format(Object s, String space) {
-        StringBuilder sb = new StringBuilder();
-        if (s instanceof List<?> list) {
-            for (int i = 0; i < list.size(); i++) {
-                Object item = list.get(i);
-                if (item instanceof List itemList) {
-                    sb.append(space).append(i + 1).append(" ) ").append("\n").append(format(itemList, "  ")).append("\n");
-                } else {
-                    sb.append(space).append(i + 1).append(" ) ").append(space).append(item).append("\n");
-                }
-            }
-        } else {
-            sb.append(s);
-        }
-        return sb.toString();
-    }
+
 
     @Override
     protected ConnectInfo connectInfo() {

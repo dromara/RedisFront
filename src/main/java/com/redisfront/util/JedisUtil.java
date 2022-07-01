@@ -13,9 +13,9 @@ import java.util.List;
  *
  * @author Jin
  */
-public class RedisUtil {
+public class JedisUtil {
 
-    public static Object sendCommand(ConnectInfo connect, Boolean enableCluster, String inputText) throws Exception {
+    public static Object sendCommand(ConnectInfo connect, String inputText) throws Exception {
         var connection = new Connection(new HostAndPort(connect.host(), connect.port()), createJedisClientConfig(connect));
         try (connection) {
             if (connection.ping()) {
@@ -25,10 +25,8 @@ public class RedisUtil {
                         .findAny()
                         .orElseThrow(() -> new Throwable("ERR unknown command '" + inputText + "'"));
                 commandList.remove(0);
-                if (enableCluster) {
-                    return connection.executeCommand(new ClusterCommandArguments(command).addObjects(commandList));
-                }
-                return encode(connection.executeCommand(new CommandArguments(command).addObjects(commandList)));
+                Object ret = encode(connection.executeCommand(new CommandArguments(command).addObjects(commandList)));
+                return format(ret, "");
             } else {
                 return "连接失败！";
             }
@@ -61,11 +59,28 @@ public class RedisUtil {
         }
     }
 
+    private static String format(Object s, String space) {
+        StringBuilder sb = new StringBuilder();
+        if (s instanceof List<?> list) {
+            for (int i = 0; i < list.size(); i++) {
+                Object item = list.get(i);
+                if (item instanceof List itemList) {
+                    sb.append(space).append(i + 1).append(" ) ").append("\n").append(format(itemList, "  ")).append("\n");
+                } else {
+                    sb.append(space).append(i + 1).append(" ) ").append(space).append(item).append("\n");
+                }
+            }
+        } else {
+            sb.append(s);
+        }
+        return sb.toString();
+    }
+
     private static Object encode(Object object) {
         if (object instanceof byte[] bytes) {
             return SafeEncoder.encode(bytes);
         } else if (object instanceof List<?> list) {
-            return list.stream().parallel().map(RedisUtil::encode).toList();
+            return list.stream().parallel().map(JedisUtil::encode).toList();
         } else if (object instanceof Number number) {
             return number;
         } else if (object instanceof String str) {

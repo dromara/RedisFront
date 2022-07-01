@@ -5,14 +5,19 @@ import com.formdev.flatlaf.extras.FlatInspector;
 import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
 import com.formdev.flatlaf.util.SystemInfo;
 import com.redisfront.constant.Constant;
-import com.redisfront.util.Init;
-import com.redisfront.util.*;
 import com.redisfront.ui.frame.RedisFrontFrame;
+import com.redisfront.util.Init;
+import com.redisfront.util.PrefUtil;
+import com.redisfront.util.ThemeUtil;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Collections;
-
+/**
+ * RedisFrontApplication
+ *
+ * @author Jin
+ */
 public class RedisFrontApplication {
 
     public static RedisFrontFrame frame;
