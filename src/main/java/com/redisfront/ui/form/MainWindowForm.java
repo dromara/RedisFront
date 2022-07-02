@@ -47,15 +47,16 @@ public class MainWindowForm {
     }
 
     public void addActionPerformed(ConnectInfo connectInfo) {
+
+        //set redis mode
+        connectInfo.setRedisModeEnum(RedisService.service.getRedisModeEnum(connectInfo));
+
         //存数据库
         if (Fn.equal(connectInfo.id(), 0)) {
             ConnectService.service.save(connectInfo);
         } else {
             ConnectService.service.update(connectInfo);
         }
-
-        //set redis mode
-        connectInfo.setRedisModeEnum(RedisService.service.getRedisModeEnum(connectInfo));
 
         var mainTabbedPanel = MainTabbedPanel.newInstance(connectInfo);
 

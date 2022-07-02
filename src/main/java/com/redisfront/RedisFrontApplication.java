@@ -6,13 +6,14 @@ import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
 import com.formdev.flatlaf.util.SystemInfo;
 import com.redisfront.constant.Const;
 import com.redisfront.ui.frame.RedisFrontMainFrame;
-import com.redisfront.util.Init;
+import com.redisfront.util.AppInit;
 import com.redisfront.util.PrefUtil;
 import com.redisfront.util.ThemeUtil;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Collections;
+
 /**
  * RedisFrontApplication
  *
@@ -48,10 +49,9 @@ public class RedisFrontApplication {
         PrefUtil.init(Const.ROOT_PATH);
 
         SwingUtilities.invokeLater(() -> {
-
             ThemeUtil.setupTheme(args);
 
-            Init.init();
+            AppInit.init();
 
             FlatInspector.install("ctrl shift alt X");
 

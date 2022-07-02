@@ -1,6 +1,7 @@
 package com.redisfront.ui.component;
 
 
+import com.formdev.flatlaf.ui.FlatLineBorder;
 import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rtextarea.RTextAreaBase;
 import org.fife.ui.rtextarea.RTextScrollPane;
@@ -90,6 +91,8 @@ public class TextEditorComponent extends JPanel {
         if (textArea != null) {
             updateTheme();
         }
+        var flatLineBorder = new FlatLineBorder(new Insets(1, 1, 1, 1), UIManager.getColor("Component.borderColor"));
+        setBorder(flatLineBorder);
     }
 
     public void updateTheme() {

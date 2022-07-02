@@ -58,7 +58,7 @@ public class LettuceUtil {
         var redisClient = getRedisClient(connectInfo);
         try (var connection = redisClient.connect()) {
             return function.apply(connection.sync());
-        } finally {
+        }finally {
             redisClient.shutdown();
         }
     }

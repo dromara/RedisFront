@@ -38,7 +38,7 @@ public class DataSplitPanel extends JSplitPane {
                 .newInstance();
         setLeftComponent(searchForm.getContentPanel());
         searchForm.init();
-        setRightComponent(new FlatTextPane());
+        setRightComponent(DataViewForm.newInstance().$$$getRootComponent$$$());
     }
 
 

@@ -1,6 +1,5 @@
 package com.redisfront.ui.dialog;
 
-import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.StringUtils;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
@@ -8,9 +7,12 @@ import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.RedisFrontApplication;
 import com.redisfront.constant.Enum;
 import com.redisfront.constant.UI;
+import com.redisfront.exception.RedisFrontException;
 import com.redisfront.model.ConnectInfo;
+import com.redisfront.service.RedisService;
 import com.redisfront.ui.component.AbstractDialog;
 import com.redisfront.util.Fn;
+import com.redisfront.util.MsgUtil;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -210,7 +212,16 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         });
 
         testBtn.addActionListener(e -> {
-
+            try {
+                var connectInfo = validGetConnectInfo();
+                if (RedisService.service.ping(connectInfo)) {
+                    MsgUtil.showInformationDialog("连接成功！");
+                } else {
+                    MsgUtil.showInformationDialog("连接失败！");
+                }
+            } catch (Exception exception) {
+                MsgUtil.showErrorDialog("连接失败！", exception);
+            }
         });
     }
 
@@ -220,14 +231,19 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
 
 
     private void submitActionPerformed(ActionEvent actionEvent) {
+        var connectInfo = validGetConnectInfo();
+        callback.accept(connectInfo);
+        dispose();
+    }
 
+    private ConnectInfo validGetConnectInfo() {
         if (StringUtils.isEmpty(titleField.getText())) {
             titleField.requestFocus();
-            return;
+            throw new RedisFrontException("名称不能为空！", false);
         }
         if (StringUtils.isEmpty(hostField.getText())) {
             titleField.requestFocus();
-            return;
+            throw new RedisFrontException("主机不能为空", false);
         }
 
         //SSH Connection
@@ -235,18 +251,18 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
             //valid sshHostField
             if (Fn.isEmpty(sshHostField.getText())) {
                 sshHostField.requestFocus();
-                return;
+                throw new RedisFrontException("SSH主机不能为空", false);
             }
             //valid sshUserField
             if (Fn.isEmpty(sshUserField.getText())) {
                 sshUserField.requestFocus();
-                return;
+                throw new RedisFrontException("SSH用户不能为空", false);
             }
             //valid enableSshPrivateKey
             if (enableSshPrivateKey.isSelected()) {
                 if (Fn.isEmpty(sshPrivateKeyFile.getText())) {
                     sshPrivateKeyFile.requestFocus();
-                    return;
+                    throw new RedisFrontException("SSH私钥不能为空", false);
                 }
             }
             //sshConfig
@@ -256,19 +272,18 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                     (Integer) sshPortField.getValue(),
                     new String(sshPasswordField.getPassword()));
 
-            callback.accept(
-                    new ConnectInfo(
-                            titleField.getText(),
-                            hostField.getText(),
-                            (Integer) portField.getValue(),
-                            userField.getText(),
-                            String.valueOf(passwordField.getPassword()),
-                            0,
-                            enableSSLBtn.isSelected(),
-                            Enum.Connect.SSH,
-                            sshConfig)
-                            .setId(id)
-            );
+            return new ConnectInfo(
+                    titleField.getText(),
+                    hostField.getText(),
+                    (Integer) portField.getValue(),
+                    userField.getText(),
+                    String.valueOf(passwordField.getPassword()),
+                    0,
+                    enableSSLBtn.isSelected(),
+                    Enum.Connect.SSH,
+                    sshConfig)
+                    .setId(id);
+
 
         } else if (enableSSLBtn.isSelected()) {
             var sshConfig = new ConnectInfo.SSLConfig(
@@ -277,32 +292,30 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                     grantField.getText(),
                     String.valueOf(sslPasswordField.getPassword())
             );
-            callback.accept(
-                    new ConnectInfo(titleField.getText(),
-                            hostField.getText(),
-                            (Integer) portField.getValue(),
-                            userField.getText(),
-                            String.valueOf(passwordField.getPassword()),
-                            0,
-                            enableSSLBtn.isSelected(),
-                            Enum.Connect.NORMAL,
-                            sshConfig)
-                            .setId(id)
-            );
+            return new ConnectInfo(titleField.getText(),
+                    hostField.getText(),
+                    (Integer) portField.getValue(),
+                    userField.getText(),
+                    String.valueOf(passwordField.getPassword()),
+                    0,
+                    enableSSLBtn.isSelected(),
+                    Enum.Connect.NORMAL,
+                    sshConfig)
+                    .setId(id);
+
         } else {
-            callback.accept(
-                    new ConnectInfo(titleField.getText(),
-                            hostField.getText(),
-                            (Integer) portField.getValue(),
-                            userField.getText(),
-                            String.valueOf(passwordField.getPassword()),
-                            0,
-                            enableSSLBtn.isSelected(),
-                            Enum.Connect.NORMAL)
-                            .setId(id)
-            );
+
+            return new ConnectInfo(titleField.getText(),
+                    hostField.getText(),
+                    (Integer) portField.getValue(),
+                    userField.getText(),
+                    String.valueOf(passwordField.getPassword()),
+                    0,
+                    enableSSLBtn.isSelected(),
+                    Enum.Connect.NORMAL)
+                    .setId(id);
+
         }
-        dispose();
     }
 
     /**
