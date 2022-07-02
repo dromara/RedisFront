@@ -30,12 +30,14 @@ public class DataSplitPanel extends JSplitPane {
     }
 
     public void init() {
-        var searchForm = DataSearchForm.newInstance();
-        var viewForm = DataViewForm.newInstance();
-        searchForm.setConnectInfo(connectInfo);
-        searchForm.setNodeClickCallback((System.out::println));
-        searchForm.init();
+        var searchForm = DataSearchForm
+                .newInstance()
+                .setConnectInfo(connectInfo)
+                .setNodeClickCallback((System.out::println));
+        var viewForm = DataViewForm
+                .newInstance();
         setLeftComponent(searchForm.getContentPanel());
+        searchForm.init();
         setRightComponent(new FlatTextPane());
     }
 
