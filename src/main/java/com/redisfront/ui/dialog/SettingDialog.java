@@ -9,7 +9,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.RedisFrontApplication;
-import com.redisfront.constant.Constant;
+import com.redisfront.constant.Const;
 import com.redisfront.ui.component.AbstractDialog;
 import com.redisfront.util.*;
 import org.slf4j.Logger;
@@ -111,7 +111,7 @@ public class SettingDialog extends AbstractDialog<Void> {
                 .entrySet()
                 .stream()
                 .filter(e -> {
-                    String languageTag = PrefUtil.getState().get(Constant.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
+                    String languageTag = PrefUtil.getState().get(Const.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
                     return Fn.equal(e.getValue(), languageTag);
                 }).findAny().orElseThrow());
     }
@@ -123,10 +123,10 @@ public class SettingDialog extends AbstractDialog<Void> {
         languageLabel.setText(LANGUAGE_LABEL.title());
 
         keySeparatorLabel.setText(KEY_SEPARATOR_LABEL.title());
-        keySeparator.setText(PrefUtil.getState().get(Constant.KEY_KEY_SEPARATOR, ":"));
+        keySeparator.setText(PrefUtil.getState().get(Const.KEY_KEY_SEPARATOR, ":"));
 
         loadNumLabel.setText(LOAD_NUM_LABEL.title());
-        keyMaxLoadNum.setText(PrefUtil.getState().get(Constant.KEY_KEY_MAX_LOAD_NUM, "5000"));
+        keyMaxLoadNum.setText(PrefUtil.getState().get(Const.KEY_KEY_MAX_LOAD_NUM, "5000"));
 
 
     }
@@ -139,12 +139,12 @@ public class SettingDialog extends AbstractDialog<Void> {
         }
         fontSizeComboBox.addActionListener(e -> {
             String fontSizeStr = (String) fontSizeComboBox.getSelectedItem();
-            if (Fn.equal(fontSizeStr, PrefUtil.getState().get(Constant.KEY_FONT_SIZE, getDefaultFontSize()))) {
+            if (Fn.equal(fontSizeStr, PrefUtil.getState().get(Const.KEY_FONT_SIZE, getDefaultFontSize()))) {
                 return;
             }
             this.updateFontSizeHandler(fontSizeStr);
         });
-        fontSizeComboBox.setSelectedItem(PrefUtil.getState().get(Constant.KEY_FONT_SIZE, getDefaultFontSize()));
+        fontSizeComboBox.setSelectedItem(PrefUtil.getState().get(Const.KEY_FONT_SIZE, getDefaultFontSize()));
     }
 
     //获取默认字体大小
@@ -178,12 +178,12 @@ public class SettingDialog extends AbstractDialog<Void> {
         });
         fontNameComboBox.addActionListener(e -> {
             String fontFamily = (String) fontNameComboBox.getSelectedItem();
-            if (Fn.equal(fontFamily, PrefUtil.getState().get(Constant.KEY_FONT_NAME, getDefaultFontFamily()))) {
+            if (Fn.equal(fontFamily, PrefUtil.getState().get(Const.KEY_FONT_NAME, getDefaultFontFamily()))) {
                 return;
             }
             this.updateFontNameHandler(fontFamily);
         });
-        fontNameComboBox.setSelectedItem(PrefUtil.getState().get(Constant.KEY_FONT_NAME, getDefaultFontFamily()));
+        fontNameComboBox.setSelectedItem(PrefUtil.getState().get(Const.KEY_FONT_NAME, getDefaultFontFamily()));
     }
 
     //获取默认字体大小
@@ -216,13 +216,13 @@ public class SettingDialog extends AbstractDialog<Void> {
             JComboBox<?> selected = (JComboBox<?>) e.getSource();
             ThemeUtil.ThemeInfo themeInfo = (ThemeUtil.ThemeInfo) selected.getSelectedItem();
             String themeName = StringUtils.isEmpty(Objects.requireNonNull(themeInfo).lafClassName()) ? "R_" + themeInfo.resourceName() : themeInfo.lafClassName();
-            if (Fn.equal(themeName, PrefUtil.getState().get(Constant.KEY_THEME, FlatDarculaLaf.class.getName()))) {
+            if (Fn.equal(themeName, PrefUtil.getState().get(Const.KEY_THEME, FlatDarculaLaf.class.getName()))) {
                 return;
             }
             ThemeUtil.changeTheme(themeInfo);
         });
 
-        themeNameComboBox.setSelectedIndex(Integer.parseInt(PrefUtil.getState().get(Constant.KEY_THEME_SELECT_INDEX, "0")));
+        themeNameComboBox.setSelectedIndex(Integer.parseInt(PrefUtil.getState().get(Const.KEY_THEME_SELECT_INDEX, "0")));
     }
 
     private void updateFontSizeHandler(String fontSize) {
@@ -244,26 +244,26 @@ public class SettingDialog extends AbstractDialog<Void> {
 
     private void onOK() {
 
-        PrefUtil.getState().put(Constant.KEY_KEY_SEPARATOR, keySeparator.getText());
-        PrefUtil.getState().put(Constant.KEY_KEY_MAX_LOAD_NUM, keyMaxLoadNum.getText());
+        PrefUtil.getState().put(Const.KEY_KEY_SEPARATOR, keySeparator.getText());
+        PrefUtil.getState().put(Const.KEY_KEY_MAX_LOAD_NUM, keyMaxLoadNum.getText());
         //风格
         ThemeUtil.ThemeInfo themeInfo = (ThemeUtil.ThemeInfo) themeNameComboBox.getSelectedItem();
         String themeName = StringUtils.isEmpty(Objects.requireNonNull(themeInfo).lafClassName()) ? "R_" + themeInfo.resourceName() : themeInfo.lafClassName();
-        PrefUtil.getState().put(Constant.KEY_THEME, themeName);
-        PrefUtil.getState().put(Constant.KEY_THEME_SELECT_INDEX, String.valueOf(themeNameComboBox.getSelectedIndex()));
+        PrefUtil.getState().put(Const.KEY_THEME, themeName);
+        PrefUtil.getState().put(Const.KEY_THEME_SELECT_INDEX, String.valueOf(themeNameComboBox.getSelectedIndex()));
         //字体名称
         String fontFamily = (String) fontNameComboBox.getSelectedItem();
-        PrefUtil.getState().put(Constant.KEY_FONT_NAME, fontFamily);
+        PrefUtil.getState().put(Const.KEY_FONT_NAME, fontFamily);
         //字体大小
         String fontSizeStr = (String) fontSizeComboBox.getSelectedItem();
-        PrefUtil.getState().put(Constant.KEY_FONT_SIZE, fontSizeStr);
+        PrefUtil.getState().put(Const.KEY_FONT_SIZE, fontSizeStr);
         //语言
         Map.Entry<?, ?> newLanguage = (Map.Entry<?, ?>) languageComboBox.getSelectedItem();
-        String oldLanguage = PrefUtil.getState().get(Constant.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
+        String oldLanguage = PrefUtil.getState().get(Const.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
         assert newLanguage != null;
         if (Fn.notEqual(newLanguage.getValue(), oldLanguage)) {
             Locale.setDefault(Locale.forLanguageTag((String) newLanguage.getValue()));
-            PrefUtil.getState().put(Constant.KEY_LANGUAGE, (String) newLanguage.getValue());
+            PrefUtil.getState().put(Const.KEY_LANGUAGE, (String) newLanguage.getValue());
             var res = MsgUtil.showConfirmDialog("语言已变更，重启后生效！\n 是否立即重启？", JOptionPane.YES_NO_OPTION);
             if (res == 0) {
                 RedisFrontApplication.frame.dispose();

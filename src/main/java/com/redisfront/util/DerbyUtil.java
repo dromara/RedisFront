@@ -1,7 +1,7 @@
 package com.redisfront.util;
 
 
-import com.redisfront.constant.Constant;
+import com.redisfront.constant.Const;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +22,7 @@ public class DerbyUtil {
 
     public static void init() throws Exception {
         try {
-            System.setProperty("derby.stream.error.file", Constant.DATA_PATH + File.separator + "derby" + File.separator + "derby.log");
+            System.setProperty("derby.stream.error.file", Const.DATA_PATH + File.separator + "derby" + File.separator + "derby.log");
             Class.forName("org.apache.derby.iapi.jdbc.InternalDriver");
             conn = DriverManager.getConnection("jdbc:derby:" + System.getProperty("user.home") + File.separator + "redis-front" + File.separator + "derby" + File.separator + "data;create=true");
             log.info("derby 初始化成功！");

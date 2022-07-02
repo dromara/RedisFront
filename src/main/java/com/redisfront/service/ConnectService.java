@@ -1,6 +1,6 @@
 package com.redisfront.service;
 
-import com.redisfront.constant.ConnectEnum;
+import com.redisfront.constant.Enum;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.impl.ConnectServiceImpl;
 import com.redisfront.util.Fn;
@@ -23,13 +23,13 @@ public interface ConnectService {
 
     ConnectInfo getConnect(Object id);
 
-    Boolean save(ConnectInfo connectInfo);
+    void save(ConnectInfo connectInfo);
 
-    Boolean update(ConnectInfo connectInfo);
+    void update(ConnectInfo connectInfo);
 
-    Boolean delete(Object id);
+    void delete(Object id);
 
-    Boolean initDatabase();
+    void initDatabase();
 
     default String buildUpdateSql(ConnectInfo connectInfo) {
         return "update rf_connect" +
@@ -109,7 +109,7 @@ public interface ConnectService {
                 .setPassword((String) map.get("password"))
                 .setDatabase((Integer) map.get("database"))
                 .setSsl(Boolean.valueOf((String) map.get("ssl")))
-                .setConnectMode(ConnectEnum.valueOf((String) map.get("connect_mode")))
+                .setConnectMode(Enum.Connect.valueOf((String) map.get("connect_mode")))
                 .setSshConfig(sshConfig)
                 .setSslConfig(sslConfig)
                 ;

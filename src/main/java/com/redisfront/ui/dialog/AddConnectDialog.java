@@ -6,7 +6,8 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.RedisFrontApplication;
-import com.redisfront.constant.ConnectEnum;
+import com.redisfront.constant.Enum;
+import com.redisfront.constant.UI;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.ui.component.AbstractDialog;
 import com.redisfront.util.Fn;
@@ -139,9 +140,9 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
             sshPanel.setVisible(false);
             sslPanel.setVisible(enableSSLBtn.isSelected());
             if (enableSSLBtn.isSelected()) {
-                setSize(new Dimension(getWidth(), getHeight() + 120));
+                setSize(new Dimension(getWidth(), getHeight() + 150));
             } else {
-                setSize(new Dimension(getWidth(), getHeight() - 120));
+                setSize(new Dimension(getWidth(), getHeight() - 150));
             }
         });
 
@@ -264,7 +265,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                             String.valueOf(passwordField.getPassword()),
                             0,
                             enableSSLBtn.isSelected(),
-                            ConnectEnum.SSH,
+                            Enum.Connect.SSH,
                             sshConfig)
                             .setId(id)
             );
@@ -284,7 +285,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                             String.valueOf(passwordField.getPassword()),
                             0,
                             enableSSLBtn.isSelected(),
-                            ConnectEnum.NORMAL,
+                            Enum.Connect.NORMAL,
                             sshConfig)
                             .setId(id)
             );
@@ -297,7 +298,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                             String.valueOf(passwordField.getPassword()),
                             0,
                             enableSSLBtn.isSelected(),
-                            ConnectEnum.NORMAL)
+                            Enum.Connect.NORMAL)
                             .setId(id)
             );
         }
@@ -315,7 +316,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         this.userField.setText(connectInfo.user());
         this.passwordField.setText(connectInfo.password());
         this.enableSSLBtn.setSelected(connectInfo.ssl());
-        this.enableSSHBtn.setSelected(ConnectEnum.SSH.equals(connectInfo.connectMode()));
+        this.enableSSHBtn.setSelected(Enum.Connect.SSH.equals(connectInfo.connectMode()));
     }
 
     private void createUIComponents() {
@@ -338,7 +339,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         hostField.setText("127.0.0.1");
         testBtn = new JButton();
         testBtn.setText("测试连接");
-        testBtn.setIcon(new FlatSVGIcon("icons/lan-connect.svg"));
+        testBtn.setIcon(UI.TEST_CONNECTION_ICON);
         sshPortField = new JSpinner();
         sshPortField.setValue(22);
     }

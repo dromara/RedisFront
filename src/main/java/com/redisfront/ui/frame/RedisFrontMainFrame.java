@@ -1,23 +1,24 @@
 
 package com.redisfront.ui.frame;
 
-import com.formdev.flatlaf.extras.FlatSVGUtils;
+import com.redisfront.constant.UI;
 import com.redisfront.ui.component.MainMenuBar;
 import com.redisfront.ui.form.MainWindowForm;
 import org.jdesktop.swingx.JXFrame;
 
 import javax.swing.*;
 import java.awt.*;
+
 /**
  * RedisFrontFrame
  *
  * @author Jin
  */
-public class RedisFrontFrame extends JXFrame {
+public class RedisFrontMainFrame extends JXFrame {
 
-    public RedisFrontFrame() {
+    public RedisFrontMainFrame() {
         super(" RedisFront ", true);
-        setIconImages(FlatSVGUtils.createWindowIconImages("/svg/redis.svg"));
+        setIconImages(UI.MAIN_FRAME_ICON_IMAGES);
         UIManager.put("TitlePane.unifiedBackground", false);
         setJMenuBar(MainMenuBar.getInstance());
         initComponents();

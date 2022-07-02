@@ -5,8 +5,11 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.RedisFrontApplication;
+import com.redisfront.constant.Enum;
+import com.redisfront.constant.UI;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.ConnectService;
+import com.redisfront.service.RedisService;
 import com.redisfront.ui.component.AbstractDialog;
 import com.redisfront.model.ConnectTableModel;
 import com.redisfront.util.MsgUtil;
@@ -15,9 +18,7 @@ import com.redisfront.util.Fn;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -75,6 +76,21 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
             }
         });
         connectTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        connectTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    var row = connectTable.getSelectedRow();
+                    if (row == -1) {
+                        return;
+                    }
+                    var id = connectTable.getValueAt(row, 0);
+                    var connectInfo = ConnectService.service.getConnect(id);
+                    onCancel();
+                    openActionCallback.accept(connectInfo);
+                }
+            }
+        });
         connectTable.setComponentPopupMenu(new JPopupMenu() {
             {
                 //表格打开链接操作
@@ -137,8 +153,10 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         }
         var id = connectTable.getValueAt(row, 0);
         var connectInfo = ConnectService.service.getConnect(id);
+        //set redisMode
+        var redisMode = RedisService.service.getRedisModeEnum(connectInfo);
         dispose();
-        openActionCallback.accept(connectInfo);
+        openActionCallback.accept(connectInfo.setRedisModeEnum(redisMode));
 
     }
 
@@ -152,7 +170,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
             dispose();
             AddConnectDialog.showAddConnectDialog(openActionCallback);
         });
-        addConnectBtn.setIcon(new FlatSVGIcon("icons/connection.svg"));
+        addConnectBtn.setIcon(UI.CONNECTION_ICON);
     }
 
     /**

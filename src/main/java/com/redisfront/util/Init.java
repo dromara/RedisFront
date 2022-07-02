@@ -1,6 +1,6 @@
 package com.redisfront.util;
 
-import com.redisfront.constant.Constant;
+import com.redisfront.constant.Const;
 import com.redisfront.service.ConnectService;
 
 import javax.swing.*;
@@ -20,9 +20,9 @@ public class Init {
             DerbyUtil.init();
 
             //数据库初始化
-            if (PrefUtil.getState().getBoolean(Constant.KEY_APP_DATABASE_INIT, true)) {
+            if (PrefUtil.getState().getBoolean(Const.KEY_APP_DATABASE_INIT, true)) {
                 ConnectService.service.initDatabase();
-                PrefUtil.getState().put(Constant.KEY_APP_DATABASE_INIT, Boolean.FALSE.toString());
+                PrefUtil.getState().put(Const.KEY_APP_DATABASE_INIT, Boolean.FALSE.toString());
             }
 
         } catch (Exception ex) {

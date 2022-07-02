@@ -8,7 +8,7 @@ import java.io.File;
  * @author Jin
  */
 
-public class Constant {
+public class Const {
 
     public static final String KEY_THEME = "theme";
     public static final String KEY_THEME_SELECT_INDEX = "themeSelectIndex";
@@ -27,7 +27,7 @@ public class Constant {
 
     public static final String DATA_PATH = System.getProperty("user.home") + File.separator + "redis-front";
 
-    public static final String LOG_FILE_PATH =  Constant.DATA_PATH + File.separator + "logs" + File.separator + "redis-front.log";
+    public static final String LOG_FILE_PATH =  Const.DATA_PATH + File.separator + "logs" + File.separator + "redis-front.log";
 
     public static final String LOG_FILE =  "LOG_FILE";
 

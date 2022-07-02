@@ -1,7 +1,6 @@
 package com.redisfront.model;
 
-import com.redisfront.constant.RedisModeEnum;
-import com.redisfront.constant.ConnectEnum;
+import com.redisfront.constant.Enum;
 import com.redisfront.util.Fn;
 
 import java.io.Serializable;
@@ -21,20 +20,20 @@ public class ConnectInfo implements Serializable {
     private String password;
     private Integer database;
     private Boolean ssl;
-    private ConnectEnum connectMode;
-    private RedisModeEnum redisModeEnum;
+    private Enum.Connect connectMode;
+    private Enum.RedisMode redisMode;
     private SSLConfig sslConfig;
     private SSHConfig sshConfig;
 
-    public ConnectInfo(String title, String host, Integer port, String username, String password, Integer database, Boolean ssl, ConnectEnum connectMode) {
+    public ConnectInfo(String title, String host, Integer port, String username, String password, Integer database, Boolean ssl, Enum.Connect connectMode) {
         this(title, host, port, username, password, database, ssl, connectMode, null, null);
     }
 
-    public ConnectInfo(String title, String host, Integer port, String username, String password, Integer database, Boolean ssl, ConnectEnum connectMode, SSHConfig sshConfig) {
+    public ConnectInfo(String title, String host, Integer port, String username, String password, Integer database, Boolean ssl, Enum.Connect connectMode, SSHConfig sshConfig) {
         this(title, host, port, username, password, database, ssl, connectMode, null, sshConfig);
     }
 
-    public ConnectInfo(String title, String host, Integer port, String username, String password, Integer database, Boolean ssl, ConnectEnum connectMode, SSLConfig sslConfig) {
+    public ConnectInfo(String title, String host, Integer port, String username, String password, Integer database, Boolean ssl, Enum.Connect connectMode, SSLConfig sslConfig) {
         this(title, host, port, username, password, database, ssl, connectMode, sslConfig, null);
     }
 
@@ -96,7 +95,7 @@ public class ConnectInfo implements Serializable {
     public ConnectInfo() {
     }
 
-    public ConnectInfo(String title, String host, Integer port, String username, String password, Integer database, Boolean ssl, ConnectEnum connectMode, SSLConfig sslConfig, SSHConfig sshConfig) {
+    public ConnectInfo(String title, String host, Integer port, String username, String password, Integer database, Boolean ssl, Enum.Connect connectMode, SSLConfig sslConfig, SSHConfig sshConfig) {
         this.title = title;
         this.host = host;
         this.port = port;
@@ -227,11 +226,11 @@ public class ConnectInfo implements Serializable {
         return this;
     }
 
-    public ConnectEnum connectMode() {
+    public Enum.Connect connectMode() {
         return connectMode;
     }
 
-    public ConnectInfo setConnectMode(ConnectEnum connectMode) {
+    public ConnectInfo setConnectMode(Enum.Connect connectMode) {
         this.connectMode = connectMode;
         return this;
     }
@@ -267,12 +266,12 @@ public class ConnectInfo implements Serializable {
         return username;
     }
 
-    public RedisModeEnum redisModeEnum() {
-        return redisModeEnum;
+    public Enum.RedisMode redisModeEnum() {
+        return redisMode;
     }
 
-    public ConnectInfo setRedisModeEnum(RedisModeEnum redisModeEnum) {
-        this.redisModeEnum = redisModeEnum;
+    public ConnectInfo setRedisModeEnum(Enum.RedisMode redisMode) {
+        this.redisMode = redisMode;
         return this;
     }
 
@@ -289,7 +288,7 @@ public class ConnectInfo implements Serializable {
                 ", database=" + database +
                 ", ssl=" + ssl +
                 ", connectMode=" + connectMode +
-                ", redisModeEnum=" + redisModeEnum +
+                ", redisModeEnum=" + redisMode +
                 ", sslConfig=" + sslConfig +
                 ", sshConfig=" + sshConfig +
                 '}';

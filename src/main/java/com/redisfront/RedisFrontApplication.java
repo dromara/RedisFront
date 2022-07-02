@@ -4,8 +4,8 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatInspector;
 import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
 import com.formdev.flatlaf.util.SystemInfo;
-import com.redisfront.constant.Constant;
-import com.redisfront.ui.frame.RedisFrontFrame;
+import com.redisfront.constant.Const;
+import com.redisfront.ui.frame.RedisFrontMainFrame;
 import com.redisfront.util.Init;
 import com.redisfront.util.PrefUtil;
 import com.redisfront.util.ThemeUtil;
@@ -20,7 +20,7 @@ import java.util.Collections;
  */
 public class RedisFrontApplication {
 
-    public static RedisFrontFrame frame;
+    public static RedisFrontMainFrame frame;
 
     public static void main(String[] args) {
 
@@ -39,13 +39,13 @@ public class RedisFrontApplication {
             System.setProperty("flatlaf.uiScale", "2x");
         }
 
-        FlatLaf.registerCustomDefaultsSource(Constant.PACKAGE_NAME);
+        FlatLaf.registerCustomDefaultsSource(Const.PACKAGE_NAME);
 
         FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", "#d81e06"));
 
-        System.setProperty(Constant.LOG_FILE, Constant.LOG_FILE_PATH);
+        System.setProperty(Const.LOG_FILE, Const.LOG_FILE_PATH);
 
-        PrefUtil.init(Constant.ROOT_PATH);
+        PrefUtil.init(Const.ROOT_PATH);
 
         SwingUtilities.invokeLater(() -> {
 
@@ -57,7 +57,7 @@ public class RedisFrontApplication {
 
             FlatUIDefaultsInspector.install("ctrl shift alt Y");
 
-            frame = new RedisFrontFrame();
+            frame = new RedisFrontMainFrame();
             frame.setMinimumSize(new Dimension(1024, 768));
             frame.pack();
             frame.setLocationRelativeTo(null);

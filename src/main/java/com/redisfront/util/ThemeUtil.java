@@ -3,7 +3,7 @@ package com.redisfront.util;
 import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialOceanicContrastIJTheme;
 import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.redisfront.RedisFrontApplication;
-import com.redisfront.constant.Constant;
+import com.redisfront.constant.Const;
 import com.formdev.flatlaf.*;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.json.Json;
@@ -71,8 +71,8 @@ public class ThemeUtil {
 
     public static void fontInit() {
         var font = UIManager.getFont("defaultFont");
-        var fontSizeStr = PrefUtil.getState().get(Constant.KEY_FONT_SIZE, String.valueOf(font.getSize()));
-        var fontNameStr = PrefUtil.getState().get(Constant.KEY_FONT_NAME, font.getFontName());
+        var fontSizeStr = PrefUtil.getState().get(Const.KEY_FONT_SIZE, String.valueOf(font.getSize()));
+        var fontNameStr = PrefUtil.getState().get(Const.KEY_FONT_NAME, font.getFontName());
         var newFont = StyleContext.getDefaultStyleContext().getFont(fontNameStr, font.getStyle(), Integer.parseInt(fontSizeStr));
         UIManager.put("defaultFont", FlatUIUtils.nonUIResource(newFont));
     }
@@ -82,7 +82,7 @@ public class ThemeUtil {
             if (args.length > 0) {
                 UIManager.setLookAndFeel(args[0]);
             } else {
-                String theme = PrefUtil.getState().get(Constant.KEY_THEME, FlatMaterialOceanicContrastIJTheme.class.getName());
+                String theme = PrefUtil.getState().get(Const.KEY_THEME, FlatMaterialOceanicContrastIJTheme.class.getName());
                 if (theme.startsWith("R_")) {
                     IntelliJTheme.setup(ThemeUtil.class.getResourceAsStream(THEMES_PACKAGE + theme.replace("R_", "")));
                 } else {

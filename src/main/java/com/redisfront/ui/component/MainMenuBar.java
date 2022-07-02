@@ -5,6 +5,7 @@ import com.formdev.flatlaf.extras.FlatDesktop;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.components.FlatButton;
 import com.redisfront.RedisFrontApplication;
+import com.redisfront.constant.UI;
 import com.redisfront.service.ConnectService;
 import com.redisfront.ui.dialog.AddConnectDialog;
 import com.redisfront.ui.dialog.OpenConnectDialog;
@@ -108,11 +109,11 @@ public class MainMenuBar extends JMenuBar {
         add(Box.createGlue());
 
         var gitBtn = new FlatButton();
-        gitBtn.setIcon(new FlatSVGIcon("icons/gitee.svg"));
+        gitBtn.setIcon(UI.GITEE_ICON);
         gitBtn.setButtonType(FlatButton.ButtonType.toolBarButton);
         gitBtn.setFocusable(false);
         gitBtn.setToolTipText(" 去码云给个star吧 :) ");
-        gitBtn.setRolloverIcon(new FlatSVGIcon("icons/gitee_red.svg"));
+        gitBtn.setRolloverIcon(UI.GITEE_RED_ICON);
         gitBtn.addActionListener(e -> {
             try {
                 Desktop.getDesktop().browse(new URI("https://gitee.com/westboy/redis-front"));

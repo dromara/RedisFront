@@ -1,6 +1,6 @@
 package com.redisfront.service.impl;
 
-import com.redisfront.constant.RedisModeEnum;
+import com.redisfront.constant.Enum;
 import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisService;
@@ -27,11 +27,11 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
-    public RedisModeEnum getRedisModeEnum(ConnectInfo connectInfo) {
+    public Enum.RedisMode getRedisModeEnum(ConnectInfo connectInfo) {
         Map<String, Object> server = getServerInfo(connectInfo);
         String redisMode = (String) server.get("redis_mode");
         log.info("获取到Redis [ {}:{} ] 服务类型 - {}", connectInfo.host(), connectInfo.port(), redisMode);
-        return RedisModeEnum.valueOf(redisMode.toUpperCase());
+        return Enum.RedisMode.valueOf(redisMode.toUpperCase());
     }
 
     @Override

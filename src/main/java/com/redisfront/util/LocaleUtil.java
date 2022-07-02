@@ -1,6 +1,6 @@
 package com.redisfront.util;
 
-import com.redisfront.constant.Constant;
+import com.redisfront.constant.Const;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -15,7 +15,7 @@ public class LocaleUtil {
     static ResourceBundle bundle;
 
     public static void init() {
-        var languageTag = PrefUtil.getState().get(Constant.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
+        var languageTag = PrefUtil.getState().get(Const.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
         Locale.setDefault(Locale.forLanguageTag(languageTag));
         bundle = ResourceBundle.getBundle("com.redisfront.RedisFront");
     }
@@ -42,9 +42,9 @@ public class LocaleUtil {
             this.desc = desc;
         }
 
-        private String title;
-        private Integer mnemonic;
-        private String desc;
+        private final String title;
+        private final Integer mnemonic;
+        private final String desc;
 
         public String title() {
             return title;

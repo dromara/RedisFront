@@ -1,7 +1,7 @@
 package com.redisfront.ui.component;
 
 import cn.hutool.core.date.DateUtil;
-import com.redisfront.constant.ConnectEnum;
+import com.redisfront.constant.Enum;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisService;
 import com.redisfront.util.TelnetUtil;
@@ -54,7 +54,7 @@ public class TerminalComponent extends AbstractTerminal {
 
     @Override
     protected ConnectInfo connectInfo() {
-        return new ConnectInfo("a", "127.0.0.1", 6379, null, null, 11, false, ConnectEnum.NORMAL);
+        return connectInfo;
     }
 
     @Override

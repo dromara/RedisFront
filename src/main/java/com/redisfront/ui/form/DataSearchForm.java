@@ -4,6 +4,8 @@ import cn.hutool.core.lang.Assert;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
+import com.redisfront.constant.Enum;
+import com.redisfront.constant.UI;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.model.TreeNodeInfo;
 import com.redisfront.util.LettuceUtil;
@@ -68,7 +70,9 @@ public class DataSearchForm {
     public void init() {
         Assert.notNull(connectInfo, () -> new RuntimeException("connectInfo 不能为空"));
         Assert.notNull(nodeClickCallback, () -> new RuntimeException("nodeClickCallback 不能为空"));
-
+        if (connectInfo.redisModeEnum() == Enum.RedisMode.CLUSTER) {
+            databaseComboBox.setEnabled(false);
+        }
         LettuceUtil.run(connectInfo, redisCommands -> {
             var list = redisCommands.keys("*");
             var treeModel = TreeUtil.toTreeModel(new HashSet<>(list), ":");
@@ -132,9 +136,9 @@ public class DataSearchForm {
         contentPanel.setBorder(new EmptyBorder(5, 5, 5, 0));
         addBtn = new JButton();
         refreshBtn = new JButton();
-        refreshBtn.setIcon(new FlatSVGIcon("icons/refresh.svg"));
+        refreshBtn.setIcon(UI.REFRESH_ICON);
         databaseComboBox = new JComboBox<>();
-        var dbList = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 16));
+        var dbList = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15));
         for (var db : dbList) {
             databaseComboBox.addItem(db);
         }
@@ -158,6 +162,7 @@ public class DataSearchForm {
 
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> LettuceUtil.run(connectInfo, redisCommands -> {
+            searchTextField.setText("");
             var list = redisCommands.keys("*");
             var treeModel = TreeUtil.toTreeModel(new HashSet<>(list), ":");
             keyTree.setModel(treeModel);
