@@ -35,28 +35,28 @@ public class ConnectServiceImpl implements ConnectService {
     }
 
     @Override
-    public Boolean update(ConnectInfo connectInfo) {
+    public void update(ConnectInfo connectInfo) {
         String sql = this.buildUpdateSql(connectInfo);
-        return DerbyUtil.getInstance().exec(sql);
+        DerbyUtil.getInstance().exec(sql);
     }
 
     @Override
-    public Boolean delete(Object id) {
+    public void delete(Object id) {
         String sql = "delete from rf_connect where id =".concat(id.toString());
-        return DerbyUtil.getInstance().exec(sql);
+        DerbyUtil.getInstance().exec(sql);
     }
 
 
     @Override
-    public Boolean save(ConnectInfo connectInfo) {
+    public void save(ConnectInfo connectInfo) {
         String sql = this.buildInsertSql(connectInfo);
-        return DerbyUtil.getInstance().exec(sql);
+        DerbyUtil.getInstance().exec(sql);
     }
 
     @Override
-    public Boolean initDatabase() {
+    public void initDatabase() {
         String sqlData = ResourceUtil.readUtf8Str("sql/redisfront.sql");
-        return DerbyUtil.getInstance().exec(sqlData);
+        DerbyUtil.getInstance().exec(sqlData);
     }
 
 }
