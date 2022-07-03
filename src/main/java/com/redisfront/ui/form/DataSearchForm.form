@@ -7,65 +7,76 @@
     <properties/>
     <border type="none"/>
     <children>
-      <grid id="92cb4" layout-manager="BorderLayout" hgap="0" vgap="0">
-        <constraints border-constraint="North"/>
-        <properties/>
-        <border type="none"/>
-        <children>
-          <grid id="947c1" layout-manager="BorderLayout" hgap="0" vgap="0">
-            <constraints border-constraint="North"/>
-            <properties/>
-            <border type="none"/>
-            <children>
-              <component id="fafaa" class="javax.swing.JComboBox" binding="databaseComboBox" custom-create="true">
-                <constraints border-constraint="West"/>
-                <properties/>
-              </component>
-              <component id="523a3" class="javax.swing.JButton" binding="addBtn" custom-create="true">
-                <constraints border-constraint="Center"/>
-                <properties>
-                  <horizontalAlignment value="0"/>
-                  <horizontalTextPosition value="11"/>
-                  <text value="新增"/>
-                </properties>
-              </component>
-              <component id="225bb" class="javax.swing.JButton" binding="refreshBtn" custom-create="true">
-                <constraints border-constraint="East"/>
-                <properties>
-                  <text value=""/>
-                </properties>
-              </component>
-            </children>
-          </grid>
-          <grid id="20d54" layout-manager="BorderLayout" hgap="0" vgap="0">
-            <constraints border-constraint="South"/>
-            <properties/>
-            <border type="none"/>
-            <children>
-              <component id="3fc8c" class="javax.swing.JTextField" binding="searchTextField" custom-create="true">
-                <constraints border-constraint="Center"/>
-                <properties/>
-              </component>
-            </children>
-          </grid>
-        </children>
-      </grid>
-      <grid id="90b7d" binding="treePanel" custom-create="true" layout-manager="BorderLayout" hgap="0" vgap="0">
+      <grid id="96897" binding="borderPanel" custom-create="true" layout-manager="BorderLayout" hgap="0" vgap="0">
         <constraints border-constraint="Center"/>
         <properties/>
         <border type="none"/>
         <children>
-          <scrollpane id="96925">
+          <grid id="92cb4" layout-manager="BorderLayout" hgap="0" vgap="0">
+            <constraints border-constraint="North"/>
+            <properties/>
+            <border type="empty">
+              <size top="5" left="5" bottom="5" right="10"/>
+            </border>
+            <children>
+              <grid id="947c1" layout-manager="BorderLayout" hgap="0" vgap="0">
+                <constraints border-constraint="North"/>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="fafaa" class="javax.swing.JComboBox" binding="databaseComboBox" custom-create="true">
+                    <constraints border-constraint="West"/>
+                    <properties/>
+                  </component>
+                  <component id="523a3" class="javax.swing.JButton" binding="addBtn" custom-create="true">
+                    <constraints border-constraint="Center"/>
+                    <properties>
+                      <horizontalAlignment value="0"/>
+                      <horizontalTextPosition value="11"/>
+                      <text value="新增"/>
+                    </properties>
+                  </component>
+                  <component id="225bb" class="javax.swing.JButton" binding="refreshBtn" custom-create="true">
+                    <constraints border-constraint="East"/>
+                    <properties>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+              <grid id="20d54" layout-manager="BorderLayout" hgap="0" vgap="0">
+                <constraints border-constraint="South"/>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="3fc8c" class="javax.swing.JTextField" binding="searchTextField" custom-create="true">
+                    <constraints border-constraint="Center"/>
+                    <properties/>
+                  </component>
+                </children>
+              </grid>
+            </children>
+          </grid>
+          <grid id="90b7d" binding="treePanel" custom-create="true" layout-manager="BorderLayout" hgap="0" vgap="0">
             <constraints border-constraint="Center"/>
             <properties/>
-            <border type="none"/>
+            <border type="empty">
+              <size top="0" left="5" bottom="5" right="10"/>
+            </border>
             <children>
-              <component id="2fb53" class="javax.swing.JTree" binding="keyTree" custom-create="true">
-                <constraints/>
+              <scrollpane id="96925">
+                <constraints border-constraint="Center"/>
                 <properties/>
-              </component>
+                <border type="none"/>
+                <children>
+                  <component id="2fb53" class="javax.swing.JTree" binding="keyTree" custom-create="true">
+                    <constraints/>
+                    <properties/>
+                  </component>
+                </children>
+              </scrollpane>
             </children>
-          </scrollpane>
+          </grid>
         </children>
       </grid>
     </children>

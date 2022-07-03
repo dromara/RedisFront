@@ -4,6 +4,10 @@ import cn.hutool.core.lang.Assert;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
+import com.formdev.flatlaf.ui.FlatLineBorder;
+import com.intellij.uiDesigner.core.GridConstraints;
+import com.intellij.uiDesigner.core.GridLayoutManager;
+import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.constant.Enum;
 import com.redisfront.constant.UI;
 import com.redisfront.model.ConnectInfo;
@@ -13,6 +17,7 @@ import com.redisfront.util.TreeUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.text.JTextComponent;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
@@ -35,6 +40,7 @@ public class DataSearchForm {
     private JButton addBtn;
     private JPanel treePanel;
     private JButton refreshBtn;
+    private JPanel borderPanel;
 
     private Consumer<TreeNodeInfo> nodeClickCallback;
 
@@ -99,9 +105,12 @@ public class DataSearchForm {
     private void $$$setupUI$$$() {
         createUIComponents();
         contentPanel.setLayout(new BorderLayout(0, 0));
+        borderPanel.setLayout(new BorderLayout(0, 0));
+        contentPanel.add(borderPanel, BorderLayout.CENTER);
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new BorderLayout(0, 0));
-        contentPanel.add(panel1, BorderLayout.NORTH);
+        borderPanel.add(panel1, BorderLayout.NORTH);
+        panel1.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 5, 5, 10), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new BorderLayout(0, 0));
         panel1.add(panel2, BorderLayout.NORTH);
@@ -117,7 +126,8 @@ public class DataSearchForm {
         panel1.add(panel3, BorderLayout.SOUTH);
         panel3.add(searchTextField, BorderLayout.CENTER);
         treePanel.setLayout(new BorderLayout(0, 0));
-        contentPanel.add(treePanel, BorderLayout.CENTER);
+        borderPanel.add(treePanel, BorderLayout.CENTER);
+        treePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(0, 5, 5, 10), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         final JScrollPane scrollPane1 = new JScrollPane();
         treePanel.add(scrollPane1, BorderLayout.CENTER);
         scrollPane1.setViewportView(keyTree);
@@ -133,7 +143,17 @@ public class DataSearchForm {
     private void createUIComponents() {
         contentPanel = new JPanel();
         contentPanel.setLayout(new BorderLayout());
-        contentPanel.setBorder(new EmptyBorder(5, 5, 5, 0));
+        contentPanel.setBorder(new EmptyBorder(0, 5, 0, 5));
+        borderPanel = new JPanel() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                var flatLineBorder = new FlatLineBorder(new Insets(0, 0, 0, 2), UIManager.getColor("Component.borderColor"));
+                setBorder(flatLineBorder);
+            }
+        };
+        borderPanel.setLayout(new BorderLayout());
+
         addBtn = new JButton();
         refreshBtn = new JButton();
         refreshBtn.setIcon(UI.REFRESH_ICON);
