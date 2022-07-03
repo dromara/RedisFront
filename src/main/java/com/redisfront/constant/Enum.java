@@ -1,5 +1,7 @@
 package com.redisfront.constant;
 
+import java.awt.*;
+
 public class Enum {
 
     public enum Connect {
@@ -8,13 +10,24 @@ public class Enum {
     }
 
     public enum KeyTypeEnum {
-        STRING,
-        LIST,
-        HASH,
-        SET,
-        ZSET,
-        JSON,
-        STREAM
+        STRING(Color.MAGENTA),
+        LIST(Color.ORANGE),
+        HASH(Color.red),
+        SET(Color.blue),
+        ZSET(Color.pink),
+        JSON(Color.orange),
+        STREAM(Color.MAGENTA);
+
+
+        private final Color color;
+
+        KeyTypeEnum(Color color) {
+            this.color = color;
+        }
+
+        public Color color() {
+            return color;
+        }
     }
 
     public enum RedisMode {

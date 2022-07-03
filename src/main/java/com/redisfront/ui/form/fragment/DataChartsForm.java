@@ -13,6 +13,16 @@ public class DataChartsForm {
 
     private JPanel contentPanel;
 
+
+
+    public static DataChartsForm getInstance() {
+        return new DataChartsForm();
+    }
+
+    public JPanel contentPanel() {
+        return contentPanel;
+    }
+
     private void createUIComponents() {
         contentPanel = new JPanel();
         contentPanel.setLayout(new BorderLayout());

@@ -6,6 +6,7 @@ import com.formdev.flatlaf.extras.components.FlatToolBar;
 import com.redisfront.constant.UI;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisService;
+import com.redisfront.ui.form.fragment.DataChartsForm;
 import com.redisfront.ui.form.fragment.DataSearchForm;
 
 import javax.swing.*;
@@ -79,7 +80,7 @@ public class MainTabbedPanel extends JPanel {
 
         contentPanel.addTab("数据", UI.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(connectInfo), "数据界面");
         contentPanel.addTab("命令", UI.CONTENT_TAB_COMMAND_ICON, TerminalComponent.newInstance(connectInfo), "命令界面");
-        contentPanel.addTab("信息", UI.CONTENT_TAB_INFO_ICON, DataSearchForm.newInstance().getContentPanel(), "信息界面");
+        contentPanel.addTab("信息", UI.CONTENT_TAB_INFO_ICON, DataChartsForm.getInstance().contentPanel(), "信息界面");
 
         //tab 切换事件
         contentPanel.addChangeListener(e -> {

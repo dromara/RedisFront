@@ -138,18 +138,24 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         });
 
         enableSSLBtn.addActionListener(e -> {
-            enableSSHBtn.setSelected(false);
+            if (enableSSHBtn.isSelected()) {
+                enableSSHBtn.setSelected(false);
+                setSize(new Dimension(getWidth(), getHeight() - 120));
+            }
             sshPanel.setVisible(false);
             sslPanel.setVisible(enableSSLBtn.isSelected());
             if (enableSSLBtn.isSelected()) {
-                setSize(new Dimension(getWidth(), getHeight() + 150));
+                setSize(new Dimension(getWidth(), getHeight() + 130));
             } else {
-                setSize(new Dimension(getWidth(), getHeight() - 150));
+                setSize(new Dimension(getWidth(), getHeight() - 130));
             }
         });
 
         enableSSHBtn.addActionListener(e -> {
-            enableSSLBtn.setSelected(false);
+            if (enableSSLBtn.isSelected()) {
+                enableSSLBtn.setSelected(false);
+                setSize(new Dimension(getWidth(), getHeight() - 130));
+            }
             sslPanel.setVisible(false);
             sshPanel.setVisible(enableSSHBtn.isSelected());
             if (enableSSHBtn.isSelected()) {

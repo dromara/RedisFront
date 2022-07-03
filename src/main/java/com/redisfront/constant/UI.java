@@ -19,6 +19,9 @@ public class UI {
     public static final Icon TEST_CONNECTION_ICON = new FlatSVGIcon("icons/lan-connect.svg");
 
     public static final Icon REFRESH_ICON = new FlatSVGIcon("icons/refresh.svg");
+    public static final Icon RENAME_ICON = new FlatSVGIcon("icons/RENAME.svg");
+    public static final Icon DELETE_ICON = new FlatSVGIcon("icons/delete.svg");
+    public static final Icon SAVE_ICON = new FlatSVGIcon("icons/save.svg");
     public static final Icon CONTENT_TAB_DATA_ICON = new FlatSVGIcon("icons/db_key2.svg");
     public static final Icon CONTENT_TAB_COMMAND_ICON = new FlatSVGIcon("icons/db_cli2.svg");
     public static final Icon CONTENT_TAB_INFO_ICON = new FlatSVGIcon("icons/db_report2.svg");

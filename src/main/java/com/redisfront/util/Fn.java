@@ -13,7 +13,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
+import javax.swing.*;
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -28,6 +31,13 @@ public class Fn {
     public static void revalidateAndRepaintAllFramesAndDialogs() {
         FlatLaf.revalidateAndRepaintAllFramesAndDialogs();
     }
+
+    public static void removeAllComponent(JComponent component) {
+        for (Component c : component.getComponents()) {
+            component.remove(c);
+        }
+    }
+
 
     public static boolean isNotEmpty(Collection<?> collection) {
         return CollectionUtil.isNotEmpty(collection);

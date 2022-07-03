@@ -1,12 +1,22 @@
 package com.redisfront.ui.form.fragment;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.ui.FlatEmptyBorder;
 import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import com.intellij.uiDesigner.core.Spacer;
+import com.redisfront.constant.Enum;
+import com.redisfront.constant.UI;
+import com.redisfront.model.ConnectInfo;
+import com.redisfront.model.TreeNodeInfo;
 import com.redisfront.ui.component.TextEditorComponent;
+import com.redisfront.ui.form.MainNoneForm;
+import com.redisfront.util.Fn;
+import com.redisfront.util.LettuceUtil;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 
@@ -18,20 +28,84 @@ import java.awt.*;
 public class DataViewForm {
 
     private JPanel contentPanel;
-    private JTextField textField1;
-    private JButton button1;
-    private JButton button2;
-    private JButton button3;
+    private JTextField keyField;
     private JPanel bodyPanel;
     private JPanel valueViewPanel;
     private JPanel StringViewPanel;
+    private JLabel keyTypeLabel;
+    private JLabel ttlLabel;
+    private JButton delBtn;
+    private JButton refBtn;
+    private JLabel lengthLabel;
+    private JLabel keySizeLabel;
+    private JButton saveBtn;
 
-    public static DataViewForm newInstance() {
-        return new DataViewForm();
+    private final ConnectInfo connectInfo;
+    private TextEditorComponent textEditorComponent;
+
+    public static DataViewForm newInstance(ConnectInfo connectInfo) {
+        return new DataViewForm(connectInfo);
     }
 
-    public DataViewForm() {
+    public DataViewForm(ConnectInfo connectInfo) {
+        this.connectInfo = connectInfo;
         $$$setupUI$$$();
+        Fn.removeAllComponent(bodyPanel);
+        bodyPanel.add(MainNoneForm.getInstance().getContentPanel());
+        keyTypeLabel.setOpaque(true);
+        keyTypeLabel.setForeground(Color.WHITE);
+        keyTypeLabel.setBorder(new EmptyBorder(2, 3, 2, 3));
+        var renameBtn = new JButton(UI.RENAME_ICON);
+        renameBtn.setToolTipText("重命名");
+        renameBtn.addActionListener(actionEvent -> System.out.println());
+        keyField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, renameBtn);
+
+        delBtn.setIcon(UI.DELETE_ICON);
+        delBtn.setText("删除");
+        delBtn.setToolTipText("删除键");
+        refBtn.setIcon(UI.REFRESH_ICON);
+        refBtn.setText("重载");
+        refBtn.setToolTipText("重载");
+
+        saveBtn.setIcon(UI.SAVE_ICON);
+        saveBtn.setText("保存");
+        saveBtn.setToolTipText("保存");
+    }
+
+    public JPanel contentPanel() {
+        return contentPanel;
+    }
+
+    public void dataChange(TreeNodeInfo treeNodeInfo) {
+        if (bodyPanel.getComponentCount() == 1) {
+            Fn.removeAllComponent(bodyPanel);
+            bodyPanel.add(StringViewPanel, BorderLayout.NORTH);
+            bodyPanel.add(valueViewPanel, BorderLayout.CENTER);
+        }
+
+        this.keyField.setText(treeNodeInfo.key());
+
+        LettuceUtil.run(connectInfo, redisCommands -> {
+            Long ttl = redisCommands.ttl(treeNodeInfo.key());
+            ttlLabel.setText("TTL: " + ttl);
+            String type = redisCommands.type(treeNodeInfo.key());
+            Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(type.toUpperCase());
+
+            if (keyTypeEnum == Enum.KeyTypeEnum.STRING) {
+
+                Long strLen = redisCommands.strlen(treeNodeInfo.key());
+                lengthLabel.setText("Length: " + strLen);
+
+                keyTypeLabel.setText(keyTypeEnum.name());
+                keyTypeLabel.setBackground(keyTypeEnum.color());
+
+                String value = redisCommands.get(treeNodeInfo.key());
+                keySizeLabel.setText("Size: " + value.getBytes().length + " Bytes");
+                textEditorComponent.textArea().setText(value);
+            }
+
+
+        });
     }
 
     /**
@@ -48,23 +122,38 @@ public class DataViewForm {
         contentPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         bodyPanel.setLayout(new BorderLayout(0, 0));
         contentPanel.add(bodyPanel, BorderLayout.CENTER);
-        StringViewPanel.setLayout(new GridLayoutManager(5, 5, new Insets(0, 0, 0, 0), -1, -1));
+        StringViewPanel.setLayout(new GridLayoutManager(2, 10, new Insets(0, 0, 0, 0), -1, -1));
         bodyPanel.add(StringViewPanel, BorderLayout.NORTH);
         StringViewPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
-        final JLabel label1 = new JLabel();
-        label1.setText("Label");
-        StringViewPanel.add(label1, new GridConstraints(0, 0, 5, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        textField1 = new JTextField();
-        StringViewPanel.add(textField1, new GridConstraints(0, 1, 2, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-        button1 = new JButton();
-        button1.setText("Button");
-        StringViewPanel.add(button1, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        button2 = new JButton();
-        button2.setText("Button");
-        StringViewPanel.add(button2, new GridConstraints(0, 3, 3, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        button3 = new JButton();
-        button3.setText("Button");
-        StringViewPanel.add(button3, new GridConstraints(0, 4, 4, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        keyTypeLabel = new JLabel();
+        keyTypeLabel.setText("Label");
+        StringViewPanel.add(keyTypeLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final Spacer spacer1 = new Spacer();
+        StringViewPanel.add(spacer1, new GridConstraints(0, 9, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer2 = new Spacer();
+        StringViewPanel.add(spacer2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        keyField = new JTextField();
+        StringViewPanel.add(keyField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        ttlLabel = new JLabel();
+        ttlLabel.setText("Label");
+        StringViewPanel.add(ttlLabel, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        lengthLabel = new JLabel();
+        lengthLabel.setText("Label");
+        StringViewPanel.add(lengthLabel, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        keySizeLabel = new JLabel();
+        keySizeLabel.setText("Label");
+        StringViewPanel.add(keySizeLabel, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        delBtn = new JButton();
+        delBtn.setText("");
+        StringViewPanel.add(delBtn, new GridConstraints(0, 6, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        refBtn = new JButton();
+        refBtn.setText("");
+        StringViewPanel.add(refBtn, new GridConstraints(0, 7, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final Spacer spacer3 = new Spacer();
+        StringViewPanel.add(spacer3, new GridConstraints(0, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        saveBtn = new JButton();
+        saveBtn.setText("");
+        StringViewPanel.add(saveBtn, new GridConstraints(0, 8, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         bodyPanel.add(valueViewPanel, BorderLayout.CENTER);
         valueViewPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 10, 8, 10), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
     }
@@ -104,7 +193,9 @@ public class DataViewForm {
                 add(new JSeparator(), BorderLayout.CENTER);
             }
         }, BorderLayout.NORTH);
-        valueViewPanel.add(TextEditorComponent.newInstance(), BorderLayout.CENTER);
+
+        textEditorComponent = TextEditorComponent.newInstance();
+        valueViewPanel.add(textEditorComponent, BorderLayout.CENTER);
 
         StringViewPanel = new JPanel() {
             @Override
@@ -116,6 +207,7 @@ public class DataViewForm {
                 setLayout(new BorderLayout());
             }
         };
+
     }
 
 

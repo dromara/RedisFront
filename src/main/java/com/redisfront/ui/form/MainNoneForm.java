@@ -1,6 +1,5 @@
 package com.redisfront.ui.form;
 
-import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
