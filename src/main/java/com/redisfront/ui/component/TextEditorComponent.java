@@ -1,9 +1,7 @@
 package com.redisfront.ui.component;
 
 
-import com.formdev.flatlaf.ui.FlatLineBorder;
 import org.fife.ui.rsyntaxtextarea.*;
-import org.fife.ui.rtextarea.RTextAreaBase;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 import javax.swing.*;
@@ -46,9 +44,24 @@ public class TextEditorComponent extends JPanel {
         scrollPane = new RTextScrollPane(this.textArea);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.setLineNumbersEnabled(true);
+        this.setLayout(new BorderLayout());
+        this.add(scrollPane, BorderLayout.CENTER);
+        updateTheme();
 
+    }
+
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        if (textArea != null) {
+            updateTheme();
+        }
+    }
+
+    public void updateTheme() {
         var font = UIManager.getFont("defaultFont");
         this.textArea.setFont(font);
+
         this.textArea.setSyntaxScheme(new SyntaxScheme(font) {
             private void init(String key, int token) {
                 var prefix = "FlatEditorPane.style.";
@@ -77,25 +90,6 @@ public class TextEditorComponent extends JPanel {
                 this.init("comment", 1);
             }
         });
-        this.scrollPane.getGutter().setLineNumberFont(font);
-
-        this.setLayout(new BorderLayout());
-        this.add(scrollPane, BorderLayout.CENTER);
-        updateTheme();
-
-    }
-
-    @Override
-    public void updateUI() {
-        super.updateUI();
-        if (textArea != null) {
-            updateTheme();
-        }
-        var flatLineBorder = new FlatLineBorder(new Insets(1, 1, 1, 1), UIManager.getColor("Component.borderColor"));
-        setBorder(flatLineBorder);
-    }
-
-    public void updateTheme() {
         this.textArea.setBackground(UIManager.getColor("FlatEditorPane.background"));
         this.textArea.setCaretColor(UIManager.getColor("FlatEditorPane.caretColor"));
         this.textArea.setSelectionColor(UIManager.getColor("FlatEditorPane.selectionBackground"));
@@ -107,6 +101,7 @@ public class TextEditorComponent extends JPanel {
         this.textArea.setPaintMatchedBracketPair(true);
         this.textArea.setAnimateBracketMatching(false);
         var gutter = this.scrollPane.getGutter();
+        gutter.setLineNumberFont(font);
         gutter.setBackground(UIManager.getColor("FlatEditorPane.gutter.background"));
         gutter.setBorderColor(UIManager.getColor("FlatEditorPane.gutter.borderColor"));
         gutter.setLineNumberColor(UIManager.getColor("FlatEditorPane.gutter.lineNumberColor"));

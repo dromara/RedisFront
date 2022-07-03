@@ -95,7 +95,16 @@ public class DataViewForm {
                 setLayout(new BorderLayout());
             }
         };
-        valueViewPanel.add(TextEditorComponent.newInstance());
+        valueViewPanel.add(new JPanel() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setLayout(new BorderLayout());
+                setBorder(new FlatEmptyBorder(0, 0, 5, 0));
+                add(new JSeparator(), BorderLayout.CENTER);
+            }
+        }, BorderLayout.NORTH);
+        valueViewPanel.add(TextEditorComponent.newInstance(), BorderLayout.CENTER);
 
         StringViewPanel = new JPanel() {
             @Override
