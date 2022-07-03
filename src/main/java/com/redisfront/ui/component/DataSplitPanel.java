@@ -1,10 +1,9 @@
 package com.redisfront.ui.component;
 
-import com.formdev.flatlaf.extras.components.FlatTextPane;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisService;
-import com.redisfront.ui.form.DataSearchForm;
-import com.redisfront.ui.form.DataViewForm;
+import com.redisfront.ui.form.fragment.DataSearchForm;
+import com.redisfront.ui.form.fragment.DataViewForm;
 import com.redisfront.util.MsgUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

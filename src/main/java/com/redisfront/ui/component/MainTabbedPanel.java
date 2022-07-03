@@ -6,7 +6,7 @@ import com.formdev.flatlaf.extras.components.FlatToolBar;
 import com.redisfront.constant.UI;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisService;
-import com.redisfront.ui.form.DataSearchForm;
+import com.redisfront.ui.form.fragment.DataSearchForm;
 
 import javax.swing.*;
 import java.awt.*;
@@ -88,7 +88,6 @@ public class MainTabbedPanel extends JPanel {
             if (component instanceof TerminalComponent terminalComponent) {
                 terminalComponent.ping();
             }
-
             if (component instanceof DataSplitPanel dataSplitPanel) {
                 dataSplitPanel.ping();
             }

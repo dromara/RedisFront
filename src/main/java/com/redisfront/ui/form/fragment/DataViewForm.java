@@ -1,4 +1,4 @@
-package com.redisfront.ui.form;
+package com.redisfront.ui.form.fragment;
 
 import com.formdev.flatlaf.ui.FlatEmptyBorder;
 import com.formdev.flatlaf.ui.FlatLineBorder;
