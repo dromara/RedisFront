@@ -1,5 +1,6 @@
 package com.redisfront.ui.form.fragment;
 
+import cn.hutool.core.io.unit.DataSizeUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.ui.FlatEmptyBorder;
 import com.formdev.flatlaf.ui.FlatLineBorder;
@@ -33,12 +34,12 @@ public class DataViewForm {
     private JPanel valueViewPanel;
     private JPanel StringViewPanel;
     private JLabel keyTypeLabel;
-    private JLabel ttlLabel;
     private JButton delBtn;
     private JButton refBtn;
     private JLabel lengthLabel;
     private JLabel keySizeLabel;
     private JButton saveBtn;
+    private JTextField ttlField;
 
     private final ConnectInfo connectInfo;
     private TextEditorComponent textEditorComponent;
@@ -59,6 +60,10 @@ public class DataViewForm {
         renameBtn.setToolTipText("重命名");
         renameBtn.addActionListener(actionEvent -> System.out.println());
         keyField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, renameBtn);
+
+        var ttlLabel = new JLabel();
+        ttlLabel.setText("TTL");
+        ttlField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, ttlLabel);
 
         delBtn.setIcon(UI.DELETE_ICON);
         delBtn.setText("删除");
@@ -87,7 +92,7 @@ public class DataViewForm {
 
         LettuceUtil.run(connectInfo, redisCommands -> {
             Long ttl = redisCommands.ttl(treeNodeInfo.key());
-            ttlLabel.setText("TTL: " + ttl);
+            ttlField.setText(ttl.toString());
             String type = redisCommands.type(treeNodeInfo.key());
             Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(type.toUpperCase());
 
@@ -100,7 +105,7 @@ public class DataViewForm {
                 keyTypeLabel.setBackground(keyTypeEnum.color());
 
                 String value = redisCommands.get(treeNodeInfo.key());
-                keySizeLabel.setText("Size: " + value.getBytes().length + " Bytes");
+                keySizeLabel.setText("Size: " + DataSizeUtil.format(value.getBytes().length));
                 textEditorComponent.textArea().setText(value);
             }
 
@@ -134,9 +139,6 @@ public class DataViewForm {
         StringViewPanel.add(spacer2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         keyField = new JTextField();
         StringViewPanel.add(keyField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-        ttlLabel = new JLabel();
-        ttlLabel.setText("Label");
-        StringViewPanel.add(ttlLabel, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         lengthLabel = new JLabel();
         lengthLabel.setText("Label");
         StringViewPanel.add(lengthLabel, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -154,6 +156,8 @@ public class DataViewForm {
         saveBtn = new JButton();
         saveBtn.setText("");
         StringViewPanel.add(saveBtn, new GridConstraints(0, 8, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        ttlField = new JTextField();
+        StringViewPanel.add(ttlField, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         bodyPanel.add(valueViewPanel, BorderLayout.CENTER);
         valueViewPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 10, 8, 10), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
     }
