@@ -130,7 +130,7 @@ public class DataViewForm {
         contentPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         bodyPanel.setLayout(new BorderLayout(0, 0));
         contentPanel.add(bodyPanel, BorderLayout.CENTER);
-        StringViewPanel.setLayout(new GridLayoutManager(2, 8, new Insets(0, 0, 0, 0), -1, -1));
+        StringViewPanel.setLayout(new GridLayoutManager(2, 9, new Insets(0, 0, 0, 0), -1, -1));
         bodyPanel.add(StringViewPanel, BorderLayout.NORTH);
         StringViewPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         keyTypeLabel = new JLabel();
@@ -157,6 +157,8 @@ public class DataViewForm {
         StringViewPanel.add(saveBtn, new GridConstraints(0, 7, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         ttlField = new JTextField();
         StringViewPanel.add(ttlField, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        final Spacer spacer2 = new Spacer();
+        StringViewPanel.add(spacer2, new GridConstraints(0, 8, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         bodyPanel.add(valueViewPanel, BorderLayout.CENTER);
         valueViewPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 10, 8, 10), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
     }
@@ -199,6 +201,16 @@ public class DataViewForm {
 
         textEditorComponent = TextEditorComponent.newInstance();
         valueViewPanel.add(textEditorComponent, BorderLayout.CENTER);
+
+        valueViewPanel.add(new JPanel() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setLayout(new BorderLayout());
+                setBorder(new FlatEmptyBorder(5, 0, 5, 0));
+                add(new JSeparator(), BorderLayout.CENTER);
+            }
+        }, BorderLayout.SOUTH);
 
         StringViewPanel = new JPanel() {
             @Override
