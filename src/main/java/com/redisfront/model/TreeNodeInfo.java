@@ -53,7 +53,11 @@ public class TreeNodeInfo extends DefaultMutableTreeNode implements Comparable<T
 
     @Override
     public String toString() {
-        return title;
+        if (getChildCount() > 0) {
+            return title + " (" + getChildCount() + ") ";
+        } else {
+            return title;
+        }
     }
 
 

@@ -10,13 +10,13 @@ public class Enum {
     }
 
     public enum KeyTypeEnum {
-        STRING(Color.MAGENTA),
-        LIST(Color.ORANGE),
-        HASH(Color.red),
-        SET(Color.blue),
-        ZSET(Color.pink),
-        JSON(Color.orange),
-        STREAM(Color.MAGENTA);
+        STRING(new Color(20,92,205)),
+        LIST(new Color(241,163,37)),
+        HASH(new Color(56,176,63)),
+        SET(new Color(3,184,207)),
+        ZSET(new Color(189,123,70)),
+        JSON(new Color(134,102,184)),
+        STREAM(new Color(234,100,74));
 
 
         private final Color color;
