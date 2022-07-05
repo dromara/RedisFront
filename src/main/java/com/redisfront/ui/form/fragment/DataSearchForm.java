@@ -8,6 +8,7 @@ import com.redisfront.constant.Enum;
 import com.redisfront.constant.UI;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.model.TreeNodeInfo;
+import com.redisfront.ui.dialog.AddKeyDialog;
 import com.redisfront.util.LettuceUtil;
 import com.redisfront.util.TreeUtil;
 
@@ -20,6 +21,8 @@ import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -135,6 +138,8 @@ public class DataSearchForm {
         borderPanel.setLayout(new BorderLayout());
 
         addBtn = new JButton();
+        addBtn.addActionListener(e -> AddKeyDialog.showAddDialog());
+
         refreshBtn = new JButton();
         refreshBtn.setIcon(UI.REFRESH_ICON);
         databaseComboBox = new JComboBox<>();

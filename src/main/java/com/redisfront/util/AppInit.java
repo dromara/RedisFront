@@ -6,6 +6,8 @@ import com.redisfront.service.ConnectService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.*;
+
 /**
  * Init
  *
@@ -17,13 +19,15 @@ public class AppInit {
 
     public static void init() {
 
+        ToolTipManager.sharedInstance().setInitialDelay(0);
+
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
             if (e instanceof RedisFrontException redisFrontException) {
                 if (redisFrontException.showMessage()) {
-                    MsgUtil.showErrorDialog("程序出现异常", redisFrontException);
+                    MsgUtil.showErrorDialog("Error", redisFrontException);
                 }
             } else {
-                MsgUtil.showErrorDialog("程序出现异常", new Exception(e.getMessage()));
+                MsgUtil.showErrorDialog("Error", new Exception(e.getMessage()));
             }
             log.error("程序运行异常", e);
         });

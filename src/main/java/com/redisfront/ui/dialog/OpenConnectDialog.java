@@ -36,15 +36,15 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
     protected Consumer<ConnectInfo> delActionCallback;
 
     public static void showOpenConnectDialog(Consumer<ConnectInfo> openActionCallback, Consumer<ConnectInfo> editActionCallback, Consumer<ConnectInfo> delActionCallback) {
-        var openConnectDialog = new OpenConnectDialog(RedisFrontApplication.frame, openActionCallback, editActionCallback, delActionCallback);
+        var openConnectDialog = new OpenConnectDialog(openActionCallback, editActionCallback, delActionCallback);
         openConnectDialog.setSize(new Dimension(500, 280));
         openConnectDialog.setLocationRelativeTo(RedisFrontApplication.frame);
         openConnectDialog.pack();
         openConnectDialog.setVisible(true);
     }
 
-    public OpenConnectDialog(Frame owner, Consumer<ConnectInfo> openActionCallback, Consumer<ConnectInfo> editActionCallback, Consumer<ConnectInfo> delActionCallback) {
-        super(owner);
+    public OpenConnectDialog(Consumer<ConnectInfo> openActionCallback, Consumer<ConnectInfo> editActionCallback, Consumer<ConnectInfo> delActionCallback) {
+        super(RedisFrontApplication.frame);
         $$$setupUI$$$();
         setTitle("打开连接");
         setModal(true);

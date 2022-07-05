@@ -19,7 +19,10 @@ import com.redisfront.util.LettuceUtil;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.plaf.FontUIResource;
+import javax.swing.text.StyleContext;
 import java.awt.*;
+import java.util.Locale;
 
 /**
  * DataViewForm
@@ -71,6 +74,7 @@ public class DataViewForm {
         delBtn.setIcon(UI.DELETE_ICON);
         delBtn.setText("删除");
         delBtn.setToolTipText("删除键");
+
         refBtn.setIcon(UI.REFRESH_ICON);
         refBtn.setText("重载");
         refBtn.setToolTipText("重载");
@@ -99,13 +103,14 @@ public class DataViewForm {
             String type = redisCommands.type(treeNodeInfo.key());
             Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(type.toUpperCase());
 
+            keyTypeLabel.setText(keyTypeEnum.typeName());
+            keyTypeLabel.setBackground(keyTypeEnum.color());
+
             if (keyTypeEnum == Enum.KeyTypeEnum.STRING) {
 
                 Long strLen = redisCommands.strlen(treeNodeInfo.key());
                 lengthLabel.setText("Length: " + strLen);
 
-                keyTypeLabel.setText(keyTypeEnum.typeName());
-                keyTypeLabel.setBackground(keyTypeEnum.color());
 
                 String value = redisCommands.get(treeNodeInfo.key());
                 keySizeLabel.setText("Size: " + DataSizeUtil.format(value.getBytes().length));
@@ -134,6 +139,8 @@ public class DataViewForm {
         bodyPanel.add(StringViewPanel, BorderLayout.NORTH);
         StringViewPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         keyTypeLabel = new JLabel();
+        Font keyTypeLabelFont = this.$$$getFont$$$(null, Font.BOLD, 14, keyTypeLabel.getFont());
+        if (keyTypeLabelFont != null) keyTypeLabel.setFont(keyTypeLabelFont);
         keyTypeLabel.setText("Label");
         StringViewPanel.add(keyTypeLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer1 = new Spacer();
@@ -161,6 +168,28 @@ public class DataViewForm {
         StringViewPanel.add(spacer2, new GridConstraints(0, 8, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         bodyPanel.add(valueViewPanel, BorderLayout.CENTER);
         valueViewPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 10, 8, 10), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    private Font $$$getFont$$$(String fontName, int style, int size, Font currentFont) {
+        if (currentFont == null) return null;
+        String resultName;
+        if (fontName == null) {
+            resultName = currentFont.getName();
+        } else {
+            Font testFont = new Font(fontName, Font.PLAIN, 10);
+            if (testFont.canDisplay('a') && testFont.canDisplay('1')) {
+                resultName = fontName;
+            } else {
+                resultName = currentFont.getName();
+            }
+        }
+        Font font = new Font(resultName, style >= 0 ? style : currentFont.getStyle(), size >= 0 ? size : currentFont.getSize());
+        boolean isMac = System.getProperty("os.name", "").toLowerCase(Locale.ENGLISH).startsWith("mac");
+        Font fontWithFallback = isMac ? new Font(font.getFamily(), font.getStyle(), font.getSize()) : new StyleContext().getFont(font.getFamily(), font.getStyle(), font.getSize());
+        return fontWithFallback instanceof FontUIResource ? fontWithFallback : new FontUIResource(fontWithFallback);
     }
 
     /**

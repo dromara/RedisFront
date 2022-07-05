@@ -11,10 +11,10 @@ public class Enum {
 
     public enum KeyTypeEnum {
         STRING("String",new Color(20,92,205)),
-        LIST("List",new Color(241,163,37)),
+        LIST("List",new Color(222, 138, 4)),
         HASH("Hash",new Color(56,176,63)),
-        SET("Set",new Color(3,184,207)),
-        ZSET("ZSet",new Color(189,123,70)),
+        SET("Set",new Color(3, 148, 166)),
+        ZSET("ZSet",new Color(174, 30, 20)),
         JSON("Json",new Color(134,102,184)),
         STREAM("Stream",new Color(234,100,74));
 

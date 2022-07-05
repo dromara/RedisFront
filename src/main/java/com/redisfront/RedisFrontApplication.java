@@ -48,6 +48,7 @@ public class RedisFrontApplication {
 
         PrefUtil.init(Const.ROOT_PATH);
 
+
         SwingUtilities.invokeLater(() -> {
             ThemeUtil.setupTheme(args);
 
