@@ -15,8 +15,13 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.JTextComponent;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeCellRenderer;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -133,29 +138,30 @@ public class DataSearchForm {
         refreshBtn = new JButton();
         refreshBtn.setIcon(UI.REFRESH_ICON);
         databaseComboBox = new JComboBox<>();
+
         var dbList = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15));
         for (var db : dbList) {
             databaseComboBox.addItem(db);
         }
+
         databaseComboBox.addActionListener(e -> {
             var db = (Integer) databaseComboBox.getSelectedItem();
             this.connectInfo.setDatabase(db);
             this.init();
         });
+
         treePanel = new JPanel();
         treePanel.setBorder(new EmptyBorder(3, 2, 2, 2));
+
         searchTextField = new JTextField();
         searchTextField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入关键字...");
-
         var searchBtn = new JButton(new FlatSearchIcon());
-
         searchBtn.addActionListener(actionEvent -> LettuceUtil.run(connectInfo, redisCommands -> {
             var list = redisCommands.keys(searchTextField.getText());
             var treeModel = TreeUtil.toTreeModel(new HashSet<>(list), ":");
             keyTree.setModel(treeModel);
         }));
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchBtn);
-
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> LettuceUtil.run(connectInfo, redisCommands -> {
             searchTextField.setText("");
@@ -175,5 +181,36 @@ public class DataSearchForm {
                 }
             }
         });
+
+        var popupMenu = new JPopupMenu() {
+            {
+                var addMenuItem = new JMenuItem("添加");
+                add(addMenuItem);
+                var delMenuItem = new JMenuItem("删除");
+                delMenuItem.addActionListener((e) -> {
+
+                });
+                add(delMenuItem);
+                var refMenuItem = new JMenuItem("刷新");
+                add(refMenuItem);
+                var memMenuItem = new JMenuItem("内存分析");
+                add(memMenuItem);
+            }
+        };
+
+        keyTree.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                var i = keyTree.getSelectionCount();
+                if (MouseEvent.BUTTON3 == e.getButton() && keyTree.getSelectionCount() > 0) {
+                    popupMenu.show(keyTree, e.getX(), e.getY());
+                    popupMenu.setVisible(true);
+                    popupMenu.pack();
+                }
+            }
+        });
+
     }
+
+
 }

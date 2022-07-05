@@ -52,6 +52,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         setContentPane(contentPane);
         getRootPane().setDefaultButton(buttonOK);
         buttonOK.addActionListener(e -> onOK());
+        buttonOK.setEnabled(false);
         buttonCancel.addActionListener(e -> onCancel());
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
@@ -76,22 +77,8 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
             }
         });
         connectTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        connectTable.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-                    var row = connectTable.getSelectedRow();
-                    if (row == -1) {
-                        return;
-                    }
-                    var id = connectTable.getValueAt(row, 0);
-                    var connectInfo = ConnectService.service.getConnect(id);
-                    onCancel();
-                    openActionCallback.accept(connectInfo);
-                }
-            }
-        });
-        connectTable.setComponentPopupMenu(new JPopupMenu() {
+
+        var popupMenu = new JPopupMenu() {
             {
                 //表格打开链接操作
                 var openConnectMenu = new JMenuItem("打开链接");
@@ -139,7 +126,36 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                 });
                 add(deleteConnectMenu);
             }
+        };
+
+        connectTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    if (connectTable.getSelectedRow() != -1) {
+                        buttonOK.setEnabled(true);
+                    } else {
+                        buttonOK.setEnabled(false);
+                    }
+                }
+                if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2) {
+                    var row = connectTable.getSelectedRow();
+                    if (row == -1) {
+                        return;
+                    }
+                    var id = connectTable.getValueAt(row, 0);
+                    var connectInfo = ConnectService.service.getConnect(id);
+                    onCancel();
+                    openActionCallback.accept(connectInfo);
+                }
+                if (e.getButton() == MouseEvent.BUTTON3 && connectTable.getSelectedRow() != -1) {
+                    popupMenu.show(connectTable, e.getX(), e.getY());
+                    popupMenu.setVisible(true);
+                    popupMenu.pack();
+                }
+            }
         });
+
         //查询数据连接列表
         List<ConnectInfo> connectInfoList = ConnectService.service.getAllConnectList();
         connectTable.setModel(new ConnectTableModel(connectInfoList, "编号", "名称", "地址", "端口", "SSL", "连接模式"));

@@ -104,7 +104,7 @@ public class DataViewForm {
                 Long strLen = redisCommands.strlen(treeNodeInfo.key());
                 lengthLabel.setText("Length: " + strLen);
 
-                keyTypeLabel.setText(keyTypeEnum.name());
+                keyTypeLabel.setText(keyTypeEnum.typeName());
                 keyTypeLabel.setBackground(keyTypeEnum.color());
 
                 String value = redisCommands.get(treeNodeInfo.key());
