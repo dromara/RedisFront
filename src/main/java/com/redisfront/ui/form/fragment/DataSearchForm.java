@@ -138,7 +138,7 @@ public class DataSearchForm {
         borderPanel.setLayout(new BorderLayout());
 
         addBtn = new JButton();
-        addBtn.addActionListener(e -> AddKeyDialog.showAddDialog());
+        addBtn.addActionListener(e -> AddKeyDialog.showAddDialog(connectInfo, System.out::println));
 
         refreshBtn = new JButton();
         refreshBtn.setIcon(UI.REFRESH_ICON);

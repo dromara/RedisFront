@@ -47,30 +47,6 @@ public class MainTabbedPanel extends JPanel {
         var hostInfo = new FlatLabel();
         hostInfo.setText(connectInfo.host() + ":" + connectInfo.port() + " - " + connectInfo.redisModeEnum().modeName);
 
-        var buf = new StringBuilder(1500);
-        buf.append("<html><style>");
-        buf.append("td { padding: 0 10 0 0; }");
-        buf.append("</style><table>");
-        var serverInfo = RedisService.service.getServerInfo(connectInfo);
-        String version = (String) serverInfo.get("redis_version");
-        appendRow(buf, "Redis版本", version);
-
-        String port = (String) serverInfo.get("tcp_port");
-        appendRow(buf, "连接端口", port);
-
-        String os = (String) serverInfo.get("os");
-        appendRow(buf, "操作系统", os);
-
-        String redisMode = (String) serverInfo.get("redis_mode");
-        appendRow(buf, "Redis模式", redisMode);
-
-        String configFile = (String) serverInfo.get("config_file");
-        appendRow(buf, "配置文件", configFile);
-
-        buf.append("</td></tr>");
-        buf.append("</table></html>");
-        hostInfo.setToolTipText(buf.toString());
-
         hostInfo.setIcon(UI.CONTENT_TAB_HOST_ICON);
         leftToolBar.add(hostInfo);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_LEADING_COMPONENT, leftToolBar);

@@ -125,9 +125,9 @@ public class RedisServiceImpl implements RedisService {
     private Long countKeys(Map<String, Object> keySpace) {
         return keySpace.values()
                 .stream()
+                .findFirst()
                 .map(s -> s.toString().split(",")[0])
                 .map(s -> Long.parseLong(s.replace("keys=", "")))
-                .reduce(Long::sum)
                 .orElse(0L);
     }
 

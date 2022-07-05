@@ -51,13 +51,6 @@ public class MainWindowForm {
         //set redis mode
         connectInfo.setRedisModeEnum(RedisService.service.getRedisModeEnum(connectInfo));
 
-        //存数据库
-        if (Fn.equal(connectInfo.id(), 0)) {
-            ConnectService.service.save(connectInfo);
-        } else {
-            ConnectService.service.update(connectInfo);
-        }
-
         var mainTabbedPanel = MainTabbedPanel.newInstance(connectInfo);
 
         //添加到tab面板
@@ -65,6 +58,12 @@ public class MainWindowForm {
         this.tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
         this.contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
 
+        //存数据库
+        if (Fn.equal(connectInfo.id(), 0)) {
+            ConnectService.service.save(connectInfo);
+        } else {
+            ConnectService.service.update(connectInfo);
+        }
 
     }
 
