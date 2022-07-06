@@ -1,5 +1,8 @@
+import java.time.LocalDateTime
+
 plugins {
-    `java-library`
+    id("java")
+    id("java-library")
 }
 
 group = "com.redisfront"
@@ -9,21 +12,23 @@ var flatlafVersion = "2.3"
 var hutoolVersion = "5.8.3"
 var jedisVersion = "4.2.3"
 var fifesoftVersion = "3.2.0"
+var derbyVersion = "10.15.2.0"
 
 repositories {
     mavenCentral()
 }
 
-// check required Java version
 if (JavaVersion.current() < JavaVersion.VERSION_17)
     throw RuntimeException("Java required (running ${JavaVersion.VERSION_17})")
 
-// log version, Gradle and Java versions
+
 println()
 println("-------------------------------------------------------------------------------")
 println("RedisFront Version: ${version}")
-println("Gradle ${gradle.gradleVersion} at ${gradle.gradleHomeDir}")
-println("Java ${System.getProperty("java.version")}")
+println("Gradle Path: ${gradle.gradleVersion} at ${gradle.gradleHomeDir}")
+println("Java Version: ${System.getProperty("java.version")}")
+println("Build Date: ${LocalDateTime.now()}")
+println("-------------------------------------------------------------------------------")
 println()
 
 dependencies {
@@ -40,7 +45,7 @@ dependencies {
     implementation("redis.clients:jedis:${jedisVersion}")
     implementation("cn.hutool:hutool-extra:${hutoolVersion}")
     implementation("com.jcraft:jsch:0.1.55")
-    implementation("org.apache.derby:derby:10.15.2.0")
+    implementation("org.apache.derby:derby:${derbyVersion}")
     implementation("commons-net:commons-net:3.8.0")
     implementation("org.bouncycastle:bcpkix-jdk15on:1.70")
     implementation("org.bouncycastle:bcprov-jdk15on:1.70")
@@ -49,6 +54,7 @@ dependencies {
     implementation("com.intellij:forms_rt:7.0.3")
     implementation("ch.qos.logback:logback-classic:1.2.11")
 }
+
 
 tasks {
 
@@ -59,24 +65,28 @@ tasks {
     withType<JavaCompile>().configureEach {
         sourceCompatibility = "17"
         targetCompatibility = "17"
-
-        options.encoding = "ISO-8859-1"
+        options.encoding = "utf-8"
         options.isDeprecation = false
     }
 
     withType<Jar>().configureEach {
 
+        this.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
         manifest {
             attributes("Main-Class" to "com.redisfront.RedisFrontApplication")
             attributes("Implementation-Vendor" to "www.redisfront.com")
-            attributes("Main-Class" to project.version)
+            attributes("Implementation-Copyright" to "redisfront")
+            attributes("Implementation-Version" to project.version)
             attributes("Multi-Release" to "true")
         }
 
         exclude("module-info.class")
         exclude("META-INF/versions/*/module-info.class")
+        exclude("META-INF/*.SF")
+        exclude("META-INF/*.DSA")
+        exclude("META-INF/*.LIST")
 
-        // include all dependencies in jar
         from({
             configurations.runtimeClasspath.get()
                 .filter { it.name.endsWith("jar") }
@@ -87,7 +97,6 @@ tasks {
                 }
         })
 
-        // add META-INF/LICENSE to all created JARs
         from("${rootDir}/LICENSE") {
             into("META-INF")
         }
