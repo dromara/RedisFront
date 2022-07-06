@@ -1,6 +1,7 @@
 package com.redisfront.util;
 
 import com.redisfront.model.TreeNodeInfo;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,7 +13,8 @@ import java.util.Set;
  */
 public class TreeUtilTest {
 
-    public static void main(String[] args) {
+    @Test
+    public  void test1(){
         Set<String> rows = new HashSet<>();
         rows.add("1:2:3.4");
         rows.add("1:2.2");
