@@ -2,7 +2,6 @@ import java.time.LocalDateTime
 
 plugins {
     id("java")
-    id("java-library")
 }
 
 group = "com.redisfront"
@@ -19,7 +18,7 @@ repositories {
 }
 
 if (JavaVersion.current() < JavaVersion.VERSION_17)
-    throw RuntimeException("Java required (running ${JavaVersion.VERSION_17})")
+    throw RuntimeException("required ( Java ${JavaVersion.VERSION_17})")
 
 
 println()
