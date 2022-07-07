@@ -2,10 +2,9 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 plugins {
-    id("java")
+    `java-library`
 }
 
-group = "com.redisfront"
 version = "1.0-SNAPSHOT"
 
 val flatlafVersion = "2.3"
@@ -39,7 +38,9 @@ println()
 
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+
     implementation("io.lettuce:lettuce-core:${lettuceVersion}")
     implementation("com.google.code.gson:gson:${gsonVersion}")
     implementation("com.formdev:flatlaf:${flatlafVersion}")
@@ -61,12 +62,14 @@ dependencies {
     implementation("com.jcraft:jsch:0.1.55")
 }
 
+
 tasks.test {
     useJUnitPlatform()
+    testLogging.exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
 }
 
 tasks.compileJava {
-     sourceCompatibility = "17"
+    sourceCompatibility = "17"
     targetCompatibility = "17"
     options.encoding = "utf-8"
     options.isDeprecation = false
@@ -88,6 +91,7 @@ tasks.jar {
     exclude("META-INF/*.SF")
     exclude("META-INF/*.DSA")
     exclude("META-INF/*.LIST")
+    exclude("META-INF/*.factories")
 
     from({
         configurations.runtimeClasspath.get()
