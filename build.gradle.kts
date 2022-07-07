@@ -1,11 +1,16 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.lang.Boolean
 
 plugins {
     `java-library`
 }
 
-version = "1.0-SNAPSHOT"
+val releaseVersion = "1.0"
+val developmentVersion = "1.0-SNAPSHOT"
+
+version = if (Boolean.getBoolean("release")) releaseVersion else developmentVersion
 
 val flatlafVersion = "2.3"
 val hutoolVersion = "5.8.3"
@@ -65,7 +70,7 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-    testLogging.exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    testLogging.exceptionFormat = TestExceptionFormat.FULL
 }
 
 tasks.compileJava {
