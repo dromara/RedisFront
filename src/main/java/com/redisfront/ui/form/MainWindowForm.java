@@ -3,12 +3,14 @@ package com.redisfront.ui.form;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.icons.FlatTabbedPaneCloseIcon;
+import com.redisfront.RedisFrontApplication;
 import com.redisfront.constant.UI;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.ConnectService;
 import com.redisfront.service.RedisService;
 import com.redisfront.ui.component.MainTabbedPanel;
 import com.redisfront.ui.dialog.AddConnectDialog;
+import com.redisfront.ui.dialog.LoadingDialog;
 import com.redisfront.ui.dialog.OpenConnectDialog;
 import com.redisfront.util.Fn;
 import com.redisfront.util.MsgUtil;
@@ -47,10 +49,7 @@ public class MainWindowForm {
     }
 
     public void addActionPerformed(ConnectInfo connectInfo) {
-
-        //set redis mode
         connectInfo.setRedisModeEnum(RedisService.service.getRedisModeEnum(connectInfo));
-
         var mainTabbedPanel = MainTabbedPanel.newInstance(connectInfo);
 
         //添加到tab面板
@@ -64,7 +63,6 @@ public class MainWindowForm {
         } else {
             ConnectService.service.update(connectInfo);
         }
-
     }
 
     private void createUIComponents() {
@@ -110,7 +108,11 @@ public class MainWindowForm {
         newBtn.setToolTipText("新建连接");
         newBtn.addActionListener(e -> AddConnectDialog.showAddConnectDialog(
                 //打开连接回调
-                (this::addActionPerformed)
+                ((connectInfo) -> {
+                    LoadingDialog.showDialog();
+                    this.addActionPerformed(connectInfo);
+                    LoadingDialog.closeDialog();
+                })
         ));
         jPanel.add(newBtn);
 
@@ -118,9 +120,17 @@ public class MainWindowForm {
         openBtn.setToolTipText("打开连接");
         openBtn.addActionListener(e -> OpenConnectDialog.showOpenConnectDialog(
                 //打开连接回调
-                (this::addActionPerformed),
+                ((connectInfo) -> {
+                    new Thread(LoadingDialog::showDialog).start();
+                    this.addActionPerformed(connectInfo);
+//                    new Thread(LoadingDialog::closeDialog).start();
+                }),
                 //编辑连接回调
-                (connectInfo -> AddConnectDialog.showEditConnectDialog(connectInfo, (this::addActionPerformed))),
+                (connectInfo -> AddConnectDialog.showEditConnectDialog(connectInfo,  ((c) -> {
+                    LoadingDialog.showDialog();
+                    this.addActionPerformed(connectInfo);
+                    LoadingDialog.closeDialog();
+                }))),
                 //删除连接回调
                 (connectInfo -> ConnectService.service.delete(connectInfo.id()))));
         jPanel.add(openBtn);
@@ -151,5 +161,4 @@ public class MainWindowForm {
     public JComponent $$$getRootComponent$$$() {
         return contentPanel;
     }
-
 }

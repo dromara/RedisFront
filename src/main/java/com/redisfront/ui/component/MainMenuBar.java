@@ -8,6 +8,7 @@ import com.redisfront.RedisFrontApplication;
 import com.redisfront.constant.UI;
 import com.redisfront.service.ConnectService;
 import com.redisfront.ui.dialog.AddConnectDialog;
+import com.redisfront.ui.dialog.LoadingDialog;
 import com.redisfront.ui.dialog.OpenConnectDialog;
 import com.redisfront.ui.dialog.SettingDialog;
 import com.redisfront.ui.form.MainWindowForm;
@@ -53,18 +54,30 @@ public class MainMenuBar extends JMenuBar {
         //新建连接
         var addConnectMenu = new JMenuItem(FILE_MENU_NEW_ITEM.title(), FILE_MENU_NEW_ITEM.mnemonic());
         addConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK));
-        addConnectMenu.addActionListener(e -> AddConnectDialog.showAddConnectDialog(MainWindowForm.getInstance()::addActionPerformed));
+        addConnectMenu.addActionListener(e -> AddConnectDialog.showAddConnectDialog(((connectInfo) -> {
+            LoadingDialog.showDialog();
+            MainWindowForm.getInstance().addActionPerformed(connectInfo);
+            LoadingDialog.closeDialog();
+        })));
         fileMenu.add(addConnectMenu);
         //打开连接
         var openConnectMenu = new JMenuItem(FILE_MENU_OPEN_ITEM.title(), FILE_MENU_OPEN_ITEM.mnemonic());
         openConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
         openConnectMenu.addActionListener(e -> OpenConnectDialog.showOpenConnectDialog(
                 //打开连接回调
-                (MainWindowForm.getInstance()::addActionPerformed),
+                (((connectInfo) -> {
+                    new Thread(LoadingDialog::showDialog).start();
+                    MainWindowForm.getInstance().addActionPerformed(connectInfo);
+                    new Thread(LoadingDialog::closeDialog).start();
+                })),
                 //编辑连接回调
                 (connectInfo -> AddConnectDialog.showEditConnectDialog(
                         connectInfo,
-                        (MainWindowForm.getInstance()::addActionPerformed)
+                        ((c) -> {
+                            LoadingDialog.showDialog();
+                            MainWindowForm.getInstance().addActionPerformed(c);
+//                            LoadingDialog.closeDialog();
+                        })
                 )),
                 //删除连接回调
                 (connectInfo -> ConnectService.service.delete(connectInfo.id())))

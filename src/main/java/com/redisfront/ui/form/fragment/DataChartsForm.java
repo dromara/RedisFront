@@ -4,6 +4,7 @@ import com.redisfront.ui.component.TextEditorComponent;
 
 import javax.swing.*;
 import java.awt.*;
+
 /**
  * DataChartsForm
  *
@@ -12,7 +13,6 @@ import java.awt.*;
 public class DataChartsForm {
 
     private JPanel contentPanel;
-
 
 
     public static DataChartsForm getInstance() {

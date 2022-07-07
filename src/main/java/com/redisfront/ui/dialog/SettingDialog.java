@@ -408,5 +408,4 @@ public class SettingDialog extends AbstractDialog<Void> {
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
-
 }

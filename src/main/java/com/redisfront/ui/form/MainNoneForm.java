@@ -32,13 +32,8 @@ public class MainNoneForm {
     private static final LocaleUtil.BundleInfo NEW_LABEL = LocaleUtil.get("MainNoneForm.NewLabel");
     private static final LocaleUtil.BundleInfo OPEN_LABEL = LocaleUtil.get("MainNoneForm.OpenLabel");
 
-    private static MainNoneForm noneForm;
-
     public static MainNoneForm getInstance() {
-        if (Fn.isNull(noneForm)) {
-            noneForm = new MainNoneForm();
-        }
-        return noneForm;
+        return new MainNoneForm();
     }
 
     public JLabel infoLabel() {
@@ -156,5 +151,4 @@ public class MainNoneForm {
     public JComponent $$$getRootComponent$$$() {
         return contentPanel;
     }
-
 }

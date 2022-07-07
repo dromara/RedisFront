@@ -235,5 +235,4 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
-
 }
