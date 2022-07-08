@@ -102,9 +102,9 @@ public class MainTabbedPanel extends JPanel {
         rightToolBar.add(memoryInfo);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, rightToolBar);
 
-        contentPanel.addTab("数据", UI.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(connectInfo), "数据界面");
-        contentPanel.addTab("命令", UI.CONTENT_TAB_COMMAND_ICON, TerminalComponent.newInstance(connectInfo), "命令界面");
-        contentPanel.addTab("信息", UI.CONTENT_TAB_INFO_ICON, DataChartsForm.getInstance().contentPanel(), "信息界面");
+        contentPanel.addTab("数据", UI.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(connectInfo));
+        contentPanel.addTab("命令", UI.CONTENT_TAB_COMMAND_ICON, TerminalComponent.newInstance(connectInfo));
+        contentPanel.addTab("信息", UI.CONTENT_TAB_INFO_ICON, DataChartsForm.getInstance().contentPanel());
 
         //tab 切换事件
         contentPanel.addChangeListener(e -> {

@@ -1,3 +1,5 @@
+@file:Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

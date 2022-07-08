@@ -33,6 +33,7 @@ public class ExecutorUtil {
 
     public static void runAsync(Runnable command) {
         try {
+            FunUtil.revalidateAndRepaintAllFramesAndDialogs();
             executorService.execute(command);
         } catch (Exception e) {
             e.fillInStackTrace();

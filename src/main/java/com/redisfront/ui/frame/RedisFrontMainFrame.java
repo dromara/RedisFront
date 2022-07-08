@@ -17,7 +17,7 @@ import java.awt.*;
 public class RedisFrontMainFrame extends JXFrame {
 
     public RedisFrontMainFrame() {
-        super(" RedisFront ", true);
+        super("RedisFront", true);
         setIconImages(UI.MAIN_FRAME_ICON_IMAGES);
         UIManager.put("TitlePane.unifiedBackground", false);
         setJMenuBar(MainMenuBar.getInstance());

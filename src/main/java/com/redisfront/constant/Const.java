@@ -10,10 +10,10 @@ import java.io.File;
 
 public class Const {
 
-    public static final String KEY_THEME = "theme";
+    public static final String KEY_THEME = "theme2";
     public static final String KEY_THEME_SELECT_INDEX = "themeSelectIndex";
 
-    public static final String KEY_FONT_NAME = "fontName";
+    public static final String KEY_FONT_NAME = "fontName2";
 
     public static final String KEY_FONT_SIZE = "fontSize";
 
@@ -21,7 +21,7 @@ public class Const {
 
     public static final String KEY_KEY_MAX_LOAD_NUM = "keyMaxLoadNum";
 
-    public static final String KEY_APP_DATABASE_INIT = "appDatabaseInit";
+    public static final String KEY_APP_DATABASE_INIT = "appDatabaseInit2";
 
     public static final String KEY_LANGUAGE = "language";
 

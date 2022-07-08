@@ -1,13 +1,16 @@
 package com.redisfront.util;
 
-import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialOceanicContrastIJTheme;
-import com.formdev.flatlaf.ui.FlatUIUtils;
-import com.redisfront.RedisFrontApplication;
-import com.redisfront.constant.Const;
-import com.formdev.flatlaf.*;
+import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.FlatPropertiesLaf;
+import com.formdev.flatlaf.IntelliJTheme;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.json.Json;
+import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.LoggingFacade;
+import com.redisfront.RedisFrontApplication;
+import com.redisfront.constant.Const;
+import com.redisfront.theme.RedisFrontLightLaf;
 
 import javax.swing.*;
 import javax.swing.text.StyleContext;
@@ -82,7 +85,7 @@ public class ThemeUtil {
             if (args.length > 0) {
                 UIManager.setLookAndFeel(args[0]);
             } else {
-                String theme = PrefUtil.getState().get(Const.KEY_THEME, FlatMaterialOceanicContrastIJTheme.class.getName());
+                String theme = PrefUtil.getState().get(Const.KEY_THEME, RedisFrontLightLaf.class.getName());
                 if (theme.startsWith("R_")) {
                     IntelliJTheme.setup(ThemeUtil.class.getResourceAsStream(THEMES_PACKAGE + theme.replace("R_", "")));
                 } else {

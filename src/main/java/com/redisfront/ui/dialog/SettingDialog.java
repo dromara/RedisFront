@@ -10,6 +10,8 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.RedisFrontApplication;
 import com.redisfront.constant.Const;
+import com.redisfront.theme.RedisFrontDarkLaf;
+import com.redisfront.theme.RedisFrontLightLaf;
 import com.redisfront.ui.component.AbstractDialog;
 import com.redisfront.util.*;
 import org.slf4j.Logger;
@@ -193,22 +195,8 @@ public class SettingDialog extends AbstractDialog<Void> {
 
 
     private void initThemeNameComboBox() {
-        themeNameComboBox.addItem(new ThemeUtil.ThemeInfo(FlatIntelliJLaf.NAME, null, true, null, null, null, null, null, FlatIntelliJLaf.class.getName()));
-        themeNameComboBox.addItem(new ThemeUtil.ThemeInfo(FlatDarculaLaf.NAME, null, true, null, null, null, null, null, FlatDarculaLaf.class.getName()));
-
-        boolean addMaterialTag = true;
-        for (int i = 0; i < ThemeUtil.bundledThemes.size(); i++) {
-            if (i == 0) {
-                themeNameComboBox.addItem(new ThemeUtil.ThemeInfo("****** IntelliJ Theme ******", null, false, null, null, null, null, null, null));
-            }
-            ThemeUtil.ThemeInfo themeInfo = ThemeUtil.bundledThemes.get(i);
-
-            if (themeInfo.name().startsWith("Material") && addMaterialTag) {
-                themeNameComboBox.addItem(new ThemeUtil.ThemeInfo("****** Material Theme ******", null, false, null, null, null, null, null, null));
-                addMaterialTag = false;
-            }
-            themeNameComboBox.addItem(themeInfo);
-        }
+        themeNameComboBox.addItem(new ThemeUtil.ThemeInfo(RedisFrontLightLaf.NAME, null, true, null, null, null, null, null, RedisFrontLightLaf.class.getName()));
+        themeNameComboBox.addItem(new ThemeUtil.ThemeInfo(RedisFrontDarkLaf.NAME, null, true, null, null, null, null, null, RedisFrontDarkLaf.class.getName()));
 
         themeNameComboBox.addActionListener(e -> {
             JComboBox<?> selected = (JComboBox<?>) e.getSource();
