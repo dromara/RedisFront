@@ -1,9 +1,11 @@
 package com.redisfront.service.impl;
 
+import com.redisfront.constant.Const;
 import com.redisfront.util.DerbyUtil;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.ConnectService;
 import cn.hutool.core.io.resource.ResourceUtil;
+import com.redisfront.util.PrefUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -14,6 +16,13 @@ import java.util.Map;
  * @author Jin
  */
 public class ConnectServiceImpl implements ConnectService {
+
+    public ConnectServiceImpl() {
+        if (PrefUtil.getState().getBoolean(Const.KEY_APP_DATABASE_INIT, true)) {
+            this.initDatabase();
+            PrefUtil.getState().put(Const.KEY_APP_DATABASE_INIT, Boolean.FALSE.toString());
+        }
+    }
 
     @Override
     public List<ConnectInfo> getConnectListByName(String name) {

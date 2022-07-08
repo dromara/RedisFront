@@ -1,19 +1,19 @@
 package com.redisfront.ui.dialog;
 
-import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.RedisFrontApplication;
-import com.redisfront.constant.Enum;
 import com.redisfront.constant.UI;
 import com.redisfront.model.ConnectInfo;
+import com.redisfront.model.ConnectTableModel;
 import com.redisfront.service.ConnectService;
 import com.redisfront.service.RedisService;
 import com.redisfront.ui.component.AbstractDialog;
-import com.redisfront.model.ConnectTableModel;
+import com.redisfront.util.ExecutorUtil;
+import com.redisfront.util.FunUtil;
+import com.redisfront.util.LoadingUtil;
 import com.redisfront.util.MsgUtil;
-import com.redisfront.util.Fn;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -83,15 +83,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                 //表格打开链接操作
                 var openConnectMenu = new JMenuItem("打开链接");
                 openConnectMenu.addActionListener(e -> {
-                    var row = connectTable.getSelectedRow();
-                    if (row == -1) {
-                        MsgUtil.showInformationDialog("未选中打开行或列");
-                        return;
-                    }
-                    var id = connectTable.getValueAt(row, 0);
-                    var connectInfo = ConnectService.service.getConnect(id);
-                    onCancel();
-                    openActionCallback.accept(connectInfo);
+                    onOK();
                 });
                 add(openConnectMenu);
                 //表格编辑链接操作
@@ -105,7 +97,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                     var id = connectTable.getValueAt(row, 0);
                     var connectInfo = ConnectService.service.getConnect(id);
                     onCancel();
-                    editActionCallback.accept(connectInfo);
+                    ExecutorUtil.runAsync(() -> editActionCallback.accept(connectInfo));
                 });
                 add(editConnectMenu);
                 //表格删除操作
@@ -118,11 +110,13 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                     }
                     var id = connectTable.getValueAt(row, 0);
                     var connectInfo = ConnectService.service.getConnect(id);
-                    if (Fn.isNotNull(connectInfo)) {
-                        delActionCallback.accept(connectInfo);
+                    if (FunUtil.isNotNull(connectInfo)) {
+                        ExecutorUtil.runAsync(() -> {
+                            delActionCallback.accept(connectInfo);
+                            ((ConnectTableModel) connectTable.getModel()).removeRow(row);
+                            connectTable.revalidate();
+                        });
                     }
-                    ((ConnectTableModel) connectTable.getModel()).removeRow(row);
-                    connectTable.revalidate();
                 });
                 add(deleteConnectMenu);
             }
@@ -132,21 +126,10 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    if (connectTable.getSelectedRow() != -1) {
-                        buttonOK.setEnabled(true);
-                    } else {
-                        buttonOK.setEnabled(false);
-                    }
+                    buttonOK.setEnabled(connectTable.getSelectedRow() != -1);
                 }
                 if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2) {
-                    var row = connectTable.getSelectedRow();
-                    if (row == -1) {
-                        return;
-                    }
-                    var id = connectTable.getValueAt(row, 0);
-                    var connectInfo = ConnectService.service.getConnect(id);
-                    onCancel();
-                    openActionCallback.accept(connectInfo);
+                    onOK();
                 }
                 if (e.getButton() == MouseEvent.BUTTON3 && connectTable.getSelectedRow() != -1) {
                     popupMenu.show(connectTable, e.getX(), e.getY());
@@ -169,11 +152,13 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         }
         var id = connectTable.getValueAt(row, 0);
         var connectInfo = ConnectService.service.getConnect(id);
-        //set redisMode
-        var redisMode = RedisService.service.getRedisModeEnum(connectInfo);
+        ExecutorUtil.runAsync(() -> {
+            LoadingUtil.showDialog();
+            var redisMode = RedisService.service.getRedisModeEnum(connectInfo);
+            openActionCallback.accept(connectInfo.setRedisModeEnum(redisMode));
+            LoadingUtil.closeDialog();
+        });
         dispose();
-        openActionCallback.accept(connectInfo.setRedisModeEnum(redisMode));
-
     }
 
     private void onCancel() {

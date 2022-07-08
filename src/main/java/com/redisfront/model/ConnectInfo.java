@@ -1,7 +1,7 @@
 package com.redisfront.model;
 
 import com.redisfront.constant.Enum;
-import com.redisfront.util.Fn;
+import com.redisfront.util.FunUtil;
 
 import java.io.Serializable;
 
@@ -88,7 +88,7 @@ public class ConnectInfo implements Serializable {
 
         @Override
         public String toString() {
-            return Fn.toJson(this);
+            return FunUtil.toJson(this);
         }
     }
 
@@ -159,7 +159,7 @@ public class ConnectInfo implements Serializable {
 
         @Override
         public String toString() {
-            return Fn.toJson(this);
+            return FunUtil.toJson(this);
         }
     }
 
@@ -191,7 +191,7 @@ public class ConnectInfo implements Serializable {
     }
 
     public String user() {
-        return Fn.isEmpty(username) ? null : Fn.equal(username.toLowerCase(), "null") ? "" : username;
+        return FunUtil.isEmpty(username) ? null : FunUtil.equal(username.toLowerCase(), "null") ? "" : username;
     }
 
     public ConnectInfo setUsername(String username) {
@@ -200,7 +200,7 @@ public class ConnectInfo implements Serializable {
     }
 
     public String password() {
-        return Fn.isEmpty(password) ? null : Fn.equal(password.toLowerCase(), "null") ? "" : password;
+        return FunUtil.isEmpty(password) ? null : FunUtil.equal(password.toLowerCase(), "null") ? "" : password;
     }
 
     public ConnectInfo setPassword(String password) {
@@ -209,7 +209,7 @@ public class ConnectInfo implements Serializable {
     }
 
     public Integer database() {
-        return Fn.isNull(database) ? 0 : database;
+        return FunUtil.isNull(database) ? 0 : database;
     }
 
     public ConnectInfo setDatabase(Integer database) {

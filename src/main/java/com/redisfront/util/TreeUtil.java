@@ -58,7 +58,7 @@ public class TreeUtil {
     public static Set<TreeNodeInfo> convertTreeNodeInfoSet(StringTreeMap stringTreeMap, String parentKey) {
         return stringTreeMap.entrySet().stream().parallel().map(treeMapEntry -> {
             //完整的KeyName
-            var fullKeyName = (Fn.isEmpty(parentKey) ? "" : parentKey.concat(":")).concat(treeMapEntry.getKey());
+            var fullKeyName = (FunUtil.isEmpty(parentKey) ? "" : parentKey.concat(":")).concat(treeMapEntry.getKey());
             var treeNodeInfo = new TreeNodeInfo(treeMapEntry.getKey(), fullKeyName);
             //递归查找下级
             convertTreeNodeInfoSet(treeMapEntry.getValue(), fullKeyName)

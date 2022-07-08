@@ -4,7 +4,7 @@ import com.redisfront.constant.Enum;
 import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.impl.RedisServiceImpl;
-import com.redisfront.util.Fn;
+import com.redisfront.util.FunUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -108,7 +108,7 @@ public interface RedisService {
     default Map<String, Object> strToMap(String str) {
         Map<String, Object> result = new HashMap<>();
         for (String s : str.split("\r\n")) {
-            if (!Fn.startWith(s, "#") && Fn.isNotEmpty(s)) {
+            if (!FunUtil.startWith(s, "#") && FunUtil.isNotEmpty(s)) {
                 String[] v = s.split(":");
                 if (v.length > 1) {
                     result.put(v[0], v[1]);

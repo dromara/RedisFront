@@ -4,7 +4,6 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.constant.UI;
-import com.redisfront.util.Fn;
 import com.redisfront.util.LocaleUtil;
 
 import javax.swing.*;

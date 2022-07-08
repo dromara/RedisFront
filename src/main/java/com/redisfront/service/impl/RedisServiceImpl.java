@@ -4,7 +4,7 @@ import com.redisfront.constant.Enum;
 import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisService;
-import com.redisfront.util.Fn;
+import com.redisfront.util.FunUtil;
 import com.redisfront.util.LettuceUtil;
 import io.lettuce.core.api.sync.BaseRedisCommands;
 import io.lettuce.core.api.sync.RedisServerCommands;
@@ -23,7 +23,7 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public Boolean ping(ConnectInfo connectInfo) {
         String ping = LettuceUtil.exec(connectInfo, BaseRedisCommands::ping);
-        return Fn.equal(ping, "PONG");
+        return FunUtil.equal(ping, "PONG");
     }
 
     @Override
@@ -99,7 +99,7 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public Boolean isClusterMode(ConnectInfo connectInfo) {
         var cluster = LettuceUtil.exec(connectInfo, redisCommands -> redisCommands.info("Cluster"));
-        return (Fn.equal(strToMap(cluster).get("cluster_enabled"), "1"));
+        return (FunUtil.equal(strToMap(cluster).get("cluster_enabled"), "1"));
     }
 
 
@@ -134,7 +134,7 @@ public class RedisServiceImpl implements RedisService {
     private List<ClusterNode> strToClusterNodes(String str) {
         List<ClusterNode> clusterNodes = new ArrayList<>();
         for (var s : str.split("\n")) {
-            if (!Fn.startWith(s, "#") && Fn.isNotEmpty(s)) {
+            if (!FunUtil.startWith(s, "#") && FunUtil.isNotEmpty(s)) {
                 var v = s.split(" ");
                 var clusterNode = new ClusterNode()
                         .setId(v[0])

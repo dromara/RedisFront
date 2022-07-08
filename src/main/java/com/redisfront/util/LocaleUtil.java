@@ -23,7 +23,7 @@ public class LocaleUtil {
     public static BundleInfo getMenu(String prefix) {
         var name = bundle.getString(prefix.concat(".Title"));
         var mnemonicStr = bundle.getString(prefix.concat(".Mnemonic"));
-        var mnemonic = Fn.isEmpty(mnemonicStr) ? 0 : (int) mnemonicStr.charAt(0);
+        var mnemonic = FunUtil.isEmpty(mnemonicStr) ? 0 : (int) mnemonicStr.charAt(0);
         var desc = bundle.getString(prefix.concat(".Desc"));
         return new BundleInfo(name, mnemonic, desc);
     }

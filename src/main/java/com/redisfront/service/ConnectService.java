@@ -3,7 +3,7 @@ package com.redisfront.service;
 import com.redisfront.constant.Enum;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.impl.ConnectServiceImpl;
-import com.redisfront.util.Fn;
+import com.redisfront.util.FunUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -56,10 +56,10 @@ public interface ConnectService {
                 connectInfo.connectMode().name() +
                 "'," +
                 "ssl_config ='" +
-                (Fn.isNull(connectInfo.sshConfig()) ? "" : connectInfo.sshConfig()) +
+                (FunUtil.isNull(connectInfo.sshConfig()) ? "" : connectInfo.sshConfig()) +
                 "'," +
                 "ssh_config ='" +
-                (Fn.isNull(connectInfo.sshConfig()) ? "" : connectInfo.sshConfig()) +
+                (FunUtil.isNull(connectInfo.sshConfig()) ? "" : connectInfo.sshConfig()) +
                 "' where id =" +
                 connectInfo.id();
 
@@ -71,8 +71,8 @@ public interface ConnectService {
                 "title, " +
                 "host, " +
                 "port, " +
-                (Fn.isNotEmpty(connectInfo.user()) ? "username, " : "") +
-                (Fn.isNotEmpty(connectInfo.password()) ? "password, " : "") +
+                (FunUtil.isNotEmpty(connectInfo.user()) ? "username, " : "") +
+                (FunUtil.isNotEmpty(connectInfo.password()) ? "password, " : "") +
                 "ssl, " +
                 "connect_mode, " +
                 "ssl_config, " +
@@ -85,21 +85,21 @@ public interface ConnectService {
                 "'," +
                 connectInfo.port() +
                 ",'" +
-                (Fn.isNotEmpty(connectInfo.user()) ? connectInfo.user() + "','" : "") +
-                (Fn.isNotEmpty(connectInfo.password()) ? connectInfo.password() + "','" : "") +
+                (FunUtil.isNotEmpty(connectInfo.user()) ? connectInfo.user() + "','" : "") +
+                (FunUtil.isNotEmpty(connectInfo.password()) ? connectInfo.password() + "','" : "") +
                 connectInfo.ssl() +
                 "','" +
                 connectInfo.connectMode().name() +
                 "','" +
-                (Fn.isNull(connectInfo.sshConfig()) ? "" : connectInfo.sshConfig()) +
+                (FunUtil.isNull(connectInfo.sshConfig()) ? "" : connectInfo.sshConfig()) +
                 "','" +
-                (Fn.isNull(connectInfo.sshConfig()) ? "" : connectInfo.sshConfig()) +
+                (FunUtil.isNull(connectInfo.sshConfig()) ? "" : connectInfo.sshConfig()) +
                 "')";
     }
 
     default ConnectInfo mapToConnectInfo(Map<String, Object> map) {
-        ConnectInfo.SSLConfig sslConfig = Fn.isNull(map.get("ssl_config")) ? null : Fn.fromJson((String) map.get("ssl_config"), ConnectInfo.SSLConfig.class);
-        ConnectInfo.SSHConfig sshConfig = Fn.isNull(map.get("ssh_config")) ? null : Fn.fromJson((String) map.get("ssh_config"), ConnectInfo.SSHConfig.class);
+        ConnectInfo.SSLConfig sslConfig = FunUtil.isNull(map.get("ssl_config")) ? null : FunUtil.fromJson((String) map.get("ssl_config"), ConnectInfo.SSLConfig.class);
+        ConnectInfo.SSHConfig sshConfig = FunUtil.isNull(map.get("ssh_config")) ? null : FunUtil.fromJson((String) map.get("ssh_config"), ConnectInfo.SSHConfig.class);
         return new ConnectInfo()
                 .setId((Integer) map.get("id"))
                 .setTitle((String) map.get("title"))

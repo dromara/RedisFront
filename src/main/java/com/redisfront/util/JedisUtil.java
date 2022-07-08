@@ -21,7 +21,7 @@ public class JedisUtil {
             if (connection.ping()) {
                 var commandList = new ArrayList<>(List.of(inputText.split(" ")));
                 var command = Arrays.stream(Protocol.Command.values())
-                        .filter(e -> Fn.equal(e.name(), commandList.get(0).toUpperCase()))
+                        .filter(e -> FunUtil.equal(e.name(), commandList.get(0).toUpperCase()))
                         .findAny()
                         .orElseThrow(() -> new Throwable("ERR unknown command '" + inputText + "'"));
                 commandList.remove(0);
@@ -38,7 +38,7 @@ public class JedisUtil {
 
     private static DefaultJedisClientConfig createJedisClientConfig(ConnectInfo connect) throws Exception {
         if (connect.ssl()) {
-            if (Fn.isNotNull(connect.sslConfig())) {
+            if (FunUtil.isNotNull(connect.sslConfig())) {
                 var sslSocketFactory = SslUtil.getSocketFactory(connect.sslConfig().publicKeyFilePath(), connect.sslConfig().grantFilePath(), connect.sslConfig().privateKeyFilePath(), connect.sslConfig().password());
                 return DefaultJedisClientConfig
                         .builder()

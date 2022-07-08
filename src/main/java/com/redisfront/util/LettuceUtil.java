@@ -98,10 +98,10 @@ public class LettuceUtil {
                 .withDatabase(connectInfo.database())
                 .withSsl(connectInfo.ssl())
                 .build();
-        if (Fn.isNotEmpty(connectInfo.user())) {
+        if (FunUtil.isNotEmpty(connectInfo.user())) {
             redisURI.setUsername(connectInfo.user());
         }
-        if (Fn.isNotEmpty(connectInfo.password())) {
+        if (FunUtil.isNotEmpty(connectInfo.password())) {
             redisURI.setPassword(connectInfo.password().toCharArray());
         }
         return RedisClient.create(redisURI);

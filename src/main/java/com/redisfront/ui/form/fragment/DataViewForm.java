@@ -13,7 +13,7 @@ import com.redisfront.model.ConnectInfo;
 import com.redisfront.model.TreeNodeInfo;
 import com.redisfront.ui.component.TextEditorComponent;
 import com.redisfront.ui.form.MainNoneForm;
-import com.redisfront.util.Fn;
+import com.redisfront.util.FunUtil;
 import com.redisfront.util.LettuceUtil;
 
 import javax.swing.*;
@@ -54,7 +54,7 @@ public class DataViewForm {
     public DataViewForm(ConnectInfo connectInfo) {
         this.connectInfo = connectInfo;
         $$$setupUI$$$();
-        Fn.removeAllComponent(bodyPanel);
+        FunUtil.removeAllComponent(bodyPanel);
         bodyPanel.add(MainNoneForm.getInstance().getContentPanel());
         keyTypeLabel.setOpaque(true);
         keyTypeLabel.setForeground(Color.WHITE);
@@ -90,7 +90,7 @@ public class DataViewForm {
 
     public void dataChange(TreeNodeInfo treeNodeInfo) {
         if (bodyPanel.getComponentCount() == 1) {
-            Fn.removeAllComponent(bodyPanel);
+            FunUtil.removeAllComponent(bodyPanel);
             bodyPanel.add(StringViewPanel, BorderLayout.NORTH);
             bodyPanel.add(valueViewPanel, BorderLayout.CENTER);
         }

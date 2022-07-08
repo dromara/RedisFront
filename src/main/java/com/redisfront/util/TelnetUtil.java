@@ -4,7 +4,6 @@ import cn.hutool.core.io.IoUtil;
 import com.redisfront.model.ConnectInfo;
 import org.apache.commons.net.telnet.TelnetClient;
 
-import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
@@ -18,7 +17,7 @@ public class TelnetUtil {
             telnetClient.connect(connect.host(), connect.port());
             if (telnetClient.isConnected() && telnetClient.isAvailable()) {
                 var printStream = new PrintStream(telnetClient.getOutputStream());
-                if (Fn.isNotEmpty(connect.password())) {
+                if (FunUtil.isNotEmpty(connect.password())) {
                     printStream.println("auth " + connect.password());
                     printStream.flush();
                 }

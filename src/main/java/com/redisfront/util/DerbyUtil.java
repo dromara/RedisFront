@@ -3,6 +3,7 @@ package com.redisfront.util;
 
 import com.redisfront.constant.Const;
 import com.redisfront.exception.RedisFrontException;
+import com.redisfront.service.ConnectService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +28,6 @@ public class DerbyUtil {
             Class.forName("org.apache.derby.iapi.jdbc.InternalDriver");
             conn = DriverManager.getConnection("jdbc:derby:" + Const.DERBY_DATA_PATH + "create=true");
         } catch (ClassNotFoundException | SQLException e) {
-            log.error(e.getMessage());
             throw new RedisFrontException(e,true);
         }
     }

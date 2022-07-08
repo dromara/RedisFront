@@ -112,7 +112,7 @@ public class SettingDialog extends AbstractDialog<Void> {
                 .stream()
                 .filter(e -> {
                     String languageTag = PrefUtil.getState().get(Const.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
-                    return Fn.equal(e.getValue(), languageTag);
+                    return FunUtil.equal(e.getValue(), languageTag);
                 }).findAny().orElseThrow());
     }
 
@@ -139,7 +139,7 @@ public class SettingDialog extends AbstractDialog<Void> {
         }
         fontSizeComboBox.addActionListener(e -> {
             String fontSizeStr = (String) fontSizeComboBox.getSelectedItem();
-            if (Fn.equal(fontSizeStr, PrefUtil.getState().get(Const.KEY_FONT_SIZE, getDefaultFontSize()))) {
+            if (FunUtil.equal(fontSizeStr, PrefUtil.getState().get(Const.KEY_FONT_SIZE, getDefaultFontSize()))) {
                 return;
             }
             this.updateFontSizeHandler(fontSizeStr);
@@ -178,7 +178,7 @@ public class SettingDialog extends AbstractDialog<Void> {
         });
         fontNameComboBox.addActionListener(e -> {
             String fontFamily = (String) fontNameComboBox.getSelectedItem();
-            if (Fn.equal(fontFamily, PrefUtil.getState().get(Const.KEY_FONT_NAME, getDefaultFontFamily()))) {
+            if (FunUtil.equal(fontFamily, PrefUtil.getState().get(Const.KEY_FONT_NAME, getDefaultFontFamily()))) {
                 return;
             }
             this.updateFontNameHandler(fontFamily);
@@ -214,7 +214,7 @@ public class SettingDialog extends AbstractDialog<Void> {
             JComboBox<?> selected = (JComboBox<?>) e.getSource();
             ThemeUtil.ThemeInfo themeInfo = (ThemeUtil.ThemeInfo) selected.getSelectedItem();
             String themeName = StringUtils.isEmpty(Objects.requireNonNull(themeInfo).lafClassName()) ? "R_" + themeInfo.resourceName() : themeInfo.lafClassName();
-            if (Fn.equal(themeName, PrefUtil.getState().get(Const.KEY_THEME, FlatDarculaLaf.class.getName()))) {
+            if (FunUtil.equal(themeName, PrefUtil.getState().get(Const.KEY_THEME, FlatDarculaLaf.class.getName()))) {
                 return;
             }
             ThemeUtil.changeTheme(themeInfo);
@@ -259,7 +259,7 @@ public class SettingDialog extends AbstractDialog<Void> {
         Map.Entry<?, ?> newLanguage = (Map.Entry<?, ?>) languageComboBox.getSelectedItem();
         String oldLanguage = PrefUtil.getState().get(Const.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
         assert newLanguage != null;
-        if (Fn.notEqual(newLanguage.getValue(), oldLanguage)) {
+        if (FunUtil.notEqual(newLanguage.getValue(), oldLanguage)) {
             Locale.setDefault(Locale.forLanguageTag((String) newLanguage.getValue()));
             PrefUtil.getState().put(Const.KEY_LANGUAGE, (String) newLanguage.getValue());
             var res = MsgUtil.showConfirmDialog("语言已变更，重启后生效！\n 是否立即重启？", JOptionPane.YES_NO_OPTION);

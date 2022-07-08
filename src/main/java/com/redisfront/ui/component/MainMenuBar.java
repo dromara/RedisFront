@@ -2,16 +2,15 @@ package com.redisfront.ui.component;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatDesktop;
-import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.components.FlatButton;
 import com.redisfront.RedisFrontApplication;
 import com.redisfront.constant.UI;
 import com.redisfront.service.ConnectService;
 import com.redisfront.ui.dialog.AddConnectDialog;
-import com.redisfront.ui.dialog.LoadingDialog;
 import com.redisfront.ui.dialog.OpenConnectDialog;
 import com.redisfront.ui.dialog.SettingDialog;
 import com.redisfront.ui.form.MainWindowForm;
+import com.redisfront.util.ExecutorUtil;
 import com.redisfront.util.LocaleUtil;
 
 import javax.swing.*;
@@ -50,35 +49,19 @@ public class MainMenuBar extends JMenuBar {
 
         var fileMenu = new JMenu(FILE_MENU.title());
         fileMenu.setMnemonic(FILE_MENU.mnemonic());
-        fileMenu.setToolTipText(FILE_MENU.desc());
         //新建连接
         var addConnectMenu = new JMenuItem(FILE_MENU_NEW_ITEM.title(), FILE_MENU_NEW_ITEM.mnemonic());
         addConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK));
-        addConnectMenu.addActionListener(e -> AddConnectDialog.showAddConnectDialog(((connectInfo) -> {
-            LoadingDialog.showDialog();
-            MainWindowForm.getInstance().addActionPerformed(connectInfo);
-            LoadingDialog.closeDialog();
-        })));
+        addConnectMenu.addActionListener(e -> AddConnectDialog.showAddConnectDialog(((connectInfo) -> MainWindowForm.getInstance().addActionPerformed(connectInfo))));
         fileMenu.add(addConnectMenu);
         //打开连接
         var openConnectMenu = new JMenuItem(FILE_MENU_OPEN_ITEM.title(), FILE_MENU_OPEN_ITEM.mnemonic());
         openConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
         openConnectMenu.addActionListener(e -> OpenConnectDialog.showOpenConnectDialog(
                 //打开连接回调
-                (((connectInfo) -> {
-                    new Thread(LoadingDialog::showDialog).start();
-                    MainWindowForm.getInstance().addActionPerformed(connectInfo);
-                    new Thread(LoadingDialog::closeDialog).start();
-                })),
+                ((connectInfo) -> MainWindowForm.getInstance().addActionPerformed(connectInfo)),
                 //编辑连接回调
-                (connectInfo -> AddConnectDialog.showEditConnectDialog(
-                        connectInfo,
-                        ((c) -> {
-                            LoadingDialog.showDialog();
-                            MainWindowForm.getInstance().addActionPerformed(c);
-//                            LoadingDialog.closeDialog();
-                        })
-                )),
+                (connectInfo -> AddConnectDialog.showEditConnectDialog(connectInfo, (connectInfo1) -> MainWindowForm.getInstance().addActionPerformed(connectInfo1))),
                 //删除连接回调
                 (connectInfo -> ConnectService.service.delete(connectInfo.id())))
         );
@@ -104,7 +87,7 @@ public class MainMenuBar extends JMenuBar {
         settingMenu.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                SettingDialog.showSettingDialog();
+                ExecutorUtil.runAsync(SettingDialog::showSettingDialog);
             }
         });
         add(settingMenu);
@@ -114,7 +97,7 @@ public class MainMenuBar extends JMenuBar {
         aboutMenu.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                aboutActionPerformed();
+                ExecutorUtil.runAsync(() -> aboutActionPerformed());
             }
         });
         add(aboutMenu);

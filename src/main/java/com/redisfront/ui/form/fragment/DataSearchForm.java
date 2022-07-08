@@ -9,6 +9,7 @@ import com.redisfront.constant.UI;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.model.TreeNodeInfo;
 import com.redisfront.ui.dialog.AddKeyDialog;
+import com.redisfront.util.ExecutorUtil;
 import com.redisfront.util.LettuceUtil;
 import com.redisfront.util.TreeUtil;
 
@@ -137,7 +138,7 @@ public class DataSearchForm {
             var selectNode = keyTree.getLastSelectedPathComponent();
             if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
                 if (treeNodeInfo.getChildCount() == 0) {
-                    nodeClickCallback.accept(treeNodeInfo);
+                    ExecutorUtil.runAsync(() -> nodeClickCallback.accept(treeNodeInfo));
                 }
             }
         });
