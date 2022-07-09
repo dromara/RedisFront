@@ -28,6 +28,9 @@ import java.util.stream.Collectors;
  */
 public class FunUtil {
 
+    private FunUtil() {
+    }
+
     public static void revalidateAndRepaintAllFramesAndDialogs() {
         FlatLaf.revalidateAndRepaintAllFramesAndDialogs();
     }

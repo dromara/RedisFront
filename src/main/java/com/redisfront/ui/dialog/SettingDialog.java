@@ -250,7 +250,7 @@ public class SettingDialog extends AbstractDialog<Void> {
         if (FunUtil.notEqual(newLanguage.getValue(), oldLanguage)) {
             Locale.setDefault(Locale.forLanguageTag((String) newLanguage.getValue()));
             PrefUtil.getState().put(Const.KEY_LANGUAGE, (String) newLanguage.getValue());
-            var res = MsgUtil.showConfirmDialog("语言已变更，重启后生效！\n 是否立即重启？", JOptionPane.YES_NO_OPTION);
+            var res = AlertUtil.showConfirmDialog("语言已变更，重启后生效！\n 是否立即重启？", JOptionPane.YES_NO_OPTION);
             if (res == 0) {
                 RedisFrontApplication.frame.dispose();
                 System.exit(0);

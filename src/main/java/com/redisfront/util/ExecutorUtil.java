@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * ExectorUtil
@@ -13,27 +14,23 @@ import java.util.concurrent.Executors;
  * @author Jin
  */
 public class ExecutorUtil {
-    private static final Logger log = LoggerFactory.getLogger(ExecutorUtil.class);
+    private static final int MAX_WORKER_THREADS = 10;
+
     private static ExecutorService executorService;
 
+
     public static void init() {
-        executorService = Executors.newFixedThreadPool(10);
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
-            log.error("exception:", e);
-            LoadingUtil.closeDialog();
-            if (e instanceof RedisFrontException redisFrontException) {
-                if (redisFrontException.showMessage()) {
-                    MsgUtil.showErrorDialog("Error", redisFrontException);
-                }
-            } else {
-                MsgUtil.showErrorDialog("Error", new Exception(e.getMessage()));
-            }
+        executorService = Executors.newFixedThreadPool(MAX_WORKER_THREADS, runnable -> {
+            final var threadFactory = Executors.defaultThreadFactory();
+            final var newThread = threadFactory.newThread(runnable);
+            newThread.setName("RedisFrontWorker-" + newThread.getName());
+            newThread.setDaemon(true);
+            return newThread;
         });
     }
 
     public static void runAsync(Runnable command) {
         try {
-            FunUtil.revalidateAndRepaintAllFramesAndDialogs();
             executorService.execute(command);
         } catch (Exception e) {
             e.fillInStackTrace();

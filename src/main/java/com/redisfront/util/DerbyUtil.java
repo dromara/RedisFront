@@ -18,6 +18,10 @@ public class DerbyUtil {
     private static final Logger log = LoggerFactory.getLogger(DerbyUtil.class);
     private static Connection conn;
 
+    private DerbyUtil() {
+
+    }
+
     public static DerbyUtil getInstance() {
         return new DerbyUtil();
     }
@@ -28,7 +32,7 @@ public class DerbyUtil {
             Class.forName("org.apache.derby.iapi.jdbc.InternalDriver");
             conn = DriverManager.getConnection("jdbc:derby:" + Const.DERBY_DATA_PATH + "create=true");
         } catch (ClassNotFoundException | SQLException e) {
-            throw new RedisFrontException(e,true);
+            throw new RedisFrontException(e, true);
         }
     }
 

@@ -13,7 +13,7 @@ import com.redisfront.ui.component.AbstractDialog;
 import com.redisfront.util.ExecutorUtil;
 import com.redisfront.util.FunUtil;
 import com.redisfront.util.LoadingUtil;
-import com.redisfront.util.MsgUtil;
+import com.redisfront.util.AlertUtil;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -91,7 +91,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                 editConnectMenu.addActionListener(e -> {
                     var row = connectTable.getSelectedRow();
                     if (row == -1) {
-                        MsgUtil.showInformationDialog("未选中编辑行或列");
+                        AlertUtil.showInformationDialog("未选中编辑行或列");
                         return;
                     }
                     var id = connectTable.getValueAt(row, 0);
@@ -105,7 +105,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                 deleteConnectMenu.addActionListener(e -> {
                     int row = connectTable.getSelectedRow();
                     if (row == -1) {
-                        MsgUtil.showInformationDialog("未选中删除行或列");
+                        AlertUtil.showInformationDialog("未选中删除行或列");
                         return;
                     }
                     var id = connectTable.getValueAt(row, 0);
@@ -147,7 +147,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
     private void onOK() {
         var row = connectTable.getSelectedRow();
         if (row == -1) {
-            MsgUtil.showInformationDialog("未选中编辑行或列");
+            AlertUtil.showInformationDialog("未选中编辑行或列");
             return;
         }
         var id = connectTable.getValueAt(row, 0);

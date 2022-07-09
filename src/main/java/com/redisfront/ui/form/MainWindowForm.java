@@ -2,6 +2,7 @@ package com.redisfront.ui.form;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.icons.FlatTabbedPaneCloseIcon;
+import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.redisfront.constant.UI;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.ConnectService;
@@ -95,8 +96,16 @@ public class MainWindowForm {
         var toolBar = new JToolBar();
         toolBar.setBorder(new EmptyBorder(10, 10, 10, 10));
         toolBar.setLayout(new BorderLayout());
-        var jPanel = new JPanel();
+
+        var jPanel = new JPanel() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setBorder(new FlatLineBorder(new Insets(1, 1, 1, 1), UIManager.getColor("Component.borderColor")));
+            }
+        };
         jPanel.setLayout(new FlowLayout());
+
 
         var newBtn = new JButton(null, UI.NEW_CONN_ICON);
         newBtn.setToolTipText("新建连接");

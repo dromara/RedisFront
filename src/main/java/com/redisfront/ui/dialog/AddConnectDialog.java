@@ -14,7 +14,7 @@ import com.redisfront.ui.component.AbstractDialog;
 import com.redisfront.util.ExecutorUtil;
 import com.redisfront.util.FunUtil;
 import com.redisfront.util.LoadingUtil;
-import com.redisfront.util.MsgUtil;
+import com.redisfront.util.AlertUtil;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -223,12 +223,12 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
             try {
                 var connectInfo = validGetConnectInfo();
                 if (RedisService.service.ping(connectInfo)) {
-                    MsgUtil.showInformationDialog("连接成功！");
+                    AlertUtil.showInformationDialog("连接成功！");
                 } else {
-                    MsgUtil.showInformationDialog("连接失败！");
+                    AlertUtil.showInformationDialog("连接失败！");
                 }
             } catch (Exception exception) {
-                MsgUtil.showErrorDialog("连接失败！", exception);
+                AlertUtil.showErrorDialog("连接失败！", exception);
             }
         });
     }

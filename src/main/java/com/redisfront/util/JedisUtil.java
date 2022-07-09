@@ -15,6 +15,8 @@ import java.util.List;
  */
 public class JedisUtil {
 
+    private JedisUtil() {
+    }
     public static Object sendCommand(ConnectInfo connect, String inputText) throws Exception {
         var connection = new Connection(new HostAndPort(connect.host(), connect.port()), createJedisClientConfig(connect));
         try (connection) {

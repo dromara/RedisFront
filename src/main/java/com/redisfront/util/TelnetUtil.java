@@ -8,6 +8,9 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
 public class TelnetUtil {
+    private TelnetUtil() {
+    }
+
 
     public static String sendCommand(ConnectInfo connect, String command) {
         try {

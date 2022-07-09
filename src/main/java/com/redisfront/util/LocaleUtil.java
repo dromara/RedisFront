@@ -12,7 +12,10 @@ import java.util.ResourceBundle;
  */
 public class LocaleUtil {
 
-    static ResourceBundle bundle;
+   private static ResourceBundle bundle;
+
+    private LocaleUtil() {
+    }
 
     public static void init() {
         var languageTag = PrefUtil.getState().get(Const.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());

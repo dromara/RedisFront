@@ -5,6 +5,11 @@ import com.redisfront.ui.component.LoadingDialog;
 
 import java.awt.*;
 
+/**
+ * LoadingUtil
+ *
+ * @author Jin
+ */
 public class LoadingUtil {
 
     private static LoadingDialog loadingDialog;

@@ -17,11 +17,14 @@ import java.util.stream.Collectors;
  */
 public class TreeUtil {
 
+    private TreeUtil() {
+    }
+
     public static DefaultTreeModel toTreeModel(Set<String> rows, String delim) {
         var rootNode = new TreeNodeInfo();
         var stringTreeMap = toStringTreeMap(rows, delim);
         var treeNodeInfos = convertTreeNodeInfoSet(stringTreeMap, "");
-        treeNodeInfos.stream().sorted().forEach(rootNode::add);
+        treeNodeInfos.stream().sorted(Comparator.reverseOrder()).forEach(rootNode::add);
         return new DefaultTreeModel(rootNode);
     }
 

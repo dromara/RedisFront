@@ -7,7 +7,6 @@ import com.redisfront.constant.UI;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisService;
 import com.redisfront.ui.form.fragment.DataChartsForm;
-import com.redisfront.util.LettuceUtil;
 
 import javax.swing.*;
 import java.awt.*;

@@ -5,6 +5,8 @@ import com.formdev.flatlaf.extras.FlatInspector;
 import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
 import com.formdev.flatlaf.util.SystemInfo;
 import com.redisfront.constant.Const;
+import com.redisfront.exception.ExceptionHandler;
+import com.redisfront.exception.RedisFrontException;
 import com.redisfront.ui.frame.RedisFrontMainFrame;
 import com.redisfront.util.*;
 
@@ -37,6 +39,8 @@ public class RedisFrontApplication {
         if (!SystemInfo.isJava_9_orLater && System.getProperty("flatlaf.uiScale") == null) {
             System.setProperty("flatlaf.uiScale", "2x");
         }
+
+        ExceptionHandler.init();
 
         FlatLaf.registerCustomDefaultsSource(Const.PACKAGE_NAME);
 

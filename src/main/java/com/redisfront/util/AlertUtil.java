@@ -9,7 +9,10 @@ import javax.swing.*;
  *
  * @author Jin
  */
-public class MsgUtil {
+public class AlertUtil {
+
+    private AlertUtil() {
+    }
 
     public static void showInformationDialog(String message) {
         JOptionPane.showMessageDialog(SwingUtilities.windowForComponent(RedisFrontApplication.frame),
@@ -30,7 +33,7 @@ public class MsgUtil {
     }
 
 
-    public static int showConfirmDialog(String message,int optionType) {
+    public static int showConfirmDialog(String message, int optionType) {
         return JOptionPane.showConfirmDialog(SwingUtilities.windowForComponent(RedisFrontApplication.frame),
                 message,
                 "RedisFront", optionType, JOptionPane.INFORMATION_MESSAGE);

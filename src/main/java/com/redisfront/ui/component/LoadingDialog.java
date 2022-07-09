@@ -4,6 +4,7 @@ import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.redisfront.util.FunUtil;
+import com.redisfront.util.AlertUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,6 +12,10 @@ import java.awt.*;
 public class LoadingDialog extends JDialog {
 
     private final ProgressBarWorker progressBarWorker;
+    private JLabel loadInfoLabel;
+    private JProgressBar progressBar;
+
+    private Timer timer;
 
 
     public LoadingDialog() {
@@ -18,30 +23,39 @@ public class LoadingDialog extends JDialog {
         setModal(false);
         setAlwaysOnTop(true);
         setUndecorated(true);
-        JPanel contentPane = new JPanel();
+        initComponentUI();
+        progressBarWorker = new ProgressBarWorker(progressBar, 50);
+        timer = new Timer((15 * 1000), e -> {
+            dispose();
+            AlertUtil.showInformationDialog("数据加载超时，请重试！");
+        });
+    }
+
+    private void initComponentUI() {
+        var contentPane = new JPanel();
         contentPane.setBorder(new FlatLineBorder(new Insets(1, 1, 1, 1), UIManager.getColor("Component.borderColor")));
         contentPane.setLayout(new GridLayoutManager(2, 1, new Insets(10, 10, 10, 10), -1, -1));
         setContentPane(contentPane);
-        JLabel loadInfoLabel = new JLabel();
-        loadInfoLabel.setText("");
+        loadInfoLabel = new JLabel();
+        loadInfoLabel.setText("数据加载中，请稍后....");
         contentPane.add(loadInfoLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        var progressBar = new JProgressBar();
+        progressBar = new JProgressBar();
         contentPane.add(progressBar, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         progressBar.setMaximum(100);
-        progressBarWorker = new ProgressBarWorker(progressBar, 50);
-        loadInfoLabel.setText("加载中，请稍后....");
     }
 
     @Override
     public void pack() {
-        super.pack();
         progressBarWorker.execute();
+        timer.start();
+        super.pack();
     }
 
     @Override
     public void dispose() {
-        super.dispose();
         progressBarWorker.cancel(true);
+        timer.stop();
+        super.dispose();
     }
 
     public static class ProgressBarWorker extends SwingWorker<Void, Integer> {

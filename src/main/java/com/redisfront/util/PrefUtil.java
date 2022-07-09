@@ -6,6 +6,9 @@ import java.util.prefs.Preferences;
  * @author Karl Tauber
  */
 public class PrefUtil {
+
+    private PrefUtil() {
+    }
     private static Preferences state;
 
     public static Preferences getState() {

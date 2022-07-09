@@ -18,6 +18,9 @@ import java.util.function.Function;
  */
 public class LettuceUtil {
 
+    private LettuceUtil() {
+    }
+
     public static void run(ConnectInfo connectInfo, Consumer<RedisCommands<String, String>> consumer) {
         var redisClient = getRedisClient(connectInfo);
         try (var connection = redisClient.connect()) {

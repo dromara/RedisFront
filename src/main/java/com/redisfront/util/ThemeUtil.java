@@ -51,7 +51,7 @@ public class ThemeUtil {
                 UIManager.setLookAndFeel(themeInfo.lafClassName());
             } catch (Exception ex) {
                 LoggingFacade.INSTANCE.logSevere(null, ex);
-                MsgUtil.showInformationDialog("Failed to create '" + themeInfo.lafClassName() + "'.", ex);
+                AlertUtil.showInformationDialog("Failed to create '" + themeInfo.lafClassName() + "'.", ex);
             }
         } else if (themeInfo.themeFile() != null) {
             FlatAnimatedLafChange.showSnapshot();
@@ -62,7 +62,7 @@ public class ThemeUtil {
                     FlatLaf.setup(IntelliJTheme.createLaf(new FileInputStream(themeInfo.themeFile())));
 
             } catch (Exception ex) {
-                MsgUtil.showInformationDialog("Failed to load '" + themeInfo.themeFile() + "'.", ex);
+                AlertUtil.showInformationDialog("Failed to load '" + themeInfo.themeFile() + "'.", ex);
             }
         } else {
             FlatAnimatedLafChange.showSnapshot();
@@ -108,7 +108,6 @@ public class ThemeUtil {
         }
     }
 
-    @SuppressWarnings("unchecked")
     static void loadBundledThemes() {
         Map<String, Object> json;
         try (var reader = new InputStreamReader(Objects.requireNonNull(RedisFrontApplication.class.getResourceAsStream("themes.json")), StandardCharsets.UTF_8)) {
