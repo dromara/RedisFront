@@ -7,10 +7,13 @@ import com.redisfront.constant.UI;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisService;
 import com.redisfront.ui.form.fragment.DataChartsForm;
+import com.redisfront.util.ExecutorUtil;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -122,18 +125,23 @@ public class MainTabbedPanel extends JPanel {
     }
 
     private void threadInit(ConnectInfo connectInfo, FlatLabel keysInfo, FlatLabel cupInfo, FlatLabel memoryInfo) {
-        scheduledExecutor.scheduleAtFixedRate(() -> {
-            Long keysCount = RedisService.service.countDatabaseKey(connectInfo);
-            keysInfo.setText(keysCount.toString());
-            keysInfo.setToolTipText("Key数量：" + keysCount);
-            Map<String, Object> stats = RedisService.service.getStatInfo(connectInfo);
-            cupInfo.setText((String) stats.get("instantaneous_ops_per_sec"));
-            cupInfo.setToolTipText("每秒命令数：" + stats.get("instantaneous_ops_per_sec"));
-
-            Map<String, Object> memory = RedisService.service.getMemoryInfo(connectInfo);
-            memoryInfo.setText((String) memory.get("used_memory_human"));
-            memoryInfo.setToolTipText("内存占用：" + memory.get("used_memory_human"));
-        }, 0, 5, TimeUnit.SECONDS);
+        scheduledExecutor.scheduleAtFixedRate(() ->
+                CompletableFuture.allOf(
+                        CompletableFuture.supplyAsync(() -> RedisService.service.countDatabaseKey(connectInfo), ExecutorUtil.getExecutorService()).thenAccept(keysCount ->
+                                SwingUtilities.invokeLater(() -> {
+                                    keysInfo.setText(keysCount.toString());
+                                    keysInfo.setToolTipText("Key数量：" + keysCount);
+                                })),
+                        CompletableFuture.supplyAsync(() -> RedisService.service.getStatInfo(connectInfo), ExecutorUtil.getExecutorService()).thenAccept(stats ->
+                                SwingUtilities.invokeLater(() -> {
+                                    cupInfo.setText((String) stats.get("instantaneous_ops_per_sec"));
+                                    cupInfo.setToolTipText("每秒命令数：" + stats.get("instantaneous_ops_per_sec"));
+                                })),
+                        CompletableFuture.supplyAsync(() -> RedisService.service.getMemoryInfo(connectInfo), ExecutorUtil.getExecutorService()).thenAccept(memory ->
+                                SwingUtilities.invokeLater(() -> {
+                                    memoryInfo.setText((String) memory.get("used_memory_human"));
+                                    memoryInfo.setToolTipText("内存占用：" + memory.get("used_memory_human"));
+                                }))), 0, 5, TimeUnit.SECONDS);
     }
 
     private void appendRow(StringBuilder buf, String key, String value) {

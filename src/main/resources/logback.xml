@@ -28,6 +28,6 @@
         <appender-ref ref="FILE"/>
     </root>
 
-    <logger name="com.redisfront" level="INFO"/>
+    <logger name="com.redisfront" level="ERROR"/>
 
 </configuration>

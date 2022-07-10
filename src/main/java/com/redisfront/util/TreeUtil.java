@@ -20,7 +20,8 @@ public class TreeUtil {
     private TreeUtil() {
     }
 
-    public static DefaultTreeModel toTreeModel(Set<String> rows, String delim) {
+    public static synchronized DefaultTreeModel toTreeModel(Set<String> rows, String delim) {
+        System.out.println("TreeUtil - " + Thread.currentThread().getName());
         var rootNode = new TreeNodeInfo();
         var stringTreeMap = toStringTreeMap(rows, delim);
         var treeNodeInfos = convertTreeNodeInfoSet(stringTreeMap, "");
@@ -37,7 +38,7 @@ public class TreeUtil {
      */
     public static StringTreeMap toStringTreeMap(Set<String> rows, String delim) {
         var root = new StringTreeMap();
-        rows.stream().parallel().forEach(row -> {
+        rows.forEach(row -> {
             var n = root;
             var cells = row.split(delim);
             for (var cell : cells) {

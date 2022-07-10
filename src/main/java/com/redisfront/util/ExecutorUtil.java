@@ -1,12 +1,7 @@
 package com.redisfront.util;
 
-import com.redisfront.exception.RedisFrontException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 
 /**
  * ExectorUtil
@@ -18,6 +13,9 @@ public class ExecutorUtil {
 
     private static ExecutorService executorService;
 
+    public static ExecutorService getExecutorService(){
+        return executorService;
+    }
 
     public static void init() {
         executorService = Executors.newFixedThreadPool(MAX_WORKER_THREADS, runnable -> {

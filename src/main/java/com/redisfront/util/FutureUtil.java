@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 public class FutureUtil {
 
     private FutureUtil() {
+
     }
 
     public static <T> CompletableFuture<Void> propConv(Supplier<T> supplier, Consumer<T> consumer, Executor executor) {

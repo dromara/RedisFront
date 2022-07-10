@@ -75,6 +75,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
      * 打开编辑连接窗口
      */
     public static void showEditConnectDialog(ConnectInfo connectInfo, Consumer<ConnectInfo> callback) {
+        System.out.println("showEditConnectDialog - " + Thread.currentThread().getName());
         var addConnectDialog = new AddConnectDialog(RedisFrontApplication.frame, callback);
         //数据初始化
         addConnectDialog.componentsDataInit(connectInfo);

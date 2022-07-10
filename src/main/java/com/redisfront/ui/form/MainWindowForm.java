@@ -44,13 +44,16 @@ public class MainWindowForm {
     }
 
     public void addActionPerformed(ConnectInfo connectInfo) {
+
         connectInfo.setRedisModeEnum(RedisService.service.getRedisModeEnum(connectInfo));
         var mainTabbedPanel = MainTabbedPanel.newInstance(connectInfo);
 
-        //添加到tab面板
-        this.tabPanel.addTab(connectInfo.title(), UI.MAIN_TAB_DATABASE_ICON, mainTabbedPanel);
-        this.tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
-        this.contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
+        SwingUtilities.invokeLater(() -> {
+            //添加到tab面板
+            this.tabPanel.addTab(connectInfo.title(), UI.MAIN_TAB_DATABASE_ICON, mainTabbedPanel);
+            this.tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
+            this.contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
+        });
 
         //存数据库
         if (FunUtil.equal(connectInfo.id(), 0)) {
@@ -58,6 +61,7 @@ public class MainWindowForm {
         } else {
             ConnectService.service.update(connectInfo);
         }
+
     }
 
     private void createUIComponents() {

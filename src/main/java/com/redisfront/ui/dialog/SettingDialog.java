@@ -201,10 +201,6 @@ public class SettingDialog extends AbstractDialog<Void> {
         themeNameComboBox.addActionListener(e -> {
             JComboBox<?> selected = (JComboBox<?>) e.getSource();
             ThemeUtil.ThemeInfo themeInfo = (ThemeUtil.ThemeInfo) selected.getSelectedItem();
-            String themeName = StringUtils.isEmpty(Objects.requireNonNull(themeInfo).lafClassName()) ? "R_" + themeInfo.resourceName() : themeInfo.lafClassName();
-            if (FunUtil.equal(themeName, PrefUtil.getState().get(Const.KEY_THEME, FlatDarculaLaf.class.getName()))) {
-                return;
-            }
             ThemeUtil.changeTheme(themeInfo);
         });
 
