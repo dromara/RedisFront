@@ -1,6 +1,8 @@
 package com.redisfront.exception;
 
-public class RedisFrontException extends RuntimeException {
+import java.util.function.Supplier;
+
+public class RedisFrontException extends RuntimeException implements Supplier<Object> {
 
     private final Boolean showMessage;
 
@@ -26,5 +28,10 @@ public class RedisFrontException extends RuntimeException {
     public RedisFrontException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace, Boolean showMessage) {
         super(message, cause, enableSuppression, writableStackTrace);
         this.showMessage = showMessage;
+    }
+
+    @Override
+    public Object get() {
+        return null;
     }
 }

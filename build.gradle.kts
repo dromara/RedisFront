@@ -16,7 +16,6 @@ version = if (Boolean.getBoolean("release")) releaseVersion else developmentVers
 
 val flatlafVersion = "2.3"
 val hutoolVersion = "5.8.3"
-val jedisVersion = "4.2.3"
 val fifesoftVersion = "3.2.0"
 val derbyVersion = "10.15.2.0"
 val lettuceVersion = "6.1.8.RELEASE"
@@ -54,7 +53,6 @@ dependencies {
     implementation("com.formdev:flatlaf-swingx:${flatlafVersion}")
     implementation("com.formdev:flatlaf-intellij-themes:${flatlafVersion}")
     implementation("com.formdev:flatlaf-extras:${flatlafVersion}")
-    implementation("redis.clients:jedis:${jedisVersion}")
     implementation("cn.hutool:hutool-extra:${hutoolVersion}")
     implementation("org.apache.derby:derby:${derbyVersion}")
     implementation("com.fifesoft:rsyntaxtextarea:${fifesoftVersion}")

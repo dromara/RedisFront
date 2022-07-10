@@ -2,16 +2,22 @@ package com.redisfront.ui.component;
 
 import cn.hutool.core.date.DateUtil;
 import com.redisfront.constant.Enum;
+import com.redisfront.exception.RedisFrontException;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisService;
-import com.redisfront.util.ExecutorUtil;
-import com.redisfront.util.JedisUtil;
-import com.redisfront.util.TelnetUtil;
+import com.redisfront.util.FunUtil;
+import com.redisfront.util.LettuceUtil;
+import io.lettuce.core.StatefulRedisConnectionImpl;
+import io.lettuce.core.output.ArrayOutput;
+import io.lettuce.core.protocol.CommandArgs;
+import io.lettuce.core.protocol.CommandType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 public class TerminalComponent extends AbstractTerminal {
     private static final Logger log = LoggerFactory.getLogger(TerminalComponent.class);
@@ -44,13 +50,46 @@ public class TerminalComponent extends AbstractTerminal {
     }
 
     @Override
-    protected void inputProcessHandler(String input) {
+    protected void inputProcessHandler(String inputText) {
         try {
-            String str = JedisUtil.sendCommand(connectInfo(), input);
-            println(str);
+            LettuceUtil.run(connectInfo(), redisCommands -> {
+                if (redisCommands.getStatefulConnection() instanceof StatefulRedisConnectionImpl<String, String> statefulRedisConnection) {
+                    var commandList = new ArrayList<>(List.of(inputText.split(" ")));
+                    var commandType = Arrays.stream(CommandType.values())
+                            .filter(e -> FunUtil.equal(e.name(), commandList.get(0).toUpperCase()))
+                            .findAny()
+                            .orElseThrow(() -> new RedisFrontException("ERR unknown command '" + inputText + "'", false));
+                    commandList.remove(0);
+                    if (FunUtil.equal(connectInfo().redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+                    }
+                    var s = redisCommands.dispatch(commandType, new ArrayOutput<>(statefulRedisConnection.getCodec()), new CommandArgs<>(statefulRedisConnection.getCodec()).addKeys(commandList));
+                    println(format(s, ""));
+                }
+            });
+
         } catch (Exception e) {
             print(e.getMessage());
         }
+    }
+
+    private static String format(Object s, String space) {
+        StringBuilder sb = new StringBuilder();
+        if (s instanceof List<?> list) {
+            if (list.size() == 1) {
+                return (String) list.get(0);
+            }
+            for (int i = 0; i < list.size(); i++) {
+                Object item = list.get(i);
+                if (item instanceof List itemList) {
+                    sb.append(space).append(i + 1).append(" ) ").append("\n").append(format(itemList, "  " + space));
+                } else {
+                    sb.append(space).append(i + 1).append(" ) ").append(item).append("\n");
+                }
+            }
+        } else {
+            sb.append(s);
+        }
+        return sb.toString();
     }
 
 
