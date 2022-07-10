@@ -5,6 +5,7 @@ import com.redisfront.constant.Enum;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisService;
 import com.redisfront.util.ExecutorUtil;
+import com.redisfront.util.JedisUtil;
 import com.redisfront.util.TelnetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,7 @@ public class TerminalComponent extends AbstractTerminal {
     @Override
     protected void inputProcessHandler(String input) {
         try {
-            String str = TelnetUtil.sendCommand(connectInfo(), input);
+            String str = JedisUtil.sendCommand(connectInfo(), input);
             println(str);
         } catch (Exception e) {
             print(e.getMessage());

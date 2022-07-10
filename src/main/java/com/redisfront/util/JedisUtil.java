@@ -17,8 +17,9 @@ public class JedisUtil {
 
     private JedisUtil() {
     }
-    public static Object sendCommand(ConnectInfo connect, String inputText) throws Exception {
-        var connection = new Connection(new HostAndPort(connect.host(), connect.port()), createJedisClientConfig(connect));
+
+    public static String sendCommand(ConnectInfo connect, String inputText) throws Exception {
+        var connection = new Connection(new HostAndPort(connect.host(), connect.port()));
         try (connection) {
             if (connection.ping()) {
                 var commandList = new ArrayList<>(List.of(inputText.split(" ")));
@@ -67,9 +68,9 @@ public class JedisUtil {
             for (int i = 0; i < list.size(); i++) {
                 Object item = list.get(i);
                 if (item instanceof List itemList) {
-                    sb.append(space).append(i + 1).append(" ) ").append("\n").append(format(itemList, "  ")).append("\n");
+                    sb.append(space).append(i + 1).append(" ) ").append("\n").append(format(itemList, "  " + space));
                 } else {
-                    sb.append(space).append(i + 1).append(" ) ").append(space).append(item).append("\n");
+                    sb.append(space).append(i + 1).append(" ) ").append(item).append("\n");
                 }
             }
         } else {

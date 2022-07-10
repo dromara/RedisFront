@@ -54,7 +54,7 @@ dependencies {
     implementation("com.formdev:flatlaf-swingx:${flatlafVersion}")
     implementation("com.formdev:flatlaf-intellij-themes:${flatlafVersion}")
     implementation("com.formdev:flatlaf-extras:${flatlafVersion}")
-    compileOnly("redis.clients:jedis:${jedisVersion}")
+    implementation("redis.clients:jedis:${jedisVersion}")
     implementation("cn.hutool:hutool-extra:${hutoolVersion}")
     implementation("org.apache.derby:derby:${derbyVersion}")
     implementation("com.fifesoft:rsyntaxtextarea:${fifesoftVersion}")

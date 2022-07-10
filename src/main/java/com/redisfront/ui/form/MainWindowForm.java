@@ -10,11 +10,13 @@ import com.redisfront.service.RedisService;
 import com.redisfront.ui.component.MainTabbedPanel;
 import com.redisfront.ui.dialog.AddConnectDialog;
 import com.redisfront.ui.dialog.OpenConnectDialog;
+import com.redisfront.util.ExecutorUtil;
 import com.redisfront.util.FunUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
 /**
@@ -45,22 +47,19 @@ public class MainWindowForm {
 
     public void addActionPerformed(ConnectInfo connectInfo) {
 
-        connectInfo.setRedisModeEnum(RedisService.service.getRedisModeEnum(connectInfo));
-        var mainTabbedPanel = MainTabbedPanel.newInstance(connectInfo);
-
-        SwingUtilities.invokeLater(() -> {
+        CompletableFuture.allOf(CompletableFuture.supplyAsync(() -> connectInfo.setRedisModeEnum(RedisService.service.getRedisModeEnum(connectInfo)), ExecutorUtil.getExecutorService()), CompletableFuture.runAsync(() -> {
+            if (FunUtil.equal(connectInfo.id(), 0)) {
+                ConnectService.service.save(connectInfo);
+            } else {
+                ConnectService.service.update(connectInfo);
+            }
+        }, ExecutorUtil.getExecutorService())).thenRunAsync(() -> SwingUtilities.invokeLater(() -> {
+            var mainTabbedPanel = MainTabbedPanel.newInstance(connectInfo);
             //添加到tab面板
             this.tabPanel.addTab(connectInfo.title(), UI.MAIN_TAB_DATABASE_ICON, mainTabbedPanel);
             this.tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
             this.contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
-        });
-
-        //存数据库
-        if (FunUtil.equal(connectInfo.id(), 0)) {
-            ConnectService.service.save(connectInfo);
-        } else {
-            ConnectService.service.update(connectInfo);
-        }
+        }));
 
     }
 
