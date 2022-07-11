@@ -9,7 +9,7 @@ import com.redisfront.constant.Enum;
 import com.redisfront.constant.UI;
 import com.redisfront.exception.RedisFrontException;
 import com.redisfront.model.ConnectInfo;
-import com.redisfront.service.RedisService;
+import com.redisfront.service.RedisBasicService;
 import com.redisfront.ui.component.AbstractDialog;
 import com.redisfront.util.ExecutorUtil;
 import com.redisfront.util.FunUtil;
@@ -223,7 +223,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         testBtn.addActionListener(e -> {
             try {
                 var connectInfo = validGetConnectInfo();
-                if (RedisService.service.ping(connectInfo)) {
+                if (RedisBasicService.service.ping(connectInfo)) {
                     AlertUtil.showInformationDialog("连接成功！");
                 } else {
                     AlertUtil.showInformationDialog("连接失败！");
@@ -243,7 +243,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         var connectInfo = validGetConnectInfo();
         ExecutorUtil.runAsync(() -> {
             LoadingUtil.showDialog();
-            var redisMode = RedisService.service.getRedisModeEnum(connectInfo);
+            var redisMode = RedisBasicService.service.getRedisModeEnum(connectInfo);
             callback.accept(connectInfo.setRedisModeEnum(redisMode));
             LoadingUtil.closeDialog();
         });

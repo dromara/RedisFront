@@ -13,18 +13,13 @@ import com.redisfront.util.ExecutorUtil;
 import com.redisfront.util.FunUtil;
 import com.redisfront.util.LettuceUtil;
 import com.redisfront.util.TreeUtil;
+import io.lettuce.core.api.sync.RedisServerCommands;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.JTextComponent;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeCellRenderer;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -72,11 +67,26 @@ public class DataSearchForm {
         if (connectInfo.redisModeEnum() == Enum.RedisMode.CLUSTER) {
             databaseComboBox.setEnabled(false);
         }
-        ExecutorUtil.runAsync(() -> LettuceUtil.run(connectInfo, redisCommands -> {
-            var list = redisCommands.keys("*");
-            var treeModel = TreeUtil.toTreeModel(new HashSet<>(list), ":");
-            SwingUtilities.invokeLater(() -> keyTree.setModel(treeModel));
-        }));
+        treeDataInit();
+    }
+
+    private void treeDataInit() {
+        ExecutorUtil.runAsync(() -> {
+            SwingUtilities.invokeLater(() -> searchTextField.setText(""));
+            if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+                LettuceUtil.clusterRun(connectInfo, redisCommands -> {
+                    var list = redisCommands.keys("*");
+                    var treeModel = TreeUtil.toTreeModel(new HashSet<>(list), ":");
+                    SwingUtilities.invokeLater(() -> keyTree.setModel(treeModel));
+                });
+            } else {
+                LettuceUtil.run(connectInfo, redisCommands -> {
+                    var list = redisCommands.keys("*");
+                    var treeModel = TreeUtil.toTreeModel(new HashSet<>(list), ":");
+                    SwingUtilities.invokeLater(() -> keyTree.setModel(treeModel));
+                });
+            }
+        });
     }
 
 
@@ -118,21 +128,27 @@ public class DataSearchForm {
         searchTextField = new JTextField();
         searchTextField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入关键字...");
         var searchBtn = new JButton(new FlatSearchIcon());
-        searchBtn.addActionListener(actionEvent -> ExecutorUtil.runAsync(() ->
-                LettuceUtil.run(connectInfo, redisCommands -> {
-                    var list = redisCommands.keys(searchTextField.getText());
-                    var treeModel = TreeUtil.toTreeModel(new HashSet<>(list), ":");
-                    SwingUtilities.invokeLater(() -> keyTree.setModel(treeModel));
-                })));
+        searchBtn.addActionListener(actionEvent ->
+                ExecutorUtil.runAsync(() -> {
+                    SwingUtilities.invokeLater(() -> searchTextField.setText(""));
+                    if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+                        LettuceUtil.clusterRun(connectInfo, redisCommands -> {
+                            var list = redisCommands.keys(searchTextField.getText());
+                            var treeModel = TreeUtil.toTreeModel(new HashSet<>(list), ":");
+                            SwingUtilities.invokeLater(() -> keyTree.setModel(treeModel));
+                        });
+                    } else {
+                        LettuceUtil.run(connectInfo, redisCommands -> {
+                            var list = redisCommands.keys(searchTextField.getText());
+                            var treeModel = TreeUtil.toTreeModel(new HashSet<>(list), ":");
+                            SwingUtilities.invokeLater(() -> keyTree.setModel(treeModel));
+                        });
+                    }
+                }));
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchBtn);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
-        searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField ->
-                ExecutorUtil.runAsync(() -> LettuceUtil.run(connectInfo, redisCommands -> {
-                    searchTextField.setText("");
-                    var list = redisCommands.keys("*");
-                    var treeModel = TreeUtil.toTreeModel(new HashSet<>(list), ":");
-                    SwingUtilities.invokeLater(() -> keyTree.setModel(treeModel));
-                })));
+        searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> treeDataInit());
+
         keyTree = new JTree();
         keyTree.setRootVisible(false);
         keyTree.setBorder(new EmptyBorder(5, 5, 5, 5));

@@ -2,6 +2,7 @@ package com.redisfront.ui.form.fragment;
 
 import cn.hutool.core.io.unit.DataSizeUtil;
 import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.ui.FlatEmptyBorder;
 import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
@@ -11,6 +12,8 @@ import com.redisfront.constant.Enum;
 import com.redisfront.constant.UI;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.model.TreeNodeInfo;
+import com.redisfront.service.RedisBasicService;
+import com.redisfront.service.RedisStringService;
 import com.redisfront.ui.component.TextEditorComponent;
 import com.redisfront.ui.form.MainNoneForm;
 import com.redisfront.util.FunUtil;
@@ -35,7 +38,7 @@ public class DataViewForm {
     private JTextField keyField;
     private JPanel bodyPanel;
     private JPanel valueViewPanel;
-    private JPanel StringViewPanel;
+    private JPanel stringViewPanel;
     private JLabel keyTypeLabel;
     private JButton delBtn;
     private JButton refBtn;
@@ -54,8 +57,6 @@ public class DataViewForm {
     public DataViewForm(ConnectInfo connectInfo) {
         this.connectInfo = connectInfo;
         $$$setupUI$$$();
-        FunUtil.removeAllComponent(bodyPanel);
-        bodyPanel.add(MainNoneForm.getInstance().getContentPanel());
         keyTypeLabel.setOpaque(true);
         keyTypeLabel.setForeground(Color.WHITE);
         keyTypeLabel.setBorder(new EmptyBorder(2, 3, 2, 3));
@@ -89,36 +90,31 @@ public class DataViewForm {
     }
 
     public void dataChange(TreeNodeInfo treeNodeInfo) {
-        if (bodyPanel.getComponentCount() == 1) {
-            FunUtil.removeAllComponent(bodyPanel);
-            bodyPanel.add(StringViewPanel, BorderLayout.NORTH);
-            bodyPanel.add(valueViewPanel, BorderLayout.CENTER);
+        Thread thread = Thread.currentThread();
+
+        Long ttl = RedisBasicService.service.ttl(connectInfo, treeNodeInfo.key());
+        String type = RedisBasicService.service.type(connectInfo, treeNodeInfo.key());
+        Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(type.toUpperCase());
+
+        Long strLen = 0L;
+        String value = "";
+
+        if (keyTypeEnum == Enum.KeyTypeEnum.STRING) {
+            strLen = RedisStringService.service.strlen(connectInfo, treeNodeInfo.key());
+            value = RedisStringService.service.get(connectInfo, treeNodeInfo.key());
         }
+        final Long finalStrLen = strLen;
+        final String finalValue = value;
 
-        this.keyField.setText(treeNodeInfo.key());
-
-        LettuceUtil.run(connectInfo, redisCommands -> {
-            Long ttl = redisCommands.ttl(treeNodeInfo.key());
+        SwingUtilities.invokeLater(() -> {
             ttlField.setText(ttl.toString());
-            String type = redisCommands.type(treeNodeInfo.key());
-            Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(type.toUpperCase());
-
             keyTypeLabel.setText(keyTypeEnum.typeName());
             keyTypeLabel.setBackground(keyTypeEnum.color());
-
-            if (keyTypeEnum == Enum.KeyTypeEnum.STRING) {
-
-                Long strLen = redisCommands.strlen(treeNodeInfo.key());
-                lengthLabel.setText("Length: " + strLen);
-
-
-                String value = redisCommands.get(treeNodeInfo.key());
-                keySizeLabel.setText("Size: " + DataSizeUtil.format(value.getBytes().length));
-                textEditorComponent.textArea().setText(value);
-            }
-
-
+            lengthLabel.setText("Length: " + finalStrLen);
+            keySizeLabel.setText("Size: " + DataSizeUtil.format(finalValue.getBytes().length));
+            textEditorComponent.textArea().setText(finalValue);
         });
+
     }
 
     private void createUIComponents() {
@@ -163,7 +159,7 @@ public class DataViewForm {
             }
         }, BorderLayout.SOUTH);
 
-        StringViewPanel = new JPanel() {
+        stringViewPanel = new JPanel() {
             @Override
             public void updateUI() {
                 super.updateUI();
@@ -191,37 +187,37 @@ public class DataViewForm {
         contentPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         bodyPanel.setLayout(new BorderLayout(0, 0));
         contentPanel.add(bodyPanel, BorderLayout.CENTER);
-        StringViewPanel.setLayout(new GridLayoutManager(2, 9, new Insets(0, 0, 0, 0), -1, -1));
-        bodyPanel.add(StringViewPanel, BorderLayout.NORTH);
-        StringViewPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
+        stringViewPanel.setLayout(new GridLayoutManager(2, 9, new Insets(0, 0, 0, 0), -1, -1));
+        bodyPanel.add(stringViewPanel, BorderLayout.NORTH);
+        stringViewPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         keyTypeLabel = new JLabel();
         Font keyTypeLabelFont = this.$$$getFont$$$(null, Font.BOLD, 14, keyTypeLabel.getFont());
         if (keyTypeLabelFont != null) keyTypeLabel.setFont(keyTypeLabelFont);
         keyTypeLabel.setText("Label");
-        StringViewPanel.add(keyTypeLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        stringViewPanel.add(keyTypeLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer1 = new Spacer();
-        StringViewPanel.add(spacer1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        stringViewPanel.add(spacer1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         keyField = new JTextField();
-        StringViewPanel.add(keyField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        stringViewPanel.add(keyField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         lengthLabel = new JLabel();
         lengthLabel.setText("Label");
-        StringViewPanel.add(lengthLabel, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        stringViewPanel.add(lengthLabel, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         keySizeLabel = new JLabel();
         keySizeLabel.setText("Label");
-        StringViewPanel.add(keySizeLabel, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        stringViewPanel.add(keySizeLabel, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         delBtn = new JButton();
         delBtn.setText("");
-        StringViewPanel.add(delBtn, new GridConstraints(0, 5, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        stringViewPanel.add(delBtn, new GridConstraints(0, 5, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         refBtn = new JButton();
         refBtn.setText("");
-        StringViewPanel.add(refBtn, new GridConstraints(0, 6, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        stringViewPanel.add(refBtn, new GridConstraints(0, 6, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         saveBtn = new JButton();
         saveBtn.setText("");
-        StringViewPanel.add(saveBtn, new GridConstraints(0, 7, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        stringViewPanel.add(saveBtn, new GridConstraints(0, 7, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         ttlField = new JTextField();
-        StringViewPanel.add(ttlField, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        stringViewPanel.add(ttlField, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final Spacer spacer2 = new Spacer();
-        StringViewPanel.add(spacer2, new GridConstraints(0, 8, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        stringViewPanel.add(spacer2, new GridConstraints(0, 8, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         bodyPanel.add(valueViewPanel, BorderLayout.CENTER);
         valueViewPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 10, 8, 10), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
     }
@@ -254,4 +250,5 @@ public class DataViewForm {
     public JComponent $$$getRootComponent$$$() {
         return contentPanel;
     }
+
 }

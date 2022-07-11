@@ -3,11 +3,12 @@ package com.redisfront.service.impl;
 import com.redisfront.constant.Enum;
 import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
-import com.redisfront.service.RedisService;
+import com.redisfront.service.RedisBasicService;
 import com.redisfront.util.FunUtil;
 import com.redisfront.util.LettuceUtil;
 import io.lettuce.core.api.sync.BaseRedisCommands;
 import io.lettuce.core.api.sync.RedisServerCommands;
+import io.lettuce.core.cluster.api.sync.RedisAdvancedClusterCommands;
 import io.lettuce.core.cluster.api.sync.RedisClusterCommands;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +17,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class RedisServiceImpl implements RedisService {
+public class RedisBasicServiceImpl implements RedisBasicService {
 
-    private static final Logger log = LoggerFactory.getLogger(RedisServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(RedisBasicServiceImpl.class);
+
+    @Override
+    public String type(ConnectInfo connectInfo, String key) {
+        if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            return LettuceUtil.clusterExec(connectInfo, redisCommands -> redisCommands.type(key));
+        } else {
+            return LettuceUtil.exec(connectInfo, redisCommands -> redisCommands.type(key));
+        }
+    }
+
+    @Override
+    public Long ttl(ConnectInfo connectInfo, String key) {
+        if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            return LettuceUtil.clusterExec(connectInfo, redisCommands -> redisCommands.ttl(key));
+        } else {
+            return LettuceUtil.exec(connectInfo, redisCommands -> redisCommands.ttl(key));
+        }
+    }
 
     @Override
     public Boolean ping(ConnectInfo connectInfo) {
@@ -104,32 +123,14 @@ public class RedisServiceImpl implements RedisService {
 
 
     @Override
-    public Long countDatabaseKey(ConnectInfo connectInfo) {
-        if (isClusterMode(connectInfo)) {
-            var clusterNodes = getClusterNodes(connectInfo);
-            return clusterNodes
-                    .stream()
-                    .map(clusterNode -> {
-                        String keyspace = LettuceUtil.exec(connectInfo, redisCommands -> redisCommands.info("keyspace"));
-                        return strToMap(keyspace);
-                    })
-                    .map(this::countKeys)
-                    .reduce(Long::sum)
-                    .orElse(0L);
+    public Long dbSize(ConnectInfo connectInfo) {
+        if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            return LettuceUtil.clusterExec(connectInfo, RedisAdvancedClusterCommands::dbsize);
         } else {
-            var keySpace = RedisService.service.getKeySpace(connectInfo);
-            return countKeys(keySpace);
+            return LettuceUtil.exec(connectInfo, RedisServerCommands::dbsize);
         }
     }
 
-    private Long countKeys(Map<String, Object> keySpace) {
-        return keySpace.values()
-                .stream()
-                .findFirst()
-                .map(s -> s.toString().split(",")[0])
-                .map(s -> Long.parseLong(s.replace("keys=", "")))
-                .orElse(0L);
-    }
 
     private List<ClusterNode> strToClusterNodes(String str) {
         List<ClusterNode> clusterNodes = new ArrayList<>();

@@ -8,7 +8,7 @@ import com.redisfront.constant.UI;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.model.ConnectTableModel;
 import com.redisfront.service.ConnectService;
-import com.redisfront.service.RedisService;
+import com.redisfront.service.RedisBasicService;
 import com.redisfront.ui.component.AbstractDialog;
 import com.redisfront.util.ExecutorUtil;
 import com.redisfront.util.FunUtil;
@@ -154,8 +154,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         var connectInfo = ConnectService.service.getConnect(id);
         ExecutorUtil.runAsync(() -> {
             LoadingUtil.showDialog();
-            System.out.println(Thread.currentThread().getName());
-            var redisMode = RedisService.service.getRedisModeEnum(connectInfo);
+            var redisMode = RedisBasicService.service.getRedisModeEnum(connectInfo);
             SwingUtilities.invokeLater(() -> openActionCallback.accept(connectInfo.setRedisModeEnum(redisMode)));
             LoadingUtil.closeDialog();
         });

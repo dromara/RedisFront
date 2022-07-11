@@ -3,16 +3,35 @@ package com.redisfront.service;
 import com.redisfront.constant.Enum;
 import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
-import com.redisfront.service.impl.RedisServiceImpl;
+import com.redisfront.service.impl.RedisBasicServiceImpl;
 import com.redisfront.util.FunUtil;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public interface RedisService {
+public interface RedisBasicService {
 
-    RedisService service = new RedisServiceImpl();
+    RedisBasicService service = new RedisBasicServiceImpl();
+
+
+    /**
+     * type
+     *
+     * @param connectInfo connectInfo
+     * @param key         key
+     * @return String
+     */
+    String type(ConnectInfo connectInfo, String key);
+
+    /**
+     * ttl
+     *
+     * @param connectInfo connectInfo
+     * @param key         key
+     * @return String
+     */
+    Long ttl(ConnectInfo connectInfo, String key);
 
     /**
      * redis ping
@@ -103,7 +122,7 @@ public interface RedisService {
 
     Boolean isClusterMode(ConnectInfo connectInfo);
 
-    Long countDatabaseKey(ConnectInfo connectInfo);
+    Long dbSize(ConnectInfo connectInfo);
 
     default Map<String, Object> strToMap(String str) {
         Map<String, Object> result = new HashMap<>();
