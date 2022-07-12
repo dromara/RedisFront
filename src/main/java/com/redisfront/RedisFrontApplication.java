@@ -39,19 +39,19 @@ public class RedisFrontApplication {
             System.setProperty("flatlaf.uiScale", "2x");
         }
 
-        ExceptionHandler.init();
+        System.setProperty(Const.LOG_FILE, Const.LOG_FILE_PATH);
 
         FlatLaf.registerCustomDefaultsSource(Const.PACKAGE_NAME);
 
         FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", "#d81e06"));
-
-        System.setProperty(Const.LOG_FILE, Const.LOG_FILE_PATH);
 
         ToolTipManager.sharedInstance().setInitialDelay(0);
 
         SwingUtilities.invokeLater(() -> {
 
             PrefUtil.init(Const.ROOT_PATH);
+
+            ExceptionHandler.init();
 
             ThemeUtil.setupTheme(args);
 
@@ -66,7 +66,7 @@ public class RedisFrontApplication {
             FlatUIDefaultsInspector.install("ctrl shift alt Y");
 
             frame = new RedisFrontMainFrame();
-            frame.setMinimumSize(new Dimension(1220, 800));
+            frame.setMinimumSize(new Dimension(1280, 850));
             frame.pack();
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);

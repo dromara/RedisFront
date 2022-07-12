@@ -12,7 +12,8 @@ import com.redisfront.commons.util.LettuceUtil;
 import com.redisfront.commons.util.TreeUtil;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.model.TreeNodeInfo;
-import com.redisfront.ui.dialog.AddKeyDialog;
+import com.redisfront.service.RedisBasicService;
+import com.redisfront.ui.dialog.AddRedisKeyDialog;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -20,8 +21,6 @@ import javax.swing.border.TitledBorder;
 import javax.swing.text.JTextComponent;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -99,6 +98,7 @@ public class DataSearchForm {
         var selectNode = keyTree.getLastSelectedPathComponent();
         if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
             if (treeNodeInfo.getParent() != null) {
+                RedisBasicService.service.del(connectInfo, treeNodeInfo.key());
                 treeModel.removeNodeFromParent(treeNodeInfo);
             }
         }
@@ -120,7 +120,7 @@ public class DataSearchForm {
         borderPanel.setLayout(new BorderLayout());
 
         addBtn = new JButton();
-        addBtn.addActionListener(e -> AddKeyDialog.showAddDialog(connectInfo, System.out::println));
+        addBtn.addActionListener(e -> AddRedisKeyDialog.showAddDialog(connectInfo, System.out::println));
 
         refreshBtn = new JButton();
         refreshBtn.addActionListener(e -> searchActionPerformed());

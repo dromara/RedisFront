@@ -8,23 +8,25 @@ import com.redisfront.RedisFrontApplication;
 import com.redisfront.commons.Handler.ProcessHandler;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.exception.RedisFrontException;
-import com.redisfront.model.ConnectInfo;
-import com.redisfront.ui.AbstractDialog;
 import com.redisfront.commons.func.Fn;
-import com.redisfront.commons.util.LettuceUtil;
+import com.redisfront.model.ConnectInfo;
+import com.redisfront.service.*;
+import com.redisfront.ui.AbstractDialog;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
-public class AddKeyDialog extends AbstractDialog<String> {
+public class AddRedisKeyDialog extends AbstractDialog<String> {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
     private JTextField keyNameField;
     private JComboBox<String> keyTypeComboBox;
     private JTextArea keyValueField;
-    private JTextField setScoreField;
+    private JTextField zsetScoreField;
     private JTextField hashKeyField;
     private JTextField streamField;
     private JLabel scoreLabel;
@@ -35,15 +37,16 @@ public class AddKeyDialog extends AbstractDialog<String> {
     private final ConnectInfo connectInfo;
 
     public static void showAddDialog(ConnectInfo connectInfo, ProcessHandler<String> addSuccessProcessHandler) {
-        var openConnectDialog = new AddKeyDialog(connectInfo, addSuccessProcessHandler);
+        var openConnectDialog = new AddRedisKeyDialog(connectInfo, addSuccessProcessHandler);
         openConnectDialog.setSize(new Dimension(500, 280));
         openConnectDialog.setLocationRelativeTo(RedisFrontApplication.frame);
         openConnectDialog.pack();
         openConnectDialog.setVisible(true);
     }
 
-    public AddKeyDialog(ConnectInfo connectInfo, ProcessHandler<String> addSucFun) {
+    public AddRedisKeyDialog(ConnectInfo connectInfo, ProcessHandler<String> addSucFun) {
         super(RedisFrontApplication.frame);
+        this.setMinimumSize(new Dimension(500, 400));
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
@@ -73,18 +76,16 @@ public class AddKeyDialog extends AbstractDialog<String> {
         hashKeyLabel.setVisible(false);
         streamLabel.setVisible(false);
         hashKeyField.setVisible(false);
-        setScoreField.setVisible(false);
+        zsetScoreField.setVisible(false);
         streamField.setVisible(false);
         ttlSpinner.setValue(-1);
         ttlSpinner.addChangeListener(e -> {
             if (((Integer) ttlSpinner.getValue()) < 0) {
                 ttlSpinner.setValue(-1);
             }
-
             if (((Integer) ttlSpinner.getValue()) == 0) {
                 ttlSpinner.setValue(1);
             }
-
         });
 
         keyTypeComboBox.addActionListener(e -> {
@@ -93,7 +94,7 @@ public class AddKeyDialog extends AbstractDialog<String> {
                 hashKeyField.setVisible(true);
                 hashKeyLabel.setVisible(true);
 
-                setScoreField.setVisible(false);
+                zsetScoreField.setVisible(false);
                 scoreLabel.setVisible(false);
 
                 streamField.setVisible(false);
@@ -103,7 +104,7 @@ public class AddKeyDialog extends AbstractDialog<String> {
                 hashKeyField.setVisible(false);
                 hashKeyLabel.setVisible(false);
 
-                setScoreField.setVisible(false);
+                zsetScoreField.setVisible(false);
                 scoreLabel.setVisible(false);
 
                 streamField.setVisible(true);
@@ -113,7 +114,7 @@ public class AddKeyDialog extends AbstractDialog<String> {
                 hashKeyField.setVisible(false);
                 hashKeyLabel.setVisible(false);
 
-                setScoreField.setVisible(true);
+                zsetScoreField.setVisible(true);
                 scoreLabel.setVisible(true);
 
                 streamLabel.setVisible(false);
@@ -122,7 +123,7 @@ public class AddKeyDialog extends AbstractDialog<String> {
                 hashKeyField.setVisible(false);
                 hashKeyLabel.setVisible(false);
 
-                setScoreField.setVisible(false);
+                zsetScoreField.setVisible(false);
                 scoreLabel.setVisible(false);
 
                 streamField.setVisible(false);
@@ -150,8 +151,8 @@ public class AddKeyDialog extends AbstractDialog<String> {
             throw new RedisFrontException("参数校验失败", false);
         }
 
-        if (Fn.equal(Enum.KeyTypeEnum.ZSET.typeName(), selectItem) && Fn.isEmpty(setScoreField.getText())) {
-            setScoreField.requestFocus();
+        if (Fn.equal(Enum.KeyTypeEnum.ZSET.typeName(), selectItem) && Fn.isEmpty(zsetScoreField.getText())) {
+            zsetScoreField.requestFocus();
             throw new RedisFrontException("参数校验失败", false);
         }
 
@@ -162,31 +163,30 @@ public class AddKeyDialog extends AbstractDialog<String> {
     }
 
     private void onOK() {
-
         validParam();
+
         var key = keyNameField.getText();
         var value = keyValueField.getText();
         var ttl = ((Integer) ttlSpinner.getValue());
-
         var selectItem = (String) keyTypeComboBox.getSelectedItem();
-        if (Fn.equal(Enum.KeyTypeEnum.HASH.typeName(), selectItem) && Fn.isEmpty(hashKeyField.getText())) {
-            LettuceUtil.run(connectInfo, redisCommands -> {
-                redisCommands.hset(key, hashKeyField.getText(), keyValueField.getText());
-            });
-        } else if (Fn.equal(Enum.KeyTypeEnum.STREAM.typeName(), selectItem) && Fn.isEmpty(streamField.getText())) {
 
-        } else if (Fn.equal(Enum.KeyTypeEnum.ZSET.typeName(), selectItem) && Fn.isEmpty(setScoreField.getText())) {
-
+        if (Fn.equal(Enum.KeyTypeEnum.HASH.typeName(), selectItem)) {
+            RedisHashService.service.hset(connectInfo, key, hashKeyField.getText(), keyValueField.getText());
+        } else if (Fn.equal(Enum.KeyTypeEnum.STREAM.typeName(), selectItem)) {
+            System.out.println("STREAM");
+        } else if (Fn.equal(Enum.KeyTypeEnum.SET.typeName(), selectItem)) {
+            RedisSetService.service.sadd(connectInfo, key, value);
+        } else if (Fn.equal(Enum.KeyTypeEnum.LIST.typeName(), selectItem)) {
+            RedisListService.service.lpush(connectInfo, key, value);
+        } else if (Fn.equal(Enum.KeyTypeEnum.ZSET.typeName(), selectItem)) {
+            RedisZSetService.service.zadd(connectInfo, key, Double.parseDouble(zsetScoreField.getText()), value);
         } else {
-            LettuceUtil.run(connectInfo, redisCommands -> {
-                if (ttl > 0) {
-                    redisCommands.setex(key, ttl, value);
-                } else {
-                    redisCommands.set(key, value);
-                }
-            });
+            RedisStringService.service.set(connectInfo, key, value);
         }
 
+        if (ttl > 0) {
+            RedisBasicService.service.ttl(connectInfo, key);
+        }
         dispose();
     }
 
@@ -240,8 +240,8 @@ public class AddKeyDialog extends AbstractDialog<String> {
         contentPane.add(keyTypeComboBox, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         keyValueField = new JTextArea();
         contentPane.add(keyValueField, new GridConstraints(5, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
-        setScoreField = new JTextField();
-        contentPane.add(setScoreField, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        zsetScoreField = new JTextField();
+        contentPane.add(zsetScoreField, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         hashKeyField = new JTextField();
         contentPane.add(hashKeyField, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         streamField = new JTextField();
@@ -272,4 +272,5 @@ public class AddKeyDialog extends AbstractDialog<String> {
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
+
 }
