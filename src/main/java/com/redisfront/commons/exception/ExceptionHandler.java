@@ -1,7 +1,7 @@
-package com.redisfront.exception;
+package com.redisfront.commons.exception;
 
-import com.redisfront.util.LoadingUtil;
-import com.redisfront.util.AlertUtil;
+import com.redisfront.commons.util.LoadingUtil;
+import com.redisfront.commons.util.AlertUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

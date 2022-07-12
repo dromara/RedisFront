@@ -3,15 +3,15 @@ package com.redisfront.ui.form;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.icons.FlatTabbedPaneCloseIcon;
 import com.formdev.flatlaf.ui.FlatLineBorder;
-import com.redisfront.constant.UI;
+import com.redisfront.commons.constant.UI;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.ConnectService;
 import com.redisfront.service.RedisBasicService;
 import com.redisfront.ui.component.MainTabbedPanel;
 import com.redisfront.ui.dialog.AddConnectDialog;
 import com.redisfront.ui.dialog.OpenConnectDialog;
-import com.redisfront.util.ExecutorUtil;
-import com.redisfront.util.FunUtil;
+import com.redisfront.commons.util.ExecutorUtil;
+import com.redisfront.commons.func.Fn;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -30,7 +30,7 @@ public class MainWindowForm {
     private static MainWindowForm mainWindowForm;
 
     public static MainWindowForm getInstance() {
-        if (FunUtil.isNull(mainWindowForm)) {
+        if (Fn.isNull(mainWindowForm)) {
             mainWindowForm = new MainWindowForm();
         }
         return mainWindowForm;
@@ -48,7 +48,7 @@ public class MainWindowForm {
     public void addActionPerformed(ConnectInfo connectInfo) {
 
         CompletableFuture.allOf(CompletableFuture.supplyAsync(() -> connectInfo.setRedisModeEnum(RedisBasicService.service.getRedisModeEnum(connectInfo)), ExecutorUtil.getExecutorService()), CompletableFuture.runAsync(() -> {
-            if (FunUtil.equal(connectInfo.id(), 0)) {
+            if (Fn.equal(connectInfo.id(), 0)) {
                 ConnectService.service.save(connectInfo);
             } else {
                 ConnectService.service.update(connectInfo);

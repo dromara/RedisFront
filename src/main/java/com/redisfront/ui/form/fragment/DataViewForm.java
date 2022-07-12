@@ -2,22 +2,20 @@ package com.redisfront.ui.form.fragment;
 
 import cn.hutool.core.io.unit.DataSizeUtil;
 import com.formdev.flatlaf.FlatClientProperties;
-import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.ui.FlatEmptyBorder;
 import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import com.redisfront.constant.Enum;
-import com.redisfront.constant.UI;
+import com.redisfront.commons.constant.Enum;
+import com.redisfront.commons.constant.UI;
 import com.redisfront.model.ConnectInfo;
-import com.redisfront.model.TreeNodeInfo;
 import com.redisfront.service.RedisBasicService;
 import com.redisfront.service.RedisStringService;
-import com.redisfront.ui.component.TextEditorComponent;
-import com.redisfront.ui.form.MainNoneForm;
-import com.redisfront.util.FunUtil;
-import com.redisfront.util.LettuceUtil;
+import com.redisfront.commons.Handler.ActionHandler;
+import com.redisfront.ui.component.TextEditor;
+import com.redisfront.commons.util.ExecutorUtil;
+import com.redisfront.commons.util.FutureUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -26,6 +24,7 @@ import javax.swing.plaf.FontUIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * DataViewForm
@@ -46,12 +45,19 @@ public class DataViewForm {
     private JLabel keySizeLabel;
     private JButton saveBtn;
     private JTextField ttlField;
+    private TextEditor textEditor;
 
     private final ConnectInfo connectInfo;
-    private TextEditorComponent textEditorComponent;
+
+    private ActionHandler deleteActionHandler;
 
     public static DataViewForm newInstance(ConnectInfo connectInfo) {
         return new DataViewForm(connectInfo);
+    }
+
+    public DataViewForm setDeleteActionHandler(ActionHandler handler) {
+        this.deleteActionHandler = handler;
+        return this;
     }
 
     public DataViewForm(ConnectInfo connectInfo) {
@@ -74,10 +80,15 @@ public class DataViewForm {
 
         delBtn.setIcon(UI.DELETE_ICON);
         delBtn.setText("删除");
+        delBtn.addActionListener(e -> deleteActionHandler.handle());
         delBtn.setToolTipText("删除键");
 
         refBtn.setIcon(UI.REFRESH_ICON);
         refBtn.setText("重载");
+        refBtn.addActionListener(e -> {
+            String key = keyField.getText();
+            dataChangeActionPerformed(key);
+        });
         refBtn.setToolTipText("重载");
 
         saveBtn.setIcon(UI.SAVE_ICON);
@@ -89,32 +100,33 @@ public class DataViewForm {
         return contentPanel;
     }
 
-    public void dataChange(TreeNodeInfo treeNodeInfo) {
-        Thread thread = Thread.currentThread();
-
-        Long ttl = RedisBasicService.service.ttl(connectInfo, treeNodeInfo.key());
-        String type = RedisBasicService.service.type(connectInfo, treeNodeInfo.key());
-        Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(type.toUpperCase());
-
-        Long strLen = 0L;
-        String value = "";
-
-        if (keyTypeEnum == Enum.KeyTypeEnum.STRING) {
-            strLen = RedisStringService.service.strlen(connectInfo, treeNodeInfo.key());
-            value = RedisStringService.service.get(connectInfo, treeNodeInfo.key());
-        }
-        final Long finalStrLen = strLen;
-        final String finalValue = value;
-
-        SwingUtilities.invokeLater(() -> {
-            ttlField.setText(ttl.toString());
-            keyTypeLabel.setText(keyTypeEnum.typeName());
-            keyTypeLabel.setBackground(keyTypeEnum.color());
-            lengthLabel.setText("Length: " + finalStrLen);
-            keySizeLabel.setText("Size: " + DataSizeUtil.format(finalValue.getBytes().length));
-            textEditorComponent.textArea().setText(finalValue);
-        });
-
+    public void dataChangeActionPerformed(String key) {
+        CompletableFuture<Void> updateContentFuture = CompletableFuture.supplyAsync(() -> {
+                    String type = RedisBasicService.service.type(connectInfo, key);
+                    Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(type.toUpperCase());
+                    SwingUtilities.invokeLater(() -> {
+                        keyTypeLabel.setText(keyTypeEnum.typeName());
+                        keyTypeLabel.setBackground(keyTypeEnum.color());
+                    });
+                    return keyTypeEnum;
+                }, ExecutorUtil.getExecutorService())
+                .thenAccept((keyTypeEnum -> {
+                    if (keyTypeEnum == Enum.KeyTypeEnum.STRING) {
+                        Long strLen = RedisStringService.service.strlen(connectInfo, key);
+                        String value = RedisStringService.service.get(connectInfo, key);
+                        SwingUtilities.invokeLater(() -> {
+                            lengthLabel.setText("Length: " + strLen);
+                            keySizeLabel.setText("Size: " + DataSizeUtil.format(value.getBytes().length));
+                            textEditor.textArea().setText(value);
+                        });
+                    }
+                }));
+        CompletableFuture.allOf(FutureUtil.completableFuture(() -> RedisBasicService.service.ttl(connectInfo, key), ttl -> SwingUtilities.invokeLater(() ->
+                {
+                    ttlField.setText(ttl.toString());
+                    keyField.setText(key);
+                }
+        )), updateContentFuture);
     }
 
     private void createUIComponents() {
@@ -146,8 +158,8 @@ public class DataViewForm {
             }
         }, BorderLayout.NORTH);
 
-        textEditorComponent = TextEditorComponent.newInstance();
-        valueViewPanel.add(textEditorComponent, BorderLayout.CENTER);
+        textEditor = TextEditor.newInstance();
+        valueViewPanel.add(textEditor, BorderLayout.CENTER);
 
         valueViewPanel.add(new JPanel() {
             @Override
@@ -193,17 +205,17 @@ public class DataViewForm {
         keyTypeLabel = new JLabel();
         Font keyTypeLabelFont = this.$$$getFont$$$(null, Font.BOLD, 14, keyTypeLabel.getFont());
         if (keyTypeLabelFont != null) keyTypeLabel.setFont(keyTypeLabelFont);
-        keyTypeLabel.setText("Label");
+        keyTypeLabel.setText("");
         stringViewPanel.add(keyTypeLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer1 = new Spacer();
         stringViewPanel.add(spacer1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         keyField = new JTextField();
         stringViewPanel.add(keyField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         lengthLabel = new JLabel();
-        lengthLabel.setText("Label");
+        lengthLabel.setText("");
         stringViewPanel.add(lengthLabel, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         keySizeLabel = new JLabel();
-        keySizeLabel.setText("Label");
+        keySizeLabel.setText("");
         stringViewPanel.add(keySizeLabel, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         delBtn = new JButton();
         delBtn.setText("");

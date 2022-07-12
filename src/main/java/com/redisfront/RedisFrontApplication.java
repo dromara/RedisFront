@@ -4,11 +4,10 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatInspector;
 import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
 import com.formdev.flatlaf.util.SystemInfo;
-import com.redisfront.constant.Const;
-import com.redisfront.exception.ExceptionHandler;
-import com.redisfront.exception.RedisFrontException;
+import com.redisfront.commons.constant.Const;
+import com.redisfront.commons.exception.ExceptionHandler;
+import com.redisfront.commons.util.*;
 import com.redisfront.ui.frame.RedisFrontMainFrame;
-import com.redisfront.util.*;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,7 +1,7 @@
-package com.redisfront.ui.component;
+package com.redisfront.ui;
 
 import com.redisfront.model.ConnectInfo;
-import com.redisfront.util.FunUtil;
+import com.redisfront.commons.func.Fn;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -53,7 +53,7 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
         this.println("");
         this.println("connection ".concat(connectInfo().host()).concat(":") + connectInfo().port() + " redis server success...");
         this.println("");
-        this.print(connectInfo().host().concat(":").concat(String.valueOf(connectInfo().port())).concat(FunUtil.equal("0", databaseName()) ? "" : "[" + databaseName() + "]").concat(">"));
+        this.print(connectInfo().host().concat(":").concat(String.valueOf(connectInfo().port())).concat(Fn.equal("0", databaseName()) ? "" : "[" + databaseName() + "]").concat(">"));
     }
 
     @Override
@@ -67,12 +67,12 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
             var subEndLength = terminal.getSelectionEnd() - 1;
             if ((subStartLength < subEndLength)) {
                 String input = terminal.getText().substring(subStartLength, subEndLength);
-                if (FunUtil.isNotEmpty(input)) {
+                if (Fn.isNotEmpty(input)) {
                     this.inputProcessHandler(input.trim());
                 }
             }
             this.print("\n");
-            this.print(connectInfo().host().concat(":").concat(connectInfo().port().toString()).concat(FunUtil.equal("0", databaseName()) ? "" : "[" + databaseName() + "]").concat(">"));
+            this.print(connectInfo().host().concat(":").concat(connectInfo().port().toString()).concat(Fn.equal("0", databaseName()) ? "" : "[" + databaseName() + "]").concat(">"));
         } else if (currentKeyCode == KeyEvent.VK_ENTER && e.getKeyChar() != '\n') {
             e.consume();
             terminal.setText(terminal.getText().concat(String.valueOf(e.getKeyChar())));

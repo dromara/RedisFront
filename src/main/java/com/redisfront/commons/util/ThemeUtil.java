@@ -1,4 +1,4 @@
-package com.redisfront.util;
+package com.redisfront.commons.util;
 
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
@@ -9,8 +9,8 @@ import com.formdev.flatlaf.json.Json;
 import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.LoggingFacade;
 import com.redisfront.RedisFrontApplication;
-import com.redisfront.constant.Const;
-import com.redisfront.theme.RedisFrontLightLaf;
+import com.redisfront.commons.constant.Const;
+import com.redisfront.commons.theme.RedisFrontLightLaf;
 
 import javax.swing.*;
 import javax.swing.text.StyleContext;

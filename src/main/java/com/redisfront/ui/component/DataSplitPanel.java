@@ -1,12 +1,10 @@
 package com.redisfront.ui.component;
 
 import com.redisfront.model.ConnectInfo;
-import com.redisfront.model.TreeNodeInfo;
 import com.redisfront.service.RedisBasicService;
 import com.redisfront.ui.form.MainNoneForm;
 import com.redisfront.ui.form.fragment.DataSearchForm;
 import com.redisfront.ui.form.fragment.DataViewForm;
-import com.redisfront.util.LoadingUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,17 +25,22 @@ public class DataSplitPanel extends JSplitPane {
 
     public DataSplitPanel(ConnectInfo connectInfo) {
         this.connectInfo = connectInfo;
-        Thread thread = Thread.currentThread();
-        this.setLeftComponent(DataSearchForm.newInstance((treeNodeInfo) -> {
-            var dataViewForm = DataViewForm.newInstance(connectInfo);
-            LoadingUtil.showDialog();
-            dataViewForm.dataChange(treeNodeInfo);
-            LoadingUtil.closeDialog();
-            setRightComponent(dataViewForm.contentPanel());
+        var dataSearchForm = DataSearchForm.newInstance(connectInfo);
 
-        }, connectInfo).getContentPanel());
+        dataSearchForm.setNodeClickProcessHandler((treeNodeInfo) -> {
+            var dataViewForm = DataViewForm.newInstance(connectInfo);
+            dataViewForm.dataChangeActionPerformed(treeNodeInfo.key());
+            dataViewForm.setDeleteActionHandler(() -> {
+                dataSearchForm.deleteActionPerformed();
+                setRightComponent(MainNoneForm.getInstance().getContentPanel());
+            });
+            setRightComponent(dataViewForm.contentPanel());
+        });
+
+        this.setLeftComponent(dataSearchForm.getContentPanel());
         this.setRightComponent(MainNoneForm.getInstance().getContentPanel());
     }
+
 
     public void ping() {
         RedisBasicService.service.ping(connectInfo);

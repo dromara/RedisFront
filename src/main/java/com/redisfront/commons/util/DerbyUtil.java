@@ -1,13 +1,11 @@
-package com.redisfront.util;
+package com.redisfront.commons.util;
 
 
-import com.redisfront.constant.Const;
-import com.redisfront.exception.RedisFrontException;
-import com.redisfront.service.ConnectService;
+import com.redisfront.commons.constant.Const;
+import com.redisfront.commons.exception.RedisFrontException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;

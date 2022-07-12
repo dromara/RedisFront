@@ -3,8 +3,8 @@ package com.redisfront.ui.form;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import com.redisfront.constant.UI;
-import com.redisfront.util.LocaleUtil;
+import com.redisfront.commons.constant.UI;
+import com.redisfront.commons.util.LocaleUtil;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;

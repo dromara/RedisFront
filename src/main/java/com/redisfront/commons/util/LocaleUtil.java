@@ -1,6 +1,7 @@
-package com.redisfront.util;
+package com.redisfront.commons.util;
 
-import com.redisfront.constant.Const;
+import com.redisfront.commons.constant.Const;
+import com.redisfront.commons.func.Fn;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -26,7 +27,7 @@ public class LocaleUtil {
     public static BundleInfo getMenu(String prefix) {
         var name = bundle.getString(prefix.concat(".Title"));
         var mnemonicStr = bundle.getString(prefix.concat(".Mnemonic"));
-        var mnemonic = FunUtil.isEmpty(mnemonicStr) ? 0 : (int) mnemonicStr.charAt(0);
+        var mnemonic = Fn.isEmpty(mnemonicStr) ? 0 : (int) mnemonicStr.charAt(0);
         var desc = bundle.getString(prefix.concat(".Desc"));
         return new BundleInfo(name, mnemonic, desc);
     }

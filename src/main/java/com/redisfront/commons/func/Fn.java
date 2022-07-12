@@ -1,4 +1,4 @@
-package com.redisfront.util;
+package com.redisfront.commons.func;
 
 
 import cn.hutool.core.bean.BeanUtil;
@@ -26,9 +26,9 @@ import java.util.stream.Collectors;
  *
  * @author Jin
  */
-public class FunUtil {
+public class Fn {
 
-    private FunUtil() {
+    private Fn() {
     }
 
     public static void revalidateAndRepaintAllFramesAndDialogs() {
@@ -174,10 +174,10 @@ public class FunUtil {
      * @return
      */
     public static <R, T> List<R> collectList(List<T> dataList, Function<? super T, ? extends R> function) {
-        if (FunUtil.isEmpty(dataList)) {
+        if (Fn.isEmpty(dataList)) {
             return Collections.emptyList();
         }
-        return dataList.stream().map(function).filter(FunUtil::isNotNull).distinct().collect(Collectors.toList());
+        return dataList.stream().map(function).filter(Fn::isNotNull).distinct().collect(Collectors.toList());
     }
 
     /**
@@ -191,7 +191,7 @@ public class FunUtil {
      * @return
      */
     public static <R, T> Map<R, T> collectMap(List<T> dataList, Function<? super T, ? extends R> keyMapper) {
-        if (FunUtil.isEmpty(dataList)) {
+        if (Fn.isEmpty(dataList)) {
             return new HashMap<>();
         }
         return dataList.stream().collect(Collectors.toMap(keyMapper, Function.identity(), (a, b) -> a));

@@ -1,25 +1,27 @@
 package com.redisfront.ui.form.fragment;
 
-import cn.hutool.core.lang.Assert;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.formdev.flatlaf.ui.FlatLineBorder;
-import com.redisfront.constant.Enum;
-import com.redisfront.constant.UI;
+import com.redisfront.commons.Handler.ProcessHandler;
+import com.redisfront.commons.constant.Enum;
+import com.redisfront.commons.constant.UI;
+import com.redisfront.commons.func.Fn;
+import com.redisfront.commons.util.ExecutorUtil;
+import com.redisfront.commons.util.LettuceUtil;
+import com.redisfront.commons.util.TreeUtil;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.model.TreeNodeInfo;
 import com.redisfront.ui.dialog.AddKeyDialog;
-import com.redisfront.util.ExecutorUtil;
-import com.redisfront.util.FunUtil;
-import com.redisfront.util.LettuceUtil;
-import com.redisfront.util.TreeUtil;
-import io.lettuce.core.api.sync.RedisServerCommands;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.JTextComponent;
+import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -42,7 +44,7 @@ public class DataSearchForm {
     private JButton refreshBtn;
     private JPanel borderPanel;
 
-    private final Consumer<TreeNodeInfo> nodeClickCallback;
+    private ProcessHandler<TreeNodeInfo> nodeClickProcessHandler;
 
     private final ConnectInfo connectInfo;
 
@@ -50,43 +52,56 @@ public class DataSearchForm {
         return contentPanel;
     }
 
-    public static DataSearchForm newInstance(Consumer<TreeNodeInfo> nodeClickCallback, ConnectInfo connectInfo) {
-        return new DataSearchForm(nodeClickCallback, connectInfo);
+    public static DataSearchForm newInstance(ConnectInfo connectInfo) {
+        return new DataSearchForm(connectInfo);
     }
 
-    public DataSearchForm(Consumer<TreeNodeInfo> nodeClickCallback, ConnectInfo connectInfo) {
-        this.nodeClickCallback = nodeClickCallback;
+    public DataSearchForm(ConnectInfo connectInfo) {
         this.connectInfo = connectInfo;
         $$$setupUI$$$();
-        this.init();
-    }
-
-    public void init() {
-        Assert.notNull(connectInfo, () -> new RuntimeException("connectInfo 不能为空"));
-        Assert.notNull(nodeClickCallback, () -> new RuntimeException("nodeClickCallback 不能为空"));
-        if (connectInfo.redisModeEnum() == Enum.RedisMode.CLUSTER) {
+        if (connectInfo.redisModeEnum() == Enum.RedisMode.CLUSTER)
             databaseComboBox.setEnabled(false);
-        }
-        treeDataInit();
+        loadTreeModelData("*");
     }
 
-    private void treeDataInit() {
+    public void setNodeClickProcessHandler(ProcessHandler<TreeNodeInfo> nodeClickProcessHandler) {
+        this.nodeClickProcessHandler = nodeClickProcessHandler;
+    }
+
+    public void loadTreeModelData(String key) {
         ExecutorUtil.runAsync(() -> {
-            SwingUtilities.invokeLater(() -> searchTextField.setText(""));
-            if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
                 LettuceUtil.clusterRun(connectInfo, redisCommands -> {
-                    var list = redisCommands.keys("*");
+                    var list = redisCommands.keys(key);
                     var treeModel = TreeUtil.toTreeModel(new HashSet<>(list), ":");
                     SwingUtilities.invokeLater(() -> keyTree.setModel(treeModel));
                 });
             } else {
                 LettuceUtil.run(connectInfo, redisCommands -> {
-                    var list = redisCommands.keys("*");
+                    var list = redisCommands.keys(key);
                     var treeModel = TreeUtil.toTreeModel(new HashSet<>(list), ":");
                     SwingUtilities.invokeLater(() -> keyTree.setModel(treeModel));
                 });
             }
         });
+    }
+
+    public void searchActionPerformed() {
+        if (Fn.isEmpty(searchTextField.getText())) {
+            loadTreeModelData("*");
+        } else {
+            loadTreeModelData(searchTextField.getText());
+        }
+    }
+
+    public void deleteActionPerformed() {
+        DefaultTreeModel treeModel = (DefaultTreeModel) keyTree.getModel();
+        var selectNode = keyTree.getLastSelectedPathComponent();
+        if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
+            if (treeNodeInfo.getParent() != null) {
+                treeModel.removeNodeFromParent(treeNodeInfo);
+            }
+        }
     }
 
 
@@ -108,6 +123,7 @@ public class DataSearchForm {
         addBtn.addActionListener(e -> AddKeyDialog.showAddDialog(connectInfo, System.out::println));
 
         refreshBtn = new JButton();
+        refreshBtn.addActionListener(e -> searchActionPerformed());
         refreshBtn.setIcon(UI.REFRESH_ICON);
         databaseComboBox = new JComboBox<>();
 
@@ -119,7 +135,7 @@ public class DataSearchForm {
         databaseComboBox.addActionListener(e -> {
             var db = (Integer) databaseComboBox.getSelectedItem();
             this.connectInfo.setDatabase(db);
-            this.init();
+            searchActionPerformed();
         });
 
         treePanel = new JPanel();
@@ -128,26 +144,10 @@ public class DataSearchForm {
         searchTextField = new JTextField();
         searchTextField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入关键字...");
         var searchBtn = new JButton(new FlatSearchIcon());
-        searchBtn.addActionListener(actionEvent ->
-                ExecutorUtil.runAsync(() -> {
-                    SwingUtilities.invokeLater(() -> searchTextField.setText(""));
-                    if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
-                        LettuceUtil.clusterRun(connectInfo, redisCommands -> {
-                            var list = redisCommands.keys(searchTextField.getText());
-                            var treeModel = TreeUtil.toTreeModel(new HashSet<>(list), ":");
-                            SwingUtilities.invokeLater(() -> keyTree.setModel(treeModel));
-                        });
-                    } else {
-                        LettuceUtil.run(connectInfo, redisCommands -> {
-                            var list = redisCommands.keys(searchTextField.getText());
-                            var treeModel = TreeUtil.toTreeModel(new HashSet<>(list), ":");
-                            SwingUtilities.invokeLater(() -> keyTree.setModel(treeModel));
-                        });
-                    }
-                }));
+        searchBtn.addActionListener(actionEvent -> searchActionPerformed());
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchBtn);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
-        searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> treeDataInit());
+        searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> searchActionPerformed());
 
         keyTree = new JTree();
         keyTree.setRootVisible(false);
@@ -156,7 +156,7 @@ public class DataSearchForm {
             var selectNode = keyTree.getLastSelectedPathComponent();
             if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
                 if (treeNodeInfo.getChildCount() == 0) {
-                    ExecutorUtil.runAsync(() -> nodeClickCallback.accept(treeNodeInfo));
+                    ExecutorUtil.runAsync(() -> nodeClickProcessHandler.processHandler(treeNodeInfo));
                 }
             }
         });
@@ -166,9 +166,7 @@ public class DataSearchForm {
                 var addMenuItem = new JMenuItem("添加");
                 add(addMenuItem);
                 var delMenuItem = new JMenuItem("删除");
-                delMenuItem.addActionListener((e) -> {
-
-                });
+                delMenuItem.addActionListener((e) -> deleteActionPerformed());
                 add(delMenuItem);
                 var refMenuItem = new JMenuItem("刷新");
                 add(refMenuItem);
@@ -180,7 +178,6 @@ public class DataSearchForm {
         keyTree.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                var i = keyTree.getSelectionCount();
                 if (MouseEvent.BUTTON3 == e.getButton() && keyTree.getSelectionCount() > 0) {
                     popupMenu.show(keyTree, e.getX(), e.getY());
                     popupMenu.setVisible(true);

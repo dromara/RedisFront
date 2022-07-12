@@ -1,7 +1,7 @@
 package com.redisfront.ui.dialog;
 
 
-import com.formdev.flatlaf.*;
+import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.StringUtils;
@@ -9,11 +9,12 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.RedisFrontApplication;
-import com.redisfront.constant.Const;
-import com.redisfront.theme.RedisFrontDarkLaf;
-import com.redisfront.theme.RedisFrontLightLaf;
-import com.redisfront.ui.component.AbstractDialog;
-import com.redisfront.util.*;
+import com.redisfront.commons.func.Fn;
+import com.redisfront.ui.AbstractDialog;
+import com.redisfront.commons.constant.Const;
+import com.redisfront.commons.theme.RedisFrontDarkLaf;
+import com.redisfront.commons.theme.RedisFrontLightLaf;
+import com.redisfront.commons.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,7 +115,7 @@ public class SettingDialog extends AbstractDialog<Void> {
                 .stream()
                 .filter(e -> {
                     String languageTag = PrefUtil.getState().get(Const.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
-                    return FunUtil.equal(e.getValue(), languageTag);
+                    return Fn.equal(e.getValue(), languageTag);
                 }).findAny().orElseThrow());
     }
 
@@ -141,7 +142,7 @@ public class SettingDialog extends AbstractDialog<Void> {
         }
         fontSizeComboBox.addActionListener(e -> {
             String fontSizeStr = (String) fontSizeComboBox.getSelectedItem();
-            if (FunUtil.equal(fontSizeStr, PrefUtil.getState().get(Const.KEY_FONT_SIZE, getDefaultFontSize()))) {
+            if (Fn.equal(fontSizeStr, PrefUtil.getState().get(Const.KEY_FONT_SIZE, getDefaultFontSize()))) {
                 return;
             }
             this.updateFontSizeHandler(fontSizeStr);
@@ -180,7 +181,7 @@ public class SettingDialog extends AbstractDialog<Void> {
         });
         fontNameComboBox.addActionListener(e -> {
             String fontFamily = (String) fontNameComboBox.getSelectedItem();
-            if (FunUtil.equal(fontFamily, PrefUtil.getState().get(Const.KEY_FONT_NAME, getDefaultFontFamily()))) {
+            if (Fn.equal(fontFamily, PrefUtil.getState().get(Const.KEY_FONT_NAME, getDefaultFontFamily()))) {
                 return;
             }
             this.updateFontNameHandler(fontFamily);
@@ -243,7 +244,7 @@ public class SettingDialog extends AbstractDialog<Void> {
         Map.Entry<?, ?> newLanguage = (Map.Entry<?, ?>) languageComboBox.getSelectedItem();
         String oldLanguage = PrefUtil.getState().get(Const.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
         assert newLanguage != null;
-        if (FunUtil.notEqual(newLanguage.getValue(), oldLanguage)) {
+        if (Fn.notEqual(newLanguage.getValue(), oldLanguage)) {
             Locale.setDefault(Locale.forLanguageTag((String) newLanguage.getValue()));
             PrefUtil.getState().put(Const.KEY_LANGUAGE, (String) newLanguage.getValue());
             var res = AlertUtil.showConfirmDialog("语言已变更，重启后生效！\n 是否立即重启？", JOptionPane.YES_NO_OPTION);

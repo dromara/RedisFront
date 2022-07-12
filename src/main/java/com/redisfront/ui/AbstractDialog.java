@@ -1,4 +1,6 @@
-package com.redisfront.ui.component;
+package com.redisfront.ui;
+
+import com.redisfront.commons.Handler.ProcessHandler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,11 +12,11 @@ import java.util.function.Consumer;
  * @author Jin
  */
 public abstract class AbstractDialog<T> extends JDialog {
-    protected Consumer<T> callback;
+    protected ProcessHandler<T> processHandler;
 
-    public AbstractDialog(Frame owner, Consumer<T> callback) {
+    public AbstractDialog(Frame owner, ProcessHandler<T> processHandler) {
         super(owner);
-        this.callback = callback;
+        this.processHandler = processHandler;
     }
 
     public AbstractDialog(Frame owner) {

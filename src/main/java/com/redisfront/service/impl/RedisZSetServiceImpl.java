@@ -1,10 +1,10 @@
 package com.redisfront.service.impl;
 
-import com.redisfront.constant.Enum;
+import com.redisfront.commons.constant.Enum;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisZSetService;
-import com.redisfront.util.FunUtil;
-import com.redisfront.util.LettuceUtil;
+import com.redisfront.commons.func.Fn;
+import com.redisfront.commons.util.LettuceUtil;
 import io.lettuce.core.*;
 
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.List;
 public class RedisZSetServiceImpl implements RedisZSetService {
     @Override
     public Long zadd(ConnectInfo connectInfo, String key, double score, String member) {
-        if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtil.clusterExec(connectInfo, commands -> commands.zadd(key, score, member));
         } else {
             return LettuceUtil.exec(connectInfo, commands -> commands.zadd(key, score, member));
@@ -26,7 +26,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @Override
     public Long zadd(ConnectInfo connectInfo, String key, ScoredValue<String>... scoredValues) {
-        if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtil.clusterExec(connectInfo, commands -> commands.zadd(key, scoredValues));
         } else {
             return LettuceUtil.exec(connectInfo, commands -> commands.zadd(key, scoredValues));
@@ -35,7 +35,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @Override
     public Double zaddincr(ConnectInfo connectInfo, String key, double score, String member) {
-        if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtil.clusterExec(connectInfo, commands -> commands.zaddincr(key, score, member));
         } else {
             return LettuceUtil.exec(connectInfo, commands -> commands.zaddincr(key, score, member));
@@ -44,7 +44,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @Override
     public Long zcard(ConnectInfo connectInfo, String key) {
-        if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtil.clusterExec(connectInfo, commands -> commands.zcard(key));
         } else {
             return LettuceUtil.exec(connectInfo, commands -> commands.zcard(key));
@@ -53,7 +53,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @Override
     public Long zcount(ConnectInfo connectInfo, String key, Range<? extends Number> range) {
-        if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtil.clusterExec(connectInfo, commands -> commands.zcount(key, range));
         } else {
             return LettuceUtil.exec(connectInfo, commands -> commands.zcount(key, range));
@@ -62,7 +62,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @Override
     public List<String> zrangebyscore(ConnectInfo connectInfo, String key, Range<? extends Number> range, Limit limit) {
-        if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtil.clusterExec(connectInfo, commands -> commands.zrangebyscore(key, range, limit));
         } else {
             return LettuceUtil.exec(connectInfo, commands -> commands.zrangebyscore(key, range, limit));
@@ -71,7 +71,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @Override
     public List<ScoredValue<String>> zrangebyscoreWithScores(ConnectInfo connectInfo, String key, Range<? extends Number> range) {
-        if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtil.clusterExec(connectInfo, commands -> commands.zrangebyscoreWithScores(key, range));
         } else {
             return LettuceUtil.exec(connectInfo, commands -> commands.zrangebyscoreWithScores(key, range));
@@ -80,7 +80,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @Override
     public List<String> zrevrangebyscore(ConnectInfo connectInfo, String key, Range<? extends Number> range, Limit limit) {
-        if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtil.clusterExec(connectInfo, commands -> commands.zrevrangebyscore(key, range, limit));
         } else {
             return LettuceUtil.exec(connectInfo, commands -> commands.zrevrangebyscore(key, range, limit));
@@ -89,7 +89,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @Override
     public Long zrevrank(ConnectInfo connectInfo, String key, String member) {
-        if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtil.clusterExec(connectInfo, commands -> commands.zrevrank(key, member));
         } else {
             return LettuceUtil.exec(connectInfo, commands -> commands.zrevrank(key, member));
@@ -98,7 +98,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @Override
     public ScoredValueScanCursor<String> zscan(ConnectInfo connectInfo, String key) {
-        if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtil.clusterExec(connectInfo, commands -> commands.zscan(key));
         } else {
             return LettuceUtil.exec(connectInfo, commands -> commands.zscan(key));
@@ -107,7 +107,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @Override
     public ScoredValueScanCursor<String> zscan(ConnectInfo connectInfo, String key, ScanArgs scanArgs) {
-        if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtil.clusterExec(connectInfo, commands -> commands.zscan(key, scanArgs));
         } else {
             return LettuceUtil.exec(connectInfo, commands -> commands.zscan(key, scanArgs));
@@ -116,7 +116,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @Override
     public ScoredValueScanCursor<String> zscan(ConnectInfo connectInfo, String key, ScanCursor scanCursor, ScanArgs scanArgs) {
-        if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtil.clusterExec(connectInfo, commands -> commands.zscan(key, scanCursor, scanArgs));
         } else {
             return LettuceUtil.exec(connectInfo, commands -> commands.zscan(key, scanCursor, scanArgs));
@@ -125,7 +125,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @Override
     public ScoredValueScanCursor<String> zscan(ConnectInfo connectInfo, String key, ScanCursor scanCursor) {
-        if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtil.clusterExec(connectInfo, commands -> commands.zscan(key, scanCursor));
         } else {
             return LettuceUtil.exec(connectInfo, commands -> commands.zscan(key, scanCursor));
@@ -134,7 +134,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @Override
     public Double zscore(ConnectInfo connectInfo, String key, String member) {
-        if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtil.clusterExec(connectInfo, commands -> commands.zscore(key, member));
         } else {
             return LettuceUtil.exec(connectInfo, commands -> commands.zscore(key, member));
@@ -143,7 +143,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @Override
     public ScoredValue<String> zpopmin(ConnectInfo connectInfo, String key) {
-        if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtil.clusterExec(connectInfo, commands -> commands.zpopmin(key));
         } else {
             return LettuceUtil.exec(connectInfo, commands -> commands.zpopmin(key));
@@ -152,7 +152,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @Override
     public List<ScoredValue<String>> zpopmin(ConnectInfo connectInfo, String key, long count) {
-        if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtil.clusterExec(connectInfo, commands -> commands.zpopmin(key, count));
         } else {
             return LettuceUtil.exec(connectInfo, commands -> commands.zpopmin(key, count));

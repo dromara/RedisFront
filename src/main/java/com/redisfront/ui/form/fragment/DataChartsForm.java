@@ -1,6 +1,6 @@
 package com.redisfront.ui.form.fragment;
 
-import com.redisfront.ui.component.TextEditorComponent;
+import com.redisfront.ui.component.TextEditor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,7 +26,7 @@ public class DataChartsForm {
     private void createUIComponents() {
         contentPanel = new JPanel();
         contentPanel.setLayout(new BorderLayout());
-        contentPanel.add(TextEditorComponent.newInstance());
+        contentPanel.add(TextEditor.newInstance());
     }
 
     {

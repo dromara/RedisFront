@@ -1,6 +1,7 @@
-package com.redisfront.util;
+package com.redisfront.commons.util;
 
 import com.redisfront.RedisFrontApplication;
+import com.redisfront.commons.func.Fn;
 import com.redisfront.ui.component.LoadingDialog;
 
 import java.awt.*;
@@ -25,7 +26,7 @@ public class LoadingUtil {
     }
 
     public static void closeDialog() {
-        if (FunUtil.isNotNull(loadingDialog)) {
+        if (Fn.isNotNull(loadingDialog)) {
             loadingDialog.dispose();
             loadingDialog = null;
         }

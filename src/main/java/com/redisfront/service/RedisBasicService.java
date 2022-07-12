@@ -1,10 +1,10 @@
 package com.redisfront.service;
 
-import com.redisfront.constant.Enum;
+import com.redisfront.commons.constant.Enum;
 import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.impl.RedisBasicServiceImpl;
-import com.redisfront.util.FunUtil;
+import com.redisfront.commons.func.Fn;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +15,14 @@ public interface RedisBasicService {
     RedisBasicService service = new RedisBasicServiceImpl();
 
 
+    /**
+     * del
+     *
+     * @param connectInfo connectInfo
+     * @param key         key
+     * @return String
+     */
+    Long del(ConnectInfo connectInfo, String key);
     /**
      * type
      *
@@ -127,7 +135,7 @@ public interface RedisBasicService {
     default Map<String, Object> strToMap(String str) {
         Map<String, Object> result = new HashMap<>();
         for (String s : str.split("\r\n")) {
-            if (!FunUtil.startWith(s, "#") && FunUtil.isNotEmpty(s)) {
+            if (!Fn.startWith(s, "#") && Fn.isNotEmpty(s)) {
                 String[] v = s.split(":");
                 if (v.length > 1) {
                     result.put(v[0], v[1]);

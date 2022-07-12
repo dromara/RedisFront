@@ -1,4 +1,4 @@
-package com.redisfront.exception;
+package com.redisfront.commons.exception;
 
 import java.util.function.Supplier;
 

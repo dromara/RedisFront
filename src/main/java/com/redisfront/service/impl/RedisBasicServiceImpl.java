@@ -1,11 +1,11 @@
 package com.redisfront.service.impl;
 
-import com.redisfront.constant.Enum;
+import com.redisfront.commons.constant.Enum;
 import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
-import com.redisfront.util.FunUtil;
-import com.redisfront.util.LettuceUtil;
+import com.redisfront.commons.func.Fn;
+import com.redisfront.commons.util.LettuceUtil;
 import io.lettuce.core.api.sync.BaseRedisCommands;
 import io.lettuce.core.api.sync.RedisServerCommands;
 import io.lettuce.core.cluster.api.sync.RedisAdvancedClusterCommands;
@@ -22,8 +22,17 @@ public class RedisBasicServiceImpl implements RedisBasicService {
     private static final Logger log = LoggerFactory.getLogger(RedisBasicServiceImpl.class);
 
     @Override
+    public Long del(ConnectInfo connectInfo, String key) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            return LettuceUtil.clusterExec(connectInfo, redisCommands -> redisCommands.del(key));
+        } else {
+            return LettuceUtil.exec(connectInfo, redisCommands -> redisCommands.del(key));
+        }
+    }
+
+    @Override
     public String type(ConnectInfo connectInfo, String key) {
-        if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtil.clusterExec(connectInfo, redisCommands -> redisCommands.type(key));
         } else {
             return LettuceUtil.exec(connectInfo, redisCommands -> redisCommands.type(key));
@@ -32,7 +41,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public Long ttl(ConnectInfo connectInfo, String key) {
-        if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtil.clusterExec(connectInfo, redisCommands -> redisCommands.ttl(key));
         } else {
             return LettuceUtil.exec(connectInfo, redisCommands -> redisCommands.ttl(key));
@@ -42,7 +51,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
     @Override
     public Boolean ping(ConnectInfo connectInfo) {
         String ping = LettuceUtil.exec(connectInfo, BaseRedisCommands::ping);
-        return FunUtil.equal(ping, "PONG");
+        return Fn.equal(ping, "PONG");
     }
 
     @Override
@@ -118,13 +127,13 @@ public class RedisBasicServiceImpl implements RedisBasicService {
     @Override
     public Boolean isClusterMode(ConnectInfo connectInfo) {
         var cluster = LettuceUtil.exec(connectInfo, redisCommands -> redisCommands.info("Cluster"));
-        return (FunUtil.equal(strToMap(cluster).get("cluster_enabled"), "1"));
+        return (Fn.equal(strToMap(cluster).get("cluster_enabled"), "1"));
     }
 
 
     @Override
     public Long dbSize(ConnectInfo connectInfo) {
-        if (FunUtil.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtil.clusterExec(connectInfo, RedisAdvancedClusterCommands::dbsize);
         } else {
             return LettuceUtil.exec(connectInfo, RedisServerCommands::dbsize);
@@ -135,7 +144,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
     private List<ClusterNode> strToClusterNodes(String str) {
         List<ClusterNode> clusterNodes = new ArrayList<>();
         for (var s : str.split("\n")) {
-            if (!FunUtil.startWith(s, "#") && FunUtil.isNotEmpty(s)) {
+            if (!Fn.startWith(s, "#") && Fn.isNotEmpty(s)) {
                 var v = s.split(" ");
                 var clusterNode = new ClusterNode()
                         .setId(v[0])

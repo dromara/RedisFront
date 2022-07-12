@@ -1,4 +1,4 @@
-package com.redisfront.constant;
+package com.redisfront.commons.constant;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.FlatSVGUtils;

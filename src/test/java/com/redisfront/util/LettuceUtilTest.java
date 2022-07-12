@@ -1,5 +1,6 @@
 package com.redisfront.util;
 
+import com.redisfront.commons.util.LettuceUtil;
 import com.redisfront.model.ConnectInfo;
 import io.lettuce.core.StatefulRedisConnectionImpl;
 import io.lettuce.core.output.*;
@@ -8,7 +9,6 @@ import io.lettuce.core.protocol.CommandType;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Map;
 
 
 /**

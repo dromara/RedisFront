@@ -3,11 +3,11 @@ package com.redisfront.ui.component;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.components.FlatLabel;
 import com.formdev.flatlaf.extras.components.FlatToolBar;
-import com.redisfront.constant.UI;
+import com.redisfront.commons.constant.UI;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
 import com.redisfront.ui.form.fragment.DataChartsForm;
-import com.redisfront.util.ExecutorUtil;
+import com.redisfront.commons.util.ExecutorUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -103,15 +103,15 @@ public class MainTabbedPanel extends JPanel {
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, rightToolBar);
 
         contentPanel.addTab("数据", UI.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(connectInfo));
-        contentPanel.addTab("命令", UI.CONTENT_TAB_COMMAND_ICON, TerminalComponent.newInstance(connectInfo));
+        contentPanel.addTab("命令", UI.CONTENT_TAB_COMMAND_ICON, RedisTerminal.newInstance(connectInfo));
         contentPanel.addTab("信息", UI.CONTENT_TAB_INFO_ICON, DataChartsForm.getInstance().contentPanel());
 
         //tab 切换事件
         contentPanel.addChangeListener(e -> {
             var tabbedPane = (JTabbedPane) e.getSource();
             var component = tabbedPane.getSelectedComponent();
-            if (component instanceof TerminalComponent terminalComponent) {
-                terminalComponent.ping();
+            if (component instanceof RedisTerminal redisTerminal) {
+                redisTerminal.ping();
             }
             if (component instanceof DataSplitPanel dataSplitPanel) {
                 dataSplitPanel.ping();

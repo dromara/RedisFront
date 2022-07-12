@@ -4,14 +4,14 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatDesktop;
 import com.formdev.flatlaf.extras.components.FlatButton;
 import com.redisfront.RedisFrontApplication;
-import com.redisfront.constant.UI;
+import com.redisfront.commons.constant.UI;
 import com.redisfront.service.ConnectService;
 import com.redisfront.ui.dialog.AddConnectDialog;
 import com.redisfront.ui.dialog.OpenConnectDialog;
 import com.redisfront.ui.dialog.SettingDialog;
 import com.redisfront.ui.form.MainWindowForm;
-import com.redisfront.util.ExecutorUtil;
-import com.redisfront.util.LocaleUtil;
+import com.redisfront.commons.util.ExecutorUtil;
+import com.redisfront.commons.util.LocaleUtil;
 
 import javax.swing.*;
 import java.awt.*;

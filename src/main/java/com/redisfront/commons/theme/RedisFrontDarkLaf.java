@@ -1,4 +1,4 @@
-package com.redisfront.theme;
+package com.redisfront.commons.theme;
 
 import com.formdev.flatlaf.FlatDarculaLaf;
 

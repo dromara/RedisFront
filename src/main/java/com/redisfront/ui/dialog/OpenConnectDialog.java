@@ -4,23 +4,23 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.RedisFrontApplication;
-import com.redisfront.constant.UI;
+import com.redisfront.commons.Handler.ProcessHandler;
+import com.redisfront.commons.constant.UI;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.model.ConnectTableModel;
 import com.redisfront.service.ConnectService;
 import com.redisfront.service.RedisBasicService;
-import com.redisfront.ui.component.AbstractDialog;
-import com.redisfront.util.ExecutorUtil;
-import com.redisfront.util.FunUtil;
-import com.redisfront.util.LoadingUtil;
-import com.redisfront.util.AlertUtil;
+import com.redisfront.ui.AbstractDialog;
+import com.redisfront.commons.util.ExecutorUtil;
+import com.redisfront.commons.func.Fn;
+import com.redisfront.commons.util.LoadingUtil;
+import com.redisfront.commons.util.AlertUtil;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
     private JPanel contentPane;
@@ -29,21 +29,21 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
     private JTable connectTable;
     private JButton addConnectBtn;
 
-    protected Consumer<ConnectInfo> openActionCallback;
+    protected ProcessHandler<ConnectInfo> openProcessHandler;
 
-    protected Consumer<ConnectInfo> editActionCallback;
+    protected ProcessHandler<ConnectInfo> editProcessHandler;
 
-    protected Consumer<ConnectInfo> delActionCallback;
+    protected ProcessHandler<ConnectInfo> delProcessHandler;
 
-    public static void showOpenConnectDialog(Consumer<ConnectInfo> openActionCallback, Consumer<ConnectInfo> editActionCallback, Consumer<ConnectInfo> delActionCallback) {
-        var openConnectDialog = new OpenConnectDialog(openActionCallback, editActionCallback, delActionCallback);
+    public static void showOpenConnectDialog(ProcessHandler<ConnectInfo> openProcessHandler, ProcessHandler<ConnectInfo> editProcessHandler, ProcessHandler<ConnectInfo> delProcessHandler) {
+        var openConnectDialog = new OpenConnectDialog(openProcessHandler, editProcessHandler, delProcessHandler);
         openConnectDialog.setSize(new Dimension(500, 280));
         openConnectDialog.setLocationRelativeTo(RedisFrontApplication.frame);
         openConnectDialog.pack();
         openConnectDialog.setVisible(true);
     }
 
-    public OpenConnectDialog(Consumer<ConnectInfo> openActionCallback, Consumer<ConnectInfo> editActionCallback, Consumer<ConnectInfo> delActionCallback) {
+    public OpenConnectDialog(ProcessHandler<ConnectInfo> openProcessHandler, ProcessHandler<ConnectInfo> editProcessHandler, ProcessHandler<ConnectInfo> delProcessHandler) {
         super(RedisFrontApplication.frame);
         $$$setupUI$$$();
         setTitle("打开连接");
@@ -62,9 +62,9 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         });
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         connectTableInit();
-        this.openActionCallback = openActionCallback;
-        this.editActionCallback = editActionCallback;
-        this.delActionCallback = delActionCallback;
+        this.openProcessHandler = openProcessHandler;
+        this.editProcessHandler = editProcessHandler;
+        this.delProcessHandler = delProcessHandler;
     }
 
 
@@ -97,7 +97,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                     var id = connectTable.getValueAt(row, 0);
                     var connectInfo = ConnectService.service.getConnect(id);
                     onCancel();
-                    ExecutorUtil.runAsync(() -> editActionCallback.accept(connectInfo));
+                    ExecutorUtil.runAsync(() -> editProcessHandler.processHandler(connectInfo));
                 });
                 add(editConnectMenu);
                 //表格删除操作
@@ -110,9 +110,9 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                     }
                     var id = connectTable.getValueAt(row, 0);
                     var connectInfo = ConnectService.service.getConnect(id);
-                    if (FunUtil.isNotNull(connectInfo)) {
+                    if (Fn.isNotNull(connectInfo)) {
                         ExecutorUtil.runAsync(() -> {
-                            delActionCallback.accept(connectInfo);
+                            delProcessHandler.processHandler(connectInfo);
                             ((ConnectTableModel) connectTable.getModel()).removeRow(row);
                             connectTable.revalidate();
                         });
@@ -155,7 +155,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         ExecutorUtil.runAsync(() -> {
             LoadingUtil.showDialog();
             var redisMode = RedisBasicService.service.getRedisModeEnum(connectInfo);
-            SwingUtilities.invokeLater(() -> openActionCallback.accept(connectInfo.setRedisModeEnum(redisMode)));
+            SwingUtilities.invokeLater(() -> openProcessHandler.processHandler(connectInfo.setRedisModeEnum(redisMode)));
             LoadingUtil.closeDialog();
         });
         dispose();
@@ -169,7 +169,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         addConnectBtn = new JButton();
         addConnectBtn.addActionListener(e -> {
             dispose();
-            AddConnectDialog.showAddConnectDialog(openActionCallback);
+            AddConnectDialog.showAddConnectDialog(openProcessHandler);
         });
         addConnectBtn.setIcon(UI.CONNECTION_ICON);
     }

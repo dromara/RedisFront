@@ -3,20 +3,16 @@ package com.redisfront.ui.component;
 import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import com.redisfront.util.FunUtil;
-import com.redisfront.util.AlertUtil;
+import com.redisfront.commons.func.Fn;
+import com.redisfront.commons.util.AlertUtil;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class LoadingDialog extends JDialog {
-
+    private final Timer timer;
     private final ProgressBarWorker progressBarWorker;
-    private JLabel loadInfoLabel;
     private JProgressBar progressBar;
-
-    private Timer timer;
-
 
     public LoadingDialog() {
         setResizable(false);
@@ -24,7 +20,7 @@ public class LoadingDialog extends JDialog {
         setAlwaysOnTop(true);
         setUndecorated(true);
         initComponentUI();
-        progressBarWorker = new ProgressBarWorker(progressBar, 50);
+        progressBarWorker = new ProgressBarWorker(progressBar, 20);
         timer = new Timer((15 * 1000), e -> {
             dispose();
             AlertUtil.showInformationDialog("数据加载超时，请重试！");
@@ -36,7 +32,7 @@ public class LoadingDialog extends JDialog {
         contentPane.setBorder(new FlatLineBorder(new Insets(1, 1, 1, 1), UIManager.getColor("Component.borderColor")));
         contentPane.setLayout(new GridLayoutManager(2, 1, new Insets(10, 10, 10, 10), -1, -1));
         setContentPane(contentPane);
-        loadInfoLabel = new JLabel();
+        JLabel loadInfoLabel = new JLabel();
         loadInfoLabel.setText("数据加载中，请稍后....");
         contentPane.add(loadInfoLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         progressBar = new JProgressBar();
@@ -64,7 +60,7 @@ public class LoadingDialog extends JDialog {
         public ProgressBarWorker(JProgressBar progressBar, int delay) {
             this.delay = delay;
             addPropertyChangeListener(evt -> {
-                if (FunUtil.equal(evt.getPropertyName(), "progress")) {
+                if (Fn.equal(evt.getPropertyName(), "progress")) {
                     progressBar.setValue((Integer) evt.getNewValue());
                 }
             });

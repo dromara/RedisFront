@@ -5,22 +5,22 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.RedisFrontApplication;
-import com.redisfront.constant.Enum;
-import com.redisfront.constant.UI;
-import com.redisfront.exception.RedisFrontException;
+import com.redisfront.commons.Handler.ProcessHandler;
+import com.redisfront.commons.constant.Enum;
+import com.redisfront.commons.constant.UI;
+import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
-import com.redisfront.ui.component.AbstractDialog;
-import com.redisfront.util.ExecutorUtil;
-import com.redisfront.util.FunUtil;
-import com.redisfront.util.LoadingUtil;
-import com.redisfront.util.AlertUtil;
+import com.redisfront.ui.AbstractDialog;
+import com.redisfront.commons.util.ExecutorUtil;
+import com.redisfront.commons.func.Fn;
+import com.redisfront.commons.util.LoadingUtil;
+import com.redisfront.commons.util.AlertUtil;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.function.Consumer;
 
 public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     private JPanel contentPane;
@@ -63,7 +63,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     /***
      * 打开添加连接窗口
      */
-    public static void showAddConnectDialog(Consumer<ConnectInfo> callback) {
+    public static void showAddConnectDialog(ProcessHandler<ConnectInfo> callback) {
         var addConnectDialog = new AddConnectDialog(RedisFrontApplication.frame, callback);
         addConnectDialog.setResizable(false);
         addConnectDialog.setLocationRelativeTo(RedisFrontApplication.frame);
@@ -74,8 +74,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     /**
      * 打开编辑连接窗口
      */
-    public static void showEditConnectDialog(ConnectInfo connectInfo, Consumer<ConnectInfo> callback) {
-        System.out.println("showEditConnectDialog - " + Thread.currentThread().getName());
+    public static void showEditConnectDialog(ConnectInfo connectInfo, ProcessHandler<ConnectInfo> callback) {
         var addConnectDialog = new AddConnectDialog(RedisFrontApplication.frame, callback);
         //数据初始化
         addConnectDialog.componentsDataInit(connectInfo);
@@ -86,9 +85,8 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     }
 
 
-    public AddConnectDialog(Frame owner, Consumer<ConnectInfo> callback) {
+    public AddConnectDialog(Frame owner, ProcessHandler<ConnectInfo> callback) {
         super(owner, callback);
-
         $$$setupUI$$$();
         this.setTitle("新建连接");
         this.setModal(true);
@@ -176,7 +174,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                 fileChooser.setFileFilter(new FileNameExtensionFilter("密钥文件", "pem", "crt"));
                 fileChooser.showDialog(AddConnectDialog.this, "选择私钥文件");
                 var selectedFile = fileChooser.getSelectedFile();
-                if (FunUtil.isNotNull(selectedFile)) {
+                if (Fn.isNotNull(selectedFile)) {
                     privateKeyField.setText(selectedFile.getAbsolutePath());
                 }
             }
@@ -188,7 +186,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                 fileChooser.setFileFilter(new FileNameExtensionFilter("公钥文件", "pem", "crt"));
                 fileChooser.showDialog(AddConnectDialog.this, "选择公钥文件");
                 var selectedFile = fileChooser.getSelectedFile();
-                if (FunUtil.isNotNull(selectedFile)) {
+                if (Fn.isNotNull(selectedFile)) {
                     publicKeyField.setText(selectedFile.getAbsolutePath());
                 }
             }
@@ -201,7 +199,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                 fileChooser.setFileFilter(new FileNameExtensionFilter("授权文件", "pem", "crt"));
                 fileChooser.showDialog(AddConnectDialog.this, "选择授权文件");
                 var selectedFile = fileChooser.getSelectedFile();
-                if (FunUtil.isNotNull(selectedFile)) {
+                if (Fn.isNotNull(selectedFile)) {
                     grantField.setText(selectedFile.getAbsolutePath());
                 }
             }
@@ -214,7 +212,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                 fileChooser.setFileFilter(new FileNameExtensionFilter("私钥文件", "pem", "crt"));
                 fileChooser.showDialog(AddConnectDialog.this, "选择私钥文件");
                 var selectedFile = fileChooser.getSelectedFile();
-                if (FunUtil.isNotNull(selectedFile)) {
+                if (Fn.isNotNull(selectedFile)) {
                     sshPrivateKeyFile.setText(selectedFile.getAbsolutePath());
                 }
             }
@@ -244,7 +242,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         ExecutorUtil.runAsync(() -> {
             LoadingUtil.showDialog();
             var redisMode = RedisBasicService.service.getRedisModeEnum(connectInfo);
-            callback.accept(connectInfo.setRedisModeEnum(redisMode));
+            processHandler.processHandler(connectInfo.setRedisModeEnum(redisMode));
             LoadingUtil.closeDialog();
         });
         dispose();
@@ -263,18 +261,18 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         //SSH Connection
         if (enableSSHBtn.isSelected()) {
             //valid sshHostField
-            if (FunUtil.isEmpty(sshHostField.getText())) {
+            if (Fn.isEmpty(sshHostField.getText())) {
                 sshHostField.requestFocus();
                 throw new RedisFrontException("SSH主机不能为空", false);
             }
             //valid sshUserField
-            if (FunUtil.isEmpty(sshUserField.getText())) {
+            if (Fn.isEmpty(sshUserField.getText())) {
                 sshUserField.requestFocus();
                 throw new RedisFrontException("SSH用户不能为空", false);
             }
             //valid enableSshPrivateKey
             if (enableSshPrivateKey.isSelected()) {
-                if (FunUtil.isEmpty(sshPrivateKeyFile.getText())) {
+                if (Fn.isEmpty(sshPrivateKeyFile.getText())) {
                     sshPrivateKeyFile.requestFocus();
                     throw new RedisFrontException("SSH私钥不能为空", false);
                 }

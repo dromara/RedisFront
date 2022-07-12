@@ -13,20 +13,20 @@ import java.awt.*;
  *
  * @author Jin
  */
-public class TextEditorComponent extends JPanel {
+public class TextEditor extends JPanel {
 
     private final RSyntaxTextArea textArea;
     private final RTextScrollPane scrollPane;
 
-    public static TextEditorComponent newInstance() {
-        return new TextEditorComponent();
+    public static TextEditor newInstance() {
+        return new TextEditor();
     }
 
     public RSyntaxTextArea textArea() {
         return textArea;
     }
 
-    public TextEditorComponent() {
+    public TextEditor() {
         System.out.println();
         this.textArea = new RSyntaxTextArea() {
             {

@@ -5,17 +5,17 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.RedisFrontApplication;
-import com.redisfront.constant.Enum;
-import com.redisfront.exception.RedisFrontException;
+import com.redisfront.commons.Handler.ProcessHandler;
+import com.redisfront.commons.constant.Enum;
+import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.model.ConnectInfo;
-import com.redisfront.ui.component.AbstractDialog;
-import com.redisfront.util.FunUtil;
-import com.redisfront.util.LettuceUtil;
+import com.redisfront.ui.AbstractDialog;
+import com.redisfront.commons.func.Fn;
+import com.redisfront.commons.util.LettuceUtil;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.function.Consumer;
 
 public class AddKeyDialog extends AbstractDialog<String> {
     private JPanel contentPane;
@@ -34,22 +34,22 @@ public class AddKeyDialog extends AbstractDialog<String> {
 
     private final ConnectInfo connectInfo;
 
-    public static void showAddDialog(ConnectInfo connectInfo, Consumer<String> addSuccessFun) {
-        var openConnectDialog = new AddKeyDialog(connectInfo, addSuccessFun);
+    public static void showAddDialog(ConnectInfo connectInfo, ProcessHandler<String> addSuccessProcessHandler) {
+        var openConnectDialog = new AddKeyDialog(connectInfo, addSuccessProcessHandler);
         openConnectDialog.setSize(new Dimension(500, 280));
         openConnectDialog.setLocationRelativeTo(RedisFrontApplication.frame);
         openConnectDialog.pack();
         openConnectDialog.setVisible(true);
     }
 
-    public AddKeyDialog(ConnectInfo connectInfo, Consumer<String> addSucFun) {
+    public AddKeyDialog(ConnectInfo connectInfo, ProcessHandler<String> addSucFun) {
         super(RedisFrontApplication.frame);
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
         setTitle("添加");
         this.connectInfo = connectInfo;
-        this.callback = addSucFun;
+        this.processHandler = addSucFun;
         buttonOK.addActionListener(e -> onOK());
 
         buttonCancel.addActionListener(e -> onCancel());
@@ -89,7 +89,7 @@ public class AddKeyDialog extends AbstractDialog<String> {
 
         keyTypeComboBox.addActionListener(e -> {
             String selectItem = (String) keyTypeComboBox.getSelectedItem();
-            if (FunUtil.equal(Enum.KeyTypeEnum.HASH.typeName(), selectItem)) {
+            if (Fn.equal(Enum.KeyTypeEnum.HASH.typeName(), selectItem)) {
                 hashKeyField.setVisible(true);
                 hashKeyLabel.setVisible(true);
 
@@ -99,7 +99,7 @@ public class AddKeyDialog extends AbstractDialog<String> {
                 streamField.setVisible(false);
                 streamLabel.setVisible(false);
 
-            } else if (FunUtil.equal(Enum.KeyTypeEnum.STREAM.typeName(), selectItem)) {
+            } else if (Fn.equal(Enum.KeyTypeEnum.STREAM.typeName(), selectItem)) {
                 hashKeyField.setVisible(false);
                 hashKeyLabel.setVisible(false);
 
@@ -109,7 +109,7 @@ public class AddKeyDialog extends AbstractDialog<String> {
                 streamField.setVisible(true);
                 streamLabel.setVisible(true);
 
-            } else if (FunUtil.equal(Enum.KeyTypeEnum.ZSET.typeName(), selectItem)) {
+            } else if (Fn.equal(Enum.KeyTypeEnum.ZSET.typeName(), selectItem)) {
                 hashKeyField.setVisible(false);
                 hashKeyLabel.setVisible(false);
 
@@ -135,27 +135,27 @@ public class AddKeyDialog extends AbstractDialog<String> {
     private void validParam() {
         var selectItem = (String) keyTypeComboBox.getSelectedItem();
 
-        if (FunUtil.isEmpty(keyNameField.getText())) {
+        if (Fn.isEmpty(keyNameField.getText())) {
             keyNameField.requestFocus();
             throw new RedisFrontException("参数校验失败", false);
         }
 
-        if (FunUtil.equal(Enum.KeyTypeEnum.HASH.typeName(), selectItem) && FunUtil.isEmpty(hashKeyField.getText())) {
+        if (Fn.equal(Enum.KeyTypeEnum.HASH.typeName(), selectItem) && Fn.isEmpty(hashKeyField.getText())) {
             hashKeyField.requestFocus();
             throw new RedisFrontException("参数校验失败", false);
         }
 
-        if (FunUtil.equal(Enum.KeyTypeEnum.STREAM.typeName(), selectItem) && FunUtil.isEmpty(streamField.getText())) {
+        if (Fn.equal(Enum.KeyTypeEnum.STREAM.typeName(), selectItem) && Fn.isEmpty(streamField.getText())) {
             streamField.requestFocus();
             throw new RedisFrontException("参数校验失败", false);
         }
 
-        if (FunUtil.equal(Enum.KeyTypeEnum.ZSET.typeName(), selectItem) && FunUtil.isEmpty(setScoreField.getText())) {
+        if (Fn.equal(Enum.KeyTypeEnum.ZSET.typeName(), selectItem) && Fn.isEmpty(setScoreField.getText())) {
             setScoreField.requestFocus();
             throw new RedisFrontException("参数校验失败", false);
         }
 
-        if (FunUtil.isEmpty(keyValueField.getText())) {
+        if (Fn.isEmpty(keyValueField.getText())) {
             keyValueField.requestFocus();
             throw new RedisFrontException("参数校验失败", false);
         }
@@ -169,13 +169,13 @@ public class AddKeyDialog extends AbstractDialog<String> {
         var ttl = ((Integer) ttlSpinner.getValue());
 
         var selectItem = (String) keyTypeComboBox.getSelectedItem();
-        if (FunUtil.equal(Enum.KeyTypeEnum.HASH.typeName(), selectItem) && FunUtil.isEmpty(hashKeyField.getText())) {
+        if (Fn.equal(Enum.KeyTypeEnum.HASH.typeName(), selectItem) && Fn.isEmpty(hashKeyField.getText())) {
             LettuceUtil.run(connectInfo, redisCommands -> {
                 redisCommands.hset(key, hashKeyField.getText(), keyValueField.getText());
             });
-        } else if (FunUtil.equal(Enum.KeyTypeEnum.STREAM.typeName(), selectItem) && FunUtil.isEmpty(streamField.getText())) {
+        } else if (Fn.equal(Enum.KeyTypeEnum.STREAM.typeName(), selectItem) && Fn.isEmpty(streamField.getText())) {
 
-        } else if (FunUtil.equal(Enum.KeyTypeEnum.ZSET.typeName(), selectItem) && FunUtil.isEmpty(setScoreField.getText())) {
+        } else if (Fn.equal(Enum.KeyTypeEnum.ZSET.typeName(), selectItem) && Fn.isEmpty(setScoreField.getText())) {
 
         } else {
             LettuceUtil.run(connectInfo, redisCommands -> {

@@ -1,6 +1,7 @@
-package com.redisfront.util;
+package com.redisfront.commons.util;
 
 import cn.hutool.core.io.IoUtil;
+import com.redisfront.commons.func.Fn;
 import com.redisfront.model.ConnectInfo;
 import org.apache.commons.net.telnet.TelnetClient;
 
@@ -20,7 +21,7 @@ public class TelnetUtil {
             telnetClient.connect(connect.host(), connect.port());
             if (telnetClient.isConnected() && telnetClient.isAvailable()) {
                 var printStream = new PrintStream(telnetClient.getOutputStream());
-                if (FunUtil.isNotEmpty(connect.password())) {
+                if (Fn.isNotEmpty(connect.password())) {
                     printStream.println("auth " + connect.password());
                     printStream.flush();
                 }

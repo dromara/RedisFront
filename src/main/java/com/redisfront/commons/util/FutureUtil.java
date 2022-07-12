@@ -1,8 +1,7 @@
-package com.redisfront.util;
+package com.redisfront.commons.util;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -12,8 +11,8 @@ public class FutureUtil {
 
     }
 
-    public static <T> CompletableFuture<Void> propConv(Supplier<T> supplier, Consumer<T> consumer, Executor executor) {
-        return CompletableFuture.supplyAsync(supplier, executor).thenAccept(t -> {
+    public static <T> CompletableFuture<Void> completableFuture(Supplier<T> supplier, Consumer<T> consumer) {
+        return CompletableFuture.supplyAsync(supplier, ExecutorUtil.getExecutorService()).thenAccept(t -> {
             if (Objects.nonNull(t)) {
                 consumer.accept(t);
             }

@@ -1,12 +1,13 @@
 package com.redisfront.ui.component;
 
 import cn.hutool.core.date.DateUtil;
-import com.redisfront.constant.Enum;
-import com.redisfront.exception.RedisFrontException;
+import com.redisfront.ui.AbstractTerminal;
+import com.redisfront.commons.constant.Enum;
+import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
-import com.redisfront.util.FunUtil;
-import com.redisfront.util.LettuceUtil;
+import com.redisfront.commons.func.Fn;
+import com.redisfront.commons.util.LettuceUtil;
 import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.output.ArrayOutput;
 import io.lettuce.core.protocol.CommandArgs;
@@ -19,16 +20,16 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-public class TerminalComponent extends AbstractTerminal {
-    private static final Logger log = LoggerFactory.getLogger(TerminalComponent.class);
+public class RedisTerminal extends AbstractTerminal {
+    private static final Logger log = LoggerFactory.getLogger(RedisTerminal.class);
     private final ConnectInfo connectInfo;
 
 
-    public static TerminalComponent newInstance(ConnectInfo connectInfo) {
-        return new TerminalComponent(connectInfo);
+    public static RedisTerminal newInstance(ConnectInfo connectInfo) {
+        return new RedisTerminal(connectInfo);
     }
 
-    public TerminalComponent(ConnectInfo connectInfo) {
+    public RedisTerminal(ConnectInfo connectInfo) {
         this.connectInfo = connectInfo;
         terminal.setEnabled(false);
     }
@@ -55,25 +56,27 @@ public class TerminalComponent extends AbstractTerminal {
 
             var commandList = new ArrayList<>(List.of(inputText.split(" ")));
             var commandType = Arrays.stream(CommandType.values())
-                    .filter(e -> FunUtil.equal(e.name(), commandList.get(0).toUpperCase()))
+                    .filter(e -> Fn.equal(e.name(), commandList.get(0).toUpperCase()))
                     .findAny()
                     .orElseThrow(() -> new RedisFrontException("ERR unknown command '" + inputText + "'", false));
             commandList.remove(0);
 
-            if (FunUtil.equal(connectInfo().redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            if (Fn.equal(connectInfo().redisModeEnum(), Enum.RedisMode.CLUSTER)) {
                 LettuceUtil.clusterRun(connectInfo(), redisCommands -> {
                     var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
                     println(format(res, ""));
                 });
-            } else if (FunUtil.equal(connectInfo().redisModeEnum(), Enum.RedisMode.SENTINEL)) {
-
+            } else if (Fn.equal(connectInfo().redisModeEnum(), Enum.RedisMode.SENTINEL)) {
+                LettuceUtil.sentinelRun(connectInfo(), redisCommands -> {
+                    var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
+                    println(format(res, ""));
+                });
             } else {
                 LettuceUtil.run(connectInfo(), redisCommands -> {
                         var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
                         println(format(res, ""));
                 });
             }
-
         } catch (Exception e) {
             print(e.getMessage());
         }

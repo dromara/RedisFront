@@ -1,7 +1,7 @@
 
 package com.redisfront.ui.frame;
 
-import com.redisfront.constant.UI;
+import com.redisfront.commons.constant.UI;
 import com.redisfront.ui.component.MainMenuBar;
 import com.redisfront.ui.form.MainWindowForm;
 import org.jdesktop.swingx.JXFrame;

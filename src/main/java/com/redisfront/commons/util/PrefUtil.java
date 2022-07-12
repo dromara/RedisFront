@@ -1,4 +1,4 @@
-package com.redisfront.util;
+package com.redisfront.commons.util;
 
 import java.util.prefs.Preferences;
 

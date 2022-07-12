@@ -1,5 +1,6 @@
-package com.redisfront.util;
+package com.redisfront.commons.util;
 
+import com.redisfront.commons.func.Fn;
 import com.redisfront.model.ConnectInfo;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
@@ -25,18 +26,26 @@ public class LettuceUtil {
     private LettuceUtil() {
     }
 
+    private static RedisClusterClient getRedisClusterClient(RedisURI redisURI) {
+        var clusterClient = RedisClusterClient.create(redisURI);
+        var clusterTopologyRefreshOptions = ClusterTopologyRefreshOptions.builder()
+                .enableAdaptiveRefreshTrigger(ClusterTopologyRefreshOptions.RefreshTrigger.MOVED_REDIRECT, ClusterTopologyRefreshOptions.RefreshTrigger.PERSISTENT_RECONNECTS)
+                .enablePeriodicRefresh(Duration.ofMinutes(30))
+                .build();
+        var clusterClientOptions = ClusterClientOptions.builder()
+                .topologyRefreshOptions(clusterTopologyRefreshOptions)
+                .build();
+        clusterClient.setOptions(clusterClientOptions);
+        return clusterClient;
+    }
+
     public static void clusterRun(ConnectInfo connectInfo, Consumer<RedisAdvancedClusterCommands<String, String>> consumer) {
         var redisURI = getRedisURI(connectInfo);
-        var clusterClient = RedisClusterClient.create(redisURI);
-        clusterClient.getPartitions().getPartitions().forEach(redisClusterNode -> redisClusterNode.getUri().setHost(connectInfo.host()));
+        var clusterClient = getRedisClusterClient(redisURI);
+        if (Fn.isNull(connectInfo.sshConfig())) {
+            clusterClient.getPartitions().forEach(redisClusterNode -> redisClusterNode.getUri().setHost(connectInfo.host()));
+        }
         try (var connection = clusterClient.connect()) {
-            clusterClient
-                    .setOptions(ClusterClientOptions.builder()
-                            .topologyRefreshOptions(ClusterTopologyRefreshOptions.builder()
-                                    .enableAdaptiveRefreshTrigger(ClusterTopologyRefreshOptions.RefreshTrigger.MOVED_REDIRECT, ClusterTopologyRefreshOptions.RefreshTrigger.PERSISTENT_RECONNECTS)
-                                    .enablePeriodicRefresh(Duration.ofMinutes(30))
-                                    .build())
-                            .build());
             consumer.accept(connection.sync());
         } finally {
             clusterClient.shutdown();
@@ -45,8 +54,10 @@ public class LettuceUtil {
 
     public static <T> T clusterExec(ConnectInfo connectInfo, Function<RedisAdvancedClusterCommands<String, String>, T> function) {
         var redisURI = getRedisURI(connectInfo);
-        var clusterClient = RedisClusterClient.create(redisURI);
-        clusterClient.getPartitions().getPartitions().forEach(redisClusterNode -> redisClusterNode.getUri().setHost(connectInfo.host()));
+        var clusterClient = getRedisClusterClient(redisURI);
+        if (Fn.isNull(connectInfo.sshConfig())) {
+            clusterClient.getPartitions().forEach(redisClusterNode -> redisClusterNode.getUri().setHost(connectInfo.host()));
+        }
         try (var connection = clusterClient.connect()) {
             return function.apply(connection.sync());
         } finally {
@@ -103,10 +114,10 @@ public class LettuceUtil {
                 .withDatabase(connectInfo.database())
                 .withSsl(connectInfo.ssl())
                 .build();
-        if (FunUtil.isNotEmpty(connectInfo.user())) {
+        if (Fn.isNotEmpty(connectInfo.user())) {
             redisURI.setUsername(connectInfo.user());
         }
-        if (FunUtil.isNotEmpty(connectInfo.password())) {
+        if (Fn.isNotEmpty(connectInfo.password())) {
             redisURI.setPassword(connectInfo.password().toCharArray());
         }
         return redisURI;

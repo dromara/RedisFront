@@ -1,4 +1,4 @@
-package com.redisfront.util;
+package com.redisfront.commons.util;
 
 import cn.hutool.core.io.resource.ClassPathResource;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;

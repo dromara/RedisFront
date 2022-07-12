@@ -1,4 +1,4 @@
-package com.redisfront.constant;
+package com.redisfront.commons.constant;
 
 import java.awt.*;
 

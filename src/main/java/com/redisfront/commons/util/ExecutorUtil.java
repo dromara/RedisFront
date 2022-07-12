@@ -1,4 +1,4 @@
-package com.redisfront.util;
+package com.redisfront.commons.util;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
