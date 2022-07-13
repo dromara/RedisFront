@@ -15,6 +15,15 @@ import java.util.List;
  */
 public class RedisListServiceImpl implements RedisListService {
     @Override
+    public List<String> lrange(ConnectInfo connectInfo, String key, long start, long stop) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            return LettuceUtil.clusterExec(connectInfo, commands -> commands.lrange(key, start, stop));
+        } else {
+            return LettuceUtil.exec(connectInfo, commands -> commands.lrange(key, start, stop));
+        }
+    }
+
+    @Override
     public Long llen(ConnectInfo connectInfo, String key) {
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtil.clusterExec(connectInfo, commands -> commands.llen(key));

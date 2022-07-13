@@ -10,3 +10,7 @@
 <img src="screenshot/img_4.png">
 <img src="screenshot/img_6.png">
 
+#### 打包
+
+###### JRE
+%JAVA_HOME%/jlink.exe --module-path jmods --add-modules java.desktop,java.prefs,java.base,java.logging,java.sql,java.naming --output jre

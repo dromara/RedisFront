@@ -17,6 +17,8 @@ public interface RedisZSetService {
 
     Long zcard(ConnectInfo connectInfo,String key);
 
+    List<ScoredValue<String>> zrange(ConnectInfo connectInfo,String key, long start, long stop);
+
     Long zcount(ConnectInfo connectInfo, String key, Range<? extends Number> range);
 
     List<String> zrangebyscore(ConnectInfo connectInfo,String key, Range<? extends Number> range, Limit limit);
