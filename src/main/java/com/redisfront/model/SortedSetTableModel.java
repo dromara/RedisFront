@@ -15,7 +15,7 @@ public class SortedSetTableModel extends DefaultTableModel {
             Integer.class, Double.class, String.class, Integer.class, String.class
     };
     private final boolean[] columnEditable = new boolean[]{
-            false, false, false, false
+            false, false, false, false, false
     };
 
     public SortedSetTableModel(List<ScoredValue<String>> dataList, String... columNames) {

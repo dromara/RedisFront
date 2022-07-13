@@ -61,6 +61,7 @@ public class DataViewForm {
     private JTable dataTable;
     private JButton tableRefreshBtn;
     private JPanel dataPanel;
+    private JScrollPane tableScorePanel;
     private TextEditor textEditor;
 
     private final ConnectInfo connectInfo;
@@ -78,6 +79,8 @@ public class DataViewForm {
     public DataViewForm(ConnectInfo connectInfo) {
         this.connectInfo = connectInfo;
         $$$setupUI$$$();
+
+        tableScorePanel.setPreferredSize(new Dimension(500, 200));
 
         tableViewPanel.add(new JPanel() {
             @Override
@@ -396,10 +399,10 @@ public class DataViewForm {
         panel2.add(tableDelBtn, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer4 = new Spacer();
         panel2.add(spacer4, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        final JScrollPane scrollPane1 = new JScrollPane();
-        panel1.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        tableScorePanel = new JScrollPane();
+        panel1.add(tableScorePanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         dataTable = new JTable();
-        scrollPane1.setViewportView(dataTable);
+        tableScorePanel.setViewportView(dataTable);
         valueViewPanel.setMinimumSize(new Dimension(-1, -1));
         dataSplitPanel.setRightComponent(valueViewPanel);
         valueViewPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));

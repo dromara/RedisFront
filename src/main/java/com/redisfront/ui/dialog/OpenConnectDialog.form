@@ -56,7 +56,7 @@
         <properties/>
         <border type="none"/>
         <children>
-          <scrollpane id="10aab">
+          <scrollpane id="10aab" binding="scrollPanel">
             <constraints border-constraint="Center"/>
             <properties/>
             <border type="none"/>
@@ -84,6 +84,9 @@
               <text value="添加新连接"/>
             </properties>
           </component>
+          <hspacer id="805eb">
+            <constraints border-constraint="Center"/>
+          </hspacer>
         </children>
       </grid>
     </children>

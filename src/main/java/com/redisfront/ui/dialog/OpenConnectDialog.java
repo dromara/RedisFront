@@ -28,6 +28,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
     private JButton buttonCancel;
     private JTable connectTable;
     private JButton addConnectBtn;
+    private JScrollPane scrollPanel;
 
     protected ProcessHandler<ConnectInfo> openProcessHandler;
 
@@ -48,7 +49,8 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         $$$setupUI$$$();
         setTitle("打开连接");
         setModal(true);
-        setMinimumSize(new Dimension(400, 500));
+        setMinimumSize(new Dimension(500, 400));
+        setResizable(false);
         setContentPane(contentPane);
         getRootPane().setDefaultButton(buttonOK);
         buttonOK.addActionListener(e -> onOK());
@@ -69,6 +71,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
 
 
     private void connectTableInit() {
+        scrollPanel.setPreferredSize(new Dimension(500, 300));
         connectTable.setShowHorizontalLines(true);
         connectTable.setShowVerticalLines(true);
         connectTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
@@ -202,16 +205,18 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new BorderLayout(0, 0));
         contentPane.add(panel3, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        final JScrollPane scrollPane1 = new JScrollPane();
-        panel3.add(scrollPane1, BorderLayout.CENTER);
+        scrollPanel = new JScrollPane();
+        panel3.add(scrollPanel, BorderLayout.CENTER);
         connectTable = new JTable();
         connectTable.setAutoResizeMode(1);
-        scrollPane1.setViewportView(connectTable);
+        scrollPanel.setViewportView(connectTable);
         final JPanel panel4 = new JPanel();
         panel4.setLayout(new BorderLayout(0, 0));
         contentPane.add(panel4, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         addConnectBtn.setText("添加新连接");
         panel4.add(addConnectBtn, BorderLayout.WEST);
+        final Spacer spacer2 = new Spacer();
+        panel4.add(spacer2, BorderLayout.CENTER);
     }
 
     /**
@@ -220,4 +225,5 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
+
 }
