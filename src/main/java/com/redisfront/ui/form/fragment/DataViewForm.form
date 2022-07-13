@@ -181,43 +181,50 @@
                                 <properties/>
                                 <border type="none"/>
                                 <children>
-                                  <grid id="605d0" layout-manager="BorderLayout" hgap="0" vgap="0">
+                                  <grid id="605d0" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                    <margin top="0" left="0" bottom="0" right="0"/>
                                     <constraints border-constraint="North"/>
                                     <properties/>
                                     <border type="none"/>
                                     <children>
-                                      <component id="3d0c7" class="javax.swing.JTextField" binding="textField1" default-binding="true">
-                                        <constraints border-constraint="Center"/>
-                                        <properties>
-                                          <horizontalAlignment value="0"/>
-                                        </properties>
+                                      <component id="990cf" class="javax.swing.JTextField" binding="textField1" default-binding="true">
+                                        <constraints>
+                                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                                            <preferred-size width="150" height="-1"/>
+                                          </grid>
+                                        </constraints>
+                                        <properties/>
                                       </component>
-                                      <component id="10923" class="javax.swing.JTextField" binding="textField2" default-binding="true">
-                                        <constraints border-constraint="West"/>
-                                        <properties>
-                                          <horizontalAlignment value="0"/>
-                                        </properties>
+                                      <component id="c042a" class="javax.swing.JTextField" binding="textField2" default-binding="true">
+                                        <constraints>
+                                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                                            <preferred-size width="150" height="-1"/>
+                                          </grid>
+                                        </constraints>
+                                        <properties/>
                                       </component>
                                     </children>
                                   </grid>
-                                  <grid id="5406f" layout-manager="BorderLayout" hgap="0" vgap="0">
+                                  <grid id="5406f" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                                    <margin top="0" left="0" bottom="0" right="0"/>
                                     <constraints border-constraint="South"/>
                                     <properties/>
                                     <border type="none"/>
                                     <children>
-                                      <component id="e9033" class="javax.swing.JButton" binding="上一页Button" default-binding="true">
-                                        <constraints border-constraint="West"/>
+                                      <component id="b6244" class="javax.swing.JButton" binding="button1" default-binding="true">
+                                        <constraints>
+                                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                        </constraints>
                                         <properties>
-                                          <horizontalAlignment value="0"/>
-                                          <horizontalTextPosition value="0"/>
-                                          <text value="上一页"/>
+                                          <text value="Button"/>
                                         </properties>
                                       </component>
-                                      <component id="f0228" class="javax.swing.JButton" binding="下一页Button" default-binding="true">
-                                        <constraints border-constraint="Center"/>
+                                      <component id="1865f" class="javax.swing.JButton" binding="button2" default-binding="true">
+                                        <constraints>
+                                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                                        </constraints>
                                         <properties>
-                                          <horizontalTextPosition value="0"/>
-                                          <text value="下一页"/>
+                                          <text value="Button"/>
                                         </properties>
                                       </component>
                                     </children>
