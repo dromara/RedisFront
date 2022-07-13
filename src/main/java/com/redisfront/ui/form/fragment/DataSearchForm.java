@@ -120,6 +120,7 @@ public class DataSearchForm {
         borderPanel.setLayout(new BorderLayout());
 
         addBtn = new JButton();
+        addBtn.setIcon(UI.PLUS_ICON);
         addBtn.addActionListener(e -> AddRedisKeyDialog.showAddDialog(connectInfo, System.out::println));
 
         refreshBtn = new JButton();
