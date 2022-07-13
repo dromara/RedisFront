@@ -45,13 +45,13 @@ public class DataViewForm {
     private JLabel keySizeLabel;
     private JButton saveBtn;
     private JTextField ttlField;
-    private JTable table1;
     private JTextField textField1;
     private JButton button1;
     private JButton button2;
     private JButton button3;
     private JPanel tableViewPanel;
     private JSplitPane dataSplitPanel;
+    private JTable table1;
     private TextEditor textEditor;
 
     private final ConnectInfo connectInfo;
@@ -62,14 +62,24 @@ public class DataViewForm {
         return new DataViewForm(connectInfo);
     }
 
-    public DataViewForm setDeleteActionHandler(ActionHandler handler) {
+    public void setDeleteActionHandler(ActionHandler handler) {
         this.deleteActionHandler = handler;
-        return this;
     }
 
     public DataViewForm(ConnectInfo connectInfo) {
         this.connectInfo = connectInfo;
         $$$setupUI$$$();
+
+        tableViewPanel.add(new JPanel() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setLayout(new BorderLayout());
+                setBorder(new FlatEmptyBorder(5, 0, 0, 0));
+                add(new JSeparator(), BorderLayout.CENTER);
+            }
+        }, BorderLayout.SOUTH);
+
         keyTypeLabel.setOpaque(true);
         keyTypeLabel.setForeground(Color.WHITE);
         keyTypeLabel.setBorder(new EmptyBorder(2, 3, 2, 3));
@@ -145,6 +155,7 @@ public class DataViewForm {
                 setBorder(flatLineBorder);
             }
         };
+
         valueViewPanel = new JPanel() {
             @Override
             public void updateUI() {
@@ -155,18 +166,24 @@ public class DataViewForm {
                 setLayout(new BorderLayout());
             }
         };
-//        valueViewPanel.add(new JPanel() {
-//            @Override
-//            public void updateUI() {
-//                super.updateUI();
-//                setLayout(new BorderLayout());
-//                setBorder(new FlatEmptyBorder(0, 0, 5, 0));
-//                add(new JSeparator(), BorderLayout.CENTER);
-//            }
-//        }, BorderLayout.NORTH);
+        valueViewPanel.add(new JPanel() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setLayout(new BorderLayout());
+                setBorder(new FlatEmptyBorder(0, 0, 5, 0));
+                add(new JSeparator(), BorderLayout.CENTER);
+            }
+        }, BorderLayout.NORTH);
 
         textEditor = TextEditor.newInstance();
-        valueViewPanel.add(textEditor, BorderLayout.CENTER);
+        valueViewPanel.add(new JPanel() {
+            {
+                setLayout(new BorderLayout());
+                setBorder(new FlatEmptyBorder(0, 10, 0, 10));
+                add(textEditor, BorderLayout.CENTER);
+            }
+        }, BorderLayout.CENTER);
 
         stringViewPanel = new JPanel() {
             @Override
@@ -234,32 +251,36 @@ public class DataViewForm {
         dataSplitPanel.setOrientation(0);
         panel1.add(dataSplitPanel, BorderLayout.CENTER);
         tableViewPanel = new JPanel();
-        tableViewPanel.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
+        tableViewPanel.setLayout(new BorderLayout(0, 0));
         dataSplitPanel.setLeftComponent(tableViewPanel);
-        tableViewPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
-        table1 = new JTable();
-        tableViewPanel.add(table1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
+        tableViewPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         final JPanel panel2 = new JPanel();
-        panel2.setLayout(new GridLayoutManager(3, 3, new Insets(0, 0, 0, 0), -1, -1));
-        tableViewPanel.add(panel2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panel2.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
+        tableViewPanel.add(panel2, BorderLayout.CENTER);
+        panel2.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
+        final JPanel panel3 = new JPanel();
+        panel3.setLayout(new GridLayoutManager(3, 3, new Insets(0, 0, 0, 0), -1, -1));
+        panel2.add(panel3, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         textField1 = new JTextField();
-        panel2.add(textField1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        panel3.add(textField1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final Spacer spacer3 = new Spacer();
-        panel2.add(spacer3, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        panel3.add(spacer3, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         button1 = new JButton();
         button1.setText("Button");
-        panel2.add(button1, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel3.add(button1, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         button2 = new JButton();
         button2.setText("Button");
-        panel2.add(button2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel3.add(button2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         button3 = new JButton();
         button3.setText("Button");
-        panel2.add(button3, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel3.add(button3, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer4 = new Spacer();
-        panel2.add(spacer4, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        panel3.add(spacer4, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        table1 = new JTable();
+        panel2.add(table1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
         valueViewPanel.setMinimumSize(new Dimension(-1, -1));
         dataSplitPanel.setRightComponent(valueViewPanel);
-        valueViewPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 10, 8, 10), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
+        valueViewPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         final JSeparator separator1 = new JSeparator();
         panel1.add(separator1, BorderLayout.NORTH);
     }
