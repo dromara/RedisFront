@@ -71,6 +71,7 @@ public class DataViewForm {
     private JButton prevBtn;
     private JButton nextBtn;
     private TextEditor textEditor;
+    private JTextField keyTextField;
 
     private final ConnectInfo connectInfo;
 
@@ -330,6 +331,18 @@ public class DataViewForm {
         valueSaveBtn.setEnabled(false);
         valueSaveBtn.setIcon(UI.SAVE_ICON);
         jToolBar.add(valueSaveBtn);
+
+        keyTextField = new JTextField();
+        var keyLabel = new JLabel();
+        keyLabel.setText("Key:");
+        keyLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
+        keyTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, keyLabel);
+
+        var sizeLabel = new JLabel();
+        sizeLabel.setText("100KB");
+        sizeLabel.setBorder(new EmptyBorder(2, 10, 2, 10));
+        keyTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, sizeLabel);
+
         valueViewPanel.add(new JPanel() {
             @Override
             public void updateUI() {
@@ -337,7 +350,14 @@ public class DataViewForm {
                 setLayout(new BorderLayout());
                 setBorder(new FlatEmptyBorder(0, 0, 5, 0));
                 add(new JSeparator(), BorderLayout.NORTH);
-                add(jToolBar, BorderLayout.CENTER);
+                add(jToolBar, BorderLayout.SOUTH);
+                add(new JPanel() {
+                    {
+                        setLayout(new BorderLayout());
+                        setBorder(new FlatEmptyBorder(5, 5, 5, 5));
+                        add(keyTextField, BorderLayout.CENTER);
+                    }
+                }, BorderLayout.CENTER);
             }
         }, BorderLayout.NORTH);
 
