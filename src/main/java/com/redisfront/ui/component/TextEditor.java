@@ -1,6 +1,7 @@
 package com.redisfront.ui.component;
 
 
+import com.formdev.flatlaf.ui.FlatLineBorder;
 import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
@@ -60,9 +61,10 @@ public class TextEditor extends JPanel {
     }
 
     public void updateTheme() {
+        var flatLineBorder = new FlatLineBorder(new Insets(1, 1, 1, 1), UIManager.getColor("Component.borderColor"));
+        this.setBorder(flatLineBorder);
         var font = UIManager.getFont("defaultFont");
         this.textArea.setFont(font);
-
         this.textArea.setSyntaxScheme(new SyntaxScheme(font) {
             private void init(String key, int token) {
                 var prefix = "FlatEditorPane.style.";

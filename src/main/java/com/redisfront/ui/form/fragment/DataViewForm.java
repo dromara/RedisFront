@@ -18,6 +18,7 @@ import com.redisfront.service.*;
 import com.redisfront.ui.component.TextEditor;
 import com.redisfront.ui.form.MainNoneForm;
 import io.lettuce.core.ScoredValue;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -49,10 +50,9 @@ public class DataViewForm {
     private JLabel keyTypeLabel;
     private JButton delBtn;
     private JButton refBtn;
+    private JLabel keyLabel;
     private JLabel lengthLabel;
     private JLabel keySizeLabel;
-
-    private JLabel valueSizeLabel;
     private JButton valueSaveBtn;
     private JButton saveBtn;
     private JTextField ttlField;
@@ -204,15 +204,23 @@ public class DataViewForm {
                 if (e.getButton() == MouseEvent.BUTTON1 && row != -1) {
                     if (dataTable.getModel() instanceof SortedSetTableModel) {
                         var value = dataTable.getValueAt(row, 2);
+                        var score = dataTable.getValueAt(row, 1);
                         SwingUtilities.invokeLater(() -> {
-                            valueSizeLabel.setText("Size: ".concat(DataSizeUtil.format(((String) value).getBytes().length)));
+                            keyTextField.setText(score.toString());
                             valueSaveBtn.setEnabled(true);
                             textEditor.textArea().setText((String) value);
+                        });
+                    } else if (dataTable.getModel() instanceof HashTableModel) {
+                        var value = dataTable.getValueAt(row, 1);
+                        var key = dataTable.getValueAt(row, 0);
+                        SwingUtilities.invokeLater(() -> {
+                            keyTextField.setText(key.toString());
+                            valueSaveBtn.setEnabled(true);
+                            textEditor.textArea().setText(value.toString());
                         });
                     } else {
                         var value = dataTable.getValueAt(row, 1);
                         SwingUtilities.invokeLater(() -> {
-                            valueSizeLabel.setText("Size: ".concat(DataSizeUtil.format(((String) value).getBytes().length)));
                             valueSaveBtn.setEnabled(true);
                             textEditor.textArea().setText((String) value);
                         });
@@ -231,6 +239,7 @@ public class DataViewForm {
                     String type = RedisBasicService.service.type(connectInfo, key);
                     Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(type.toUpperCase());
                     SwingUtilities.invokeLater(() -> {
+                        keyTextField.setVisible(keyTypeEnum == Enum.KeyTypeEnum.ZSET || keyTypeEnum == Enum.KeyTypeEnum.HASH);
                         keyTypeLabel.setText(keyTypeEnum.typeName());
                         keyTypeLabel.setBackground(keyTypeEnum.color());
                     });
@@ -241,7 +250,6 @@ public class DataViewForm {
                         Long strLen = RedisStringService.service.strlen(connectInfo, key);
                         String value = RedisStringService.service.get(connectInfo, key);
                         SwingUtilities.invokeLater(() -> {
-                            valueSizeLabel.setText("Size: ".concat(DataSizeUtil.format(value.getBytes().length)));
                             valueSaveBtn.setEnabled(true);
                             lengthLabel.setText("Length: " + strLen);
                             keySizeLabel.setText("Size: " + DataSizeUtil.format(value.getBytes().length));
@@ -253,6 +261,9 @@ public class DataViewForm {
                         Map<String, String> value = RedisHashService.service.hgetall(connectInfo, key);
                         HashTableModel hashTableModel = new HashTableModel(new ArrayList<>(value.entrySet()));
                         SwingUtilities.invokeLater(() -> {
+                            pageNumField.setText("1");
+                            pageSizeField.setText(String.valueOf(value.size()));
+                            keyLabel.setText("键名：");
                             lengthLabel.setText("Length: " + len);
                             keySizeLabel.setText("Size: " + DataSizeUtil.format(value.values().stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)));
                             dataTable.setModel(hashTableModel);
@@ -263,6 +274,8 @@ public class DataViewForm {
                         Set<String> value = RedisSetService.service.smembers(connectInfo, key);
                         SetTableModel setTableModel = new SetTableModel(new ArrayList<>(value));
                         SwingUtilities.invokeLater(() -> {
+                            pageNumField.setText("1");
+                            pageSizeField.setText(String.valueOf(value.size()));
                             lengthLabel.setText("Length: " + scard);
                             keySizeLabel.setText("Size: " + DataSizeUtil.format(value.stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)));
                             dataTable.setModel(setTableModel);
@@ -273,6 +286,9 @@ public class DataViewForm {
                         List<ScoredValue<String>> value = RedisZSetService.service.zrange(connectInfo, key, 0, -1);
                         SortedSetTableModel sortedSetTableModel = new SortedSetTableModel(value);
                         SwingUtilities.invokeLater(() -> {
+                            keyLabel.setText("分数：");
+                            pageNumField.setText("1");
+                            pageSizeField.setText(String.valueOf(value.size()));
                             lengthLabel.setText("Length: " + strLen);
                             keySizeLabel.setText("Size: " + DataSizeUtil.format(value.stream().map(e -> e.getValue().getBytes().length).reduce(Integer::sum).orElse(0)));
                             dataTable.setModel(sortedSetTableModel);
@@ -284,6 +300,8 @@ public class DataViewForm {
                         ListTableModel listTableModel = new ListTableModel(value);
                         SwingUtilities.invokeLater(() -> {
                             lengthLabel.setText("Length: " + llen);
+                            pageNumField.setText("1");
+                            pageSizeField.setText(String.valueOf(value.size()));
                             keySizeLabel.setText("Size: " + DataSizeUtil.format(value.stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)));
                             dataTable.setModel(listTableModel);
                             dataPanel.add(dataSplitPanel, BorderLayout.CENTER, 0);
@@ -322,26 +340,27 @@ public class DataViewForm {
         };
 
         JToolBar jToolBar = new JToolBar();
-        jToolBar.setBorder(new EmptyBorder(0, 10, 0, 15));
-        valueSizeLabel = new JLabel();
-        valueSizeLabel.setText("Size: 0");
-        jToolBar.add(valueSizeLabel);
-        jToolBar.add(Box.createGlue());
+        jToolBar.setBorder(new EmptyBorder(5, 8, 0, 10));
+
+        keyTextField = new JTextField();
+        keyLabel = new JLabel();
+        keyLabel.setText("键名：");
+        keyLabel.setBackground(UIManager.getColor("background"));
+        keyLabel.setBorder(new EmptyBorder(0, 2, 0, 2));
+        keyTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, keyLabel);
+        keyTextField.setBackground(UIManager.getColor("FlatEditorPane.background"));
+        jToolBar.add(keyTextField);
+
+        JComboBox<String> jComboBox = new JComboBox<>();
+        jComboBox.addItem(SyntaxConstants.SYNTAX_STYLE_NONE);
+        jComboBox.addItem(SyntaxConstants.SYNTAX_STYLE_JSON);
+        jComboBox.setBackground(UIManager.getColor("FlatEditorPane.background"));
+        jToolBar.add(jComboBox);
         valueSaveBtn = new JButton();
         valueSaveBtn.setEnabled(false);
         valueSaveBtn.setIcon(UI.SAVE_ICON);
         jToolBar.add(valueSaveBtn);
 
-        keyTextField = new JTextField();
-        var keyLabel = new JLabel();
-        keyLabel.setText("Key:");
-        keyLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
-        keyTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, keyLabel);
-
-        var sizeLabel = new JLabel();
-        sizeLabel.setText("100KB");
-        sizeLabel.setBorder(new EmptyBorder(2, 10, 2, 10));
-        keyTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, sizeLabel);
 
         valueViewPanel.add(new JPanel() {
             @Override
@@ -351,13 +370,6 @@ public class DataViewForm {
                 setBorder(new FlatEmptyBorder(0, 0, 5, 0));
                 add(new JSeparator(), BorderLayout.NORTH);
                 add(jToolBar, BorderLayout.SOUTH);
-                add(new JPanel() {
-                    {
-                        setLayout(new BorderLayout());
-                        setBorder(new FlatEmptyBorder(5, 5, 5, 5));
-                        add(keyTextField, BorderLayout.CENTER);
-                    }
-                }, BorderLayout.CENTER);
             }
         }, BorderLayout.NORTH);
 
