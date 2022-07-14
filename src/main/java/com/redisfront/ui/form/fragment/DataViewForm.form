@@ -187,7 +187,7 @@
                                     <properties/>
                                     <border type="none"/>
                                     <children>
-                                      <component id="990cf" class="javax.swing.JTextField" binding="textField1" default-binding="true">
+                                      <component id="990cf" class="javax.swing.JTextField" binding="pageNumField">
                                         <constraints>
                                           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                                             <preferred-size width="150" height="-1"/>
@@ -195,7 +195,7 @@
                                         </constraints>
                                         <properties/>
                                       </component>
-                                      <component id="c042a" class="javax.swing.JTextField" binding="textField2" default-binding="true">
+                                      <component id="c042a" class="javax.swing.JTextField" binding="pageSizeField">
                                         <constraints>
                                           <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                                             <preferred-size width="150" height="-1"/>
@@ -211,20 +211,20 @@
                                     <properties/>
                                     <border type="none"/>
                                     <children>
-                                      <component id="b6244" class="javax.swing.JButton" binding="button1" default-binding="true">
+                                      <component id="b6244" class="javax.swing.JButton" binding="prevBtn">
                                         <constraints>
                                           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                                         </constraints>
                                         <properties>
-                                          <text value="Button"/>
+                                          <text value="上一页"/>
                                         </properties>
                                       </component>
-                                      <component id="1865f" class="javax.swing.JButton" binding="button2" default-binding="true">
+                                      <component id="1865f" class="javax.swing.JButton" binding="nextBtn">
                                         <constraints>
                                           <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                                         </constraints>
                                         <properties>
-                                          <text value="Button"/>
+                                          <text value="下一页"/>
                                         </properties>
                                       </component>
                                     </children>

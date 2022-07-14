@@ -17,15 +17,15 @@ public class ListTableModel extends DefaultTableModel {
             false, false, false, false
     };
 
-    public ListTableModel(List<String> dataList, String... columNames) {
+    public ListTableModel(List<String> dataList) {
         var dataVector = new Object[dataList.size()][4];
         for (var i = 0; i < dataList.size(); i++) {
-            dataVector[i][0] = i;
+            dataVector[i][0] = i + 1;
             dataVector[i][1] = dataList.get(i);
             dataVector[i][2] = dataList.get(i).length();
             dataVector[i][3] = DataSizeUtil.format(dataList.get(i).getBytes().length);
         }
-        this.setDataVector(dataVector, columNames);
+        this.setDataVector(dataVector, new String[]{"#", "Value", "Length", "Size"});
     }
 
 

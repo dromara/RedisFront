@@ -51,6 +51,9 @@ public class DataViewForm {
     private JButton refBtn;
     private JLabel lengthLabel;
     private JLabel keySizeLabel;
+
+    private JLabel valueSizeLabel;
+    private JButton valueSaveBtn;
     private JButton saveBtn;
     private JTextField ttlField;
     private JTextField tableSearchField;
@@ -63,10 +66,10 @@ public class DataViewForm {
     private JPanel dataPanel;
     private JScrollPane tableScorePanel;
     private JPanel pagePanel;
-    private JTextField textField1;
-    private JTextField textField2;
-    private JButton button1;
-    private JButton button2;
+    private JTextField pageNumField;
+    private JTextField pageSizeField;
+    private JButton prevBtn;
+    private JButton nextBtn;
     private TextEditor textEditor;
 
     private final ConnectInfo connectInfo;
@@ -85,7 +88,7 @@ public class DataViewForm {
         this.connectInfo = connectInfo;
         $$$setupUI$$$();
 
-        tableScorePanel.setPreferredSize(new Dimension(500, 200));
+        tableScorePanel.setPreferredSize(new Dimension(500, 190));
 
         tableViewPanel.add(new JPanel() {
             @Override
@@ -160,6 +163,16 @@ public class DataViewForm {
         tableRefreshBtn.setIcon(UI.REFRESH_ICON);
         tableRefreshBtn.setText("重新载入");
 
+        var pageNumLabel = new JLabel();
+        pageNumLabel.setText("页码:");
+        pageNumLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
+        pageNumField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, pageNumLabel);
+
+        var pageSizeLabel = new JLabel();
+        pageSizeLabel.setText("大小:");
+        pageSizeLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
+        pageSizeField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, pageSizeLabel);
+
         dataTableInit();
     }
 
@@ -190,10 +203,18 @@ public class DataViewForm {
                 if (e.getButton() == MouseEvent.BUTTON1 && row != -1) {
                     if (dataTable.getModel() instanceof SortedSetTableModel) {
                         var value = dataTable.getValueAt(row, 2);
-                        SwingUtilities.invokeLater(() -> textEditor.textArea().setText((String) value));
+                        SwingUtilities.invokeLater(() -> {
+                            valueSizeLabel.setText("Size: ".concat(DataSizeUtil.format(((String) value).getBytes().length)));
+                            valueSaveBtn.setEnabled(true);
+                            textEditor.textArea().setText((String) value);
+                        });
                     } else {
                         var value = dataTable.getValueAt(row, 1);
-                        SwingUtilities.invokeLater(() -> textEditor.textArea().setText((String) value));
+                        SwingUtilities.invokeLater(() -> {
+                            valueSizeLabel.setText("Size: ".concat(DataSizeUtil.format(((String) value).getBytes().length)));
+                            valueSaveBtn.setEnabled(true);
+                            textEditor.textArea().setText((String) value);
+                        });
                     }
                 }
             }
@@ -219,6 +240,8 @@ public class DataViewForm {
                         Long strLen = RedisStringService.service.strlen(connectInfo, key);
                         String value = RedisStringService.service.get(connectInfo, key);
                         SwingUtilities.invokeLater(() -> {
+                            valueSizeLabel.setText("Size: ".concat(DataSizeUtil.format(value.getBytes().length)));
+                            valueSaveBtn.setEnabled(true);
                             lengthLabel.setText("Length: " + strLen);
                             keySizeLabel.setText("Size: " + DataSizeUtil.format(value.getBytes().length));
                             textEditor.textArea().setText(value);
@@ -227,7 +250,7 @@ public class DataViewForm {
                     } else if (keyTypeEnum == Enum.KeyTypeEnum.HASH) {
                         Long len = RedisHashService.service.hlen(connectInfo, key);
                         Map<String, String> value = RedisHashService.service.hgetall(connectInfo, key);
-                        HashTableModel hashTableModel = new HashTableModel(new ArrayList<>(value.entrySet()), "key", "Value", "Length", "Size");
+                        HashTableModel hashTableModel = new HashTableModel(new ArrayList<>(value.entrySet()));
                         SwingUtilities.invokeLater(() -> {
                             lengthLabel.setText("Length: " + len);
                             keySizeLabel.setText("Size: " + DataSizeUtil.format(value.values().stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)));
@@ -237,7 +260,7 @@ public class DataViewForm {
                     } else if (keyTypeEnum == Enum.KeyTypeEnum.SET) {
                         Long scard = RedisSetService.service.scard(connectInfo, key);
                         Set<String> value = RedisSetService.service.smembers(connectInfo, key);
-                        SetTableModel setTableModel = new SetTableModel(new ArrayList<>(value), "#", "Value", "Length", "Size");
+                        SetTableModel setTableModel = new SetTableModel(new ArrayList<>(value));
                         SwingUtilities.invokeLater(() -> {
                             lengthLabel.setText("Length: " + scard);
                             keySizeLabel.setText("Size: " + DataSizeUtil.format(value.stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)));
@@ -247,7 +270,7 @@ public class DataViewForm {
                     } else if (keyTypeEnum == Enum.KeyTypeEnum.ZSET) {
                         Long strLen = RedisZSetService.service.zcard(connectInfo, key);
                         List<ScoredValue<String>> value = RedisZSetService.service.zrange(connectInfo, key, 0, -1);
-                        SortedSetTableModel sortedSetTableModel = new SortedSetTableModel(value, "#", "Score", "Value", "Length", "Size");
+                        SortedSetTableModel sortedSetTableModel = new SortedSetTableModel(value);
                         SwingUtilities.invokeLater(() -> {
                             lengthLabel.setText("Length: " + strLen);
                             keySizeLabel.setText("Size: " + DataSizeUtil.format(value.stream().map(e -> e.getValue().getBytes().length).reduce(Integer::sum).orElse(0)));
@@ -257,7 +280,7 @@ public class DataViewForm {
                     } else if (keyTypeEnum == Enum.KeyTypeEnum.LIST) {
                         Long llen = RedisListService.service.llen(connectInfo, key);
                         List<String> value = RedisListService.service.lrange(connectInfo, key, 0, -1);
-                        ListTableModel listTableModel = new ListTableModel(value, "#", "Value", "Length", "Size");
+                        ListTableModel listTableModel = new ListTableModel(value);
                         SwingUtilities.invokeLater(() -> {
                             lengthLabel.setText("Length: " + llen);
                             keySizeLabel.setText("Size: " + DataSizeUtil.format(value.stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)));
@@ -296,13 +319,25 @@ public class DataViewForm {
                 setLayout(new BorderLayout());
             }
         };
+
+        JToolBar jToolBar = new JToolBar();
+        jToolBar.setBorder(new EmptyBorder(0, 10, 0, 15));
+        valueSizeLabel = new JLabel();
+        valueSizeLabel.setText("Size: 0");
+        jToolBar.add(valueSizeLabel);
+        jToolBar.add(Box.createGlue());
+        valueSaveBtn = new JButton();
+        valueSaveBtn.setEnabled(false);
+        valueSaveBtn.setIcon(UI.SAVE_ICON);
+        jToolBar.add(valueSaveBtn);
         valueViewPanel.add(new JPanel() {
             @Override
             public void updateUI() {
                 super.updateUI();
                 setLayout(new BorderLayout());
                 setBorder(new FlatEmptyBorder(0, 0, 5, 0));
-                add(new JSeparator(), BorderLayout.CENTER);
+                add(new JSeparator(), BorderLayout.NORTH);
+                add(jToolBar, BorderLayout.CENTER);
             }
         }, BorderLayout.NORTH);
 
@@ -310,7 +345,7 @@ public class DataViewForm {
         valueViewPanel.add(new JPanel() {
             {
                 setLayout(new BorderLayout());
-                setBorder(new FlatEmptyBorder(0, 10, 0, 10));
+                setBorder(new FlatEmptyBorder(0, 10, 5, 10));
                 add(textEditor, BorderLayout.CENTER);
             }
         }, BorderLayout.CENTER);
@@ -409,19 +444,19 @@ public class DataViewForm {
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         pagePanel.add(panel3, BorderLayout.NORTH);
-        textField1 = new JTextField();
-        panel3.add(textField1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-        textField2 = new JTextField();
-        panel3.add(textField2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        pageNumField = new JTextField();
+        panel3.add(pageNumField, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        pageSizeField = new JTextField();
+        panel3.add(pageSizeField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final JPanel panel4 = new JPanel();
         panel4.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         pagePanel.add(panel4, BorderLayout.SOUTH);
-        button1 = new JButton();
-        button1.setText("Button");
-        panel4.add(button1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        button2 = new JButton();
-        button2.setText("Button");
-        panel4.add(button2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        prevBtn = new JButton();
+        prevBtn.setText("上一页");
+        panel4.add(prevBtn, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        nextBtn = new JButton();
+        nextBtn.setText("下一页");
+        panel4.add(nextBtn, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         tableScorePanel = new JScrollPane();
         panel1.add(tableScorePanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         dataTable = new JTable();

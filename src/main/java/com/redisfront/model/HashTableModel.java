@@ -17,7 +17,7 @@ public class HashTableModel extends DefaultTableModel {
             false, false, false, false
     };
 
-    public HashTableModel(List<Map.Entry<String, String>> dataList, String... columNames) {
+    public HashTableModel(List<Map.Entry<String, String>> dataList) {
         var dataVector = new Object[dataList.size()][4];
         for (var i = 0; i < dataList.size(); i++) {
             Map.Entry<String, String> Entry = dataList.get(i);
@@ -26,7 +26,7 @@ public class HashTableModel extends DefaultTableModel {
             dataVector[i][2] = Entry.getValue().length();
             dataVector[i][3] = DataSizeUtil.format(Entry.getValue().getBytes().length);
         }
-        this.setDataVector(dataVector, columNames);
+        this.setDataVector(dataVector, new String[]{"key", "Value", "Length", "Size"});
     }
 
 

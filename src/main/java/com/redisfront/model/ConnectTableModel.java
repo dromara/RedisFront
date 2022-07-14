@@ -15,7 +15,7 @@ public class ConnectTableModel extends DefaultTableModel {
             false, false, false, false, false, false
     };
 
-    public ConnectTableModel(List<ConnectInfo> dataList, String... columNames) {
+    public ConnectTableModel(List<ConnectInfo> dataList) {
         var dataVector = new Object[dataList.size()][6];
         for (var i = 0; i < dataList.size(); i++) {
             dataVector[i][0] = dataList.get(i).id();
@@ -25,7 +25,7 @@ public class ConnectTableModel extends DefaultTableModel {
             dataVector[i][4] = dataList.get(i).ssl().toString();
             dataVector[i][5] = dataList.get(i).connectMode();
         }
-        this.setDataVector(dataVector, columNames);
+        this.setDataVector(dataVector, new String[]{"编号", "名称", "地址", "端口", "SSL", "连接模式"});
     }
 
 

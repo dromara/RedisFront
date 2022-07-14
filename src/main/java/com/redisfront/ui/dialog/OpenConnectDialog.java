@@ -144,7 +144,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
 
         //查询数据连接列表
         List<ConnectInfo> connectInfoList = ConnectService.service.getAllConnectList();
-        connectTable.setModel(new ConnectTableModel(connectInfoList, "编号", "名称", "地址", "端口", "SSL", "连接模式"));
+        connectTable.setModel(new ConnectTableModel(connectInfoList));
     }
 
     private void onOK() {
