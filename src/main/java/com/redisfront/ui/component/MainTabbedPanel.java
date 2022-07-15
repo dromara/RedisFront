@@ -139,7 +139,7 @@ public class MainTabbedPanel extends JPanel {
                                 SwingUtilities.invokeLater(() -> {
                                     memoryInfo.setText((String) memory.get("used_memory_human"));
                                     memoryInfo.setToolTipText("内存占用：" + memory.get("used_memory_human"));
-                                }))), 0, 5, TimeUnit.SECONDS);
+                                }))), 0, 30, TimeUnit.SECONDS);
     }
 
     private void appendRow(StringBuilder buf, String key, String value) {

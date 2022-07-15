@@ -11,6 +11,7 @@ import com.redisfront.commons.util.ExecutorUtil;
 import com.redisfront.commons.util.LettuceUtil;
 import com.redisfront.commons.util.TreeUtil;
 import com.redisfront.model.ConnectInfo;
+import com.redisfront.model.DbInfo;
 import com.redisfront.model.TreeNodeInfo;
 import com.redisfront.service.RedisBasicService;
 import com.redisfront.ui.dialog.AddRedisKeyDialog;
@@ -23,9 +24,7 @@ import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -37,7 +36,7 @@ public class DataSearchForm {
     private JPanel contentPanel;
     private JTree keyTree;
     private JTextField searchTextField;
-    private JComboBox<Integer> databaseComboBox;
+    private JComboBox<DbInfo> databaseComboBox;
     private JButton addBtn;
     private JPanel treePanel;
     private JButton refreshBtn;
@@ -58,6 +57,12 @@ public class DataSearchForm {
     public DataSearchForm(ConnectInfo connectInfo) {
         this.connectInfo = connectInfo;
         $$$setupUI$$$();
+        var loadBtn = new JButton("加载更多");
+        loadBtn.addActionListener(e -> {
+            DefaultTreeModel treeModel = (DefaultTreeModel) keyTree.getModel();
+            System.out.println();
+        });
+        treePanel.add(loadBtn, BorderLayout.SOUTH);
         if (connectInfo.redisModeEnum() == Enum.RedisMode.CLUSTER)
             databaseComboBox.setEnabled(false);
         loadTreeModelData("*");
@@ -128,14 +133,48 @@ public class DataSearchForm {
         refreshBtn.setIcon(UI.REFRESH_ICON);
         databaseComboBox = new JComboBox<>();
 
-        var dbList = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15));
-        for (var db : dbList) {
-            databaseComboBox.addItem(db);
+        var dbList = new ArrayList<DbInfo>() {
+            {
+                add(new DbInfo("DB0", 0));
+                add(new DbInfo("DB1", 1));
+                add(new DbInfo("DB2", 2));
+                add(new DbInfo("DB3", 3));
+                add(new DbInfo("DB4", 4));
+                add(new DbInfo("DB5", 5));
+                add(new DbInfo("DB6", 6));
+                add(new DbInfo("DB7", 7));
+                add(new DbInfo("DB8", 8));
+                add(new DbInfo("DB9", 9));
+                add(new DbInfo("DB10", 10));
+                add(new DbInfo("DB11", 11));
+                add(new DbInfo("DB12", 12));
+                add(new DbInfo("DB13", 13));
+                add(new DbInfo("DB14", 14));
+                add(new DbInfo("DB15", 15));
+            }
+        };
+        if (Fn.notEqual(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            var keySpace = RedisBasicService.service.getKeySpace(connectInfo);
+            for (var db : dbList) {
+                var value = (String) keySpace.get(db.dbName().toLowerCase());
+                if (Fn.isNotEmpty(value)) {
+                    String[] s = value.split(",");
+                    String[] sub = s[0].split("=");
+                    db.setDbSize(sub[1]);
+                }
+                databaseComboBox.addItem(db);
+            }
+        } else {
+            var dbInfo = dbList.get(0);
+            var dbSize = RedisBasicService.service.dbSize(connectInfo);
+            dbInfo.setDbSize(dbSize.toString());
+            databaseComboBox.addItem(dbInfo);
         }
 
         databaseComboBox.addActionListener(e -> {
-            var db = (Integer) databaseComboBox.getSelectedItem();
-            this.connectInfo.setDatabase(db);
+            var db = (DbInfo) databaseComboBox.getSelectedItem();
+            assert db != null;
+            this.connectInfo.setDatabase(db.dbIndex());
             searchActionPerformed();
         });
 

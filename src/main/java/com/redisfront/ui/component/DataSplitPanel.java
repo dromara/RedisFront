@@ -1,5 +1,6 @@
 package com.redisfront.ui.component;
 
+import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
 import com.redisfront.ui.form.MainNoneForm;
@@ -9,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 
 /**
  * MainSplitComponent
@@ -27,18 +30,39 @@ public class DataSplitPanel extends JSplitPane {
         this.connectInfo = connectInfo;
         var dataSearchForm = DataSearchForm.newInstance(connectInfo);
 
+        var nonePanel = new JPanel() {
+            {
+                setLayout(new BorderLayout());
+                setBorder(new EmptyBorder(0, 5, 0, 0));
+                var subPanel = new JPanel() {
+                    @Override
+                    public void updateUI() {
+                        super.updateUI();
+                        var flatLineBorder = new FlatLineBorder(new Insets(0, 2, 0, 0), UIManager.getColor("Component.borderColor"));
+                        setBorder(flatLineBorder);
+                    }
+
+                    {
+                        setLayout(new BorderLayout());
+                        add(MainNoneForm.getInstance().getContentPanel(), BorderLayout.CENTER);
+                    }
+                };
+                add(subPanel, BorderLayout.CENTER);
+            }
+        };
+
         dataSearchForm.setNodeClickProcessHandler((treeNodeInfo) -> {
             var dataViewForm = DataViewForm.newInstance(connectInfo);
             dataViewForm.dataChangeActionPerformed(treeNodeInfo.key());
             dataViewForm.setDeleteActionHandler(() -> {
                 dataSearchForm.deleteActionPerformed();
-                setRightComponent(MainNoneForm.getInstance().getContentPanel());
+                setRightComponent(nonePanel);
             });
             setRightComponent(dataViewForm.contentPanel());
         });
 
         this.setLeftComponent(dataSearchForm.getContentPanel());
-        this.setRightComponent(MainNoneForm.getInstance().getContentPanel());
+        this.setRightComponent(nonePanel);
     }
 
 

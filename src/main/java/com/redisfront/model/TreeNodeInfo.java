@@ -17,10 +17,13 @@ public class TreeNodeInfo extends DefaultMutableTreeNode implements Comparable<T
     public TreeNodeInfo() {
     }
 
+
     public TreeNodeInfo(String title, String key) {
         this.title = title;
         this.key = key;
     }
+
+
 
     public String title() {
         return title;
