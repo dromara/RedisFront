@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.icons.FlatTabbedPaneCloseIcon;
 import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.redisfront.commons.constant.UI;
+import com.redisfront.commons.util.LoadingUtil;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.ConnectService;
 import com.redisfront.service.RedisBasicService;
@@ -46,7 +47,6 @@ public class MainWindowForm {
     }
 
     public void addActionPerformed(ConnectInfo connectInfo) {
-
         CompletableFuture.allOf(CompletableFuture.supplyAsync(() -> connectInfo.setRedisModeEnum(RedisBasicService.service.getRedisModeEnum(connectInfo)), ExecutorUtil.getExecutorService()), CompletableFuture.runAsync(() -> {
             if (Fn.equal(connectInfo.id(), 0)) {
                 ConnectService.service.save(connectInfo);
@@ -58,6 +58,7 @@ public class MainWindowForm {
             this.tabPanel.addTab(connectInfo.title(), UI.MAIN_TAB_DATABASE_ICON, mainTabbedPanel);
             this.tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
             this.contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
+            LoadingUtil.closeDialog();
         }));
 
     }

@@ -1,10 +1,9 @@
 package com.redisfront.ui.component;
 
-import cn.hutool.core.img.ImgUtil;
+import cn.hutool.core.io.resource.ResourceUtil;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 
 /**
  * LoadingPanel
@@ -14,10 +13,13 @@ import java.awt.image.BufferedImage;
 public class LoadingPanel extends JPanel {
 
 
-    public LoadingPanel() {
+    public static LoadingPanel newInstance() {
+        return new LoadingPanel();
+    }
+
+    private LoadingPanel() {
         setLayout(new BorderLayout());
-
-        BufferedImage bufferedImage = ImgUtil.read("/gif/loading.gif");
-
+        var icon = new JLabel(new ImageIcon(ResourceUtil.getResource("gif/21.gif")));
+        add(icon, BorderLayout.CENTER);
     }
 }

@@ -156,10 +156,9 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         var id = connectTable.getValueAt(row, 0);
         var connectInfo = ConnectService.service.getConnect(id);
         ExecutorUtil.runAsync(() -> {
-            LoadingUtil.showDialog();
+            SwingUtilities.invokeLater(LoadingUtil::showDialog);
             var redisMode = RedisBasicService.service.getRedisModeEnum(connectInfo);
-            SwingUtilities.invokeLater(() -> openProcessHandler.processHandler(connectInfo.setRedisModeEnum(redisMode)));
-            LoadingUtil.closeDialog();
+            openProcessHandler.processHandler(connectInfo.setRedisModeEnum(redisMode));
         });
         dispose();
     }

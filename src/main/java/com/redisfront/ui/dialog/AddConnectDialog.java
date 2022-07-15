@@ -240,10 +240,9 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     private void submitActionPerformed(ActionEvent actionEvent) {
         var connectInfo = validGetConnectInfo();
         ExecutorUtil.runAsync(() -> {
-            LoadingUtil.showDialog();
+            SwingUtilities.invokeLater(LoadingUtil::showDialog);
             var redisMode = RedisBasicService.service.getRedisModeEnum(connectInfo);
             processHandler.processHandler(connectInfo.setRedisModeEnum(redisMode));
-            LoadingUtil.closeDialog();
         });
         dispose();
     }

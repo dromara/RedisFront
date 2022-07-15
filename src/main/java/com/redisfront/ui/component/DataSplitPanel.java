@@ -26,43 +26,47 @@ public class DataSplitPanel extends JSplitPane {
         return new DataSplitPanel(connectInfo);
     }
 
+    @Override
+    public void updateUI() {
+        super.updateUI();
+    }
+
     public DataSplitPanel(ConnectInfo connectInfo) {
         this.connectInfo = connectInfo;
         var dataSearchForm = DataSearchForm.newInstance(connectInfo);
 
-        var nonePanel = new JPanel() {
-            {
-                setLayout(new BorderLayout());
-                setBorder(new EmptyBorder(0, 5, 0, 0));
-                var subPanel = new JPanel() {
-                    @Override
-                    public void updateUI() {
-                        super.updateUI();
-                        var flatLineBorder = new FlatLineBorder(new Insets(0, 2, 0, 0), UIManager.getColor("Component.borderColor"));
-                        setBorder(flatLineBorder);
-                    }
-
-                    {
-                        setLayout(new BorderLayout());
-                        add(MainNoneForm.getInstance().getContentPanel(), BorderLayout.CENTER);
-                    }
-                };
-                add(subPanel, BorderLayout.CENTER);
-            }
-        };
 
         dataSearchForm.setNodeClickProcessHandler((treeNodeInfo) -> {
             var dataViewForm = DataViewForm.newInstance(connectInfo);
             dataViewForm.dataChangeActionPerformed(treeNodeInfo.key());
             dataViewForm.setDeleteActionHandler(() -> {
                 dataSearchForm.deleteActionPerformed();
-                setRightComponent(nonePanel);
+                setRightComponent(newNonePanel());
             });
             setRightComponent(dataViewForm.contentPanel());
         });
 
         this.setLeftComponent(dataSearchForm.getContentPanel());
-        this.setRightComponent(nonePanel);
+        this.setRightComponent(newNonePanel());
+    }
+
+    private JPanel newNonePanel() {
+        return new JPanel() {
+            {
+                setLayout(new BorderLayout());
+                setBorder(new EmptyBorder(0, 5, 0, 0));
+                add(new JPanel() {
+                    @Override
+                    public void updateUI() {
+                        super.updateUI();
+                        var flatLineBorder = new FlatLineBorder(new Insets(0, 2, 0, 0), UIManager.getColor("Component.borderColor"));
+                        setBorder(flatLineBorder);
+                        setLayout(new BorderLayout());
+                        add(MainNoneForm.getInstance().getContentPanel(), BorderLayout.CENTER);
+                    }
+                }, BorderLayout.CENTER);
+            }
+        };
     }
 
 

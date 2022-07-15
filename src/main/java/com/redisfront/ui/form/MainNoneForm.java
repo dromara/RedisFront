@@ -35,14 +35,6 @@ public class MainNoneForm {
         return new MainNoneForm();
     }
 
-    public JLabel infoLabel() {
-        return infoLabel;
-    }
-
-    public JProgressBar progressBar1() {
-        return progressBar1;
-    }
-
     public JPanel getContentPanel() {
         return contentPanel;
     }
