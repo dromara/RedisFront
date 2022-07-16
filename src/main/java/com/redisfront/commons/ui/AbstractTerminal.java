@@ -1,4 +1,4 @@
-package com.redisfront.ui;
+package com.redisfront.commons.ui;
 
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.commons.func.Fn;

@@ -15,6 +15,8 @@ import com.redisfront.model.DbInfo;
 import com.redisfront.model.TreeNodeInfo;
 import com.redisfront.service.RedisBasicService;
 import com.redisfront.ui.dialog.AddRedisKeyDialog;
+import org.jdesktop.swingx.JXTree;
+import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -34,7 +36,7 @@ import java.util.function.Consumer;
  */
 public class DataSearchForm {
     private JPanel contentPanel;
-    private JTree keyTree;
+    private JXTree keyTree;
     private JTextField searchTextField;
     private JComboBox<DbInfo> databaseComboBox;
     private JButton addBtn;
@@ -189,9 +191,18 @@ public class DataSearchForm {
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> searchActionPerformed());
 
-        keyTree = new JTree();
+        keyTree = new JXTree();
         keyTree.setRootVisible(false);
+        keyTree.setModel(null);
         keyTree.setBorder(new EmptyBorder(5, 5, 5, 5));
+        keyTree.setCellRenderer(new DefaultXTreeCellRenderer() {
+            @Override
+            public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+                return super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+            }
+
+
+        });
         keyTree.addTreeSelectionListener(e -> {
             var selectNode = keyTree.getLastSelectedPathComponent();
             if (selectNode instanceof TreeNodeInfo treeNodeInfo) {

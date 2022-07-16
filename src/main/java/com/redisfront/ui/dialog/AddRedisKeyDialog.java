@@ -11,7 +11,7 @@ import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.*;
-import com.redisfront.ui.AbstractDialog;
+import com.redisfront.commons.ui.AbstractDialog;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,9 +1,9 @@
 package com.redisfront.ui.component;
 
 import cn.hutool.core.date.DateUtil;
-import com.redisfront.ui.AbstractTerminal;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.exception.RedisFrontException;
+import com.redisfront.commons.ui.AbstractTerminal;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
 import com.redisfront.commons.func.Fn;
@@ -73,8 +73,8 @@ public class RedisTerminal extends AbstractTerminal {
                 });
             } else {
                 LettuceUtil.run(connectInfo(), redisCommands -> {
-                        var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
-                        println(format(res, ""));
+                    var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
+                    println(format(res, ""));
                 });
             }
         } catch (Exception e) {

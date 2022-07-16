@@ -69,7 +69,7 @@
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <component id="2fb53" class="javax.swing.JTree" binding="keyTree" custom-create="true">
+                  <component id="2fb53" class="org.jdesktop.swingx.JXTree" binding="keyTree" custom-create="true">
                     <constraints/>
                     <properties/>
                   </component>

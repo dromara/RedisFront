@@ -1,4 +1,4 @@
-package com.redisfront.ui;
+package com.redisfront.commons.ui;
 
 import com.redisfront.commons.Handler.ProcessHandler;
 

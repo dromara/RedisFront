@@ -33,6 +33,34 @@ public class LettuceUtilTest {
     }
 
     @Test
+    public void test3() {
+        String[] list = new String[]{"a", "b", "c", "d", "e", "f", "g", "h", "l", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
+        for (int i = 0; i < 26; i++) {
+            int finalI = i;
+            String key = list[finalI] + ":" + finalI;
+            LettuceUtil.run(new ConnectInfo().setHost("mysql.public.hncongxun.com").setPort(63378).setSsl(false), redisCommands -> {
+                redisCommands.set(key, String.valueOf(finalI));
+            });
+            for (int j = 0; j < 200; j++) {
+                String key2 = key + ":" + j;
+                int finalJ = j;
+                LettuceUtil.run(new ConnectInfo().setHost("mysql.public.hncongxun.com").setPort(63378).setSsl(false), redisCommands -> {
+                    redisCommands.set(key2, String.valueOf(finalJ));
+                });
+
+                for (int k = 0; k < 50; k++) {
+                    String key3 = key2 + ":" + k;
+                    int finalK = k;
+                    LettuceUtil.run(new ConnectInfo().setHost("mysql.public.hncongxun.com").setPort(63378).setSsl(false), redisCommands -> {
+                        redisCommands.set(key3, String.valueOf(finalK));
+                    });
+                }
+            }
+        }
+
+    }
+
+    @Test
     public void test2() {
         LettuceUtil.run(new ConnectInfo().setHost("127.0.0.1").setPort(6379).setSsl(false), redisCommands -> {
             ScanArgs scanArgs = new ScanArgs();

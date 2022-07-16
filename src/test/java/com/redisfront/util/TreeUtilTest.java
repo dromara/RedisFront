@@ -4,8 +4,12 @@ import com.redisfront.commons.util.TreeUtil;
 import com.redisfront.model.TreeNodeInfo;
 import org.junit.jupiter.api.Test;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * TreeUtil
@@ -15,11 +19,10 @@ import java.util.Set;
 public class TreeUtilTest {
 
     @Test
-    public  void test1(){
+    public void test1() {
         Set<String> rows = new HashSet<>();
-        rows.add("1:2:3.4");
-        rows.add("1:2.2");
-        rows.add("8");
+        rows.add("A:0:1");
+        rows.add("A:0");
         Set<TreeNodeInfo> treeNodeInfos = TreeUtil.convertTreeNodeInfoSet(TreeUtil.toStringTreeMap(rows, ":"), "");
         System.out.println();
     }

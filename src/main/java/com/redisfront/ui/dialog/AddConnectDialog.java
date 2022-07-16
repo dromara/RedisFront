@@ -11,7 +11,7 @@ import com.redisfront.commons.constant.UI;
 import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
-import com.redisfront.ui.AbstractDialog;
+import com.redisfront.commons.ui.AbstractDialog;
 import com.redisfront.commons.util.ExecutorUtil;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.util.LoadingUtil;
