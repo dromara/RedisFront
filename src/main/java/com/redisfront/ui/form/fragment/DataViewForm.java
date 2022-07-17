@@ -116,11 +116,6 @@ public class DataViewForm {
         keyTypeLabel.setForeground(Color.WHITE);
         keyTypeLabel.setBorder(new EmptyBorder(2, 3, 2, 3));
 
-        var keyLabel = new JLabel();
-        keyLabel.setText("KEY:");
-        keyLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
-        keyField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, keyLabel);
-
         var ttlLabel = new JLabel();
         ttlLabel.setText("TTL:");
         ttlLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
