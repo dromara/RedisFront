@@ -15,7 +15,7 @@ public class LoadingUtil {
 
     private static LoadingDialog loadingDialog;
 
-    public static void showDialog() {
+    public synchronized static void showDialog() {
         if (loadingDialog == null) {
             loadingDialog = new LoadingDialog();
         }
@@ -25,7 +25,7 @@ public class LoadingUtil {
         loadingDialog.setVisible(true);
     }
 
-    public static void closeDialog() {
+    public synchronized static void closeDialog() {
         if (Fn.isNotNull(loadingDialog)) {
             loadingDialog.dispose();
             loadingDialog = null;
