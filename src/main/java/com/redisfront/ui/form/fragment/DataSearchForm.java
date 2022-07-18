@@ -3,6 +3,8 @@ package com.redisfront.ui.form.fragment;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.formdev.flatlaf.ui.FlatLineBorder;
+import com.intellij.uiDesigner.core.GridConstraints;
+import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.redisfront.commons.Handler.ProcessHandler;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
@@ -47,6 +49,9 @@ public class DataSearchForm {
     private JPanel treePanel;
     private JButton refreshBtn;
     private JPanel borderPanel;
+    private JTextField currentField;
+    private JTextField allField;
+    private JPanel loadMorePanel;
 
     private volatile Map<Integer, ScanKeysContext> scanKeysContextMap;
 
@@ -69,8 +74,21 @@ public class DataSearchForm {
         if (connectInfo.redisModeEnum() == Enum.RedisMode.CLUSTER) {
             databaseComboBox.setEnabled(false);
         }
-        treePanel.add(loadMoreBtn, BorderLayout.SOUTH);
         databaseComboBox.setSelectedIndex(0);
+        var currentLabel = new JLabel();
+        currentLabel.setText("当前");
+        currentLabel.setOpaque(true);
+        currentLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
+        currentLabel.setSize(5, -1);
+        currentField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, currentLabel);
+
+        var allLabel = new JLabel();
+        allLabel.setText("全部");
+        allLabel.setOpaque(true);
+        allLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
+        allLabel.setSize(5, -1);
+        allField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, allLabel);
+
     }
 
     public void setNodeClickProcessHandler(ProcessHandler<TreeNodeInfo> nodeClickProcessHandler) {
@@ -127,7 +145,7 @@ public class DataSearchForm {
             var scanKeysContext = scanKeysContextMap.get(connectInfo.database());
 
             if (Fn.isNull(scanKeysContext.limit)) {
-                scanKeysContext.setLimit(10000L);
+                scanKeysContext.setLimit(1000L);
             }
 
             var lastSearchKey = scanKeysContext.getSearchKey();
@@ -146,15 +164,16 @@ public class DataSearchForm {
                 scanKeysContext.setKeyList(keyScanCursor.getKeys());
             }
 
+
             var treeModel = TreeUtil.toTreeModel(new HashSet<>(scanKeysContext.keys), ":");
 
             SwingUtilities.invokeLater(() -> {
+                currentField.setText(String.valueOf(scanKeysContext.getKeyList().size()));
                 loadMoreBtn.setEnabled(!keyScanCursor.isFinished());
                 keyTree.setModel(treeModel);
             });
-        } catch (Exception e) {
             enableInputComponent();
-        } finally {
+        } catch (Exception e) {
             enableInputComponent();
         }
 
@@ -188,8 +207,7 @@ public class DataSearchForm {
             refreshBtn.setEnabled(true);
             searchBtn.setEnabled(true);
             keyTree.setEnabled(true);
-            loadMoreBtn.setEnabled(true);
-            loadMoreBtn.setText("加载更多>>");
+            loadMoreBtn.setText("加载更多");
             loadMoreBtn.requestFocus();
             databaseComboBox.setEnabled(true);
         });
@@ -288,12 +306,13 @@ public class DataSearchForm {
             this.connectInfo.setDatabase(db.dbIndex());
             scanKeysContextMap.put(connectInfo.database(), new ScanKeysContext());
             var flag = !Fn.isNull(db.dbSize()) && (db.dbSize() > 10000L);
-            loadMoreBtn.setVisible(flag);
+            allField.setText(String.valueOf(db.dbSize()));
+            loadMorePanel.setVisible(flag);
             searchActionPerformed();
         });
 
         searchTextField = new JTextField();
-        searchTextField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入关键字...");
+        searchTextField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入搜索词...");
         searchBtn = new JButton(new FlatSearchIcon());
         searchBtn.addActionListener(actionEvent -> {
             scanKeysContextMap.put(connectInfo.database(), new ScanKeysContext());
@@ -302,8 +321,8 @@ public class DataSearchForm {
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchBtn);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> {
-            SwingUtilities.invokeLater(() -> searchTextField.setText(""));
             scanKeysContextMap.put(connectInfo.database(), new ScanKeysContext());
+            searchTextField.setText("");
             searchActionPerformed();
         });
 
@@ -392,6 +411,21 @@ public class DataSearchForm {
         final JScrollPane scrollPane1 = new JScrollPane();
         treePanel.add(scrollPane1, BorderLayout.CENTER);
         scrollPane1.setViewportView(keyTree);
+        loadMorePanel = new JPanel();
+        loadMorePanel.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
+        loadMorePanel.setEnabled(true);
+        treePanel.add(loadMorePanel, BorderLayout.SOUTH);
+        loadMorePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
+        currentField = new JTextField();
+        currentField.setEditable(false);
+        currentField.setEnabled(false);
+        loadMorePanel.add(currentField, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(120, -1), null, 0, false));
+        allField = new JTextField();
+        allField.setEditable(false);
+        allField.setEnabled(false);
+        loadMorePanel.add(allField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(120, -1), null, 0, false));
+        loadMoreBtn.setText("Button");
+        loadMorePanel.add(loadMoreBtn, new GridConstraints(1, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**

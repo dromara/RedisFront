@@ -117,7 +117,8 @@ public class DataViewForm {
         keyTypeLabel.setBorder(new EmptyBorder(2, 3, 2, 3));
 
         var ttlLabel = new JLabel();
-        ttlLabel.setText("TTL:");
+        ttlLabel.setText("TTL");
+        ttlLabel.setOpaque(true);
         ttlLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
         ttlField.setSize(5, -1);
         ttlField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, ttlLabel);
@@ -141,7 +142,7 @@ public class DataViewForm {
         saveBtn.setToolTipText("保存");
 
 
-        tableSearchField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入关键字");
+        tableSearchField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入搜索词...");
         var searchBtn = new JButton(new FlatSearchIcon());
         searchBtn.addActionListener(actionEvent -> System.out.println());
 
@@ -159,12 +160,12 @@ public class DataViewForm {
         tableRefreshBtn.setText("重新载入");
 
         var pageNumLabel = new JLabel();
-        pageNumLabel.setText("页码:");
+        pageNumLabel.setText("当前");
         pageNumLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
         pageNumField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, pageNumLabel);
 
         var pageSizeLabel = new JLabel();
-        pageSizeLabel.setText("大小:");
+        pageSizeLabel.setText("数量");
         pageSizeLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
         pageSizeField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, pageSizeLabel);
 

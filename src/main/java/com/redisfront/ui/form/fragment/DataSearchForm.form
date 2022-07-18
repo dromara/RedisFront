@@ -75,6 +75,48 @@
                   </component>
                 </children>
               </scrollpane>
+              <grid id="edff8" binding="loadMorePanel" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints border-constraint="South"/>
+                <properties>
+                  <enabled value="true"/>
+                </properties>
+                <border type="empty">
+                  <size top="5" left="0" bottom="0" right="0"/>
+                </border>
+                <children>
+                  <component id="42e91" class="javax.swing.JTextField" binding="currentField">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                        <preferred-size width="120" height="-1"/>
+                      </grid>
+                    </constraints>
+                    <properties>
+                      <editable value="false"/>
+                      <enabled value="false"/>
+                    </properties>
+                  </component>
+                  <component id="b1d66" class="javax.swing.JTextField" binding="allField">
+                    <constraints>
+                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                        <preferred-size width="120" height="-1"/>
+                      </grid>
+                    </constraints>
+                    <properties>
+                      <editable value="false"/>
+                      <enabled value="false"/>
+                    </properties>
+                  </component>
+                  <component id="bdf8d" class="javax.swing.JButton" binding="loadMoreBtn" custom-create="true">
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text value="Button"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
             </children>
           </grid>
         </children>
