@@ -8,13 +8,15 @@ import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.util.ExecutorUtil;
-import com.redisfront.commons.util.LettuceUtil;
+import com.redisfront.commons.util.LoadingUtil;
 import com.redisfront.commons.util.TreeUtil;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.model.DbInfo;
 import com.redisfront.model.TreeNodeInfo;
 import com.redisfront.service.RedisBasicService;
 import com.redisfront.ui.dialog.AddRedisKeyDialog;
+import io.lettuce.core.ScanArgs;
+import io.lettuce.core.ScanCursor;
 import org.jdesktop.swingx.JXTree;
 import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer;
 
@@ -26,6 +28,7 @@ import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.List;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -40,13 +43,17 @@ public class DataSearchForm {
     private JTextField searchTextField;
     private JComboBox<DbInfo> databaseComboBox;
     private JButton addBtn;
+    private final JButton loadMoreBtn;
     private JPanel treePanel;
     private JButton refreshBtn;
     private JPanel borderPanel;
 
+    private volatile Map<Integer, ScanKeysContext> scanKeysContextMap;
+
     private ProcessHandler<TreeNodeInfo> nodeClickProcessHandler;
 
     private final ConnectInfo connectInfo;
+    private JButton searchBtn;
 
     public JPanel getContentPanel() {
         return contentPanel;
@@ -59,45 +66,133 @@ public class DataSearchForm {
     public DataSearchForm(ConnectInfo connectInfo) {
         this.connectInfo = connectInfo;
         $$$setupUI$$$();
-        var loadBtn = new JButton("加载更多");
-        loadBtn.addActionListener(e -> {
-            DefaultTreeModel treeModel = (DefaultTreeModel) keyTree.getModel();
-            System.out.println();
-        });
-        treePanel.add(loadBtn, BorderLayout.SOUTH);
-        if (connectInfo.redisModeEnum() == Enum.RedisMode.CLUSTER)
+        loadMoreBtn = new JButton("加载更多");
+        loadMoreBtn.addActionListener(e -> searchActionPerformed());
+        treePanel.add(loadMoreBtn, BorderLayout.SOUTH);
+        if (connectInfo.redisModeEnum() == Enum.RedisMode.CLUSTER) {
             databaseComboBox.setEnabled(false);
-        loadTreeModelData("*");
+        }
+        ExecutorUtil.runAsync(() -> loadTreeModelData("*"));
     }
 
     public void setNodeClickProcessHandler(ProcessHandler<TreeNodeInfo> nodeClickProcessHandler) {
         this.nodeClickProcessHandler = nodeClickProcessHandler;
     }
 
-    public void loadTreeModelData(String key) {
-        ExecutorUtil.runAsync(() -> {
-            if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
-                LettuceUtil.clusterRun(connectInfo, redisCommands -> {
-                    var list = redisCommands.keys(key);
-                    var treeModel = TreeUtil.toTreeModel(new HashSet<>(list), ":");
-                    SwingUtilities.invokeLater(() -> keyTree.setModel(treeModel));
-                });
-            } else {
-                LettuceUtil.run(connectInfo, redisCommands -> {
-                    var list = redisCommands.keys(key);
-                    var treeModel = TreeUtil.toTreeModel(new HashSet<>(list), ":");
-                    SwingUtilities.invokeLater(() -> keyTree.setModel(treeModel));
-                });
+    private static class ScanKeysContext {
+        private ScanCursor scanCursor;
+        private Long limit;
+        private String searchKey;
+        private List<String> keys;
+
+        public ScanCursor getScanCursor() {
+            return scanCursor;
+        }
+
+        public void setScanCursor(ScanCursor scanCursor) {
+            this.scanCursor = scanCursor;
+        }
+
+        public Long getLimit() {
+            return limit;
+        }
+
+        public void setLimit(Long limit) {
+            this.limit = limit;
+        }
+
+        public String getSearchKey() {
+            return searchKey;
+        }
+
+        public void setSearchKey(String searchKey) {
+            this.searchKey = searchKey;
+        }
+
+        public ScanArgs getScanArgs() {
+            return ScanArgs.Builder.matches(getSearchKey()).limit(getLimit());
+        }
+
+
+        public List<String> getKeyList() {
+            return keys;
+        }
+
+        public void setKeyList(List<String> keys) {
+            this.keys = keys;
+        }
+    }
+
+    public synchronized void loadTreeModelData(String key) {
+        try {
+            disableInputComponent();
+            var scanKeysContext = scanKeysContextMap.get(connectInfo.database());
+
+            if (Fn.isNull(scanKeysContext.limit)) {
+                scanKeysContext.setLimit(10000L);
             }
-        });
+
+            var lastSearchKey = scanKeysContext.getSearchKey();
+            scanKeysContext.setSearchKey(key);
+
+            if (Fn.isNull(scanKeysContext.getScanCursor())) {
+                scanKeysContext.setScanCursor(ScanCursor.INITIAL);
+            }
+
+            var keyScanCursor = RedisBasicService.service.scan(connectInfo, scanKeysContext.getScanCursor(), scanKeysContext.getScanArgs());
+            scanKeysContext.setScanCursor(keyScanCursor);
+
+            if (Fn.equal(scanKeysContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanKeysContext.getKeyList())) {
+                scanKeysContext.getKeyList().addAll(keyScanCursor.getKeys());
+            } else {
+                scanKeysContext.setKeyList(keyScanCursor.getKeys());
+            }
+
+            var treeModel = TreeUtil.toTreeModel(new HashSet<>(scanKeysContext.keys), ":");
+
+            SwingUtilities.invokeLater(() -> {
+                loadMoreBtn.setEnabled(!keyScanCursor.isFinished());
+                keyTree.setModel(treeModel);
+            });
+        } finally {
+            enableInputComponent();
+        }
+
     }
 
     public void searchActionPerformed() {
         if (Fn.isEmpty(searchTextField.getText())) {
-            loadTreeModelData("*");
+            ExecutorUtil.runAsync(() -> loadTreeModelData("*"));
         } else {
-            loadTreeModelData(searchTextField.getText());
+            ExecutorUtil.runAsync(() -> loadTreeModelData(searchTextField.getText()));
         }
+    }
+
+    private void disableInputComponent() {
+        SwingUtilities.invokeLater(() -> {
+            LoadingUtil.showDialog();
+            searchTextField.setEnabled(false);
+            refreshBtn.setEnabled(false);
+            searchBtn.setEnabled(false);
+            keyTree.setEnabled(false);
+            loadMoreBtn.setEnabled(false);
+            loadMoreBtn.setText("数据加载中...");
+            databaseComboBox.setEnabled(false);
+        });
+    }
+
+    private void enableInputComponent() {
+        SwingUtilities.invokeLater(() -> {
+            LoadingUtil.closeDialog();
+            searchTextField.setEnabled(true);
+            refreshBtn.setEnabled(true);
+            searchBtn.setEnabled(true);
+            keyTree.setEnabled(true);
+            loadMoreBtn.setEnabled(true);
+            loadMoreBtn.setText("加载更多>>");
+            loadMoreBtn.requestFocus();
+            databaseComboBox.setEnabled(true);
+        });
     }
 
     public void deleteActionPerformed() {
@@ -131,7 +226,10 @@ public class DataSearchForm {
         addBtn.addActionListener(e -> AddRedisKeyDialog.showAddDialog(connectInfo, System.out::println));
 
         refreshBtn = new JButton();
-        refreshBtn.addActionListener(e -> searchActionPerformed());
+        refreshBtn.addActionListener(e -> {
+            scanKeysContextMap.put(connectInfo.database(), new ScanKeysContext());
+            searchActionPerformed();
+        });
         refreshBtn.setIcon(UI.REFRESH_ICON);
         databaseComboBox = new JComboBox<>();
 
@@ -155,19 +253,24 @@ public class DataSearchForm {
                 add(new DbInfo("DB15", 15));
             }
         };
+
+        scanKeysContextMap = new LinkedHashMap<>();
+
         if (Fn.notEqual(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             var keySpace = RedisBasicService.service.getKeySpace(connectInfo);
-            for (var db : dbList) {
-                var value = (String) keySpace.get(db.dbName().toLowerCase());
+            for (var dbInfo : dbList) {
+                var value = (String) keySpace.get(dbInfo.dbName().toLowerCase());
                 if (Fn.isNotEmpty(value)) {
                     String[] s = value.split(",");
                     String[] sub = s[0].split("=");
-                    db.setDbSize(sub[1]);
+                    dbInfo.setDbSize(sub[1]);
                 }
-                databaseComboBox.addItem(db);
+                scanKeysContextMap.put(dbInfo.dbIndex(), new ScanKeysContext());
+                databaseComboBox.addItem(dbInfo);
             }
         } else {
             var dbInfo = dbList.get(0);
+            scanKeysContextMap.put(dbInfo.dbIndex(), new ScanKeysContext());
             var dbSize = RedisBasicService.service.dbSize(connectInfo);
             dbInfo.setDbSize(dbSize.toString());
             databaseComboBox.addItem(dbInfo);
@@ -185,11 +288,18 @@ public class DataSearchForm {
 
         searchTextField = new JTextField();
         searchTextField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入关键字...");
-        var searchBtn = new JButton(new FlatSearchIcon());
-        searchBtn.addActionListener(actionEvent -> searchActionPerformed());
+        searchBtn = new JButton(new FlatSearchIcon());
+        searchBtn.addActionListener(actionEvent -> {
+            scanKeysContextMap.put(connectInfo.database(), new ScanKeysContext());
+            searchActionPerformed();
+        });
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchBtn);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
-        searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> searchActionPerformed());
+        searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> {
+            SwingUtilities.invokeLater(() -> searchTextField.setText(""));
+            scanKeysContextMap.put(connectInfo.database(), new ScanKeysContext());
+            searchActionPerformed();
+        });
 
         keyTree = new JXTree();
         keyTree.setRootVisible(false);

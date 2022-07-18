@@ -17,6 +17,9 @@ import com.redisfront.commons.func.Fn;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.geom.RoundRectangle2D;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
@@ -104,9 +107,10 @@ public class MainWindowForm {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setBorder(new FlatLineBorder(new Insets(1, 1, 1, 1), UIManager.getColor("Component.borderColor")));
+                setBorder(new FlatLineBorder(new Insets(1, 1, 1, 1), UIManager.getColor("Component.borderColor"), 1, 10));
             }
         };
+
         jPanel.setLayout(new FlowLayout());
 
 

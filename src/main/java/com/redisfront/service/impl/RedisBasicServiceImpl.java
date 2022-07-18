@@ -6,10 +6,16 @@ import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.util.LettuceUtil;
+import io.lettuce.core.KeyScanCursor;
+import io.lettuce.core.ScanArgs;
+import io.lettuce.core.ScanCursor;
+import io.lettuce.core.StreamScanCursor;
 import io.lettuce.core.api.sync.BaseRedisCommands;
+import io.lettuce.core.api.sync.RedisKeyCommands;
 import io.lettuce.core.api.sync.RedisServerCommands;
 import io.lettuce.core.cluster.api.sync.RedisAdvancedClusterCommands;
 import io.lettuce.core.cluster.api.sync.RedisClusterCommands;
+import io.lettuce.core.output.KeyStreamingChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +26,78 @@ import java.util.Map;
 public class RedisBasicServiceImpl implements RedisBasicService {
 
     private static final Logger log = LoggerFactory.getLogger(RedisBasicServiceImpl.class);
+
+    @Override
+    public KeyScanCursor<String> scan(ConnectInfo connectInfo) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            return LettuceUtil.clusterExec(connectInfo, RedisAdvancedClusterCommands::scan);
+        } else {
+            return LettuceUtil.exec(connectInfo, RedisKeyCommands::scan);
+        }
+    }
+
+    @Override
+    public KeyScanCursor<String> scan(ConnectInfo connectInfo, ScanArgs scanArgs) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            return LettuceUtil.clusterExec(connectInfo, redisCommands -> redisCommands.scan(scanArgs));
+        } else {
+            return LettuceUtil.exec(connectInfo, redisCommands -> redisCommands.scan(scanArgs));
+        }
+    }
+
+    @Override
+    public KeyScanCursor<String> scan(ConnectInfo connectInfo, ScanCursor scanCursor, ScanArgs scanArgs) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            return LettuceUtil.clusterExec(connectInfo, redisCommands -> redisCommands.scan(scanCursor, scanArgs));
+        } else {
+            return LettuceUtil.exec(connectInfo, redisCommands -> redisCommands.scan(scanCursor, scanArgs));
+        }
+    }
+
+    @Override
+    public KeyScanCursor<String> scan(ConnectInfo connectInfo, ScanCursor scanCursor) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            return LettuceUtil.clusterExec(connectInfo, redisCommands -> redisCommands.scan(scanCursor));
+        } else {
+            return LettuceUtil.exec(connectInfo, redisCommands -> redisCommands.scan(scanCursor));
+        }
+    }
+
+    @Override
+    public StreamScanCursor scan(ConnectInfo connectInfo, KeyStreamingChannel<String> channel) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            return LettuceUtil.clusterExec(connectInfo, redisCommands -> redisCommands.scan(channel));
+        } else {
+            return LettuceUtil.exec(connectInfo, redisCommands -> redisCommands.scan(channel));
+        }
+    }
+
+    @Override
+    public StreamScanCursor scan(ConnectInfo connectInfo, KeyStreamingChannel<String> channel, ScanArgs scanArgs) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            return LettuceUtil.clusterExec(connectInfo, redisCommands -> redisCommands.scan(channel, scanArgs));
+        } else {
+            return LettuceUtil.exec(connectInfo, redisCommands -> redisCommands.scan(channel, scanArgs));
+        }
+    }
+
+    @Override
+    public StreamScanCursor scan(ConnectInfo connectInfo, KeyStreamingChannel<String> channel, ScanCursor scanCursor, ScanArgs scanArgs) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            return LettuceUtil.clusterExec(connectInfo, redisCommands -> redisCommands.scan(channel, scanCursor, scanArgs));
+        } else {
+            return LettuceUtil.exec(connectInfo, redisCommands -> redisCommands.scan(channel, scanCursor, scanArgs));
+        }
+    }
+
+    @Override
+    public StreamScanCursor scan(ConnectInfo connectInfo, KeyStreamingChannel<String> channel, ScanCursor scanCursor) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            return LettuceUtil.clusterExec(connectInfo, redisCommands -> redisCommands.scan(channel, scanCursor));
+        } else {
+            return LettuceUtil.exec(connectInfo, redisCommands -> redisCommands.scan(channel, scanCursor));
+        }
+    }
 
     @Override
     public Long del(ConnectInfo connectInfo, String key) {

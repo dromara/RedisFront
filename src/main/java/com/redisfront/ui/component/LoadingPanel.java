@@ -4,6 +4,8 @@ import cn.hutool.core.io.resource.ResourceUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.Ellipse2D;
+import java.net.URL;
 
 /**
  * LoadingPanel
@@ -19,7 +21,9 @@ public class LoadingPanel extends JPanel {
 
     private LoadingPanel() {
         setLayout(new BorderLayout());
-        var icon = new JLabel(new ImageIcon(ResourceUtil.getResource("gif/21.gif")));
-        add(icon, BorderLayout.CENTER);
+        var iconImage = new ImageIcon(ResourceUtil.getResource("gif/21.gif"));
+
+        var iconLabel = new JLabel(iconImage);
+        add(iconLabel, BorderLayout.CENTER);
     }
 }

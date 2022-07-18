@@ -5,6 +5,12 @@ import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.impl.RedisBasicServiceImpl;
 import com.redisfront.commons.func.Fn;
+import io.lettuce.core.KeyScanCursor;
+import io.lettuce.core.ScanArgs;
+import io.lettuce.core.ScanCursor;
+import io.lettuce.core.StreamScanCursor;
+import io.lettuce.core.api.sync.RedisKeyCommands;
+import io.lettuce.core.output.KeyStreamingChannel;
 
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +20,21 @@ public interface RedisBasicService {
 
     RedisBasicService service = new RedisBasicServiceImpl();
 
+    KeyScanCursor<String> scan(ConnectInfo connectInfo);
+
+    KeyScanCursor<String> scan(ConnectInfo connectInfo,ScanArgs scanArgs);
+
+    KeyScanCursor<String> scan(ConnectInfo connectInfo,ScanCursor scanCursor, ScanArgs scanArgs);
+
+    KeyScanCursor<String> scan(ConnectInfo connectInfo,ScanCursor scanCursor);
+    StreamScanCursor scan(ConnectInfo connectInfo,KeyStreamingChannel<String> channel);
+
+    StreamScanCursor scan(ConnectInfo connectInfo,KeyStreamingChannel<String> channel, ScanArgs scanArgs);
+
+    StreamScanCursor scan(ConnectInfo connectInfo,KeyStreamingChannel<String> channel, ScanCursor scanCursor, ScanArgs scanArgs);
+
+
+    StreamScanCursor scan(ConnectInfo connectInfo,KeyStreamingChannel<String> channel, ScanCursor scanCursor);
 
     /**
      * del

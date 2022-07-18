@@ -19,35 +19,14 @@ public class TreeUtil {
     private TreeUtil() {
     }
 
-    public static DefaultMutableTreeNode sortTree(DefaultMutableTreeNode root) {
-        for (int i = 0; i < root.getChildCount() - 1; i++) {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) root.getChildAt(i);
-            String nt = node.getUserObject().toString();
-
-            for (int j = i + 1; j <= root.getChildCount() - 1; j++) {
-                DefaultMutableTreeNode prevNode = (DefaultMutableTreeNode) root.getChildAt(j);
-                String np = prevNode.getUserObject().toString();
-
-                System.out.println(nt + " " + np);
-                if (nt.compareToIgnoreCase(np) > 0) {
-
-                    root.insert(node, j);
-                    root.insert(prevNode, i);
-                }
-            }
-            if (node.getChildCount() > 0) {
-                node = sortTree(node);
-            }
-        }
-        return root;
-
-    }
-
     public static synchronized DefaultTreeModel toTreeModel(Set<String> rows, String delim) {
+        var startTime = System.currentTimeMillis();
         var rootNode = new TreeNodeInfo();
         var stringTreeMap = toStringTreeMap(rows, delim);
         var treeNodeInfos = convertTreeNodeInfoSet(stringTreeMap, "");
         treeNodeInfos.forEach(rootNode::add);
+        var endTime = System.currentTimeMillis();
+        System.out.println("转换树耗时：" + (endTime - startTime));
         return new DefaultTreeModel(rootNode);
     }
 
@@ -86,7 +65,7 @@ public class TreeUtil {
      * @return Set<TreeNodeInfo>
      */
     public static Set<TreeNodeInfo> convertTreeNodeInfoSet(StringTreeMap stringTreeMap, String parentKey) {
-        return stringTreeMap.entrySet().stream().map(treeMapEntry -> {
+        return stringTreeMap.entrySet().stream().parallel().map(treeMapEntry -> {
             String key = treeMapEntry.getKey().replace("->!N!", "");
             //完整的KeyName
             var fullKeyName = (Fn.isEmpty(parentKey) ? "" : parentKey.concat(":")).concat(key);
