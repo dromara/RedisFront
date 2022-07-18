@@ -43,7 +43,7 @@ public class DataSearchForm {
     private JTextField searchTextField;
     private JComboBox<DbInfo> databaseComboBox;
     private JButton addBtn;
-    private final JButton loadMoreBtn;
+    private JButton loadMoreBtn;
     private JPanel treePanel;
     private JButton refreshBtn;
     private JPanel borderPanel;
@@ -66,13 +66,11 @@ public class DataSearchForm {
     public DataSearchForm(ConnectInfo connectInfo) {
         this.connectInfo = connectInfo;
         $$$setupUI$$$();
-        loadMoreBtn = new JButton("加载更多");
-        loadMoreBtn.addActionListener(e -> searchActionPerformed());
-        treePanel.add(loadMoreBtn, BorderLayout.SOUTH);
         if (connectInfo.redisModeEnum() == Enum.RedisMode.CLUSTER) {
             databaseComboBox.setEnabled(false);
         }
-        ExecutorUtil.runAsync(() -> loadTreeModelData("*"));
+        treePanel.add(loadMoreBtn, BorderLayout.SOUTH);
+        databaseComboBox.setSelectedIndex(0);
     }
 
     public void setNodeClickProcessHandler(ProcessHandler<TreeNodeInfo> nodeClickProcessHandler) {
@@ -154,6 +152,8 @@ public class DataSearchForm {
                 loadMoreBtn.setEnabled(!keyScanCursor.isFinished());
                 keyTree.setModel(treeModel);
             });
+        } catch (Exception e) {
+            enableInputComponent();
         } finally {
             enableInputComponent();
         }
@@ -221,6 +221,9 @@ public class DataSearchForm {
         };
         borderPanel.setLayout(new BorderLayout());
 
+        treePanel = new JPanel();
+        treePanel.setBorder(new EmptyBorder(3, 2, 2, 2));
+
         addBtn = new JButton();
         addBtn.setIcon(UI.PLUS_ICON);
         addBtn.addActionListener(e -> AddRedisKeyDialog.showAddDialog(connectInfo, System.out::println));
@@ -232,6 +235,9 @@ public class DataSearchForm {
         });
         refreshBtn.setIcon(UI.REFRESH_ICON);
         databaseComboBox = new JComboBox<>();
+
+        loadMoreBtn = new JButton("加载更多");
+        loadMoreBtn.addActionListener(e -> searchActionPerformed());
 
         var dbList = new ArrayList<DbInfo>() {
             {
@@ -263,7 +269,7 @@ public class DataSearchForm {
                 if (Fn.isNotEmpty(value)) {
                     String[] s = value.split(",");
                     String[] sub = s[0].split("=");
-                    dbInfo.setDbSize(sub[1]);
+                    dbInfo.setDbSize(Long.valueOf(sub[1]));
                 }
                 scanKeysContextMap.put(dbInfo.dbIndex(), new ScanKeysContext());
                 databaseComboBox.addItem(dbInfo);
@@ -272,7 +278,7 @@ public class DataSearchForm {
             var dbInfo = dbList.get(0);
             scanKeysContextMap.put(dbInfo.dbIndex(), new ScanKeysContext());
             var dbSize = RedisBasicService.service.dbSize(connectInfo);
-            dbInfo.setDbSize(dbSize.toString());
+            dbInfo.setDbSize(dbSize);
             databaseComboBox.addItem(dbInfo);
         }
 
@@ -280,11 +286,11 @@ public class DataSearchForm {
             var db = (DbInfo) databaseComboBox.getSelectedItem();
             assert db != null;
             this.connectInfo.setDatabase(db.dbIndex());
+            scanKeysContextMap.put(connectInfo.database(), new ScanKeysContext());
+            var flag = !Fn.isNull(db.dbSize()) && (db.dbSize() > 10000L);
+            loadMoreBtn.setVisible(flag);
             searchActionPerformed();
         });
-
-        treePanel = new JPanel();
-        treePanel.setBorder(new EmptyBorder(3, 2, 2, 2));
 
         searchTextField = new JTextField();
         searchTextField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入关键字...");

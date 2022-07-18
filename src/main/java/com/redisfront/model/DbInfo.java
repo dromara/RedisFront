@@ -10,7 +10,7 @@ import com.redisfront.commons.func.Fn;
 public class DbInfo {
     private String dbName;
     private Integer dbIndex;
-    private String dbSize;
+    private Long dbSize;
 
     public DbInfo(String dbName, Integer dbIndex) {
         this.dbName = dbName;
@@ -35,11 +35,11 @@ public class DbInfo {
         return this;
     }
 
-    public String dbSize() {
+    public Long dbSize() {
         return dbSize;
     }
 
-    public DbInfo setDbSize(String dbSize) {
+    public DbInfo setDbSize(Long dbSize) {
         this.dbSize = dbSize;
         return this;
     }
