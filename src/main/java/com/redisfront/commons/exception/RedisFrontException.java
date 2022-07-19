@@ -10,6 +10,11 @@ public class RedisFrontException extends RuntimeException implements Supplier<Ob
         return showMessage;
     }
 
+    public RedisFrontException(String message) {
+        super(message);
+        this.showMessage = false;
+    }
+
     public RedisFrontException(String message, Boolean showMessage) {
         super(message);
         this.showMessage = showMessage;

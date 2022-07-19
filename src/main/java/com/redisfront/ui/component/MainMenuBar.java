@@ -84,22 +84,16 @@ public class MainMenuBar extends JMenuBar {
 
         var settingMenu = new JMenu(SETTING_MENU.title());
         settingMenu.setMnemonic(SETTING_MENU.mnemonic());
-        settingMenu.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                ExecutorUtil.runAsync(SettingDialog::showSettingDialog);
-            }
-        });
+        var settingMenuItem = new JMenuItem("系统设置");
+        settingMenuItem.addActionListener(e -> ExecutorUtil.runAsync(SettingDialog::showSettingDialog));
+        settingMenu.add(settingMenuItem);
         add(settingMenu);
 
         var aboutMenu = new JMenu(ABOUT_MENU.title());
         aboutMenu.setMnemonic(ABOUT_MENU.mnemonic());
-        aboutMenu.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                ExecutorUtil.runAsync(() -> aboutActionPerformed());
-            }
-        });
+        var aboutMenuItem = new JMenuItem("关于RedisFront");
+        aboutMenuItem.addActionListener((e) -> ExecutorUtil.runAsync(this::aboutActionPerformed));
+        aboutMenu.add(aboutMenuItem);
         add(aboutMenu);
 
         add(Box.createGlue());

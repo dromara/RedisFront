@@ -25,6 +25,7 @@ public class RedisFrontApplication {
     public static void main(String[] args) {
 
         if (SystemInfo.isMacOS) {
+            System.setProperty("apple.awt.UIElement", "true");
             System.setProperty("apple.laf.useScreenMenuBar", "true");
             System.setProperty("apple.awt.application.name", "RedisFront");
             System.setProperty("apple.awt.application.appearance", "system");

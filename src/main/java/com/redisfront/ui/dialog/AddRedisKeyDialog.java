@@ -44,7 +44,7 @@ public class AddRedisKeyDialog extends AbstractDialog<String> {
         openConnectDialog.setVisible(true);
     }
 
-    public AddRedisKeyDialog(ConnectInfo connectInfo, ProcessHandler<String> addSucFun) {
+    public AddRedisKeyDialog(ConnectInfo connectInfo, ProcessHandler<String> addSuccessProcessHandler) {
         super(RedisFrontApplication.frame);
         this.setMinimumSize(new Dimension(500, 400));
         setContentPane(contentPane);
@@ -52,7 +52,7 @@ public class AddRedisKeyDialog extends AbstractDialog<String> {
         getRootPane().setDefaultButton(buttonOK);
         setTitle("添加");
         this.connectInfo = connectInfo;
-        this.processHandler = addSucFun;
+        this.processHandler = addSuccessProcessHandler;
         buttonOK.addActionListener(e -> onOK());
 
         buttonCancel.addActionListener(e -> onCancel());
@@ -138,27 +138,27 @@ public class AddRedisKeyDialog extends AbstractDialog<String> {
 
         if (Fn.isEmpty(keyNameField.getText())) {
             keyNameField.requestFocus();
-            throw new RedisFrontException("参数校验失败", false);
+            throw new RedisFrontException("参数校验失败");
         }
 
         if (Fn.equal(Enum.KeyTypeEnum.HASH.typeName(), selectItem) && Fn.isEmpty(hashKeyField.getText())) {
             hashKeyField.requestFocus();
-            throw new RedisFrontException("参数校验失败", false);
+            throw new RedisFrontException("参数校验失败");
         }
 
         if (Fn.equal(Enum.KeyTypeEnum.STREAM.typeName(), selectItem) && Fn.isEmpty(streamField.getText())) {
             streamField.requestFocus();
-            throw new RedisFrontException("参数校验失败", false);
+            throw new RedisFrontException("参数校验失败");
         }
 
         if (Fn.equal(Enum.KeyTypeEnum.ZSET.typeName(), selectItem) && Fn.isEmpty(zsetScoreField.getText())) {
             zsetScoreField.requestFocus();
-            throw new RedisFrontException("参数校验失败", false);
+            throw new RedisFrontException("参数校验失败");
         }
 
         if (Fn.isEmpty(keyValueField.getText())) {
             keyValueField.requestFocus();
-            throw new RedisFrontException("参数校验失败", false);
+            throw new RedisFrontException("参数校验失败");
         }
     }
 

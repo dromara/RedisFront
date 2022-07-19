@@ -6,14 +6,12 @@ import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.redisfront.commons.Handler.ProcessHandler;
+import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
 import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.commons.func.Fn;
-import com.redisfront.commons.util.AlertUtil;
-import com.redisfront.commons.util.ExecutorUtil;
-import com.redisfront.commons.util.LoadingUtil;
-import com.redisfront.commons.util.TreeUtil;
+import com.redisfront.commons.util.*;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.model.DbInfo;
 import com.redisfront.model.TreeNodeInfo;
@@ -23,6 +21,8 @@ import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
 import org.jdesktop.swingx.JXTree;
 import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -42,6 +42,8 @@ import java.util.function.Consumer;
  * @author Jin
  */
 public class DataSearchForm {
+    private static final Logger log = LoggerFactory.getLogger(DataSearchForm.class);
+
     private JPanel contentPanel;
     private JXTree keyTree;
     private JTextField searchTextField;
@@ -78,14 +80,14 @@ public class DataSearchForm {
         }
         databaseComboBox.setSelectedIndex(0);
         var currentLabel = new JLabel();
-        currentLabel.setText("当前");
+        currentLabel.setText("扫描到");
         currentLabel.setOpaque(true);
         currentLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
         currentLabel.setSize(5, -1);
         currentField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, currentLabel);
 
         var allLabel = new JLabel();
-        allLabel.setText("全部");
+        allLabel.setText("全部键");
         allLabel.setOpaque(true);
         allLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
         allLabel.setSize(5, -1);
@@ -146,8 +148,9 @@ public class DataSearchForm {
             disableInputComponent();
             var scanKeysContext = scanKeysContextMap.get(connectInfo.database());
 
-            if (Fn.isNull(scanKeysContext.limit)) {
-                scanKeysContext.setLimit(10000L);
+            if (Fn.isNull(scanKeysContext.getLimit())) {
+                Long limit = PrefUtil.getState().getLong(Const.KEY_KEY_MAX_LOAD_NUM, 10000L);
+                scanKeysContext.setLimit(limit);
             }
 
             var lastSearchKey = scanKeysContext.getSearchKey();
@@ -159,17 +162,21 @@ public class DataSearchForm {
 
             var keyScanCursor = RedisBasicService.service.scan(connectInfo, scanKeysContext.getScanCursor(), scanKeysContext.getScanArgs());
             scanKeysContext.setScanCursor(keyScanCursor);
+            log.debug("本次扫描到：{}", keyScanCursor.getKeys().size());
 
             if (Fn.equal(scanKeysContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanKeysContext.getKeyList())) {
                 if (scanKeysContext.getKeyList().size() >= 300000) {
-                    throw new RedisFrontException("数据加载上限，请使用正则模糊匹配查找！", true);
+                    System.gc();
+                    throw new RedisFrontException("数据加载上限，请使用正则模糊匹配查找！");
                 }
                 scanKeysContext.getKeyList().addAll(keyScanCursor.getKeys());
             } else {
                 scanKeysContext.setKeyList(keyScanCursor.getKeys());
             }
 
-            var treeModel = TreeUtil.toTreeModel(new HashSet<>(scanKeysContext.keys), ":");
+            String delim = PrefUtil.getState().get(Const.KEY_KEY_SEPARATOR, ":");
+
+            var treeModel = TreeUtil.toTreeModel(new HashSet<>(scanKeysContext.keys), delim);
 
             SwingUtilities.invokeLater(() -> {
                 currentField.setText(String.valueOf(scanKeysContext.getKeyList().size()));
