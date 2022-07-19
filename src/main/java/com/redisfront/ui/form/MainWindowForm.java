@@ -93,6 +93,7 @@ public class MainWindowForm {
             if (tabbedPane.getTabCount() == 0) {
                 contentPanel.add(MainNoneForm.getInstance().getContentPanel(), BorderLayout.CENTER, 0);
             }
+            System.gc();
         });
 
         tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, SwingConstants.LEADING);

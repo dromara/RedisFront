@@ -8,7 +8,9 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.redisfront.commons.Handler.ProcessHandler;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
+import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.commons.func.Fn;
+import com.redisfront.commons.util.AlertUtil;
 import com.redisfront.commons.util.ExecutorUtil;
 import com.redisfront.commons.util.LoadingUtil;
 import com.redisfront.commons.util.TreeUtil;
@@ -88,12 +90,12 @@ public class DataSearchForm {
         allLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
         allLabel.setSize(5, -1);
         allField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, allLabel);
-
     }
 
     public void setNodeClickProcessHandler(ProcessHandler<TreeNodeInfo> nodeClickProcessHandler) {
         this.nodeClickProcessHandler = nodeClickProcessHandler;
     }
+
 
     private static class ScanKeysContext {
         private ScanCursor scanCursor;
@@ -145,7 +147,7 @@ public class DataSearchForm {
             var scanKeysContext = scanKeysContextMap.get(connectInfo.database());
 
             if (Fn.isNull(scanKeysContext.limit)) {
-                scanKeysContext.setLimit(1000L);
+                scanKeysContext.setLimit(10000L);
             }
 
             var lastSearchKey = scanKeysContext.getSearchKey();
@@ -159,11 +161,13 @@ public class DataSearchForm {
             scanKeysContext.setScanCursor(keyScanCursor);
 
             if (Fn.equal(scanKeysContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanKeysContext.getKeyList())) {
+                if (scanKeysContext.getKeyList().size() >= 300000) {
+                    throw new RedisFrontException("数据加载上限，请使用正则模糊匹配查找！", true);
+                }
                 scanKeysContext.getKeyList().addAll(keyScanCursor.getKeys());
             } else {
                 scanKeysContext.setKeyList(keyScanCursor.getKeys());
             }
-
 
             var treeModel = TreeUtil.toTreeModel(new HashSet<>(scanKeysContext.keys), ":");
 
@@ -174,7 +178,13 @@ public class DataSearchForm {
             });
             enableInputComponent();
         } catch (Exception e) {
-            enableInputComponent();
+            if (e instanceof RedisFrontException) {
+                enableInputComponent();
+                loadMoreBtn.setEnabled(false);
+                AlertUtil.showInformationDialog(e.getMessage());
+            } else {
+                throw e;
+            }
         }
 
     }
@@ -209,7 +219,7 @@ public class DataSearchForm {
             keyTree.setEnabled(true);
             loadMoreBtn.setText("加载更多");
             loadMoreBtn.requestFocus();
-            databaseComboBox.setEnabled(true);
+            databaseComboBox.setEnabled(Fn.notEqual(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER));
         });
     }
 
@@ -419,10 +429,12 @@ public class DataSearchForm {
         currentField = new JTextField();
         currentField.setEditable(false);
         currentField.setEnabled(false);
+        currentField.setVisible(true);
         loadMorePanel.add(currentField, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(120, -1), null, 0, false));
         allField = new JTextField();
         allField.setEditable(false);
         allField.setEnabled(false);
+        allField.setVisible(true);
         loadMorePanel.add(allField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(120, -1), null, 0, false));
         loadMoreBtn.setText("Button");
         loadMorePanel.add(loadMoreBtn, new GridConstraints(1, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));

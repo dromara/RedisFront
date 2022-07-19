@@ -3,7 +3,10 @@ package com.redisfront.ui.component;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.components.FlatLabel;
 import com.formdev.flatlaf.extras.components.FlatToolBar;
+import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
+import com.redisfront.commons.func.Fn;
+import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
 import com.redisfront.ui.form.fragment.DataChartsForm;
@@ -11,6 +14,8 @@ import com.redisfront.commons.util.ExecutorUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -66,6 +71,11 @@ public class MainTabbedPanel extends JPanel {
 
         String configFile = (String) serverInfo.get("config_file");
         appendRow(buf, "配置文件", configFile);
+
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            List<ClusterNode> clusterNodes = RedisBasicService.service.getClusterNodes(connectInfo);
+            clusterNodes.forEach(s -> appendRow(buf, s.flags().toUpperCase(), s.ipAndPort()));
+        }
 
         buf.append("</td></tr>");
         buf.append("</table></html>");
@@ -125,10 +135,40 @@ public class MainTabbedPanel extends JPanel {
     private void threadInit(ConnectInfo connectInfo, FlatLabel keysInfo, FlatLabel cupInfo, FlatLabel memoryInfo) {
         scheduledExecutor.scheduleAtFixedRate(() ->
                 CompletableFuture.allOf(
-                        CompletableFuture.supplyAsync(() -> RedisBasicService.service.dbSize(connectInfo), ExecutorUtil.getExecutorService()).thenAccept(keysCount ->
+                        CompletableFuture.supplyAsync(() -> {
+                            String[] keyInfo = new String[2];
+                            if (Fn.notEqual(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+                                var keySpace = RedisBasicService.service.getKeySpace(connectInfo);
+                                var count = keySpace.values().stream()
+                                        .map(value -> ((String) value).split(",")[0].split("=")[1])
+                                        .map(Integer::parseInt).reduce(Integer::sum).orElse(0);
+                                keyInfo[0] = String.valueOf(count);
+                                var buf = new StringBuilder(200);
+                                buf.append("<html><style>");
+                                buf.append("td { padding: 0 10 0 0; }");
+                                buf.append("</style>");
+                                buf.append("<p>");
+                                buf.append("Key数量: ").append(count);
+                                buf.append("</p>");
+                                buf.append("<hr>");
+                                buf.append("</hr>");
+                                buf.append("<table>");
+                                keySpace.forEach((key, value) -> appendRow(buf, key, String.valueOf(value)));
+                                buf.append("</td></tr>");
+                                buf.append("</table>");
+                                buf.append("<hr>");
+                                buf.append("</hr>");
+                                buf.append("</html>");
+                                keyInfo[1] = buf.toString();
+                            } else {
+                                keyInfo[0] = String.valueOf(RedisBasicService.service.dbSize(connectInfo));
+                                keyInfo[1] = "Key数量：" + keyInfo[0];
+                            }
+                            return keyInfo;
+                        }, ExecutorUtil.getExecutorService()).thenAccept(s ->
                                 SwingUtilities.invokeLater(() -> {
-                                    keysInfo.setText(keysCount.toString());
-                                    keysInfo.setToolTipText("Key数量：" + keysCount);
+                                    keysInfo.setText(s[0]);
+                                    keysInfo.setToolTipText(s[1]);
                                 })),
                         CompletableFuture.supplyAsync(() -> RedisBasicService.service.getStatInfo(connectInfo), ExecutorUtil.getExecutorService()).thenAccept(stats ->
                                 SwingUtilities.invokeLater(() -> {

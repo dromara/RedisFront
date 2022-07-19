@@ -34,8 +34,6 @@ public class DataSplitPanel extends JSplitPane {
     public DataSplitPanel(ConnectInfo connectInfo) {
         this.connectInfo = connectInfo;
         var dataSearchForm = DataSearchForm.newInstance(connectInfo);
-
-
         dataSearchForm.setNodeClickProcessHandler((treeNodeInfo) -> {
             var dataViewForm = DataViewForm.newInstance(connectInfo);
             dataViewForm.dataChangeActionPerformed(treeNodeInfo.key());

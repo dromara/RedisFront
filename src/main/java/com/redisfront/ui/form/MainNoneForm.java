@@ -48,8 +48,6 @@ public class MainNoneForm {
         openLabel.setText(OPEN_LABEL.title());
         openKeyLabel.putClientProperty("FlatLaf.styleClass", "h3");
     }
-
-
     private void createUIComponents() {
         logoLabel = new JLabel(UI.REDIS_ICON);
     }
