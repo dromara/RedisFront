@@ -78,7 +78,9 @@ public class DataViewForm {
 
     private final ConnectInfo connectInfo;
 
-    private final Map<String, ScanContext<?>> scanContextMap;
+    private final Map<String, ScanContext<String>> scanSetContextMap;
+    private final Map<String, ScanContext<ScoredValue<String>>> scanZSetContextMap;
+    private final Map<String, ScanContext<Map.Entry<String, String>>> scanHashContextMap;
 
     private ActionHandler deleteActionHandler;
 
@@ -172,7 +174,9 @@ public class DataViewForm {
         pageSizeLabel.setText("数量");
         pageSizeLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
         allCountField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, pageSizeLabel);
-        scanContextMap = new LinkedHashMap<>();
+        scanZSetContextMap = new LinkedHashMap<>();
+        scanSetContextMap = new LinkedHashMap<>();
+        scanHashContextMap = new LinkedHashMap<>();
         dataTableInit();
     }
 
@@ -259,19 +263,7 @@ public class DataViewForm {
                             dataPanel.add(valueViewPanel, BorderLayout.CENTER);
                         });
                     } else if (keyTypeEnum == Enum.KeyTypeEnum.HASH) {
-                        Long len = RedisHashService.service.hlen(connectInfo, key);
-                        Map<String, String> value = RedisHashService.service.hgetall(connectInfo, key);
-                        HashTableModel hashTableModel = new HashTableModel(new ArrayList<>(value.entrySet()));
-                        SwingUtilities.invokeLater(() -> {
-                            currentCountField.setText("1");
-                            allCountField.setText(String.valueOf(value.size()));
-                            keyLabel.setText("键名：");
-                            lengthLabel.setText("Length: " + len);
-                            keySizeLabel.setText("Size: " + DataSizeUtil.format(value.values().stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)));
-                            dataTable.setModel(hashTableModel);
-                            Fn.removeAllComponent(dataPanel);
-                            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
-                        });
+                        loadHashData(key);
                     } else if (keyTypeEnum == Enum.KeyTypeEnum.SET) {
                         loadSetData(key);
                     } else if (keyTypeEnum == Enum.KeyTypeEnum.ZSET) {
@@ -301,12 +293,43 @@ public class DataViewForm {
                 )), updateContentFuture);
     }
 
+    private void loadHashData(String key) {
+        Long len = RedisHashService.service.hlen(connectInfo, key);
+        ScanContext<Map.Entry<String, String>> scanContext = scanHashContextMap.getOrDefault(key, new ScanContext<>());
+        var lastSearchKey = scanContext.getSearchKey();
+        scanContext.setSearchKey(tableSearchField.getText());
+
+        MapScanCursor<String, String> mapScanCursor = RedisHashService.service.hscan(connectInfo, key, ScanCursor.INITIAL, ScanArgs.Builder.limit(100));
+        scanContext.setScanCursor(mapScanCursor);
+
+
+        if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
+            if (scanContext.getKeyList().size() >= 5000) {
+                System.gc();
+                throw new RedisFrontException("数据加载上限，请使用正则模糊匹配查找！");
+            }
+            scanContext.getKeyList().addAll(new ArrayList<>(mapScanCursor.getMap().entrySet()));
+        } else {
+            scanContext.setKeyList(new ArrayList<>(mapScanCursor.getMap().entrySet()));
+        }
+
+        HashTableModel hashTableModel = new HashTableModel(scanContext.getKeyList());
+
+        SwingUtilities.invokeLater(() -> {
+            currentCountField.setText("1");
+            allCountField.setText(String.valueOf(scanContext.getKeyList().size()));
+            keyLabel.setText("键名：");
+            lengthLabel.setText("Length: " + len);
+            keySizeLabel.setText("Size: " + DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getValue().getBytes().length).reduce(Integer::sum).orElse(0)));
+            dataTable.setModel(hashTableModel);
+            Fn.removeAllComponent(dataPanel);
+            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
+        });
+    }
+
     private void loadSetData(String key) {
-        Long strLen = RedisSetService.service.scard(connectInfo, key);
-
-        ScanContext<String> scanContext = getScanContext(key);
-
-
+        Long len = RedisSetService.service.scard(connectInfo, key);
+        ScanContext<String> scanContext = scanSetContextMap.getOrDefault(key, new ScanContext<>());
         var lastSearchKey = scanContext.getSearchKey();
         scanContext.setSearchKey(tableSearchField.getText());
 
@@ -314,7 +337,7 @@ public class DataViewForm {
         scanContext.setScanCursor(valueScanCursor);
 
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
-            if (scanContext.getKeyList().size() >= 300000) {
+            if (scanContext.getKeyList().size() >= 5000) {
                 System.gc();
                 throw new RedisFrontException("数据加载上限，请使用正则模糊匹配查找！");
             }
@@ -325,12 +348,10 @@ public class DataViewForm {
 
         SetTableModel setTableModel = new SetTableModel(scanContext.getKeyList());
 
-
         SwingUtilities.invokeLater(() -> {
-            keyLabel.setText("分数：");
-            currentCountField.setText(String.valueOf(valueScanCursor.getValues().size()));
-            allCountField.setText(String.valueOf(strLen));
-            lengthLabel.setText("Length: " + strLen);
+            currentCountField.setText(String.valueOf(scanContext.getKeyList().size()));
+            allCountField.setText(String.valueOf(len));
+            lengthLabel.setText("Length: " + len);
             keySizeLabel.setText("Size: " + DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)));
             dataTable.setModel(setTableModel);
             loadMoreBtn.setEnabled(!valueScanCursor.isFinished());
@@ -339,36 +360,19 @@ public class DataViewForm {
         });
     }
 
-    private <T extends Object> ScanContext<T> getScanContext(String key, T clazz) {
-        ScanContext<T> scanContext = (ScanContext<T>) scanContextMap.get(key);
-
-        if (Fn.isNull(scanContext)) {
-            scanContextMap.put(key, new ScanContext<>());
-        }
-
-        if (Fn.isNull(scanContext.getLimit())) {
-            scanContext.setLimit(500L);
-        }
-
-        if (Fn.isNull(scanContext.getScanCursor())) {
-            scanContext.setScanCursor(ScanCursor.INITIAL);
-        }
-
-        return scanContext;
-    }
 
     private void loadZSetData(String key) {
         Long strLen = RedisZSetService.service.zcard(connectInfo, key);
 
-        ScanContext<ScoredValue> scanContext = getScanContext(key,ScoredValue.class);
+        ScanContext<ScoredValue<String>> scanContext = scanZSetContextMap.getOrDefault(key, new ScanContext<>());
+        var lastSearchKey = scanContext.getSearchKey();
         scanContext.setSearchKey(tableSearchField.getText());
 
-        var lastSearchKey = scanContext.getSearchKey();
         ScoredValueScanCursor<String> valueScanCursor = RedisZSetService.service.zscan(connectInfo, key, ScanCursor.INITIAL, ScanArgs.Builder.limit(100));
         scanContext.setScanCursor(valueScanCursor);
 
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
-            if (scanContext.getKeyList().size() >= 300000) {
+            if (scanContext.getKeyList().size() >= 5000) {
                 System.gc();
                 throw new RedisFrontException("数据加载上限，请使用正则模糊匹配查找！");
             }
@@ -378,7 +382,6 @@ public class DataViewForm {
         }
 
         SortedSetTableModel sortedSetTableModel = new SortedSetTableModel(scanContext.getKeyList());
-
 
         SwingUtilities.invokeLater(() -> {
             keyLabel.setText("分数：");

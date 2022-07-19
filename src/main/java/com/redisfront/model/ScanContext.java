@@ -1,5 +1,6 @@
 package com.redisfront.model;
 
+import com.redisfront.commons.func.Fn;
 import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
 
@@ -12,6 +13,9 @@ public class ScanContext<T> {
     private List<T> keys;
 
     public ScanCursor getScanCursor() {
+        if (Fn.isNull(scanCursor)) {
+            return ScanCursor.INITIAL;
+        }
         return scanCursor;
     }
 

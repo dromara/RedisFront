@@ -59,7 +59,7 @@ public class DataSearchForm {
     private JTextField allField;
     private JPanel loadMorePanel;
 
-    private  Map<Integer, ScanContext<String>> scanKeysContextMap;
+    private Map<Integer, ScanContext<String>> scanKeysContextMap;
 
     private ProcessHandler<TreeNodeInfo> nodeClickProcessHandler;
 
@@ -82,17 +82,18 @@ public class DataSearchForm {
         }
         databaseComboBox.setSelectedIndex(0);
         var currentLabel = new JLabel();
-        currentLabel.setText("扫描到");
-        currentLabel.setOpaque(true);
+        currentLabel.setText("结果");
         currentLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
         currentLabel.setSize(5, -1);
+        currentField.setBorder(new EmptyBorder(0, 5, 0, 0));
         currentField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, currentLabel);
 
         var allLabel = new JLabel();
-        allLabel.setText("全部键");
+        allLabel.setText("");
         allLabel.setOpaque(true);
         allLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
         allLabel.setSize(5, -1);
+        allField.setBorder(new EmptyBorder(0, 5, 0, 0));
         allField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, allLabel);
     }
 
@@ -118,6 +119,17 @@ public class DataSearchForm {
                 scanKeysContext.setScanCursor(ScanCursor.INITIAL);
             }
 
+            if (!key.contains("*")) {
+                var all = allField.getText();
+                var scanInfo = all.split("/");
+                if (scanInfo.length > 1) {
+                    scanKeysContext.setLimit(Long.valueOf(scanInfo[1]));
+                } else {
+                    scanKeysContext.setLimit(Long.valueOf(all));
+                }
+
+            }
+
             var keyScanCursor = RedisBasicService.service.scan(connectInfo, scanKeysContext.getScanCursor(), scanKeysContext.getScanArgs());
             scanKeysContext.setScanCursor(keyScanCursor);
             log.debug("本次扫描到：{}", keyScanCursor.getKeys().size());
@@ -139,6 +151,21 @@ public class DataSearchForm {
             SwingUtilities.invokeLater(() -> {
                 currentField.setText(String.valueOf(scanKeysContext.getKeyList().size()));
                 loadMoreBtn.setEnabled(!keyScanCursor.isFinished());
+                var all = allField.getText();
+                var scanInfo = all.split("/");
+                if (scanInfo.length > 1) {
+                    var current = Long.valueOf(scanInfo[0]);
+                    allField.setText((current + scanKeysContext.getLimit()) + "/" + scanInfo[1]);
+                    allField.setToolTipText("已扫描：".concat(String.valueOf(current)) + ",全部：".concat(scanInfo[1]));
+                } else {
+                    allField.setToolTipText("已扫描：".concat(String.valueOf(scanKeysContext.getLimit())) + ",全部：".concat(all));
+                    allField.setText(scanKeysContext.getLimit() + "/" + all);
+                }
+                if (loadMoreBtn.isEnabled()) {
+                    loadMoreBtn.requestFocus();
+                } else {
+                    loadMoreBtn.setText("扫描完成");
+                }
                 keyTree.setModel(treeModel);
             });
             enableInputComponent();
@@ -170,7 +197,6 @@ public class DataSearchForm {
             searchBtn.setEnabled(false);
             keyTree.setEnabled(false);
             loadMoreBtn.setEnabled(false);
-            loadMoreBtn.setText("数据加载中...");
             databaseComboBox.setEnabled(false);
         });
     }
@@ -182,7 +208,6 @@ public class DataSearchForm {
             refreshBtn.setEnabled(true);
             searchBtn.setEnabled(true);
             keyTree.setEnabled(true);
-            loadMoreBtn.setText("加载更多");
             loadMoreBtn.requestFocus();
             databaseComboBox.setEnabled(Fn.notEqual(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER));
         });
@@ -229,7 +254,8 @@ public class DataSearchForm {
         refreshBtn.setIcon(UI.REFRESH_ICON);
         databaseComboBox = new JComboBox<>();
 
-        loadMoreBtn = new JButton("加载更多");
+        loadMoreBtn = new JButton("继续扫描");
+        loadMoreBtn.setIcon(UI.LOAD_MORE_ICON);
         loadMoreBtn.addActionListener(e -> searchActionPerformed());
 
         var dbList = new ArrayList<DbInfo>() {
@@ -296,8 +322,8 @@ public class DataSearchForm {
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchBtn);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> {
-            scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
             searchTextField.setText("");
+            scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
             searchActionPerformed();
         });
 
@@ -387,7 +413,7 @@ public class DataSearchForm {
         treePanel.add(scrollPane1, BorderLayout.CENTER);
         scrollPane1.setViewportView(keyTree);
         loadMorePanel = new JPanel();
-        loadMorePanel.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
+        loadMorePanel.setLayout(new GridLayoutManager(2, 11, new Insets(0, 0, 0, 0), -1, -1));
         loadMorePanel.setEnabled(true);
         treePanel.add(loadMorePanel, BorderLayout.SOUTH);
         loadMorePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
@@ -395,14 +421,14 @@ public class DataSearchForm {
         currentField.setEditable(false);
         currentField.setEnabled(false);
         currentField.setVisible(true);
-        loadMorePanel.add(currentField, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(120, -1), null, 0, false));
+        loadMorePanel.add(currentField, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(125, -1), null, 0, false));
+        loadMoreBtn.setText("扫描更多");
+        loadMorePanel.add(loadMoreBtn, new GridConstraints(1, 0, 1, 11, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         allField = new JTextField();
         allField.setEditable(false);
         allField.setEnabled(false);
         allField.setVisible(true);
-        loadMorePanel.add(allField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(120, -1), null, 0, false));
-        loadMoreBtn.setText("Button");
-        loadMorePanel.add(loadMoreBtn, new GridConstraints(1, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        loadMorePanel.add(allField, new GridConstraints(0, 2, 1, 8, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(125, -1), null, 0, false));
     }
 
     /**

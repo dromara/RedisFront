@@ -6,6 +6,7 @@ import com.redisfront.service.RedisHashService;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.util.LettuceUtil;
 import io.lettuce.core.MapScanCursor;
+import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
 
 import java.util.List;
@@ -64,11 +65,11 @@ public class RedisHashServiceImpl implements RedisHashService {
     }
 
     @Override
-    public MapScanCursor<String, String> hscan(ConnectInfo connectInfo, String key, ScanCursor scanCursor) {
+    public MapScanCursor<String, String> hscan(ConnectInfo connectInfo, String key,ScanCursor scanCursor, ScanArgs scanArgs) {
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
-            return LettuceUtil.clusterExec(connectInfo, commands -> commands.hscan(key, scanCursor));
+            return LettuceUtil.clusterExec(connectInfo, commands -> commands.hscan(key, scanCursor,scanArgs));
         } else {
-            return LettuceUtil.exec(connectInfo, commands -> commands.hscan(key, scanCursor));
+            return LettuceUtil.exec(connectInfo, commands -> commands.hscan(key, scanCursor,scanArgs));
         }
     }
 

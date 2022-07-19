@@ -3,6 +3,7 @@ package com.redisfront.service;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.impl.RedisHashServiceImpl;
 import io.lettuce.core.MapScanCursor;
+import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public interface RedisHashService {
 
     String hmset(ConnectInfo connectInfo, String key, Map<String, String> map);
 
-    MapScanCursor<String, String> hscan(ConnectInfo connectInfo, String key, ScanCursor scanCursor);
+    MapScanCursor<String, String> hscan(ConnectInfo connectInfo, String key, ScanCursor scanCursor, ScanArgs scanArgs);
 
     Boolean hset(ConnectInfo connectInfo, String key, String field, String value);
 
