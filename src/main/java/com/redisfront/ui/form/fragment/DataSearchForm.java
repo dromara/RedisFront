@@ -14,10 +14,10 @@ import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.util.*;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.model.DbInfo;
+import com.redisfront.model.ScanContext;
 import com.redisfront.model.TreeNodeInfo;
 import com.redisfront.service.RedisBasicService;
 import com.redisfront.ui.dialog.AddRedisKeyDialog;
-import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
 import org.jdesktop.swingx.JXTree;
 import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer;
@@ -32,8 +32,10 @@ import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.List;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -57,7 +59,7 @@ public class DataSearchForm {
     private JTextField allField;
     private JPanel loadMorePanel;
 
-    private volatile Map<Integer, ScanKeysContext> scanKeysContextMap;
+    private  Map<Integer, ScanContext<String>> scanKeysContextMap;
 
     private ProcessHandler<TreeNodeInfo> nodeClickProcessHandler;
 
@@ -99,50 +101,6 @@ public class DataSearchForm {
     }
 
 
-    private static class ScanKeysContext {
-        private ScanCursor scanCursor;
-        private Long limit;
-        private String searchKey;
-        private List<String> keys;
-
-        public ScanCursor getScanCursor() {
-            return scanCursor;
-        }
-
-        public void setScanCursor(ScanCursor scanCursor) {
-            this.scanCursor = scanCursor;
-        }
-
-        public Long getLimit() {
-            return limit;
-        }
-
-        public void setLimit(Long limit) {
-            this.limit = limit;
-        }
-
-        public String getSearchKey() {
-            return searchKey;
-        }
-
-        public void setSearchKey(String searchKey) {
-            this.searchKey = searchKey;
-        }
-
-        public ScanArgs getScanArgs() {
-            return ScanArgs.Builder.matches(getSearchKey()).limit(getLimit());
-        }
-
-
-        public List<String> getKeyList() {
-            return keys;
-        }
-
-        public void setKeyList(List<String> keys) {
-            this.keys = keys;
-        }
-    }
-
     public synchronized void loadTreeModelData(String key) {
         try {
             disableInputComponent();
@@ -176,7 +134,7 @@ public class DataSearchForm {
 
             String delim = PrefUtil.getState().get(Const.KEY_KEY_SEPARATOR, ":");
 
-            var treeModel = TreeUtil.toTreeModel(new HashSet<>(scanKeysContext.keys), delim);
+            var treeModel = TreeUtil.toTreeModel(new HashSet<>(scanKeysContext.getKeyList()), delim);
 
             SwingUtilities.invokeLater(() -> {
                 currentField.setText(String.valueOf(scanKeysContext.getKeyList().size()));
@@ -265,7 +223,7 @@ public class DataSearchForm {
 
         refreshBtn = new JButton();
         refreshBtn.addActionListener(e -> {
-            scanKeysContextMap.put(connectInfo.database(), new ScanKeysContext());
+            scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
             searchActionPerformed();
         });
         refreshBtn.setIcon(UI.REFRESH_ICON);
@@ -306,12 +264,12 @@ public class DataSearchForm {
                     String[] sub = s[0].split("=");
                     dbInfo.setDbSize(Long.valueOf(sub[1]));
                 }
-                scanKeysContextMap.put(dbInfo.dbIndex(), new ScanKeysContext());
+                scanKeysContextMap.put(dbInfo.dbIndex(), new ScanContext<>());
                 databaseComboBox.addItem(dbInfo);
             }
         } else {
             var dbInfo = dbList.get(0);
-            scanKeysContextMap.put(dbInfo.dbIndex(), new ScanKeysContext());
+            scanKeysContextMap.put(dbInfo.dbIndex(), new ScanContext<>());
             var dbSize = RedisBasicService.service.dbSize(connectInfo);
             dbInfo.setDbSize(dbSize);
             databaseComboBox.addItem(dbInfo);
@@ -321,7 +279,7 @@ public class DataSearchForm {
             var db = (DbInfo) databaseComboBox.getSelectedItem();
             assert db != null;
             this.connectInfo.setDatabase(db.dbIndex());
-            scanKeysContextMap.put(connectInfo.database(), new ScanKeysContext());
+            scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
             var flag = !Fn.isNull(db.dbSize()) && (db.dbSize() > 10000L);
             allField.setText(String.valueOf(db.dbSize()));
             loadMorePanel.setVisible(flag);
@@ -332,13 +290,13 @@ public class DataSearchForm {
         searchTextField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入搜索词...");
         searchBtn = new JButton(new FlatSearchIcon());
         searchBtn.addActionListener(actionEvent -> {
-            scanKeysContextMap.put(connectInfo.database(), new ScanKeysContext());
+            scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
             searchActionPerformed();
         });
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchBtn);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> {
-            scanKeysContextMap.put(connectInfo.database(), new ScanKeysContext());
+            scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
             searchTextField.setText("");
             searchActionPerformed();
         });

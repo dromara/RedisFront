@@ -52,16 +52,16 @@ public class MainMenuBar extends JMenuBar {
         //新建连接
         var addConnectMenu = new JMenuItem(FILE_MENU_NEW_ITEM.title(), FILE_MENU_NEW_ITEM.mnemonic());
         addConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK));
-        addConnectMenu.addActionListener(e -> AddConnectDialog.showAddConnectDialog(((connectInfo) -> MainWindowForm.getInstance().addActionPerformed(connectInfo))));
+        addConnectMenu.addActionListener(e -> AddConnectDialog.showAddConnectDialog(((connectInfo) -> MainWindowForm.getInstance().addTabActionPerformed(connectInfo))));
         fileMenu.add(addConnectMenu);
         //打开连接
         var openConnectMenu = new JMenuItem(FILE_MENU_OPEN_ITEM.title(), FILE_MENU_OPEN_ITEM.mnemonic());
         openConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
         openConnectMenu.addActionListener(e -> OpenConnectDialog.showOpenConnectDialog(
                 //打开连接回调
-                ((connectInfo) -> MainWindowForm.getInstance().addActionPerformed(connectInfo)),
+                ((connectInfo) -> MainWindowForm.getInstance().addTabActionPerformed(connectInfo)),
                 //编辑连接回调
-                (connectInfo -> AddConnectDialog.showEditConnectDialog(connectInfo, (connectInfo1) -> MainWindowForm.getInstance().addActionPerformed(connectInfo1))),
+                (connectInfo -> AddConnectDialog.showEditConnectDialog(connectInfo, (connectInfo1) -> MainWindowForm.getInstance().addTabActionPerformed(connectInfo1))),
                 //删除连接回调
                 (connectInfo -> ConnectService.service.delete(connectInfo.id())))
         );

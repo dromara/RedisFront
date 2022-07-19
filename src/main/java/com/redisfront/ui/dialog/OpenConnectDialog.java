@@ -85,9 +85,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
             {
                 //表格打开链接操作
                 var openConnectMenu = new JMenuItem("打开链接");
-                openConnectMenu.addActionListener(e -> {
-                    onOK();
-                });
+                openConnectMenu.addActionListener(e -> onOK());
                 add(openConnectMenu);
                 //表格编辑链接操作
                 var editConnectMenu = new JMenuItem("编辑链接");

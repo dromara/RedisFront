@@ -9,16 +9,19 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.commons.Handler.ActionHandler;
+import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
+import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.util.ExecutorUtil;
 import com.redisfront.commons.util.FutureUtil;
+import com.redisfront.commons.util.PrefUtil;
 import com.redisfront.model.*;
 import com.redisfront.service.*;
 import com.redisfront.ui.component.LoadingPanel;
 import com.redisfront.ui.component.TextEditor;
-import io.lettuce.core.ScoredValue;
+import io.lettuce.core.*;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
 import javax.swing.*;
@@ -67,14 +70,15 @@ public class DataViewForm {
     private JPanel dataPanel;
     private JScrollPane tableScorePanel;
     private JPanel pagePanel;
-    private JTextField pageNumField;
-    private JTextField pageSizeField;
-    private JButton prevBtn;
-    private JButton nextBtn;
+    private JTextField currentCountField;
+    private JTextField allCountField;
+    private JButton loadMoreBtn;
     private TextEditor textEditor;
     private JTextField keyTextField;
 
     private final ConnectInfo connectInfo;
+
+    private final Map<String, ScanContext<?>> scanContextMap;
 
     private ActionHandler deleteActionHandler;
 
@@ -162,17 +166,18 @@ public class DataViewForm {
         var pageNumLabel = new JLabel();
         pageNumLabel.setText("当前");
         pageNumLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
-        pageNumField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, pageNumLabel);
+        currentCountField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, pageNumLabel);
 
         var pageSizeLabel = new JLabel();
         pageSizeLabel.setText("数量");
         pageSizeLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
-        pageSizeField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, pageSizeLabel);
-
+        allCountField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, pageSizeLabel);
+        scanContextMap = new LinkedHashMap<>();
         dataTableInit();
     }
 
     private void dataTableInit() {
+
         dataTable.setShowHorizontalLines(true);
         dataTable.setShowVerticalLines(true);
         dataTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
@@ -229,7 +234,7 @@ public class DataViewForm {
         return contentPanel;
     }
 
-    public void dataChangeActionPerformed(String key) {
+    public synchronized void dataChangeActionPerformed(String key) {
         CompletableFuture<Void> updateContentFuture = CompletableFuture.supplyAsync(() -> {
                     String type = RedisBasicService.service.type(connectInfo, key);
                     Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(type.toUpperCase());
@@ -258,8 +263,8 @@ public class DataViewForm {
                         Map<String, String> value = RedisHashService.service.hgetall(connectInfo, key);
                         HashTableModel hashTableModel = new HashTableModel(new ArrayList<>(value.entrySet()));
                         SwingUtilities.invokeLater(() -> {
-                            pageNumField.setText("1");
-                            pageSizeField.setText(String.valueOf(value.size()));
+                            currentCountField.setText("1");
+                            allCountField.setText(String.valueOf(value.size()));
                             keyLabel.setText("键名：");
                             lengthLabel.setText("Length: " + len);
                             keySizeLabel.setText("Size: " + DataSizeUtil.format(value.values().stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)));
@@ -268,40 +273,17 @@ public class DataViewForm {
                             dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
                         });
                     } else if (keyTypeEnum == Enum.KeyTypeEnum.SET) {
-                        Long scard = RedisSetService.service.scard(connectInfo, key);
-                        Set<String> value = RedisSetService.service.smembers(connectInfo, key);
-                        SetTableModel setTableModel = new SetTableModel(new ArrayList<>(value));
-                        SwingUtilities.invokeLater(() -> {
-                            pageNumField.setText("1");
-                            pageSizeField.setText(String.valueOf(value.size()));
-                            lengthLabel.setText("Length: " + scard);
-                            keySizeLabel.setText("Size: " + DataSizeUtil.format(value.stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)));
-                            dataTable.setModel(setTableModel);
-                            Fn.removeAllComponent(dataPanel);
-                            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
-                        });
+                        loadSetData(key);
                     } else if (keyTypeEnum == Enum.KeyTypeEnum.ZSET) {
-                        Long strLen = RedisZSetService.service.zcard(connectInfo, key);
-                        List<ScoredValue<String>> value = RedisZSetService.service.zrange(connectInfo, key, 0, -1);
-                        SortedSetTableModel sortedSetTableModel = new SortedSetTableModel(value);
-                        SwingUtilities.invokeLater(() -> {
-                            keyLabel.setText("分数：");
-                            pageNumField.setText("1");
-                            pageSizeField.setText(String.valueOf(value.size()));
-                            lengthLabel.setText("Length: " + strLen);
-                            keySizeLabel.setText("Size: " + DataSizeUtil.format(value.stream().map(e -> e.getValue().getBytes().length).reduce(Integer::sum).orElse(0)));
-                            dataTable.setModel(sortedSetTableModel);
-                            Fn.removeAllComponent(dataPanel);
-                            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
-                        });
+                        loadZSetData(key);
                     } else if (keyTypeEnum == Enum.KeyTypeEnum.LIST) {
                         Long llen = RedisListService.service.llen(connectInfo, key);
                         List<String> value = RedisListService.service.lrange(connectInfo, key, 0, -1);
                         ListTableModel listTableModel = new ListTableModel(value);
                         SwingUtilities.invokeLater(() -> {
                             lengthLabel.setText("Length: " + llen);
-                            pageNumField.setText("1");
-                            pageSizeField.setText(String.valueOf(value.size()));
+                            currentCountField.setText("1");
+                            allCountField.setText(String.valueOf(value.size()));
                             keySizeLabel.setText("Size: " + DataSizeUtil.format(value.stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)));
                             dataTable.setModel(listTableModel);
                             Fn.removeAllComponent(dataPanel);
@@ -318,6 +300,99 @@ public class DataViewForm {
                         }
                 )), updateContentFuture);
     }
+
+    private void loadSetData(String key) {
+        Long strLen = RedisSetService.service.scard(connectInfo, key);
+
+        ScanContext<String> scanContext = getScanContext(key);
+
+
+        var lastSearchKey = scanContext.getSearchKey();
+        scanContext.setSearchKey(tableSearchField.getText());
+
+        ValueScanCursor<String> valueScanCursor = RedisSetService.service.sscan(connectInfo, key, ScanCursor.INITIAL, ScanArgs.Builder.limit(100));
+        scanContext.setScanCursor(valueScanCursor);
+
+        if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
+            if (scanContext.getKeyList().size() >= 300000) {
+                System.gc();
+                throw new RedisFrontException("数据加载上限，请使用正则模糊匹配查找！");
+            }
+            scanContext.getKeyList().addAll(valueScanCursor.getValues());
+        } else {
+            scanContext.setKeyList(valueScanCursor.getValues());
+        }
+
+        SetTableModel setTableModel = new SetTableModel(scanContext.getKeyList());
+
+
+        SwingUtilities.invokeLater(() -> {
+            keyLabel.setText("分数：");
+            currentCountField.setText(String.valueOf(valueScanCursor.getValues().size()));
+            allCountField.setText(String.valueOf(strLen));
+            lengthLabel.setText("Length: " + strLen);
+            keySizeLabel.setText("Size: " + DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)));
+            dataTable.setModel(setTableModel);
+            loadMoreBtn.setEnabled(!valueScanCursor.isFinished());
+            Fn.removeAllComponent(dataPanel);
+            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
+        });
+    }
+
+    private <T extends Object> ScanContext<T> getScanContext(String key, T clazz) {
+        ScanContext<T> scanContext = (ScanContext<T>) scanContextMap.get(key);
+
+        if (Fn.isNull(scanContext)) {
+            scanContextMap.put(key, new ScanContext<>());
+        }
+
+        if (Fn.isNull(scanContext.getLimit())) {
+            scanContext.setLimit(500L);
+        }
+
+        if (Fn.isNull(scanContext.getScanCursor())) {
+            scanContext.setScanCursor(ScanCursor.INITIAL);
+        }
+
+        return scanContext;
+    }
+
+    private void loadZSetData(String key) {
+        Long strLen = RedisZSetService.service.zcard(connectInfo, key);
+
+        ScanContext<ScoredValue> scanContext = getScanContext(key,ScoredValue.class);
+        scanContext.setSearchKey(tableSearchField.getText());
+
+        var lastSearchKey = scanContext.getSearchKey();
+        ScoredValueScanCursor<String> valueScanCursor = RedisZSetService.service.zscan(connectInfo, key, ScanCursor.INITIAL, ScanArgs.Builder.limit(100));
+        scanContext.setScanCursor(valueScanCursor);
+
+        if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
+            if (scanContext.getKeyList().size() >= 300000) {
+                System.gc();
+                throw new RedisFrontException("数据加载上限，请使用正则模糊匹配查找！");
+            }
+            scanContext.getKeyList().addAll(valueScanCursor.getValues());
+        } else {
+            scanContext.setKeyList(valueScanCursor.getValues());
+        }
+
+        SortedSetTableModel sortedSetTableModel = new SortedSetTableModel(scanContext.getKeyList());
+
+
+        SwingUtilities.invokeLater(() -> {
+            keyLabel.setText("分数：");
+            currentCountField.setText(String.valueOf(valueScanCursor.getValues().size()));
+            allCountField.setText(String.valueOf(strLen));
+            lengthLabel.setText("Length: " + strLen);
+            keySizeLabel.setText("Size: " + DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getValue().getBytes().length).reduce(Integer::sum).orElse(0)));
+            dataTable.setModel(sortedSetTableModel);
+            loadMoreBtn.setEnabled(!valueScanCursor.isFinished());
+            Fn.removeAllComponent(dataPanel);
+            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
+        });
+    }
+
 
     private void createUIComponents() {
         bodyPanel = new JPanel() {
@@ -479,19 +554,16 @@ public class DataViewForm {
         final JPanel panel4 = new JPanel();
         panel4.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         pagePanel.add(panel4, BorderLayout.NORTH);
-        pageNumField = new JTextField();
-        panel4.add(pageNumField, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-        pageSizeField = new JTextField();
-        panel4.add(pageSizeField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        currentCountField = new JTextField();
+        panel4.add(currentCountField, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        allCountField = new JTextField();
+        panel4.add(allCountField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final JPanel panel5 = new JPanel();
-        panel5.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
+        panel5.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         pagePanel.add(panel5, BorderLayout.SOUTH);
-        prevBtn = new JButton();
-        prevBtn.setText("上一页");
-        panel5.add(prevBtn, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        nextBtn = new JButton();
-        nextBtn.setText("下一页");
-        panel5.add(nextBtn, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        loadMoreBtn = new JButton();
+        loadMoreBtn.setText("加载更多");
+        panel5.add(loadMoreBtn, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         tableScorePanel = new JScrollPane();
         panel2.add(tableScorePanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         dataTable = new JTable();

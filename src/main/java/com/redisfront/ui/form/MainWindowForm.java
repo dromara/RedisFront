@@ -17,9 +17,6 @@ import com.redisfront.commons.func.Fn;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.geom.RoundRectangle2D;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
@@ -49,7 +46,7 @@ public class MainWindowForm {
         contentPanel.add(MainNoneForm.getInstance().getContentPanel(), BorderLayout.CENTER);
     }
 
-    public void addActionPerformed(ConnectInfo connectInfo) {
+    public void addTabActionPerformed(ConnectInfo connectInfo) {
         CompletableFuture.allOf(CompletableFuture.supplyAsync(() -> connectInfo.setRedisModeEnum(RedisBasicService.service.getRedisModeEnum(connectInfo)), ExecutorUtil.getExecutorService()), CompletableFuture.runAsync(() -> {
             if (Fn.equal(connectInfo.id(), 0)) {
                 ConnectService.service.save(connectInfo);
@@ -117,16 +114,16 @@ public class MainWindowForm {
 
         var newBtn = new JButton(null, UI.NEW_CONN_ICON);
         newBtn.setToolTipText("新建连接");
-        newBtn.addActionListener(e -> AddConnectDialog.showAddConnectDialog(this::addActionPerformed));
+        newBtn.addActionListener(e -> AddConnectDialog.showAddConnectDialog(this::addTabActionPerformed));
         jPanel.add(newBtn);
 
         var openBtn = new JButton(null, UI.OPEN_CONN_ICON);
         openBtn.setToolTipText("打开连接");
         openBtn.addActionListener(e -> OpenConnectDialog.showOpenConnectDialog(
                 //打开连接回调
-                (connectInfo) -> MainWindowForm.getInstance().addActionPerformed(connectInfo),
+                (connectInfo) -> MainWindowForm.getInstance().addTabActionPerformed(connectInfo),
                 //编辑连接回调
-                (connectInfo -> AddConnectDialog.showEditConnectDialog(connectInfo, (c) -> MainWindowForm.getInstance().addActionPerformed(c))),
+                (connectInfo -> AddConnectDialog.showEditConnectDialog(connectInfo, (c) -> MainWindowForm.getInstance().addTabActionPerformed(c))),
                 //删除连接回调
                 (connectInfo -> ConnectService.service.delete(connectInfo.id()))));
         jPanel.add(openBtn);
