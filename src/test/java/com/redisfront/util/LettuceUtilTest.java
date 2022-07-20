@@ -22,7 +22,7 @@ import java.util.List;
 public class LettuceUtilTest {
 
 
-    @Test
+//    @Test
     public void test1() {
         LettuceUtil.run(new ConnectInfo().setHost("127.0.0.1").setPort(6379).setSsl(false), redisCommands -> {
             if (redisCommands.getStatefulConnection() instanceof StatefulRedisConnectionImpl<String, String> statefulRedisConnection) {
@@ -32,7 +32,7 @@ public class LettuceUtilTest {
         });
     }
 
-    @Test
+//    @Test
     public void test3() {
         String[] list = new String[]{"a", "b", "c", "d", "e", "f", "g", "h", "l", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
         for (int i = 0; i < 26; i++) {
@@ -60,7 +60,7 @@ public class LettuceUtilTest {
 
     }
 
-    @Test
+//    @Test
     public void test2() {
         LettuceUtil.run(new ConnectInfo().setHost("127.0.0.1").setPort(6379).setSsl(false), redisCommands -> {
             ScanArgs scanArgs = new ScanArgs();

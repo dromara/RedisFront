@@ -8,18 +8,23 @@ import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import com.redisfront.commons.handler.ActionHandler;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
 import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.commons.func.Fn;
+import com.redisfront.commons.handler.ActionHandler;
+import com.redisfront.commons.util.AlertUtil;
 import com.redisfront.commons.util.ExecutorUtil;
 import com.redisfront.commons.util.FutureUtil;
 import com.redisfront.model.*;
 import com.redisfront.service.*;
 import com.redisfront.ui.component.LoadingPanel;
 import com.redisfront.ui.component.TextEditor;
-import io.lettuce.core.*;
+import com.redisfront.ui.dialog.AddOrUpdateItemDialog;
+import io.lettuce.core.MapScanCursor;
+import io.lettuce.core.ScoredValue;
+import io.lettuce.core.ScoredValueScanCursor;
+import io.lettuce.core.ValueScanCursor;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
 import javax.swing.*;
@@ -93,6 +98,11 @@ public class DataViewForm {
     public DataViewForm(ConnectInfo connectInfo) {
         this.connectInfo = connectInfo;
         $$$setupUI$$$();
+
+        scanZSetContextMap = new LinkedHashMap<>();
+        scanSetContextMap = new LinkedHashMap<>();
+        scanHashContextMap = new LinkedHashMap<>();
+
         loadMoreBtn.setIcon(UI.LOAD_MORE_ICON);
         tableScorePanel.setPreferredSize(new Dimension(500, 190));
 
@@ -135,10 +145,29 @@ public class DataViewForm {
         refBtn.setIcon(UI.REFRESH_ICON);
         refBtn.setText("重载");
         refBtn.addActionListener(e -> {
+            refBtn.setEnabled(false);
             saveBtn.setEnabled(false);
             delBtn.setEnabled(false);
             String key = keyField.getText();
+
+            var keyType = keyTypeLabel.getText();
+            Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(keyType.toUpperCase());
+
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.ZSET)) {
+                this.scanZSetContextMap.put(key, new ScanContext<>());
+            }
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.HASH)) {
+                this.scanHashContextMap.put(key, new ScanContext<>());
+            }
+
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.LIST)) {
+            }
+
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
+                this.scanSetContextMap.put(key, new ScanContext<>());
+            }
             dataChangeActionPerformed(key);
+
         });
         refBtn.setToolTipText("重载");
 
@@ -160,9 +189,58 @@ public class DataViewForm {
 
         tableAddBtn.setIcon(UI.PLUS_ICON);
         tableAddBtn.setText("插入元素");
+        tableAddBtn.addActionListener((event) -> {
+            var keyType = keyTypeLabel.getText();
+            Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(keyType.toUpperCase());
+
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.ZSET)) {
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog("插入元素", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
+            }
+
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.HASH)) {
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog("插入元素", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
+            }
+
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.LIST)) {
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog("插入元素", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
+            }
+
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog("插入元素", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
+            }
+        });
 
         tableDelBtn.setIcon(UI.DELETE_ICON);
         tableDelBtn.setText("删除元素");
+        tableAddBtn.addActionListener((event) -> {
+            var row = dataTable.getSelectedRow();
+
+            if (row == -1) {
+                return;
+            }
+            var keyType = keyTypeLabel.getText();
+            Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(keyType.toUpperCase());
+            String key = keyField.getText();
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.ZSET)) {
+                var value = (String) dataTable.getValueAt(row, 2);
+                RedisZSetService.service.zrem(connectInfo, key, value);
+            }
+
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.HASH)) {
+                var field = (String) dataTable.getValueAt(row, 0);
+                RedisHashService.service.hdel(connectInfo, key, field);
+            }
+
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.LIST)) {
+                var value = (String) dataTable.getValueAt(row, 1);
+                RedisListService.service.lrem(connectInfo, key, 1, value);
+            }
+
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
+                var value = (String) dataTable.getValueAt(row, 1);
+                RedisSetService.service.srem(connectInfo, key, value);
+            }
+        });
 
         tableRefreshBtn.setIcon(UI.REFRESH_ICON);
         tableRefreshBtn.setText("重新载入");
@@ -176,9 +254,7 @@ public class DataViewForm {
         pageSizeLabel.setText("总数");
         pageSizeLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
         allCountField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, pageSizeLabel);
-        scanZSetContextMap = new LinkedHashMap<>();
-        scanSetContextMap = new LinkedHashMap<>();
-        scanHashContextMap = new LinkedHashMap<>();
+
         dataTableInit();
     }
 
@@ -208,6 +284,7 @@ public class DataViewForm {
             public void mouseClicked(MouseEvent e) {
                 var row = dataTable.getSelectedRow();
                 if (e.getButton() == MouseEvent.BUTTON1 && row != -1) {
+                    tableDelBtn.setEnabled(true);
                     if (dataTable.getModel() instanceof SortedSetTableModel) {
                         var value = dataTable.getValueAt(row, 2);
                         var score = dataTable.getValueAt(row, 1);
@@ -231,6 +308,11 @@ public class DataViewForm {
                             textEditor.textArea().setText((String) value);
                         });
                     }
+                } else if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2) {
+                    tableDelBtn.setEnabled(true);
+                    updateValueActionPerformed();
+                } else {
+                    tableDelBtn.setEnabled(false);
                 }
             }
         });
@@ -265,11 +347,11 @@ public class DataViewForm {
                             dataPanel.add(valueViewPanel, BorderLayout.CENTER);
                         });
                     } else if (keyTypeEnum == Enum.KeyTypeEnum.HASH) {
-                        loadHashData(key);
+                        loadHashDataActionPerformed(key);
                     } else if (keyTypeEnum == Enum.KeyTypeEnum.SET) {
-                        loadSetData(key);
+                        loadSetDataActionPerformed(key);
                     } else if (keyTypeEnum == Enum.KeyTypeEnum.ZSET) {
-                        loadZSetData(key);
+                        loadZSetDataActionPerformed(key);
                     } else if (keyTypeEnum == Enum.KeyTypeEnum.LIST) {
                         Long llen = RedisListService.service.llen(connectInfo, key);
                         List<String> value = RedisListService.service.lrange(connectInfo, key, 0, -1);
@@ -287,26 +369,32 @@ public class DataViewForm {
                 }));
 
         CompletableFuture.allOf(
-                FutureUtil.completableFuture(() -> RedisBasicService.service.ttl(connectInfo, key), ttl -> SwingUtilities.invokeLater(() ->
-                        {
-                            ttlField.setText(ttl.toString());
-                            keyField.setText(key);
-                            saveBtn.setEnabled(true);
-                            delBtn.setEnabled(true);
-                        }
-                )), updateContentFuture);
+                        FutureUtil.completableFuture(() -> RedisBasicService.service.ttl(connectInfo, key), ttl -> SwingUtilities.invokeLater(() ->
+                                {
+                                    ttlField.setText(ttl.toString());
+                                    keyField.setText(key);
+                                    saveBtn.setEnabled(true);
+                                    delBtn.setEnabled(true);
+                                    refBtn.setEnabled(true);
+                                }
+                        )), updateContentFuture)
+                .exceptionally(throwable -> {
+                    SwingUtilities.invokeLater(() -> AlertUtil.showErrorDialog("error", throwable));
+                    return null;
+                })
+        ;
     }
 
-    private void loadHashData(String key) {
+    private synchronized void loadHashDataActionPerformed(String key) {
         Long len = RedisHashService.service.hlen(connectInfo, key);
         ScanContext<Map.Entry<String, String>> scanContext = scanHashContextMap.getOrDefault(key, new ScanContext<>());
         var lastSearchKey = scanContext.getSearchKey();
 
         scanContext.setSearchKey(tableSearchField.getText());
+        scanContext.setLimit(1000L);
 
         MapScanCursor<String, String> mapScanCursor = RedisHashService.service.hscan(connectInfo, key, scanContext.getScanCursor(), scanContext.getScanArgs());
         scanContext.setScanCursor(mapScanCursor);
-
 
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
             if (scanContext.getKeyList().size() >= 1000) {
@@ -320,7 +408,7 @@ public class DataViewForm {
 
         scanHashContextMap.put(key, scanContext);
 
-        HashTableModel hashTableModel = new HashTableModel(scanContext.getKeyList());
+        var hashTableModel = new HashTableModel(scanContext.getKeyList());
 
         SwingUtilities.invokeLater(() -> {
             currentCountField.setText("1");
@@ -331,24 +419,25 @@ public class DataViewForm {
             lengthLabel.setText("Length: " + len);
             keySizeLabel.setText("Size: " + DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getValue().getBytes().length).reduce(Integer::sum).orElse(0)));
             dataTable.setModel(hashTableModel);
+            loadMoreBtn.setEnabled(!mapScanCursor.isFinished());
             Fn.removeAllComponent(dataPanel);
             dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
         });
     }
 
-    private void loadSetData(String key) {
+    private synchronized void loadSetDataActionPerformed(String key) {
         Long len = RedisSetService.service.scard(connectInfo, key);
         ScanContext<String> scanContext = scanSetContextMap.getOrDefault(key, new ScanContext<>());
 
         var lastSearchKey = scanContext.getSearchKey();
-
         scanContext.setSearchKey(tableSearchField.getText());
+        scanContext.setLimit(1000L);
 
         ValueScanCursor<String> valueScanCursor = RedisSetService.service.sscan(connectInfo, key, scanContext.getScanCursor(), scanContext.getScanArgs());
         scanContext.setScanCursor(valueScanCursor);
 
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
-            if (scanContext.getKeyList().size() >= 5000) {
+            if (scanContext.getKeyList().size() >= 2000) {
                 System.gc();
                 throw new RedisFrontException("数据加载上限，请使用正则模糊匹配查找！");
             }
@@ -375,18 +464,21 @@ public class DataViewForm {
     }
 
 
-    private void loadZSetData(String key) {
+    private void loadZSetDataActionPerformed(String key) {
         Long strLen = RedisZSetService.service.zcard(connectInfo, key);
 
         ScanContext<ScoredValue<String>> scanContext = scanZSetContextMap.getOrDefault(key, new ScanContext<>());
+
         var lastSearchKey = scanContext.getSearchKey();
         scanContext.setSearchKey(tableSearchField.getText());
+        scanContext.setLimit(1000L);
 
         ScoredValueScanCursor<String> valueScanCursor = RedisZSetService.service.zscan(connectInfo, key, scanContext.getScanCursor(), scanContext.getScanArgs());
         scanContext.setScanCursor(valueScanCursor);
 
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
-            if (scanContext.getKeyList().size() >= 5000) {
+            if (scanContext.getKeyList().size() >= 2000) {
+                scanContext.getKeyList().clear();
                 System.gc();
                 throw new RedisFrontException("数据加载上限，请使用正则模糊匹配查找！");
             }
@@ -397,7 +489,7 @@ public class DataViewForm {
 
         scanZSetContextMap.put(key, scanContext);
 
-        SortedSetTableModel sortedSetTableModel = new SortedSetTableModel(scanContext.getKeyList());
+        var sortedSetTableModel = new SortedSetTableModel(scanContext.getKeyList());
 
         SwingUtilities.invokeLater(() -> {
             keyLabel.setText("分数：");
@@ -412,6 +504,37 @@ public class DataViewForm {
         });
     }
 
+    private void updateValueActionPerformed() {
+        var row = dataTable.getSelectedRow();
+
+        if (row == -1) {
+            return;
+        }
+        var keyType = keyTypeLabel.getText();
+        Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(keyType.toUpperCase());
+
+        if (keyTypeEnum.equals(Enum.KeyTypeEnum.ZSET)) {
+            var score = (Double) dataTable.getValueAt(row, 1);
+            var value = (String) dataTable.getValueAt(row, 2);
+            AddOrUpdateItemDialog.showAddOrUpdateItemDialog("修改元素", keyField.getText(), score.toString(), value, connectInfo, keyTypeEnum, () -> System.out.println("修改成功！"));
+        }
+
+        if (keyTypeEnum.equals(Enum.KeyTypeEnum.HASH)) {
+            var key = (String) dataTable.getValueAt(row, 0);
+            var value = (String) dataTable.getValueAt(row, 1);
+            AddOrUpdateItemDialog.showAddOrUpdateItemDialog("修改元素", keyField.getText(), key, value, connectInfo, keyTypeEnum, () -> System.out.println("修改成功！"));
+        }
+
+        if (keyTypeEnum.equals(Enum.KeyTypeEnum.LIST)) {
+            var value = (String) dataTable.getValueAt(row, 1);
+            AddOrUpdateItemDialog.showAddOrUpdateItemDialog("修改元素", keyField.getText(), null, value, connectInfo, keyTypeEnum, () -> System.out.println("修改成功！"));
+        }
+
+        if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
+            var value = (String) dataTable.getValueAt(row, 1);
+            AddOrUpdateItemDialog.showAddOrUpdateItemDialog("修改元素", keyField.getText(), null, value, connectInfo, keyTypeEnum, () -> System.out.println("修改成功！"));
+        }
+    }
 
     private void createUIComponents() {
         bodyPanel = new JPanel() {
@@ -454,6 +577,45 @@ public class DataViewForm {
         valueSaveBtn = new JButton();
         valueSaveBtn.setEnabled(false);
         valueSaveBtn.setIcon(UI.SAVE_ICON);
+        valueSaveBtn.addActionListener((e) -> {
+
+            var row = dataTable.getSelectedRow();
+
+            if (row == -1) {
+                return;
+            }
+            var keyType = keyTypeLabel.getText();
+
+            Enum.KeyTypeEnum typeEnum = Enum.KeyTypeEnum.valueOf(keyType.toUpperCase());
+            var key = keyField.getText();
+            var newValue = textEditor.textArea().getText();
+
+            if (typeEnum.equals(Enum.KeyTypeEnum.ZSET)) {
+                var fieldOrScore = keyTextField.getText();
+                var value = (String) dataTable.getValueAt(row, 2);
+                RedisZSetService.service.zrem(connectInfo, key, value);
+                RedisZSetService.service.zadd(connectInfo, key, Double.parseDouble(fieldOrScore), newValue);
+            }
+
+            if (typeEnum.equals(Enum.KeyTypeEnum.HASH)) {
+                var fieldOrScore = keyTextField.getText();
+                RedisHashService.service.hdel(connectInfo, key, fieldOrScore);
+                RedisHashService.service.hset(connectInfo, key, fieldOrScore, newValue);
+            }
+
+            if (typeEnum.equals(Enum.KeyTypeEnum.LIST)) {
+                var value = (String) dataTable.getValueAt(row, 1);
+                RedisListService.service.lrem(connectInfo, key, 1, value);
+                RedisListService.service.lpush(connectInfo, key, newValue);
+            }
+
+            if (typeEnum.equals(Enum.KeyTypeEnum.SET)) {
+                var value = (String) dataTable.getValueAt(row, 1);
+                RedisSetService.service.srem(connectInfo, key, value);
+                RedisSetService.service.sadd(connectInfo, key, newValue);
+            }
+
+        });
         jToolBar.add(valueSaveBtn);
 
 
@@ -559,6 +721,7 @@ public class DataViewForm {
         final Spacer spacer2 = new Spacer();
         panel3.add(spacer2, new GridConstraints(5, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         tableDelBtn = new JButton();
+        tableDelBtn.setEnabled(false);
         tableDelBtn.setText("删除");
         panel3.add(tableDelBtn, new GridConstraints(3, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
         tableRefreshBtn = new JButton();

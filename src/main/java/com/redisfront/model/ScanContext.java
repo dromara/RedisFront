@@ -32,7 +32,7 @@ public class ScanContext<T> {
     }
 
     public String getSearchKey() {
-        return searchKey;
+        return Fn.isNotEmpty(searchKey) ? searchKey : "*";
     }
 
     public void setSearchKey(String searchKey) {

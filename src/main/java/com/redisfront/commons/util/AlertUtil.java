@@ -26,7 +26,7 @@ public class AlertUtil {
                 "RedisFront", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    public static void showErrorDialog(String message, Exception ex) {
+    public static void showErrorDialog(String message, Throwable ex) {
         JOptionPane.showMessageDialog(SwingUtilities.windowForComponent(RedisFrontApplication.frame),
                 message + "\n\n" + ex.getMessage(),
                 "RedisFront", JOptionPane.ERROR_MESSAGE);

@@ -65,17 +65,9 @@
               <text value="值"/>
             </properties>
           </component>
-          <component id="bed30" class="javax.swing.JTextArea" binding="valueTextArea">
-            <constraints>
-              <grid row="5" column="1" row-span="2" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                <preferred-size width="150" height="50"/>
-              </grid>
-            </constraints>
-            <properties/>
-          </component>
           <component id="a2231" class="javax.swing.JTextField" binding="nameField">
             <constraints>
-              <grid row="0" column="1" row-span="5" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+              <grid row="0" column="1" row-span="5" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="150" height="-1"/>
               </grid>
             </constraints>
@@ -89,6 +81,23 @@
               <text value="Label"/>
             </properties>
           </component>
+          <scrollpane id="b047c">
+            <constraints>
+              <grid row="5" column="1" row-span="2" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                <minimum-size width="400" height="-1"/>
+                <preferred-size width="400" height="400"/>
+                <maximum-size width="400" height="-1"/>
+              </grid>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="36236" class="javax.swing.JTextPane" binding="valueTextArea">
+                <constraints/>
+                <properties/>
+              </component>
+            </children>
+          </scrollpane>
         </children>
       </grid>
     </children>
