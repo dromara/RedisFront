@@ -1,10 +1,9 @@
 package com.redisfront.commons.ui;
 
-import com.redisfront.commons.Handler.ProcessHandler;
+import com.redisfront.commons.handler.ProcessHandler;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.function.Consumer;
 
 /**
  * BaseDialog

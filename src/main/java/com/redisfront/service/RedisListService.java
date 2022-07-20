@@ -13,6 +13,7 @@ public interface RedisListService {
 
     List<String> lrange(ConnectInfo connectInfo, String key, long start, long stop);
 
+    Long lrem(ConnectInfo connectInfo,String key, long count, String value);
 
     Long llen(ConnectInfo connectInfo, String key);
 

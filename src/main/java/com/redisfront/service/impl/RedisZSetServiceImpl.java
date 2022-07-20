@@ -52,6 +52,15 @@ public class RedisZSetServiceImpl implements RedisZSetService {
     }
 
     @Override
+    public Long zrem(ConnectInfo connectInfo, String key, String... members) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            return LettuceUtil.clusterExec(connectInfo, commands -> commands.zrem(key, members));
+        } else {
+            return LettuceUtil.exec(connectInfo, commands -> commands.zrem(key, members));
+        }
+    }
+
+    @Override
     public List<ScoredValue<String>> zrange(ConnectInfo connectInfo, String key, long start, long stop) {
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtil.clusterExec(connectInfo, commands -> commands.zrangeWithScores(key, start, stop));

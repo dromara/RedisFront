@@ -8,7 +8,7 @@ import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import com.redisfront.commons.Handler.ActionHandler;
+import com.redisfront.commons.handler.ActionHandler;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
 import com.redisfront.commons.exception.RedisFrontException;
@@ -301,9 +301,10 @@ public class DataViewForm {
         Long len = RedisHashService.service.hlen(connectInfo, key);
         ScanContext<Map.Entry<String, String>> scanContext = scanHashContextMap.getOrDefault(key, new ScanContext<>());
         var lastSearchKey = scanContext.getSearchKey();
+
         scanContext.setSearchKey(tableSearchField.getText());
 
-        MapScanCursor<String, String> mapScanCursor = RedisHashService.service.hscan(connectInfo, key, ScanCursor.INITIAL, ScanArgs.Builder.limit(100));
+        MapScanCursor<String, String> mapScanCursor = RedisHashService.service.hscan(connectInfo, key, scanContext.getScanCursor(), scanContext.getScanArgs());
         scanContext.setScanCursor(mapScanCursor);
 
 
@@ -316,6 +317,8 @@ public class DataViewForm {
         } else {
             scanContext.setKeyList(new ArrayList<>(mapScanCursor.getMap().entrySet()));
         }
+
+        scanHashContextMap.put(key, scanContext);
 
         HashTableModel hashTableModel = new HashTableModel(scanContext.getKeyList());
 
@@ -336,10 +339,12 @@ public class DataViewForm {
     private void loadSetData(String key) {
         Long len = RedisSetService.service.scard(connectInfo, key);
         ScanContext<String> scanContext = scanSetContextMap.getOrDefault(key, new ScanContext<>());
+
         var lastSearchKey = scanContext.getSearchKey();
+
         scanContext.setSearchKey(tableSearchField.getText());
 
-        ValueScanCursor<String> valueScanCursor = RedisSetService.service.sscan(connectInfo, key, ScanCursor.INITIAL, ScanArgs.Builder.limit(100));
+        ValueScanCursor<String> valueScanCursor = RedisSetService.service.sscan(connectInfo, key, scanContext.getScanCursor(), scanContext.getScanArgs());
         scanContext.setScanCursor(valueScanCursor);
 
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
@@ -351,6 +356,9 @@ public class DataViewForm {
         } else {
             scanContext.setKeyList(valueScanCursor.getValues());
         }
+
+
+        scanSetContextMap.put(key, scanContext);
 
         SetTableModel setTableModel = new SetTableModel(scanContext.getKeyList());
 
@@ -374,7 +382,7 @@ public class DataViewForm {
         var lastSearchKey = scanContext.getSearchKey();
         scanContext.setSearchKey(tableSearchField.getText());
 
-        ScoredValueScanCursor<String> valueScanCursor = RedisZSetService.service.zscan(connectInfo, key, ScanCursor.INITIAL, ScanArgs.Builder.limit(100));
+        ScoredValueScanCursor<String> valueScanCursor = RedisZSetService.service.zscan(connectInfo, key, scanContext.getScanCursor(), scanContext.getScanArgs());
         scanContext.setScanCursor(valueScanCursor);
 
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
@@ -386,6 +394,8 @@ public class DataViewForm {
         } else {
             scanContext.setKeyList(valueScanCursor.getValues());
         }
+
+        scanZSetContextMap.put(key, scanContext);
 
         SortedSetTableModel sortedSetTableModel = new SortedSetTableModel(scanContext.getKeyList());
 

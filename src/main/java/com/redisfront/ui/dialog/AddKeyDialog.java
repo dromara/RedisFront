@@ -5,7 +5,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.RedisFrontApplication;
-import com.redisfront.commons.Handler.ProcessHandler;
+import com.redisfront.commons.handler.ProcessHandler;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.commons.func.Fn;
@@ -19,7 +19,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-public class AddRedisKeyDialog extends AbstractDialog<String> {
+public class AddKeyDialog extends AbstractDialog<String> {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -37,14 +37,14 @@ public class AddRedisKeyDialog extends AbstractDialog<String> {
     private final ConnectInfo connectInfo;
 
     public static void showAddDialog(ConnectInfo connectInfo, ProcessHandler<String> addSuccessProcessHandler) {
-        var openConnectDialog = new AddRedisKeyDialog(connectInfo, addSuccessProcessHandler);
+        var openConnectDialog = new AddKeyDialog(connectInfo, addSuccessProcessHandler);
         openConnectDialog.setSize(new Dimension(500, 280));
         openConnectDialog.setLocationRelativeTo(RedisFrontApplication.frame);
         openConnectDialog.pack();
         openConnectDialog.setVisible(true);
     }
 
-    public AddRedisKeyDialog(ConnectInfo connectInfo, ProcessHandler<String> addSuccessProcessHandler) {
+    public AddKeyDialog(ConnectInfo connectInfo, ProcessHandler<String> addSuccessProcessHandler) {
         super(RedisFrontApplication.frame);
         this.setMinimumSize(new Dimension(500, 400));
         setContentPane(contentPane);

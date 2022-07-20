@@ -5,7 +5,7 @@ import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import com.redisfront.commons.Handler.ProcessHandler;
+import com.redisfront.commons.handler.ProcessHandler;
 import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
@@ -17,7 +17,7 @@ import com.redisfront.model.DbInfo;
 import com.redisfront.model.ScanContext;
 import com.redisfront.model.TreeNodeInfo;
 import com.redisfront.service.RedisBasicService;
-import com.redisfront.ui.dialog.AddRedisKeyDialog;
+import com.redisfront.ui.dialog.AddKeyDialog;
 import io.lettuce.core.KeyScanCursor;
 import io.lettuce.core.ScanCursor;
 import org.jdesktop.swingx.JXTree;
@@ -49,7 +49,6 @@ import java.util.function.Consumer;
 public class DataSearchForm {
     private static final Logger log = LoggerFactory.getLogger(DataSearchForm.class);
     private static final String SEPARATOR_FLAG = "/";
-
     private JPanel contentPanel;
     private JXTree keyTree;
     private JTextField searchTextField;
@@ -62,11 +61,8 @@ public class DataSearchForm {
     private JTextField currentField;
     private JTextField allField;
     private JPanel loadMorePanel;
-
     private Map<Integer, ScanContext<String>> scanKeysContextMap;
-
     private ProcessHandler<TreeNodeInfo> nodeClickProcessHandler;
-
     private final ConnectInfo connectInfo;
     private JButton searchBtn;
 
@@ -253,7 +249,7 @@ public class DataSearchForm {
 
         addBtn = new JButton();
         addBtn.setIcon(UI.PLUS_ICON);
-        addBtn.addActionListener(e -> AddRedisKeyDialog.showAddDialog(connectInfo, System.out::println));
+        addBtn.addActionListener(e -> AddKeyDialog.showAddDialog(connectInfo, System.out::println));
 
         refreshBtn = new JButton();
         refreshBtn.addActionListener(e -> {

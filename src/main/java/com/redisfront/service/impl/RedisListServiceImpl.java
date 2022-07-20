@@ -24,6 +24,15 @@ public class RedisListServiceImpl implements RedisListService {
     }
 
     @Override
+    public Long lrem(ConnectInfo connectInfo, String key, long count, String value) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            return LettuceUtil.clusterExec(connectInfo, commands -> commands.lrem(key, count, value));
+        } else {
+            return LettuceUtil.exec(connectInfo, commands -> commands.lrem(key, count, value));
+        }
+    }
+
+    @Override
     public Long llen(ConnectInfo connectInfo, String key) {
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtil.clusterExec(connectInfo, commands -> commands.llen(key));

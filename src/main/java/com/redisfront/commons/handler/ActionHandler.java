@@ -1,4 +1,4 @@
-package com.redisfront.commons.Handler;
+package com.redisfront.commons.handler;
 
 @FunctionalInterface
 public interface ActionHandler {

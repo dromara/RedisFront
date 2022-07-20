@@ -5,7 +5,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.RedisFrontApplication;
-import com.redisfront.commons.Handler.ProcessHandler;
+import com.redisfront.commons.handler.ProcessHandler;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
 import com.redisfront.commons.exception.RedisFrontException;
