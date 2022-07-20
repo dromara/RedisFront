@@ -105,7 +105,7 @@ public class MainWindowForm {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setBorder(new FlatLineBorder(new Insets(1, 1, 1, 1), UIManager.getColor("Component.borderColor"), 1, 10));
+                setBorder(new FlatLineBorder(new Insets(1, 1, 1, 1), UIManager.getColor("Component.borderColor"), 1, 6));
             }
         };
 

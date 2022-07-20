@@ -36,7 +36,10 @@ public class MainMenuBar extends JMenuBar {
     private static final LocaleUtil.BundleInfo FILE_MENU_EXPORT_ITEM = LocaleUtil.getMenu("Menu.File.Export");
     private static final LocaleUtil.BundleInfo FILE_MENU_EXIT_ITEM = LocaleUtil.getMenu("Menu.File.Exit");
     private static final LocaleUtil.BundleInfo SETTING_MENU = LocaleUtil.getMenu("Menu.Setting");
-    private static final LocaleUtil.BundleInfo ABOUT_MENU = LocaleUtil.getMenu("Menu.About");
+
+    private static final LocaleUtil.BundleInfo HELP_MENU = LocaleUtil.getMenu("Menu.Help");
+    private static final LocaleUtil.BundleInfo HELP_ABOUT_MENU = LocaleUtil.getMenu("Menu.Help.About");
+
 
     public static JMenuBar getInstance() {
         return new MainMenuBar();
@@ -84,14 +87,24 @@ public class MainMenuBar extends JMenuBar {
 
         var settingMenu = new JMenu(SETTING_MENU.title());
         settingMenu.setMnemonic(SETTING_MENU.mnemonic());
-        var settingMenuItem = new JMenuItem("系统设置");
+        var settingMenuItem = new JMenuItem("全局设置");
         settingMenuItem.addActionListener(e -> ExecutorUtil.runAsync(SettingDialog::showSettingDialog));
         settingMenu.add(settingMenuItem);
+
+
+        var languageMenu = new JMenu("语言设置");
+        var chineseItem = new JMenuItem("简体中文");
+        languageMenu.add(chineseItem);
+        var englishItem = new JMenuItem("英文");
+        languageMenu.add(englishItem);
+        settingMenu.add(languageMenu);
+
         add(settingMenu);
 
-        var aboutMenu = new JMenu(ABOUT_MENU.title());
-        aboutMenu.setMnemonic(ABOUT_MENU.mnemonic());
-        var aboutMenuItem = new JMenuItem("关于RedisFront");
+        var aboutMenu = new JMenu(HELP_MENU.title());
+        aboutMenu.setMnemonic(HELP_MENU.mnemonic());
+        var aboutMenuItem = new JMenuItem(HELP_ABOUT_MENU.title());
+        aboutMenuItem.setMnemonic(HELP_ABOUT_MENU.mnemonic());
         aboutMenuItem.addActionListener((e) -> ExecutorUtil.runAsync(this::aboutActionPerformed));
         aboutMenu.add(aboutMenuItem);
         add(aboutMenu);
@@ -132,7 +145,7 @@ public class MainMenuBar extends JMenuBar {
                 }
             }
         });
-        JOptionPane.showMessageDialog(RedisFrontApplication.frame, new Object[]{titleLabel, "一款 Redis GUI 工具", " ", linkLabel,}, ABOUT_MENU.title(),
+        JOptionPane.showMessageDialog(RedisFrontApplication.frame, new Object[]{titleLabel, "一款 Redis GUI 工具", " ", linkLabel,}, HELP_ABOUT_MENU.title(),
                 JOptionPane.PLAIN_MESSAGE);
     }
 }

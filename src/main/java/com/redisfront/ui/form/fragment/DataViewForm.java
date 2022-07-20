@@ -9,14 +9,12 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.commons.Handler.ActionHandler;
-import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
 import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.util.ExecutorUtil;
 import com.redisfront.commons.util.FutureUtil;
-import com.redisfront.commons.util.PrefUtil;
 import com.redisfront.model.*;
 import com.redisfront.service.*;
 import com.redisfront.ui.component.LoadingPanel;
@@ -95,7 +93,7 @@ public class DataViewForm {
     public DataViewForm(ConnectInfo connectInfo) {
         this.connectInfo = connectInfo;
         $$$setupUI$$$();
-
+        loadMoreBtn.setIcon(UI.LOAD_MORE_ICON);
         tableScorePanel.setPreferredSize(new Dimension(500, 190));
 
         tableViewPanel.add(new JPanel() {
@@ -137,16 +135,20 @@ public class DataViewForm {
         refBtn.setIcon(UI.REFRESH_ICON);
         refBtn.setText("重载");
         refBtn.addActionListener(e -> {
+            saveBtn.setEnabled(false);
+            delBtn.setEnabled(false);
             String key = keyField.getText();
             dataChangeActionPerformed(key);
         });
         refBtn.setToolTipText("重载");
 
-
         saveBtn.setIcon(UI.SAVE_ICON);
         saveBtn.setText("保存");
+        saveBtn.addActionListener((e) -> {
+            saveBtn.setEnabled(false);
+            delBtn.setEnabled(false);
+        });
         saveBtn.setToolTipText("保存");
-
 
         tableSearchField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入搜索词...");
         var searchBtn = new JButton(new FlatSearchIcon());
@@ -166,12 +168,12 @@ public class DataViewForm {
         tableRefreshBtn.setText("重新载入");
 
         var pageNumLabel = new JLabel();
-        pageNumLabel.setText("当前");
+        pageNumLabel.setText("扫描");
         pageNumLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
         currentCountField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, pageNumLabel);
 
         var pageSizeLabel = new JLabel();
-        pageSizeLabel.setText("数量");
+        pageSizeLabel.setText("总数");
         pageSizeLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
         allCountField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, pageSizeLabel);
         scanZSetContextMap = new LinkedHashMap<>();
@@ -289,6 +291,8 @@ public class DataViewForm {
                         {
                             ttlField.setText(ttl.toString());
                             keyField.setText(key);
+                            saveBtn.setEnabled(true);
+                            delBtn.setEnabled(true);
                         }
                 )), updateContentFuture);
     }
@@ -304,7 +308,7 @@ public class DataViewForm {
 
 
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
-            if (scanContext.getKeyList().size() >= 5000) {
+            if (scanContext.getKeyList().size() >= 1000) {
                 System.gc();
                 throw new RedisFrontException("数据加载上限，请使用正则模糊匹配查找！");
             }
@@ -318,7 +322,9 @@ public class DataViewForm {
         SwingUtilities.invokeLater(() -> {
             currentCountField.setText("1");
             allCountField.setText(String.valueOf(scanContext.getKeyList().size()));
-            keyLabel.setText("键名：");
+            keyLabel.setText("键名");
+            keyLabel.setOpaque(true);
+            keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
             lengthLabel.setText("Length: " + len);
             keySizeLabel.setText("Size: " + DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getValue().getBytes().length).reduce(Integer::sum).orElse(0)));
             dataTable.setModel(hashTableModel);
@@ -539,18 +545,18 @@ public class DataViewForm {
         panel3.setLayout(new GridLayoutManager(6, 5, new Insets(0, 0, 0, 0), -1, -1));
         panel2.add(panel3, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         tableSearchField = new JTextField();
-        panel3.add(tableSearchField, new GridConstraints(0, 0, 1, 5, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        panel3.add(tableSearchField, new GridConstraints(0, 0, 1, 5, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
         final Spacer spacer2 = new Spacer();
         panel3.add(spacer2, new GridConstraints(5, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         tableDelBtn = new JButton();
         tableDelBtn.setText("删除");
-        panel3.add(tableDelBtn, new GridConstraints(3, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel3.add(tableDelBtn, new GridConstraints(3, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
         tableRefreshBtn = new JButton();
         tableRefreshBtn.setText("重载");
-        panel3.add(tableRefreshBtn, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel3.add(tableRefreshBtn, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
         tableAddBtn = new JButton();
         tableAddBtn.setText("添加");
-        panel3.add(tableAddBtn, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel3.add(tableAddBtn, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
         pagePanel = new JPanel();
         pagePanel.setLayout(new BorderLayout(0, 0));
         panel3.add(pagePanel, new GridConstraints(4, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
@@ -558,15 +564,15 @@ public class DataViewForm {
         panel4.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         pagePanel.add(panel4, BorderLayout.NORTH);
         currentCountField = new JTextField();
-        panel4.add(currentCountField, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        panel4.add(currentCountField, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(80, -1), null, 0, false));
         allCountField = new JTextField();
-        panel4.add(allCountField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        panel4.add(allCountField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(80, -1), null, 0, false));
         final JPanel panel5 = new JPanel();
         panel5.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         pagePanel.add(panel5, BorderLayout.SOUTH);
         loadMoreBtn = new JButton();
         loadMoreBtn.setText("加载更多");
-        panel5.add(loadMoreBtn, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel5.add(loadMoreBtn, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
         tableScorePanel = new JScrollPane();
         panel2.add(tableScorePanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         dataTable = new JTable();

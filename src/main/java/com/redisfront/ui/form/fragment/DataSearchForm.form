@@ -4,12 +4,17 @@
     <constraints>
       <xy x="20" y="20" width="500" height="400"/>
     </constraints>
-    <properties/>
+    <properties>
+      <minimumSize width="300" height="-1"/>
+      <preferredSize width="300" height="681"/>
+    </properties>
     <border type="none"/>
     <children>
       <grid id="96897" binding="borderPanel" custom-create="true" layout-manager="BorderLayout" hgap="0" vgap="0">
         <constraints border-constraint="Center"/>
-        <properties/>
+        <properties>
+          <minimumSize width="350" height="199"/>
+        </properties>
         <border type="none"/>
         <children>
           <grid id="92cb4" layout-manager="BorderLayout" hgap="0" vgap="0">
@@ -66,12 +71,17 @@
             <children>
               <scrollpane id="96925">
                 <constraints border-constraint="Center"/>
-                <properties/>
+                <properties>
+                  <minimumSize width="200" height="18"/>
+                </properties>
                 <border type="none"/>
                 <children>
                   <component id="2fb53" class="org.jdesktop.swingx.JXTree" binding="keyTree" custom-create="true">
                     <constraints/>
-                    <properties/>
+                    <properties>
+                      <maximumSize width="-1" height="-1"/>
+                      <minimumSize width="200" height="0"/>
+                    </properties>
                   </component>
                 </children>
               </scrollpane>
@@ -85,10 +95,10 @@
                   <size top="5" left="0" bottom="0" right="0"/>
                 </border>
                 <children>
-                  <component id="42e91" class="javax.swing.JTextField" binding="currentField">
+                  <component id="42e91" class="javax.swing.JTextField" binding="currentField" custom-create="true">
                     <constraints>
                       <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                        <preferred-size width="125" height="-1"/>
+                        <preferred-size width="120" height="-1"/>
                       </grid>
                     </constraints>
                     <properties>
@@ -102,13 +112,14 @@
                       <grid row="1" column="0" row-span="1" col-span="11" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
+                      <margin top="0" left="0" bottom="0" right="3"/>
                       <text value="扫描更多"/>
                     </properties>
                   </component>
-                  <component id="69d1c" class="javax.swing.JTextField" binding="allField">
+                  <component id="69d1c" class="javax.swing.JTextField" binding="allField" custom-create="true">
                     <constraints>
-                      <grid row="0" column="2" row-span="1" col-span="8" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
-                        <preferred-size width="125" height="-1"/>
+                      <grid row="0" column="2" row-span="1" col-span="9" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
+                        <preferred-size width="135" height="-1"/>
                       </grid>
                     </constraints>
                     <properties>

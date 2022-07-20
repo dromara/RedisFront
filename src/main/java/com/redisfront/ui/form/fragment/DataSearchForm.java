@@ -18,6 +18,7 @@ import com.redisfront.model.ScanContext;
 import com.redisfront.model.TreeNodeInfo;
 import com.redisfront.service.RedisBasicService;
 import com.redisfront.ui.dialog.AddRedisKeyDialog;
+import io.lettuce.core.KeyScanCursor;
 import io.lettuce.core.ScanCursor;
 import org.jdesktop.swingx.JXTree;
 import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer;
@@ -30,6 +31,8 @@ import javax.swing.border.TitledBorder;
 import javax.swing.text.JTextComponent;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -45,6 +48,7 @@ import java.util.function.Consumer;
  */
 public class DataSearchForm {
     private static final Logger log = LoggerFactory.getLogger(DataSearchForm.class);
+    private static final String SEPARATOR_FLAG = "/";
 
     private JPanel contentPanel;
     private JXTree keyTree;
@@ -77,24 +81,7 @@ public class DataSearchForm {
     public DataSearchForm(ConnectInfo connectInfo) {
         this.connectInfo = connectInfo;
         $$$setupUI$$$();
-        if (connectInfo.redisModeEnum() == Enum.RedisMode.CLUSTER) {
-            databaseComboBox.setEnabled(false);
-        }
         databaseComboBox.setSelectedIndex(0);
-        var currentLabel = new JLabel();
-        currentLabel.setText("结果");
-        currentLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
-        currentLabel.setSize(5, -1);
-        currentField.setBorder(new EmptyBorder(0, 5, 0, 0));
-        currentField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, currentLabel);
-
-        var allLabel = new JLabel();
-        allLabel.setText("");
-        allLabel.setOpaque(true);
-        allLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
-        allLabel.setSize(5, -1);
-        allField.setBorder(new EmptyBorder(0, 5, 0, 0));
-        allField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, allLabel);
     }
 
     public void setNodeClickProcessHandler(ProcessHandler<TreeNodeInfo> nodeClickProcessHandler) {
@@ -121,7 +108,7 @@ public class DataSearchForm {
 
             if (!key.contains("*")) {
                 var all = allField.getText();
-                var scanInfo = all.split("/");
+                var scanInfo = all.split(SEPARATOR_FLAG);
                 if (scanInfo.length > 1) {
                     scanKeysContext.setLimit(Long.valueOf(scanInfo[1]));
                 } else {
@@ -134,37 +121,59 @@ public class DataSearchForm {
             scanKeysContext.setScanCursor(keyScanCursor);
             log.debug("本次扫描到：{}", keyScanCursor.getKeys().size());
 
+            ArrayList<String> scanKeysList = new ArrayList<>(keyScanCursor.getKeys());
+
+            //模糊匹配(模糊匹配在key数量小于 limit 的情况加全部查询出来)
+            if (!loadMorePanel.isVisible() && Fn.equal("*", key)) {
+                while (Fn.equal("*", key) && !keyScanCursor.isFinished()) {
+                    keyScanCursor = RedisBasicService.service.scan(connectInfo, scanKeysContext.getScanCursor(), scanKeysContext.getScanArgs());
+                    scanKeysContext.setScanCursor(keyScanCursor);
+                    scanKeysList.addAll(keyScanCursor.getKeys());
+                }
+            }
+
+            //数据扫描上限判断！
             if (Fn.equal(scanKeysContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanKeysContext.getKeyList())) {
                 if (scanKeysContext.getKeyList().size() >= 300000) {
                     System.gc();
                     throw new RedisFrontException("数据加载上限，请使用正则模糊匹配查找！");
                 }
-                scanKeysContext.getKeyList().addAll(keyScanCursor.getKeys());
+                scanKeysContext.getKeyList().addAll(scanKeysList);
             } else {
-                scanKeysContext.setKeyList(keyScanCursor.getKeys());
+                scanKeysContext.setKeyList(scanKeysList);
             }
 
             String delim = PrefUtil.getState().get(Const.KEY_KEY_SEPARATOR, ":");
 
             var treeModel = TreeUtil.toTreeModel(new HashSet<>(scanKeysContext.getKeyList()), delim);
 
+            KeyScanCursor<String> finalKeyScanCursor = keyScanCursor;
             SwingUtilities.invokeLater(() -> {
                 currentField.setText(String.valueOf(scanKeysContext.getKeyList().size()));
-                loadMoreBtn.setEnabled(!keyScanCursor.isFinished());
+                loadMoreBtn.setEnabled(!finalKeyScanCursor.isFinished());
                 var all = allField.getText();
-                var scanInfo = all.split("/");
+                var scanInfo = all.split(SEPARATOR_FLAG);
                 if (scanInfo.length > 1) {
                     var current = Long.valueOf(scanInfo[0]);
-                    allField.setText((current + scanKeysContext.getLimit()) + "/" + scanInfo[1]);
-                    allField.setToolTipText("已扫描：".concat(String.valueOf(current)) + ",全部：".concat(scanInfo[1]));
+                    //如果全部扫描完成！
+                    if (finalKeyScanCursor.isFinished()) {
+                        allField.setText(scanInfo[1] + SEPARATOR_FLAG + scanInfo[1]);
+                        allField.setToolTipText("已扫描：".concat(scanInfo[1]) + ",全部：".concat(scanInfo[1]));
+                    } else {
+                        allField.setText((current + scanKeysContext.getLimit()) + SEPARATOR_FLAG + scanInfo[1]);
+                        allField.setToolTipText("已扫描：".concat(String.valueOf(current)) + ",全部：".concat(scanInfo[1]));
+                    }
+
                 } else {
                     allField.setToolTipText("已扫描：".concat(String.valueOf(scanKeysContext.getLimit())) + ",全部：".concat(all));
-                    allField.setText(scanKeysContext.getLimit() + "/" + all);
+                    allField.setText(scanKeysContext.getLimit() + SEPARATOR_FLAG + all);
                 }
                 if (loadMoreBtn.isEnabled()) {
+                    loadMoreBtn.setText("扫描更多");
                     loadMoreBtn.requestFocus();
                 } else {
                     loadMoreBtn.setText("扫描完成");
+                    loadMoreBtn.setEnabled(false);
                 }
                 keyTree.setModel(treeModel);
             });
@@ -181,7 +190,7 @@ public class DataSearchForm {
 
     }
 
-    public void searchActionPerformed() {
+    public void scanKeysActionPerformed() {
         if (Fn.isEmpty(searchTextField.getText())) {
             ExecutorUtil.runAsync(() -> loadTreeModelData("*"));
         } else {
@@ -249,14 +258,14 @@ public class DataSearchForm {
         refreshBtn = new JButton();
         refreshBtn.addActionListener(e -> {
             scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
-            searchActionPerformed();
+            scanKeysAndInitScanInfo();
         });
         refreshBtn.setIcon(UI.REFRESH_ICON);
         databaseComboBox = new JComboBox<>();
 
         loadMoreBtn = new JButton("继续扫描");
         loadMoreBtn.setIcon(UI.LOAD_MORE_ICON);
-        loadMoreBtn.addActionListener(e -> searchActionPerformed());
+        loadMoreBtn.addActionListener(e -> scanKeysActionPerformed());
 
         var dbList = new ArrayList<DbInfo>() {
             {
@@ -299,6 +308,7 @@ public class DataSearchForm {
             var dbSize = RedisBasicService.service.dbSize(connectInfo);
             dbInfo.setDbSize(dbSize);
             databaseComboBox.addItem(dbInfo);
+            databaseComboBox.setEnabled(false);
         }
 
         databaseComboBox.addActionListener(e -> {
@@ -306,25 +316,35 @@ public class DataSearchForm {
             assert db != null;
             this.connectInfo.setDatabase(db.dbIndex());
             scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
-            var flag = !Fn.isNull(db.dbSize()) && (db.dbSize() > 10000L);
+            var limit = PrefUtil.getState().getLong(Const.KEY_KEY_MAX_LOAD_NUM, 10000L);
+            var flag = !Fn.isNull(db.dbSize()) && (db.dbSize() > limit);
             allField.setText(String.valueOf(db.dbSize()));
             loadMorePanel.setVisible(flag);
-            searchActionPerformed();
+            scanKeysActionPerformed();
         });
 
         searchTextField = new JTextField();
         searchTextField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入搜索词...");
         searchBtn = new JButton(new FlatSearchIcon());
+        searchTextField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (Fn.equal(e.getKeyCode(), KeyEvent.VK_ENTER)) {
+                    scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
+                    scanKeysAndInitScanInfo();
+                }
+            }
+        });
         searchBtn.addActionListener(actionEvent -> {
             scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
-            searchActionPerformed();
+            scanKeysAndInitScanInfo();
         });
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchBtn);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> {
-            searchTextField.setText("");
             scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
-            searchActionPerformed();
+            searchTextField.setText("");
+            scanKeysAndInitScanInfo();
         });
 
         keyTree = new JXTree();
@@ -373,6 +393,33 @@ public class DataSearchForm {
             }
         });
 
+        currentField = new JTextField();
+        var currentLabel = new JLabel();
+        currentLabel.setText("结果");
+        currentLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
+        currentLabel.setSize(5, -1);
+        currentField.setBorder(new EmptyBorder(0, 5, 0, 0));
+        currentField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, currentLabel);
+
+        allField = new JTextField();
+        var allLabel = new JLabel();
+        allLabel.setText("已扫");
+        allLabel.setOpaque(true);
+        allLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
+        allLabel.setSize(5, -1);
+        allField.setBorder(new EmptyBorder(0, 5, 0, 0));
+        allField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, allLabel);
+
+    }
+
+    private void scanKeysAndInitScanInfo() {
+        var all = allField.getText();
+        var scanInfo = all.split(SEPARATOR_FLAG);
+        if (scanInfo.length > 1) {
+            allField.setText("0" + SEPARATOR_FLAG + scanInfo[1]);
+            allField.setToolTipText("已扫描：" + 0 + ",全部：".concat(scanInfo[1]));
+        }
+        scanKeysActionPerformed();
     }
 
 
@@ -386,7 +433,10 @@ public class DataSearchForm {
     private void $$$setupUI$$$() {
         createUIComponents();
         contentPanel.setLayout(new BorderLayout(0, 0));
+        contentPanel.setMinimumSize(new Dimension(300, -1));
+        contentPanel.setPreferredSize(new Dimension(300, 681));
         borderPanel.setLayout(new BorderLayout(0, 0));
+        borderPanel.setMinimumSize(new Dimension(350, 199));
         contentPanel.add(borderPanel, BorderLayout.CENTER);
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new BorderLayout(0, 0));
@@ -410,25 +460,27 @@ public class DataSearchForm {
         borderPanel.add(treePanel, BorderLayout.CENTER);
         treePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(0, 5, 5, 10), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         final JScrollPane scrollPane1 = new JScrollPane();
+        scrollPane1.setMinimumSize(new Dimension(200, 18));
         treePanel.add(scrollPane1, BorderLayout.CENTER);
+        keyTree.setMaximumSize(new Dimension(-1, -1));
+        keyTree.setMinimumSize(new Dimension(200, 0));
         scrollPane1.setViewportView(keyTree);
         loadMorePanel = new JPanel();
         loadMorePanel.setLayout(new GridLayoutManager(2, 11, new Insets(0, 0, 0, 0), -1, -1));
         loadMorePanel.setEnabled(true);
         treePanel.add(loadMorePanel, BorderLayout.SOUTH);
         loadMorePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
-        currentField = new JTextField();
         currentField.setEditable(false);
         currentField.setEnabled(false);
         currentField.setVisible(true);
-        loadMorePanel.add(currentField, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(125, -1), null, 0, false));
+        loadMorePanel.add(currentField, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(120, -1), null, 0, false));
+        loadMoreBtn.setMargin(new Insets(0, 0, 0, 3));
         loadMoreBtn.setText("扫描更多");
         loadMorePanel.add(loadMoreBtn, new GridConstraints(1, 0, 1, 11, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        allField = new JTextField();
         allField.setEditable(false);
         allField.setEnabled(false);
         allField.setVisible(true);
-        loadMorePanel.add(allField, new GridConstraints(0, 2, 1, 8, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(125, -1), null, 0, false));
+        loadMorePanel.add(allField, new GridConstraints(0, 2, 1, 9, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(135, -1), null, 0, false));
     }
 
     /**
