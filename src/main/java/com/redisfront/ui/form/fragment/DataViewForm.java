@@ -35,6 +35,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.StyleContext;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
@@ -60,7 +62,7 @@ public class DataViewForm {
     private JLabel keyLabel;
     private JLabel lengthLabel;
     private JLabel keySizeLabel;
-    private JButton valueSaveBtn;
+    private JButton valueUpdateSaveBtn;
     private JButton saveBtn;
     private JTextField ttlField;
     private JTextField tableSearchField;
@@ -77,7 +79,7 @@ public class DataViewForm {
     private JTextField allCountField;
     private JButton loadMoreBtn;
     private TextEditor textEditor;
-    private JTextField keyTextField;
+    private JTextField fieldOrScoreField;
 
     private final ConnectInfo connectInfo;
 
@@ -95,6 +97,18 @@ public class DataViewForm {
         this.deleteActionHandler = handler;
     }
 
+    private void refreshDisableBtn() {
+        refBtn.setEnabled(false);
+        saveBtn.setEnabled(false);
+        delBtn.setEnabled(false);
+    }
+
+    private void refreshEnableBtn() {
+        saveBtn.setEnabled(true);
+        delBtn.setEnabled(true);
+        refBtn.setEnabled(true);
+    }
+
     public DataViewForm(ConnectInfo connectInfo) {
         this.connectInfo = connectInfo;
         $$$setupUI$$$();
@@ -104,6 +118,13 @@ public class DataViewForm {
         scanHashContextMap = new LinkedHashMap<>();
 
         loadMoreBtn.setIcon(UI.LOAD_MORE_ICON);
+        loadMoreBtn.addActionListener((e) -> {
+            if (loadMoreBtn.isEnabled()) {
+                loadMoreBtn.setEnabled(false);
+                reloadTableDataActionPerformed(false);
+            }
+        });
+
         tableScorePanel.setPreferredSize(new Dimension(500, 190));
 
         tableViewPanel.add(new JPanel() {
@@ -144,31 +165,7 @@ public class DataViewForm {
 
         refBtn.setIcon(UI.REFRESH_ICON);
         refBtn.setText("重载");
-        refBtn.addActionListener(e -> {
-            refBtn.setEnabled(false);
-            saveBtn.setEnabled(false);
-            delBtn.setEnabled(false);
-            String key = keyField.getText();
-
-            var keyType = keyTypeLabel.getText();
-            Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(keyType.toUpperCase());
-
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.ZSET)) {
-                this.scanZSetContextMap.put(key, new ScanContext<>());
-            }
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.HASH)) {
-                this.scanHashContextMap.put(key, new ScanContext<>());
-            }
-
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.LIST)) {
-            }
-
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
-                this.scanSetContextMap.put(key, new ScanContext<>());
-            }
-            dataChangeActionPerformed(key);
-
-        });
+        refBtn.addActionListener(e -> reloadAllActionPerformed());
         refBtn.setToolTipText("重载");
 
         saveBtn.setIcon(UI.SAVE_ICON);
@@ -212,7 +209,7 @@ public class DataViewForm {
 
         tableDelBtn.setIcon(UI.DELETE_ICON);
         tableDelBtn.setText("删除元素");
-        tableAddBtn.addActionListener((event) -> {
+        tableDelBtn.addActionListener((event) -> {
             var row = dataTable.getSelectedRow();
 
             if (row == -1) {
@@ -242,17 +239,25 @@ public class DataViewForm {
             }
         });
 
-        tableRefreshBtn.setIcon(UI.REFRESH_ICON);
         tableRefreshBtn.setText("重新载入");
+        tableRefreshBtn.setIcon(UI.REFRESH_ICON);
+        tableRefreshBtn.addActionListener(e -> {
+            if (tableRefreshBtn.isEnabled()) {
+                tableRefreshBtn.setEnabled(false);
+                reloadTableDataActionPerformed(true);
+            }
+        });
 
         var pageNumLabel = new JLabel();
-        pageNumLabel.setText("扫描");
+        pageNumLabel.setText("当前");
         pageNumLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
+        currentCountField.setEnabled(false);
         currentCountField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, pageNumLabel);
 
         var pageSizeLabel = new JLabel();
         pageSizeLabel.setText("总数");
         pageSizeLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
+        allCountField.setEnabled(false);
         allCountField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, pageSizeLabel);
 
         dataTableInit();
@@ -289,22 +294,22 @@ public class DataViewForm {
                         var value = dataTable.getValueAt(row, 2);
                         var score = dataTable.getValueAt(row, 1);
                         SwingUtilities.invokeLater(() -> {
-                            keyTextField.setText(score.toString());
-                            valueSaveBtn.setEnabled(true);
+                            fieldOrScoreField.setText(score.toString());
+                            valueUpdateSaveBtn.setEnabled(true);
                             textEditor.textArea().setText((String) value);
                         });
                     } else if (dataTable.getModel() instanceof HashTableModel) {
                         var value = dataTable.getValueAt(row, 1);
                         var key = dataTable.getValueAt(row, 0);
                         SwingUtilities.invokeLater(() -> {
-                            keyTextField.setText(key.toString());
-                            valueSaveBtn.setEnabled(true);
+                            fieldOrScoreField.setText(key.toString());
+                            valueUpdateSaveBtn.setEnabled(true);
                             textEditor.textArea().setText(value.toString());
                         });
                     } else {
                         var value = dataTable.getValueAt(row, 1);
                         SwingUtilities.invokeLater(() -> {
-                            valueSaveBtn.setEnabled(true);
+                            valueUpdateSaveBtn.setEnabled(true);
                             textEditor.textArea().setText((String) value);
                         });
                     }
@@ -316,10 +321,77 @@ public class DataViewForm {
                 }
             }
         });
+        dataTable.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                super.focusGained(e);
+                tableDelBtn.setEnabled(true);
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                super.focusLost(e);
+                tableDelBtn.setEnabled(false);
+            }
+        });
     }
 
     public JPanel contentPanel() {
         return contentPanel;
+    }
+
+    private void reloadAllActionPerformed() {
+        if (refBtn.isEnabled()) {
+            refreshDisableBtn();
+            String key = keyField.getText();
+            var keyType = keyTypeLabel.getText();
+            Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(keyType.toUpperCase());
+
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.ZSET)) {
+                this.scanZSetContextMap.put(key, new ScanContext<>());
+            }
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.HASH)) {
+                this.scanHashContextMap.put(key, new ScanContext<>());
+            }
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.LIST)) {
+
+            }
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
+                this.scanSetContextMap.put(key, new ScanContext<>());
+            }
+            dataChangeActionPerformed(key);
+        }
+    }
+
+    private void reloadTableDataActionPerformed(Boolean init) {
+        CompletableFuture.runAsync(() -> {
+            String key = keyField.getText();
+            var keyType = keyTypeLabel.getText();
+            Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(keyType.toUpperCase());
+            tableAddBtn.setEnabled(false);
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.ZSET)) {
+                if (init)
+                    scanZSetContextMap.put(key, new ScanContext<>());
+                loadZSetDataActionPerformed(key);
+            }
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.HASH)) {
+                if (init)
+                    scanHashContextMap.put(key, new ScanContext<>());
+                loadHashDataActionPerformed(key);
+            }
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.LIST)) {
+
+            }
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
+                if (init)
+                    scanSetContextMap.put(key, new ScanContext<>());
+                loadSetDataActionPerformed(key);
+            }
+        }).thenRun(() -> SwingUtilities.invokeLater(() -> {
+            loadMoreBtn.requestFocus();
+            tableAddBtn.setEnabled(true);
+            tableRefreshBtn.setEnabled(true);
+        }));
     }
 
     public synchronized void dataChangeActionPerformed(String key) {
@@ -328,7 +400,7 @@ public class DataViewForm {
                     Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(type.toUpperCase());
                     SwingUtilities.invokeLater(() -> {
                         dataPanel.add(LoadingPanel.newInstance(), BorderLayout.CENTER);
-                        keyTextField.setVisible(keyTypeEnum == Enum.KeyTypeEnum.ZSET || keyTypeEnum == Enum.KeyTypeEnum.HASH);
+                        fieldOrScoreField.setVisible(keyTypeEnum == Enum.KeyTypeEnum.ZSET || keyTypeEnum == Enum.KeyTypeEnum.HASH);
                         keyTypeLabel.setText(keyTypeEnum.typeName());
                         keyTypeLabel.setBackground(keyTypeEnum.color());
                     });
@@ -339,7 +411,7 @@ public class DataViewForm {
                         Long strLen = RedisStringService.service.strlen(connectInfo, key);
                         String value = RedisStringService.service.get(connectInfo, key);
                         SwingUtilities.invokeLater(() -> {
-                            valueSaveBtn.setEnabled(true);
+                            valueUpdateSaveBtn.setEnabled(true);
                             lengthLabel.setText("Length: " + strLen);
                             keySizeLabel.setText("Size: " + DataSizeUtil.format(value.getBytes().length));
                             textEditor.textArea().setText(value);
@@ -353,11 +425,11 @@ public class DataViewForm {
                     } else if (keyTypeEnum == Enum.KeyTypeEnum.ZSET) {
                         loadZSetDataActionPerformed(key);
                     } else if (keyTypeEnum == Enum.KeyTypeEnum.LIST) {
-                        Long llen = RedisListService.service.llen(connectInfo, key);
+                        Long lLen = RedisListService.service.llen(connectInfo, key);
                         List<String> value = RedisListService.service.lrange(connectInfo, key, 0, -1);
                         ListTableModel listTableModel = new ListTableModel(value);
                         SwingUtilities.invokeLater(() -> {
-                            lengthLabel.setText("Length: " + llen);
+                            lengthLabel.setText("Length: " + lLen);
                             currentCountField.setText("1");
                             allCountField.setText(String.valueOf(value.size()));
                             keySizeLabel.setText("Size: " + DataSizeUtil.format(value.stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)));
@@ -373,9 +445,7 @@ public class DataViewForm {
                                 {
                                     ttlField.setText(ttl.toString());
                                     keyField.setText(key);
-                                    saveBtn.setEnabled(true);
-                                    delBtn.setEnabled(true);
-                                    refBtn.setEnabled(true);
+                                    refreshEnableBtn();
                                 }
                         )), updateContentFuture)
                 .exceptionally(throwable -> {
@@ -391,7 +461,7 @@ public class DataViewForm {
         var lastSearchKey = scanContext.getSearchKey();
 
         scanContext.setSearchKey(tableSearchField.getText());
-        scanContext.setLimit(1000L);
+        scanContext.setLimit(1L);
 
         MapScanCursor<String, String> mapScanCursor = RedisHashService.service.hscan(connectInfo, key, scanContext.getScanCursor(), scanContext.getScanArgs());
         scanContext.setScanCursor(mapScanCursor);
@@ -411,15 +481,14 @@ public class DataViewForm {
         var hashTableModel = new HashTableModel(scanContext.getKeyList());
 
         SwingUtilities.invokeLater(() -> {
-            currentCountField.setText("1");
-            allCountField.setText(String.valueOf(scanContext.getKeyList().size()));
+
+            LoadAfterUpdate(len, DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getValue().getBytes().length).reduce(Integer::sum).orElse(0)), String.valueOf(scanContext.getKeyList().size()), mapScanCursor.isFinished());
+
             keyLabel.setText("键名");
             keyLabel.setOpaque(true);
             keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
-            lengthLabel.setText("Length: " + len);
-            keySizeLabel.setText("Size: " + DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getValue().getBytes().length).reduce(Integer::sum).orElse(0)));
+
             dataTable.setModel(hashTableModel);
-            loadMoreBtn.setEnabled(!mapScanCursor.isFinished());
             Fn.removeAllComponent(dataPanel);
             dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
         });
@@ -452,20 +521,31 @@ public class DataViewForm {
         SetTableModel setTableModel = new SetTableModel(scanContext.getKeyList());
 
         SwingUtilities.invokeLater(() -> {
-            currentCountField.setText(String.valueOf(scanContext.getKeyList().size()));
-            allCountField.setText(String.valueOf(len));
-            lengthLabel.setText("Length: " + len);
-            keySizeLabel.setText("Size: " + DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)));
+            LoadAfterUpdate(len, DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)), String.valueOf(scanContext.getKeyList().size()), valueScanCursor.isFinished());
             dataTable.setModel(setTableModel);
-            loadMoreBtn.setEnabled(!valueScanCursor.isFinished());
             Fn.removeAllComponent(dataPanel);
             dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
         });
     }
 
+    private void LoadAfterUpdate(Long len, String dataSize, String loadSize, Boolean isFinished) {
+        lengthLabel.setText("Length: " + len);
+        keySizeLabel.setText("Size: " + dataSize);
+        currentCountField.setText(loadSize);
+        allCountField.setText(String.valueOf(len));
+        if (isFinished) {
+            loadMoreBtn.setText("加载完成");
+            loadMoreBtn.setEnabled(false);
+        } else {
+            loadMoreBtn.setText("加载更多");
+            loadMoreBtn.setEnabled(true);
+        }
+
+    }
+
 
     private void loadZSetDataActionPerformed(String key) {
-        Long strLen = RedisZSetService.service.zcard(connectInfo, key);
+        Long len = RedisZSetService.service.zcard(connectInfo, key);
 
         ScanContext<ScoredValue<String>> scanContext = scanZSetContextMap.getOrDefault(key, new ScanContext<>());
 
@@ -493,12 +573,8 @@ public class DataViewForm {
 
         SwingUtilities.invokeLater(() -> {
             keyLabel.setText("分数：");
-            currentCountField.setText(String.valueOf(valueScanCursor.getValues().size()));
-            allCountField.setText(String.valueOf(strLen));
-            lengthLabel.setText("Length: " + strLen);
-            keySizeLabel.setText("Size: " + DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getValue().getBytes().length).reduce(Integer::sum).orElse(0)));
+            LoadAfterUpdate(len, DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getValue().getBytes().length).reduce(Integer::sum).orElse(0)), String.valueOf(scanContext.getKeyList().size()), valueScanCursor.isFinished());
             dataTable.setModel(sortedSetTableModel);
-            loadMoreBtn.setEnabled(!valueScanCursor.isFinished());
             Fn.removeAllComponent(dataPanel);
             dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
         });
@@ -543,6 +619,9 @@ public class DataViewForm {
                 super.updateUI();
                 var flatLineBorder = new FlatLineBorder(new Insets(0, 2, 0, 0), UIManager.getColor("Component.borderColor"));
                 setBorder(flatLineBorder);
+                if (Fn.isNotNull(dataTable)) {
+                    dataTableInit();
+                }
             }
         };
 
@@ -560,24 +639,24 @@ public class DataViewForm {
         JToolBar jToolBar = new JToolBar();
         jToolBar.setBorder(new EmptyBorder(5, 8, 0, 10));
 
-        keyTextField = new JTextField();
+        fieldOrScoreField = new JTextField();
         keyLabel = new JLabel();
         keyLabel.setText("键名：");
         keyLabel.setBackground(UIManager.getColor("background"));
         keyLabel.setBorder(new EmptyBorder(0, 2, 0, 2));
-        keyTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, keyLabel);
-        keyTextField.setBackground(UIManager.getColor("FlatEditorPane.background"));
-        jToolBar.add(keyTextField);
+        fieldOrScoreField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, keyLabel);
+        fieldOrScoreField.setBackground(UIManager.getColor("FlatEditorPane.background"));
+        jToolBar.add(fieldOrScoreField);
 
         JComboBox<String> jComboBox = new JComboBox<>();
         jComboBox.addItem(SyntaxConstants.SYNTAX_STYLE_NONE);
         jComboBox.addItem(SyntaxConstants.SYNTAX_STYLE_JSON);
         jComboBox.setBackground(UIManager.getColor("FlatEditorPane.background"));
         jToolBar.add(jComboBox);
-        valueSaveBtn = new JButton();
-        valueSaveBtn.setEnabled(false);
-        valueSaveBtn.setIcon(UI.SAVE_ICON);
-        valueSaveBtn.addActionListener((e) -> {
+        valueUpdateSaveBtn = new JButton();
+        valueUpdateSaveBtn.setEnabled(false);
+        valueUpdateSaveBtn.setIcon(UI.SAVE_ICON);
+        valueUpdateSaveBtn.addActionListener((e) -> {
 
             var row = dataTable.getSelectedRow();
 
@@ -591,15 +670,16 @@ public class DataViewForm {
             var newValue = textEditor.textArea().getText();
 
             if (typeEnum.equals(Enum.KeyTypeEnum.ZSET)) {
-                var fieldOrScore = keyTextField.getText();
+                var fieldOrScore = fieldOrScoreField.getText();
                 var value = (String) dataTable.getValueAt(row, 2);
                 RedisZSetService.service.zrem(connectInfo, key, value);
                 RedisZSetService.service.zadd(connectInfo, key, Double.parseDouble(fieldOrScore), newValue);
             }
 
             if (typeEnum.equals(Enum.KeyTypeEnum.HASH)) {
-                var fieldOrScore = keyTextField.getText();
-                RedisHashService.service.hdel(connectInfo, key, fieldOrScore);
+                var fieldOrScore = fieldOrScoreField.getText();
+                var filed = (String) dataTable.getValueAt(row, 0);
+                RedisHashService.service.hdel(connectInfo, key, filed);
                 RedisHashService.service.hset(connectInfo, key, fieldOrScore, newValue);
             }
 
@@ -616,7 +696,7 @@ public class DataViewForm {
             }
 
         });
-        jToolBar.add(valueSaveBtn);
+        jToolBar.add(valueUpdateSaveBtn);
 
 
         valueViewPanel.add(new JPanel() {
