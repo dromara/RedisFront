@@ -87,7 +87,8 @@ public class DataSearchForm {
 
     public synchronized void loadTreeModelData(String key) {
         try {
-            disableInputComponent();
+            LoadingUtil.showDialog();
+            scanAfterActionPerformed();
             var scanKeysContext = scanKeysContextMap.get(connectInfo.database());
 
             if (Fn.isNull(scanKeysContext.getLimit())) {
@@ -173,10 +174,13 @@ public class DataSearchForm {
                 }
                 keyTree.setModel(treeModel);
             });
-            enableInputComponent();
+            scanBeforeActionPerformed();
+            LoadingUtil.closeDialog();
         } catch (Exception e) {
+            e.printStackTrace();
             if (e instanceof RedisFrontException) {
-                enableInputComponent();
+                scanBeforeActionPerformed();
+                LoadingUtil.closeDialog();
                 loadMoreBtn.setEnabled(false);
                 AlertUtil.showInformationDialog(e.getMessage());
             } else {
@@ -194,9 +198,8 @@ public class DataSearchForm {
         }
     }
 
-    private void disableInputComponent() {
+    private void scanAfterActionPerformed() {
         SwingUtilities.invokeLater(() -> {
-            LoadingUtil.showDialog();
             searchTextField.setEnabled(false);
             refreshBtn.setEnabled(false);
             searchBtn.setEnabled(false);
@@ -206,9 +209,8 @@ public class DataSearchForm {
         });
     }
 
-    private void enableInputComponent() {
+    private void scanBeforeActionPerformed() {
         SwingUtilities.invokeLater(() -> {
-            LoadingUtil.closeDialog();
             searchTextField.setEnabled(true);
             refreshBtn.setEnabled(true);
             searchBtn.setEnabled(true);

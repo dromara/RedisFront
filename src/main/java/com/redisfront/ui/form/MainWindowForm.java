@@ -8,6 +8,7 @@ import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
 import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.commons.func.Fn;
+import com.redisfront.commons.util.AlertUtil;
 import com.redisfront.commons.util.ExecutorUtil;
 import com.redisfront.commons.util.LettuceUtil;
 import com.redisfront.commons.util.LoadingUtil;
@@ -17,13 +18,11 @@ import com.redisfront.service.RedisBasicService;
 import com.redisfront.ui.component.MainTabbedPanel;
 import com.redisfront.ui.dialog.AddConnectDialog;
 import com.redisfront.ui.dialog.OpenConnectDialog;
-import io.lettuce.core.api.sync.BaseRedisCommands;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
@@ -57,10 +56,16 @@ public class MainWindowForm {
         CompletableFuture.allOf(CompletableFuture.runAsync(() -> {
                     connectInfo.setRedisModeEnum(RedisBasicService.service.getRedisModeEnum(connectInfo));
                     if (Enum.RedisMode.SENTINEL == connectInfo.redisModeEnum()) {
-                        java.util.List<Map<String, String>> masterList = LettuceUtil.sentinelExec(connectInfo, RedisSentinelCommands::masters);
-                        Map<String, String> master = masterList.stream().findAny().orElseThrow();
-                        String port = master.get("port");
-                        connectInfo.setPort(Integer.valueOf(port));
+                        var masterList = LettuceUtil.sentinelExec(connectInfo, RedisSentinelCommands::masters);
+                        var master = masterList.stream().findAny().orElseThrow();
+                        var ip = master.get("ip");
+                        var port = master.get("port");
+                        LoadingUtil.closeDialog();
+                        var ret = JOptionPane.showConfirmDialog(RedisFrontApplication.frame, "您连接的主机为Sentinel节点，是否重定向的到Master[ " + ip + "/" + port + " ]节点？", "连接提示", JOptionPane.YES_NO_OPTION);
+                        if (ret == JOptionPane.YES_OPTION) {
+                            connectInfo.setPort(Integer.valueOf(port));
+                        }
+                        LoadingUtil.showDialog();
                     }
                 }, ExecutorUtil.getExecutorService()), CompletableFuture.runAsync(() -> {
                     if (Fn.equal(connectInfo.id(), 0)) {
@@ -69,14 +74,18 @@ public class MainWindowForm {
                         ConnectService.service.update(connectInfo);
                     }
                 }, ExecutorUtil.getExecutorService()))
-                .thenRunAsync(() -> SwingUtilities.invokeLater(() -> {
+                .thenRunAsync(() -> {
                     var mainTabbedPanel = MainTabbedPanel.newInstance(connectInfo);
-                    this.tabPanel.addTab(connectInfo.title(), UI.MAIN_TAB_DATABASE_ICON, mainTabbedPanel);
-                    this.tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
-                    this.contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
+                    SwingUtilities.invokeLater(() -> {
+                        this.tabPanel.addTab(connectInfo.title(), UI.MAIN_TAB_DATABASE_ICON, mainTabbedPanel);
+                        this.tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
+                        this.contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
+                        LoadingUtil.closeDialog();
+                    });
+                }).exceptionally((throwable -> {
                     LoadingUtil.closeDialog();
-                })).exceptionally((throwable -> {
-                    throw new RedisFrontException(throwable.getMessage(), true);
+                    AlertUtil.showErrorDialog("Error", throwable.getCause().getCause());
+                    return null;
                 }));
 
     }

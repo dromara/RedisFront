@@ -21,10 +21,7 @@ import com.redisfront.service.*;
 import com.redisfront.ui.component.LoadingPanel;
 import com.redisfront.ui.component.TextEditor;
 import com.redisfront.ui.dialog.AddOrUpdateItemDialog;
-import io.lettuce.core.MapScanCursor;
-import io.lettuce.core.ScoredValue;
-import io.lettuce.core.ScoredValueScanCursor;
-import io.lettuce.core.ValueScanCursor;
+import io.lettuce.core.*;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
 import javax.swing.*;
@@ -84,6 +81,7 @@ public class DataViewForm {
     private final ConnectInfo connectInfo;
 
     private final Map<String, ScanContext<String>> scanSetContextMap;
+    private final Map<String, ScanContext<String>> scanListContextMap;
     private final Map<String, ScanContext<ScoredValue<String>>> scanZSetContextMap;
     private final Map<String, ScanContext<Map.Entry<String, String>>> scanHashContextMap;
 
@@ -115,6 +113,7 @@ public class DataViewForm {
 
         scanZSetContextMap = new LinkedHashMap<>();
         scanSetContextMap = new LinkedHashMap<>();
+        scanListContextMap = new LinkedHashMap<>();
         scanHashContextMap = new LinkedHashMap<>();
 
         loadMoreBtn.setIcon(UI.LOAD_MORE_ICON);
@@ -360,7 +359,7 @@ public class DataViewForm {
                 this.scanHashContextMap.put(key, new ScanContext<>());
             }
             if (keyTypeEnum.equals(Enum.KeyTypeEnum.LIST)) {
-
+                this.scanListContextMap.put(key, new ScanContext<>());
             }
             if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
                 this.scanSetContextMap.put(key, new ScanContext<>());
@@ -386,7 +385,9 @@ public class DataViewForm {
                 loadHashDataActionPerformed(key);
             }
             if (keyTypeEnum.equals(Enum.KeyTypeEnum.LIST)) {
-
+                if (init)
+                    scanListContextMap.put(key, new ScanContext<>());
+                loadListDataActionPerformed(key);
             }
             if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
                 if (init)
@@ -401,7 +402,8 @@ public class DataViewForm {
     }
 
     public synchronized void dataChangeActionPerformed(String key) {
-        CompletableFuture<Void> updateContentFuture = CompletableFuture.supplyAsync(() -> {
+
+        CompletableFuture<Void> scanOrGetFuture = CompletableFuture.supplyAsync(() -> {
                     String type = RedisBasicService.service.type(connectInfo, key);
                     Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(type.toUpperCase());
                     SwingUtilities.invokeLater(() -> {
@@ -431,18 +433,7 @@ public class DataViewForm {
                     } else if (keyTypeEnum == Enum.KeyTypeEnum.ZSET) {
                         loadZSetDataActionPerformed(key);
                     } else if (keyTypeEnum == Enum.KeyTypeEnum.LIST) {
-                        Long lLen = RedisListService.service.llen(connectInfo, key);
-                        List<String> value = RedisListService.service.lrange(connectInfo, key, 0, -1);
-                        ListTableModel listTableModel = new ListTableModel(value);
-                        SwingUtilities.invokeLater(() -> {
-                            lengthLabel.setText("Length: " + lLen);
-                            currentCountField.setText("1");
-                            allCountField.setText(String.valueOf(value.size()));
-                            keySizeLabel.setText("Size: " + DataSizeUtil.format(value.stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)));
-                            dataTable.setModel(listTableModel);
-                            Fn.removeAllComponent(dataPanel);
-                            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
-                        });
+                        loadListDataActionPerformed(key);
                     }
                 }));
 
@@ -453,8 +444,9 @@ public class DataViewForm {
                                     keyField.setText(key);
                                     refreshEnableBtn();
                                 }
-                        )), updateContentFuture)
+                        )), scanOrGetFuture)
                 .exceptionally(throwable -> {
+                    throwable.printStackTrace();
                     SwingUtilities.invokeLater(() -> AlertUtil.showErrorDialog("error", throwable));
                     return null;
                 })
@@ -534,23 +526,48 @@ public class DataViewForm {
         });
     }
 
-    private void LoadAfterUpdate(Long len, String dataSize, String loadSize, Boolean isFinished) {
-        lengthLabel.setText("Length: " + len);
-        keySizeLabel.setText("Size: " + dataSize);
-        currentCountField.setText(loadSize);
-        allCountField.setText(String.valueOf(len));
-        if (isFinished) {
-            loadMoreBtn.setText("加载完成");
-            loadMoreBtn.setEnabled(false);
+    private synchronized void loadListDataActionPerformed(String key) {
+        Long len = RedisListService.service.llen(connectInfo, key);
+
+        ScanContext<String> scanContext = scanListContextMap.getOrDefault(key, new ScanContext<>());
+
+        var lastSearchKey = scanContext.getSearchKey();
+        scanContext.setSearchKey(tableSearchField.getText());
+        scanContext.setLimit(1L);
+        var start = Long.parseLong(scanContext.getScanCursor().getCursor());
+        var stop = start == 0 ? (scanContext.getLimit() - 1) : scanContext.getLimit() + start;
+        List<String> value = RedisListService.service.lrange(connectInfo, key, start, stop);
+
+        var nextCursor = start + scanContext.getLimit();
+        if (nextCursor >= len) {
+            scanContext.setScanCursor(new ScanCursor(String.valueOf(len), true));
         } else {
-            loadMoreBtn.setText("加载更多");
-            loadMoreBtn.setEnabled(true);
+            scanContext.setScanCursor(new ScanCursor(String.valueOf(nextCursor), false));
         }
 
+        if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
+            if (scanContext.getKeyList().size() >= 2000) {
+                System.gc();
+                throw new RedisFrontException("数据加载上限，请使用正则模糊匹配查找！");
+            }
+            scanContext.getKeyList().addAll(value);
+        } else {
+            scanContext.setKeyList(value);
+        }
+
+        scanListContextMap.put(key, scanContext);
+
+        ListTableModel listTableModel = new ListTableModel(scanContext.getKeyList());
+
+        SwingUtilities.invokeLater(() -> {
+            LoadAfterUpdate(len, DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)), String.valueOf(scanContext.getKeyList().size()), scanContext.getScanCursor().isFinished());
+            dataTable.setModel(listTableModel);
+            Fn.removeAllComponent(dataPanel);
+            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
+        });
     }
 
-
-    private void loadZSetDataActionPerformed(String key) {
+    private synchronized void loadZSetDataActionPerformed(String key) {
         Long len = RedisZSetService.service.zcard(connectInfo, key);
 
         ScanContext<ScoredValue<String>> scanContext = scanZSetContextMap.getOrDefault(key, new ScanContext<>());
@@ -585,6 +602,22 @@ public class DataViewForm {
             dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
         });
     }
+
+    private synchronized void LoadAfterUpdate(Long len, String dataSize, String loadSize, Boolean isFinished) {
+        lengthLabel.setText("Length: " + len);
+        keySizeLabel.setText("Size: " + dataSize);
+        currentCountField.setText(loadSize);
+        allCountField.setText(String.valueOf(len));
+        if (isFinished) {
+            loadMoreBtn.setText("加载完成");
+            loadMoreBtn.setEnabled(false);
+        } else {
+            loadMoreBtn.setText("加载更多");
+            loadMoreBtn.setEnabled(true);
+        }
+
+    }
+
 
     private void updateValueActionPerformed() {
         var row = dataTable.getSelectedRow();
