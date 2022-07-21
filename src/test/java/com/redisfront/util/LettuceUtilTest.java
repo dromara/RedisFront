@@ -1,17 +1,24 @@
 package com.redisfront.util;
 
+import cn.hutool.extra.ssh.JschUtil;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import com.redisfront.commons.util.LettuceUtil;
 import com.redisfront.model.ConnectInfo;
-import io.lettuce.core.ScanArgs;
-import io.lettuce.core.ScanCursor;
-import io.lettuce.core.StatefulRedisConnectionImpl;
-import io.lettuce.core.ValueScanCursor;
+import io.lettuce.core.*;
+import io.lettuce.core.api.StatefulRedisConnection;
+import io.lettuce.core.api.sync.RedisCommands;
+import io.lettuce.core.codec.StringCodec;
+import io.lettuce.core.masterreplica.MasterReplica;
+import io.lettuce.core.masterreplica.StatefulRedisMasterReplicaConnection;
 import io.lettuce.core.output.*;
 import io.lettuce.core.protocol.CommandArgs;
 import io.lettuce.core.protocol.CommandType;
+import io.lettuce.core.protocol.RedisCommand;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -21,8 +28,12 @@ import java.util.List;
  */
 public class LettuceUtilTest {
 
+    @Test
+    public void test5() {
 
-//    @Test
+    }
+
+    //    @Test
     public void test1() {
         LettuceUtil.run(new ConnectInfo().setHost("127.0.0.1").setPort(6379).setSsl(false), redisCommands -> {
             if (redisCommands.getStatefulConnection() instanceof StatefulRedisConnectionImpl<String, String> statefulRedisConnection) {
@@ -32,7 +43,7 @@ public class LettuceUtilTest {
         });
     }
 
-//    @Test
+    //    @Test
     public void test3() {
         String[] list = new String[]{"a", "b", "c", "d", "e", "f", "g", "h", "l", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
         for (int i = 0; i < 26; i++) {
@@ -60,7 +71,7 @@ public class LettuceUtilTest {
 
     }
 
-//    @Test
+    //    @Test
     public void test2() {
         LettuceUtil.run(new ConnectInfo().setHost("127.0.0.1").setPort(6379).setSsl(false), redisCommands -> {
             ScanArgs scanArgs = new ScanArgs();

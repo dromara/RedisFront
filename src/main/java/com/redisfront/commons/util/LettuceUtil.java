@@ -1,5 +1,6 @@
 package com.redisfront.commons.util;
 
+import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.model.ConnectInfo;
 import io.lettuce.core.RedisClient;
@@ -111,8 +112,8 @@ public class LettuceUtil {
         var redisURI = RedisURI.builder()
                 .withHost(connectInfo.host())
                 .withPort(connectInfo.port())
-                .withDatabase(connectInfo.database())
                 .withSsl(connectInfo.ssl())
+                .withDatabase(connectInfo.database())
                 .build();
         if (Fn.isNotEmpty(connectInfo.user())) {
             redisURI.setUsername(connectInfo.user());

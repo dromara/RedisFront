@@ -215,6 +215,7 @@ public class DataViewForm {
             if (row == -1) {
                 return;
             }
+            tableDelBtn.setEnabled(false);
             var keyType = keyTypeLabel.getText();
             Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(keyType.toUpperCase());
             String key = keyField.getText();
@@ -237,6 +238,8 @@ public class DataViewForm {
                 var value = (String) dataTable.getValueAt(row, 1);
                 RedisSetService.service.srem(connectInfo, key, value);
             }
+            tableDelBtn.setEnabled(false);
+            reloadTableDataActionPerformed(true);
         });
 
         tableRefreshBtn.setText("重新载入");
@@ -331,7 +334,10 @@ public class DataViewForm {
             @Override
             public void focusLost(FocusEvent e) {
                 super.focusLost(e);
-                tableDelBtn.setEnabled(false);
+                var row = dataTable.getSelectedRow();
+                if (row == -1) {
+                    tableDelBtn.setEnabled(false);
+                }
             }
         });
     }
@@ -801,8 +807,8 @@ public class DataViewForm {
         final Spacer spacer2 = new Spacer();
         panel3.add(spacer2, new GridConstraints(5, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         tableDelBtn = new JButton();
-        tableDelBtn.setEnabled(false);
-        tableDelBtn.setText("删除");
+        tableDelBtn.setEnabled(true);
+        tableDelBtn.setText("");
         panel3.add(tableDelBtn, new GridConstraints(3, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
         tableRefreshBtn = new JButton();
         tableRefreshBtn.setText("重载");
