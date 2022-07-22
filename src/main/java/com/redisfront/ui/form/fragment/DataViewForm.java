@@ -177,11 +177,13 @@ public class DataViewForm {
 
         tableSearchField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入搜索词...");
         var searchBtn = new JButton(new FlatSearchIcon());
-        searchBtn.addActionListener(actionEvent -> System.out.println());
-
+        searchBtn.addActionListener(actionEvent -> reloadTableDataActionPerformed(true));
         tableSearchField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchBtn);
         tableSearchField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
-        tableSearchField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> System.out.println());
+        tableSearchField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> {
+            tableSearchField.setText("");
+            reloadTableDataActionPerformed(true);
+        });
 
         tableAddBtn.setIcon(UI.PLUS_ICON);
         tableAddBtn.setText("插入元素");
@@ -459,7 +461,7 @@ public class DataViewForm {
         var lastSearchKey = scanContext.getSearchKey();
 
         scanContext.setSearchKey(tableSearchField.getText());
-        scanContext.setLimit(1L);
+        scanContext.setLimit(500L);
 
         MapScanCursor<String, String> mapScanCursor = RedisHashService.service.hscan(connectInfo, key, scanContext.getScanCursor(), scanContext.getScanArgs());
         scanContext.setScanCursor(mapScanCursor);
@@ -498,7 +500,7 @@ public class DataViewForm {
 
         var lastSearchKey = scanContext.getSearchKey();
         scanContext.setSearchKey(tableSearchField.getText());
-        scanContext.setLimit(1000L);
+        scanContext.setLimit(500L);
 
         ValueScanCursor<String> valueScanCursor = RedisSetService.service.sscan(connectInfo, key, scanContext.getScanCursor(), scanContext.getScanArgs());
         scanContext.setScanCursor(valueScanCursor);
@@ -533,7 +535,7 @@ public class DataViewForm {
 
         var lastSearchKey = scanContext.getSearchKey();
         scanContext.setSearchKey(tableSearchField.getText());
-        scanContext.setLimit(3L);
+        scanContext.setLimit(500L);
         var start = Long.parseLong(scanContext.getScanCursor().getCursor());
         var stop = start + (scanContext.getLimit() - 1);
         List<String> value = RedisListService.service.lrange(connectInfo, key, start, stop);
@@ -574,7 +576,7 @@ public class DataViewForm {
 
         var lastSearchKey = scanContext.getSearchKey();
         scanContext.setSearchKey(tableSearchField.getText());
-        scanContext.setLimit(1000L);
+        scanContext.setLimit(500L);
 
         ScoredValueScanCursor<String> valueScanCursor = RedisZSetService.service.zscan(connectInfo, key, scanContext.getScanCursor(), scanContext.getScanArgs());
         scanContext.setScanCursor(valueScanCursor);

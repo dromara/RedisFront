@@ -6,7 +6,6 @@ import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.redisfront.RedisFrontApplication;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
-import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.util.AlertUtil;
 import com.redisfront.commons.util.ExecutorUtil;
@@ -18,6 +17,8 @@ import com.redisfront.service.RedisBasicService;
 import com.redisfront.ui.component.MainTabbedPanel;
 import com.redisfront.ui.dialog.AddConnectDialog;
 import com.redisfront.ui.dialog.OpenConnectDialog;
+import io.lettuce.core.RedisException;
+import io.lettuce.core.api.sync.BaseRedisCommands;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
 
 import javax.swing.*;
@@ -65,6 +66,22 @@ public class MainWindowForm {
                         if (ret == JOptionPane.YES_OPTION) {
                             connectInfo.setPort(Integer.valueOf(port));
                         }
+                        try {
+                            LettuceUtil.run(connectInfo, BaseRedisCommands::ping);
+                        } catch (Exception e) {
+                            if (e instanceof RedisException redisException) {
+                                var ex = redisException.getCause();
+                                if (Fn.equal(ex.getMessage(), "WRONGPASS invalid username-password pair or user is disabled.")) {
+                                    var password = JOptionPane.showInputDialog(RedisFrontApplication.frame, "您输入Master[ " + ip + "/" + port + " ]节点的密码！");
+                                    if (ret == JOptionPane.YES_OPTION) {
+                                        connectInfo.setPassword(password);
+                                        LettuceUtil.run(connectInfo, BaseRedisCommands::ping);
+                                    }
+                                }
+                            } else {
+                                throw e;
+                            }
+                        }
                         LoadingUtil.showDialog();
                     }
                 }, ExecutorUtil.getExecutorService()), CompletableFuture.runAsync(() -> {
@@ -73,6 +90,7 @@ public class MainWindowForm {
                     } else {
                         ConnectService.service.update(connectInfo);
                     }
+
                 }, ExecutorUtil.getExecutorService()))
                 .thenRunAsync(() -> {
                     var mainTabbedPanel = MainTabbedPanel.newInstance(connectInfo);
