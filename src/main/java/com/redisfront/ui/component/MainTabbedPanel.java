@@ -6,16 +6,15 @@ import com.formdev.flatlaf.extras.components.FlatToolBar;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
 import com.redisfront.commons.func.Fn;
+import com.redisfront.commons.util.ExecutorUtil;
 import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
 import com.redisfront.ui.form.fragment.DataChartsForm;
-import com.redisfront.commons.util.ExecutorUtil;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -114,7 +113,7 @@ public class MainTabbedPanel extends JPanel {
 
         contentPanel.addTab("数据", UI.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(connectInfo));
         contentPanel.addTab("命令", UI.CONTENT_TAB_COMMAND_ICON, RedisTerminal.newInstance(connectInfo));
-        contentPanel.addTab("信息", UI.CONTENT_TAB_INFO_ICON, DataChartsForm.getInstance().contentPanel());
+        contentPanel.addTab("信息", UI.CONTENT_TAB_INFO_ICON, new JPanel());
 
         //tab 切换事件
         contentPanel.addChangeListener(e -> {
@@ -149,15 +148,17 @@ public class MainTabbedPanel extends JPanel {
                                 buf.append("</style>");
                                 buf.append("<p>");
                                 buf.append("Key数量: ").append(count);
-                                buf.append("</p>");
-                                buf.append("<hr>");
-                                buf.append("</hr>");
-                                buf.append("<table>");
-                                keySpace.forEach((key, value) -> appendRow(buf, key, String.valueOf(value)));
-                                buf.append("</td></tr>");
-                                buf.append("</table>");
-                                buf.append("<hr>");
-                                buf.append("</hr>");
+                                if (count > 0) {
+                                    buf.append("</p>");
+                                    buf.append("<hr>");
+                                    buf.append("</hr>");
+                                    buf.append("<table>");
+                                    keySpace.forEach((key, value) -> appendRow(buf, key, String.valueOf(value)));
+                                    buf.append("</td></tr>");
+                                    buf.append("</table>");
+                                    buf.append("<hr>");
+                                    buf.append("</hr>");
+                                }
                                 buf.append("</html>");
                                 keyInfo[1] = buf.toString();
                             } else {
@@ -177,8 +178,8 @@ public class MainTabbedPanel extends JPanel {
                                 })),
                         CompletableFuture.supplyAsync(() -> RedisBasicService.service.getMemoryInfo(connectInfo), ExecutorUtil.getExecutorService()).thenAccept(memory ->
                                 SwingUtilities.invokeLater(() -> {
-                                    memoryInfo.setText((String) memory.get("used_memory_human"));
-                                    memoryInfo.setToolTipText("内存占用：" + memory.get("used_memory_human"));
+                                    memoryInfo.setText((Fn.isNotNull(memory.get("used_memory_human")) ? (String) memory.get("used_memory_human") : "0"));
+                                    memoryInfo.setToolTipText("内存占用：" + (Fn.isNotNull(memory.get("used_memory_human")) ? memory.get("used_memory_human") : 0));
                                 }))), 0, 30, TimeUnit.SECONDS);
     }
 
