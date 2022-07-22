@@ -9,7 +9,7 @@ import java.util.List;
 
 public class UI {
     public static final List<Image> MAIN_FRAME_ICON_IMAGES = FlatSVGUtils.createWindowIconImages("/svg/redis.svg");
-    public static final Icon REDIS_ICON = new FlatSVGIcon("svg/redis_64.svg");
+    public static final Icon REDIS_ICON = new FlatSVGIcon("svg/redis.svg");
     public static final Icon PLUS_ICON = new FlatSVGIcon("icons/add.svg");
     public static final Icon LOAD_MORE_ICON = new FlatSVGIcon("svg/testBtn.svg");
     public static final Icon GITEE_ICON = new FlatSVGIcon("icons/gitee.svg");
