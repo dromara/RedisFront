@@ -349,7 +349,6 @@ public class DataViewForm {
 
     private void reloadAllActionPerformed() {
         if (refBtn.isEnabled()) {
-            refreshDisableBtn();
             String key = keyField.getText();
             var keyType = keyTypeLabel.getText();
             Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(keyType.toUpperCase());
@@ -405,7 +404,8 @@ public class DataViewForm {
 
     public synchronized void dataChangeActionPerformed(String key) {
 
-        CompletableFuture<Void> scanOrGetFuture = CompletableFuture.supplyAsync(() -> {
+        CompletableFuture<Void> scanOrGetDataFuture = CompletableFuture.supplyAsync(() -> {
+                    SwingUtilities.invokeLater(this::refreshDisableBtn);
                     String type = RedisBasicService.service.type(connectInfo, key);
                     Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(type.toUpperCase());
                     SwingUtilities.invokeLater(() -> {
@@ -437,22 +437,23 @@ public class DataViewForm {
                     } else if (keyTypeEnum == Enum.KeyTypeEnum.LIST) {
                         loadListDataActionPerformed(key);
                     }
-                }));
+                }))
+                .thenRun(() -> SwingUtilities.invokeLater(this::refreshEnableBtn));
 
-        CompletableFuture.allOf(
-                        FutureUtil.completableFuture(() -> RedisBasicService.service.ttl(connectInfo, key), ttl -> SwingUtilities.invokeLater(() ->
-                                {
-                                    ttlField.setText(ttl.toString());
-                                    keyField.setText(key);
-                                    refreshEnableBtn();
-                                }
-                        )), scanOrGetFuture)
+        CompletableFuture<Void> setKeyInfoAndTTLFuture = FutureUtil.completableFuture(() -> RedisBasicService.service.ttl(connectInfo, key),
+                ttl -> SwingUtilities.invokeLater(() ->
+                        {
+                            ttlField.setText(ttl.toString());
+                            keyField.setText(key);
+                        }
+                ));
+
+        CompletableFuture.allOf(setKeyInfoAndTTLFuture, scanOrGetDataFuture)
                 .exceptionally(throwable -> {
                     throwable.printStackTrace();
                     SwingUtilities.invokeLater(() -> AlertUtil.showErrorDialog("error", throwable));
                     return null;
-                })
-        ;
+                });
     }
 
     private synchronized void loadHashDataActionPerformed(String key) {
