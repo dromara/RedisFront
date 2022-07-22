@@ -533,9 +533,9 @@ public class DataViewForm {
 
         var lastSearchKey = scanContext.getSearchKey();
         scanContext.setSearchKey(tableSearchField.getText());
-        scanContext.setLimit(1L);
+        scanContext.setLimit(3L);
         var start = Long.parseLong(scanContext.getScanCursor().getCursor());
-        var stop = start == 0 ? (scanContext.getLimit() - 1) : scanContext.getLimit() + start;
+        var stop = start + (scanContext.getLimit() - 1);
         List<String> value = RedisListService.service.lrange(connectInfo, key, start, stop);
 
         var nextCursor = start + scanContext.getLimit();
