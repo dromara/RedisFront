@@ -10,7 +10,6 @@ import com.redisfront.commons.util.ExecutorUtil;
 import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
-import com.redisfront.ui.form.fragment.DataChartsForm;
 
 import javax.swing.*;
 import java.awt.*;
