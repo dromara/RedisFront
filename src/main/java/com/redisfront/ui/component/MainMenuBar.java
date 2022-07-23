@@ -10,8 +10,8 @@ import com.redisfront.ui.dialog.AddConnectDialog;
 import com.redisfront.ui.dialog.OpenConnectDialog;
 import com.redisfront.ui.dialog.SettingDialog;
 import com.redisfront.ui.form.MainWindowForm;
-import com.redisfront.commons.util.ExecutorUtil;
-import com.redisfront.commons.util.LocaleUtil;
+import com.redisfront.commons.util.ExecutorUtils;
+import com.redisfront.commons.util.LocaleUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,16 +29,16 @@ import java.net.URISyntaxException;
  */
 public class MainMenuBar extends JMenuBar {
 
-    private static final LocaleUtil.BundleInfo FILE_MENU = LocaleUtil.getMenu("Menu.File");
-    private static final LocaleUtil.BundleInfo FILE_MENU_NEW_ITEM = LocaleUtil.getMenu("Menu.File.New");
-    private static final LocaleUtil.BundleInfo FILE_MENU_OPEN_ITEM = LocaleUtil.getMenu("Menu.File.Open");
-    private static final LocaleUtil.BundleInfo FILE_MENU_IMPORT_ITEM = LocaleUtil.getMenu("Menu.File.Import");
-    private static final LocaleUtil.BundleInfo FILE_MENU_EXPORT_ITEM = LocaleUtil.getMenu("Menu.File.Export");
-    private static final LocaleUtil.BundleInfo FILE_MENU_EXIT_ITEM = LocaleUtil.getMenu("Menu.File.Exit");
-    private static final LocaleUtil.BundleInfo SETTING_MENU = LocaleUtil.getMenu("Menu.Setting");
+    private static final LocaleUtils.BundleInfo FILE_MENU = LocaleUtils.getMenu("Menu.File");
+    private static final LocaleUtils.BundleInfo FILE_MENU_NEW_ITEM = LocaleUtils.getMenu("Menu.File.New");
+    private static final LocaleUtils.BundleInfo FILE_MENU_OPEN_ITEM = LocaleUtils.getMenu("Menu.File.Open");
+    private static final LocaleUtils.BundleInfo FILE_MENU_IMPORT_ITEM = LocaleUtils.getMenu("Menu.File.Import");
+    private static final LocaleUtils.BundleInfo FILE_MENU_EXPORT_ITEM = LocaleUtils.getMenu("Menu.File.Export");
+    private static final LocaleUtils.BundleInfo FILE_MENU_EXIT_ITEM = LocaleUtils.getMenu("Menu.File.Exit");
+    private static final LocaleUtils.BundleInfo SETTING_MENU = LocaleUtils.getMenu("Menu.Setting");
 
-    private static final LocaleUtil.BundleInfo HELP_MENU = LocaleUtil.getMenu("Menu.Help");
-    private static final LocaleUtil.BundleInfo HELP_ABOUT_MENU = LocaleUtil.getMenu("Menu.Help.About");
+    private static final LocaleUtils.BundleInfo HELP_MENU = LocaleUtils.getMenu("Menu.Help");
+    private static final LocaleUtils.BundleInfo HELP_ABOUT_MENU = LocaleUtils.getMenu("Menu.Help.About");
 
 
     public static JMenuBar getInstance() {
@@ -88,7 +88,7 @@ public class MainMenuBar extends JMenuBar {
         var settingMenu = new JMenu(SETTING_MENU.title());
         settingMenu.setMnemonic(SETTING_MENU.mnemonic());
         var settingMenuItem = new JMenuItem("全局设置");
-        settingMenuItem.addActionListener(e -> ExecutorUtil.runAsync(SettingDialog::showSettingDialog));
+        settingMenuItem.addActionListener(e -> ExecutorUtils.runAsync(SettingDialog::showSettingDialog));
         settingMenu.add(settingMenuItem);
 
 
@@ -105,7 +105,7 @@ public class MainMenuBar extends JMenuBar {
         aboutMenu.setMnemonic(HELP_MENU.mnemonic());
         var aboutMenuItem = new JMenuItem(HELP_ABOUT_MENU.title());
         aboutMenuItem.setMnemonic(HELP_ABOUT_MENU.mnemonic());
-        aboutMenuItem.addActionListener((e) -> ExecutorUtil.runAsync(this::aboutActionPerformed));
+        aboutMenuItem.addActionListener((e) -> ExecutorUtils.runAsync(this::aboutActionPerformed));
         aboutMenu.add(aboutMenuItem);
         add(aboutMenu);
 

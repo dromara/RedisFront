@@ -12,16 +12,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DerbyUtil {
-    private static final Logger log = LoggerFactory.getLogger(DerbyUtil.class);
+public class DerbyUtils {
+    private static final Logger log = LoggerFactory.getLogger(DerbyUtils.class);
     private static Connection conn;
 
-    private DerbyUtil() {
+    private DerbyUtils() {
 
     }
 
-    public static DerbyUtil getInstance() {
-        return new DerbyUtil();
+    public static DerbyUtils getInstance() {
+        return new DerbyUtils();
     }
 
     public static void init() {

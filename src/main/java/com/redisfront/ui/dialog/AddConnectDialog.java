@@ -12,10 +12,10 @@ import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
 import com.redisfront.commons.ui.AbstractDialog;
-import com.redisfront.commons.util.ExecutorUtil;
+import com.redisfront.commons.util.ExecutorUtils;
 import com.redisfront.commons.func.Fn;
-import com.redisfront.commons.util.LoadingUtil;
-import com.redisfront.commons.util.AlertUtil;
+import com.redisfront.commons.util.LoadingUtils;
+import com.redisfront.commons.util.AlertUtils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -222,12 +222,12 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
             try {
                 var connectInfo = validGetConnectInfo();
                 if (RedisBasicService.service.ping(connectInfo)) {
-                    AlertUtil.showInformationDialog("连接成功！");
+                    AlertUtils.showInformationDialog("连接成功！");
                 } else {
-                    AlertUtil.showInformationDialog("连接失败！");
+                    AlertUtils.showInformationDialog("连接失败！");
                 }
             } catch (Exception exception) {
-                AlertUtil.showErrorDialog("连接失败！", exception);
+                AlertUtils.showErrorDialog("连接失败！", exception);
             }
         });
     }
@@ -239,8 +239,8 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
 
     private void submitActionPerformed(ActionEvent actionEvent) {
         var connectInfo = validGetConnectInfo();
-        ExecutorUtil.runAsync(() -> {
-            SwingUtilities.invokeLater(LoadingUtil::showDialog);
+        ExecutorUtils.runAsync(() -> {
+            SwingUtilities.invokeLater(LoadingUtils::showDialog);
             var redisMode = RedisBasicService.service.getRedisModeEnum(connectInfo);
             processHandler.processHandler(connectInfo.setRedisModeEnum(redisMode));
         });
@@ -280,6 +280,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
             var sshConfig = new ConnectInfo.SSHConfig(
                     sshPrivateKeyFile.getText(),
                     sshUserField.getText(),
+                    sshHostField.getText(),
                     (Integer) sshPortField.getValue(),
                     new String(sshPasswordField.getPassword()));
 

@@ -39,7 +39,7 @@ public class SettingDialog extends AbstractDialog<Void> {
     private JPanel redisPanel;
     private JComboBox<String> fontSizeComboBox;
     private JComboBox<String> fontNameComboBox;
-    private JComboBox<ThemeUtil.ThemeInfo> themeNameComboBox;
+    private JComboBox<ThemeUtils.ThemeInfo> themeNameComboBox;
     private JTextField keySeparator;
     private JTextField keyMaxLoadNum;
     private JLabel fontLabel;
@@ -51,19 +51,19 @@ public class SettingDialog extends AbstractDialog<Void> {
     private JLabel languageLabel;
     private JComboBox<Map.Entry<String, String>> languageComboBox;
 
-    private static final LocaleUtil.BundleInfo SETTING_DIALOG = LocaleUtil.get("SettingDialog.Window");
-    private static final LocaleUtil.BundleInfo THEME_PANEL = LocaleUtil.get("SettingDialog.ThemePanel");
+    private static final LocaleUtils.BundleInfo SETTING_DIALOG = LocaleUtils.get("SettingDialog.Window");
+    private static final LocaleUtils.BundleInfo THEME_PANEL = LocaleUtils.get("SettingDialog.ThemePanel");
 
-    private static final LocaleUtil.BundleInfo LANGUAGE_PANEL = LocaleUtil.get("SettingDialog.LanguagePanel");
-    private static final LocaleUtil.BundleInfo FONT_PANEL = LocaleUtil.get("SettingDialog.FontPanel");
-    private static final LocaleUtil.BundleInfo REDIS_PANEL = LocaleUtil.get("SettingDialog.RedisPanel");
-    private static final LocaleUtil.BundleInfo FONT_LABEL = LocaleUtil.get("SettingDialog.FontLabel");
+    private static final LocaleUtils.BundleInfo LANGUAGE_PANEL = LocaleUtils.get("SettingDialog.LanguagePanel");
+    private static final LocaleUtils.BundleInfo FONT_PANEL = LocaleUtils.get("SettingDialog.FontPanel");
+    private static final LocaleUtils.BundleInfo REDIS_PANEL = LocaleUtils.get("SettingDialog.RedisPanel");
+    private static final LocaleUtils.BundleInfo FONT_LABEL = LocaleUtils.get("SettingDialog.FontLabel");
 
-    private static final LocaleUtil.BundleInfo LANGUAGE_LABEL = LocaleUtil.get("SettingDialog.LanguageLabel");
-    private static final LocaleUtil.BundleInfo FONT_SIZE_LABEL = LocaleUtil.get("SettingDialog.FontSizeLabel");
-    private static final LocaleUtil.BundleInfo THEME_LABEL = LocaleUtil.get("SettingDialog.ThemeLabel");
-    private static final LocaleUtil.BundleInfo LOAD_NUM_LABEL = LocaleUtil.get("SettingDialog.LoadNumLabel");
-    private static final LocaleUtil.BundleInfo KEY_SEPARATOR_LABEL = LocaleUtil.get("SettingDialog.KeySeparatorLabel");
+    private static final LocaleUtils.BundleInfo LANGUAGE_LABEL = LocaleUtils.get("SettingDialog.LanguageLabel");
+    private static final LocaleUtils.BundleInfo FONT_SIZE_LABEL = LocaleUtils.get("SettingDialog.FontSizeLabel");
+    private static final LocaleUtils.BundleInfo THEME_LABEL = LocaleUtils.get("SettingDialog.ThemeLabel");
+    private static final LocaleUtils.BundleInfo LOAD_NUM_LABEL = LocaleUtils.get("SettingDialog.LoadNumLabel");
+    private static final LocaleUtils.BundleInfo KEY_SEPARATOR_LABEL = LocaleUtils.get("SettingDialog.KeySeparatorLabel");
 
     public static void showSettingDialog() {
         var settingDialog = new SettingDialog(RedisFrontApplication.frame);
@@ -114,7 +114,7 @@ public class SettingDialog extends AbstractDialog<Void> {
                 .entrySet()
                 .stream()
                 .filter(e -> {
-                    String languageTag = PrefUtil.getState().get(Const.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
+                    String languageTag = PrefUtils.getState().get(Const.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
                     return Fn.equal(e.getValue(), languageTag);
                 }).findAny().orElseThrow());
     }
@@ -126,10 +126,10 @@ public class SettingDialog extends AbstractDialog<Void> {
         languageLabel.setText(LANGUAGE_LABEL.title());
 
         keySeparatorLabel.setText(KEY_SEPARATOR_LABEL.title());
-        keySeparator.setText(PrefUtil.getState().get(Const.KEY_KEY_SEPARATOR, ":"));
+        keySeparator.setText(PrefUtils.getState().get(Const.KEY_KEY_SEPARATOR, ":"));
 
         loadNumLabel.setText(LOAD_NUM_LABEL.title());
-        keyMaxLoadNum.setText(PrefUtil.getState().get(Const.KEY_KEY_MAX_LOAD_NUM, "5000"));
+        keyMaxLoadNum.setText(PrefUtils.getState().get(Const.KEY_KEY_MAX_LOAD_NUM, "5000"));
 
 
     }
@@ -142,12 +142,12 @@ public class SettingDialog extends AbstractDialog<Void> {
         }
         fontSizeComboBox.addActionListener(e -> {
             String fontSizeStr = (String) fontSizeComboBox.getSelectedItem();
-            if (Fn.equal(fontSizeStr, PrefUtil.getState().get(Const.KEY_FONT_SIZE, getDefaultFontSize()))) {
+            if (Fn.equal(fontSizeStr, PrefUtils.getState().get(Const.KEY_FONT_SIZE, getDefaultFontSize()))) {
                 return;
             }
             this.updateFontSizeHandler(fontSizeStr);
         });
-        fontSizeComboBox.setSelectedItem(PrefUtil.getState().get(Const.KEY_FONT_SIZE, getDefaultFontSize()));
+        fontSizeComboBox.setSelectedItem(PrefUtils.getState().get(Const.KEY_FONT_SIZE, getDefaultFontSize()));
     }
 
     //获取默认字体大小
@@ -181,12 +181,12 @@ public class SettingDialog extends AbstractDialog<Void> {
         });
         fontNameComboBox.addActionListener(e -> {
             String fontFamily = (String) fontNameComboBox.getSelectedItem();
-            if (Fn.equal(fontFamily, PrefUtil.getState().get(Const.KEY_FONT_NAME, getDefaultFontFamily()))) {
+            if (Fn.equal(fontFamily, PrefUtils.getState().get(Const.KEY_FONT_NAME, getDefaultFontFamily()))) {
                 return;
             }
             this.updateFontNameHandler(fontFamily);
         });
-        fontNameComboBox.setSelectedItem(PrefUtil.getState().get(Const.KEY_FONT_NAME, getDefaultFontFamily()));
+        fontNameComboBox.setSelectedItem(PrefUtils.getState().get(Const.KEY_FONT_NAME, getDefaultFontFamily()));
     }
 
     //获取默认字体大小
@@ -196,16 +196,16 @@ public class SettingDialog extends AbstractDialog<Void> {
 
 
     private void initThemeNameComboBox() {
-        themeNameComboBox.addItem(new ThemeUtil.ThemeInfo(RedisFrontLightLaf.NAME, null, true, null, null, null, null, null, RedisFrontLightLaf.class.getName()));
-        themeNameComboBox.addItem(new ThemeUtil.ThemeInfo(RedisFrontDarkLaf.NAME, null, true, null, null, null, null, null, RedisFrontDarkLaf.class.getName()));
+        themeNameComboBox.addItem(new ThemeUtils.ThemeInfo(RedisFrontLightLaf.NAME, null, true, null, null, null, null, null, RedisFrontLightLaf.class.getName()));
+        themeNameComboBox.addItem(new ThemeUtils.ThemeInfo(RedisFrontDarkLaf.NAME, null, true, null, null, null, null, null, RedisFrontDarkLaf.class.getName()));
 
         themeNameComboBox.addActionListener(e -> {
             JComboBox<?> selected = (JComboBox<?>) e.getSource();
-            ThemeUtil.ThemeInfo themeInfo = (ThemeUtil.ThemeInfo) selected.getSelectedItem();
-            ThemeUtil.changeTheme(themeInfo);
+            ThemeUtils.ThemeInfo themeInfo = (ThemeUtils.ThemeInfo) selected.getSelectedItem();
+            ThemeUtils.changeTheme(themeInfo);
         });
 
-        themeNameComboBox.setSelectedIndex(Integer.parseInt(PrefUtil.getState().get(Const.KEY_THEME_SELECT_INDEX, "0")));
+        themeNameComboBox.setSelectedIndex(Integer.parseInt(PrefUtils.getState().get(Const.KEY_THEME_SELECT_INDEX, "0")));
     }
 
     private void updateFontSizeHandler(String fontSize) {
@@ -227,27 +227,27 @@ public class SettingDialog extends AbstractDialog<Void> {
 
     private void onOK() {
 
-        PrefUtil.getState().put(Const.KEY_KEY_SEPARATOR, keySeparator.getText());
-        PrefUtil.getState().put(Const.KEY_KEY_MAX_LOAD_NUM, keyMaxLoadNum.getText());
+        PrefUtils.getState().put(Const.KEY_KEY_SEPARATOR, keySeparator.getText());
+        PrefUtils.getState().put(Const.KEY_KEY_MAX_LOAD_NUM, keyMaxLoadNum.getText());
         //风格
-        ThemeUtil.ThemeInfo themeInfo = (ThemeUtil.ThemeInfo) themeNameComboBox.getSelectedItem();
+        ThemeUtils.ThemeInfo themeInfo = (ThemeUtils.ThemeInfo) themeNameComboBox.getSelectedItem();
         String themeName = StringUtils.isEmpty(Objects.requireNonNull(themeInfo).lafClassName()) ? "R_" + themeInfo.resourceName() : themeInfo.lafClassName();
-        PrefUtil.getState().put(Const.KEY_THEME, themeName);
-        PrefUtil.getState().put(Const.KEY_THEME_SELECT_INDEX, String.valueOf(themeNameComboBox.getSelectedIndex()));
+        PrefUtils.getState().put(Const.KEY_THEME, themeName);
+        PrefUtils.getState().put(Const.KEY_THEME_SELECT_INDEX, String.valueOf(themeNameComboBox.getSelectedIndex()));
         //字体名称
         String fontFamily = (String) fontNameComboBox.getSelectedItem();
-        PrefUtil.getState().put(Const.KEY_FONT_NAME, fontFamily);
+        PrefUtils.getState().put(Const.KEY_FONT_NAME, fontFamily);
         //字体大小
         String fontSizeStr = (String) fontSizeComboBox.getSelectedItem();
-        PrefUtil.getState().put(Const.KEY_FONT_SIZE, fontSizeStr);
+        PrefUtils.getState().put(Const.KEY_FONT_SIZE, fontSizeStr);
         //语言
         Map.Entry<?, ?> newLanguage = (Map.Entry<?, ?>) languageComboBox.getSelectedItem();
-        String oldLanguage = PrefUtil.getState().get(Const.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
+        String oldLanguage = PrefUtils.getState().get(Const.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
         assert newLanguage != null;
         if (Fn.notEqual(newLanguage.getValue(), oldLanguage)) {
             Locale.setDefault(Locale.forLanguageTag((String) newLanguage.getValue()));
-            PrefUtil.getState().put(Const.KEY_LANGUAGE, (String) newLanguage.getValue());
-            var res = AlertUtil.showConfirmDialog("语言已变更，重启后生效！\n 是否立即重启？", JOptionPane.YES_NO_OPTION);
+            PrefUtils.getState().put(Const.KEY_LANGUAGE, (String) newLanguage.getValue());
+            var res = AlertUtils.showConfirmDialog("语言已变更，重启后生效！\n 是否立即重启？", JOptionPane.YES_NO_OPTION);
             if (res == 0) {
                 RedisFrontApplication.frame.dispose();
                 System.exit(0);
@@ -272,7 +272,7 @@ public class SettingDialog extends AbstractDialog<Void> {
         themeNameComboBox = new JComboBox<>() {
             @Override
             public void setSelectedItem(Object item) {
-                ThemeUtil.ThemeInfo themeInfo = (ThemeUtil.ThemeInfo) item;
+                ThemeUtils.ThemeInfo themeInfo = (ThemeUtils.ThemeInfo) item;
                 if (themeInfo == null) {
                     return;
                 }
@@ -288,7 +288,7 @@ public class SettingDialog extends AbstractDialog<Void> {
                     @Override
                     public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                         super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                        ThemeUtil.ThemeInfo themeInfo = (ThemeUtil.ThemeInfo) value;
+                        ThemeUtils.ThemeInfo themeInfo = (ThemeUtils.ThemeInfo) value;
                         if (themeInfo.name().startsWith("Material Theme UI Lite /")) {
                             setText(themeInfo.name().replace("Material Theme UI Lite /", ""));
                         }

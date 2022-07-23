@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
  *
  * @author Jin
  */
-public class ExecutorUtil {
+public class ExecutorUtils {
     private static final int MAX_WORKER_THREADS = 10;
 
     private static ExecutorService executorService;

@@ -3,7 +3,6 @@ package com.redisfront.commons.util;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.model.TreeNodeInfo;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.io.Serial;
 import java.util.*;
@@ -14,9 +13,9 @@ import java.util.stream.Collectors;
  *
  * @author Jin
  */
-public class TreeUtil {
+public class TreeUtils {
 
-    private TreeUtil() {
+    private TreeUtils() {
     }
 
     public static synchronized DefaultTreeModel toTreeModel(Set<String> rows, String delim) {

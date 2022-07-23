@@ -4,7 +4,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.commons.constant.UI;
-import com.redisfront.commons.util.LocaleUtil;
+import com.redisfront.commons.util.LocaleUtils;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
@@ -28,8 +28,8 @@ public class MainNoneForm {
     private JLabel infoLabel;
 
 
-    private static final LocaleUtil.BundleInfo NEW_LABEL = LocaleUtil.get("MainNoneForm.NewLabel");
-    private static final LocaleUtil.BundleInfo OPEN_LABEL = LocaleUtil.get("MainNoneForm.OpenLabel");
+    private static final LocaleUtils.BundleInfo NEW_LABEL = LocaleUtils.get("MainNoneForm.NewLabel");
+    private static final LocaleUtils.BundleInfo OPEN_LABEL = LocaleUtils.get("MainNoneForm.OpenLabel");
 
     public static MainNoneForm getInstance() {
         return new MainNoneForm();

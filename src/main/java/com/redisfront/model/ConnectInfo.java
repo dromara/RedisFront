@@ -16,6 +16,7 @@ public class ConnectInfo implements Serializable {
     private String title;
     private String host;
     private Integer port;
+    private Integer localPort;
     private String username;
     private String password;
     private Integer database;
@@ -40,14 +41,25 @@ public class ConnectInfo implements Serializable {
     public static class SSHConfig {
         String privateKeyPath;
         String user;
+        String host;
         Integer port;
         String password;
 
-        public SSHConfig(String privateKeyPath, String user, Integer port, String password) {
+        public SSHConfig(String privateKeyPath, String user, String host, Integer port, String password) {
             this.privateKeyPath = privateKeyPath;
             this.user = user;
+            this.host = host;
             this.port = port;
             this.password = password;
+        }
+
+        public String host() {
+            return host;
+        }
+
+        public SSHConfig setHost(String host) {
+            this.host = host;
+            return this;
         }
 
         public String privateKeyPath() {
@@ -77,6 +89,8 @@ public class ConnectInfo implements Serializable {
             return this;
         }
 
+
+
         public String password() {
             return password;
         }
@@ -90,6 +104,15 @@ public class ConnectInfo implements Serializable {
         public String toString() {
             return Fn.toJson(this);
         }
+    }
+
+    public Integer localPort() {
+        return localPort;
+    }
+
+    public ConnectInfo setLocalPort(Integer localPort) {
+        this.localPort = localPort;
+        return this;
     }
 
     public ConnectInfo() {

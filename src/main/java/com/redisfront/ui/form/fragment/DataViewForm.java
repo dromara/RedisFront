@@ -13,9 +13,9 @@ import com.redisfront.commons.constant.UI;
 import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.handler.ActionHandler;
-import com.redisfront.commons.util.AlertUtil;
-import com.redisfront.commons.util.ExecutorUtil;
-import com.redisfront.commons.util.FutureUtil;
+import com.redisfront.commons.util.AlertUtils;
+import com.redisfront.commons.util.ExecutorUtils;
+import com.redisfront.commons.util.FutureUtils;
 import com.redisfront.model.*;
 import com.redisfront.service.*;
 import com.redisfront.ui.component.LoadingPanel;
@@ -415,7 +415,7 @@ public class DataViewForm {
                         keyTypeLabel.setBackground(keyTypeEnum.color());
                     });
                     return keyTypeEnum;
-                }, ExecutorUtil.getExecutorService())
+                }, ExecutorUtils.getExecutorService())
                 .thenAccept((keyTypeEnum -> {
                     if (keyTypeEnum == Enum.KeyTypeEnum.STRING || keyTypeEnum == Enum.KeyTypeEnum.JSON) {
                         Long strLen = RedisStringService.service.strlen(connectInfo, key);
@@ -440,7 +440,7 @@ public class DataViewForm {
                 }))
                 .thenRun(() -> SwingUtilities.invokeLater(this::refreshEnableBtn));
 
-        CompletableFuture<Void> setKeyInfoAndTTLFuture = FutureUtil.completableFuture(() -> RedisBasicService.service.ttl(connectInfo, key),
+        CompletableFuture<Void> setKeyInfoAndTTLFuture = FutureUtils.completableFuture(() -> RedisBasicService.service.ttl(connectInfo, key),
                 ttl -> SwingUtilities.invokeLater(() ->
                         {
                             ttlField.setText(ttl.toString());
@@ -451,7 +451,7 @@ public class DataViewForm {
         CompletableFuture.allOf(setKeyInfoAndTTLFuture, scanOrGetDataFuture)
                 .exceptionally(throwable -> {
                     throwable.printStackTrace();
-                    SwingUtilities.invokeLater(() -> AlertUtil.showErrorDialog("error", throwable));
+                    SwingUtilities.invokeLater(() -> AlertUtils.showErrorDialog("error", throwable));
                     return null;
                 });
     }

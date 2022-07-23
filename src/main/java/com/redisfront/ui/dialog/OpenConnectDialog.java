@@ -11,10 +11,10 @@ import com.redisfront.model.ConnectInfo;
 import com.redisfront.model.ConnectTableModel;
 import com.redisfront.service.ConnectService;
 import com.redisfront.service.RedisBasicService;
-import com.redisfront.commons.util.ExecutorUtil;
+import com.redisfront.commons.util.ExecutorUtils;
 import com.redisfront.commons.func.Fn;
-import com.redisfront.commons.util.LoadingUtil;
-import com.redisfront.commons.util.AlertUtil;
+import com.redisfront.commons.util.LoadingUtils;
+import com.redisfront.commons.util.AlertUtils;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -92,13 +92,13 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                 editConnectMenu.addActionListener(e -> {
                     var row = connectTable.getSelectedRow();
                     if (row == -1) {
-                        AlertUtil.showInformationDialog("未选中编辑行或列");
+                        AlertUtils.showInformationDialog("未选中编辑行或列");
                         return;
                     }
                     var id = connectTable.getValueAt(row, 0);
                     var connectInfo = ConnectService.service.getConnect(id);
                     onCancel();
-                    ExecutorUtil.runAsync(() -> editProcessHandler.processHandler(connectInfo));
+                    ExecutorUtils.runAsync(() -> editProcessHandler.processHandler(connectInfo));
                 });
                 add(editConnectMenu);
                 //表格删除操作
@@ -106,13 +106,13 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                 deleteConnectMenu.addActionListener(e -> {
                     int row = connectTable.getSelectedRow();
                     if (row == -1) {
-                        AlertUtil.showInformationDialog("未选中删除行或列");
+                        AlertUtils.showInformationDialog("未选中删除行或列");
                         return;
                     }
                     var id = connectTable.getValueAt(row, 0);
                     var connectInfo = ConnectService.service.getConnect(id);
                     if (Fn.isNotNull(connectInfo)) {
-                        ExecutorUtil.runAsync(() -> {
+                        ExecutorUtils.runAsync(() -> {
                             delProcessHandler.processHandler(connectInfo);
                             ((ConnectTableModel) connectTable.getModel()).removeRow(row);
                             connectTable.revalidate();
@@ -148,13 +148,13 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
     private void onOK() {
         var row = connectTable.getSelectedRow();
         if (row == -1) {
-            AlertUtil.showInformationDialog("未选中编辑行或列");
+            AlertUtils.showInformationDialog("未选中编辑行或列");
             return;
         }
         var id = connectTable.getValueAt(row, 0);
         var connectInfo = ConnectService.service.getConnect(id);
-        ExecutorUtil.runAsync(() -> {
-            LoadingUtil.showDialog();
+        ExecutorUtils.runAsync(() -> {
+            LoadingUtils.showDialog();
             var redisMode = RedisBasicService.service.getRedisModeEnum(connectInfo);
             openProcessHandler.processHandler(connectInfo.setRedisModeEnum(redisMode));
         });

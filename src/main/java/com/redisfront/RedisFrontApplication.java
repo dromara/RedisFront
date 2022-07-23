@@ -50,17 +50,17 @@ public class RedisFrontApplication {
 
         SwingUtilities.invokeLater(() -> {
 
-            PrefUtil.init(Const.ROOT_PATH);
+            PrefUtils.init(Const.ROOT_PATH);
 
             ExceptionHandler.init();
 
-            ThemeUtil.setupTheme(args);
+            ThemeUtils.setupTheme(args);
 
-            ExecutorUtil.init();
+            ExecutorUtils.init();
 
-            LocaleUtil.init();
+            LocaleUtils.init();
 
-            DerbyUtil.init();
+            DerbyUtils.init();
 
             FlatInspector.install("ctrl shift alt X");
 

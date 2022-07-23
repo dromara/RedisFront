@@ -9,9 +9,9 @@ import javax.swing.*;
  *
  * @author Jin
  */
-public class AlertUtil {
+public class AlertUtils {
 
-    private AlertUtil() {
+    private AlertUtils() {
     }
 
     public static void showInformationDialog(String message) {

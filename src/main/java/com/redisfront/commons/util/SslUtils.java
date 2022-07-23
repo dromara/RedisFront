@@ -21,7 +21,7 @@ import java.security.Security;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-public class SslUtil {
+public class SslUtils {
 
     public static SSLSocketFactory getSocketFactory(final String caCrtFile, final String crtFile, final String keyFile, final String password) throws Exception {
         InputStream caInputStream = null;

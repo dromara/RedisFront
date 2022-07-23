@@ -11,15 +11,15 @@ import java.util.ResourceBundle;
  *
  * @author Jin
  */
-public class LocaleUtil {
+public class LocaleUtils {
 
    private static ResourceBundle bundle;
 
-    private LocaleUtil() {
+    private LocaleUtils() {
     }
 
     public static void init() {
-        var languageTag = PrefUtil.getState().get(Const.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
+        var languageTag = PrefUtils.getState().get(Const.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
         Locale.setDefault(Locale.forLanguageTag(languageTag));
         bundle = ResourceBundle.getBundle("com.redisfront.RedisFront");
     }

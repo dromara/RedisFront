@@ -1,7 +1,7 @@
 package com.redisfront.commons.exception;
 
-import com.redisfront.commons.util.AlertUtil;
-import com.redisfront.commons.util.LoadingUtil;
+import com.redisfront.commons.util.AlertUtils;
+import com.redisfront.commons.util.LoadingUtils;
 import io.lettuce.core.RedisException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,16 +17,16 @@ public class ExceptionHandler {
     public static void init() {
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
             log.error("Thread[{}] 应用异常", t.getName(), e);
-            LoadingUtil.closeDialog();
+            LoadingUtils.closeDialog();
             if (e instanceof RedisFrontException redisFrontException) {
                 if (redisFrontException.showMessage()) {
-                    AlertUtil.showErrorDialog("Error", redisFrontException);
+                    AlertUtils.showErrorDialog("Error", redisFrontException);
                 }
             } else if (e instanceof RedisException redisFrontException) {
                 Throwable throwable = redisFrontException.getCause() == null ? redisFrontException : redisFrontException.getCause();
-                AlertUtil.showErrorDialog("Error", throwable);
+                AlertUtils.showErrorDialog("Error", throwable);
             } else {
-                AlertUtil.showErrorDialog("Error", e);
+                AlertUtils.showErrorDialog("Error", e);
             }
         });
     }

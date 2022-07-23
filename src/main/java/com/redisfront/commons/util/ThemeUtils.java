@@ -29,7 +29,7 @@ import java.util.Objects;
  *
  * @author Jin
  */
-public class ThemeUtil {
+public class ThemeUtils {
 
     public static final String THEMES_PACKAGE = "/com/formdev/flatlaf/intellijthemes/themes/";
 
@@ -51,7 +51,7 @@ public class ThemeUtil {
                 UIManager.setLookAndFeel(themeInfo.lafClassName());
             } catch (Exception ex) {
                 LoggingFacade.INSTANCE.logSevere(null, ex);
-                AlertUtil.showInformationDialog("Failed to create '" + themeInfo.lafClassName() + "'.", ex);
+                AlertUtils.showInformationDialog("Failed to create '" + themeInfo.lafClassName() + "'.", ex);
             }
         } else if (themeInfo.themeFile() != null) {
             FlatAnimatedLafChange.showSnapshot();
@@ -62,11 +62,11 @@ public class ThemeUtil {
                     FlatLaf.setup(IntelliJTheme.createLaf(new FileInputStream(themeInfo.themeFile())));
 
             } catch (Exception ex) {
-                AlertUtil.showInformationDialog("Failed to load '" + themeInfo.themeFile() + "'.", ex);
+                AlertUtils.showInformationDialog("Failed to load '" + themeInfo.themeFile() + "'.", ex);
             }
         } else {
             FlatAnimatedLafChange.showSnapshot();
-            IntelliJTheme.setup(ThemeUtil.class.getResourceAsStream(THEMES_PACKAGE + themeInfo.resourceName()));
+            IntelliJTheme.setup(ThemeUtils.class.getResourceAsStream(THEMES_PACKAGE + themeInfo.resourceName()));
         }
         FlatLaf.updateUI();
         FlatAnimatedLafChange.hideSnapshotWithAnimation();
@@ -74,8 +74,8 @@ public class ThemeUtil {
 
     public static void fontInit() {
         var font = UIManager.getFont("defaultFont");
-        var fontSizeStr = PrefUtil.getState().get(Const.KEY_FONT_SIZE, String.valueOf(font.getSize()));
-        var fontNameStr = PrefUtil.getState().get(Const.KEY_FONT_NAME, font.getFontName());
+        var fontSizeStr = PrefUtils.getState().get(Const.KEY_FONT_SIZE, String.valueOf(font.getSize()));
+        var fontNameStr = PrefUtils.getState().get(Const.KEY_FONT_NAME, font.getFontName());
         var newFont = StyleContext.getDefaultStyleContext().getFont(fontNameStr, font.getStyle(), Integer.parseInt(fontSizeStr));
         UIManager.put("defaultFont", FlatUIUtils.nonUIResource(newFont));
     }
@@ -85,9 +85,9 @@ public class ThemeUtil {
             if (args.length > 0) {
                 UIManager.setLookAndFeel(args[0]);
             } else {
-                String theme = PrefUtil.getState().get(Const.KEY_THEME, RedisFrontLightLaf.class.getName());
+                String theme = PrefUtils.getState().get(Const.KEY_THEME, RedisFrontLightLaf.class.getName());
                 if (theme.startsWith("R_")) {
-                    IntelliJTheme.setup(ThemeUtil.class.getResourceAsStream(THEMES_PACKAGE + theme.replace("R_", "")));
+                    IntelliJTheme.setup(ThemeUtils.class.getResourceAsStream(THEMES_PACKAGE + theme.replace("R_", "")));
                 } else {
                     UIManager.setLookAndFeel(theme);
                 }

@@ -6,7 +6,7 @@ import com.formdev.flatlaf.extras.components.FlatToolBar;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
 import com.redisfront.commons.func.Fn;
-import com.redisfront.commons.util.ExecutorUtil;
+import com.redisfront.commons.util.ExecutorUtils;
 import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
@@ -165,17 +165,17 @@ public class MainTabbedPanel extends JPanel {
                                 keyInfo[1] = "Key数量：" + keyInfo[0];
                             }
                             return keyInfo;
-                        }, ExecutorUtil.getExecutorService()).thenAccept(s ->
+                        }, ExecutorUtils.getExecutorService()).thenAccept(s ->
                                 SwingUtilities.invokeLater(() -> {
                                     keysInfo.setText(s[0]);
                                     keysInfo.setToolTipText(s[1]);
                                 })),
-                        CompletableFuture.supplyAsync(() -> RedisBasicService.service.getStatInfo(connectInfo), ExecutorUtil.getExecutorService()).thenAccept(stats ->
+                        CompletableFuture.supplyAsync(() -> RedisBasicService.service.getStatInfo(connectInfo), ExecutorUtils.getExecutorService()).thenAccept(stats ->
                                 SwingUtilities.invokeLater(() -> {
                                     cupInfo.setText((String) stats.get("instantaneous_ops_per_sec"));
                                     cupInfo.setToolTipText("每秒命令数：" + stats.get("instantaneous_ops_per_sec"));
                                 })),
-                        CompletableFuture.supplyAsync(() -> RedisBasicService.service.getMemoryInfo(connectInfo), ExecutorUtil.getExecutorService()).thenAccept(memory ->
+                        CompletableFuture.supplyAsync(() -> RedisBasicService.service.getMemoryInfo(connectInfo), ExecutorUtils.getExecutorService()).thenAccept(memory ->
                                 SwingUtilities.invokeLater(() -> {
                                     memoryInfo.setText((Fn.isNotNull(memory.get("used_memory_human")) ? (String) memory.get("used_memory_human") : "0"));
                                     memoryInfo.setToolTipText("内存占用：" + (Fn.isNotNull(memory.get("used_memory_human")) ? memory.get("used_memory_human") : 0));

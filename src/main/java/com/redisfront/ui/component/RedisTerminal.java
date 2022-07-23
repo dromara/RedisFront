@@ -7,7 +7,7 @@ import com.redisfront.commons.ui.AbstractTerminal;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
 import com.redisfront.commons.func.Fn;
-import com.redisfront.commons.util.LettuceUtil;
+import com.redisfront.commons.util.LettuceUtils;
 import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.output.ArrayOutput;
 import io.lettuce.core.protocol.CommandArgs;
@@ -62,17 +62,17 @@ public class RedisTerminal extends AbstractTerminal {
             commandList.remove(0);
 
             if (Fn.equal(connectInfo().redisModeEnum(), Enum.RedisMode.CLUSTER)) {
-                LettuceUtil.clusterRun(connectInfo(), redisCommands -> {
+                LettuceUtils.clusterRun(connectInfo(), redisCommands -> {
                     var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
                     println(format(res, ""));
                 });
             } else if (Fn.equal(connectInfo().redisModeEnum(), Enum.RedisMode.SENTINEL)) {
-                LettuceUtil.sentinelRun(connectInfo(), redisCommands -> {
+                LettuceUtils.sentinelRun(connectInfo(), redisCommands -> {
                     var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
                     println(format(res, ""));
                 });
             } else {
-                LettuceUtil.run(connectInfo(), redisCommands -> {
+                LettuceUtils.run(connectInfo(), redisCommands -> {
                     var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
                     println(format(res, ""));
                 });

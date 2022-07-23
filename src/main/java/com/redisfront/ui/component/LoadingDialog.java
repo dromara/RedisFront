@@ -4,7 +4,7 @@ import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.redisfront.commons.func.Fn;
-import com.redisfront.commons.util.AlertUtil;
+import com.redisfront.commons.util.AlertUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,7 +23,7 @@ public class LoadingDialog extends JDialog {
         progressBarWorker = new ProgressBarWorker(progressBar, 20);
         timer = new Timer((15 * 1000), e -> {
             dispose();
-            AlertUtil.showInformationDialog("数据加载超时，请重试！");
+            AlertUtils.showInformationDialog("数据加载超时，请重试！");
         });
     }
 

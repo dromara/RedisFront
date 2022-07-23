@@ -12,7 +12,7 @@ import java.awt.*;
  *
  * @author Jin
  */
-public class LoadingUtil {
+public class LoadingUtils {
 
     private static LoadingDialog loadingDialog;
 

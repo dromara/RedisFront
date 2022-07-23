@@ -1,9 +1,7 @@
 package com.redisfront.commons.util;
 
-import cn.hutool.extra.ssh.JschUtil;
-import com.jcraft.jsch.JSchException;
+import cn.hutool.core.util.RandomUtil;
 import com.jcraft.jsch.Session;
-import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.model.ConnectInfo;
 import io.lettuce.core.RedisClient;
@@ -13,7 +11,6 @@ import io.lettuce.core.cluster.ClusterClientOptions;
 import io.lettuce.core.cluster.ClusterTopologyRefreshOptions;
 import io.lettuce.core.cluster.RedisClusterClient;
 import io.lettuce.core.cluster.api.sync.RedisAdvancedClusterCommands;
-import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
 
 import java.time.Duration;
@@ -26,53 +23,9 @@ import java.util.function.Function;
  *
  * @author Jin
  */
-public class LettuceUtil {
+public class LettuceUtils {
 
-    private LettuceUtil() {
-    }
-
-
-    private static Session getSession(ConnectInfo connectInfo) {
-        if (Fn.isNotEmpty(connectInfo.sshConfig().privateKeyPath()) && Fn.isNotEmpty(connectInfo.sshConfig().password())) {
-            return JschUtil.createSession(connectInfo.host(), connectInfo.port(), connectInfo.user(), connectInfo.sshConfig().privateKeyPath(), connectInfo.sshConfig().password().getBytes());
-        } else if (Fn.isNotEmpty(connectInfo.sshConfig().privateKeyPath())) {
-            return JschUtil.createSession(connectInfo.host(), connectInfo.port(), connectInfo.user(), connectInfo.sshConfig().privateKeyPath(), null);
-        } else {
-            return JschUtil.createSession(connectInfo.host(), connectInfo.port(), connectInfo.user(), connectInfo.password());
-        }
-    }
-
-
-    private static Session getJschSession(ConnectInfo connectInfo, RedisClusterClient clusterClient) {
-        if (Fn.isNotNull(connectInfo.sshConfig())) {
-            Session session = getSession(connectInfo);
-            try {
-                session.connect();
-                for (RedisClusterNode partition : clusterClient.getPartitions()) {
-                    JschUtil.bindPort(session, connectInfo.host(), partition.getUri().getPort(), partition.getUri().getPort());
-                }
-                return session;
-            } catch (JSchException e) {
-                throw new RedisFrontException(e, true);
-            }
-        } else {
-            clusterClient.getPartitions().forEach(redisClusterNode -> redisClusterNode.getUri().setHost(connectInfo.host()));
-            return null;
-        }
-    }
-
-    private static Session getJschSession(ConnectInfo connectInfo) {
-        if (Fn.isNotNull(connectInfo.sshConfig())) {
-            Session session = getSession(connectInfo);
-            try {
-                session.connect();
-                return session;
-            } catch (JSchException e) {
-                throw new RedisFrontException(e, true);
-            }
-        } else {
-            return null;
-        }
+    private LettuceUtils() {
     }
 
     private static RedisClusterClient getRedisClusterClient(RedisURI redisURI) {
@@ -91,70 +44,60 @@ public class LettuceUtil {
     public static void clusterRun(ConnectInfo connectInfo, Consumer<RedisAdvancedClusterCommands<String, String>> consumer) {
         var redisURI = getRedisURI(connectInfo);
         var clusterClient = getRedisClusterClient(redisURI);
-        Session session = getJschSession(connectInfo, clusterClient);
+        Session session = JschUtils.openSession(connectInfo, clusterClient);
         try (var connection = clusterClient.connect()) {
             consumer.accept(connection.sync());
         } finally {
-            if (session != null) {
-                session.disconnect();
-            }
             clusterClient.shutdown();
+            JschUtils.closeSession(session);
         }
     }
 
     public static <T> T clusterExec(ConnectInfo connectInfo, Function<RedisAdvancedClusterCommands<String, String>, T> function) {
         var redisURI = getRedisURI(connectInfo);
         var clusterClient = getRedisClusterClient(redisURI);
-        Session session = getJschSession(connectInfo, clusterClient);
+        Session session = JschUtils.openSession(connectInfo, clusterClient);
         try (var connection = clusterClient.connect()) {
             return function.apply(connection.sync());
         } finally {
-            if (session != null) {
-                session.disconnect();
-            }
             clusterClient.shutdown();
+            JschUtils.closeSession(session);
         }
     }
 
     public static void sentinelRun(ConnectInfo connectInfo, Consumer<RedisSentinelCommands<String, String>> consumer) {
         var redisURI = getRedisURI(connectInfo);
         var redisClient = RedisClient.create(redisURI);
-        Session session = getJschSession(connectInfo);
+        Session session = JschUtils.openSession(connectInfo);
         try (var connection = redisClient.connectSentinel()) {
             consumer.accept(connection.sync());
         } finally {
-            if (session != null) {
-                session.disconnect();
-            }
             redisClient.shutdown();
+            JschUtils.closeSession(session);
         }
     }
 
     public static <T> T sentinelExec(ConnectInfo connectInfo, Function<RedisSentinelCommands<String, String>, T> function) {
         var redisURI = getRedisURI(connectInfo);
         var redisClient = RedisClient.create(redisURI);
-        Session session = getJschSession(connectInfo);
+        Session session = JschUtils.openSession(connectInfo);
         try (var connection = redisClient.connectSentinel()) {
             return function.apply(connection.sync());
         } finally {
-            if (session != null) {
-                session.disconnect();
-            }
             redisClient.shutdown();
+            JschUtils.closeSession(session);
         }
     }
 
     public static void run(ConnectInfo connectInfo, Consumer<RedisCommands<String, String>> consumer) {
         var redisURI = getRedisURI(connectInfo);
-        Session session = getJschSession(connectInfo);
+        Session session = JschUtils.openSession(connectInfo);
         var redisClient = RedisClient.create(redisURI);
         try (var connection = redisClient.connect()) {
             consumer.accept(connection.sync());
         } finally {
-            if (session != null) {
-                session.disconnect();
-            }
             redisClient.shutdown();
+            JschUtils.closeSession(session);
         }
     }
 
@@ -162,22 +105,25 @@ public class LettuceUtil {
     public static <T> T exec(ConnectInfo connectInfo, Function<RedisCommands<String, String>, T> function) {
         var redisURI = getRedisURI(connectInfo);
         var redisClient = RedisClient.create(redisURI);
-        Session session = getJschSession(connectInfo);
+        Session session = JschUtils.openSession(connectInfo);
         try (var connection = redisClient.connect()) {
             return function.apply(connection.sync());
         } finally {
-            if (session != null) {
-                session.disconnect();
-            }
             redisClient.shutdown();
+            JschUtils.closeSession(session);
         }
     }
 
 
     public static RedisURI getRedisURI(ConnectInfo connectInfo) {
+        Integer port = connectInfo.port();
+        if (Fn.isNotNull(connectInfo.sshConfig())) {
+            port = RandomUtil.randomInt(32768, 61000);
+        }
+        connectInfo.setLocalPort(port);
         var redisURI = RedisURI.builder()
                 .withHost(connectInfo.host())
-                .withPort(connectInfo.port())
+                .withPort(port)
                 .withSsl(connectInfo.ssl())
                 .withDatabase(connectInfo.database())
                 .build();
