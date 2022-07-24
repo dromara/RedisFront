@@ -9,7 +9,7 @@ import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.handler.ProcessHandler;
 import com.redisfront.commons.ui.AbstractDialog;
 import com.redisfront.commons.util.AlertUtils;
-import com.redisfront.commons.util.ExecutorUtils;
+import com.redisfront.commons.util.FutureUtils;
 import com.redisfront.commons.util.LoadingUtils;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.model.ConnectTableModel;
@@ -98,7 +98,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                     var id = connectTable.getValueAt(row, 0);
                     var connectInfo = ConnectService.service.getConnect(id);
                     onCancel();
-                    ExecutorUtils.runAsync(() -> editProcessHandler.processHandler(connectInfo));
+                    FutureUtils.runAsync(() -> editProcessHandler.processHandler(connectInfo));
                 });
                 add(editConnectMenu);
                 //表格删除操作
@@ -112,7 +112,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                     var id = connectTable.getValueAt(row, 0);
                     var connectInfo = ConnectService.service.getConnect(id);
                     if (Fn.isNotNull(connectInfo)) {
-                        ExecutorUtils.runAsync(() -> {
+                        FutureUtils.runAsync(() -> {
                             delProcessHandler.processHandler(connectInfo);
                             ((ConnectTableModel) connectTable.getModel()).removeRow(row);
                             connectTable.revalidate();
@@ -153,7 +153,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         }
         var id = connectTable.getValueAt(row, 0);
         var connectInfo = ConnectService.service.getConnect(id);
-        ExecutorUtils.runAsync(() -> {
+        FutureUtils.runAsync(() -> {
             LoadingUtils.showDialog();
             var redisMode = RedisBasicService.service.getRedisModeEnum(connectInfo);
             openProcessHandler.processHandler(connectInfo.setRedisModeEnum(redisMode));

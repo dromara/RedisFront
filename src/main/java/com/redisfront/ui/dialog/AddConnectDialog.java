@@ -12,7 +12,7 @@ import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
 import com.redisfront.commons.ui.AbstractDialog;
-import com.redisfront.commons.util.ExecutorUtils;
+import com.redisfront.commons.util.FutureUtils;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.util.LoadingUtils;
 import com.redisfront.commons.util.AlertUtils;
@@ -21,8 +21,6 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
-import java.lang.reflect.InvocationTargetException;
-import java.util.concurrent.ExecutionException;
 
 public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     private JPanel contentPane;
@@ -241,7 +239,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
 
     private void submitActionPerformed(ActionEvent actionEvent) {
         var connectInfo = validGetConnectInfo();
-        ExecutorUtils.runAsync(() -> {
+        FutureUtils.runAsync(() -> {
             SwingUtilities.invokeLater(LoadingUtils::showDialog);
             var redisMode = RedisBasicService.service.getRedisModeEnum(connectInfo);
             processHandler.processHandler(connectInfo.setRedisModeEnum(redisMode));

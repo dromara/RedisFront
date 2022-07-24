@@ -1,7 +1,7 @@
 package com.redisfront.ui.component;
 
 import com.formdev.flatlaf.ui.FlatLineBorder;
-import com.redisfront.commons.util.ExecutorUtils;
+import com.redisfront.commons.util.FutureUtils;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
 import com.redisfront.ui.form.MainNoneForm;
@@ -47,7 +47,7 @@ public class DataSplitPanel extends JSplitPane {
                 setRightComponent(newNonePanel());
             });
 
-            ExecutorUtils.runAsync(() -> dataViewForm.dataChangeActionPerformed(treeNodeInfo.key(),
+            FutureUtils.runAsync(() -> dataViewForm.dataChangeActionPerformed(treeNodeInfo.key(),
                     () -> SwingUtilities.invokeLater(() -> setRightComponent(LoadingPanel.newInstance())),
                     () -> SwingUtilities.invokeLater(() -> setRightComponent(dataViewForm.contentPanel()))
             ));

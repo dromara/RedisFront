@@ -56,7 +56,7 @@ public class RedisFrontApplication {
 
             ThemeUtils.setupTheme(args);
 
-            ExecutorUtils.init();
+            FutureUtils.init();
 
             LocaleUtils.init();
 

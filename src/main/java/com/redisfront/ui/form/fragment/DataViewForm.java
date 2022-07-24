@@ -13,7 +13,7 @@ import com.redisfront.commons.constant.UI;
 import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.handler.ActionHandler;
-import com.redisfront.commons.util.ExecutorUtils;
+import com.redisfront.commons.util.FutureUtils;
 import com.redisfront.model.*;
 import com.redisfront.service.*;
 import com.redisfront.ui.component.LoadingPanel;
@@ -385,11 +385,12 @@ public class DataViewForm {
             if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
                 this.scanSetContextMap.put(key, new ScanContext<>());
             }
-            ExecutorUtils.runAsync(() ->
+            FutureUtils.runAsync(() ->
                     dataChangeActionPerformed(key, () -> SwingUtilities.invokeLater(() -> {
                         refreshBeforeHandler.handle();
                         refreshDisableBtn();
-                        dataPanel.add(LoadingPanel.newInstance(), BorderLayout.CENTER, 0);
+                        Fn.removeAllComponent(dataPanel);
+                        dataPanel.add(LoadingPanel.newInstance(), BorderLayout.CENTER);
                         dataPanel.updateUI();
                     }), () -> SwingUtilities.invokeLater(() -> {
                         refreshAfterHandler.handle();
@@ -397,13 +398,16 @@ public class DataViewForm {
                         Fn.removeAllComponent(dataPanel);
                         dataPanel.add(valueViewPanel, BorderLayout.CENTER);
                         dataPanel.updateUI();
-                    })));
+                    })), throwable -> {
+
+                refreshAfterHandler.handle();
+            });
 
         }
     }
 
     private void reloadTableDataActionPerformed(Boolean init) {
-        CompletableFuture.runAsync(() -> {
+        FutureUtils.runAsync(() -> {
             String key = keyField.getText();
             var keyType = keyTypeLabel.getText();
             Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(keyType.toUpperCase());
@@ -428,11 +432,14 @@ public class DataViewForm {
                     scanSetContextMap.put(key, new ScanContext<>());
                 loadSetDataActionPerformed(key);
             }
-        }).thenRun(() -> SwingUtilities.invokeLater(() -> {
-            loadMoreBtn.requestFocus();
-            tableAddBtn.setEnabled(true);
-            tableRefreshBtn.setEnabled(true);
-        }));
+
+            SwingUtilities.invokeLater(() -> {
+                loadMoreBtn.requestFocus();
+                tableAddBtn.setEnabled(true);
+                tableRefreshBtn.setEnabled(true);
+            });
+
+        });
     }
 
     public synchronized void dataChangeActionPerformed(String key, ActionHandler beforeActionHandler, ActionHandler afterActionHandler) {

@@ -179,9 +179,9 @@ public class DataSearchForm {
             LoadingUtils.closeDialog();
         } catch (Exception e) {
             e.printStackTrace();
+            scanAfterProcess();
+            LoadingUtils.closeDialog();
             if (e instanceof RedisFrontException) {
-                scanAfterProcess();
-                LoadingUtils.closeDialog();
                 loadMoreBtn.setEnabled(false);
                 AlertUtils.showInformationDialog(e.getMessage());
             } else {
@@ -193,7 +193,7 @@ public class DataSearchForm {
 
     public synchronized void scanKeysActionPerformed() {
         if (Fn.isEmpty(searchTextField.getText())) {
-            ExecutorUtils.runAsync(() -> {
+            FutureUtils.runAsync(() -> {
                 try {
                     loadTreeModelData("*");
                 } catch (InterruptedException | InvocationTargetException e) {
@@ -201,7 +201,7 @@ public class DataSearchForm {
                 }
             });
         } else {
-            ExecutorUtils.runAsync(() -> {
+            FutureUtils.runAsync(() -> {
                 try {
                     loadTreeModelData(searchTextField.getText());
                 } catch (InterruptedException | InvocationTargetException e) {
@@ -374,7 +374,7 @@ public class DataSearchForm {
             var selectNode = keyTree.getLastSelectedPathComponent();
             if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
                 if (treeNodeInfo.getChildCount() == 0) {
-                    ExecutorUtils.runAsync(() -> nodeClickProcessHandler.processHandler(treeNodeInfo));
+                    FutureUtils.runAsync(() -> nodeClickProcessHandler.processHandler(treeNodeInfo));
                 }
             }
         });

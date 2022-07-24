@@ -6,7 +6,7 @@ import com.formdev.flatlaf.extras.components.FlatToolBar;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
 import com.redisfront.commons.func.Fn;
-import com.redisfront.commons.util.ExecutorUtils;
+import com.redisfront.commons.util.FutureUtils;
 import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
@@ -131,55 +131,61 @@ public class MainTabbedPanel extends JPanel {
     }
 
     private void threadInit(ConnectInfo connectInfo, FlatLabel keysInfo, FlatLabel cupInfo, FlatLabel memoryInfo) {
-        scheduledExecutor.scheduleAtFixedRate(() ->
-                CompletableFuture.allOf(
-                        CompletableFuture.supplyAsync(() -> {
-                            String[] keyInfo = new String[2];
-                            if (Fn.notEqual(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
-                                var keySpace = RedisBasicService.service.getKeySpace(connectInfo);
-                                var count = keySpace.values().stream()
-                                        .map(value -> ((String) value).split(",")[0].split("=")[1])
-                                        .map(Integer::parseInt).reduce(Integer::sum).orElse(0);
-                                keyInfo[0] = String.valueOf(count);
-                                var buf = new StringBuilder(200);
-                                buf.append("<html><style>");
-                                buf.append("td { padding: 0 10 0 0; }");
-                                buf.append("</style>");
-                                buf.append("<p>");
-                                buf.append("Key数量: ").append(count);
-                                if (count > 0) {
-                                    buf.append("</p>");
-                                    buf.append("<hr>");
-                                    buf.append("</hr>");
-                                    buf.append("<table>");
-                                    keySpace.forEach((key, value) -> appendRow(buf, key, String.valueOf(value)));
-                                    buf.append("</td></tr>");
-                                    buf.append("</table>");
-                                    buf.append("<hr>");
-                                    buf.append("</hr>");
-                                }
-                                buf.append("</html>");
-                                keyInfo[1] = buf.toString();
-                            } else {
-                                keyInfo[0] = String.valueOf(RedisBasicService.service.dbSize(connectInfo));
-                                keyInfo[1] = "Key数量：" + keyInfo[0];
+        scheduledExecutor.scheduleAtFixedRate(() -> {
+                    CompletableFuture<Void> keyInfoFuture = FutureUtils.supplyAsync(() -> {
+                        String[] keyInfo = new String[2];
+                        if (Fn.notEqual(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+                            var keySpace = RedisBasicService.service.getKeySpace(connectInfo);
+                            var count = keySpace.values().stream()
+                                    .map(value -> ((String) value).split(",")[0].split("=")[1])
+                                    .map(Integer::parseInt).reduce(Integer::sum).orElse(0);
+                            keyInfo[0] = String.valueOf(count);
+                            var buf = new StringBuilder(200);
+                            buf.append("<html><style>");
+                            buf.append("td { padding: 0 10 0 0; }");
+                            buf.append("</style>");
+                            buf.append("<p>");
+                            buf.append("Key数量: ").append(count);
+                            if (count > 0) {
+                                buf.append("</p>");
+                                buf.append("<hr>");
+                                buf.append("</hr>");
+                                buf.append("<table>");
+                                keySpace.forEach((key, value) -> appendRow(buf, key, String.valueOf(value)));
+                                buf.append("</td></tr>");
+                                buf.append("</table>");
+                                buf.append("<hr>");
+                                buf.append("</hr>");
                             }
-                            return keyInfo;
-                        }, ExecutorUtils.getExecutorService()).thenAccept(s ->
-                                SwingUtilities.invokeLater(() -> {
-                                    keysInfo.setText(s[0]);
-                                    keysInfo.setToolTipText(s[1]);
-                                })),
-                        CompletableFuture.supplyAsync(() -> RedisBasicService.service.getStatInfo(connectInfo), ExecutorUtils.getExecutorService()).thenAccept(stats ->
-                                SwingUtilities.invokeLater(() -> {
-                                    cupInfo.setText((String) stats.get("instantaneous_ops_per_sec"));
-                                    cupInfo.setToolTipText("每秒命令数：" + stats.get("instantaneous_ops_per_sec"));
-                                })),
-                        CompletableFuture.supplyAsync(() -> RedisBasicService.service.getMemoryInfo(connectInfo), ExecutorUtils.getExecutorService()).thenAccept(memory ->
-                                SwingUtilities.invokeLater(() -> {
-                                    memoryInfo.setText((Fn.isNotNull(memory.get("used_memory_human")) ? (String) memory.get("used_memory_human") : "0"));
-                                    memoryInfo.setToolTipText("内存占用：" + (Fn.isNotNull(memory.get("used_memory_human")) ? memory.get("used_memory_human") : 0));
-                                }))), 0, 5, TimeUnit.SECONDS);
+                            buf.append("</html>");
+                            keyInfo[1] = buf.toString();
+                        } else {
+                            keyInfo[0] = String.valueOf(RedisBasicService.service.dbSize(connectInfo));
+                            keyInfo[1] = "Key数量：" + keyInfo[0];
+                        }
+                        return keyInfo;
+                    }, s ->
+                            SwingUtilities.invokeLater(() -> {
+                                keysInfo.setText(s[0]);
+                                keysInfo.setToolTipText(s[1]);
+                            }));
+
+                    CompletableFuture<Void> opsInfoFuture = FutureUtils.supplyAsync(() -> RedisBasicService.service.getStatInfo(connectInfo), stats ->
+                            SwingUtilities.invokeLater(() -> {
+                                cupInfo.setText((String) stats.get("instantaneous_ops_per_sec"));
+                                cupInfo.setToolTipText("每秒命令数：" + stats.get("instantaneous_ops_per_sec"));
+                            }));
+
+                    CompletableFuture<Void> memoryFuture = FutureUtils.supplyAsync(() -> RedisBasicService.service.getMemoryInfo(connectInfo), memory ->
+                            SwingUtilities.invokeLater(() -> {
+                                memoryInfo.setText((Fn.isNotNull(memory.get("used_memory_human")) ? (String) memory.get("used_memory_human") : "0"));
+                                memoryInfo.setToolTipText("内存占用：" + (Fn.isNotNull(memory.get("used_memory_human")) ? memory.get("used_memory_human") : 0));
+                            }));
+
+                    CompletableFuture.anyOf(keyInfoFuture, opsInfoFuture, memoryFuture);
+
+                }
+                , 0, 5, TimeUnit.SECONDS);
     }
 
     private void appendRow(StringBuilder buf, String key, String value) {

@@ -10,7 +10,7 @@ import com.redisfront.ui.dialog.AddConnectDialog;
 import com.redisfront.ui.dialog.OpenConnectDialog;
 import com.redisfront.ui.dialog.SettingDialog;
 import com.redisfront.ui.form.MainWindowForm;
-import com.redisfront.commons.util.ExecutorUtils;
+import com.redisfront.commons.util.FutureUtils;
 import com.redisfront.commons.util.LocaleUtils;
 
 import javax.swing.*;
@@ -88,7 +88,7 @@ public class MainMenuBar extends JMenuBar {
         var settingMenu = new JMenu(SETTING_MENU.title());
         settingMenu.setMnemonic(SETTING_MENU.mnemonic());
         var settingMenuItem = new JMenuItem("全局设置");
-        settingMenuItem.addActionListener(e -> ExecutorUtils.runAsync(SettingDialog::showSettingDialog));
+        settingMenuItem.addActionListener(e -> FutureUtils.runAsync(SettingDialog::showSettingDialog));
         settingMenu.add(settingMenuItem);
 
 
@@ -105,7 +105,7 @@ public class MainMenuBar extends JMenuBar {
         aboutMenu.setMnemonic(HELP_MENU.mnemonic());
         var aboutMenuItem = new JMenuItem(HELP_ABOUT_MENU.title());
         aboutMenuItem.setMnemonic(HELP_ABOUT_MENU.mnemonic());
-        aboutMenuItem.addActionListener((e) -> ExecutorUtils.runAsync(this::aboutActionPerformed));
+        aboutMenuItem.addActionListener((e) -> FutureUtils.runAsync(this::aboutActionPerformed));
         aboutMenu.add(aboutMenuItem);
         add(aboutMenu);
 

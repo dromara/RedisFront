@@ -8,7 +8,7 @@ import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.util.AlertUtils;
-import com.redisfront.commons.util.ExecutorUtils;
+import com.redisfront.commons.util.FutureUtils;
 import com.redisfront.commons.util.LettuceUtils;
 import com.redisfront.commons.util.LoadingUtils;
 import com.redisfront.model.ConnectInfo;
@@ -54,58 +54,58 @@ public class MainWindowForm {
     }
 
     public void addTabActionPerformed(ConnectInfo connectInfo) {
-        CompletableFuture.allOf(CompletableFuture.runAsync(() -> {
-                    connectInfo.setRedisModeEnum(RedisBasicService.service.getRedisModeEnum(connectInfo));
-                    if (Enum.RedisMode.SENTINEL == connectInfo.redisModeEnum()) {
-                        var masterList = LettuceUtils.sentinelExec(connectInfo, RedisSentinelCommands::masters);
-                        var master = masterList.stream().findAny().orElseThrow();
-                        var ip = master.get("ip");
-                        var port = master.get("port");
-                        LoadingUtils.closeDialog();
-                        var ret = JOptionPane.showConfirmDialog(RedisFrontApplication.frame, "您连接的主机为Sentinel节点，是否重定向的到Master[ " + ip + "/" + port + " ]节点？", "连接提示", JOptionPane.YES_NO_OPTION);
-                        if (ret == JOptionPane.YES_OPTION) {
-                            connectInfo.setHost(ip);
-                            connectInfo.setPort(Integer.valueOf(port));
-                        }
-                        try {
-                            LettuceUtils.run(connectInfo, BaseRedisCommands::ping);
-                        } catch (Exception e) {
-                            if (e instanceof RedisException redisException) {
-                                var ex = redisException.getCause();
-                                if (Fn.equal(ex.getMessage(), "WRONGPASS invalid username-password pair or user is disabled.")) {
-                                    var password = JOptionPane.showInputDialog(RedisFrontApplication.frame, "您输入Master[ " + ip + "/" + port + " ]节点的密码！");
-                                    if (ret == JOptionPane.YES_OPTION) {
-                                        connectInfo.setPassword(password);
-                                        LettuceUtils.run(connectInfo, BaseRedisCommands::ping);
-                                    }
-                                }
-                            } else {
-                                throw e;
+
+        FutureUtils.runAsync(() -> {
+            connectInfo.setRedisModeEnum(RedisBasicService.service.getRedisModeEnum(connectInfo));
+            if (Enum.RedisMode.SENTINEL == connectInfo.redisModeEnum()) {
+                var masterList = LettuceUtils.sentinelExec(connectInfo, RedisSentinelCommands::masters);
+                var master = masterList.stream().findAny().orElseThrow();
+                var ip = master.get("ip");
+                var port = master.get("port");
+                LoadingUtils.closeDialog();
+                var ret = JOptionPane.showConfirmDialog(RedisFrontApplication.frame, "您连接的主机为Sentinel节点，是否重定向的到Master[ " + ip + "/" + port + " ]节点？", "连接提示", JOptionPane.YES_NO_OPTION);
+                if (ret == JOptionPane.YES_OPTION) {
+                    connectInfo.setHost(ip);
+                    connectInfo.setPort(Integer.valueOf(port));
+                }
+                try {
+                    LettuceUtils.run(connectInfo, BaseRedisCommands::ping);
+                } catch (Exception e) {
+                    if (e instanceof RedisException redisException) {
+                        var ex = redisException.getCause();
+                        if (Fn.equal(ex.getMessage(), "WRONGPASS invalid username-password pair or user is disabled.")) {
+                            var password = JOptionPane.showInputDialog(RedisFrontApplication.frame, "您输入Master[ " + ip + "/" + port + " ]节点的密码！");
+                            if (ret == JOptionPane.YES_OPTION) {
+                                connectInfo.setPassword(password);
+                                LettuceUtils.run(connectInfo, BaseRedisCommands::ping);
                             }
                         }
-                        LoadingUtils.showDialog();
-                    }
-                }, ExecutorUtils.getExecutorService()), CompletableFuture.runAsync(() -> {
-                    if (Fn.equal(connectInfo.id(), 0)) {
-                        ConnectService.service.save(connectInfo);
                     } else {
-                        ConnectService.service.update(connectInfo);
+                        throw e;
                     }
+                }
+                LoadingUtils.showDialog();
+            }
+        }).thenRunAsync((() -> {
+            if (Fn.equal(connectInfo.id(), 0)) {
+                ConnectService.service.save(connectInfo);
+            } else {
+                ConnectService.service.update(connectInfo);
+            }
+        }));
 
-                }, ExecutorUtils.getExecutorService()))
-                .thenRunAsync(() -> {
-                    var mainTabbedPanel = MainTabbedPanel.newInstance(connectInfo);
-                    SwingUtilities.invokeLater(() -> {
-                        this.tabPanel.addTab(connectInfo.title(), UI.MAIN_TAB_DATABASE_ICON, mainTabbedPanel);
-                        this.tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
-                        this.contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
-                        LoadingUtils.closeDialog();
-                    });
-                }).exceptionally((throwable -> {
-                    LoadingUtils.closeDialog();
-                    AlertUtils.showErrorDialog("Error", throwable.getCause().getCause());
-                    return null;
-                }));
+        FutureUtils.runAsync(() -> {
+            var mainTabbedPanel = MainTabbedPanel.newInstance(connectInfo);
+            SwingUtilities.invokeLater(() -> {
+                this.tabPanel.addTab(connectInfo.title(), UI.MAIN_TAB_DATABASE_ICON, mainTabbedPanel);
+                this.tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
+                this.contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
+                LoadingUtils.closeDialog();
+            });
+        }, throwable -> {
+            LoadingUtils.closeDialog();
+            AlertUtils.showErrorDialog("Error", throwable.getCause().getCause());
+        });
 
     }
 
