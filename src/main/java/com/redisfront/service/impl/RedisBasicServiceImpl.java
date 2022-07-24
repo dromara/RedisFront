@@ -109,6 +109,24 @@ public class RedisBasicServiceImpl implements RedisBasicService {
     }
 
     @Override
+    public String rename(ConnectInfo connectInfo, String key, String newKey) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.rename(key, newKey));
+        } else {
+            return LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.rename(key, newKey));
+        }
+    }
+
+    @Override
+    public Boolean expire(ConnectInfo connectInfo, String key, Long ttl) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.expire(key, ttl));
+        } else {
+            return LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.expire(key, ttl));
+        }
+    }
+
+    @Override
     public String type(ConnectInfo connectInfo, String key) {
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.type(key));

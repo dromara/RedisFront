@@ -1,9 +1,6 @@
 package com.redisfront.commons.util;
 
-import cn.hutool.extra.ssh.JschRuntimeException;
 import cn.hutool.extra.ssh.JschUtil;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.commons.func.Fn;
@@ -32,7 +29,7 @@ public class JschUtils {
     }
 
     private static String getRemoteAddress(ConnectInfo connectInfo) {
-        String remoteAddress = connectInfo.host();
+        var remoteAddress = connectInfo.host();
         if (Fn.equal(remoteAddress, "127.0.0.1") || Fn.equal(remoteAddress.toLowerCase(), "localhost")) {
             remoteAddress = connectInfo.sshConfig().host();
         }
@@ -41,7 +38,7 @@ public class JschUtils {
 
 
     public static void closeSession() {
-        Session session = sessionThreadLocal.get();
+        var session = sessionThreadLocal.get();
         if (session != null) {
             session.disconnect();
             sessionThreadLocal.remove();
@@ -60,8 +57,8 @@ public class JschUtils {
                 String remoteAddress = getRemoteAddress(connectInfo);
                 session.connect();
                 for (RedisClusterNode partition : clusterClient.getPartitions()) {
-                    Integer remotePort = partition.getUri().getPort();
-                    partition.getUri().setPort(connectInfo.localPort() - remotePort);
+                    var remotePort = partition.getUri().getPort();
+                    partition.getUri().setPort(remotePort);
                     JschUtil.bindPort(sessionThreadLocal.get(), remoteAddress, remotePort, partition.getUri().getPort());
                 }
                 sessionThreadLocal.set(session);
@@ -77,12 +74,12 @@ public class JschUtils {
     public synchronized static void openSession(ConnectInfo connectInfo) {
         if (Fn.isNotNull(connectInfo.sshConfig())) {
             try {
-                Session session = createSession(connectInfo);
+                var session = createSession(connectInfo);
                 if (Fn.isNotNull(session)) {
                     session.disconnect();
                 }
                 session = createSession(connectInfo);
-                String remoteAddress = getRemoteAddress(connectInfo);
+                var remoteAddress = getRemoteAddress(connectInfo);
                 session.connect();
                 JschUtil.bindPort(session, remoteAddress, connectInfo.port(), connectInfo.port());
                 sessionThreadLocal.set(session);

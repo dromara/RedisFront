@@ -20,7 +20,7 @@ public class AlertUtils {
                 "RedisFront", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    public static void showInformationDialog(String message, Exception ex) {
+    public static void showInformationDialog(String message, Throwable ex) {
         JOptionPane.showMessageDialog(SwingUtilities.windowForComponent(RedisFrontApplication.frame),
                 message + "\n\n" + ex.getMessage(),
                 "RedisFront", JOptionPane.INFORMATION_MESSAGE);

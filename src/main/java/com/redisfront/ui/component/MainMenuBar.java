@@ -92,12 +92,12 @@ public class MainMenuBar extends JMenuBar {
         settingMenu.add(settingMenuItem);
 
 
-        var languageMenu = new JMenu("语言设置");
-        var chineseItem = new JMenuItem("简体中文");
-        languageMenu.add(chineseItem);
-        var englishItem = new JMenuItem("英文");
-        languageMenu.add(englishItem);
-        settingMenu.add(languageMenu);
+//        var languageMenu = new JMenu("语言设置");
+//        var chineseItem = new JMenuItem("简体中文");
+//        languageMenu.add(chineseItem);
+//        var englishItem = new JMenuItem("英文");
+//        languageMenu.add(englishItem);
+//        settingMenu.add(languageMenu);
 
         add(settingMenu);
 

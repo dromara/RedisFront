@@ -31,13 +31,15 @@ public class RedisTerminal extends AbstractTerminal {
 
     public RedisTerminal(ConnectInfo connectInfo) {
         this.connectInfo = connectInfo;
-        terminal.setEnabled(false);
+        this.terminal.setEnabled(false);
     }
 
-    public void ping() {
+    public void init() {
         try {
+
             if (RedisBasicService.service.ping(connectInfo)) {
                 if (!terminal.isEnabled()) {
+                    connectInfo.setDatabase(0);
                     terminal.setEnabled(true);
                     super.printConnectedSuccessMessage();
                 }
@@ -74,11 +76,14 @@ public class RedisTerminal extends AbstractTerminal {
             } else {
                 LettuceUtils.run(connectInfo(), redisCommands -> {
                     var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
+                    if (CommandType.SELECT.equals(commandType)) {
+                        connectInfo.setDatabase(Integer.valueOf(commandList.get(0)));
+                    }
                     println(format(res, ""));
                 });
             }
         } catch (Exception e) {
-            print(e.getMessage());
+            println(e.getMessage());
         }
     }
 
@@ -86,7 +91,7 @@ public class RedisTerminal extends AbstractTerminal {
         StringBuilder sb = new StringBuilder();
         if (s instanceof List<?> list) {
             if (list.size() == 1) {
-                return (String) list.get(0);
+                return String.valueOf(list.get(0));
             }
             for (int i = 0; i < list.size(); i++) {
                 Object item = list.get(i);

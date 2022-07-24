@@ -16,7 +16,6 @@ public class ConnectInfo implements Serializable {
     private String title;
     private String host;
     private Integer port;
-    private Integer localPort;
     private String username;
     private String password;
     private Integer database;
@@ -90,7 +89,6 @@ public class ConnectInfo implements Serializable {
         }
 
 
-
         public String password() {
             return password;
         }
@@ -106,14 +104,6 @@ public class ConnectInfo implements Serializable {
         }
     }
 
-    public Integer localPort() {
-        return localPort;
-    }
-
-    public synchronized ConnectInfo setLocalPort(Integer localPort) {
-        this.localPort = localPort;
-        return this;
-    }
 
     public ConnectInfo() {
     }

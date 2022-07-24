@@ -1,7 +1,5 @@
 package com.redisfront.commons.util;
 
-import cn.hutool.core.util.RandomUtil;
-import com.jcraft.jsch.Session;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.model.ConnectInfo;
 import io.lettuce.core.RedisClient;
@@ -46,12 +44,18 @@ public class LettuceUtils {
         var redisURI = getRedisURI(connectInfo);
         var clusterClient = getRedisClusterClient(redisURI);
         clusterClient.setDefaultTimeout(Duration.ofMinutes(2));
-        JschUtils.openSession(connectInfo, clusterClient);
-        try (var connection = clusterClient.connect()) {
-            consumer.accept(connection.sync());
-        } finally {
+        try {
+            JschUtils.openSession(connectInfo, clusterClient);
+            try (var connection = clusterClient.connect()) {
+                consumer.accept(connection.sync());
+            } finally {
+                clusterClient.shutdown();
+                JschUtils.closeSession();
+            }
+        } catch (Exception exception) {
             clusterClient.shutdown();
             JschUtils.closeSession();
+            throw exception;
         }
     }
 
@@ -59,12 +63,18 @@ public class LettuceUtils {
         var redisURI = getRedisURI(connectInfo);
         var clusterClient = getRedisClusterClient(redisURI);
         clusterClient.setDefaultTimeout(Duration.ofMinutes(2));
-        JschUtils.openSession(connectInfo, clusterClient);
-        try (var connection = clusterClient.connect()) {
-            return function.apply(connection.sync());
-        } finally {
+        try {
+            JschUtils.openSession(connectInfo, clusterClient);
+            try (var connection = clusterClient.connect()) {
+                return function.apply(connection.sync());
+            } finally {
+                clusterClient.shutdown();
+                JschUtils.closeSession();
+            }
+        } catch (Exception exception) {
             clusterClient.shutdown();
             JschUtils.closeSession();
+            throw exception;
         }
     }
 
@@ -72,12 +82,18 @@ public class LettuceUtils {
         var redisURI = getRedisURI(connectInfo);
         var redisClient = RedisClient.create(redisURI);
         redisClient.setDefaultTimeout(Duration.ofMinutes(2));
-        JschUtils.openSession(connectInfo);
-        try (var connection = redisClient.connectSentinel()) {
-            consumer.accept(connection.sync());
-        } finally {
+        try {
+            JschUtils.openSession(connectInfo);
+            try (var connection = redisClient.connectSentinel()) {
+                consumer.accept(connection.sync());
+            } finally {
+                redisClient.shutdown();
+                JschUtils.closeSession();
+            }
+        } catch (Exception exception) {
             redisClient.shutdown();
             JschUtils.closeSession();
+            throw exception;
         }
     }
 
@@ -85,12 +101,18 @@ public class LettuceUtils {
         var redisURI = getRedisURI(connectInfo);
         var redisClient = RedisClient.create(redisURI);
         redisClient.setDefaultTimeout(Duration.ofMinutes(2));
-        JschUtils.openSession(connectInfo);
-        try (var connection = redisClient.connectSentinel()) {
-            return function.apply(connection.sync());
-        } finally {
+        try {
+            JschUtils.openSession(connectInfo);
+            try (var connection = redisClient.connectSentinel()) {
+                return function.apply(connection.sync());
+            } finally {
+                redisClient.shutdown();
+                JschUtils.closeSession();
+            }
+        } catch (Exception exception) {
             redisClient.shutdown();
             JschUtils.closeSession();
+            throw exception;
         }
     }
 
@@ -98,12 +120,18 @@ public class LettuceUtils {
         var redisURI = getRedisURI(connectInfo);
         var redisClient = RedisClient.create(redisURI);
         redisClient.setDefaultTimeout(Duration.ofMinutes(2));
-        JschUtils.openSession(connectInfo);
-        try (var connection = redisClient.connect()) {
-            consumer.accept(connection.sync());
-        } finally {
+        try {
+            JschUtils.openSession(connectInfo);
+            try (var connection = redisClient.connect()) {
+                consumer.accept(connection.sync());
+            } finally {
+                redisClient.shutdown();
+                JschUtils.closeSession();
+            }
+        } catch (Exception exception) {
             redisClient.shutdown();
             JschUtils.closeSession();
+            throw exception;
         }
     }
 
@@ -112,12 +140,18 @@ public class LettuceUtils {
         var redisURI = getRedisURI(connectInfo);
         var redisClient = RedisClient.create(redisURI);
         redisClient.setDefaultTimeout(Duration.ofMinutes(2));
-        JschUtils.openSession(connectInfo);
-        try (var connection = redisClient.connect()) {
-            return function.apply(connection.sync());
-        } finally {
+        try {
+            JschUtils.openSession(connectInfo);
+            try (var connection = redisClient.connect()) {
+                return function.apply(connection.sync());
+            } finally {
+                redisClient.shutdown();
+                JschUtils.closeSession();
+            }
+        } catch (Exception exception) {
             redisClient.shutdown();
             JschUtils.closeSession();
+            throw exception;
         }
     }
 

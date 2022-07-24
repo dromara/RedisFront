@@ -6,6 +6,7 @@ import com.formdev.flatlaf.extras.components.FlatToolBar;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
 import com.redisfront.commons.func.Fn;
+import com.redisfront.commons.util.AlertUtils;
 import com.redisfront.commons.util.FutureUtils;
 import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
@@ -109,20 +110,21 @@ public class MainTabbedPanel extends JPanel {
         memoryInfo.setIcon(UI.CONTENT_TAB_MEMORY_ICON);
         rightToolBar.add(memoryInfo);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, rightToolBar);
-
-        contentPanel.addTab("数据", UI.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(connectInfo));
-        contentPanel.addTab("命令", UI.CONTENT_TAB_COMMAND_ICON, RedisTerminal.newInstance(connectInfo));
+        var dataSplitPanel = DataSplitPanel.newInstance(connectInfo);
+        contentPanel.addTab("数据", UI.CONTENT_TAB_DATA_ICON, dataSplitPanel);
+        var redisTerminal = RedisTerminal.newInstance(connectInfo);
+        contentPanel.addTab("命令", UI.CONTENT_TAB_COMMAND_ICON, redisTerminal);
         contentPanel.addTab("信息", UI.CONTENT_TAB_INFO_ICON, new JPanel());
 
         //tab 切换事件
         contentPanel.addChangeListener(e -> {
             var tabbedPane = (JTabbedPane) e.getSource();
             var component = tabbedPane.getSelectedComponent();
-            if (component instanceof RedisTerminal redisTerminal) {
-                redisTerminal.ping();
+            if (component instanceof RedisTerminal terminal) {
+                FutureUtils.runAsync(terminal::init, throwable -> AlertUtils.showErrorDialog("Error", throwable));
             }
-            if (component instanceof DataSplitPanel dataSplitPanel) {
-                dataSplitPanel.ping();
+            if (component instanceof DataSplitPanel dsp) {
+                FutureUtils.runAsync(dsp::ping, throwable -> AlertUtils.showErrorDialog("Error", throwable));
             }
         });
 

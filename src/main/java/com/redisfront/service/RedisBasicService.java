@@ -1,6 +1,7 @@
 package com.redisfront.service;
 
 import com.redisfront.commons.constant.Enum;
+import com.redisfront.commons.util.LettuceUtils;
 import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.impl.RedisBasicServiceImpl;
@@ -44,6 +45,13 @@ public interface RedisBasicService {
      * @return String
      */
     Long del(ConnectInfo connectInfo, String key);
+
+    String rename(ConnectInfo connectInfo,String key, String newKey);
+
+
+    Boolean expire(ConnectInfo connectInfo,String key, Long ttl);
+
+
     /**
      * type
      *
