@@ -21,6 +21,8 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
+import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.ExecutionException;
 
 public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     private JPanel contentPane;
@@ -514,4 +516,5 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
+
 }

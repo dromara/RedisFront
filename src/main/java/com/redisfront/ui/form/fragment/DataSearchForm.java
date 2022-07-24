@@ -35,10 +35,11 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 /**
@@ -61,7 +62,7 @@ public class DataSearchForm {
     private JTextField currentField;
     private JTextField allField;
     private JPanel loadMorePanel;
-    private Map<Integer, ScanContext<String>> scanKeysContextMap;
+    private volatile Map<Integer, ScanContext<String>> scanKeysContextMap;
     private ProcessHandler<TreeNodeInfo> nodeClickProcessHandler;
     private final ConnectInfo connectInfo;
     private JButton searchBtn;
@@ -85,10 +86,10 @@ public class DataSearchForm {
     }
 
 
-    public synchronized void loadTreeModelData(String key) {
+    public synchronized void loadTreeModelData(String key) throws InterruptedException, InvocationTargetException {
         try {
             LoadingUtils.showDialog();
-            scanAfterActionPerformed();
+            scanBeforeProcess();
             var scanKeysContext = scanKeysContextMap.get(connectInfo.database());
 
             if (Fn.isNull(scanKeysContext.getLimit())) {
@@ -174,12 +175,12 @@ public class DataSearchForm {
                 }
                 keyTree.setModel(treeModel);
             });
-            scanBeforeActionPerformed();
+            scanAfterProcess();
             LoadingUtils.closeDialog();
         } catch (Exception e) {
             e.printStackTrace();
             if (e instanceof RedisFrontException) {
-                scanBeforeActionPerformed();
+                scanAfterProcess();
                 LoadingUtils.closeDialog();
                 loadMoreBtn.setEnabled(false);
                 AlertUtils.showInformationDialog(e.getMessage());
@@ -190,15 +191,27 @@ public class DataSearchForm {
 
     }
 
-    public void scanKeysActionPerformed() {
+    public synchronized void scanKeysActionPerformed() {
         if (Fn.isEmpty(searchTextField.getText())) {
-            ExecutorUtils.runAsync(() -> loadTreeModelData("*"));
+            ExecutorUtils.runAsync(() -> {
+                try {
+                    loadTreeModelData("*");
+                } catch (InterruptedException | InvocationTargetException e) {
+                    throw new RedisFrontException(e, true);
+                }
+            });
         } else {
-            ExecutorUtils.runAsync(() -> loadTreeModelData(searchTextField.getText()));
+            ExecutorUtils.runAsync(() -> {
+                try {
+                    loadTreeModelData(searchTextField.getText());
+                } catch (InterruptedException | InvocationTargetException e) {
+                    throw new RedisFrontException(e, true);
+                }
+            });
         }
     }
 
-    private void scanAfterActionPerformed() {
+    public void scanBeforeProcess() {
         SwingUtilities.invokeLater(() -> {
             searchTextField.setEnabled(false);
             refreshBtn.setEnabled(false);
@@ -209,7 +222,7 @@ public class DataSearchForm {
         });
     }
 
-    private void scanBeforeActionPerformed() {
+    public void scanAfterProcess() {
         SwingUtilities.invokeLater(() -> {
             searchTextField.setEnabled(true);
             refreshBtn.setEnabled(true);
@@ -286,7 +299,7 @@ public class DataSearchForm {
             }
         };
 
-        scanKeysContextMap = new LinkedHashMap<>();
+        scanKeysContextMap = new ConcurrentHashMap<>();
 
         if (Fn.notEqual(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             var keySpace = RedisBasicService.service.getKeySpace(connectInfo);

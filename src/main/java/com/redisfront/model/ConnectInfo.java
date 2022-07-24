@@ -110,7 +110,7 @@ public class ConnectInfo implements Serializable {
         return localPort;
     }
 
-    public ConnectInfo setLocalPort(Integer localPort) {
+    public synchronized ConnectInfo setLocalPort(Integer localPort) {
         this.localPort = localPort;
         return this;
     }

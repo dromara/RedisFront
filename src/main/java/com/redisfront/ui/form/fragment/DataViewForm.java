@@ -13,9 +13,7 @@ import com.redisfront.commons.constant.UI;
 import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.handler.ActionHandler;
-import com.redisfront.commons.util.AlertUtils;
 import com.redisfront.commons.util.ExecutorUtils;
-import com.redisfront.commons.util.FutureUtils;
 import com.redisfront.model.*;
 import com.redisfront.service.*;
 import com.redisfront.ui.component.LoadingPanel;
@@ -36,9 +34,11 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 /**
@@ -86,6 +86,19 @@ public class DataViewForm {
     private final Map<String, ScanContext<Map.Entry<String, String>>> scanHashContextMap;
 
     private ActionHandler deleteActionHandler;
+
+    private ActionHandler refreshBeforeHandler;
+    private ActionHandler refreshAfterHandler;
+
+    public DataViewForm setRefreshBeforeHandler(ActionHandler refreshBeforeHandler) {
+        this.refreshBeforeHandler = refreshBeforeHandler;
+        return this;
+    }
+
+    public DataViewForm setRefreshAfterHandler(ActionHandler refreshAfterHandler) {
+        this.refreshAfterHandler = refreshAfterHandler;
+        return this;
+    }
 
     public static DataViewForm newInstance(ConnectInfo connectInfo) {
         return new DataViewForm(connectInfo);
@@ -164,7 +177,14 @@ public class DataViewForm {
 
         refBtn.setIcon(UI.REFRESH_ICON);
         refBtn.setText("重载");
-        refBtn.addActionListener(e -> reloadAllActionPerformed());
+        refBtn.addActionListener(e -> {
+            try {
+                reloadAllActionPerformed();
+            } catch (ExecutionException | InterruptedException | InvocationTargetException ex) {
+                ex.printStackTrace();
+                throw new RuntimeException(ex);
+            }
+        });
         refBtn.setToolTipText("重载");
 
         saveBtn.setIcon(UI.SAVE_ICON);
@@ -347,7 +367,7 @@ public class DataViewForm {
         return contentPanel;
     }
 
-    private void reloadAllActionPerformed() {
+    private void reloadAllActionPerformed() throws ExecutionException, InterruptedException, InvocationTargetException {
         if (refBtn.isEnabled()) {
             String key = keyField.getText();
             var keyType = keyTypeLabel.getText();
@@ -365,7 +385,20 @@ public class DataViewForm {
             if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
                 this.scanSetContextMap.put(key, new ScanContext<>());
             }
-            dataChangeActionPerformed(key);
+            ExecutorUtils.runAsync(() ->
+                    dataChangeActionPerformed(key, () -> SwingUtilities.invokeLater(() -> {
+                        refreshBeforeHandler.handle();
+                        refreshDisableBtn();
+                        dataPanel.add(LoadingPanel.newInstance(), BorderLayout.CENTER, 0);
+                        dataPanel.updateUI();
+                    }), () -> SwingUtilities.invokeLater(() -> {
+                        refreshAfterHandler.handle();
+                        refreshEnableBtn();
+                        Fn.removeAllComponent(dataPanel);
+                        dataPanel.add(valueViewPanel, BorderLayout.CENTER);
+                        dataPanel.updateUI();
+                    })));
+
         }
     }
 
@@ -402,58 +435,41 @@ public class DataViewForm {
         }));
     }
 
-    public synchronized void dataChangeActionPerformed(String key) {
+    public synchronized void dataChangeActionPerformed(String key, ActionHandler beforeActionHandler, ActionHandler afterActionHandler) {
+        refreshBeforeHandler.handle();
+        beforeActionHandler.handle();
 
-        CompletableFuture<Void> scanOrGetDataFuture = CompletableFuture.supplyAsync(() -> {
-                    SwingUtilities.invokeLater(this::refreshDisableBtn);
-                    String type = RedisBasicService.service.type(connectInfo, key);
-                    Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(type.toUpperCase());
-                    SwingUtilities.invokeLater(() -> {
-                        dataPanel.add(LoadingPanel.newInstance(), BorderLayout.CENTER);
-                        fieldOrScoreField.setVisible(keyTypeEnum == Enum.KeyTypeEnum.ZSET || keyTypeEnum == Enum.KeyTypeEnum.HASH);
-                        keyTypeLabel.setText(keyTypeEnum.typeName());
-                        keyTypeLabel.setBackground(keyTypeEnum.color());
-                    });
-                    return keyTypeEnum;
-                }, ExecutorUtils.getExecutorService())
-                .thenAccept((keyTypeEnum -> {
-                    if (keyTypeEnum == Enum.KeyTypeEnum.STRING || keyTypeEnum == Enum.KeyTypeEnum.JSON) {
-                        Long strLen = RedisStringService.service.strlen(connectInfo, key);
-                        String value = RedisStringService.service.get(connectInfo, key);
-                        SwingUtilities.invokeLater(() -> {
-                            valueUpdateSaveBtn.setEnabled(true);
-                            lengthLabel.setText("Length: " + strLen);
-                            keySizeLabel.setText("Size: " + DataSizeUtil.format(value.getBytes().length));
-                            textEditor.textArea().setText(value);
-                            Fn.removeAllComponent(dataPanel);
-                            dataPanel.add(valueViewPanel, BorderLayout.CENTER);
-                        });
-                    } else if (keyTypeEnum == Enum.KeyTypeEnum.HASH) {
-                        loadHashDataActionPerformed(key);
-                    } else if (keyTypeEnum == Enum.KeyTypeEnum.SET) {
-                        loadSetDataActionPerformed(key);
-                    } else if (keyTypeEnum == Enum.KeyTypeEnum.ZSET) {
-                        loadZSetDataActionPerformed(key);
-                    } else if (keyTypeEnum == Enum.KeyTypeEnum.LIST) {
-                        loadListDataActionPerformed(key);
-                    }
-                }))
-                .thenRun(() -> SwingUtilities.invokeLater(this::refreshEnableBtn));
+        String type = RedisBasicService.service.type(connectInfo, key);
+        Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(type.toUpperCase());
+        Long ttl = RedisBasicService.service.ttl(connectInfo, key);
+        SwingUtilities.invokeLater(() -> {
+            fieldOrScoreField.setVisible(keyTypeEnum == Enum.KeyTypeEnum.ZSET || keyTypeEnum == Enum.KeyTypeEnum.HASH);
+            keyTypeLabel.setText(keyTypeEnum.typeName());
+            keyTypeLabel.setBackground(keyTypeEnum.color());
+            ttlField.setText(ttl.toString());
+            keyField.setText(key);
+        });
+        if (keyTypeEnum == Enum.KeyTypeEnum.STRING || keyTypeEnum == Enum.KeyTypeEnum.JSON) {
+            Long strLen = RedisStringService.service.strlen(connectInfo, key);
+            String value = RedisStringService.service.get(connectInfo, key);
+            SwingUtilities.invokeLater(() -> {
+                valueUpdateSaveBtn.setEnabled(true);
+                lengthLabel.setText("Length: " + strLen);
+                keySizeLabel.setText("Size: " + DataSizeUtil.format(value.getBytes().length));
+                textEditor.textArea().setText(value);
+            });
+        } else if (keyTypeEnum == Enum.KeyTypeEnum.HASH) {
+            loadHashDataActionPerformed(key);
+        } else if (keyTypeEnum == Enum.KeyTypeEnum.SET) {
+            loadSetDataActionPerformed(key);
+        } else if (keyTypeEnum == Enum.KeyTypeEnum.ZSET) {
+            loadZSetDataActionPerformed(key);
+        } else if (keyTypeEnum == Enum.KeyTypeEnum.LIST) {
+            loadListDataActionPerformed(key);
+        }
 
-        CompletableFuture<Void> setKeyInfoAndTTLFuture = FutureUtils.completableFuture(() -> RedisBasicService.service.ttl(connectInfo, key),
-                ttl -> SwingUtilities.invokeLater(() ->
-                        {
-                            ttlField.setText(ttl.toString());
-                            keyField.setText(key);
-                        }
-                ));
-
-        CompletableFuture.allOf(setKeyInfoAndTTLFuture, scanOrGetDataFuture)
-                .exceptionally(throwable -> {
-                    throwable.printStackTrace();
-                    SwingUtilities.invokeLater(() -> AlertUtils.showErrorDialog("error", throwable));
-                    return null;
-                });
+        refreshAfterHandler.handle();
+        afterActionHandler.handle();
     }
 
     private synchronized void loadHashDataActionPerformed(String key) {

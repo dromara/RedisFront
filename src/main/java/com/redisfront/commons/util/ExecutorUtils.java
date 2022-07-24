@@ -1,7 +1,11 @@
 package com.redisfront.commons.util;
 
+import com.redisfront.commons.handler.ProcessHandler;
+
+import java.awt.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * ExectorUtil
@@ -13,7 +17,7 @@ public class ExecutorUtils {
 
     private static ExecutorService executorService;
 
-    public static ExecutorService getExecutorService(){
+    public static ExecutorService getExecutorService() {
         return executorService;
     }
 
@@ -28,10 +32,15 @@ public class ExecutorUtils {
     }
 
     public static void runAsync(Runnable command) {
+        executorService.execute(command);
+    }
+
+    public static void runAsync(Runnable command, ProcessHandler<Throwable> throwableProcessHandler) {
         try {
-            executorService.execute(command);
+            Future<?> feature = executorService.submit(command);
+            feature.get();
         } catch (Exception e) {
-            e.fillInStackTrace();
+            throwableProcessHandler.processHandler(e);
         }
     }
 
