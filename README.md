@@ -11,7 +11,5 @@
 <img src="screenshot/3.png">
 <img src="screenshot/4.png">
 
-#### 打包
-
-###### JRE
-%JAVA_17_HOME%/jlink.exe --module-path jmods --add-modules java.desktop,java.prefs,java.base,java.logging,java.sql,java.naming --output runtimes
+<img src="https://img.shields.io/badge/JDK-17+-green.svg" alt="jdk version">
+<img src="https://img.shields.io/badge/Lettuce-6.0+-blue.svg" alt="Coverage Status">
