@@ -4,10 +4,10 @@ import cn.hutool.core.date.DateUtil;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.commons.ui.AbstractTerminal;
+import com.redisfront.commons.util.LettuceUtils;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
 import com.redisfront.commons.func.Fn;
-import com.redisfront.commons.util.LettuceUtils;
 import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.output.ArrayOutput;
 import io.lettuce.core.protocol.CommandArgs;
@@ -31,12 +31,11 @@ public class RedisTerminal extends AbstractTerminal {
 
     public RedisTerminal(ConnectInfo connectInfo) {
         this.connectInfo = connectInfo;
-        this.terminal.setEnabled(false);
+        terminal.setEnabled(false);
     }
 
-    public void init() {
+    public void ping() {
         try {
-
             if (RedisBasicService.service.ping(connectInfo)) {
                 if (!terminal.isEnabled()) {
                     connectInfo.setDatabase(0);
@@ -75,15 +74,15 @@ public class RedisTerminal extends AbstractTerminal {
                 });
             } else {
                 LettuceUtils.run(connectInfo(), redisCommands -> {
-                    var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
                     if (CommandType.SELECT.equals(commandType)) {
                         connectInfo.setDatabase(Integer.valueOf(commandList.get(0)));
                     }
+                    var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
                     println(format(res, ""));
                 });
             }
         } catch (Exception e) {
-            println(e.getMessage());
+            print(e.getMessage());
         }
     }
 
@@ -119,4 +118,5 @@ public class RedisTerminal extends AbstractTerminal {
     }
 
 }
+
 

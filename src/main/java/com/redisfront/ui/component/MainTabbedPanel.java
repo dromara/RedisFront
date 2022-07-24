@@ -110,10 +110,8 @@ public class MainTabbedPanel extends JPanel {
         memoryInfo.setIcon(UI.CONTENT_TAB_MEMORY_ICON);
         rightToolBar.add(memoryInfo);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, rightToolBar);
-        var dataSplitPanel = DataSplitPanel.newInstance(connectInfo);
-        contentPanel.addTab("数据", UI.CONTENT_TAB_DATA_ICON, dataSplitPanel);
-        var redisTerminal = RedisTerminal.newInstance(connectInfo);
-        contentPanel.addTab("命令", UI.CONTENT_TAB_COMMAND_ICON, redisTerminal);
+        contentPanel.addTab("数据", UI.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(connectInfo));
+        contentPanel.addTab("命令", UI.CONTENT_TAB_COMMAND_ICON, RedisTerminal.newInstance(connectInfo));
         contentPanel.addTab("信息", UI.CONTENT_TAB_INFO_ICON, new JPanel());
 
         //tab 切换事件
@@ -121,10 +119,10 @@ public class MainTabbedPanel extends JPanel {
             var tabbedPane = (JTabbedPane) e.getSource();
             var component = tabbedPane.getSelectedComponent();
             if (component instanceof RedisTerminal terminal) {
-                FutureUtils.runAsync(terminal::init, throwable -> AlertUtils.showErrorDialog("Error", throwable));
+                terminal.ping();
             }
-            if (component instanceof DataSplitPanel dsp) {
-                FutureUtils.runAsync(dsp::ping, throwable -> AlertUtils.showErrorDialog("Error", throwable));
+            if (component instanceof DataSplitPanel dataSplitPanel) {
+                dataSplitPanel.ping();
             }
         });
 
