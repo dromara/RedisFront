@@ -1,13 +1,15 @@
 package com.redisfront.ui.dialog;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.RedisFrontApplication;
+import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.handler.ActionHandler;
-import com.redisfront.commons.handler.ProcessHandler;
+import com.redisfront.commons.util.PrefUtils;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisHashService;
 import com.redisfront.service.RedisListService;
@@ -15,8 +17,11 @@ import com.redisfront.service.RedisSetService;
 import com.redisfront.service.RedisZSetService;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class AddOrUpdateItemDialog extends JDialog {
     private JPanel contentPane;
@@ -35,7 +40,7 @@ public class AddOrUpdateItemDialog extends JDialog {
 
     public static void showAddOrUpdateItemDialog(String title, String key, String fieldOrScore, String value, ConnectInfo connectInfo, Enum.KeyTypeEnum typeEnum, ActionHandler addSuccessHandler) {
         var addOrUpdateItemDialog = new AddOrUpdateItemDialog(title, key, fieldOrScore, value, connectInfo, typeEnum, addSuccessHandler);
-        addOrUpdateItemDialog.setResizable(false);
+        addOrUpdateItemDialog.setResizable(true);
         addOrUpdateItemDialog.setLocationRelativeTo(RedisFrontApplication.frame);
         addOrUpdateItemDialog.pack();
         addOrUpdateItemDialog.setVisible(true);
@@ -43,33 +48,22 @@ public class AddOrUpdateItemDialog extends JDialog {
 
 
     public AddOrUpdateItemDialog(String title, String key, String fieldOrScore, String value, ConnectInfo connectInfo, Enum.KeyTypeEnum typeEnum, ActionHandler addSuccessHandler) {
+        super(RedisFrontApplication.frame);
         setContentPane(contentPane);
         setTitle(title);
         setModal(true);
         setMaximumSize(new Dimension(500, 400));
-        getRootPane().setDefaultButton(buttonOK);
-        buttonOK.addActionListener(e -> onOK());
-        buttonCancel.addActionListener(e -> onCancel());
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-        });
-        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         this.addSuccessHandler = addSuccessHandler;
         this.typeEnum = typeEnum;
         this.key = key;
         this.connectInfo = connectInfo;
-
-        valueLabel.setText("值");
-
         this.value = value;
         this.fieldOrScore = fieldOrScore;
 
         if (Fn.isNotEmpty(value)) {
             valueTextArea.setText(value);
         }
+
         if (typeEnum.equals(Enum.KeyTypeEnum.ZSET) || typeEnum.equals(Enum.KeyTypeEnum.HASH)) {
             this.nameField.setText(fieldOrScore);
             nameLabel.setVisible(true);
@@ -80,11 +74,25 @@ public class AddOrUpdateItemDialog extends JDialog {
             nameField.setVisible(false);
         }
 
+        initComponentListener();
+    }
 
+    private void initComponentListener() {
+        getRootPane().setDefaultButton(buttonOK);
+        buttonOK.addActionListener(e -> onOK());
+        buttonCancel.addActionListener(e -> onCancel());
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+
+        valueLabel.setText("值");
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                onCancel();
+            }
+        });
+        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     private void onOK() {
-
         if (typeEnum.equals(Enum.KeyTypeEnum.ZSET) || typeEnum.equals(Enum.KeyTypeEnum.HASH)) {
             if (Fn.isEmpty(nameField.getText())) {
                 nameField.requestFocus();

@@ -120,6 +120,14 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
             }
         });
 
+        showShhPassword.addActionListener(e -> {
+            if (showShhPassword.isSelected()) {
+                sshPasswordField.setEchoChar((char) 0);
+            } else {
+                sshPasswordField.setEchoChar('*');
+            }
+        });
+
         showSslPassword.addActionListener(e -> {
             if (showPasswordCheckBox.isSelected()) {
                 sslPasswordField.setEchoChar((char) 0);
@@ -342,6 +350,21 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         this.passwordField.setText(connectInfo.password());
         this.enableSSLBtn.setSelected(connectInfo.ssl());
         this.enableSSHBtn.setSelected(Enum.Connect.SSH.equals(connectInfo.connectMode()));
+        if (enableSSLBtn.isSelected()) {
+            sslPanel.setVisible(true);
+            sslPasswordField.setText(connectInfo.sslConfig().password());
+            privateKeyField.setText(connectInfo.sslConfig().privateKeyFilePath());
+            publicKeyField.setText(connectInfo.sslConfig().publicKeyFilePath());
+            grantField.setText(connectInfo.sslConfig().grantFilePath());
+        }
+        if (enableSSHBtn.isSelected()) {
+            sshPanel.setVisible(true);
+            sshUserField.setText(connectInfo.sshConfig().user());
+            sshHostField.setText(connectInfo.sshConfig().host());
+            sshPasswordField.setText(connectInfo.sshConfig().password());
+            sshPortField.setValue(connectInfo.sshConfig().port());
+            sshPrivateKeyFile.setText(connectInfo.sshConfig().privateKeyPath());
+        }
     }
 
     private void createUIComponents() {

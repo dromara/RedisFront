@@ -378,45 +378,50 @@ public class DataViewForm {
         if (refBtn.isEnabled()) {
             String key = keyField.getText();
             this.lastKeyName = key;
-            var keyType = keyTypeLabel.getText();
-            Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(keyType.toUpperCase());
 
-            FutureUtils.runAsync(() ->
-                    dataChangeActionPerformed(key, () -> {
-                        SwingUtilities.invokeLater(() -> {
-                            refreshDisableBtn();
-                            refreshBeforeHandler.handle();
+            String keyType = RedisBasicService.service.type(connectInfo, key);
+
+            if (Fn.notEqual(keyType, "none")) {
+                Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(keyType.toUpperCase());
+                FutureUtils.runAsync(() ->
+                        dataChangeActionPerformed(key, () -> {
+                            SwingUtilities.invokeLater(() -> {
+                                refreshDisableBtn();
+                                refreshBeforeHandler.handle();
+                                Fn.removeAllComponent(dataPanel);
+                                dataPanel.add(LoadingPanel.newInstance(), BorderLayout.CENTER);
+                                dataPanel.updateUI();
+                            });
+                            //加载数据
+                            {
+                                if (keyTypeEnum == Enum.KeyTypeEnum.STRING || keyTypeEnum == Enum.KeyTypeEnum.JSON) {
+                                    loadStringActionPerformed(key);
+                                }
+                                if (keyTypeEnum.equals(Enum.KeyTypeEnum.ZSET)) {
+                                    this.scanZSetContextMap.put(key, new ScanContext<>());
+                                }
+                                if (keyTypeEnum.equals(Enum.KeyTypeEnum.HASH)) {
+                                    this.scanHashContextMap.put(key, new ScanContext<>());
+                                }
+                                if (keyTypeEnum.equals(Enum.KeyTypeEnum.LIST)) {
+                                    this.scanListContextMap.put(key, new ScanContext<>());
+                                }
+                                if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
+                                    this.scanSetContextMap.put(key, new ScanContext<>());
+                                }
+                            }
+
+                        }, () -> SwingUtilities.invokeLater(() -> {
+                            refreshEnableBtn();
+                            refreshAfterHandler.handle();
                             Fn.removeAllComponent(dataPanel);
-                            dataPanel.add(LoadingPanel.newInstance(), BorderLayout.CENTER);
+                            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
                             dataPanel.updateUI();
-                        });
-                        //加载数据
-                        {
-                            if (keyTypeEnum == Enum.KeyTypeEnum.STRING || keyTypeEnum == Enum.KeyTypeEnum.JSON) {
-                                loadStringActionPerformed(key);
-                            }
-                            if (keyTypeEnum.equals(Enum.KeyTypeEnum.ZSET)) {
-                                this.scanZSetContextMap.put(key, new ScanContext<>());
-                            }
-                            if (keyTypeEnum.equals(Enum.KeyTypeEnum.HASH)) {
-                                this.scanHashContextMap.put(key, new ScanContext<>());
-                            }
-                            if (keyTypeEnum.equals(Enum.KeyTypeEnum.LIST)) {
-                                this.scanListContextMap.put(key, new ScanContext<>());
-                            }
-                            if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
-                                this.scanSetContextMap.put(key, new ScanContext<>());
-                            }
-                        }
-
-                    }, () -> SwingUtilities.invokeLater(() -> {
-                        refreshEnableBtn();
-                        refreshAfterHandler.handle();
-                        Fn.removeAllComponent(dataPanel);
-                        dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
-                        dataPanel.updateUI();
-                    })), throwable -> refreshAfterHandler.handle());
-
+                        })), throwable -> refreshAfterHandler.handle());
+            } else {
+                ttlField.setText("-2");
+                AlertUtils.showInformationDialog("当前Key已被删除！");
+            }
         }
     }
 

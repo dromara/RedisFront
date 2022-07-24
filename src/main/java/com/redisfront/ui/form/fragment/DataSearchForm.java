@@ -32,10 +32,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.text.JTextComponent;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
@@ -269,7 +266,7 @@ public class DataSearchForm {
 
         addBtn = new JButton();
         addBtn.setIcon(UI.PLUS_ICON);
-        addBtn.addActionListener(e -> AddKeyDialog.showAddDialog(connectInfo, System.out::println));
+        addBtn.addActionListener(e -> AddKeyDialog.showAddDialog(connectInfo, null, (key) -> AlertUtils.showInformationDialog("添加成功！")));
 
         refreshBtn = new JButton();
         refreshBtn.addActionListener(e -> {
@@ -387,13 +384,21 @@ public class DataSearchForm {
         var popupMenu = new JPopupMenu() {
             {
                 var addMenuItem = new JMenuItem("添加");
+                addMenuItem.addActionListener((e) -> {
+                    var selectNode = keyTree.getLastSelectedPathComponent();
+                    if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
+                        AddKeyDialog.showAddDialog(connectInfo, treeNodeInfo.key(), (key) -> AlertUtils.showInformationDialog("添加成功！"));
+                    }
+                });
                 add(addMenuItem);
                 var delMenuItem = new JMenuItem("删除");
                 delMenuItem.addActionListener((e) -> deleteActionPerformed());
                 add(delMenuItem);
                 var refMenuItem = new JMenuItem("刷新");
+                refMenuItem.addActionListener(e -> AlertUtils.showInformationDialog("待实现"));
                 add(refMenuItem);
                 var memMenuItem = new JMenuItem("内存分析");
+                memMenuItem.addActionListener(e -> AlertUtils.showInformationDialog("待实现"));
                 add(memMenuItem);
             }
         };
