@@ -306,7 +306,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
 
 
         } else if (enableSSLBtn.isSelected()) {
-            var sshConfig = new ConnectInfo.SSLConfig(
+            var sslConfig = new ConnectInfo.SSLConfig(
                     privateKeyField.getText(),
                     publicKeyField.getText(),
                     grantField.getText(),
@@ -320,7 +320,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                     0,
                     enableSSLBtn.isSelected(),
                     Enum.Connect.NORMAL,
-                    sshConfig)
+                    sslConfig)
                     .setId(id);
 
         } else {

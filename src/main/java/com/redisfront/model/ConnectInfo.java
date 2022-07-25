@@ -37,12 +37,12 @@ public class ConnectInfo implements Serializable {
         this(title, host, port, username, password, database, ssl, connectMode, sslConfig, null);
     }
 
-    public static class SSHConfig {
-        String privateKeyPath;
-        String user;
-        String host;
-        Integer port;
-        String password;
+    public static class SSHConfig implements Serializable {
+        private String privateKeyPath;
+        private String user;
+        private String host;
+        private Integer port;
+        private String password;
 
         public SSHConfig(String privateKeyPath, String user, String host, Integer port, String password) {
             this.privateKeyPath = privateKeyPath;
@@ -121,11 +121,11 @@ public class ConnectInfo implements Serializable {
         this.sshConfig = sshConfig;
     }
 
-    public static class SSLConfig {
-        String privateKeyFilePath;
-        String publicKeyFilePath;
-        String grantFilePath;
-        String password;
+    public static class SSLConfig implements Serializable {
+        private String privateKeyFilePath;
+        private String publicKeyFilePath;
+        private String grantFilePath;
+        private String password;
 
         public SSLConfig(String privateKeyFilePath, String publicKeyFilePath, String grantFilePath, String password) {
             this.privateKeyFilePath = privateKeyFilePath;

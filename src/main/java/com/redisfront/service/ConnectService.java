@@ -1,9 +1,12 @@
 package com.redisfront.service;
 
 import com.redisfront.commons.constant.Enum;
+import com.redisfront.commons.exception.ExceptionHandler;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.impl.ConnectServiceImpl;
 import com.redisfront.commons.func.Fn;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -14,6 +17,9 @@ import java.util.Map;
  * @author Jin
  */
 public interface ConnectService {
+
+    Logger log = LoggerFactory.getLogger(ConnectService.class);
+
 
     ConnectService service = new ConnectServiceImpl();
 
@@ -98,8 +104,8 @@ public interface ConnectService {
     }
 
     default ConnectInfo mapToConnectInfo(Map<String, Object> map) {
-        ConnectInfo.SSLConfig sslConfig = Fn.isNull(map.get("ssl_config")) ? null : Fn.fromJson((String) map.get("ssl_config"), ConnectInfo.SSLConfig.class);
-        ConnectInfo.SSHConfig sshConfig = Fn.isNull(map.get("ssh_config")) ? null : Fn.fromJson((String) map.get("ssh_config"), ConnectInfo.SSHConfig.class);
+        ConnectInfo.SSLConfig sslConfig = (Fn.isNull(map.get("ssl_config")) || Fn.isEmpty((String) map.get("ssl_config"))) ? null : Fn.fromJson((String) map.get("ssl_config"), ConnectInfo.SSLConfig.class);
+        ConnectInfo.SSHConfig sshConfig = (Fn.isNull(map.get("ssh_config")) || Fn.isEmpty((String) map.get("ssl_config"))) ? null : Fn.fromJson((String) map.get("ssh_config"), ConnectInfo.SSHConfig.class);
         return new ConnectInfo()
                 .setId((Integer) map.get("id"))
                 .setTitle((String) map.get("title"))
