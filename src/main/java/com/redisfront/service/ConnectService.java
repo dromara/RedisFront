@@ -62,7 +62,7 @@ public interface ConnectService {
                 connectInfo.connectMode().name() +
                 "'," +
                 "ssl_config ='" +
-                (Fn.isNull(connectInfo.sshConfig()) ? "" : connectInfo.sshConfig()) +
+                (Fn.isNull(connectInfo.sslConfig()) ? "" : connectInfo.sslConfig()) +
                 "'," +
                 "ssh_config ='" +
                 (Fn.isNull(connectInfo.sshConfig()) ? "" : connectInfo.sshConfig()) +
