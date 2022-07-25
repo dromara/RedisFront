@@ -97,7 +97,7 @@ public interface ConnectService {
                 "','" +
                 connectInfo.connectMode().name() +
                 "','" +
-                (Fn.isNull(connectInfo.sshConfig()) ? "" : connectInfo.sshConfig()) +
+                (Fn.isNull(connectInfo.sslConfig()) ? "" : connectInfo.sslConfig()) +
                 "','" +
                 (Fn.isNull(connectInfo.sshConfig()) ? "" : connectInfo.sshConfig()) +
                 "')";
