@@ -274,6 +274,7 @@ public class DataSearchForm {
 
         refreshBtn = new JButton();
         refreshBtn.addActionListener(e -> {
+            SwingUtilities.invokeLater(() -> searchTextField.setText(""));
             scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
             scanKeysAndInitScanInfo();
         });
