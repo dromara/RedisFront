@@ -1,5 +1,6 @@
 package com.redisfront.ui.dialog;
 
+import cn.hutool.extra.ssh.JschRuntimeException;
 import com.formdev.flatlaf.util.StringUtils;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
@@ -16,6 +17,7 @@ import com.redisfront.commons.util.FutureUtils;
 import com.redisfront.commons.util.LoadingUtils;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
+import io.lettuce.core.RedisConnectionException;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -236,6 +238,12 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                 }
             } catch (Exception exception) {
                 if (exception instanceof RedisFrontException) {
+                    if (exception.getCause() instanceof JschRuntimeException jschRuntimeException) {
+                        AlertUtils.showErrorDialog("连接失败！", jschRuntimeException.getCause());
+                    } else {
+                        AlertUtils.showErrorDialog("连接失败！", exception);
+                    }
+                } else if (exception instanceof RedisConnectionException) {
                     AlertUtils.showErrorDialog("连接失败！", exception);
                 } else {
                     AlertUtils.showErrorDialog("连接失败！", exception.getCause());

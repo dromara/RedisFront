@@ -24,7 +24,6 @@ import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
 /**
@@ -56,8 +55,9 @@ public class MainWindowForm {
 
     public void addTabActionPerformed(ConnectInfo connectInfo) {
         {  //环境判断
-            FutureUtils.runAsync(() -> {
+            FutureUtils.supplyAsync(() -> {
                 connectInfo.setRedisModeEnum(RedisBasicService.service.getRedisModeEnum(connectInfo));
+                var prototype = connectInfo.clone();
                 if (Enum.RedisMode.SENTINEL == connectInfo.redisModeEnum()) {
                     var masterList = LettuceUtils.sentinelExec(connectInfo, RedisSentinelCommands::masters);
                     var master = masterList.stream().findAny().orElseThrow();
@@ -81,19 +81,23 @@ public class MainWindowForm {
                                     LettuceUtils.run(connectInfo, BaseRedisCommands::ping);
                                 }
                             }
+                        } else if (Fn.isNotNull(e.getCause())) {
+                            var ex = e.getCause();
+                            AlertUtils.showErrorDialog("Error", ex);
                         } else {
                             throw e;
                         }
                     }
                     LoadingUtils.showDialog();
                 }
-            }).thenRun((() -> {
-                if (Fn.equal(connectInfo.id(), 0)) {
-                    ConnectService.service.save(connectInfo);
+                return prototype;
+            }, prototype -> {
+                if (Fn.equal(prototype.id(), 0)) {
+                    ConnectService.service.save(prototype);
                 } else {
-                    ConnectService.service.update(connectInfo);
+                    ConnectService.service.update(prototype);
                 }
-            })).join();
+            }).join();
         }
 
         { //主界面加载

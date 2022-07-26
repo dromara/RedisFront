@@ -28,7 +28,7 @@ public class LettuceUtils {
 
     private synchronized static RedisClusterClient getRedisClusterClient(RedisURI redisURI) {
         var clusterClient = RedisClusterClient.create(redisURI);
-        clusterClient.setDefaultTimeout(Duration.ofMinutes(2));
+        clusterClient.setDefaultTimeout(Duration.ofMinutes(1));
         var clusterTopologyRefreshOptions = ClusterTopologyRefreshOptions.builder()
                 .enableAdaptiveRefreshTrigger(ClusterTopologyRefreshOptions.RefreshTrigger.MOVED_REDIRECT, ClusterTopologyRefreshOptions.RefreshTrigger.PERSISTENT_RECONNECTS)
                 .enablePeriodicRefresh(Duration.ofMinutes(30))
@@ -43,7 +43,7 @@ public class LettuceUtils {
     public synchronized static void clusterRun(ConnectInfo connectInfo, Consumer<RedisAdvancedClusterCommands<String, String>> consumer) {
         var redisURI = getRedisURI(connectInfo);
         var clusterClient = getRedisClusterClient(redisURI);
-        clusterClient.setDefaultTimeout(Duration.ofMinutes(2));
+        clusterClient.setDefaultTimeout(Duration.ofMinutes(1));
         try {
             JschUtils.openSession(connectInfo, clusterClient);
             try (var connection = clusterClient.connect()) {
@@ -62,7 +62,7 @@ public class LettuceUtils {
     public synchronized static <T> T clusterExec(ConnectInfo connectInfo, Function<RedisAdvancedClusterCommands<String, String>, T> function) {
         var redisURI = getRedisURI(connectInfo);
         var clusterClient = getRedisClusterClient(redisURI);
-        clusterClient.setDefaultTimeout(Duration.ofMinutes(2));
+        clusterClient.setDefaultTimeout(Duration.ofMinutes(1));
         try {
             JschUtils.openSession(connectInfo, clusterClient);
             try (var connection = clusterClient.connect()) {
@@ -81,7 +81,7 @@ public class LettuceUtils {
     public synchronized static void sentinelRun(ConnectInfo connectInfo, Consumer<RedisSentinelCommands<String, String>> consumer) {
         var redisURI = getRedisURI(connectInfo);
         var redisClient = RedisClient.create(redisURI);
-        redisClient.setDefaultTimeout(Duration.ofMinutes(2));
+        redisClient.setDefaultTimeout(Duration.ofMinutes(1));
         try {
             JschUtils.openSession(connectInfo);
             try (var connection = redisClient.connectSentinel()) {
@@ -100,7 +100,7 @@ public class LettuceUtils {
     public synchronized static <T> T sentinelExec(ConnectInfo connectInfo, Function<RedisSentinelCommands<String, String>, T> function) {
         var redisURI = getRedisURI(connectInfo);
         var redisClient = RedisClient.create(redisURI);
-        redisClient.setDefaultTimeout(Duration.ofMinutes(2));
+        redisClient.setDefaultTimeout(Duration.ofMinutes(1));
         try {
             JschUtils.openSession(connectInfo);
             try (var connection = redisClient.connectSentinel()) {
@@ -119,7 +119,7 @@ public class LettuceUtils {
     public synchronized static void run(ConnectInfo connectInfo, Consumer<RedisCommands<String, String>> consumer) {
         var redisURI = getRedisURI(connectInfo);
         var redisClient = RedisClient.create(redisURI);
-        redisClient.setDefaultTimeout(Duration.ofMinutes(2));
+        redisClient.setDefaultTimeout(Duration.ofMinutes(1));
         try {
             JschUtils.openSession(connectInfo);
             try (var connection = redisClient.connect()) {
@@ -139,7 +139,7 @@ public class LettuceUtils {
     public synchronized static <T> T exec(ConnectInfo connectInfo, Function<RedisCommands<String, String>, T> function) {
         var redisURI = getRedisURI(connectInfo);
         var redisClient = RedisClient.create(redisURI);
-        redisClient.setDefaultTimeout(Duration.ofMinutes(2));
+        redisClient.setDefaultTimeout(Duration.ofMinutes(1));
         try {
             JschUtils.openSession(connectInfo);
             try (var connection = redisClient.connect()) {

@@ -1,6 +1,7 @@
 package com.redisfront.commons.util;
 
 import cn.hutool.extra.ssh.JschUtil;
+import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.commons.func.Fn;
@@ -55,6 +56,7 @@ public class JschUtils {
                 session = createSession(connectInfo);
 
                 String remoteAddress = getRemoteAddress(connectInfo);
+                session.setTimeout(2000);
                 session.connect();
                 for (RedisClusterNode partition : clusterClient.getPartitions()) {
                     var remotePort = partition.getUri().getPort();
@@ -63,7 +65,9 @@ public class JschUtils {
                 }
                 sessionThreadLocal.set(session);
             } catch (Exception e) {
-                e.printStackTrace();
+                if (e instanceof JSchException jSchException) {
+                    throw new RedisFrontException("SSH主机连接失败 - " + jSchException.getMessage());
+                }
                 throw new RedisFrontException(e, true);
             }
         } else {
@@ -79,12 +83,15 @@ public class JschUtils {
                     session.disconnect();
                 }
                 session = createSession(connectInfo);
+                session.setTimeout(2000);
                 var remoteAddress = getRemoteAddress(connectInfo);
                 session.connect();
                 JschUtil.bindPort(session, remoteAddress, connectInfo.port(), connectInfo.port());
                 sessionThreadLocal.set(session);
             } catch (Exception e) {
-                e.printStackTrace();
+                if (e instanceof JSchException jSchException) {
+                    throw new RedisFrontException("SSH主机连接失败 - " + jSchException.getMessage());
+                }
                 throw new RedisFrontException(e, true);
             }
         }

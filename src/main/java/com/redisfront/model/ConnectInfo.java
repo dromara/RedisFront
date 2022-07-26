@@ -10,7 +10,7 @@ import java.io.Serializable;
  *
  * @author Jin
  */
-public class ConnectInfo implements Serializable,Cloneable {
+public class ConnectInfo implements Serializable, Cloneable {
 
     private int id;
     private String title;
@@ -213,7 +213,7 @@ public class ConnectInfo implements Serializable,Cloneable {
     }
 
     public String user() {
-        return Fn.isEmpty(username) ? null : Fn.equal(username.toLowerCase(), "null") ? "" : username;
+        return username;
     }
 
     public ConnectInfo setUsername(String username) {
@@ -222,7 +222,7 @@ public class ConnectInfo implements Serializable,Cloneable {
     }
 
     public String password() {
-        return Fn.isEmpty(password) ? null : Fn.equal(password.toLowerCase(), "null") ? "" : password;
+        return password;
     }
 
     public ConnectInfo setPassword(String password) {

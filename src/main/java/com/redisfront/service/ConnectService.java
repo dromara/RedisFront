@@ -1,10 +1,9 @@
 package com.redisfront.service;
 
 import com.redisfront.commons.constant.Enum;
-import com.redisfront.commons.exception.ExceptionHandler;
+import com.redisfront.commons.func.Fn;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.impl.ConnectServiceImpl;
-import com.redisfront.commons.func.Fn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +37,7 @@ public interface ConnectService {
     void initDatabase();
 
     default String buildUpdateSql(ConnectInfo connectInfo) {
+        // 请查看示例 https://gist.github.com/retanoj/5fd369524a18ab68a4fe7ac5e0d121e8
         return "update rf_connect" +
                 " set " +
                 "title ='" +
@@ -50,7 +50,7 @@ public interface ConnectService {
                 connectInfo.port() +
                 "," +
                 "username ='" +
-                connectInfo.user() +
+                (Fn.isNull(connectInfo.user()) ? "" : connectInfo.user()) +
                 "'," +
                 "password ='" +
                 connectInfo.password() +
@@ -62,10 +62,10 @@ public interface ConnectService {
                 connectInfo.connectMode().name() +
                 "'," +
                 "ssl_config ='" +
-                (Fn.isNull(connectInfo.sslConfig()) ? "" : connectInfo.sslConfig()) +
+                (Fn.isNull(connectInfo.sslConfig()) ? "" : Fn.toJson(connectInfo.sslConfig())) +
                 "'," +
                 "ssh_config ='" +
-                (Fn.isNull(connectInfo.sshConfig()) ? "" : connectInfo.sshConfig()) +
+                (Fn.isNull(connectInfo.sshConfig()) ? "" : Fn.toJson(connectInfo.sshConfig())) +
                 "' where id =" +
                 connectInfo.id();
 
@@ -97,15 +97,17 @@ public interface ConnectService {
                 "','" +
                 connectInfo.connectMode().name() +
                 "','" +
-                (Fn.isNull(connectInfo.sslConfig()) ? "" : connectInfo.sslConfig()) +
+                (Fn.isNull(connectInfo.sslConfig()) ? "" : Fn.toJson(connectInfo.sslConfig())) +
                 "','" +
-                (Fn.isNull(connectInfo.sshConfig()) ? "" : connectInfo.sshConfig()) +
+                (Fn.isNull(connectInfo.sshConfig()) ? "" : Fn.toJson(connectInfo.sshConfig())) +
                 "')";
     }
 
     default ConnectInfo mapToConnectInfo(Map<String, Object> map) {
-        ConnectInfo.SSLConfig sslConfig = (Fn.isNull(map.get("ssl_config")) || Fn.isEmpty((String) map.get("ssl_config"))) ? null : Fn.fromJson((String) map.get("ssl_config"), ConnectInfo.SSLConfig.class);
-        ConnectInfo.SSHConfig sshConfig = (Fn.isNull(map.get("ssh_config")) || Fn.isEmpty((String) map.get("ssl_config"))) ? null : Fn.fromJson((String) map.get("ssh_config"), ConnectInfo.SSHConfig.class);
+        var sslConfigStr = (String) map.get("ssl_config");
+        var sshConfigStr = (String) map.get("ssh_config");
+        var sslConfig = Fn.isEmpty(sslConfigStr) ? null : Fn.fromJson(sslConfigStr, ConnectInfo.SSLConfig.class);
+        var sshConfig = Fn.isEmpty(sshConfigStr) ? null : Fn.fromJson(sshConfigStr, ConnectInfo.SSHConfig.class);
         return new ConnectInfo()
                 .setId((Integer) map.get("id"))
                 .setTitle((String) map.get("title"))

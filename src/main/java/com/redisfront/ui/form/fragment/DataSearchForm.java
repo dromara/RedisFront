@@ -199,6 +199,7 @@ public class DataSearchForm {
                 var cause = throwable.getCause();
                 if (cause instanceof RedisCommandExecutionException) {
                     scanBeforeProcess();
+                    addBtn.setEnabled(false);
                     AlertUtils.showInformationDialog("当前环境不支持该命令", cause);
                 } else {
                     AlertUtils.showErrorDialog("ERROR", cause);
