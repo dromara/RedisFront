@@ -40,7 +40,7 @@ public class AddOrUpdateItemDialog extends JDialog {
 
     public static void showAddOrUpdateItemDialog(String title, String key, String fieldOrScore, String value, ConnectInfo connectInfo, Enum.KeyTypeEnum typeEnum, ActionHandler addSuccessHandler) {
         var addOrUpdateItemDialog = new AddOrUpdateItemDialog(title, key, fieldOrScore, value, connectInfo, typeEnum, addSuccessHandler);
-        addOrUpdateItemDialog.setResizable(true);
+        addOrUpdateItemDialog.setResizable(false);
         addOrUpdateItemDialog.setLocationRelativeTo(RedisFrontApplication.frame);
         addOrUpdateItemDialog.pack();
         addOrUpdateItemDialog.setVisible(true);
@@ -52,7 +52,7 @@ public class AddOrUpdateItemDialog extends JDialog {
         setContentPane(contentPane);
         setTitle(title);
         setModal(true);
-        setMaximumSize(new Dimension(500, 400));
+        setMinimumSize(new Dimension(400, 300));
         this.addSuccessHandler = addSuccessHandler;
         this.typeEnum = typeEnum;
         this.key = key;

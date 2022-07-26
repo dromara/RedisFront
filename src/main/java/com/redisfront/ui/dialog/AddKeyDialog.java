@@ -6,14 +6,14 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.RedisFrontApplication;
 import com.redisfront.commons.constant.Const;
-import com.redisfront.commons.handler.ProcessHandler;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.commons.func.Fn;
+import com.redisfront.commons.handler.ProcessHandler;
+import com.redisfront.commons.ui.AbstractDialog;
 import com.redisfront.commons.util.PrefUtils;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.*;
-import com.redisfront.commons.ui.AbstractDialog;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -37,23 +37,24 @@ public class AddKeyDialog extends AbstractDialog<String> {
     private JLabel streamLabel;
     private JSpinner ttlSpinner;
 
-    private String parentKey;
+    private final String parentKey;
 
     private final ConnectInfo connectInfo;
 
     public static void showAddDialog(ConnectInfo connectInfo, String parent, ProcessHandler<String> addSuccessProcessHandler) {
-        var openConnectDialog = new AddKeyDialog(connectInfo, parent, addSuccessProcessHandler);
-        openConnectDialog.setSize(new Dimension(500, 280));
-        openConnectDialog.setLocationRelativeTo(RedisFrontApplication.frame);
-        openConnectDialog.pack();
-        openConnectDialog.setVisible(true);
+        var addKeyDialog = new AddKeyDialog(connectInfo, parent, addSuccessProcessHandler);
+        addKeyDialog.setResizable(false);
+        addKeyDialog.setLocationRelativeTo(RedisFrontApplication.frame);
+        addKeyDialog.pack();
+        addKeyDialog.setVisible(true);
     }
 
     public AddKeyDialog(ConnectInfo connectInfo, String parent, ProcessHandler<String> addSuccessProcessHandler) {
         super(RedisFrontApplication.frame);
+        this.setModal(true);
+        this.setResizable(true);
         this.setMinimumSize(new Dimension(500, 400));
-        setContentPane(contentPane);
-        setModal(true);
+        this.setContentPane(contentPane);
         getRootPane().setDefaultButton(buttonOK);
         setTitle("添加");
         this.connectInfo = connectInfo;
