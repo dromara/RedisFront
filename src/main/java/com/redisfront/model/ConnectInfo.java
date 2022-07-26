@@ -10,7 +10,7 @@ import java.io.Serializable;
  *
  * @author Jin
  */
-public class ConnectInfo implements Serializable {
+public class ConnectInfo implements Serializable,Cloneable {
 
     private int id;
     private String title;
@@ -35,6 +35,15 @@ public class ConnectInfo implements Serializable {
 
     public ConnectInfo(String title, String host, Integer port, String username, String password, Integer database, Boolean ssl, Enum.Connect connectMode, SSLConfig sslConfig) {
         this(title, host, port, username, password, database, ssl, connectMode, sslConfig, null);
+    }
+
+    @Override
+    public ConnectInfo clone() {
+        try {
+            return (ConnectInfo) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 
     public static class SSHConfig implements Serializable {

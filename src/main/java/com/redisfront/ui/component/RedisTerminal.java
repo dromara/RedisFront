@@ -3,11 +3,11 @@ package com.redisfront.ui.component;
 import cn.hutool.core.date.DateUtil;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.exception.RedisFrontException;
+import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.ui.AbstractTerminal;
 import com.redisfront.commons.util.LettuceUtils;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
-import com.redisfront.commons.func.Fn;
 import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.output.ArrayOutput;
 import io.lettuce.core.protocol.CommandArgs;
@@ -29,8 +29,8 @@ public class RedisTerminal extends AbstractTerminal {
         return new RedisTerminal(connectInfo);
     }
 
-    public RedisTerminal(ConnectInfo connectInfo) {
-        this.connectInfo = connectInfo;
+    public RedisTerminal(final ConnectInfo connectInfo) {
+        this.connectInfo = connectInfo.clone();
         terminal.setEnabled(false);
     }
 
@@ -43,7 +43,7 @@ public class RedisTerminal extends AbstractTerminal {
                     super.printConnectedSuccessMessage();
                 }
             } else {
-                println(DateUtil.formatDateTime(new Date()) + " - ".concat("redis PING faild!"));
+                println(DateUtil.formatDateTime(new Date()) + " - ".concat("redis PING failed!"));
             }
         } catch (Exception e) {
             log.error(e.getMessage());

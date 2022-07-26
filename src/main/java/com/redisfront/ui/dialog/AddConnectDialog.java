@@ -5,17 +5,17 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.RedisFrontApplication;
-import com.redisfront.commons.handler.ProcessHandler;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
 import com.redisfront.commons.exception.RedisFrontException;
+import com.redisfront.commons.func.Fn;
+import com.redisfront.commons.handler.ProcessHandler;
+import com.redisfront.commons.ui.AbstractDialog;
+import com.redisfront.commons.util.AlertUtils;
+import com.redisfront.commons.util.FutureUtils;
+import com.redisfront.commons.util.LoadingUtils;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
-import com.redisfront.commons.ui.AbstractDialog;
-import com.redisfront.commons.util.FutureUtils;
-import com.redisfront.commons.func.Fn;
-import com.redisfront.commons.util.LoadingUtils;
-import com.redisfront.commons.util.AlertUtils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -235,7 +235,11 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                     AlertUtils.showInformationDialog("连接失败！");
                 }
             } catch (Exception exception) {
-                AlertUtils.showErrorDialog("连接失败！", exception);
+                if (exception instanceof RedisFrontException) {
+                    AlertUtils.showErrorDialog("连接失败！", exception);
+                } else {
+                    AlertUtils.showErrorDialog("连接失败！", exception.getCause());
+                }
             }
         });
     }

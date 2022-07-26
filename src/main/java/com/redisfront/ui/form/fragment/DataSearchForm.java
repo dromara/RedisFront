@@ -106,7 +106,11 @@ public class DataSearchForm {
                 var all = allField.getText();
                 var scanInfo = all.split(SEPARATOR_FLAG);
                 if (scanInfo.length > 1) {
-                    scanKeysContext.setLimit(Long.valueOf(scanInfo[1]));
+                    if (Fn.equal(scanInfo[1], "null")) {
+                        throw new RedisFrontException("当前数据库为空！", true);
+                    } else {
+                        scanKeysContext.setLimit(Long.valueOf(scanInfo[1]));
+                    }
                 } else {
                     scanKeysContext.setLimit(Long.valueOf(all));
                 }
