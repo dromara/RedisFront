@@ -1,15 +1,12 @@
 package com.redisfront.ui.dialog;
 
-import com.formdev.flatlaf.FlatClientProperties;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.RedisFrontApplication;
-import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.handler.ActionHandler;
-import com.redisfront.commons.util.PrefUtils;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisHashService;
 import com.redisfront.service.RedisListService;
@@ -17,7 +14,6 @@ import com.redisfront.service.RedisSetService;
 import com.redisfront.service.RedisZSetService;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;

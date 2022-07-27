@@ -38,6 +38,7 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * DataViewForm
@@ -628,13 +629,19 @@ public class DataViewForm {
         }
 
         scanListContextMap.put(key, scanContext);
+        ListTableModel listTableModel;
+        if (Fn.isNotEmpty(tableSearchField.getText())) {
+            var findList = scanContext.getKeyList().stream().filter(s -> s.contains(tableSearchField.getText())).collect(Collectors.toList());
+            listTableModel = new ListTableModel(findList);
+        } else {
+            listTableModel = new ListTableModel(scanContext.getKeyList());
+        }
 
-        ListTableModel listTableModel = new ListTableModel(scanContext.getKeyList());
-
+        final var finalListTableModel = listTableModel;
         SwingUtilities.invokeLater(() -> {
             LoadAfterUpdate(len, DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)), String.valueOf(scanContext.getKeyList().size()), scanContext.getScanCursor().isFinished());
             tableViewPanel.setVisible(true);
-            dataTable.setModel(listTableModel);
+            dataTable.setModel(finalListTableModel);
             Fn.removeAllComponent(dataPanel);
             dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
         });
@@ -767,6 +774,7 @@ public class DataViewForm {
         jComboBox.setBackground(UIManager.getColor("FlatEditorPane.background"));
         jToolBar.add(jComboBox);
         valueUpdateSaveBtn = new JButton();
+        valueUpdateSaveBtn.setText("立即保存");
         valueUpdateSaveBtn.setEnabled(false);
         valueUpdateSaveBtn.setIcon(UI.SAVE_ICON);
         valueUpdateSaveBtn.addActionListener((e) -> {
