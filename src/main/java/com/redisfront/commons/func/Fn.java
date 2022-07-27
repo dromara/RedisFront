@@ -7,16 +7,13 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import com.formdev.flatlaf.FlatLaf;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -144,24 +141,11 @@ public class Fn {
     }
 
     public static String toJson(Object obj) {
-        return new Gson().toJson(obj);
+        return JSONUtil.toJsonStr(obj);
     }
 
     public static <T> T fromJson(String json, Class<T> type) {
-        return new Gson().fromJson(json, type);
-    }
-
-    public static <T> List<T> fromJsonList(String json, Class<T> clazz) {
-        List<T> list = new ArrayList<>();
-        try {
-            JsonArray array = JsonParser.parseString(json).getAsJsonArray();
-            for (final JsonElement elem : array) {
-                list.add(new Gson().fromJson(elem, clazz));
-            }
-        } catch (Exception e) {
-            return null;
-        }
-        return list;
+        return JSONUtil.toBean(json, type);
     }
 
     /**

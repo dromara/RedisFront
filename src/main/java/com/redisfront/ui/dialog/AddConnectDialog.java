@@ -298,7 +298,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
             }
             //sshConfig
             var sshConfig = new ConnectInfo.SSHConfig(
-                    sshPrivateKeyFile.getText(),
+                    Fn.isNotEmpty(sshPrivateKeyFile.getText()) ? sshPrivateKeyFile.getText() : null,
                     sshUserField.getText(),
                     sshHostField.getText(),
                     (Integer) sshPortField.getValue(),

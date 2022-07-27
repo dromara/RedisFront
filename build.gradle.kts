@@ -19,7 +19,6 @@ val hutoolVersion = "5.8.3"
 val fifesoftVersion = "3.2.0"
 val derbyVersion = "10.15.2.0"
 val lettuceVersion = "6.1.8.RELEASE"
-val gsonVersion = "2.9.0"
 val logbackVersion = "1.2.11"
 
 repositories {
@@ -48,12 +47,13 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
 
     implementation("io.lettuce:lettuce-core:${lettuceVersion}")
-    implementation("com.google.code.gson:gson:${gsonVersion}")
+    implementation("io.netty:netty-common:4.1.77.Final")
     implementation("com.formdev:flatlaf:${flatlafVersion}")
     implementation("com.formdev:flatlaf-swingx:${flatlafVersion}")
     implementation("com.formdev:flatlaf-intellij-themes:${flatlafVersion}")
     implementation("com.formdev:flatlaf-extras:${flatlafVersion}")
     implementation("cn.hutool:hutool-extra:${hutoolVersion}")
+    implementation("cn.hutool:hutool-json:${hutoolVersion}")
     implementation("org.apache.derby:derby:${derbyVersion}")
     implementation("com.fifesoft:rsyntaxtextarea:${fifesoftVersion}")
     implementation("com.fifesoft:rstaui:${fifesoftVersion}")

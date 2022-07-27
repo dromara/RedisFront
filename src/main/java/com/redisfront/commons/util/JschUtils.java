@@ -61,7 +61,7 @@ public class JschUtils {
                 for (RedisClusterNode partition : clusterClient.getPartitions()) {
                     var remotePort = partition.getUri().getPort();
                     partition.getUri().setPort(remotePort);
-                    JschUtil.bindPort(sessionThreadLocal.get(), remoteAddress, remotePort, partition.getUri().getPort());
+                    JschUtil.bindPort(session, remoteAddress, remotePort, partition.getUri().getPort());
                 }
                 sessionThreadLocal.set(session);
             } catch (Exception e) {
