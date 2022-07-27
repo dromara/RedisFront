@@ -61,50 +61,44 @@ public class ConnectInfo implements Serializable, Cloneable {
             this.password = password;
         }
 
-        public String host() {
-            return host;
-        }
-
-        public SSHConfig setHost(String host) {
-            this.host = host;
-            return this;
-        }
-
-        public String privateKeyPath() {
+        public String getPrivateKeyPath() {
             return privateKeyPath;
         }
 
-        public SSHConfig setPrivateKeyPath(String privateKeyPath) {
+        public void setPrivateKeyPath(String privateKeyPath) {
             this.privateKeyPath = privateKeyPath;
-            return this;
         }
 
-        public String user() {
+        public String getUser() {
             return user;
         }
 
-        public SSHConfig setUser(String user) {
+        public void setUser(String user) {
             this.user = user;
-            return this;
         }
 
-        public Integer port() {
+        public String getHost() {
+            return host;
+        }
+
+        public void setHost(String host) {
+            this.host = host;
+        }
+
+        public Integer getPort() {
             return port;
         }
 
-        public SSHConfig setPort(Integer port) {
+        public void setPort(Integer port) {
             this.port = port;
-            return this;
         }
 
-
-        public String password() {
+        public String getPassword() {
             return password;
         }
 
-        public SSHConfig setPassword(String password) {
+        public void setPassword(String password) {
             this.password = password;
-            return this;
         }
 
         @Override
@@ -143,40 +137,36 @@ public class ConnectInfo implements Serializable, Cloneable {
             this.password = password;
         }
 
-        public String privateKeyFilePath() {
+        public String getPrivateKeyFilePath() {
             return privateKeyFilePath;
         }
 
-        public SSLConfig setPrivateKeyFilePath(String privateKeyFilePath) {
+        public void setPrivateKeyFilePath(String privateKeyFilePath) {
             this.privateKeyFilePath = privateKeyFilePath;
-            return this;
         }
 
-        public String publicKeyFilePath() {
+        public String getPublicKeyFilePath() {
             return publicKeyFilePath;
         }
 
-        public SSLConfig setPublicKeyFilePath(String publicKeyFilePath) {
+        public void setPublicKeyFilePath(String publicKeyFilePath) {
             this.publicKeyFilePath = publicKeyFilePath;
-            return this;
         }
 
-        public String grantFilePath() {
+        public String getGrantFilePath() {
             return grantFilePath;
         }
 
-        public SSLConfig setGrantFilePath(String grantFilePath) {
+        public void setGrantFilePath(String grantFilePath) {
             this.grantFilePath = grantFilePath;
-            return this;
         }
 
-        public String password() {
+        public String getPassword() {
             return password;
         }
 
-        public SSLConfig setPassword(String password) {
+        public void setPassword(String password) {
             this.password = password;
-            return this;
         }
 
         @Override

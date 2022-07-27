@@ -141,7 +141,8 @@ public class Fn {
     }
 
     public static String toJson(Object obj) {
-        return JSONUtil.toJsonStr(obj);
+        var s = JSONUtil.parse(obj).toStringPretty();
+        return JSONUtil.parse(obj).toStringPretty();
     }
 
     public static <T> T fromJson(String json, Class<T> type) {

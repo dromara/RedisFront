@@ -298,7 +298,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
             }
             //sshConfig
             var sshConfig = new ConnectInfo.SSHConfig(
-                    Fn.isNotEmpty(sshPrivateKeyFile.getText()) ? sshPrivateKeyFile.getText() : null,
+                    sshPrivateKeyFile.getText(),
                     sshUserField.getText(),
                     sshHostField.getText(),
                     (Integer) sshPortField.getValue(),
@@ -364,18 +364,18 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         this.enableSSHBtn.setSelected(Enum.Connect.SSH.equals(connectInfo.connectMode()));
         if (enableSSLBtn.isSelected()) {
             sslPanel.setVisible(true);
-            sslPasswordField.setText(connectInfo.sslConfig().password());
-            privateKeyField.setText(connectInfo.sslConfig().privateKeyFilePath());
-            publicKeyField.setText(connectInfo.sslConfig().publicKeyFilePath());
-            grantField.setText(connectInfo.sslConfig().grantFilePath());
+            sslPasswordField.setText(connectInfo.sslConfig().getPassword());
+            privateKeyField.setText(connectInfo.sslConfig().getPrivateKeyFilePath());
+            publicKeyField.setText(connectInfo.sslConfig().getPublicKeyFilePath());
+            grantField.setText(connectInfo.sslConfig().getGrantFilePath());
         }
         if (enableSSHBtn.isSelected()) {
             sshPanel.setVisible(true);
-            sshUserField.setText(connectInfo.sshConfig().user());
-            sshHostField.setText(connectInfo.sshConfig().host());
-            sshPasswordField.setText(connectInfo.sshConfig().password());
-            sshPortField.setValue(connectInfo.sshConfig().port());
-            sshPrivateKeyFile.setText(connectInfo.sshConfig().privateKeyPath());
+            sshUserField.setText(connectInfo.sshConfig().getUser());
+            sshHostField.setText(connectInfo.sshConfig().getHost());
+            sshPasswordField.setText(connectInfo.sshConfig().getPassword());
+            sshPortField.setValue(connectInfo.sshConfig().getPort());
+            sshPrivateKeyFile.setText(connectInfo.sshConfig().getPrivateKeyPath());
         }
     }
 

@@ -20,19 +20,19 @@ public class JschUtils {
     static ThreadLocal<Session> sessionThreadLocal = new ThreadLocal<>();
 
     public static Session createSession(ConnectInfo connectInfo) {
-        if (Fn.isNotEmpty(connectInfo.sshConfig().privateKeyPath()) && Fn.isNotEmpty(connectInfo.sshConfig().password())) {
-            return JschUtil.createSession(connectInfo.sshConfig().host(), connectInfo.sshConfig().port(), connectInfo.sshConfig().user(), connectInfo.sshConfig().privateKeyPath(), connectInfo.sshConfig().password().getBytes());
-        } else if (Fn.isNotEmpty(connectInfo.sshConfig().privateKeyPath())) {
-            return JschUtil.createSession(connectInfo.sshConfig().host(), connectInfo.sshConfig().port(), connectInfo.sshConfig().user(), connectInfo.sshConfig().privateKeyPath(), null);
+        if (Fn.isNotEmpty(connectInfo.sshConfig().getPrivateKeyPath()) && Fn.isNotEmpty(connectInfo.sshConfig().getPassword())) {
+            return JschUtil.createSession(connectInfo.sshConfig().getHost(), connectInfo.sshConfig().getPort(), connectInfo.sshConfig().getUser(), connectInfo.sshConfig().getPrivateKeyPath(), connectInfo.sshConfig().getPassword().getBytes());
+        } else if (Fn.isNotEmpty(connectInfo.sshConfig().getPrivateKeyPath())) {
+            return JschUtil.createSession(connectInfo.sshConfig().getHost(), connectInfo.sshConfig().getPort(), connectInfo.sshConfig().getUser(), connectInfo.sshConfig().getPrivateKeyPath(), null);
         } else {
-            return JschUtil.createSession(connectInfo.sshConfig().host(), connectInfo.sshConfig().port(), connectInfo.sshConfig().user(), connectInfo.sshConfig().password());
+            return JschUtil.createSession(connectInfo.sshConfig().getHost(), connectInfo.sshConfig().getPort(), connectInfo.sshConfig().getUser(), connectInfo.sshConfig().getPassword());
         }
     }
 
     private static String getRemoteAddress(ConnectInfo connectInfo) {
         var remoteAddress = connectInfo.host();
         if (Fn.equal(remoteAddress, "127.0.0.1") || Fn.equal(remoteAddress.toLowerCase(), "localhost")) {
-            remoteAddress = connectInfo.sshConfig().host();
+            remoteAddress = connectInfo.sshConfig().getHost();
         }
         return remoteAddress;
     }
