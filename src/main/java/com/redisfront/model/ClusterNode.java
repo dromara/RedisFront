@@ -1,7 +1,6 @@
 package com.redisfront.model;
 
 public class ClusterNode {
-
     private String id;
     private String ipAndPort;
     private String flags;

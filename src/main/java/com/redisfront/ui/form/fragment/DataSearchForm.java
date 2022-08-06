@@ -155,17 +155,18 @@ public class DataSearchForm {
                 var scanInfo = all.split(SEPARATOR_FLAG);
                 if (scanInfo.length > 1) {
                     var current = Long.valueOf(scanInfo[0]);
+                    var allSize = Long.valueOf(scanInfo[1]);
                     //如果全部扫描完成！
-                    if (finalKeyScanCursor.isFinished()) {
-                        allField.setText(scanInfo[1] + SEPARATOR_FLAG + scanInfo[1]);
-                        allField.setToolTipText("已扫描：".concat(scanInfo[1]) + ",全部：".concat(scanInfo[1]));
+                    if (current >= allSize) {
+                        loadMoreBtn.setText("扫描完成");
+                        loadMoreBtn.setEnabled(false);
                     } else {
-                        allField.setText((current + scanKeysContext.getLimit()) + SEPARATOR_FLAG + scanInfo[1]);
-                        allField.setToolTipText("已扫描：".concat(String.valueOf(current)) + ",全部：".concat(scanInfo[1]));
+                        allField.setText((current + scanKeysContext.getLimit()) + SEPARATOR_FLAG + allSize);
+                        allField.setToolTipText("游标：" + current + ", 全部Key：" + allSize);
                     }
 
                 } else {
-                    allField.setToolTipText("已扫描：".concat(String.valueOf(scanKeysContext.getLimit())) + ",全部：".concat(all));
+                    allField.setToolTipText("游标：".concat(String.valueOf(scanKeysContext.getLimit())) + ", 全部Key：".concat(all));
                     allField.setText(scanKeysContext.getLimit() + SEPARATOR_FLAG + all);
                 }
                 if (loadMoreBtn.isEnabled()) {
@@ -235,7 +236,10 @@ public class DataSearchForm {
             refreshBtn.setEnabled(true);
             searchBtn.setEnabled(true);
             keyTree.setEnabled(true);
-            loadMoreBtn.requestFocus();
+            if (Fn.notEqual(loadMoreBtn.getText(), "扫描完成")) {
+                loadMoreBtn.requestFocus();
+                loadMoreBtn.setEnabled(true);
+            }
             databaseComboBox.setEnabled(Fn.notEqual(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER));
         });
     }
@@ -430,7 +434,7 @@ public class DataSearchForm {
 
         allField = new JTextField();
         var allLabel = new JLabel();
-        allLabel.setText("分页");
+        allLabel.setText("游标");
         allLabel.setOpaque(true);
         allLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
         allLabel.setSize(5, -1);

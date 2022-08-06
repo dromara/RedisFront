@@ -36,6 +36,7 @@ public class Fn {
         for (Component c : component.getComponents()) {
             component.remove(c);
         }
+        Fn.revalidateAndRepaintAllFramesAndDialogs();
     }
 
 
