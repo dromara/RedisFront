@@ -1,5 +1,6 @@
 package com.redisfront.commons.util;
 
+import com.redisfront.commons.handler.ActionHandler;
 import com.redisfront.commons.handler.ProcessHandler;
 
 import java.util.Objects;
@@ -35,6 +36,13 @@ public class FutureUtils {
         return CompletableFuture.runAsync(runnable);
     }
 
+    public static <T> CompletableFuture<Void> runAsync(Runnable runnable, Runnable beforeHandler, Runnable afterHandler) {
+        return CompletableFuture
+                .runAsync(beforeHandler, executorService)
+                .thenRun(runnable)
+                .thenRunAsync(afterHandler, executorService);
+    }
+
     public static CompletableFuture<Void> runAsync(Runnable runnable, ProcessHandler<Throwable> throwableProcessHandler) {
         return CompletableFuture.runAsync(runnable, executorService).exceptionallyAsync(throwable -> {
             throwableProcessHandler.processHandler(throwable);
@@ -45,6 +53,7 @@ public class FutureUtils {
     public static <T> CompletableFuture<Void> supplyAsync(Supplier<T> supplier, Consumer<T> consumer) {
         return CompletableFuture.supplyAsync(supplier, executorService).thenAccept(t -> {
             if (Objects.nonNull(t)) {
+
                 consumer.accept(t);
             }
         });

@@ -88,7 +88,7 @@ public class MainWindowForm {
                             throw e;
                         }
                     }
-                    LoadingUtils.showDialog();
+                    LoadingUtils.showDialog(String.format("正在连接 - %s:%s", connectInfo.host(), connectInfo.port()));
                 }
                 return prototype;
             }, prototype -> {
@@ -104,11 +104,12 @@ public class MainWindowForm {
             FutureUtils.runAsync(() -> {
                 var mainTabbedPanel = MainTabbedPanel.newInstance(connectInfo);
                 SwingUtilities.invokeLater(() -> {
+                    LoadingUtils.closeDialog();
                     this.tabPanel.addTab(connectInfo.title(), UI.MAIN_TAB_DATABASE_ICON, mainTabbedPanel);
                     this.tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
                     this.contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
                     this.toolBar.setVisible(true);
-                    LoadingUtils.closeDialog();
+                    LoadingUtils.showDialog("loading key...");
                 });
             }, throwable -> {
                 LoadingUtils.closeDialog();

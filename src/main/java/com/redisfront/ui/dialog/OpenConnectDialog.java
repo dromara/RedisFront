@@ -154,7 +154,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         var id = connectTable.getValueAt(row, 0);
         var connectInfo = ConnectService.service.getConnect(id);
         FutureUtils.runAsync(() -> {
-            LoadingUtils.showDialog();
+            LoadingUtils.showDialog(String.format("正在连接 - %s:%s", connectInfo.host(), connectInfo.port()));
             var redisMode = RedisBasicService.service.getRedisModeEnum(connectInfo);
             openProcessHandler.processHandler(connectInfo.setRedisModeEnum(redisMode));
         });

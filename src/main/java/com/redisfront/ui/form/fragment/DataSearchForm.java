@@ -1,5 +1,6 @@
 package com.redisfront.ui.form.fragment;
 
+import cn.hutool.core.util.NumberUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.formdev.flatlaf.ui.FlatLineBorder;
@@ -59,6 +60,7 @@ public class DataSearchForm {
     private JTextField currentField;
     private JTextField allField;
     private JPanel loadMorePanel;
+    private JButton deleteAllBtn;
     private volatile Map<Integer, ScanContext<String>> scanKeysContextMap;
     private ProcessHandler<TreeNodeInfo> nodeClickProcessHandler;
     private final ConnectInfo connectInfo;
@@ -86,7 +88,7 @@ public class DataSearchForm {
 
     public synchronized void loadTreeModelData(String key) {
         try {
-            LoadingUtils.showDialog();
+            LoadingUtils.showDialog("loading key...");
             scanBeforeProcess();
             var scanKeysContext = scanKeysContextMap.get(connectInfo.database());
 
@@ -154,12 +156,13 @@ public class DataSearchForm {
                 var all = allField.getText();
                 var scanInfo = all.split(SEPARATOR_FLAG);
                 if (scanInfo.length > 1) {
-                    var current = Long.valueOf(scanInfo[0]);
-                    var allSize = Long.valueOf(scanInfo[1]);
+                    var current = Long.parseLong(scanInfo[0]);
+                    var allSize = NumberUtil.isNumber(scanInfo[1]) ? Long.parseLong(scanInfo[1]) : 0;
                     //如果全部扫描完成！
                     if (current >= allSize) {
                         loadMoreBtn.setText("扫描完成");
                         loadMoreBtn.setEnabled(false);
+                        return;
                     } else {
                         allField.setText((current + scanKeysContext.getLimit()) + SEPARATOR_FLAG + allSize);
                         allField.setToolTipText("游标：" + current + ", 全部Key：" + allSize);
@@ -255,6 +258,16 @@ public class DataSearchForm {
         }
     }
 
+    public void deleteActionPerformed(TreeNodeInfo treeNodeInfo) {
+        if (treeNodeInfo.getChildCount() > 0) {
+            for (int i = 0; i < treeNodeInfo.getChildCount(); i++) {
+                var subNode = (TreeNodeInfo) treeNodeInfo.getChildAt(i);
+                deleteActionPerformed(subNode);
+            }
+        } else {
+            RedisBasicService.service.del(connectInfo, treeNodeInfo.key());
+        }
+    }
 
     private void createUIComponents() {
         contentPanel = new JPanel();
@@ -274,16 +287,36 @@ public class DataSearchForm {
         treePanel.setBorder(new EmptyBorder(3, 2, 2, 2));
 
         addBtn = new JButton();
+        addBtn.setToolTipText("新增一个key");
         addBtn.setIcon(UI.PLUS_ICON);
         addBtn.addActionListener(e -> AddKeyDialog.showAddDialog(connectInfo, null, (key) -> AlertUtils.showInformationDialog("添加成功！")));
 
         refreshBtn = new JButton();
+        refreshBtn.setToolTipText("重新加载");
         refreshBtn.addActionListener(e -> {
             SwingUtilities.invokeLater(() -> searchTextField.setText(""));
             scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
             scanKeysAndInitScanInfo();
         });
         refreshBtn.setIcon(UI.REFRESH_ICON);
+
+        deleteAllBtn = new JButton();
+        deleteAllBtn.setToolTipText("清空所有数据");
+        deleteAllBtn.addActionListener(e -> FutureUtils.runAsync(
+                () -> {
+                    String operation = JOptionPane.showInputDialog("请选择删除模式：\n 1.flushdb \n 2.flushall");
+                    if (Fn.equal(operation, "flushdb")) {
+                        RedisBasicService.service.flushdb(connectInfo);
+                    } else if (Fn.equal(operation, "flushall")) {
+                        RedisBasicService.service.flushall(connectInfo);
+                    }
+                },
+                this::scanBeforeProcess,
+                this::scanAfterProcess
+        ));
+        deleteAllBtn.setIcon(UI.DELETE_ICON);
+
+
         databaseComboBox = new JComboBox<>();
 
         loadMoreBtn = new JButton("继续扫描");
@@ -402,14 +435,20 @@ public class DataSearchForm {
                 });
                 add(addMenuItem);
                 var delMenuItem = new JMenuItem("删除");
-                delMenuItem.addActionListener((e) -> deleteActionPerformed());
+                delMenuItem.addActionListener((e) -> {
+                    DefaultTreeModel treeModel = (DefaultTreeModel) keyTree.getModel();
+                    var selectNode = keyTree.getLastSelectedPathComponent();
+                    if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
+                        FutureUtils.runAsync(() -> deleteActionPerformed(treeNodeInfo),
+                                () -> SwingUtilities.invokeLater(() -> {
+                                    var title = treeNodeInfo.title();
+                                    treeNodeInfo.setTitle(title.concat("  删除中... "));
+                                    keyTree.updateUI();
+                                }),
+                                () -> SwingUtilities.invokeLater(() -> treeModel.removeNodeFromParent(treeNodeInfo)));
+                    }
+                });
                 add(delMenuItem);
-                var refMenuItem = new JMenuItem("刷新");
-                refMenuItem.addActionListener(e -> AlertUtils.showInformationDialog("待实现"));
-                add(refMenuItem);
-                var memMenuItem = new JMenuItem("内存分析");
-                memMenuItem.addActionListener(e -> AlertUtils.showInformationDialog("待实现"));
-                add(memMenuItem);
             }
         };
 
@@ -480,12 +519,17 @@ public class DataSearchForm {
         addBtn.setHorizontalTextPosition(11);
         addBtn.setText("新增");
         panel2.add(addBtn, BorderLayout.CENTER);
-        refreshBtn.setText("");
-        panel2.add(refreshBtn, BorderLayout.EAST);
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new BorderLayout(0, 0));
-        panel1.add(panel3, BorderLayout.SOUTH);
-        panel3.add(searchTextField, BorderLayout.CENTER);
+        panel2.add(panel3, BorderLayout.EAST);
+        refreshBtn.setText("");
+        panel3.add(refreshBtn, BorderLayout.CENTER);
+        deleteAllBtn.setText("");
+        panel3.add(deleteAllBtn, BorderLayout.EAST);
+        final JPanel panel4 = new JPanel();
+        panel4.setLayout(new BorderLayout(0, 0));
+        panel1.add(panel4, BorderLayout.SOUTH);
+        panel4.add(searchTextField, BorderLayout.CENTER);
         treePanel.setLayout(new BorderLayout(0, 0));
         borderPanel.add(treePanel, BorderLayout.CENTER);
         treePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(0, 5, 5, 10), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));

@@ -41,12 +41,25 @@
                       <text value="新增"/>
                     </properties>
                   </component>
-                  <component id="225bb" class="javax.swing.JButton" binding="refreshBtn" custom-create="true">
+                  <grid id="7e0b4" layout-manager="BorderLayout" hgap="0" vgap="0">
                     <constraints border-constraint="East"/>
-                    <properties>
-                      <text value=""/>
-                    </properties>
-                  </component>
+                    <properties/>
+                    <border type="none"/>
+                    <children>
+                      <component id="93472" class="javax.swing.JButton" binding="refreshBtn" custom-create="true">
+                        <constraints border-constraint="Center"/>
+                        <properties>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="e51fb" class="javax.swing.JButton" binding="deleteAllBtn" custom-create="true">
+                        <constraints border-constraint="East"/>
+                        <properties>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
                 </children>
               </grid>
               <grid id="20d54" layout-manager="BorderLayout" hgap="0" vgap="0">

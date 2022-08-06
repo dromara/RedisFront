@@ -14,26 +14,26 @@ public class LoadingDialog extends JDialog {
     private final ProgressBarWorker progressBarWorker;
     private JProgressBar progressBar;
 
-    public LoadingDialog() {
+    public LoadingDialog(String message) {
         setResizable(false);
         setModal(false);
         setAlwaysOnTop(true);
         setUndecorated(true);
-        initComponentUI();
+        initComponentUI(message);
         progressBarWorker = new ProgressBarWorker(progressBar, 20);
         timer = new Timer((15 * 1000), e -> {
             dispose();
-            AlertUtils.showInformationDialog("数据加载超时，请重试！");
+            AlertUtils.showInformationDialog("加载超时，请重试！");
         });
     }
 
-    private void initComponentUI() {
+    private void initComponentUI(String message) {
         var contentPane = new JPanel();
         contentPane.setBorder(new FlatLineBorder(new Insets(1, 1, 1, 1), UIManager.getColor("Component.borderColor")));
         contentPane.setLayout(new GridLayoutManager(2, 1, new Insets(10, 10, 10, 10), -1, -1));
         setContentPane(contentPane);
         JLabel loadInfoLabel = new JLabel();
-        loadInfoLabel.setText("数据加载中，请稍后....");
+        loadInfoLabel.setText(Fn.isEmpty(message) ? "加载中，请稍后...." : message);
         contentPane.add(loadInfoLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         progressBar = new JProgressBar();
         contentPane.add(progressBar, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));

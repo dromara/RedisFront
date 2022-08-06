@@ -16,17 +16,27 @@ public class LoadingUtils {
 
     private static LoadingDialog loadingDialog;
 
-    public synchronized static void showDialog() {
+    public synchronized static void showDialog(String message) {
         SwingUtilities.invokeLater(() -> {
             if (loadingDialog == null) {
-                loadingDialog = new LoadingDialog();
+                loadingDialog = new LoadingDialog(message);
             }
             loadingDialog.setMinimumSize(new Dimension(500, -1));
             loadingDialog.setLocationRelativeTo(RedisFrontApplication.frame);
             loadingDialog.pack();
             loadingDialog.setVisible(true);
+        });
+    }
 
-
+    public synchronized static void showDialog() {
+        SwingUtilities.invokeLater(() -> {
+            if (loadingDialog == null) {
+                loadingDialog = new LoadingDialog(null);
+            }
+            loadingDialog.setMinimumSize(new Dimension(500, -1));
+            loadingDialog.setLocationRelativeTo(RedisFrontApplication.frame);
+            loadingDialog.pack();
+            loadingDialog.setVisible(true);
         });
     }
 

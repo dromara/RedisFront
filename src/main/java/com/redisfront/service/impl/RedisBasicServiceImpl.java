@@ -37,6 +37,24 @@ public class RedisBasicServiceImpl implements RedisBasicService {
     }
 
     @Override
+    public String flushdb(ConnectInfo connectInfo) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectInfo, RedisAdvancedClusterCommands::flushdb);
+        } else {
+            return LettuceUtils.exec(connectInfo, RedisServerCommands::flushdb);
+        }
+    }
+
+    @Override
+    public String flushall(ConnectInfo connectInfo) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectInfo, RedisAdvancedClusterCommands::flushall);
+        } else {
+            return LettuceUtils.exec(connectInfo, RedisServerCommands::flushall);
+        }
+    }
+
+    @Override
     public KeyScanCursor<String> scan(ConnectInfo connectInfo, ScanArgs scanArgs) {
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.scan(scanArgs));

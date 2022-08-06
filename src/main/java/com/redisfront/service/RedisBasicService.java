@@ -23,6 +23,10 @@ public interface RedisBasicService {
 
     KeyScanCursor<String> scan(ConnectInfo connectInfo);
 
+   String flushdb(ConnectInfo connectInfo);
+
+    String flushall(ConnectInfo connectInfo);
+
     KeyScanCursor<String> scan(ConnectInfo connectInfo,ScanArgs scanArgs);
 
     KeyScanCursor<String> scan(ConnectInfo connectInfo,ScanCursor scanCursor, ScanArgs scanArgs);
