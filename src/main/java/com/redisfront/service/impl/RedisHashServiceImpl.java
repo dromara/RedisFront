@@ -74,6 +74,15 @@ public class RedisHashServiceImpl implements RedisHashService {
     }
 
     @Override
+    public MapScanCursor<String, String> hscan(ConnectInfo connectInfo, String key, ScanCursor scanCursor) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectInfo, commands -> commands.hscan(key, scanCursor));
+        } else {
+            return LettuceUtils.exec(connectInfo, commands -> commands.hscan(key, scanCursor));
+        }
+    }
+
+    @Override
     public Boolean hset(ConnectInfo connectInfo, String key, String field, String value) {
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.hset(key, field, value));

@@ -17,11 +17,9 @@ import com.redisfront.model.ConnectInfo;
 import com.redisfront.model.DbInfo;
 import com.redisfront.model.ScanContext;
 import com.redisfront.model.TreeNodeInfo;
-import com.redisfront.service.RedisBasicService;
+import com.redisfront.service.*;
 import com.redisfront.ui.dialog.AddKeyDialog;
-import io.lettuce.core.KeyScanCursor;
-import io.lettuce.core.RedisCommandExecutionException;
-import io.lettuce.core.ScanCursor;
+import io.lettuce.core.*;
 import org.jdesktop.swingx.JXTree;
 import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer;
 import org.slf4j.Logger;
@@ -32,12 +30,18 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.JTextComponent;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 /**
@@ -440,18 +444,151 @@ public class DataSearchForm {
                     var selectNode = keyTree.getLastSelectedPathComponent();
                     if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
                         FutureUtils.runAsync(() -> deleteActionPerformed(treeNodeInfo),
+                                //前置方法
                                 () -> SwingUtilities.invokeLater(() -> {
                                     var title = treeNodeInfo.title();
                                     treeNodeInfo.setTitle(title.concat("  删除中... "));
                                     keyTree.updateUI();
                                 }),
+                                //后置方法
                                 () -> SwingUtilities.invokeLater(() -> treeModel.removeNodeFromParent(treeNodeInfo)));
                     }
                 });
                 add(delMenuItem);
+
+                var executorService = Executors.newFixedThreadPool(5);
+
+                var memoryMenuItem = new JMenuItem("内存分析");
+                memoryMenuItem.addActionListener((e) -> {
+                    var selectionPath = keyTree.getLeadSelectionPath();
+                    var selectNode = selectionPath.getLastPathComponent();
+                    if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
+                        var title = treeNodeInfo.title();
+                        SwingUtilities.invokeLater(() -> {
+
+                        });
+                        FutureUtils.runAsync(() -> {
+                            SwingUtilities.invokeLater(() -> {
+                            treeNodeInfo.setTitle(title.concat("  内存分析中... "));
+                            expandPath(selectionPath);
+                            keyTree.updateUI();
+                            });
+
+                            memoryAnalysis(treeNodeInfo);
+
+                            SwingUtilities.invokeLater(() -> {
+                            treeNodeInfo.setTitle(title);
+                            keyTree.updateUI();
+                            });
+                        });
+                    }
+                });
+                add(memoryMenuItem);
             }
+
+            private void expandPath(TreePath treePath) {
+                keyTree.expandPath(treePath);
+                var treeNodeInfo = (TreeNodeInfo) treePath.getLastPathComponent();
+                if (treeNodeInfo.getChildCount() > 0) {
+                    for (int i = 0; i < treeNodeInfo.getChildCount(); i++) {
+                        var childPath = treePath.pathByAddingChild(treeNodeInfo.getChildAt(i));
+                        keyTree.expandPath(childPath);
+                        expandPath(childPath);
+                    }
+                }
+            }
+
+            private void memoryAnalysis(TreeNodeInfo treeNodeInfo) {
+                if (treeNodeInfo.getChildCount() > 0) {
+                    for (int i = 0; i < treeNodeInfo.getChildCount(); i++) {
+                        memoryAnalysis((TreeNodeInfo) treeNodeInfo.getChildAt(i));
+                    }
+                } else {
+                    FutureUtils.supplyAsync(
+                            () -> RedisBasicService.service.type(connectInfo, treeNodeInfo.key()),
+                            type -> {
+                                var typeEnum = Enum.KeyTypeEnum.valueOf(type.toUpperCase());
+
+                                if (typeEnum.equals(Enum.KeyTypeEnum.STRING)) {
+                                    var value = RedisStringService.service.get(connectInfo, treeNodeInfo.key());
+                                    SwingUtilities.invokeLater(() -> {
+                                        treeNodeInfo.setMemorySize(value.length());
+                                        keyTree.updateUI();
+                                    });
+                                }
+
+                                if (typeEnum.equals(Enum.KeyTypeEnum.ZSET)) {
+                                    var valueScanCursor = RedisZSetService.service.zscan(connectInfo, treeNodeInfo.key(), ScoredValueScanCursor.INITIAL);
+                                    var dataList = new ArrayList<>(valueScanCursor.getValues());
+                                    while (!valueScanCursor.isFinished()) {
+                                        valueScanCursor = RedisZSetService.service.zscan(connectInfo, treeNodeInfo.key(), valueScanCursor);
+                                        dataList.addAll(valueScanCursor.getValues());
+                                    }
+                                    if (Fn.isNotEmpty(dataList)) {
+                                        SwingUtilities.invokeLater(() -> {
+                                            treeNodeInfo.setMemorySize(dataList.stream().map(e -> e.getValue().getBytes().length).reduce(Integer::sum).orElse(0));
+                                            keyTree.updateUI();
+                                        });
+                                    }
+                                }
+
+                                if (typeEnum.equals(Enum.KeyTypeEnum.HASH)) {
+
+                                    var mapScanCursor = RedisHashService.service.hscan(connectInfo, treeNodeInfo.key(), MapScanCursor.INITIAL);
+                                    var dataList = new ArrayList<>(mapScanCursor.getMap().entrySet());
+                                    while (!mapScanCursor.isFinished()) {
+                                        mapScanCursor = RedisHashService.service.hscan(connectInfo, treeNodeInfo.key(), mapScanCursor);
+                                        dataList.addAll(new ArrayList<>(mapScanCursor.getMap().entrySet()));
+                                    }
+
+                                    if (Fn.isNotEmpty(dataList)) {
+                                        SwingUtilities.invokeLater(() -> {
+                                            treeNodeInfo.setMemorySize(dataList.stream().map(e -> e.getValue().getBytes().length).reduce(Integer::sum).orElse(0));
+                                            keyTree.updateUI();
+                                        });
+                                    }
+                                }
+
+                                if (typeEnum.equals(Enum.KeyTypeEnum.LIST)) {
+                                    var len = RedisListService.service.llen(connectInfo, treeNodeInfo.key());
+                                    var start = 0;
+                                    var dataList = new ArrayList<>();
+                                    while (start >= len) {
+                                        var stop = start + (1000 - 1);
+                                        var values = RedisListService.service.lrange(connectInfo, treeNodeInfo.key(), start, stop);
+                                        dataList.addAll(values);
+                                        start += 1000;
+                                    }
+                                    if (Fn.isNotEmpty(dataList)) {
+                                        SwingUtilities.invokeLater(() -> {
+                                            treeNodeInfo.setMemorySize(dataList.stream().map(e -> ((String) e).getBytes().length).reduce(Integer::sum).orElse(0));
+                                            keyTree.updateUI();
+                                        });
+                                    }
+
+                                }
+
+                                if (typeEnum.equals(Enum.KeyTypeEnum.SET)) {
+                                    var valueScanCursor = RedisSetService.service.sscan(connectInfo, treeNodeInfo.key(), ValueScanCursor.INITIAL);
+                                    var dataList = new ArrayList<>(valueScanCursor.getValues());
+                                    while (!valueScanCursor.isFinished()) {
+                                        valueScanCursor = RedisSetService.service.sscan(connectInfo, treeNodeInfo.key(), valueScanCursor);
+                                        dataList.addAll(valueScanCursor.getValues());
+                                    }
+                                    if (Fn.isNotEmpty(dataList)) {
+                                        SwingUtilities.invokeLater(() -> {
+                                            treeNodeInfo.setMemorySize(dataList.stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0));
+                                            keyTree.updateUI();
+                                        });
+                                    }
+                                }
+                            }).join();
+                }
+            }
+
         };
 
+        //邮件菜单
         keyTree.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {

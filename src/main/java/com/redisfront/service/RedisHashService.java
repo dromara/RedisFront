@@ -24,6 +24,7 @@ public interface RedisHashService {
     String hmset(ConnectInfo connectInfo, String key, Map<String, String> map);
 
     MapScanCursor<String, String> hscan(ConnectInfo connectInfo, String key, ScanCursor scanCursor, ScanArgs scanArgs);
+    MapScanCursor<String, String> hscan(ConnectInfo connectInfo, String key, ScanCursor scanCursor);
 
     Boolean hset(ConnectInfo connectInfo, String key, String field, String value);
 

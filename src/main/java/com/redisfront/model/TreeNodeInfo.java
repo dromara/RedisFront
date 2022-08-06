@@ -1,5 +1,8 @@
 package com.redisfront.model;
 
+import cn.hutool.core.io.unit.DataSizeUtil;
+import com.redisfront.commons.func.Fn;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import java.util.Comparator;
@@ -14,6 +17,16 @@ public class TreeNodeInfo extends DefaultMutableTreeNode implements Comparator<T
 
     private String title;
     private String key;
+    private Integer memorySize;
+
+    public Integer memorySize() {
+        return Fn.isNull(memorySize) ? 0 : memorySize;
+    }
+
+    public TreeNodeInfo setMemorySize(Integer memorySize) {
+        this.memorySize = memorySize;
+        return this;
+    }
 
     public TreeNodeInfo() {
         super();
@@ -59,22 +72,39 @@ public class TreeNodeInfo extends DefaultMutableTreeNode implements Comparator<T
 
     @Override
     public String toString() {
-        var l = getLevel();
+
         if (getChildCount() > 0 && getLevel() > 1) {
-            return title + " (" + getChildCount() + ") ";
+            var memory = getAllChildMemory(this);
+            return title + " (" + getChildCount() + ") " + (memory == 0 ? "" : " [" + DataSizeUtil.format(memory) + "]  ");
         } else if (getChildCount() > 0 && getLevel() == 1) {
             var count = getAllChildCount(this);
-            return title + " (" + count + ") ";
+            var memory = getAllChildMemory(this);
+            return title + " (" + count + ") " + (memory == 0 ? "" : " [" + DataSizeUtil.format(memory) + "]  ");
         } else {
-            return title;
+            return title + (memorySize() == 0 ? "" : " [" + DataSizeUtil.format(memorySize()) + "]  ");
         }
+    }
+
+    public int getAllChildMemory(TreeNode treeNode) {
+        int tmp = 0;
+        if (treeNode.getChildCount() > 0) {
+            for (int i = 0; i < treeNode.getChildCount(); i++) {
+                var subTreeNode = (TreeNodeInfo) treeNode.getChildAt(i);
+                if (subTreeNode.getChildCount() > 0) {
+                    tmp += getAllChildMemory(subTreeNode);
+                } else {
+                    tmp += subTreeNode.memorySize();
+                }
+            }
+        }
+        return tmp;
     }
 
     public int getAllChildCount(TreeNode treeNode) {
         int tmp = 0;
         if (treeNode.getChildCount() > 0) {
             for (int i = 0; i < treeNode.getChildCount(); i++) {
-                TreeNode subTreeNode = treeNode.getChildAt(i);
+                var subTreeNode = treeNode.getChildAt(i);
                 if (subTreeNode.getChildCount() > 0) {
                     tmp += getAllChildCount(subTreeNode);
                 } else {

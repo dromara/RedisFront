@@ -377,7 +377,7 @@ public class DataViewForm {
 
     private void reloadAllActionPerformed() {
         if (refBtn.isEnabled()) {
-            String key = keyField.getText();
+            var key = keyField.getText();
             this.lastKeyName = key;
             FutureUtils.supplyAsync(() -> keyTypeLabel.getText(), keyType -> {
                 if (Fn.notEqual(keyType, "none")) {
@@ -428,10 +428,10 @@ public class DataViewForm {
 
     private void reloadTableDataActionPerformed(Boolean init) {
         FutureUtils.runAsync(() -> {
-            String key = keyField.getText();
+            var key = keyField.getText();
             this.lastKeyName = key;
             var keyType = keyTypeLabel.getText();
-            Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(keyType.toUpperCase());
+            var keyTypeEnum = Enum.KeyTypeEnum.valueOf(keyType.toUpperCase());
 
             SwingUtilities.invokeLater(() -> {
                 refreshBeforeHandler.handle();
@@ -480,10 +480,10 @@ public class DataViewForm {
         refreshBeforeHandler.handle();
         beforeActionHandler.handle();
 
-        String type = RedisBasicService.service.type(connectInfo, key);
+        var type = RedisBasicService.service.type(connectInfo, key);
         if (Fn.notEqual(type, "none")) {
-            Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(type.toUpperCase());
-            Long ttl = RedisBasicService.service.ttl(connectInfo, key);
+            var keyTypeEnum = Enum.KeyTypeEnum.valueOf(type.toUpperCase());
+            var ttl = RedisBasicService.service.ttl(connectInfo, key);
             SwingUtilities.invokeLater(() -> {
                 fieldOrScoreField.setVisible(keyTypeEnum == Enum.KeyTypeEnum.ZSET || keyTypeEnum == Enum.KeyTypeEnum.HASH);
                 keyTypeLabel.setText(keyTypeEnum.typeName());
@@ -514,8 +514,8 @@ public class DataViewForm {
     }
 
     private void loadStringActionPerformed(String key) {
-        Long strLen = RedisStringService.service.strlen(connectInfo, key);
-        String value = RedisStringService.service.get(connectInfo, key);
+        var strLen = RedisStringService.service.strlen(connectInfo, key);
+        var value = RedisStringService.service.get(connectInfo, key);
         SwingUtilities.invokeLater(() -> {
             tableViewPanel.setVisible(false);
             valueUpdateSaveBtn.setEnabled(true);
@@ -526,14 +526,14 @@ public class DataViewForm {
     }
 
     private void loadHashDataActionPerformed(String key) {
-        Long len = RedisHashService.service.hlen(connectInfo, key);
-        ScanContext<Map.Entry<String, String>> scanContext = scanHashContextMap.getOrDefault(key, new ScanContext<>());
+        var len = RedisHashService.service.hlen(connectInfo, key);
+        var scanContext = scanHashContextMap.getOrDefault(key, new ScanContext<>());
         var lastSearchKey = scanContext.getSearchKey();
 
         scanContext.setSearchKey(tableSearchField.getText());
         scanContext.setLimit(500L);
 
-        MapScanCursor<String, String> mapScanCursor = RedisHashService.service.hscan(connectInfo, key, scanContext.getScanCursor(), scanContext.getScanArgs());
+        var mapScanCursor = RedisHashService.service.hscan(connectInfo, key, scanContext.getScanCursor(), scanContext.getScanArgs());
         scanContext.setScanCursor(mapScanCursor);
 
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
@@ -565,14 +565,14 @@ public class DataViewForm {
     }
 
     private void loadSetDataActionPerformed(String key) {
-        Long len = RedisSetService.service.scard(connectInfo, key);
-        ScanContext<String> scanContext = scanSetContextMap.getOrDefault(key, new ScanContext<>());
+        var len = RedisSetService.service.scard(connectInfo, key);
+        var scanContext = scanSetContextMap.getOrDefault(key, new ScanContext<>());
 
         var lastSearchKey = scanContext.getSearchKey();
         scanContext.setSearchKey(tableSearchField.getText());
         scanContext.setLimit(500L);
 
-        ValueScanCursor<String> valueScanCursor = RedisSetService.service.sscan(connectInfo, key, scanContext.getScanCursor(), scanContext.getScanArgs());
+        var valueScanCursor = RedisSetService.service.sscan(connectInfo, key, scanContext.getScanCursor(), scanContext.getScanArgs());
         scanContext.setScanCursor(valueScanCursor);
 
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
@@ -588,7 +588,7 @@ public class DataViewForm {
 
         scanSetContextMap.put(key, scanContext);
 
-        SetTableModel setTableModel = new SetTableModel(scanContext.getKeyList());
+        var setTableModel = new SetTableModel(scanContext.getKeyList());
 
         SwingUtilities.invokeLater(() -> {
             LoadAfterUpdate(len, DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)), String.valueOf(scanContext.getKeyList().size()), valueScanCursor.isFinished());
@@ -600,16 +600,16 @@ public class DataViewForm {
     }
 
     private void loadListDataActionPerformed(String key) {
-        Long len = RedisListService.service.llen(connectInfo, key);
+        var len = RedisListService.service.llen(connectInfo, key);
 
-        ScanContext<String> scanContext = scanListContextMap.getOrDefault(key, new ScanContext<>());
+        var scanContext = scanListContextMap.getOrDefault(key, new ScanContext<>());
 
         var lastSearchKey = scanContext.getSearchKey();
         scanContext.setSearchKey(tableSearchField.getText());
         scanContext.setLimit(500L);
         var start = Long.parseLong(scanContext.getScanCursor().getCursor());
         var stop = start + (scanContext.getLimit() - 1);
-        List<String> value = RedisListService.service.lrange(connectInfo, key, start, stop);
+        var value = RedisListService.service.lrange(connectInfo, key, start, stop);
 
         var nextCursor = start + scanContext.getLimit();
         if (nextCursor >= len) {
@@ -648,15 +648,15 @@ public class DataViewForm {
     }
 
     private void loadZSetDataActionPerformed(String key) {
-        Long len = RedisZSetService.service.zcard(connectInfo, key);
+        var len = RedisZSetService.service.zcard(connectInfo, key);
 
-        ScanContext<ScoredValue<String>> scanContext = scanZSetContextMap.getOrDefault(key, new ScanContext<>());
+        var scanContext = scanZSetContextMap.getOrDefault(key, new ScanContext<>());
 
         var lastSearchKey = scanContext.getSearchKey();
         scanContext.setSearchKey(tableSearchField.getText());
         scanContext.setLimit(500L);
 
-        ScoredValueScanCursor<String> valueScanCursor = RedisZSetService.service.zscan(connectInfo, key, scanContext.getScanCursor(), scanContext.getScanArgs());
+        var valueScanCursor = RedisZSetService.service.zscan(connectInfo, key, scanContext.getScanCursor(), scanContext.getScanArgs());
         scanContext.setScanCursor(valueScanCursor);
 
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
