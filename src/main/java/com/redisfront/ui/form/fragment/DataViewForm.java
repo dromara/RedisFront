@@ -850,16 +850,7 @@ public class DataViewForm {
             }
         }, BorderLayout.CENTER);
 
-        basicPanel = new JPanel() {
-            @Override
-            public void updateUI() {
-                super.updateUI();
-            }
-
-            {
-                setLayout(new BorderLayout());
-            }
-        };
+        basicPanel = new JPanel();
     }
 
 
