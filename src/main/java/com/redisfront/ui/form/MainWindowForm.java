@@ -2,7 +2,6 @@ package com.redisfront.ui.form;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.icons.FlatTabbedPaneCloseIcon;
-import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.redisfront.RedisFrontApplication;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
@@ -15,8 +14,7 @@ import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.ConnectService;
 import com.redisfront.service.RedisBasicService;
 import com.redisfront.ui.component.MainTabbedPanel;
-import com.redisfront.ui.dialog.AddConnectDialog;
-import com.redisfront.ui.dialog.OpenConnectDialog;
+import com.redisfront.ui.dialog.LogsDialog;
 import io.lettuce.core.RedisException;
 import io.lettuce.core.api.sync.BaseRedisCommands;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
@@ -154,36 +152,19 @@ public class MainWindowForm {
         tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
 
         toolBar = new JToolBar();
+        toolBar.setMinimumSize(new Dimension(-1, 200));
         toolBar.setBorder(new EmptyBorder(10, 10, 10, 10));
         toolBar.setLayout(new BorderLayout());
 
-        var jPanel = new JPanel() {
-            @Override
-            public void updateUI() {
-                super.updateUI();
-                setBorder(new FlatLineBorder(new Insets(1, 1, 1, 1), UIManager.getColor("Component.borderColor"), 1, 6));
+        var newBtn = new JButton("日志", UI.LOGS_ICON);
+        newBtn.setToolTipText("查看日志");
+        newBtn.addActionListener((event) -> LogsDialog.showLogsDialog());
+        toolBar.add(new JPanel() {
+            {
+                setLayout(new BorderLayout());
+                add(newBtn, BorderLayout.CENTER);
             }
-        };
-
-        jPanel.setLayout(new FlowLayout());
-
-
-        var newBtn = new JButton(null, UI.NEW_CONN_ICON);
-        newBtn.setToolTipText("新建连接");
-        newBtn.addActionListener(e -> AddConnectDialog.showAddConnectDialog(this::addTabActionPerformed));
-        jPanel.add(newBtn);
-
-        var openBtn = new JButton(null, UI.OPEN_CONN_ICON);
-        openBtn.setToolTipText("打开连接");
-        openBtn.addActionListener(e -> OpenConnectDialog.showOpenConnectDialog(
-                //打开连接回调
-                (connectInfo) -> MainWindowForm.getInstance().addTabActionPerformed(connectInfo),
-                //编辑连接回调
-                (connectInfo -> AddConnectDialog.showEditConnectDialog(connectInfo, (c) -> MainWindowForm.getInstance().addTabActionPerformed(c))),
-                //删除连接回调
-                (connectInfo -> ConnectService.service.delete(connectInfo.id()))));
-        jPanel.add(openBtn);
-        toolBar.add(jPanel, BorderLayout.SOUTH);
+        }, BorderLayout.SOUTH);
         tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, toolBar);
     }
 

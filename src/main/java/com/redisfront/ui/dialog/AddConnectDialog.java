@@ -260,7 +260,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     private void submitActionPerformed(ActionEvent actionEvent) {
         var connectInfo = validGetConnectInfo();
         FutureUtils.runAsync(() -> {
-            SwingUtilities.invokeLater(LoadingUtils::showDialog);
+            LoadingUtils.showDialog();
             var redisMode = RedisBasicService.service.getRedisModeEnum(connectInfo);
             processHandler.processHandler(connectInfo.setRedisModeEnum(redisMode));
         });
@@ -277,6 +277,10 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
             throw new RedisFrontException("主机不能为空", false);
         }
 
+        var title = titleField.getText();
+        if (title.length() < 4) {
+            title = title + "(" + hostField.getText() + ")";
+        }
         //SSH Connection
         if (enableSSHBtn.isSelected()) {
             //valid sshHostField
@@ -305,7 +309,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                     new String(sshPasswordField.getPassword()));
 
             return new ConnectInfo(
-                    titleField.getText(),
+                    title,
                     hostField.getText(),
                     (Integer) portField.getValue(),
                     userField.getText(),
@@ -324,7 +328,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                     grantField.getText(),
                     String.valueOf(sslPasswordField.getPassword())
             );
-            return new ConnectInfo(titleField.getText(),
+            return new ConnectInfo(title,
                     hostField.getText(),
                     (Integer) portField.getValue(),
                     userField.getText(),
@@ -337,7 +341,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
 
         } else {
 
-            return new ConnectInfo(titleField.getText(),
+            return new ConnectInfo(title,
                     hostField.getText(),
                     (Integer) portField.getValue(),
                     userField.getText(),

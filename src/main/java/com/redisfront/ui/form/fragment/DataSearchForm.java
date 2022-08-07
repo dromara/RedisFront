@@ -6,6 +6,7 @@ import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import com.redisfront.RedisFrontApplication;
 import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
@@ -39,8 +40,8 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
@@ -70,6 +71,7 @@ public class DataSearchForm {
     private final ConnectInfo connectInfo;
     private JButton searchBtn;
 
+    static final ExecutorService executorService = Executors.newFixedThreadPool(5);
 
     public JPanel getContentPanel() {
         return contentPanel;
@@ -293,7 +295,13 @@ public class DataSearchForm {
         addBtn = new JButton();
         addBtn.setToolTipText("新增一个key");
         addBtn.setIcon(UI.PLUS_ICON);
-        addBtn.addActionListener(e -> AddKeyDialog.showAddDialog(connectInfo, null, (key) -> AlertUtils.showInformationDialog("添加成功！")));
+        addBtn.addActionListener(e -> AddKeyDialog.showAddDialog(connectInfo, null, (key) -> {
+            var res = JOptionPane.showConfirmDialog(RedisFrontApplication.frame, "数据添加成功，是否刷新列表？", "是否刷新", JOptionPane.YES_NO_OPTION);
+            if (res == JOptionPane.YES_OPTION) {
+                scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
+                scanKeysAndInitScanInfo();
+            }
+        }));
 
         refreshBtn = new JButton();
         refreshBtn.setToolTipText("重新加载");
@@ -434,7 +442,13 @@ public class DataSearchForm {
                 addMenuItem.addActionListener((e) -> {
                     var selectNode = keyTree.getLastSelectedPathComponent();
                     if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
-                        AddKeyDialog.showAddDialog(connectInfo, treeNodeInfo.key(), (key) -> AlertUtils.showInformationDialog("添加成功！"));
+                        AddKeyDialog.showAddDialog(connectInfo, treeNodeInfo.key(), (key) -> {
+                            var res = JOptionPane.showConfirmDialog(RedisFrontApplication.frame, "数据添加成功，是否刷新列表？", "是否刷新", JOptionPane.YES_NO_OPTION);
+                            if (res == JOptionPane.YES_OPTION) {
+                                scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
+                                scanKeysAndInitScanInfo();
+                            }
+                        });
                     }
                 });
                 add(addMenuItem);
@@ -456,7 +470,6 @@ public class DataSearchForm {
                 });
                 add(delMenuItem);
 
-                var executorService = Executors.newFixedThreadPool(5);
 
                 var memoryMenuItem = new JMenuItem("内存分析");
                 memoryMenuItem.addActionListener((e) -> {
@@ -469,18 +482,18 @@ public class DataSearchForm {
                         });
                         FutureUtils.runAsync(() -> {
                             SwingUtilities.invokeLater(() -> {
-                            treeNodeInfo.setTitle(title.concat("  内存分析中... "));
-                            expandPath(selectionPath);
-                            keyTree.updateUI();
+                                treeNodeInfo.setTitle(title.concat("  内存分析中... "));
+                                expandPath(selectionPath);
+                                keyTree.updateUI();
                             });
 
                             memoryAnalysis(treeNodeInfo);
 
                             SwingUtilities.invokeLater(() -> {
-                            treeNodeInfo.setTitle(title);
-                            keyTree.updateUI();
+                                treeNodeInfo.setTitle(title);
+                                keyTree.updateUI();
                             });
-                        });
+                        }, executorService);
                     }
                 });
                 add(memoryMenuItem);

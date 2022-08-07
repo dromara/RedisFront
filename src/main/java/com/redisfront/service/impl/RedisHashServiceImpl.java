@@ -2,13 +2,17 @@ package com.redisfront.service.impl;
 
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.model.ConnectInfo;
+import com.redisfront.model.ScanContext;
+import com.redisfront.service.RedisBasicService;
 import com.redisfront.service.RedisHashService;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.util.LettuceUtils;
+import com.redisfront.ui.dialog.LogsDialog;
 import io.lettuce.core.MapScanCursor;
 import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +25,7 @@ public class RedisHashServiceImpl implements RedisHashService {
 
     @Override
     public String hget(ConnectInfo connectInfo, String key, String field) {
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.hget(key, field));
         } else {
@@ -65,16 +70,25 @@ public class RedisHashServiceImpl implements RedisHashService {
     }
 
     @Override
-    public MapScanCursor<String, String> hscan(ConnectInfo connectInfo, String key,ScanCursor scanCursor, ScanArgs scanArgs) {
+    public MapScanCursor<String, String> hscan(ConnectInfo connectInfo, String key, ScanCursor scanCursor, ScanArgs scanArgs) {
+
+        ScanContext.MyScanArgs myScanArgs = (ScanContext.MyScanArgs) scanArgs;
+        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("HSCAN ".concat(key).concat(" ").concat(scanCursor.getCursor()).concat(myScanArgs.getCommandStr()));
+        LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectInfo, commands -> commands.hscan(key, scanCursor,scanArgs));
+            return LettuceUtils.clusterExec(connectInfo, commands -> commands.hscan(key, scanCursor, scanArgs));
         } else {
-            return LettuceUtils.exec(connectInfo, commands -> commands.hscan(key, scanCursor,scanArgs));
+            return LettuceUtils.exec(connectInfo, commands -> commands.hscan(key, scanCursor, scanArgs));
         }
     }
 
     @Override
     public MapScanCursor<String, String> hscan(ConnectInfo connectInfo, String key, ScanCursor scanCursor) {
+
+        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("HSCAN ".concat(key).concat(" ").concat(scanCursor.getCursor()));
+        LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.hscan(key, scanCursor));
         } else {
@@ -84,6 +98,10 @@ public class RedisHashServiceImpl implements RedisHashService {
 
     @Override
     public Boolean hset(ConnectInfo connectInfo, String key, String field, String value) {
+
+        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("HSET ".concat(key).concat(" ").concat(field).concat(" ").concat(value));
+        LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.hset(key, field, value));
         } else {
@@ -120,6 +138,10 @@ public class RedisHashServiceImpl implements RedisHashService {
 
     @Override
     public Long hdel(ConnectInfo connectInfo, String key, String... fields) {
+
+        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("HSET ".concat(key).concat(" ").concat(Arrays.toString(fields).replace("[", "").replace("]", "").replace(","," ")));
+        LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.hdel(key, fields));
         } else {

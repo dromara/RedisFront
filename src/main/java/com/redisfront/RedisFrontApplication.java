@@ -5,7 +5,7 @@ import com.formdev.flatlaf.extras.FlatInspector;
 import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
 import com.formdev.flatlaf.util.SystemInfo;
 import com.redisfront.commons.constant.Const;
-import com.redisfront.commons.exception.ExceptionHandler;
+import com.redisfront.commons.exception.GlobalExceptionHandler;
 import com.redisfront.commons.util.*;
 import com.redisfront.ui.frame.RedisFrontMainFrame;
 
@@ -52,7 +52,7 @@ public class RedisFrontApplication {
 
             PrefUtils.init(Const.ROOT_PATH);
 
-            ExceptionHandler.init();
+            GlobalExceptionHandler.init();
 
             ThemeUtils.setupTheme(args);
 

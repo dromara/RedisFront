@@ -40,7 +40,46 @@ public class ScanContext<T> {
     }
 
     public ScanArgs getScanArgs() {
-        return ScanArgs.Builder.matches(getSearchKey()).limit(getLimit());
+        return MyScanArgs.Builder.matches(getSearchKey()).limit(getLimit());
+    }
+
+    public static class MyScanArgs extends ScanArgs {
+        private Long count;
+        private String match;
+
+        public static class Builder {
+
+            private Builder() {
+            }
+
+            public static ScanArgs limit(long count) {
+                return new MyScanArgs().limit(count);
+            }
+
+            public static ScanArgs matches(String matches) {
+                return new MyScanArgs().match(matches);
+            }
+
+            public static ScanArgs matches(byte[] matches) {
+                return new MyScanArgs().match(matches);
+            }
+
+        }
+        @Override
+        public ScanArgs match(String match) {
+            this.match = match;
+            return super.match(match);
+        }
+
+        @Override
+        public ScanArgs limit(long count) {
+            this.count = count;
+            return super.limit(count);
+        }
+
+        public String getCommandStr() {
+            return " MATCH ".concat(match).concat(" ").concat("COUNT ").concat(count.toString());
+        }
     }
 
 

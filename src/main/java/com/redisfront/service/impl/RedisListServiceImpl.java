@@ -2,10 +2,13 @@ package com.redisfront.service.impl;
 
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.model.ConnectInfo;
+import com.redisfront.service.RedisBasicService;
 import com.redisfront.service.RedisListService;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.util.LettuceUtils;
+import com.redisfront.ui.dialog.LogsDialog;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -16,6 +19,10 @@ import java.util.List;
 public class RedisListServiceImpl implements RedisListService {
     @Override
     public List<String> lrange(ConnectInfo connectInfo, String key, long start, long stop) {
+
+        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("LRANGE ".concat(key).concat(" ").concat(String.valueOf(start)).concat(" ").concat(String.valueOf(stop)));
+        LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.lrange(key, start, stop));
         } else {
@@ -25,6 +32,10 @@ public class RedisListServiceImpl implements RedisListService {
 
     @Override
     public Long lrem(ConnectInfo connectInfo, String key, long count, String value) {
+
+        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("LREM ".concat(key).concat(" ").concat(String.valueOf(count)).concat(" ").concat(String.valueOf(value)));
+        LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.lrem(key, count, value));
         } else {
@@ -34,6 +45,10 @@ public class RedisListServiceImpl implements RedisListService {
 
     @Override
     public Long llen(ConnectInfo connectInfo, String key) {
+
+        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("LLEN ".concat(key).concat(" "));
+        LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.llen(key));
         } else {
@@ -61,6 +76,10 @@ public class RedisListServiceImpl implements RedisListService {
 
     @Override
     public Long lpush(ConnectInfo connectInfo, String key, String... values) {
+
+        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("LPUSH ".concat(key).concat(" ").concat(Arrays.toString(values).replace("[", "").replace("]", "").replace(","," ")));
+        LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.lpush(key, values));
         } else {

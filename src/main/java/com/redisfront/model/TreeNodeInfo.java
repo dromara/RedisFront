@@ -75,13 +75,13 @@ public class TreeNodeInfo extends DefaultMutableTreeNode implements Comparator<T
 
         if (getChildCount() > 0 && getLevel() > 1) {
             var memory = getAllChildMemory(this);
-            return title + " (" + getChildCount() + ") " + (memory == 0 ? "" : " [" + DataSizeUtil.format(memory) + "]  ");
+            return title + " (" + getChildCount() + ") " + (memory == 0 ? "" : " [ " + DataSizeUtil.format(memory) + " ]  ");
         } else if (getChildCount() > 0 && getLevel() == 1) {
             var count = getAllChildCount(this);
             var memory = getAllChildMemory(this);
-            return title + " (" + count + ") " + (memory == 0 ? "" : " [" + DataSizeUtil.format(memory) + "]  ");
+            return title + " (" + count + ") " + (memory == 0 ? "" : " [ " + DataSizeUtil.format(memory) + " ]  ");
         } else {
-            return title + (memorySize() == 0 ? "" : " [" + DataSizeUtil.format(memorySize()) + "]  ");
+            return title + (memorySize() == 0 ? "" : " [ " + DataSizeUtil.format(memorySize()) + " ]  ");
         }
     }
 

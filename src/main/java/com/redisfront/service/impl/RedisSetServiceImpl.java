@@ -2,13 +2,17 @@ package com.redisfront.service.impl;
 
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.model.ConnectInfo;
+import com.redisfront.model.ScanContext;
+import com.redisfront.service.RedisBasicService;
 import com.redisfront.service.RedisSetService;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.util.LettuceUtils;
+import com.redisfront.ui.dialog.LogsDialog;
 import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
 import io.lettuce.core.ValueScanCursor;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -20,6 +24,10 @@ import java.util.Set;
 public class RedisSetServiceImpl implements RedisSetService {
     @Override
     public Long sadd(ConnectInfo connectInfo, String key, String... members) {
+
+        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("SADD ".concat(key).concat(" ").concat(Arrays.toString(members).replace("[", "").replace("]", "").replace(","," ")));
+        LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.sadd(key, members));
         } else {
@@ -29,6 +37,10 @@ public class RedisSetServiceImpl implements RedisSetService {
 
     @Override
     public Long scard(ConnectInfo connectInfo, String key) {
+
+        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("SCARD ".concat(key));
+        LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.scard(key));
         } else {
@@ -146,6 +158,10 @@ public class RedisSetServiceImpl implements RedisSetService {
 
     @Override
     public Long srem(ConnectInfo connectInfo, String key, String... members) {
+
+        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("SREM ".concat(key).concat(" ").concat(Arrays.toString(members).replace("[", "").replace("]", "").replace(","," ")));
+        LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.srem(key, members));
         } else {
@@ -173,19 +189,29 @@ public class RedisSetServiceImpl implements RedisSetService {
 
     @Override
     public ValueScanCursor<String> sscan(ConnectInfo connectInfo, String key, ScanCursor scanCursor, ScanArgs scanArgs) {
+
+
+        ScanContext.MyScanArgs myScanArgs = (ScanContext.MyScanArgs) scanArgs;
+        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("SSCAN ".concat(key).concat(" ").concat(scanCursor.getCursor()).concat(myScanArgs.getCommandStr()));
+        LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectInfo, commands -> commands.sscan(key,scanCursor,scanArgs));
+            return LettuceUtils.clusterExec(connectInfo, commands -> commands.sscan(key, scanCursor, scanArgs));
         } else {
-            return LettuceUtils.exec(connectInfo, commands -> commands.sscan(key,scanCursor,scanArgs));
+            return LettuceUtils.exec(connectInfo, commands -> commands.sscan(key, scanCursor, scanArgs));
         }
     }
 
     @Override
     public ValueScanCursor<String> sscan(ConnectInfo connectInfo, String key, ScanCursor scanCursor) {
+
+        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("SSCAN ".concat(key).concat(" ").concat(scanCursor.getCursor()));
+        LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectInfo, commands -> commands.sscan(key,scanCursor));
+            return LettuceUtils.clusterExec(connectInfo, commands -> commands.sscan(key, scanCursor));
         } else {
-            return LettuceUtils.exec(connectInfo, commands -> commands.sscan(key,scanCursor));
+            return LettuceUtils.exec(connectInfo, commands -> commands.sscan(key, scanCursor));
         }
     }
 }

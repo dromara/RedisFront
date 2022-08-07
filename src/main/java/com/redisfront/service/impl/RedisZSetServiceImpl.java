@@ -2,11 +2,15 @@ package com.redisfront.service.impl;
 
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.model.ConnectInfo;
+import com.redisfront.model.ScanContext;
+import com.redisfront.service.RedisBasicService;
 import com.redisfront.service.RedisZSetService;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.util.LettuceUtils;
+import com.redisfront.ui.dialog.LogsDialog;
 import io.lettuce.core.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -17,6 +21,10 @@ import java.util.List;
 public class RedisZSetServiceImpl implements RedisZSetService {
     @Override
     public Long zadd(ConnectInfo connectInfo, String key, double score, String member) {
+
+        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("ZADD ".concat(key).concat(" ").concat(String.valueOf(score)).concat(" ").concat(member));
+        LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.zadd(key, score, member));
         } else {
@@ -44,6 +52,10 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @Override
     public Long zcard(ConnectInfo connectInfo, String key) {
+
+        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("ZCARD ".concat(key));
+        LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.zcard(key));
         } else {
@@ -53,6 +65,8 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @Override
     public Long zrem(ConnectInfo connectInfo, String key, String... members) {
+        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("ZREM ".concat(key).concat(" ").concat(Arrays.toString(members).replace("[", "").replace("]", "").replace(","," ")));
+        LogsDialog.appendLog(logInfo);
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.zrem(key, members));
         } else {
@@ -125,6 +139,11 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @Override
     public ScoredValueScanCursor<String> zscan(ConnectInfo connectInfo, String key, ScanArgs scanArgs) {
+
+        ScanContext.MyScanArgs myScanArgs = (ScanContext.MyScanArgs) scanArgs;
+        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("ZSCAN ".concat(key).concat(" ").concat(myScanArgs.getCommandStr()));
+        LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.zscan(key, scanArgs));
         } else {
@@ -134,6 +153,12 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @Override
     public ScoredValueScanCursor<String> zscan(ConnectInfo connectInfo, String key, ScanCursor scanCursor, ScanArgs scanArgs) {
+
+
+        ScanContext.MyScanArgs myScanArgs = (ScanContext.MyScanArgs) scanArgs;
+        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("ZSCAN ".concat(key).concat(" ").concat(scanCursor.getCursor()).concat(myScanArgs.getCommandStr()));
+        LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.zscan(key, scanCursor, scanArgs));
         } else {
@@ -143,6 +168,10 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @Override
     public ScoredValueScanCursor<String> zscan(ConnectInfo connectInfo, String key, ScanCursor scanCursor) {
+
+        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("ZSCAN ".concat(key).concat(" ").concat(scanCursor.getCursor()));
+        LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.zscan(key, scanCursor));
         } else {

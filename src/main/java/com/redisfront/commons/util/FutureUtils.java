@@ -1,11 +1,11 @@
 package com.redisfront.commons.util;
 
 import com.redisfront.commons.func.Fn;
-import com.redisfront.commons.handler.ActionHandler;
 import com.redisfront.commons.handler.ProcessHandler;
 
-import java.util.Objects;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -15,7 +15,7 @@ import java.util.function.Supplier;
  * @author Jin
  */
 public class FutureUtils {
-    private static final int MAX_WORKER_THREADS = 10;
+    private static final int MAX_WORKER_THREADS = 20;
 
     private static ExecutorService executorService;
 
@@ -34,6 +34,10 @@ public class FutureUtils {
     }
 
     public static CompletableFuture<Void> runAsync(Runnable runnable) {
+        return CompletableFuture.runAsync(runnable);
+    }
+
+    public static CompletableFuture<Void> runAsync(Runnable runnable,ExecutorService executorService) {
         return CompletableFuture.runAsync(runnable);
     }
 

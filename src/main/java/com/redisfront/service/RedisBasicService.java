@@ -4,6 +4,7 @@ import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.util.LettuceUtils;
 import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
+import com.redisfront.model.LogInfo;
 import com.redisfront.service.impl.RedisBasicServiceImpl;
 import com.redisfront.commons.func.Fn;
 import io.lettuce.core.KeyScanCursor;
@@ -13,6 +14,7 @@ import io.lettuce.core.StreamScanCursor;
 import io.lettuce.core.api.sync.RedisKeyCommands;
 import io.lettuce.core.output.KeyStreamingChannel;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,25 +23,24 @@ public interface RedisBasicService {
 
     RedisBasicService service = new RedisBasicServiceImpl();
 
-    KeyScanCursor<String> scan(ConnectInfo connectInfo);
-
-   String flushdb(ConnectInfo connectInfo);
+    String flushdb(ConnectInfo connectInfo);
 
     String flushall(ConnectInfo connectInfo);
 
-    KeyScanCursor<String> scan(ConnectInfo connectInfo,ScanArgs scanArgs);
+    KeyScanCursor<String> scan(ConnectInfo connectInfo, ScanArgs scanArgs);
 
-    KeyScanCursor<String> scan(ConnectInfo connectInfo,ScanCursor scanCursor, ScanArgs scanArgs);
+    KeyScanCursor<String> scan(ConnectInfo connectInfo, ScanCursor scanCursor, ScanArgs scanArgs);
 
-    KeyScanCursor<String> scan(ConnectInfo connectInfo,ScanCursor scanCursor);
-    StreamScanCursor scan(ConnectInfo connectInfo,KeyStreamingChannel<String> channel);
+    KeyScanCursor<String> scan(ConnectInfo connectInfo, ScanCursor scanCursor);
 
-    StreamScanCursor scan(ConnectInfo connectInfo,KeyStreamingChannel<String> channel, ScanArgs scanArgs);
+    StreamScanCursor scan(ConnectInfo connectInfo, KeyStreamingChannel<String> channel);
 
-    StreamScanCursor scan(ConnectInfo connectInfo,KeyStreamingChannel<String> channel, ScanCursor scanCursor, ScanArgs scanArgs);
+    StreamScanCursor scan(ConnectInfo connectInfo, KeyStreamingChannel<String> channel, ScanArgs scanArgs);
+
+    StreamScanCursor scan(ConnectInfo connectInfo, KeyStreamingChannel<String> channel, ScanCursor scanCursor, ScanArgs scanArgs);
 
 
-    StreamScanCursor scan(ConnectInfo connectInfo,KeyStreamingChannel<String> channel, ScanCursor scanCursor);
+    StreamScanCursor scan(ConnectInfo connectInfo, KeyStreamingChannel<String> channel, ScanCursor scanCursor);
 
     /**
      * del
@@ -50,10 +51,10 @@ public interface RedisBasicService {
      */
     Long del(ConnectInfo connectInfo, String key);
 
-    String rename(ConnectInfo connectInfo,String key, String newKey);
+    String rename(ConnectInfo connectInfo, String key, String newKey);
 
 
-    Boolean expire(ConnectInfo connectInfo,String key, Long ttl);
+    Boolean expire(ConnectInfo connectInfo, String key, Long ttl);
 
 
     /**
@@ -178,6 +179,10 @@ public interface RedisBasicService {
             }
         }
         return result;
+    }
+
+    static LogInfo buildLogInfo(ConnectInfo connectInfo) {
+        return new LogInfo().setDate(LocalDateTime.now()).setIp(connectInfo.host());
     }
 
 
