@@ -2,7 +2,7 @@
 <img src="screenshot/redisfront.png">
 
 #### 介绍
-基于Java Swing 开发的 Redis 桌面客户端
+基于Lettuce 开发的 Redis 桌面客户端
 
 #### 截图
 
