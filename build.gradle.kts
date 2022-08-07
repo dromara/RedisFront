@@ -14,12 +14,13 @@ val developmentVersion = "1.0-SNAPSHOT"
 
 version = if (Boolean.getBoolean("release")) releaseVersion else developmentVersion
 
-val flatlafVersion = "2.3"
+val flatlafVersion = "2.4"
 val hutoolVersion = "5.8.3"
 val fifesoftVersion = "3.2.0"
 val derbyVersion = "10.15.2.0"
-val lettuceVersion = "6.1.8.RELEASE"
+val lettuceVersion = "6.2.0.RELEASE"
 val logbackVersion = "1.2.11"
+val jfreechartVersion = "1.5.3"
 
 repositories {
     mavenLocal()
@@ -42,13 +43,15 @@ println("-----------------------------------------------------------------------
 println()
 
 dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
 
     implementation("io.lettuce:lettuce-core:${lettuceVersion}")
-    implementation("io.netty:netty-common:4.1.77.Final")
+    implementation("io.netty:netty-common:4.1.79.Final")
     implementation("com.formdev:flatlaf:${flatlafVersion}")
+    implementation("com.jfree:jfreechart:${jfreechartVersion}")
     implementation("com.formdev:flatlaf-swingx:${flatlafVersion}")
     implementation("com.formdev:flatlaf-intellij-themes:${flatlafVersion}")
     implementation("com.formdev:flatlaf-extras:${flatlafVersion}")

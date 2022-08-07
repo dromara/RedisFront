@@ -156,7 +156,7 @@ public class MainWindowForm {
         toolBar.setBorder(new EmptyBorder(10, 10, 10, 10));
         toolBar.setLayout(new BorderLayout());
 
-        var newBtn = new JButton("日志", UI.LOGS_ICON);
+        var newBtn = new JButton(" 日志", UI.LOGS_ICON);
         newBtn.setToolTipText("查看日志");
         newBtn.addActionListener((event) -> LogsDialog.showLogsDialog());
         toolBar.add(new JPanel() {

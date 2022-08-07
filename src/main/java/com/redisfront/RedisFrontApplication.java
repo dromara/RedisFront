@@ -66,6 +66,7 @@ public class RedisFrontApplication {
 
             FlatUIDefaultsInspector.install("ctrl shift alt Y");
 
+
             frame = new RedisFrontMainFrame();
             frame.setMinimumSize(new Dimension(1100, 800));
             frame.pack();
