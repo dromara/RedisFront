@@ -129,7 +129,7 @@ public class DataSearchForm {
             scanKeysContext.setScanCursor(keyScanCursor);
             log.debug("本次扫描到：{}", keyScanCursor.getKeys().size());
 
-            ArrayList<String> scanKeysList = new ArrayList<>(keyScanCursor.getKeys());
+            var scanKeysList = new ArrayList<>(keyScanCursor.getKeys());
 
             //模糊匹配(模糊匹配在key数量小于 limit 的情况加全部查询出来)
             if (!loadMorePanel.isVisible() && Fn.equal("*", key)) {
@@ -151,11 +151,11 @@ public class DataSearchForm {
                 scanKeysContext.setKeyList(scanKeysList);
             }
 
-            String delim = PrefUtils.getState().get(Const.KEY_KEY_SEPARATOR, ":");
+            var delim = PrefUtils.getState().get(Const.KEY_KEY_SEPARATOR, ":");
 
             var treeModel = TreeUtils.toTreeModel(new HashSet<>(scanKeysContext.getKeyList()), delim);
 
-            KeyScanCursor<String> finalKeyScanCursor = keyScanCursor;
+            var finalKeyScanCursor = keyScanCursor;
             SwingUtilities.invokeLater(() -> {
                 currentField.setText(String.valueOf(scanKeysContext.getKeyList().size()));
                 loadMoreBtn.setEnabled(!finalKeyScanCursor.isFinished());
@@ -254,7 +254,7 @@ public class DataSearchForm {
     }
 
     public void deleteActionPerformed() {
-        DefaultTreeModel treeModel = (DefaultTreeModel) keyTree.getModel();
+        var treeModel = (DefaultTreeModel) keyTree.getModel();
         var selectNode = keyTree.getLastSelectedPathComponent();
         if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
             if (treeNodeInfo.getParent() != null) {

@@ -16,7 +16,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class LogsDialog extends JDialog implements Runnable {
     private JPanel contentPane;
-    private JButton buttonOK;
     private JButton buttonCancel;
     private JTextArea textArea;
 

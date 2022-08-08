@@ -87,14 +87,14 @@ public class RedisTerminal extends AbstractTerminal {
     }
 
     private static String format(Object s, String space) {
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
         if (s instanceof List<?> list) {
             if (list.size() == 1) {
                 return String.valueOf(list.get(0));
             }
             for (int i = 0; i < list.size(); i++) {
-                Object item = list.get(i);
-                if (item instanceof List itemList) {
+                var item = list.get(i);
+                if (item instanceof List<?> itemList) {
                     sb.append(space).append(i + 1).append(" ) ").append("\n").append(format(itemList, "  " + space));
                 } else {
                     sb.append(space).append(i + 1).append(" ) ").append(item).append("\n");

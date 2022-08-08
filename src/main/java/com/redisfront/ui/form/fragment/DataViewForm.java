@@ -756,7 +756,7 @@ public class DataViewForm {
             }
         };
 
-        JToolBar jToolBar = new JToolBar();
+        var jToolBar = new JToolBar();
         jToolBar.setBorder(new EmptyBorder(5, 8, 0, 10));
 
         fieldOrScoreField = new JTextField();

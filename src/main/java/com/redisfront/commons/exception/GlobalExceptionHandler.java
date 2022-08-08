@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    public static Thread.UncaughtExceptionHandler redisFrontExceptionHandler = (t, e) -> {
+    public static final Thread.UncaughtExceptionHandler redisFrontExceptionHandler = (t, e) -> {
         log.error("Thread[{}] 应用异常", t.getName(), e);
         LoadingUtils.closeDialog();
         if (e instanceof RedisFrontException redisFrontException) {

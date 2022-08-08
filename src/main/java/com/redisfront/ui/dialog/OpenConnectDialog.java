@@ -141,7 +141,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         });
 
         //查询数据连接列表
-        List<ConnectInfo> connectInfoList = ConnectService.service.getAllConnectList();
+        var connectInfoList = ConnectService.service.getAllConnectList();
         connectTable.setModel(new ConnectTableModel(connectInfoList));
     }
 

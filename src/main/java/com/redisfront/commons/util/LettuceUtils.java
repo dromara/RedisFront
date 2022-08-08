@@ -4,6 +4,7 @@ import com.redisfront.commons.func.Fn;
 import com.redisfront.model.ConnectInfo;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
+import io.lettuce.core.StaticCredentialsProvider;
 import io.lettuce.core.api.sync.RedisCommands;
 import io.lettuce.core.cluster.ClusterClientOptions;
 import io.lettuce.core.cluster.ClusterTopologyRefreshOptions;
@@ -28,7 +29,6 @@ public class LettuceUtils {
 
     private synchronized static RedisClusterClient getRedisClusterClient(RedisURI redisURI) {
         var clusterClient = RedisClusterClient.create(redisURI);
-        clusterClient.setDefaultTimeout(Duration.ofMinutes(1));
         var clusterTopologyRefreshOptions = ClusterTopologyRefreshOptions.builder()
                 .enableAdaptiveRefreshTrigger(ClusterTopologyRefreshOptions.RefreshTrigger.MOVED_REDIRECT, ClusterTopologyRefreshOptions.RefreshTrigger.PERSISTENT_RECONNECTS)
                 .enablePeriodicRefresh(Duration.ofMinutes(30))
@@ -43,7 +43,6 @@ public class LettuceUtils {
     public synchronized static void clusterRun(ConnectInfo connectInfo, Consumer<RedisAdvancedClusterCommands<String, String>> consumer) {
         var redisURI = getRedisURI(connectInfo);
         var clusterClient = getRedisClusterClient(redisURI);
-        clusterClient.setDefaultTimeout(Duration.ofMinutes(1));
         try {
             JschUtils.openSession(connectInfo, clusterClient);
             try (var connection = clusterClient.connect()) {
@@ -62,7 +61,6 @@ public class LettuceUtils {
     public synchronized static <T> T clusterExec(ConnectInfo connectInfo, Function<RedisAdvancedClusterCommands<String, String>, T> function) {
         var redisURI = getRedisURI(connectInfo);
         var clusterClient = getRedisClusterClient(redisURI);
-        clusterClient.setDefaultTimeout(Duration.ofMinutes(1));
         try {
             JschUtils.openSession(connectInfo, clusterClient);
             try (var connection = clusterClient.connect()) {
@@ -81,7 +79,6 @@ public class LettuceUtils {
     public synchronized static void sentinelRun(ConnectInfo connectInfo, Consumer<RedisSentinelCommands<String, String>> consumer) {
         var redisURI = getRedisURI(connectInfo);
         var redisClient = RedisClient.create(redisURI);
-        redisClient.setDefaultTimeout(Duration.ofMinutes(1));
         try {
             JschUtils.openSession(connectInfo);
             try (var connection = redisClient.connectSentinel()) {
@@ -100,7 +97,6 @@ public class LettuceUtils {
     public synchronized static <T> T sentinelExec(ConnectInfo connectInfo, Function<RedisSentinelCommands<String, String>, T> function) {
         var redisURI = getRedisURI(connectInfo);
         var redisClient = RedisClient.create(redisURI);
-        redisClient.setDefaultTimeout(Duration.ofMinutes(1));
         try {
             JschUtils.openSession(connectInfo);
             try (var connection = redisClient.connectSentinel()) {
@@ -162,12 +158,14 @@ public class LettuceUtils {
                 .withPort(connectInfo.port())
                 .withSsl(connectInfo.ssl())
                 .withDatabase(connectInfo.database())
+                .withTimeout(Duration.ofMinutes(1))
                 .build();
-        if (Fn.isNotEmpty(connectInfo.user())) {
-            redisURI.setUsername(connectInfo.user());
-        }
-        if (Fn.isNotEmpty(connectInfo.password())) {
-            redisURI.setPassword(connectInfo.password().toCharArray());
+        if (Fn.isNotEmpty(connectInfo.user()) && Fn.isNotEmpty(connectInfo.password())) {
+            var staticCredentialsProvider = new StaticCredentialsProvider(connectInfo.user(), connectInfo.password().toCharArray());
+            redisURI.setCredentialsProvider(staticCredentialsProvider);
+        } else if (Fn.isNotEmpty(connectInfo.password())) {
+            var staticCredentialsProvider = new StaticCredentialsProvider(null, connectInfo.password().toCharArray());
+            redisURI.setCredentialsProvider(staticCredentialsProvider);
         }
         return redisURI;
     }

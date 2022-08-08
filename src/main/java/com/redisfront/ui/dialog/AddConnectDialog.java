@@ -228,28 +228,33 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
             }
         });
 
-        testBtn.addActionListener(e -> {
-            try {
-                var connectInfo = validGetConnectInfo();
-                if (RedisBasicService.service.ping(connectInfo)) {
-                    AlertUtils.showInformationDialog("连接成功！");
-                } else {
-                    AlertUtils.showInformationDialog("连接失败！");
-                }
-            } catch (Exception exception) {
-                if (exception instanceof RedisFrontException) {
-                    if (exception.getCause() instanceof JschRuntimeException jschRuntimeException) {
-                        AlertUtils.showErrorDialog("连接失败！", jschRuntimeException.getCause());
-                    } else {
-                        AlertUtils.showErrorDialog("连接失败！", exception);
-                    }
-                } else if (exception instanceof RedisConnectionException) {
-                    AlertUtils.showErrorDialog("连接失败！", exception);
-                } else {
-                    AlertUtils.showErrorDialog("连接失败！", exception.getCause());
-                }
+        testBtn.addActionListener(e -> testConnect());
+    }
+
+    private Boolean testConnect() {
+        var connectSuccess = false;
+        try {
+            var connectInfo = validGetConnectInfo();
+            if (RedisBasicService.service.ping(connectInfo)) {
+                AlertUtils.showInformationDialog("连接成功！");
+                connectSuccess = true;
+            } else {
+                AlertUtils.showInformationDialog("连接失败！");
             }
-        });
+        } catch (Exception exception) {
+            if (exception instanceof RedisFrontException) {
+                if (exception.getCause() instanceof JschRuntimeException jschRuntimeException) {
+                    AlertUtils.showErrorDialog("连接失败！", jschRuntimeException.getCause());
+                } else {
+                    AlertUtils.showErrorDialog("连接失败！", exception);
+                }
+            } else if (exception instanceof RedisConnectionException) {
+                AlertUtils.showErrorDialog("连接失败！", exception.getCause());
+            } else {
+                AlertUtils.showErrorDialog("连接失败！", exception);
+            }
+        }
+        return connectSuccess;
     }
 
     private void cancelActionPerformed(ActionEvent actionEvent) {
@@ -259,12 +264,15 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
 
     private void submitActionPerformed(ActionEvent actionEvent) {
         var connectInfo = validGetConnectInfo();
-        FutureUtils.runAsync(() -> {
-            LoadingUtils.showDialog();
-            var redisMode = RedisBasicService.service.getRedisModeEnum(connectInfo);
-            processHandler.processHandler(connectInfo.setRedisModeEnum(redisMode));
-        });
-        dispose();
+        var connectSuccess = testConnect();
+        if (connectSuccess) {
+            FutureUtils.runAsync(() -> {
+                LoadingUtils.showDialog();
+                var redisMode = RedisBasicService.service.getRedisModeEnum(connectInfo);
+                processHandler.processHandler(connectInfo.setRedisModeEnum(redisMode));
+            });
+            dispose();
+        }
     }
 
     private ConnectInfo validGetConnectInfo() {

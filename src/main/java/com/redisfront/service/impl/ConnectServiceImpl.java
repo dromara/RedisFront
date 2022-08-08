@@ -46,7 +46,6 @@ public class ConnectServiceImpl implements ConnectService {
     @Override
     public void update(ConnectInfo connectInfo) {
         var sql = this.buildUpdateSql(connectInfo);
-        System.out.println("update sql -> " + sql);
         DerbyUtils.getInstance().exec(sql);
     }
 
@@ -60,7 +59,6 @@ public class ConnectServiceImpl implements ConnectService {
     @Override
     public void save(ConnectInfo connectInfo) {
         var sql = this.buildInsertSql(connectInfo);
-        System.out.println("save sql -> " + sql);
         DerbyUtils.getInstance().exec(sql);
     }
 

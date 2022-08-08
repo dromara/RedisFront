@@ -28,7 +28,6 @@ public class TextEditor extends JPanel {
     }
 
     public TextEditor() {
-        System.out.println();
         this.textArea = new RSyntaxTextArea() {
             {
                 setRTextAreaUI(new RSyntaxTextAreaUI(this) {

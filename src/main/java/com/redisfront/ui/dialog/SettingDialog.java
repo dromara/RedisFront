@@ -135,7 +135,7 @@ public class SettingDialog extends AbstractDialog<Void> {
     }
 
     private void initFontSizeComboBox() {
-        ArrayList<String> fontSizes = new ArrayList<>(Arrays.asList(
+        var fontSizes = new ArrayList<>(Arrays.asList(
                 "10", "11", "12", "13", "14", "15", "16", "17", "18"));
         for (String fontSize : fontSizes) {
             fontSizeComboBox.addItem(fontSize);
@@ -157,9 +157,9 @@ public class SettingDialog extends AbstractDialog<Void> {
 
     private void initFontComboBox() {
         //获取系统全部字体
-        GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        List<String> availableFontFamilyNames = List.of(graphicsEnvironment.getAvailableFontFamilyNames());
-        Set<String> families = new HashSet<>(Arrays.asList(
+        var graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        var availableFontFamilyNames = List.of(graphicsEnvironment.getAvailableFontFamilyNames());
+        var families = new HashSet<>(Arrays.asList(
                 "Arial", "Cantarell", "Comic Sans MS", "Courier New", "DejaVu Sans",
                 "Dialog", "Liberation Sans", "Monospaced", "Microsoft YaHei UI", "Noto Sans", "Roboto",
                 "SansSerif", "Segoe UI", "Serif", "Tahoma", "Ubuntu", "Verdana"));
@@ -209,16 +209,16 @@ public class SettingDialog extends AbstractDialog<Void> {
     }
 
     private void updateFontSizeHandler(String fontSize) {
-        Font font = UIManager.getFont("defaultFont");
-        Font newFont = font.deriveFont(Float.parseFloat(fontSize));
+        var font = UIManager.getFont("defaultFont");
+        var newFont = font.deriveFont(Float.parseFloat(fontSize));
         UIManager.put("defaultFont", newFont);
         FlatLaf.updateUI();
     }
 
     private void updateFontNameHandler(String fontFamily) {
         FlatAnimatedLafChange.showSnapshot();
-        Font font = UIManager.getFont("defaultFont");
-        Font newFont = StyleContext.getDefaultStyleContext().getFont(fontFamily, font.getStyle(), font.getSize());
+        var font = UIManager.getFont("defaultFont");
+        var newFont = StyleContext.getDefaultStyleContext().getFont(fontFamily, font.getStyle(), font.getSize());
         newFont = FlatUIUtils.nonUIResource(newFont);
         UIManager.put("defaultFont", newFont);
         FlatLaf.updateUI();
@@ -241,8 +241,8 @@ public class SettingDialog extends AbstractDialog<Void> {
         String fontSizeStr = (String) fontSizeComboBox.getSelectedItem();
         PrefUtils.getState().put(Const.KEY_FONT_SIZE, fontSizeStr);
         //语言
-        Map.Entry<?, ?> newLanguage = (Map.Entry<?, ?>) languageComboBox.getSelectedItem();
-        String oldLanguage = PrefUtils.getState().get(Const.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
+        var newLanguage = (Map.Entry<?, ?>) languageComboBox.getSelectedItem();
+        var oldLanguage = PrefUtils.getState().get(Const.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
         assert newLanguage != null;
         if (Fn.notEqual(newLanguage.getValue(), oldLanguage)) {
             Locale.setDefault(Locale.forLanguageTag((String) newLanguage.getValue()));
@@ -272,7 +272,7 @@ public class SettingDialog extends AbstractDialog<Void> {
         themeNameComboBox = new JComboBox<>() {
             @Override
             public void setSelectedItem(Object item) {
-                ThemeUtils.ThemeInfo themeInfo = (ThemeUtils.ThemeInfo) item;
+                var themeInfo = (ThemeUtils.ThemeInfo) item;
                 if (themeInfo == null) {
                     return;
                 }
@@ -288,7 +288,7 @@ public class SettingDialog extends AbstractDialog<Void> {
                     @Override
                     public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                         super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                        ThemeUtils.ThemeInfo themeInfo = (ThemeUtils.ThemeInfo) value;
+                        var themeInfo = (ThemeUtils.ThemeInfo) value;
                         if (themeInfo.name().startsWith("Material Theme UI Lite /")) {
                             setText(themeInfo.name().replace("Material Theme UI Lite /", ""));
                         }

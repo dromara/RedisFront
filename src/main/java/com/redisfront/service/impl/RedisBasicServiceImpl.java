@@ -30,9 +30,11 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public String flushdb(ConnectInfo connectInfo) {
+
         var logInfo = RedisBasicService.buildLogInfo(connectInfo)
                 .setInfo("flushdb".toUpperCase());
         LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, RedisAdvancedClusterCommands::flushdb);
         } else {
@@ -42,9 +44,11 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public String flushall(ConnectInfo connectInfo) {
+
         var logInfo = RedisBasicService.buildLogInfo(connectInfo)
                 .setInfo("flushall".toUpperCase());
         LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, RedisAdvancedClusterCommands::flushall);
         } else {
@@ -54,9 +58,11 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public KeyScanCursor<String> scan(ConnectInfo connectInfo, ScanArgs scanArgs) {
+
         ScanContext.MyScanArgs myScanArgs = (ScanContext.MyScanArgs) scanArgs;
         var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("SCAN ".concat(myScanArgs.getCommandStr()));
         LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.scan(scanArgs));
         } else {
@@ -66,6 +72,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public KeyScanCursor<String> scan(ConnectInfo connectInfo, ScanCursor scanCursor, ScanArgs scanArgs) {
+
         ScanContext.MyScanArgs myScanArgs = (ScanContext.MyScanArgs) scanArgs;
         var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("SCAN ".concat(scanCursor.getCursor()).concat(myScanArgs.getCommandStr()));
         LogsDialog.appendLog(logInfo);
@@ -79,6 +86,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public KeyScanCursor<String> scan(ConnectInfo connectInfo, ScanCursor scanCursor) {
+
         var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("SCAN ".concat(scanCursor.getCursor()));
         LogsDialog.appendLog(logInfo);
 
@@ -127,9 +135,11 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public Long del(ConnectInfo connectInfo, String key) {
+
         var logInfo = RedisBasicService.buildLogInfo(connectInfo)
                 .setInfo("del ".concat(key).toUpperCase());
         LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.del(key));
         } else {
@@ -139,9 +149,11 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public String rename(ConnectInfo connectInfo, String key, String newKey) {
+
         var logInfo = RedisBasicService.buildLogInfo(connectInfo)
                 .setInfo("rename ".concat(key).concat(" ").concat(newKey).toUpperCase());
         LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.rename(key, newKey));
         } else {
@@ -151,9 +163,11 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public Boolean expire(ConnectInfo connectInfo, String key, Long ttl) {
+
         var logInfo = RedisBasicService.buildLogInfo(connectInfo)
                 .setInfo("expire ".concat(key).toUpperCase());
         LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.expire(key, ttl));
         } else {
@@ -163,9 +177,11 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public String type(ConnectInfo connectInfo, String key) {
+
         var logInfo = RedisBasicService.buildLogInfo(connectInfo)
                 .setInfo("type ".concat(key).toUpperCase());
         LogsDialog.appendLog(logInfo);
+
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.type(key));
         } else {

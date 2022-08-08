@@ -20,9 +20,9 @@ val fifesoftVersion = "3.2.0"
 val derbyVersion = "10.15.2.0"
 val lettuceVersion = "6.2.0.RELEASE"
 val logbackVersion = "1.2.11"
-val jfreechartVersion = "1.5.3"
 
 repositories {
+    maven ("https://maven.aliyun.com/repository/public/")
     mavenLocal()
     mavenCentral()
 }
@@ -51,7 +51,7 @@ dependencies {
     implementation("io.lettuce:lettuce-core:${lettuceVersion}")
     implementation("io.netty:netty-common:4.1.79.Final")
     implementation("com.formdev:flatlaf:${flatlafVersion}")
-    implementation("com.jfree:jfreechart:${jfreechartVersion}")
+    implementation("org.jfree:jfreechart:1.5.3")
     implementation("com.formdev:flatlaf-swingx:${flatlafVersion}")
     implementation("com.formdev:flatlaf-intellij-themes:${flatlafVersion}")
     implementation("com.formdev:flatlaf-extras:${flatlafVersion}")

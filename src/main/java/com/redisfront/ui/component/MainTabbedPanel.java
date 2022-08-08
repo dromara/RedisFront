@@ -11,6 +11,7 @@ import com.redisfront.commons.util.FutureUtils;
 import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
+import com.redisfront.ui.form.MainNoneForm;
 
 import javax.swing.*;
 import java.awt.*;
@@ -56,19 +57,19 @@ public class MainTabbedPanel extends JPanel {
         buf.append("td { padding: 0 10 0 0; }");
         buf.append("</style><table>");
         var serverInfo = RedisBasicService.service.getServerInfo(connectInfo);
-        String version = (String) serverInfo.get("redis_version");
+        var version = (String) serverInfo.get("redis_version");
         appendRow(buf, "Redis版本", version);
 
-        String port = (String) serverInfo.get("tcp_port");
+        var port = (String) serverInfo.get("tcp_port");
         appendRow(buf, "连接端口", port);
 
-        String os = (String) serverInfo.get("os");
+        var os = (String) serverInfo.get("os");
         appendRow(buf, "操作系统", os);
 
-        String redisMode = (String) serverInfo.get("redis_mode");
+        var redisMode = (String) serverInfo.get("redis_mode");
         appendRow(buf, "Redis模式", redisMode);
 
-        String configFile = (String) serverInfo.get("config_file");
+        var configFile = (String) serverInfo.get("config_file");
         appendRow(buf, "配置文件", configFile);
 
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
@@ -110,9 +111,9 @@ public class MainTabbedPanel extends JPanel {
         memoryInfo.setIcon(UI.CONTENT_TAB_MEMORY_ICON);
         rightToolBar.add(memoryInfo);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, rightToolBar);
-        contentPanel.addTab("界面", UI.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(connectInfo));
+        contentPanel.addTab("数据", UI.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(connectInfo));
         contentPanel.addTab("命令", UI.CONTENT_TAB_COMMAND_ICON, RedisTerminal.newInstance(connectInfo));
-//        contentPanel.addTab("信息", UI.CONTENT_TAB_INFO_ICON, new JPanel());
+        contentPanel.addTab("监控", UI.CONTENT_TAB_INFO_ICON, MainNoneForm.getInstance().getContentPanel());
 
         //tab 切换事件
         contentPanel.addChangeListener(e -> {
@@ -133,7 +134,7 @@ public class MainTabbedPanel extends JPanel {
     private void threadInit(ConnectInfo connectInfo, FlatLabel keysInfo, FlatLabel cupInfo, FlatLabel memoryInfo) {
         scheduledExecutor.scheduleAtFixedRate(() -> {
                     CompletableFuture<Void> keyInfoFuture = FutureUtils.supplyAsync(() -> {
-                        String[] keyInfo = new String[2];
+                        var keyInfo = new String[2];
                         if (Fn.notEqual(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
                             var keySpace = RedisBasicService.service.getKeySpace(connectInfo);
                             var count = keySpace.values().stream()
