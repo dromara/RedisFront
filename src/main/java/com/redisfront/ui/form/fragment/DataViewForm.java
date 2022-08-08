@@ -35,7 +35,6 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.List;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -74,6 +73,7 @@ public class DataViewForm {
     private JTextField currentCountField;
     private JTextField allCountField;
     private JButton loadMoreBtn;
+    private JButton closeBtn;
     private TextEditor textEditor;
     private JTextField fieldOrScoreField;
 
@@ -85,7 +85,7 @@ public class DataViewForm {
     private final Map<String, ScanContext<Map.Entry<String, String>>> scanHashContextMap;
 
     private ActionHandler deleteActionHandler;
-
+    private ActionHandler closeActionHandler;
     private ActionHandler refreshBeforeHandler;
     private ActionHandler refreshAfterHandler;
 
@@ -106,6 +106,11 @@ public class DataViewForm {
 
     public void setDeleteActionHandler(ActionHandler handler) {
         this.deleteActionHandler = handler;
+    }
+
+    public DataViewForm setCloseActionHandler(ActionHandler closeActionHandler) {
+        this.closeActionHandler = closeActionHandler;
+        return this;
     }
 
     private void refreshDisableBtn() {
@@ -291,6 +296,10 @@ public class DataViewForm {
         pageSizeLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
         allCountField.setEnabled(false);
         allCountField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, pageSizeLabel);
+
+        closeBtn.setText("关闭");
+        closeBtn.setToolTipText("关闭本页");
+        closeBtn.addActionListener(e -> closeActionHandler.handle());
 
         dataTableInit();
     }
@@ -851,6 +860,9 @@ public class DataViewForm {
         }, BorderLayout.CENTER);
 
         basicPanel = new JPanel();
+
+        closeBtn = new JButton(UI.CLOSE_ICON);
+
     }
 
 
@@ -890,17 +902,17 @@ public class DataViewForm {
         ttlField = new JTextField();
         basicPanel.add(ttlField, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
         final JPanel panel1 = new JPanel();
-        panel1.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
+        panel1.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         basicPanel.add(panel1, new GridConstraints(1, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         panel1.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 5, 0, 0), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         lengthLabel = new JLabel();
         lengthLabel.setText("");
         panel1.add(lengthLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer1 = new Spacer();
-        panel1.add(spacer1, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         keySizeLabel = new JLabel();
         keySizeLabel.setText("");
         panel1.add(keySizeLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        closeBtn.setText("");
+        basicPanel.add(closeBtn, new GridConstraints(1, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         dataPanel = new JPanel();
         dataPanel.setLayout(new BorderLayout(0, 0));
         bodyPanel.add(dataPanel, BorderLayout.CENTER);
@@ -920,8 +932,8 @@ public class DataViewForm {
         panel2.add(panel3, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         tableSearchField = new JTextField();
         panel3.add(tableSearchField, new GridConstraints(0, 0, 1, 5, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
-        final Spacer spacer2 = new Spacer();
-        panel3.add(spacer2, new GridConstraints(5, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final Spacer spacer1 = new Spacer();
+        panel3.add(spacer1, new GridConstraints(5, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         tableDelBtn = new JButton();
         tableDelBtn.setEnabled(true);
         tableDelBtn.setText("");

@@ -48,6 +48,8 @@ public class DataSplitPanel extends JSplitPane {
                 setRightComponent(newNonePanel());
             });
 
+            dataViewForm.setCloseActionHandler(() -> setRightComponent(newNonePanel()));
+
             //加载数据并展示
             FutureUtils.runAsync(() -> dataViewForm.dataChangeActionPerformed(treeNodeInfo.key(),
                     () -> SwingUtilities.invokeLater(() -> setRightComponent(
