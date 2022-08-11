@@ -51,11 +51,38 @@ public class MainWindowForm {
         contentPanel.add(MainNoneForm.getInstance().getContentPanel(), BorderLayout.CENTER);
     }
 
-    public void addTabActionPerformed(ConnectInfo connectInfo) {
-        {  //环境判断
-            FutureUtils.supplyAsync(() -> {
+    public void addTabActionPerformed(final ConnectInfo connectInfo) {
+        var addTabWorker = new SwingWorker<ConnectInfo, Integer>() {
+            @Override
+            protected void done() {
+                try {
+                    var mainTabbedPanel = MainTabbedPanel.newInstance(get());
+                    LoadingUtils.closeDialog();
+                    tabPanel.addTab(get().title(), UI.MAIN_TAB_DATABASE_ICON, mainTabbedPanel);
+                    tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
+                    contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
+                    toolBar.setVisible(true);
+                    LoadingUtils.showDialog("加载key中...");
+                } catch (Exception ex) {
+                    LoadingUtils.closeDialog();
+                    AlertUtils.showErrorDialog("Error", ex.getCause().getCause());
+                }
+
+            }
+
+            @Override
+            protected ConnectInfo doInBackground() {
                 connectInfo.setRedisModeEnum(RedisBasicService.service.getRedisModeEnum(connectInfo));
                 var prototype = connectInfo.clone();
+
+                FutureUtils.runAsync(() -> {
+                    if (Fn.equal(prototype.id(), 0)) {
+                        ConnectService.service.save(prototype);
+                    } else {
+                        ConnectService.service.update(prototype);
+                    }
+                });
+
                 if (Enum.RedisMode.SENTINEL == connectInfo.redisModeEnum()) {
                     var masterList = LettuceUtils.sentinelExec(connectInfo, RedisSentinelCommands::masters);
                     var master = masterList.stream().findAny().orElseThrow();
@@ -88,32 +115,10 @@ public class MainWindowForm {
                     }
                     LoadingUtils.showDialog(String.format("正在连接 - %s:%s", connectInfo.host(), connectInfo.port()));
                 }
-                return prototype;
-            }, prototype -> {
-                if (Fn.equal(prototype.id(), 0)) {
-                    ConnectService.service.save(prototype);
-                } else {
-                    ConnectService.service.update(prototype);
-                }
-            }).join();
-        }
-
-        { //主界面加载
-            FutureUtils.runAsync(() -> {
-                var mainTabbedPanel = MainTabbedPanel.newInstance(connectInfo);
-                SwingUtilities.invokeLater(() -> {
-                    LoadingUtils.closeDialog();
-                    this.tabPanel.addTab(connectInfo.title(), UI.MAIN_TAB_DATABASE_ICON, mainTabbedPanel);
-                    this.tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
-                    this.contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
-                    this.toolBar.setVisible(true);
-                    LoadingUtils.showDialog("loading key...");
-                });
-            }, throwable -> {
-                LoadingUtils.closeDialog();
-                AlertUtils.showErrorDialog("Error", throwable.getCause().getCause());
-            }).join();
-        }
+                return connectInfo;
+            }
+        };
+        addTabWorker.execute();
     }
 
     private void createUIComponents() {

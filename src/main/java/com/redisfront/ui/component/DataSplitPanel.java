@@ -51,27 +51,22 @@ public class DataSplitPanel extends JSplitPane {
             dataViewForm.setCloseActionHandler(() -> setRightComponent(newNonePanel()));
 
             //加载数据并展示
-            FutureUtils.runAsync(() -> dataViewForm.dataChangeActionPerformed(treeNodeInfo.key(),
-                    () -> SwingUtilities.invokeLater(() -> setRightComponent(
-                            new JPanel() {
-                                {
-                                    setLayout(new BorderLayout());
-                                    setBorder(new EmptyBorder(0, 5, 0, 0));
-                                    add(new JPanel() {
-                                        @Override
-                                        public void updateUI() {
-                                            super.updateUI();
-                                            var flatLineBorder = new FlatLineBorder(new Insets(0, 2, 0, 0), UIManager.getColor("Component.borderColor"));
-                                            setBorder(flatLineBorder);
-                                            setLayout(new BorderLayout());
-                                            add(LoadingPanel.newInstance(), BorderLayout.CENTER);
-                                        }
-                                    }, BorderLayout.CENTER);
-                                }
-                            }
-                    )),
-                    () -> SwingUtilities.invokeLater(() -> setRightComponent(dataViewForm.contentPanel()))
-            ));
+            dataViewForm.dataChangeActionPerformed(treeNodeInfo.key(), () -> SwingUtilities.invokeLater(() -> setRightComponent(new JPanel() {
+                {
+                    setLayout(new BorderLayout());
+                    setBorder(new EmptyBorder(0, 5, 0, 0));
+                    add(new JPanel() {
+                        @Override
+                        public void updateUI() {
+                            super.updateUI();
+                            var flatLineBorder = new FlatLineBorder(new Insets(0, 2, 0, 0), UIManager.getColor("Component.borderColor"));
+                            setBorder(flatLineBorder);
+                            setLayout(new BorderLayout());
+                            add(LoadingPanel.newInstance(), BorderLayout.CENTER);
+                        }
+                    }, BorderLayout.CENTER);
+                }
+            })), () -> SwingUtilities.invokeLater(() -> setRightComponent(dataViewForm.contentPanel())));
         });
 
         this.setLeftComponent(dataSearchForm.getContentPanel());

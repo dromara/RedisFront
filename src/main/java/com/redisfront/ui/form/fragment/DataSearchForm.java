@@ -94,7 +94,7 @@ public class DataSearchForm {
 
     public synchronized void loadTreeModelData(String key) {
         try {
-            LoadingUtils.showDialog("loading key...");
+            LoadingUtils.showDialog("加载key中...");
             scanBeforeProcess();
             var scanKeysContext = scanKeysContextMap.get(connectInfo.database());
 
@@ -204,28 +204,43 @@ public class DataSearchForm {
     }
 
     public void scanKeysActionPerformed() {
-        if (Fn.isEmpty(searchTextField.getText())) {
-            FutureUtils.runAsync(() -> loadTreeModelData("*"), throwable -> {
-                var cause = throwable.getCause();
-                if (cause instanceof RedisCommandExecutionException) {
-                    scanBeforeProcess();
-                    addBtn.setEnabled(false);
-                    AlertUtils.showInformationDialog("当前环境不支持该命令", cause);
+        new SwingWorker<>() {
+
+
+            @Override
+            protected Object doInBackground() throws Exception {
+
+                if (Fn.isEmpty(searchTextField.getText())) {
+                    try {
+                        loadTreeModelData("*");
+                    } catch (Exception throwable) {
+                        var cause = throwable.getCause();
+                        if (cause instanceof RedisCommandExecutionException) {
+                            scanBeforeProcess();
+                            addBtn.setEnabled(false);
+                            AlertUtils.showInformationDialog("当前环境不支持该命令", cause);
+                        } else {
+                            AlertUtils.showErrorDialog("ERROR", cause);
+                        }
+                    }
                 } else {
-                    AlertUtils.showErrorDialog("ERROR", cause);
+                    try {
+                        loadTreeModelData(searchTextField.getText());
+                    } catch (Exception throwable) {
+                        var cause = throwable.getCause();
+                        if (cause instanceof RedisCommandExecutionException) {
+                            scanBeforeProcess();
+                            addBtn.setEnabled(false);
+                            AlertUtils.showInformationDialog("当前环境不支持该命令", cause);
+                        } else {
+                            AlertUtils.showErrorDialog("ERROR", cause);
+                        }
+                    }
                 }
-            });
-        } else {
-            FutureUtils.runAsync(() -> loadTreeModelData(searchTextField.getText()), throwable -> {
-                var cause = throwable.getCause();
-                if (cause instanceof RedisCommandExecutionException) {
-                    scanBeforeProcess();
-                    AlertUtils.showInformationDialog("当前环境不支持该命令", cause);
-                } else {
-                    AlertUtils.showErrorDialog("ERROR", cause);
-                }
-            });
-        }
+                return null;
+            }
+        }.execute();
+
     }
 
     public void scanBeforeProcess() {
