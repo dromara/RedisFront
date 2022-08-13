@@ -1,13 +1,39 @@
-@file:Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+@file:Suppress("UNCHECKED_CAST", "PLATFORM_CLASS_MAPPED_TO_KOTLIN")
 
+import groovy.lang.Closure
+import io.github.fvarrui.javapackager.gradle.PackagePluginExtension
+import io.github.fvarrui.javapackager.gradle.PackageTask
+import io.github.fvarrui.javapackager.model.HeaderType
+import io.github.fvarrui.javapackager.model.Platform
+import io.github.fvarrui.javapackager.model.WindowsConfig
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import java.lang.Boolean
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.lang.Boolean
+import kotlin.RuntimeException
+import kotlin.String
+import kotlin.Suppress
+import kotlin.to
+import io.github.fvarrui.javapackager.model.*
 
 plugins {
     `java-library`
 }
+
+val javaHome: String = System.getProperty("java.home")
+
+buildscript {
+    repositories {
+        maven("https://maven.aliyun.com/repository/public/")
+        mavenLocal()
+        mavenCentral()
+        dependencies {
+            classpath("io.github.fvarrui:javapackager:1.6.7")
+        }
+    }
+}
+
+plugins.apply("io.github.fvarrui.javapackager.plugin")
 
 val releaseVersion = "1.0"
 val developmentVersion = "1.0-SNAPSHOT"
@@ -21,11 +47,19 @@ val derbyVersion = "10.15.2.0"
 val lettuceVersion = "6.2.0.RELEASE"
 val logbackVersion = "1.2.11"
 
-repositories {
-    maven ("https://maven.aliyun.com/repository/public/")
-    mavenLocal()
-    mavenCentral()
-}
+val fatJar: kotlin.Boolean = false
+
+
+val requireModules = listOf(
+    "java.desktop",
+    "java.prefs",
+    "java.base",
+    "java.logging",
+    "java.sql",
+    "java.naming"
+)
+
+val currentJdk = File(javaHome)
 
 if (JavaVersion.current() < JavaVersion.VERSION_17)
     throw RuntimeException("compile required Java ${JavaVersion.VERSION_17}, current Java ${JavaVersion.current()}")
@@ -42,12 +76,11 @@ println("Current Date:  ${LocalDateTime.now().format(dateTimeFormatter)}")
 println("-------------------------------------------------------------------------------")
 println()
 
-dependencies {
 
+dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
-
     implementation("io.lettuce:lettuce-core:${lettuceVersion}")
     implementation("io.netty:netty-common:4.1.79.Final")
     implementation("com.formdev:flatlaf:${flatlafVersion}")
@@ -70,7 +103,6 @@ dependencies {
     implementation("com.jcraft:jsch:0.1.55")
 }
 
-
 tasks.test {
     useJUnitPlatform()
     testLogging.exceptionFormat = TestExceptionFormat.FULL
@@ -84,6 +116,7 @@ tasks.compileJava {
 }
 
 tasks.jar {
+
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     manifest {
@@ -101,18 +134,66 @@ tasks.jar {
     exclude("META-INF/*.LIST")
     exclude("META-INF/*.factories")
 
-    from({
-        configurations.runtimeClasspath.get()
-            .filter { it.name.endsWith("jar") }
-            .map {
-                zipTree(it).matching {
-                    exclude("META-INF/LICENSE")
+    if (fatJar) {
+        from({
+            configurations.runtimeClasspath.get()
+                .filter { it.name.endsWith("jar") }
+                .map {
+                    zipTree(it).matching {
+                        exclude("META-INF/LICENSE")
+                    }
                 }
-            }
-    })
+        })
+    }
 
     from("${rootDir}/LICENSE") {
         into("META-INF")
     }
 }
 
+
+
+configure<PackagePluginExtension> {
+    mainClass("com.redisfront.RedisFrontApplication")
+    jreDirectoryName("runtimes")
+    packagingJdk(currentJdk)
+    modules(requireModules)
+    customizedJre(true)
+    bundleJre(true)
+}
+
+tasks.register<PackageTask>("packageForWindows") {
+    description = "package For Windows"
+    platform = Platform.windows
+    isCreateZipball = false
+    winConfig(closureOf<WindowsConfig> {
+        headerType = HeaderType.console
+        isGenerateSetup = true
+        isGenerateMsm = true
+        isGenerateMsi = true
+    } as Closure<WindowsConfig>)
+    dependsOn(tasks.build)
+}
+
+tasks.register<PackageTask>("packageForLinux") {
+    description = "package For Linux"
+    platform = Platform.linux
+    linuxConfig(
+        closureOf<LinuxConfig> {
+            isGenerateRpm = true
+            isGenerateRpm = true
+        } as Closure<LinuxConfig>
+    )
+    dependsOn(tasks.build)
+}
+
+tasks.register<PackageTask>("packageForMac") {
+    description = "package For Mac"
+    platform = Platform.mac
+    macConfig(
+        closureOf<MacConfig> {
+            isGenerateDmg = true
+        } as Closure<MacConfig>
+    )
+    dependsOn(tasks.build)
+}

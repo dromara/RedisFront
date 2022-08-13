@@ -11,14 +11,14 @@ public class FutureUtilsTest {
         FutureUtils.init();
         FutureUtils.runAsync(() -> {
             try {
-                Thread.sleep(5000);
+                Thread.sleep(50);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
             throw new RuntimeException("111111111");
         }, throwable -> System.out.println("捕获到异常：" + throwable.getMessage()));
 
-        Thread.sleep(60000);
+        Thread.sleep(50);
     }
 
 }
