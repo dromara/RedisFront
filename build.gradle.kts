@@ -21,6 +21,7 @@ plugins {
 }
 
 val javaHome: String = System.getProperty("java.home")
+val appName: String = "RedisFront"
 
 buildscript {
     repositories {
@@ -76,7 +77,6 @@ println("Current Date:  ${LocalDateTime.now().format(dateTimeFormatter)}")
 println("-------------------------------------------------------------------------------")
 println()
 
-
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.0")
@@ -103,6 +103,7 @@ dependencies {
     implementation("com.jcraft:jsch:0.1.55")
 }
 
+
 tasks.test {
     useJUnitPlatform()
     testLogging.exceptionFormat = TestExceptionFormat.FULL
@@ -116,7 +117,6 @@ tasks.compileJava {
 }
 
 tasks.jar {
-
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     manifest {
@@ -151,15 +151,17 @@ tasks.jar {
     }
 }
 
-
+//打包配置
 
 configure<PackagePluginExtension> {
     mainClass("com.redisfront.RedisFrontApplication")
-    jreDirectoryName("runtimes")
+    organizationName(project.name)
+    organizationUrl("https://www.redisfront.com")
     packagingJdk(currentJdk)
-    modules(requireModules)
-    customizedJre(true)
     bundleJre(true)
+    jreDirectoryName("runtimes")
+    customizedJre(true)
+    modules(requireModules)
 }
 
 tasks.register<PackageTask>("packageForWindows") {
@@ -167,10 +169,10 @@ tasks.register<PackageTask>("packageForWindows") {
     platform = Platform.windows
     isCreateZipball = false
     winConfig(closureOf<WindowsConfig> {
-        headerType = HeaderType.console
+        headerType = HeaderType.gui
         isGenerateSetup = true
-        isGenerateMsm = true
-        isGenerateMsi = true
+        isAdministratorRequired=true
+        isCreateZipball=true
     } as Closure<WindowsConfig>)
     dependsOn(tasks.build)
 }
@@ -197,3 +199,4 @@ tasks.register<PackageTask>("packageForMac") {
     )
     dependsOn(tasks.build)
 }
+

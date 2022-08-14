@@ -8,8 +8,8 @@ import java.awt.*;
 import java.util.List;
 
 public class UI {
-    public static final List<Image> MAIN_FRAME_ICON_IMAGES = FlatSVGUtils.createWindowIconImages("/svg/redis.svg");
-    public static final Icon REDIS_ICON = new FlatSVGIcon("svg/redis.svg");
+    public static final List<Image> MAIN_FRAME_ICON_IMAGES = FlatSVGUtils.createWindowIconImages("/svg/redisfront.svg");
+    public static final Icon REDIS_ICON = new FlatSVGIcon("svg/redisfront.svg");
     public static final Icon CLOSE_ICON = new FlatSVGIcon("icons/close.svg");
     public static final Icon LOGS_ICON = new FlatSVGIcon("icons/RecentlyUsed.svg");
     public static final Icon PLUS_ICON = new FlatSVGIcon("icons/add.svg");

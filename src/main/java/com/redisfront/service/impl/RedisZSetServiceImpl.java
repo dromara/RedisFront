@@ -32,8 +32,10 @@ public class RedisZSetServiceImpl implements RedisZSetService {
         }
     }
 
+
+    @SafeVarargs
     @Override
-    public Long zadd(ConnectInfo connectInfo, String key, ScoredValue<String>... scoredValues) {
+    public final Long zadd(ConnectInfo connectInfo, String key, ScoredValue<String>... scoredValues) {
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.zadd(key, scoredValues));
         } else {

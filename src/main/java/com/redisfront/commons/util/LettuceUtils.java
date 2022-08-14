@@ -115,7 +115,6 @@ public class LettuceUtils {
     public synchronized static void run(ConnectInfo connectInfo, Consumer<RedisCommands<String, String>> consumer) {
         var redisURI = getRedisURI(connectInfo);
         var redisClient = RedisClient.create(redisURI);
-        redisClient.setDefaultTimeout(Duration.ofMinutes(1));
         try {
             JschUtils.openSession(connectInfo);
             try (var connection = redisClient.connect()) {
@@ -135,7 +134,6 @@ public class LettuceUtils {
     public synchronized static <T> T exec(ConnectInfo connectInfo, Function<RedisCommands<String, String>, T> function) {
         var redisURI = getRedisURI(connectInfo);
         var redisClient = RedisClient.create(redisURI);
-        redisClient.setDefaultTimeout(Duration.ofMinutes(1));
         try {
             JschUtils.openSession(connectInfo);
             try (var connection = redisClient.connect()) {
