@@ -152,9 +152,9 @@ tasks.jar {
 }
 
 //打包配置
-
 configure<PackagePluginExtension> {
     mainClass("com.redisfront.RedisFrontApplication")
+    iconFile(getIconFile("redisfront_256x256.ico"))
     organizationName(project.name)
     organizationUrl("https://www.redisfront.com")
     packagingJdk(currentJdk)
@@ -169,10 +169,13 @@ tasks.register<PackageTask>("packageForWindows") {
     platform = Platform.windows
     isCreateZipball = false
     winConfig(closureOf<WindowsConfig> {
+        icoFile = getIconFile("redisfront_256x256.ico")
         headerType = HeaderType.gui
+        isDisableDirPage =false
+        isDisableFinishedPage = false
+        isDisableWelcomePage = false
         isGenerateSetup = true
-        isAdministratorRequired=true
-        isCreateZipball=true
+        isCreateZipball = true
     } as Closure<WindowsConfig>)
     dependsOn(tasks.build)
 }
@@ -182,6 +185,7 @@ tasks.register<PackageTask>("packageForLinux") {
     platform = Platform.linux
     linuxConfig(
         closureOf<LinuxConfig> {
+            pngFile = getIconFile("redisfront_256x256.png")
             isGenerateRpm = true
             isGenerateRpm = true
         } as Closure<LinuxConfig>
@@ -194,9 +198,13 @@ tasks.register<PackageTask>("packageForMac") {
     platform = Platform.mac
     macConfig(
         closureOf<MacConfig> {
+            icnsFile = getIconFile("redisfront_256x256.icns")
             isGenerateDmg = true
         } as Closure<MacConfig>
     )
     dependsOn(tasks.build)
 }
 
+fun getIconFile(fileName: String): File {
+    return File(projectDir.absolutePath + File.separator + "assets" + File.separator + fileName)
+}
