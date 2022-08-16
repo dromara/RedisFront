@@ -301,5 +301,4 @@ public class AddKeyDialog extends AbstractDialog<String> {
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
-
 }

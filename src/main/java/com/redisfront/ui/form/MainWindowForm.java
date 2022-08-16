@@ -64,8 +64,13 @@ public class MainWindowForm {
                     toolBar.setVisible(true);
                     LoadingUtils.showDialog("加载key中...");
                 } catch (Exception ex) {
+                    ex.printStackTrace();
                     LoadingUtils.closeDialog();
-                    AlertUtils.showErrorDialog("Error", ex.getCause().getCause());
+                    if (ex.getCause() != null) {
+                        AlertUtils.showErrorDialog("Error", ex.getCause().getCause());
+                    } else {
+                        AlertUtils.showErrorDialog("Error", ex);
+                    }
                 }
 
             }
@@ -196,5 +201,4 @@ public class MainWindowForm {
     public JComponent $$$getRootComponent$$$() {
         return contentPanel;
     }
-
 }

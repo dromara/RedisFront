@@ -999,5 +999,4 @@ public class DataViewForm {
     public JComponent $$$getRootComponent$$$() {
         return contentPanel;
     }
-
 }

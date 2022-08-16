@@ -12,6 +12,7 @@ import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
 import com.redisfront.ui.form.MainNoneForm;
+import com.redisfront.ui.form.fragment.DataChartsForm;
 
 import javax.swing.*;
 import java.awt.*;
@@ -113,7 +114,9 @@ public class MainTabbedPanel extends JPanel {
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, rightToolBar);
         contentPanel.addTab("命令", UI.CONTENT_TAB_COMMAND_ICON, RedisTerminal.newInstance(connectInfo));
         contentPanel.addTab("主页", UI.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(connectInfo));
-        contentPanel.addTab("信息", UI.CONTENT_TAB_INFO_ICON, MainNoneForm.getInstance().getContentPanel());
+
+        var dataChartsForm = DataChartsForm.getInstance(connectInfo);
+        contentPanel.addTab("信息", UI.CONTENT_TAB_INFO_ICON, dataChartsForm.contentPanel());
         contentPanel.setSelectedIndex(1);
 
         //tab 切换事件

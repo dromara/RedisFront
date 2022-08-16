@@ -728,5 +728,4 @@ public class DataSearchForm {
     public JComponent $$$getRootComponent$$$() {
         return contentPanel;
     }
-
 }

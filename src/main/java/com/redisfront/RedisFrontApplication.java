@@ -25,7 +25,6 @@ public class RedisFrontApplication {
     public static void main(String[] args) {
 
         if (SystemInfo.isMacOS) {
-            System.setProperty("apple.awt.UIElement", "true");
             System.setProperty("apple.laf.useScreenMenuBar", "true");
             System.setProperty("apple.awt.application.name", "RedisFront");
             System.setProperty("apple.awt.application.appearance", "system");
@@ -61,11 +60,6 @@ public class RedisFrontApplication {
             LocaleUtils.init();
 
             DerbyUtils.init();
-
-            FlatInspector.install("ctrl shift alt X");
-
-            FlatUIDefaultsInspector.install("ctrl shift alt Y");
-
 
             frame = new RedisFrontMainFrame();
             frame.setMinimumSize(new Dimension(1100, 800));

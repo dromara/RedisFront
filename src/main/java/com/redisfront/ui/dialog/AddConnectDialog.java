@@ -561,5 +561,4 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
-
 }
