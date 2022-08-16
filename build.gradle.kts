@@ -3,9 +3,8 @@
 import groovy.lang.Closure
 import io.github.fvarrui.javapackager.gradle.PackagePluginExtension
 import io.github.fvarrui.javapackager.gradle.PackageTask
-import io.github.fvarrui.javapackager.model.HeaderType
+import io.github.fvarrui.javapackager.model.*
 import io.github.fvarrui.javapackager.model.Platform
-import io.github.fvarrui.javapackager.model.WindowsConfig
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import java.lang.Boolean
 import java.time.LocalDateTime
@@ -14,7 +13,6 @@ import kotlin.RuntimeException
 import kotlin.String
 import kotlin.Suppress
 import kotlin.to
-import io.github.fvarrui.javapackager.model.*
 
 plugins {
     `java-library`
@@ -36,8 +34,8 @@ buildscript {
 
 plugins.apply("io.github.fvarrui.javapackager.plugin")
 
-val releaseVersion = "1.0"
-val developmentVersion = "1.0-SNAPSHOT"
+val releaseVersion = "1.0.0"
+val developmentVersion = "1.0.0.B"
 
 version = if (Boolean.getBoolean("release")) releaseVersion else developmentVersion
 
@@ -151,17 +149,13 @@ tasks.jar {
     }
 }
 
-//打包配置
 configure<PackagePluginExtension> {
     mainClass("com.redisfront.RedisFrontApplication")
-    iconFile(getIconFile("redisfront_256x256.ico"))
-    organizationName(project.name)
-    organizationUrl("https://www.redisfront.com")
     packagingJdk(currentJdk)
     bundleJre(true)
-    jreDirectoryName("runtimes")
     customizedJre(true)
     modules(requireModules)
+    jreDirectoryName("runtimes")
 }
 
 tasks.register<PackageTask>("packageForWindows") {
@@ -169,9 +163,9 @@ tasks.register<PackageTask>("packageForWindows") {
     platform = Platform.windows
     isCreateZipball = false
     winConfig(closureOf<WindowsConfig> {
-        icoFile = getIconFile("redisfront_256x256.ico")
+        icoFile = getIconFile("redisfront.ico")
         headerType = HeaderType.gui
-        isDisableDirPage =false
+        isDisableDirPage = false
         isDisableFinishedPage = false
         isDisableWelcomePage = false
         isGenerateSetup = true
@@ -185,9 +179,11 @@ tasks.register<PackageTask>("packageForLinux") {
     platform = Platform.linux
     linuxConfig(
         closureOf<LinuxConfig> {
-            pngFile = getIconFile("redisfront_256x256.png")
+            pngFile = getIconFile("redisfront.png")
             isGenerateRpm = true
-            isGenerateRpm = true
+            isCreateTarball=true
+            isGenerateInstaller=true
+            categories = listOf("Office")
         } as Closure<LinuxConfig>
     )
     dependsOn(tasks.build)
@@ -198,8 +194,9 @@ tasks.register<PackageTask>("packageForMac") {
     platform = Platform.mac
     macConfig(
         closureOf<MacConfig> {
-            icnsFile = getIconFile("redisfront_256x256.icns")
+            icnsFile = getIconFile("redisfront.icns")
             isGenerateDmg = true
+            macStartup = MacStartup.X86_64
         } as Closure<MacConfig>
     )
     dependsOn(tasks.build)
