@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MainTabbedPanel extends JPanel {
 
+    private final JTabbedPane contentPanel;
     private final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
     public static MainTabbedPanel newInstance(ConnectInfo connectInfo) {
@@ -32,11 +33,16 @@ public class MainTabbedPanel extends JPanel {
 
     public void shutdownScheduled() {
         scheduledExecutor.shutdown();
+        var component = contentPanel.getComponentAt(2);
+        if (component instanceof ChartsPanel chartsPanel) {
+            chartsPanel.shutDownScheduledExecutorService();
+        }
+
     }
 
     public MainTabbedPanel(ConnectInfo connectInfo) {
         setLayout(new BorderLayout());
-        var contentPanel = new JTabbedPane();
+        contentPanel = new JTabbedPane();
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.CENTER);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, false);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_TRAILING);
@@ -128,6 +134,9 @@ public class MainTabbedPanel extends JPanel {
             }
             if (component instanceof DataSplitPanel dataSplitPanel) {
                 dataSplitPanel.ping();
+            }
+            if (component instanceof DataChartsForm chartsForm) {
+                chartsForm.scheduleInit();
             }
         });
 

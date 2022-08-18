@@ -1,46 +1,61 @@
 package com.redisfront.ui.form.fragment;
 
+import cn.hutool.core.date.DateUtil;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
+import com.redisfront.commons.func.Fn;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
+import com.redisfront.ui.component.ChartsPanel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.general.SeriesException;
 import org.jfree.data.time.Second;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
-import org.jfree.data.xy.XYDataset;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
+import java.text.DecimalFormat;
 import java.util.Locale;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * DataChartsForm
  *
  * @author Jin
  */
-public class DataChartsForm {
+public class DataChartsForm extends ChartsPanel {
 
     private JPanel contentPanel;
-    private JTextArea textArea1;
     private JPanel chartsPanel;
-    private ConnectInfo connectInfo;
+    private JLabel cpuUsageValue;
+    private JLabel cpuUsageLabel;
+    private JLabel processCommandsLabel;
+    private JLabel networkLabel;
+    private JLabel clientsLabel;
+    private JLabel processCommandsValue;
+    private JLabel networkValue;
+    private JLabel clientsValue;
+    private JLabel slowLogLabel;
+    private JTextArea slowLogTextArea;
+    private final ConnectInfo connectInfo;
+
+    private JFreeChart jFreeChart;
 
 
     private final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
+    public void shutDownScheduledExecutorService() {
+        scheduledExecutor.shutdown();
+    }
 
     public static DataChartsForm getInstance(final ConnectInfo connectInfo) {
         return new DataChartsForm(connectInfo);
@@ -50,10 +65,6 @@ public class DataChartsForm {
         return contentPanel;
     }
 
-    public void setConnectInfo(final ConnectInfo connectInfo) {
-
-    }
-
     public DataChartsForm(final ConnectInfo connectInfo) {
         this.connectInfo = connectInfo;
         $$$setupUI$$$();
@@ -61,69 +72,89 @@ public class DataChartsForm {
     }
 
     private void createUIComponents() {
-        final XYDataset dataset = createDataset();
-        final JFreeChart chart = createChart(dataset);
-        final ChartPanel chartPanel = new ChartPanel(chart);
-        chartPanel.setForeground(Color.GRAY);
+        contentPanel = this;
+
+        slowLogLabel = new JLabel();
+        slowLogTextArea = new JTextArea();
+
+        cpuUsageLabel = new JLabel();
+        cpuUsageValue = new JLabel();
+
+        networkLabel = new JLabel();
+        networkValue = new JLabel();
+
+        clientsLabel = new JLabel();
+        clientsValue = new JLabel();
+
+        processCommandsLabel = new JLabel();
+        processCommandsValue = new JLabel();
+
         chartsPanel = new JPanel();
         chartsPanel.setLayout(new BorderLayout());
+
+        chartsInit();
+    }
+
+
+    protected JFreeChart createChart() {
+        return ChartFactory.createTimeSeriesChart(
+                "Used Memory",
+                "",
+                "",
+                new TimeSeriesCollection(),
+                false,
+                true,
+                false);
+    }
+
+    private void chartsInit() {
+        jFreeChart = createChart();
+        final var chartPanel = new ChartPanel(jFreeChart);
         chartsPanel.add(chartPanel, BorderLayout.CENTER);
-        var XYPlot = (XYPlot) chart.getPlot();
+    }
 
-        AtomicLong lastTimeSecond = new AtomicLong(System.currentTimeMillis() / 5000);
-        final double[] lastUsedCpuSys = {0.0};
+    public void scheduleInit() {
+        final var XYPlot = (XYPlot) jFreeChart.getPlot();
 
-        final TimeSeries series = new TimeSeries("Random Data");
-        final Second[] lastSecond = {new Second()};
+        final var lastTimeSecond = new long[]{DateUtil.currentSeconds()};
+        final var lastUsedCpuSys = new double[]{0.0};
+        final var timeSeries = new TimeSeries("cpu usage");
+        final var lastSecond = new Second[]{new Second()};
 
         scheduledExecutor.scheduleAtFixedRate(() -> {
                     try {
-                        var currentTimeSecond = System.currentTimeMillis() / 5000;
+                        var currentTimeSecond = DateUtil.currentSeconds();
                         var cpuInfo = RedisBasicService.service.getCpuInfo(connectInfo);
 
                         var usedCpuSys = (String) cpuInfo.get("used_cpu_sys");
+                        if (Fn.isNotEmpty(usedCpuSys)) {
+                            var currentUsedCpuSys = Double.parseDouble(usedCpuSys);
 
-                        var currentUsedCpuUser = Double.parseDouble(usedCpuSys);
-
-                        if (lastUsedCpuSys[0] != 0L && lastUsedCpuSys[0] != currentUsedCpuUser && lastTimeSecond.get() != currentTimeSecond) {
-                            var s = ((currentUsedCpuUser - lastUsedCpuSys[0]) / (currentTimeSecond - lastTimeSecond.get())) * 100;
-                            System.out.println("cpu : " + s);
+                            if (lastUsedCpuSys[0] != 0L && lastUsedCpuSys[0] != currentUsedCpuSys && lastTimeSecond[0] != currentTimeSecond) {
+                                var percentStr = ((currentUsedCpuSys - lastUsedCpuSys[0]) / (currentTimeSecond - lastTimeSecond[0]));
+                                var df = new DecimalFormat("0.00%");
+                                var percent = df.format(percentStr);
+                                System.out.println(percent);
+                                SwingUtilities.invokeLater(() -> cpuUsageValue.setText(percent));
+                            }
+                            lastTimeSecond[0] = currentTimeSecond;
+                            lastUsedCpuSys[0] = currentUsedCpuSys;
                         }
 
-                        lastTimeSecond.set(currentTimeSecond);
-                        lastUsedCpuSys[0] = currentUsedCpuUser;
-
-
                         var memoryInfo = RedisBasicService.service.getMemoryInfo(connectInfo);
-                        String usedMemory = (String) memoryInfo.get("used_memory");
-                        series.add(lastSecond[0], Double.parseDouble(usedMemory));
-                        lastSecond[0] = (Second) lastSecond[0].next();
-                        XYPlot.setDataset(new TimeSeriesCollection(series));
+                        var usedMemory = (String) memoryInfo.get("used_memory");
+
+                        if (Fn.isNotEmpty(usedMemory)) {
+                            timeSeries.add(lastSecond[0], Double.parseDouble(usedMemory));
+                            lastSecond[0] = (Second) lastSecond[0].next();
+                            XYPlot.setDataset(new TimeSeriesCollection(timeSeries));
+                        }
 
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
                 , 0, 5, TimeUnit.SECONDS);
-
-
-
-
-    }
-
-    private XYDataset createDataset() {
-        return new TimeSeriesCollection(new TimeSeries("Random Data"));
-    }
-
-    private JFreeChart createChart(final XYDataset dataset) {
-        return ChartFactory.createTimeSeriesChart(
-                "Used Memory",
-                "",
-                "",
-                dataset,
-                false,
-                false,
-                false);
     }
 
     /**
@@ -135,7 +166,6 @@ public class DataChartsForm {
      */
     private void $$$setupUI$$$() {
         createUIComponents();
-        contentPanel = new JPanel();
         contentPanel.setLayout(new BorderLayout(0, 0));
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
@@ -144,46 +174,38 @@ public class DataChartsForm {
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridLayoutManager(3, 4, new Insets(0, 0, 0, 0), -1, -1));
         panel1.add(panel2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        final JLabel label1 = new JLabel();
-        Font label1Font = this.$$$getFont$$$(null, -1, 18, label1.getFont());
-        if (label1Font != null) label1.setFont(label1Font);
-        label1.setText("Cpu Usage");
-        panel2.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JLabel label2 = new JLabel();
-        Font label2Font = this.$$$getFont$$$(null, -1, 18, label2.getFont());
-        if (label2Font != null) label2.setFont(label2Font);
-        label2.setText("Process Commands");
-        panel2.add(label2, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JLabel label3 = new JLabel();
-        Font label3Font = this.$$$getFont$$$(null, -1, 18, label3.getFont());
-        if (label3Font != null) label3.setFont(label3Font);
-        label3.setText("Network");
-        panel2.add(label3, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JLabel label4 = new JLabel();
-        Font label4Font = this.$$$getFont$$$(null, -1, 18, label4.getFont());
-        if (label4Font != null) label4.setFont(label4Font);
-        label4.setText("Clients");
-        panel2.add(label4, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JLabel label5 = new JLabel();
-        Font label5Font = this.$$$getFont$$$("Arial Black", Font.BOLD, 20, label5.getFont());
-        if (label5Font != null) label5.setFont(label5Font);
-        label5.setText("3/s");
-        panel2.add(label5, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JLabel label6 = new JLabel();
-        Font label6Font = this.$$$getFont$$$("Arial Black", Font.BOLD, 20, label6.getFont());
-        if (label6Font != null) label6.setFont(label6Font);
-        label6.setText("52");
-        panel2.add(label6, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JLabel label7 = new JLabel();
-        Font label7Font = this.$$$getFont$$$("Arial Black", Font.BOLD, 20, label7.getFont());
-        if (label7Font != null) label7.setFont(label7Font);
-        label7.setText("10kb/15kb");
-        panel2.add(label7, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JLabel label8 = new JLabel();
-        Font label8Font = this.$$$getFont$$$("Arial Black", Font.BOLD, 20, label8.getFont());
-        if (label8Font != null) label8.setFont(label8Font);
-        label8.setText("0.25%");
-        panel2.add(label8, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        Font cpuUsageLabelFont = this.$$$getFont$$$(null, -1, 18, cpuUsageLabel.getFont());
+        if (cpuUsageLabelFont != null) cpuUsageLabel.setFont(cpuUsageLabelFont);
+        cpuUsageLabel.setText("Cpu Usage");
+        panel2.add(cpuUsageLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        Font processCommandsLabelFont = this.$$$getFont$$$(null, -1, 18, processCommandsLabel.getFont());
+        if (processCommandsLabelFont != null) processCommandsLabel.setFont(processCommandsLabelFont);
+        processCommandsLabel.setText("Process Commands");
+        panel2.add(processCommandsLabel, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        Font networkLabelFont = this.$$$getFont$$$(null, -1, 18, networkLabel.getFont());
+        if (networkLabelFont != null) networkLabel.setFont(networkLabelFont);
+        networkLabel.setText("Network");
+        panel2.add(networkLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        Font clientsLabelFont = this.$$$getFont$$$(null, -1, 18, clientsLabel.getFont());
+        if (clientsLabelFont != null) clientsLabel.setFont(clientsLabelFont);
+        clientsLabel.setText("Clients");
+        panel2.add(clientsLabel, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        Font processCommandsValueFont = this.$$$getFont$$$("Arial Black", Font.BOLD, 20, processCommandsValue.getFont());
+        if (processCommandsValueFont != null) processCommandsValue.setFont(processCommandsValueFont);
+        processCommandsValue.setText("");
+        panel2.add(processCommandsValue, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        Font clientsValueFont = this.$$$getFont$$$("Arial Black", Font.BOLD, 20, clientsValue.getFont());
+        if (clientsValueFont != null) clientsValue.setFont(clientsValueFont);
+        clientsValue.setText("");
+        panel2.add(clientsValue, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        Font networkValueFont = this.$$$getFont$$$("Arial Black", Font.BOLD, 20, networkValue.getFont());
+        if (networkValueFont != null) networkValue.setFont(networkValueFont);
+        networkValue.setText("");
+        panel2.add(networkValue, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        Font cpuUsageValueFont = this.$$$getFont$$$("Arial Black", Font.BOLD, 20, cpuUsageValue.getFont());
+        if (cpuUsageValueFont != null) cpuUsageValue.setFont(cpuUsageValueFont);
+        cpuUsageValue.setText("");
+        panel2.add(cpuUsageValue, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new GridLayoutManager(4, 1, new Insets(0, 0, 0, 0), -1, -1));
         panel2.add(panel3, new GridConstraints(2, 0, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
@@ -198,15 +220,15 @@ public class DataChartsForm {
         panel4.add(panel5, new GridConstraints(1, 0, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JScrollPane scrollPane1 = new JScrollPane();
         panel5.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        textArea1 = new JTextArea();
-        textArea1.setBackground(new Color(-987410));
-        textArea1.setEditable(false);
-        scrollPane1.setViewportView(textArea1);
-        final JLabel label9 = new JLabel();
-        label9.setText("Slowlog");
-        panel4.add(label9, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        slowLogTextArea.setColumns(50);
+        slowLogTextArea.setEditable(false);
+        scrollPane1.setViewportView(slowLogTextArea);
         final Spacer spacer1 = new Spacer();
         panel4.add(spacer1, new GridConstraints(0, 1, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        Font slowLogLabelFont = this.$$$getFont$$$(null, Font.BOLD, 18, slowLogLabel.getFont());
+        if (slowLogLabelFont != null) slowLogLabel.setFont(slowLogLabelFont);
+        slowLogLabel.setText("slowLog");
+        panel4.add(slowLogLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JSeparator separator2 = new JSeparator();
         panel3.add(separator2, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         panel3.add(chartsPanel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
