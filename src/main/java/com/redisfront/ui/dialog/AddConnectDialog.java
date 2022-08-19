@@ -23,6 +23,8 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
+import java.lang.reflect.Method;
+import java.util.ResourceBundle;
 
 public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     private JPanel contentPane;
@@ -60,6 +62,11 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     private JButton testBtn;
     private JPasswordField sslPasswordField;
     private JCheckBox showSslPassword;
+    private JLabel titleLabel;
+    private JLabel sshHostLabel;
+    private JLabel sshUserLabel;
+    private JLabel sshPortLabel;
+    private JLabel sshPasswordLabel;
     private Integer id;
 
     /***
@@ -90,7 +97,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     public AddConnectDialog(Frame owner, ProcessHandler<ConnectInfo> callback) {
         super(owner, callback);
         $$$setupUI$$$();
-        this.setTitle("新建连接");
+        this.setTitle(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.Title"));
         this.setModal(true);
         this.setResizable(true);
         this.setMinimumSize(new Dimension(400, 280));
@@ -236,22 +243,22 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         try {
             var connectInfo = validGetConnectInfo();
             if (RedisBasicService.service.ping(connectInfo)) {
-                AlertUtils.showInformationDialog("连接成功！");
+                AlertUtils.showInformationDialog(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.test.success.message"));
                 connectSuccess = true;
             } else {
-                AlertUtils.showInformationDialog("连接失败！");
+                AlertUtils.showInformationDialog(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.test.fail.message"));
             }
         } catch (Exception exception) {
             if (exception instanceof RedisFrontException) {
                 if (exception.getCause() instanceof JschRuntimeException jschRuntimeException) {
-                    AlertUtils.showErrorDialog("连接失败！", jschRuntimeException.getCause());
+                    AlertUtils.showErrorDialog(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.test.fail.message"), jschRuntimeException.getCause());
                 } else {
-                    AlertUtils.showErrorDialog("连接失败！", exception);
+                    AlertUtils.showErrorDialog(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.test.fail.message"), exception);
                 }
             } else if (exception instanceof RedisConnectionException) {
-                AlertUtils.showErrorDialog("连接失败！", exception.getCause());
+                AlertUtils.showErrorDialog(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.test.fail.message"), exception.getCause());
             } else {
-                AlertUtils.showErrorDialog("连接失败！", exception);
+                AlertUtils.showErrorDialog(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.test.fail.message"), exception);
             }
         }
         return connectSuccess;
@@ -436,12 +443,12 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         panel2.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1, true, false));
         panel1.add(panel2, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         buttonOK = new JButton();
-        buttonOK.setText("确认");
+        this.$$$loadButtonText$$$(buttonOK, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.buttonOK.Title"));
         panel2.add(buttonOK, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         buttonCancel = new JButton();
-        buttonCancel.setText("取消");
+        this.$$$loadButtonText$$$(buttonCancel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.buttonCancel.Title"));
         panel2.add(buttonCancel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        testBtn.setText("测试连接");
+        this.$$$loadButtonText$$$(testBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.testBtn.Title"));
         panel1.add(testBtn, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new GridLayoutManager(4, 3, new Insets(0, 0, 0, 0), -1, -1));
@@ -483,63 +490,65 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         sslPanel.add(showSslPassword, new GridConstraints(3, 2, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         sshPanel.setLayout(new GridLayoutManager(5, 5, new Insets(0, 0, 0, 0), -1, -1));
         panel3.add(sshPanel, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        final JLabel label5 = new JLabel();
-        label5.setText("主机");
-        sshPanel.add(label5, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        sshHostLabel = new JLabel();
+        this.$$$loadLabelText$$$(sshHostLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.sshHostLabel.Title"));
+        sshPanel.add(sshHostLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         sshHostField = new JTextField();
         sshPanel.add(sshHostField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-        final JLabel label6 = new JLabel();
-        label6.setText("用户");
-        sshPanel.add(label6, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        sshUserLabel = new JLabel();
+        this.$$$loadLabelText$$$(sshUserLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.sshUserLabel.Title"));
+        sshPanel.add(sshUserLabel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         sshUserField = new JTextField();
         sshPanel.add(sshUserField, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         enableSshPrivateKey = new JCheckBox();
-        enableSshPrivateKey.setText("私钥");
+        this.$$$loadButtonText$$$(enableSshPrivateKey, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.enableSshPrivateKey.Title"));
         sshPanel.add(enableSshPrivateKey, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JLabel label7 = new JLabel();
-        label7.setText("端口");
-        sshPanel.add(label7, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        sshPortLabel = new JLabel();
+        this.$$$loadLabelText$$$(sshPortLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.sshPortLabel.Title"));
+        sshPanel.add(sshPortLabel, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         sshPrivateKeyFile = new JTextField();
         sshPanel.add(sshPrivateKeyFile, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         sshPrivateKeyBtn = new JButton();
-        sshPrivateKeyBtn.setText("选择文件");
+        this.$$$loadButtonText$$$(sshPrivateKeyBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.sshPrivateKeyBtn.Title"));
         sshPanel.add(sshPrivateKeyBtn, new GridConstraints(3, 2, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         showShhPassword = new JCheckBox();
-        showShhPassword.setText("显示密码");
+        this.$$$loadButtonText$$$(showShhPassword, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.showShhPassword.Title"));
         sshPanel.add(showShhPassword, new GridConstraints(4, 2, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JLabel label8 = new JLabel();
-        label8.setText("密码");
-        sshPanel.add(label8, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        sshPasswordLabel = new JLabel();
+        this.$$$loadLabelText$$$(sshPasswordLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.sshPasswordLabel.Title"));
+        sshPanel.add(sshPasswordLabel, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         sshPanel.add(sshPortField, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         sshPasswordField = new JPasswordField();
         sshPanel.add(sshPasswordField, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         basicPanel = new JPanel();
         basicPanel.setLayout(new GridLayoutManager(7, 4, new Insets(0, 0, 0, 0), -1, -1));
         panel3.add(basicPanel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        final JLabel label9 = new JLabel();
-        label9.setText("名称");
-        basicPanel.add(label9, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        titleLabel = new JLabel();
+        this.$$$loadLabelText$$$(titleLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.titleLabel.Title"));
+        titleLabel.setToolTipText(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.titleLabel.Desc"));
+        basicPanel.add(titleLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         titleField = new JTextField();
         basicPanel.add(titleField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         hostLabel = new JLabel();
-        hostLabel.setText("主机");
+        this.$$$loadLabelText$$$(hostLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.hostLabel.Title"));
         basicPanel.add(hostLabel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         passwordLabel = new JLabel();
-        passwordLabel.setText("密码");
+        this.$$$loadLabelText$$$(passwordLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.passwordLabel.Title"));
         basicPanel.add(passwordLabel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         userLabel = new JLabel();
-        userLabel.setText("用户");
+        this.$$$loadLabelText$$$(userLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.userLabel.Title"));
         basicPanel.add(userLabel, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         basicPanel.add(hostField, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         userField = new JTextField();
         basicPanel.add(userField, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         portLabel = new JLabel();
-        portLabel.setText("端口");
+        this.$$$loadLabelText$$$(portLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.portLabel.Title"));
         basicPanel.add(portLabel, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         basicPanel.add(portField, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         showPasswordCheckBox = new JCheckBox();
-        showPasswordCheckBox.setText("显示密码");
+        this.$$$loadButtonText$$$(showPasswordCheckBox, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.showPasswordCheckBox.Title"));
         basicPanel.add(showPasswordCheckBox, new GridConstraints(2, 2, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        enableSSLBtn.setEnabled(false);
         enableSSLBtn.setText("SSL/TLS");
         basicPanel.add(enableSSLBtn, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer3 = new Spacer();
@@ -555,10 +564,82 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         panel3.add(spacer6, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
     }
 
+    private static Method $$$cachedGetBundleMethod$$$ = null;
+
+    private String $$$getMessageFromBundle$$$(String path, String key) {
+        ResourceBundle bundle;
+        try {
+            Class<?> thisClass = this.getClass();
+            if ($$$cachedGetBundleMethod$$$ == null) {
+                Class<?> dynamicBundleClass = thisClass.getClassLoader().loadClass("com.intellij.DynamicBundle");
+                $$$cachedGetBundleMethod$$$ = dynamicBundleClass.getMethod("getBundle", String.class, Class.class);
+            }
+            bundle = (ResourceBundle) $$$cachedGetBundleMethod$$$.invoke(null, path, thisClass);
+        } catch (Exception e) {
+            bundle = ResourceBundle.getBundle(path);
+        }
+        return bundle.getString(key);
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    private void $$$loadLabelText$$$(JLabel component, String text) {
+        StringBuffer result = new StringBuffer();
+        boolean haveMnemonic = false;
+        char mnemonic = '\0';
+        int mnemonicIndex = -1;
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i) == '&') {
+                i++;
+                if (i == text.length()) break;
+                if (!haveMnemonic && text.charAt(i) != '&') {
+                    haveMnemonic = true;
+                    mnemonic = text.charAt(i);
+                    mnemonicIndex = result.length();
+                }
+            }
+            result.append(text.charAt(i));
+        }
+        component.setText(result.toString());
+        if (haveMnemonic) {
+            component.setDisplayedMnemonic(mnemonic);
+            component.setDisplayedMnemonicIndex(mnemonicIndex);
+        }
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    private void $$$loadButtonText$$$(AbstractButton component, String text) {
+        StringBuffer result = new StringBuffer();
+        boolean haveMnemonic = false;
+        char mnemonic = '\0';
+        int mnemonicIndex = -1;
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i) == '&') {
+                i++;
+                if (i == text.length()) break;
+                if (!haveMnemonic && text.charAt(i) != '&') {
+                    haveMnemonic = true;
+                    mnemonic = text.charAt(i);
+                    mnemonicIndex = result.length();
+                }
+            }
+            result.append(text.charAt(i));
+        }
+        component.setText(result.toString());
+        if (haveMnemonic) {
+            component.setMnemonic(mnemonic);
+            component.setDisplayedMnemonicIndex(mnemonicIndex);
+        }
+    }
+
     /**
      * @noinspection ALL
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
+
 }
