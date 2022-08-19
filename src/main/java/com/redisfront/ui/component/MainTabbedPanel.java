@@ -120,9 +120,7 @@ public class MainTabbedPanel extends JPanel {
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, rightToolBar);
         contentPanel.addTab("命令", UI.CONTENT_TAB_COMMAND_ICON, RedisTerminal.newInstance(connectInfo));
         contentPanel.addTab("主页", UI.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(connectInfo));
-
-        var dataChartsForm = DataChartsForm.getInstance(connectInfo);
-        contentPanel.addTab("信息", UI.CONTENT_TAB_INFO_ICON, dataChartsForm.contentPanel());
+        contentPanel.addTab("信息", UI.CONTENT_TAB_INFO_ICON, DataChartsForm.getInstance(connectInfo));
         contentPanel.setSelectedIndex(1);
 
         //tab 切换事件
@@ -131,9 +129,15 @@ public class MainTabbedPanel extends JPanel {
             var component = tabbedPane.getSelectedComponent();
             if (component instanceof RedisTerminal terminal) {
                 terminal.ping();
+                if (contentPanel.getComponentAt(2) instanceof DataChartsForm dataChartsForm) {
+                    dataChartsForm.scheduleInit();
+                }
             }
             if (component instanceof DataSplitPanel dataSplitPanel) {
                 dataSplitPanel.ping();
+                if (contentPanel.getComponentAt(2) instanceof DataChartsForm dataChartsForm) {
+                    dataChartsForm.scheduleInit();
+                }
             }
             if (component instanceof DataChartsForm chartsForm) {
                 chartsForm.scheduleInit();

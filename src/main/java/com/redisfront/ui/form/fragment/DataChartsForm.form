@@ -23,7 +23,7 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="72f6d" class="javax.swing.JLabel" binding="cpuUsageLabel" custom-create="true">
+              <component id="72f6d" class="javax.swing.JLabel" binding="cpuUsageLabel">
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -32,7 +32,7 @@
                   <text value="Cpu Usage"/>
                 </properties>
               </component>
-              <component id="eb1af" class="javax.swing.JLabel" binding="processCommandsLabel" custom-create="true">
+              <component id="eb1af" class="javax.swing.JLabel" binding="processCommandsLabel">
                 <constraints>
                   <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -41,7 +41,7 @@
                   <text value="Process Commands"/>
                 </properties>
               </component>
-              <component id="34544" class="javax.swing.JLabel" binding="networkLabel" custom-create="true">
+              <component id="34544" class="javax.swing.JLabel" binding="networkLabel">
                 <constraints>
                   <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -50,7 +50,7 @@
                   <text value="Network"/>
                 </properties>
               </component>
-              <component id="44680" class="javax.swing.JLabel" binding="clientsLabel" custom-create="true">
+              <component id="44680" class="javax.swing.JLabel" binding="clientsLabel">
                 <constraints>
                   <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -59,40 +59,48 @@
                   <text value="Clients"/>
                 </properties>
               </component>
-              <component id="16086" class="javax.swing.JLabel" binding="processCommandsValue" custom-create="true">
+              <component id="16086" class="javax.swing.JLabel" binding="processCommandsValue">
                 <constraints>
                   <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <font name="Arial Black" size="20" style="1"/>
-                  <text value=""/>
+                  <horizontalAlignment value="0"/>
+                  <horizontalTextPosition value="0"/>
+                  <text value="0"/>
                 </properties>
               </component>
-              <component id="6f7c1" class="javax.swing.JLabel" binding="clientsValue" custom-create="true">
+              <component id="6f7c1" class="javax.swing.JLabel" binding="clientsValue">
                 <constraints>
                   <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <font name="Arial Black" size="20" style="1"/>
-                  <text value=""/>
+                  <horizontalAlignment value="0"/>
+                  <horizontalTextPosition value="0"/>
+                  <text value="0"/>
                 </properties>
               </component>
-              <component id="54303" class="javax.swing.JLabel" binding="networkValue" custom-create="true">
+              <component id="54303" class="javax.swing.JLabel" binding="networkValue">
                 <constraints>
                   <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <font name="Arial Black" size="20" style="1"/>
-                  <text value=""/>
+                  <horizontalAlignment value="0"/>
+                  <horizontalTextPosition value="0"/>
+                  <text value="0KB/0KB"/>
                 </properties>
               </component>
-              <component id="12070" class="javax.swing.JLabel" binding="cpuUsageValue" custom-create="true">
+              <component id="12070" class="javax.swing.JLabel" binding="cpuUsageValue">
                 <constraints>
                   <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <font name="Arial Black" size="20" style="1"/>
-                  <text value=""/>
+                  <horizontalAlignment value="0"/>
+                  <horizontalTextPosition value="0"/>
+                  <text value="0.0%"/>
                 </properties>
               </component>
               <grid id="c3030" layout-manager="GridLayoutManager" row-count="4" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
@@ -147,18 +155,26 @@
                           </scrollpane>
                         </children>
                       </grid>
-                      <hspacer id="5809b">
-                        <constraints>
-                          <grid row="0" column="1" row-span="1" col-span="3" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                      </hspacer>
-                      <component id="5a4f7" class="javax.swing.JLabel" binding="slowLogLabel" custom-create="true">
+                      <component id="5a4f7" class="javax.swing.JLabel" binding="slowLogLabel">
                         <constraints>
                           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <font size="18" style="1"/>
                           <text value="slowLog"/>
+                        </properties>
+                      </component>
+                      <hspacer id="c16da">
+                        <constraints>
+                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                      </hspacer>
+                      <component id="e366a" class="javax.swing.JRadioButton" binding="autoRefreshBtn">
+                        <constraints>
+                          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="自动刷新"/>
                         </properties>
                       </component>
                     </children>

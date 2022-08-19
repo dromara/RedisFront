@@ -309,10 +309,10 @@ public class RedisBasicServiceImpl implements RedisBasicService {
     public Map<String, Object> getClientInfo(ConnectInfo connectInfo) {
 
         var logInfo = RedisBasicService.buildLogInfo(connectInfo)
-                .setInfo("info client".toUpperCase());
+                .setInfo("info clients".toUpperCase());
         LogsDialog.appendLog(logInfo);
 
-        var clientInfo = LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.info("client"));
+        var clientInfo = LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.info("clients"));
         log.info("获取到Redis [ {}:{} ] clientInfo - {}", connectInfo.host(), connectInfo.port(), clientInfo);
         return strToMap(clientInfo);
     }
