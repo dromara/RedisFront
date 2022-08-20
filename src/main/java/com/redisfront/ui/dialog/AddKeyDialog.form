@@ -116,7 +116,7 @@
           <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="分数"/>
+          <text resource-bundle="com/redisfront/RedisFront" key="AddKeyDialog.scoreLabel.title"/>
         </properties>
       </component>
       <component id="b8a11" class="javax.swing.JLabel" binding="hashKeyLabel">
@@ -124,23 +124,23 @@
           <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="键名"/>
+          <text resource-bundle="com/redisfront/RedisFront" key="AddKeyDialog.hashKeyLabel.title"/>
         </properties>
       </component>
-      <component id="71042" class="javax.swing.JLabel">
+      <component id="71042" class="javax.swing.JLabel" binding="keyLabel">
         <constraints>
           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="键名"/>
+          <text resource-bundle="com/redisfront/RedisFront" key="AddKeyDialog.keyLabel.title"/>
         </properties>
       </component>
-      <component id="595da" class="javax.swing.JLabel">
+      <component id="595da" class="javax.swing.JLabel" binding="typeLabel">
         <constraints>
           <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="类型"/>
+          <text resource-bundle="com/redisfront/RedisFront" key="AddKeyDialog.typeLabel.title"/>
         </properties>
       </component>
       <component id="5b6c2" class="javax.swing.JLabel" binding="streamLabel">
@@ -151,12 +151,12 @@
           <text value="ID"/>
         </properties>
       </component>
-      <component id="9f9f0" class="javax.swing.JLabel">
+      <component id="9f9f0" class="javax.swing.JLabel" binding="valueLabel">
         <constraints>
           <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="值"/>
+          <text resource-bundle="com/redisfront/RedisFront" key="AddKeyDialog.valueLabel.title"/>
         </properties>
       </component>
       <scrollpane id="63f3f">

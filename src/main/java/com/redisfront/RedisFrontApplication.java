@@ -57,8 +57,6 @@ public class RedisFrontApplication {
 
             FutureUtils.init();
 
-            LocaleUtils.init();
-
             DerbyUtils.init();
 
             frame = new RedisFrontMainFrame();

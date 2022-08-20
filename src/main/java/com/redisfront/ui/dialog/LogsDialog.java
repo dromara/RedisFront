@@ -4,6 +4,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.RedisFrontApplication;
+import com.redisfront.commons.util.LocaleUtils;
 import com.redisfront.model.LogInfo;
 
 import javax.swing.*;
@@ -11,7 +12,9 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.lang.reflect.Method;
 import java.time.format.DateTimeFormatter;
+import java.util.ResourceBundle;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class LogsDialog extends JDialog implements Runnable {
@@ -41,7 +44,7 @@ public class LogsDialog extends JDialog implements Runnable {
     public LogsDialog() {
         super(RedisFrontApplication.frame);
         setContentPane(contentPane);
-        setTitle("日志");
+        setTitle(LocaleUtils.getMessageFromBundle("LogsDialog.title"));
         setModal(true);
         setPreferredSize(new Dimension(800, 600));
         buttonCancel.addActionListener(e -> onCancel());
@@ -57,8 +60,9 @@ public class LogsDialog extends JDialog implements Runnable {
         thread.start();
 
         var cleanMenu = new JPopupMenu();
-        cleanMenu.add(new JMenuItem("清空") {
+        cleanMenu.add(new JMenuItem() {
             {
+                setText(LocaleUtils.getMessageFromBundle("LogsDialog.cleanMenu.title"));
                 addActionListener((event) -> textArea.setText(""));
             }
         });
@@ -118,7 +122,7 @@ public class LogsDialog extends JDialog implements Runnable {
         panel2.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         panel1.add(panel2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         buttonCancel = new JButton();
-        buttonCancel.setText("关闭");
+        this.$$$loadButtonText$$$(buttonCancel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "LogsDialog.buttonCancel.title"));
         panel2.add(buttonCancel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new BorderLayout(0, 0));
@@ -130,10 +134,55 @@ public class LogsDialog extends JDialog implements Runnable {
         scrollPane1.setViewportView(textArea);
     }
 
+    private static Method $$$cachedGetBundleMethod$$$ = null;
+
+    private String $$$getMessageFromBundle$$$(String path, String key) {
+        ResourceBundle bundle;
+        try {
+            Class<?> thisClass = this.getClass();
+            if ($$$cachedGetBundleMethod$$$ == null) {
+                Class<?> dynamicBundleClass = thisClass.getClassLoader().loadClass("com.intellij.DynamicBundle");
+                $$$cachedGetBundleMethod$$$ = dynamicBundleClass.getMethod("getBundle", String.class, Class.class);
+            }
+            bundle = (ResourceBundle) $$$cachedGetBundleMethod$$$.invoke(null, path, thisClass);
+        } catch (Exception e) {
+            bundle = ResourceBundle.getBundle(path);
+        }
+        return bundle.getString(key);
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    private void $$$loadButtonText$$$(AbstractButton component, String text) {
+        StringBuffer result = new StringBuffer();
+        boolean haveMnemonic = false;
+        char mnemonic = '\0';
+        int mnemonicIndex = -1;
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i) == '&') {
+                i++;
+                if (i == text.length()) break;
+                if (!haveMnemonic && text.charAt(i) != '&') {
+                    haveMnemonic = true;
+                    mnemonic = text.charAt(i);
+                    mnemonicIndex = result.length();
+                }
+            }
+            result.append(text.charAt(i));
+        }
+        component.setText(result.toString());
+        if (haveMnemonic) {
+            component.setMnemonic(mnemonic);
+            component.setDisplayedMnemonicIndex(mnemonicIndex);
+        }
+    }
+
     /**
      * @noinspection ALL
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
+
 }

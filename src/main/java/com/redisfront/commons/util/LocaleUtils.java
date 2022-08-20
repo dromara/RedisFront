@@ -3,6 +3,7 @@ package com.redisfront.commons.util;
 import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.func.Fn;
 
+import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -13,28 +14,42 @@ import java.util.ResourceBundle;
  */
 public class LocaleUtils {
 
-   private static ResourceBundle bundle;
+    private static Method cachedGetBundleMethod = null;
+
+    static {
+        var languageTag = PrefUtils.getState().get(Const.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
+        Locale.setDefault(Locale.forLanguageTag(languageTag));
+    }
+
+    public static String getMessageFromBundle(String key) {
+        ResourceBundle bundle;
+        try {
+            Class<?> thisClass = LocaleUtils.class;
+            if (cachedGetBundleMethod == null) {
+                Class<?> dynamicBundleClass = thisClass.getClassLoader().loadClass("com.intellij.DynamicBundle");
+                cachedGetBundleMethod = dynamicBundleClass.getMethod("getBundle", String.class, Class.class);
+            }
+            bundle = (ResourceBundle) cachedGetBundleMethod.invoke(null, "com/redisfront/RedisFront", thisClass);
+        } catch (Exception e) {
+            bundle = ResourceBundle.getBundle("com/redisfront/RedisFront");
+        }
+        return bundle.getString(key);
+    }
 
     private LocaleUtils() {
     }
 
-    public static void init() {
-        var languageTag = PrefUtils.getState().get(Const.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
-        Locale.setDefault(Locale.forLanguageTag(languageTag));
-        bundle = ResourceBundle.getBundle("com.redisfront.RedisFront");
-    }
-
     public static BundleInfo getMenu(String prefix) {
-        var name = bundle.getString(prefix.concat(".Title"));
-        var mnemonicStr = bundle.getString(prefix.concat(".Mnemonic"));
+        var name = getMessageFromBundle(prefix.concat(".Title"));
+        var mnemonicStr = getMessageFromBundle(prefix.concat(".Mnemonic"));
         var mnemonic = Fn.isEmpty(mnemonicStr) ? 0 : (int) mnemonicStr.charAt(0);
-        var desc = bundle.getString(prefix.concat(".Desc"));
+        var desc = getMessageFromBundle(prefix.concat(".Desc"));
         return new BundleInfo(name, mnemonic, desc);
     }
 
     public static BundleInfo get(String prefix) {
-        var name = bundle.getString(prefix.concat(".Title"));
-        var desc = bundle.getString(prefix.concat(".Desc"));
+        var name = getMessageFromBundle(prefix.concat(".Title"));
+        var desc = getMessageFromBundle(prefix.concat(".Desc"));
         return new BundleInfo(name, 0, desc);
     }
 

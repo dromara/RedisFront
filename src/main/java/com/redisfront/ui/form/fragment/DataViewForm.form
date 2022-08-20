@@ -23,7 +23,7 @@
               <size top="5" left="10" bottom="5" right="10"/>
             </border>
             <children>
-              <component id="3de4d" class="javax.swing.JLabel" binding="keyTypeLabel">
+              <component id="3de4d" class="javax.swing.JLabel" binding="keyTypeLabel" custom-create="true">
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -40,31 +40,34 @@
                 </constraints>
                 <properties/>
               </component>
-              <component id="7208c" class="javax.swing.JButton" binding="saveBtn">
+              <component id="7208c" class="javax.swing.JButton" binding="saveBtn" custom-create="true">
                 <constraints>
                   <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value=""/>
+                  <text resource-bundle="com/redisfront/RedisFront" key="DataViewForm.saveBtn.title"/>
+                  <toolTipText resource-bundle="com/redisfront/RedisFront" key="DataViewForm.saveBtn.toolTip.Text"/>
                 </properties>
               </component>
-              <component id="447d7" class="javax.swing.JButton" binding="delBtn">
+              <component id="447d7" class="javax.swing.JButton" binding="delBtn" custom-create="true">
                 <constraints>
                   <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value=""/>
+                  <text resource-bundle="com/redisfront/RedisFront" key="DataViewForm.delBtn.title"/>
+                  <toolTipText resource-bundle="com/redisfront/RedisFront" key="DataViewForm.delBtn.toolTip.Text"/>
                 </properties>
               </component>
-              <component id="7670d" class="javax.swing.JButton" binding="refBtn">
+              <component id="7670d" class="javax.swing.JButton" binding="refBtn" custom-create="true">
                 <constraints>
                   <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value=""/>
+                  <text resource-bundle="com/redisfront/RedisFront" key="DataViewForm.refBtn.title"/>
+                  <toolTipText resource-bundle="com/redisfront/RedisFront" key="DataViewForm.refBtn.toolTip.Text"/>
                 </properties>
               </component>
-              <component id="85ead" class="javax.swing.JTextField" binding="ttlField">
+              <component id="85ead" class="javax.swing.JTextField" binding="ttlField" custom-create="true">
                 <constraints>
                   <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false">
                     <preferred-size width="100" height="-1"/>
@@ -110,7 +113,8 @@
                   <grid row="1" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value=""/>
+                  <text resource-bundle="com/redisfront/RedisFront" key="DataViewForm.closeBtn.title"/>
+                  <toolTipText resource-bundle="com/redisfront/RedisFront" key="DataViewForm.closeBtn.toolTip.Text"/>
                 </properties>
               </component>
             </children>
@@ -127,7 +131,7 @@
                 </properties>
                 <border type="none"/>
                 <children>
-                  <grid id="61422" binding="tableViewPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+                  <grid id="61422" binding="tableViewPanel" custom-create="true" layout-manager="BorderLayout" hgap="0" vgap="0">
                     <constraints>
                       <splitpane position="left"/>
                     </constraints>
@@ -152,7 +156,7 @@
                             <properties/>
                             <border type="none"/>
                             <children>
-                              <component id="966f7" class="javax.swing.JTextField" binding="tableSearchField">
+                              <component id="966f7" class="javax.swing.JTextField" binding="tableSearchField" custom-create="true">
                                 <constraints>
                                   <grid row="0" column="0" row-span="1" col-span="5" vsize-policy="0" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
                                     <preferred-size width="100" height="-1"/>
@@ -165,7 +169,7 @@
                                   <grid row="5" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                                 </constraints>
                               </vspacer>
-                              <component id="682dd" class="javax.swing.JButton" binding="tableDelBtn">
+                              <component id="682dd" class="javax.swing.JButton" binding="tableDelBtn" custom-create="true">
                                 <constraints>
                                   <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false">
                                     <preferred-size width="100" height="-1"/>
@@ -173,27 +177,27 @@
                                 </constraints>
                                 <properties>
                                   <enabled value="true"/>
-                                  <text value=""/>
+                                  <text resource-bundle="com/redisfront/RedisFront" key="DataViewForm.tableDelBtn.title"/>
                                 </properties>
                               </component>
-                              <component id="cfb7b" class="javax.swing.JButton" binding="tableRefreshBtn">
+                              <component id="cfb7b" class="javax.swing.JButton" binding="tableRefreshBtn" custom-create="true">
                                 <constraints>
                                   <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false">
                                     <preferred-size width="100" height="-1"/>
                                   </grid>
                                 </constraints>
                                 <properties>
-                                  <text value="重载"/>
+                                  <text resource-bundle="com/redisfront/RedisFront" key="DataViewForm.tableRefreshBtn.title"/>
                                 </properties>
                               </component>
-                              <component id="cb934" class="javax.swing.JButton" binding="tableAddBtn">
+                              <component id="cb934" class="javax.swing.JButton" binding="tableAddBtn" custom-create="true">
                                 <constraints>
                                   <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false">
                                     <preferred-size width="100" height="-1"/>
                                   </grid>
                                 </constraints>
                                 <properties>
-                                  <text value="添加"/>
+                                  <text resource-bundle="com/redisfront/RedisFront" key="DataViewForm.tableAddBtn.title"/>
                                 </properties>
                               </component>
                               <grid id="117ff" binding="pagePanel" layout-manager="BorderLayout" hgap="0" vgap="0">
@@ -209,7 +213,7 @@
                                     <properties/>
                                     <border type="none"/>
                                     <children>
-                                      <component id="990cf" class="javax.swing.JTextField" binding="currentCountField">
+                                      <component id="990cf" class="javax.swing.JTextField" binding="currentCountField" custom-create="true">
                                         <constraints>
                                           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                                             <preferred-size width="80" height="-1"/>
@@ -217,7 +221,7 @@
                                         </constraints>
                                         <properties/>
                                       </component>
-                                      <component id="c042a" class="javax.swing.JTextField" binding="allCountField">
+                                      <component id="c042a" class="javax.swing.JTextField" binding="allCountField" custom-create="true">
                                         <constraints>
                                           <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                                             <preferred-size width="80" height="-1"/>
@@ -233,14 +237,14 @@
                                     <properties/>
                                     <border type="none"/>
                                     <children>
-                                      <component id="1865f" class="javax.swing.JButton" binding="loadMoreBtn">
+                                      <component id="1865f" class="javax.swing.JButton" binding="loadMoreBtn" custom-create="true">
                                         <constraints>
                                           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false">
                                             <preferred-size width="100" height="-1"/>
                                           </grid>
                                         </constraints>
                                         <properties>
-                                          <text value="加载更多"/>
+                                          <text resource-bundle="com/redisfront/RedisFront" key="DataViewForm.loadMoreBtn.title"/>
                                         </properties>
                                       </component>
                                     </children>
@@ -249,7 +253,7 @@
                               </grid>
                             </children>
                           </grid>
-                          <scrollpane id="41e19" binding="tableScorePanel">
+                          <scrollpane id="41e19" binding="tableScorePanel" custom-create="true">
                             <constraints>
                               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                             </constraints>

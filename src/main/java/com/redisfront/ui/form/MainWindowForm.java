@@ -6,10 +6,7 @@ import com.redisfront.RedisFrontApplication;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
 import com.redisfront.commons.func.Fn;
-import com.redisfront.commons.util.AlertUtils;
-import com.redisfront.commons.util.FutureUtils;
-import com.redisfront.commons.util.LettuceUtils;
-import com.redisfront.commons.util.LoadingUtils;
+import com.redisfront.commons.util.*;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.ConnectService;
 import com.redisfront.service.RedisBasicService;
@@ -62,7 +59,7 @@ public class MainWindowForm {
                     tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
                     contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
                     toolBar.setVisible(true);
-                    LoadingUtils.showDialog("加载key中...");
+                    LoadingUtils.showDialog(LocaleUtils.getMessageFromBundle("MainWindowForm.loading.title"));
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     LoadingUtils.closeDialog();
@@ -94,7 +91,7 @@ public class MainWindowForm {
                     var ip = master.get("ip");
                     var port = master.get("port");
                     LoadingUtils.closeDialog();
-                    var ret = JOptionPane.showConfirmDialog(RedisFrontApplication.frame, "您连接的主机为Sentinel节点，是否重定向的到Master[ " + ip + "/" + port + " ]节点？", "连接提示", JOptionPane.YES_NO_OPTION);
+                    var ret = JOptionPane.showConfirmDialog(RedisFrontApplication.frame, String.format(LocaleUtils.getMessageFromBundle("MainWindowForm.JOptionPane.showConfirmDialog.message"), ip, port), "连接提示", JOptionPane.YES_NO_OPTION);
                     if (ret == JOptionPane.YES_OPTION) {
                         connectInfo.setHost(ip);
                         connectInfo.setPort(Integer.valueOf(port));
@@ -105,7 +102,7 @@ public class MainWindowForm {
                         if (e instanceof RedisException redisException) {
                             var ex = redisException.getCause();
                             if (Fn.equal(ex.getMessage(), "WRONGPASS invalid username-password pair or user is disabled.")) {
-                                var password = JOptionPane.showInputDialog(RedisFrontApplication.frame, "您输入Master[ " + ip + "/" + port + " ]节点的密码！");
+                                var password = JOptionPane.showInputDialog(RedisFrontApplication.frame, String.format(LocaleUtils.getMessageFromBundle("MainWindowForm.JOptionPane.showInputDialog.message"), ip, port));
                                 if (ret == JOptionPane.YES_OPTION) {
                                     connectInfo.setPassword(password);
                                     LettuceUtils.run(connectInfo, BaseRedisCommands::ping);
@@ -118,7 +115,7 @@ public class MainWindowForm {
                             throw e;
                         }
                     }
-                    LoadingUtils.showDialog(String.format("正在连接 - %s:%s", connectInfo.host(), connectInfo.port()));
+                    LoadingUtils.showDialog(String.format(LocaleUtils.getMessageFromBundle("MainWindowForm.connection.message"), connectInfo.host(), connectInfo.port()));
                 }
                 return connectInfo;
             }
@@ -142,7 +139,7 @@ public class MainWindowForm {
 
         tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_SCROLL_BUTTONS_PLACEMENT, FlatClientProperties.TABBED_PANE_PLACEMENT_BOTH);
         //SHOW CLOSE BUTTON
-        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_TOOLTIPTEXT, "关闭连接");
+        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_TOOLTIPTEXT, LocaleUtils.getMessageFromBundle("MainWindowForm.tabPanel.closeTooltip.text"));
         //SHOW CLOSE BUTTON Callback
         tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
             Component component = tabbedPane.getComponentAt(tabIndex);
@@ -166,8 +163,14 @@ public class MainWindowForm {
         toolBar.setBorder(new EmptyBorder(10, 10, 10, 10));
         toolBar.setLayout(new BorderLayout());
 
-        var newBtn = new JButton(" 日志", UI.LOGS_ICON);
-        newBtn.setToolTipText("查看日志");
+        var newBtn = new JButton(UI.LOGS_ICON) {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMessageFromBundle("MainWindowForm.newBtn.title"));
+                setToolTipText(LocaleUtils.getMessageFromBundle("MainWindowForm.newBtn.ToolTipText"));
+            }
+        };
         newBtn.addActionListener((event) -> LogsDialog.showLogsDialog());
         toolBar.add(new JPanel() {
             {

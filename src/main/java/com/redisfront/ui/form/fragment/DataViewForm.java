@@ -15,6 +15,7 @@ import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.handler.ActionHandler;
 import com.redisfront.commons.util.AlertUtils;
 import com.redisfront.commons.util.FutureUtils;
+import com.redisfront.commons.util.LocaleUtils;
 import com.redisfront.model.*;
 import com.redisfront.service.*;
 import com.redisfront.ui.component.LoadingPanel;
@@ -22,6 +23,7 @@ import com.redisfront.ui.component.TextEditor;
 import com.redisfront.ui.dialog.AddOrUpdateItemDialog;
 import io.lettuce.core.*;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.jdesktop.swingx.JXTextField;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -35,6 +37,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -127,180 +130,11 @@ public class DataViewForm {
 
     public DataViewForm(ConnectInfo connectInfo) {
         this.connectInfo = connectInfo;
-        $$$setupUI$$$();
-
         scanZSetContextMap = new LinkedHashMap<>();
         scanSetContextMap = new LinkedHashMap<>();
         scanListContextMap = new LinkedHashMap<>();
         scanHashContextMap = new LinkedHashMap<>();
-
-        loadMoreBtn.setIcon(UI.LOAD_MORE_ICON);
-        loadMoreBtn.addActionListener((e) -> {
-            if (loadMoreBtn.isEnabled()) {
-                loadMoreBtn.setEnabled(false);
-                reloadTableDataActionPerformed(false);
-            }
-        });
-
-        tableScorePanel.setPreferredSize(new Dimension(500, 190));
-        tableViewPanel.setVisible(false);
-        tableViewPanel.add(new JPanel() {
-            @Override
-            public void updateUI() {
-                super.updateUI();
-                setLayout(new BorderLayout());
-                setBorder(new FlatEmptyBorder(5, 0, 0, 0));
-                add(new JSeparator(), BorderLayout.CENTER);
-            }
-        }, BorderLayout.SOUTH);
-
-        tableViewPanel.add(new JPanel() {
-            @Override
-            public void updateUI() {
-                super.updateUI();
-                setLayout(new BorderLayout());
-                setBorder(new FlatEmptyBorder(0, 0, 5, 0));
-                add(new JSeparator(), BorderLayout.CENTER);
-            }
-        }, BorderLayout.NORTH);
-
-        keyTypeLabel.setOpaque(true);
-        keyTypeLabel.setForeground(Color.WHITE);
-        keyTypeLabel.setBorder(new EmptyBorder(2, 3, 2, 3));
-
-        var ttlLabel = new JLabel();
-        ttlLabel.setText("TTL");
-        ttlLabel.setOpaque(true);
-        ttlLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
-        ttlField.setSize(5, -1);
-        ttlField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, ttlLabel);
-
-        delBtn.setIcon(UI.DELETE_ICON);
-        delBtn.setText("删除");
-        delBtn.addActionListener(e -> deleteActionHandler.handle());
-        delBtn.setToolTipText("删除键");
-
-        refBtn.setIcon(UI.REFRESH_ICON);
-        refBtn.setText("重载");
-        refBtn.addActionListener(e -> reloadAllActionPerformed());
-        refBtn.setToolTipText("重载");
-
-        saveBtn.setIcon(UI.SAVE_ICON);
-        saveBtn.setText("保存");
-        saveBtn.addActionListener((e) -> {
-            SwingUtilities.invokeLater(() -> {
-                refreshBeforeHandler.handle();
-                refreshDisableBtn();
-            });
-            String ttl = ttlField.getText();
-            String key = keyField.getText();
-            if (Fn.notEqual(key, lastKeyName)) {
-                RedisBasicService.service.rename(connectInfo, lastKeyName, key);
-            }
-            if (Fn.notEqual(ttl, lastKeyTTL.toString())) {
-                RedisBasicService.service.expire(connectInfo, key, Long.valueOf(ttl));
-            }
-            reloadAllActionPerformed();
-            SwingUtilities.invokeLater(() -> {
-                refreshEnableBtn();
-                refreshAfterHandler.handle();
-            });
-        });
-        saveBtn.setToolTipText("保存");
-
-        tableSearchField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入搜索词...");
-        var searchBtn = new JButton(new FlatSearchIcon());
-        searchBtn.addActionListener(actionEvent -> reloadTableDataActionPerformed(true));
-        tableSearchField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchBtn);
-        tableSearchField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
-        tableSearchField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> {
-            tableSearchField.setText("");
-            reloadTableDataActionPerformed(true);
-        });
-
-        tableAddBtn.setIcon(UI.PLUS_ICON);
-        tableAddBtn.setText("插入元素");
-        tableAddBtn.addActionListener((event) -> {
-            var keyType = keyTypeLabel.getText();
-            Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(keyType.toUpperCase());
-
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.ZSET)) {
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog("插入元素", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
-            }
-
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.HASH)) {
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog("插入元素", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
-            }
-
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.LIST)) {
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog("插入元素", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
-            }
-
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog("插入元素", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
-            }
-        });
-
-        tableDelBtn.setIcon(UI.DELETE_ICON);
-        tableDelBtn.setText("删除元素");
-        tableDelBtn.addActionListener((event) -> {
-            var row = dataTable.getSelectedRow();
-
-            if (row == -1) {
-                return;
-            }
-            tableDelBtn.setEnabled(false);
-            var keyType = keyTypeLabel.getText();
-            Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(keyType.toUpperCase());
-            String key = keyField.getText();
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.ZSET)) {
-                var value = (String) dataTable.getValueAt(row, 2);
-                RedisZSetService.service.zrem(connectInfo, key, value);
-            }
-
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.HASH)) {
-                var field = (String) dataTable.getValueAt(row, 0);
-                RedisHashService.service.hdel(connectInfo, key, field);
-            }
-
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.LIST)) {
-                var value = (String) dataTable.getValueAt(row, 1);
-                RedisListService.service.lrem(connectInfo, key, 1, value);
-            }
-
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
-                var value = (String) dataTable.getValueAt(row, 1);
-                RedisSetService.service.srem(connectInfo, key, value);
-            }
-            tableDelBtn.setEnabled(false);
-            reloadTableDataActionPerformed(true);
-        });
-
-        tableRefreshBtn.setText("重新载入");
-        tableRefreshBtn.setIcon(UI.REFRESH_ICON);
-        tableRefreshBtn.addActionListener(e -> {
-            if (tableRefreshBtn.isEnabled()) {
-                tableRefreshBtn.setEnabled(false);
-                reloadTableDataActionPerformed(true);
-            }
-        });
-
-        var pageNumLabel = new JLabel();
-        pageNumLabel.setText("当前");
-        pageNumLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
-        currentCountField.setEnabled(false);
-        currentCountField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, pageNumLabel);
-
-        var pageSizeLabel = new JLabel();
-        pageSizeLabel.setText("总数");
-        pageSizeLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
-        allCountField.setEnabled(false);
-        allCountField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, pageSizeLabel);
-
-        closeBtn.setText("关闭");
-        closeBtn.setToolTipText("关闭本页");
-        closeBtn.addActionListener(e -> closeActionHandler.handle());
-
+        $$$setupUI$$$();
         dataTableInit();
     }
 
@@ -427,7 +261,7 @@ public class DataViewForm {
                             })), throwable -> refreshAfterHandler.handle());
                 } else {
                     ttlField.setText("-2");
-                    AlertUtils.showInformationDialog("当前Key已被删除！");
+                    AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showInformationDialog.message"));
                 }
 
             });
@@ -514,7 +348,7 @@ public class DataViewForm {
                 loadListDataActionPerformed(key);
             }
         } else {
-            AlertUtils.showInformationDialog("当前key已过期，请刷新！");
+            AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showInformationDialog.message"));
             refreshDisableBtn();
         }
 
@@ -548,7 +382,7 @@ public class DataViewForm {
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
             if (scanContext.getKeyList().size() >= 1000) {
                 System.gc();
-                throw new RedisFrontException("数据加载上限，请使用正则模糊匹配查找！");
+                throw new RedisFrontException(LocaleUtils.getMessageFromBundle("DataViewForm.redisFrontException.message"));
             }
             scanContext.getKeyList().addAll(new ArrayList<>(mapScanCursor.getMap().entrySet()));
         } else {
@@ -563,7 +397,7 @@ public class DataViewForm {
 
             LoadAfterUpdate(len, DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getValue().getBytes().length).reduce(Integer::sum).orElse(0)), String.valueOf(scanContext.getKeyList().size()), mapScanCursor.isFinished());
 
-            keyLabel.setText("键名");
+            keyLabel.setText(LocaleUtils.getMessageFromBundle("DataViewForm.keyLabel.title"));
             keyLabel.setOpaque(true);
             keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
             tableViewPanel.setVisible(true);
@@ -587,7 +421,7 @@ public class DataViewForm {
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
             if (scanContext.getKeyList().size() >= 2000) {
                 System.gc();
-                throw new RedisFrontException("数据加载上限，请使用正则模糊匹配查找！");
+                throw new RedisFrontException(LocaleUtils.getMessageFromBundle("DataViewForm.redisFrontException.message"));
             }
             scanContext.getKeyList().addAll(valueScanCursor.getValues());
         } else {
@@ -630,7 +464,7 @@ public class DataViewForm {
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
             if (scanContext.getKeyList().size() >= 2000) {
                 System.gc();
-                throw new RedisFrontException("数据加载上限，请使用正则模糊匹配查找！");
+                throw new RedisFrontException(LocaleUtils.getMessageFromBundle("DataViewForm.redisFrontException.message"));
             }
             scanContext.getKeyList().addAll(value);
         } else {
@@ -672,7 +506,7 @@ public class DataViewForm {
             if (scanContext.getKeyList().size() >= 2000) {
                 scanContext.getKeyList().clear();
                 System.gc();
-                throw new RedisFrontException("数据加载上限，请使用正则模糊匹配查找！");
+                throw new RedisFrontException(LocaleUtils.getMessageFromBundle("DataViewForm.redisFrontException.message"));
             }
             scanContext.getKeyList().addAll(valueScanCursor.getValues());
         } else {
@@ -684,7 +518,7 @@ public class DataViewForm {
         var sortedSetTableModel = new SortedSetTableModel(scanContext.getKeyList());
 
         SwingUtilities.invokeLater(() -> {
-            keyLabel.setText("分数：");
+            keyLabel.setText(LocaleUtils.getMessageFromBundle("DataViewForm.keyLabel.score.title"));
             LoadAfterUpdate(len, DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getValue().getBytes().length).reduce(Integer::sum).orElse(0)), String.valueOf(scanContext.getKeyList().size()), valueScanCursor.isFinished());
             tableViewPanel.setVisible(true);
             dataTable.setModel(sortedSetTableModel);
@@ -699,10 +533,10 @@ public class DataViewForm {
         currentCountField.setText(loadSize);
         allCountField.setText(String.valueOf(len));
         if (isFinished) {
-            loadMoreBtn.setText("加载完成");
+            loadMoreBtn.setText(LocaleUtils.getMessageFromBundle("DataViewForm.loadMoreBtn.complete.title"));
             loadMoreBtn.setEnabled(false);
         } else {
-            loadMoreBtn.setText("加载更多");
+            loadMoreBtn.setText(LocaleUtils.getMessageFromBundle("DataViewForm.loadMoreBtn.title"));
             loadMoreBtn.setEnabled(true);
         }
 
@@ -721,23 +555,23 @@ public class DataViewForm {
         if (keyTypeEnum.equals(Enum.KeyTypeEnum.ZSET)) {
             var score = (Double) dataTable.getValueAt(row, 1);
             var value = (String) dataTable.getValueAt(row, 2);
-            AddOrUpdateItemDialog.showAddOrUpdateItemDialog("修改元素", keyField.getText(), score.toString(), value, connectInfo, keyTypeEnum, () -> System.out.println("修改成功！"));
+            AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), score.toString(), value, connectInfo, keyTypeEnum, () -> System.out.println("OK"));
         }
 
         if (keyTypeEnum.equals(Enum.KeyTypeEnum.HASH)) {
             var key = (String) dataTable.getValueAt(row, 0);
             var value = (String) dataTable.getValueAt(row, 1);
-            AddOrUpdateItemDialog.showAddOrUpdateItemDialog("修改元素", keyField.getText(), key, value, connectInfo, keyTypeEnum, () -> System.out.println("修改成功！"));
+            AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), key, value, connectInfo, keyTypeEnum, () -> System.out.println("OK"));
         }
 
         if (keyTypeEnum.equals(Enum.KeyTypeEnum.LIST)) {
             var value = (String) dataTable.getValueAt(row, 1);
-            AddOrUpdateItemDialog.showAddOrUpdateItemDialog("修改元素", keyField.getText(), null, value, connectInfo, keyTypeEnum, () -> System.out.println("修改成功！"));
+            AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), null, value, connectInfo, keyTypeEnum, () -> System.out.println("OK"));
         }
 
         if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
             var value = (String) dataTable.getValueAt(row, 1);
-            AddOrUpdateItemDialog.showAddOrUpdateItemDialog("修改元素", keyField.getText(), null, value, connectInfo, keyTypeEnum, () -> System.out.println("修改成功！"));
+            AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), null, value, connectInfo, keyTypeEnum, () -> System.out.println("OK"));
         }
     }
 
@@ -769,22 +603,32 @@ public class DataViewForm {
         jToolBar.setBorder(new EmptyBorder(5, 8, 0, 10));
 
         fieldOrScoreField = new JTextField();
-        keyLabel = new JLabel();
-        keyLabel.setText("键名：");
+        keyLabel = new JLabel() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMessageFromBundle("DataViewForm.keyLabel.title"));
+            }
+        };
         keyLabel.setBackground(UIManager.getColor("background"));
         keyLabel.setBorder(new EmptyBorder(0, 2, 0, 2));
         fieldOrScoreField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, keyLabel);
         fieldOrScoreField.setBackground(UIManager.getColor("FlatEditorPane.background"));
         jToolBar.add(fieldOrScoreField);
 
-        JComboBox<String> jComboBox = new JComboBox<>();
+        var jComboBox = new JComboBox<>();
         jComboBox.addItem(SyntaxConstants.SYNTAX_STYLE_NONE);
         jComboBox.addItem(SyntaxConstants.SYNTAX_STYLE_JSON);
         jComboBox.setBackground(UIManager.getColor("FlatEditorPane.background"));
         jToolBar.add(jComboBox);
-        valueUpdateSaveBtn = new JButton();
-        valueUpdateSaveBtn.setText("立即保存");
-        valueUpdateSaveBtn.setToolTipText("保存更新内容");
+        valueUpdateSaveBtn = new JButton() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMessageFromBundle("DataViewForm.valueUpdateSaveBtn.title"));
+                setToolTipText(LocaleUtils.getMessageFromBundle("DataViewForm.valueUpdateSaveBtn.toolTip.text"));
+            }
+        };
         valueUpdateSaveBtn.setEnabled(false);
         valueUpdateSaveBtn.setIcon(UI.SAVE_ICON);
         valueUpdateSaveBtn.addActionListener((e) -> {
@@ -833,7 +677,7 @@ public class DataViewForm {
                     }
                 }
             });
-            AlertUtils.showInformationDialog("更新成功！");
+            AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showInformationDialog.updateSuccess.message"));
             SwingUtilities.invokeLater(this::refreshEnableBtn);
         });
         jToolBar.add(valueUpdateSaveBtn);
@@ -861,7 +705,234 @@ public class DataViewForm {
 
         basicPanel = new JPanel();
 
-        closeBtn = new JButton(UI.CLOSE_ICON);
+        loadMoreBtn = new JButton();
+        loadMoreBtn.setIcon(UI.LOAD_MORE_ICON);
+        loadMoreBtn.addActionListener((e) -> {
+            if (loadMoreBtn.isEnabled()) {
+                loadMoreBtn.setEnabled(false);
+                reloadTableDataActionPerformed(false);
+            }
+        });
+        tableScorePanel = new JScrollPane();
+        tableScorePanel.setPreferredSize(new Dimension(500, 190));
+
+        tableViewPanel = new JPanel();
+        tableViewPanel.setVisible(false);
+        tableViewPanel.add(new JPanel() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setLayout(new BorderLayout());
+                setBorder(new FlatEmptyBorder(5, 0, 0, 0));
+                add(new JSeparator(), BorderLayout.CENTER);
+            }
+        }, BorderLayout.SOUTH);
+
+        tableViewPanel.add(new JPanel() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setLayout(new BorderLayout());
+                setBorder(new FlatEmptyBorder(0, 0, 5, 0));
+                add(new JSeparator(), BorderLayout.CENTER);
+            }
+        }, BorderLayout.NORTH);
+
+        keyTypeLabel = new JLabel();
+        keyTypeLabel.setOpaque(true);
+        keyTypeLabel.setForeground(Color.WHITE);
+        keyTypeLabel.setBorder(new EmptyBorder(2, 3, 2, 3));
+
+        var ttlLabel = new JLabel();
+        ttlLabel.setText("TTL");
+        ttlLabel.setOpaque(true);
+        ttlLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
+
+        ttlField = new JTextField();
+        ttlField.setSize(5, -1);
+        ttlField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, ttlLabel);
+        delBtn = new JButton(UI.DELETE_ICON) {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMessageFromBundle("DataViewForm.delBtn.title"));
+                setToolTipText(LocaleUtils.getMessageFromBundle("DataViewForm.delBtn.toolTip.Text"));
+            }
+        };
+        delBtn.addActionListener(e -> deleteActionHandler.handle());
+
+        refBtn = new JButton(UI.REFRESH_ICON) {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMessageFromBundle("DataViewForm.refBtn.title"));
+                setToolTipText(LocaleUtils.getMessageFromBundle("DataViewForm.refBtn.toolTip.Text"));
+            }
+        };
+        refBtn.addActionListener(e -> reloadAllActionPerformed());
+
+        saveBtn = new JButton(UI.SAVE_ICON) {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMessageFromBundle("DataViewForm.saveBtn.title"));
+                setToolTipText(LocaleUtils.getMessageFromBundle("DataViewForm.saveBtn.toolTip.Text"));
+            }
+        };
+        saveBtn.addActionListener((e) -> {
+            SwingUtilities.invokeLater(() -> {
+                refreshBeforeHandler.handle();
+                refreshDisableBtn();
+            });
+            String ttl = ttlField.getText();
+            String key = keyField.getText();
+            if (Fn.notEqual(key, lastKeyName)) {
+                RedisBasicService.service.rename(connectInfo, lastKeyName, key);
+            }
+            if (Fn.notEqual(ttl, lastKeyTTL.toString())) {
+                RedisBasicService.service.expire(connectInfo, key, Long.valueOf(ttl));
+            }
+            reloadAllActionPerformed();
+            SwingUtilities.invokeLater(() -> {
+                refreshEnableBtn();
+                refreshAfterHandler.handle();
+            });
+        });
+        tableSearchField = new JTextField() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, LocaleUtils.getMessageFromBundle("DataViewForm.tableSearchField.placeholder.text"));
+            }
+        };
+
+        var searchBtn = new JButton(new FlatSearchIcon());
+        searchBtn.addActionListener(actionEvent -> reloadTableDataActionPerformed(true));
+        tableSearchField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchBtn);
+        tableSearchField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
+        tableSearchField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> {
+            tableSearchField.setText("");
+            reloadTableDataActionPerformed(true);
+        });
+        tableAddBtn = new JButton(UI.PLUS_ICON) {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMessageFromBundle("DataViewForm.tableAddBtn.title"));
+            }
+        };
+
+        tableAddBtn.addActionListener((event) -> {
+            var keyType = keyTypeLabel.getText();
+            Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(keyType.toUpperCase());
+
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.ZSET)) {
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog("插入元素", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
+            }
+
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.HASH)) {
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog("插入元素", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
+            }
+
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.LIST)) {
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog("插入元素", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
+            }
+
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog("插入元素", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
+            }
+        });
+
+        tableDelBtn = new JButton(UI.DELETE_ICON) {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMessageFromBundle("DataViewForm.tableDelBtn.title"));
+            }
+        };
+        tableDelBtn.addActionListener((event) -> {
+            var row = dataTable.getSelectedRow();
+
+            if (row == -1) {
+                return;
+            }
+            tableDelBtn.setEnabled(false);
+            var keyType = keyTypeLabel.getText();
+            Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(keyType.toUpperCase());
+            String key = keyField.getText();
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.ZSET)) {
+                var value = (String) dataTable.getValueAt(row, 2);
+                RedisZSetService.service.zrem(connectInfo, key, value);
+            }
+
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.HASH)) {
+                var field = (String) dataTable.getValueAt(row, 0);
+                RedisHashService.service.hdel(connectInfo, key, field);
+            }
+
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.LIST)) {
+                var value = (String) dataTable.getValueAt(row, 1);
+                RedisListService.service.lrem(connectInfo, key, 1, value);
+            }
+
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
+                var value = (String) dataTable.getValueAt(row, 1);
+                RedisSetService.service.srem(connectInfo, key, value);
+            }
+            tableDelBtn.setEnabled(false);
+            reloadTableDataActionPerformed(true);
+        });
+        tableRefreshBtn = new JButton(UI.REFRESH_ICON) {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMessageFromBundle("DataViewForm.tableRefreshBtn.title"));
+            }
+        };
+
+        tableRefreshBtn.addActionListener(e -> {
+            if (tableRefreshBtn.isEnabled()) {
+                tableRefreshBtn.setEnabled(false);
+                reloadTableDataActionPerformed(true);
+            }
+        });
+
+        var pageNumLabel = new JLabel() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMessageFromBundle("DataViewForm.pageNumLabel.title"));
+            }
+        };
+        pageNumLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
+
+        currentCountField = new JTextField();
+        currentCountField.setEnabled(false);
+        currentCountField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, pageNumLabel);
+
+        var pageSizeLabel = new JLabel() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMessageFromBundle("DataViewForm.pageSizeLabel.title"));
+            }
+        };
+        pageSizeLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
+
+        allCountField = new JTextField();
+        allCountField.setEnabled(false);
+        allCountField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, pageSizeLabel);
+
+        closeBtn = new JButton(UI.CLOSE_ICON) {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMessageFromBundle("DataViewForm.closeBtn.title"));
+                setToolTipText(LocaleUtils.getMessageFromBundle("DataViewForm.closeBtn.toolTip.Text"));
+            }
+        };
+
+        closeBtn.addActionListener(e -> closeActionHandler.handle());
 
     }
 
@@ -883,23 +954,21 @@ public class DataViewForm {
         basicPanel.setLayout(new GridLayoutManager(2, 6, new Insets(0, 0, 0, 0), -1, -1));
         bodyPanel.add(basicPanel, BorderLayout.NORTH);
         basicPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
-        keyTypeLabel = new JLabel();
         Font keyTypeLabelFont = this.$$$getFont$$$(null, Font.BOLD, 14, keyTypeLabel.getFont());
         if (keyTypeLabelFont != null) keyTypeLabel.setFont(keyTypeLabelFont);
         keyTypeLabel.setText("");
         basicPanel.add(keyTypeLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         keyField = new JTextField();
         basicPanel.add(keyField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-        saveBtn = new JButton();
-        saveBtn.setText("");
+        this.$$$loadButtonText$$$(saveBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.saveBtn.title"));
+        saveBtn.setToolTipText(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.saveBtn.toolTip.Text"));
         basicPanel.add(saveBtn, new GridConstraints(0, 5, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        delBtn = new JButton();
-        delBtn.setText("");
+        this.$$$loadButtonText$$$(delBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.delBtn.title"));
+        delBtn.setToolTipText(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.delBtn.toolTip.Text"));
         basicPanel.add(delBtn, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        refBtn = new JButton();
-        refBtn.setText("");
+        this.$$$loadButtonText$$$(refBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.refBtn.title"));
+        refBtn.setToolTipText(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.refBtn.toolTip.Text"));
         basicPanel.add(refBtn, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        ttlField = new JTextField();
         basicPanel.add(ttlField, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
@@ -913,7 +982,8 @@ public class DataViewForm {
         keySizeLabel = new JLabel();
         keySizeLabel.setText("");
         panel1.add(keySizeLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        closeBtn.setText("");
+        this.$$$loadButtonText$$$(closeBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.closeBtn.title"));
+        closeBtn.setToolTipText(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.closeBtn.toolTip.Text"));
         basicPanel.add(closeBtn, new GridConstraints(1, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         dataPanel = new JPanel();
         dataPanel.setLayout(new BorderLayout(0, 0));
@@ -921,7 +991,6 @@ public class DataViewForm {
         dataSplitPanel = new JSplitPane();
         dataSplitPanel.setOrientation(0);
         dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
-        tableViewPanel = new JPanel();
         tableViewPanel.setLayout(new BorderLayout(0, 0));
         dataSplitPanel.setLeftComponent(tableViewPanel);
         tableViewPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
@@ -932,19 +1001,15 @@ public class DataViewForm {
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new GridLayoutManager(6, 5, new Insets(0, 0, 0, 0), -1, -1));
         panel2.add(panel3, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        tableSearchField = new JTextField();
         panel3.add(tableSearchField, new GridConstraints(0, 0, 1, 5, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
         final Spacer spacer2 = new Spacer();
         panel3.add(spacer2, new GridConstraints(5, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        tableDelBtn = new JButton();
         tableDelBtn.setEnabled(true);
-        tableDelBtn.setText("");
+        this.$$$loadButtonText$$$(tableDelBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.tableDelBtn.title"));
         panel3.add(tableDelBtn, new GridConstraints(3, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
-        tableRefreshBtn = new JButton();
-        tableRefreshBtn.setText("重载");
+        this.$$$loadButtonText$$$(tableRefreshBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.tableRefreshBtn.title"));
         panel3.add(tableRefreshBtn, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
-        tableAddBtn = new JButton();
-        tableAddBtn.setText("添加");
+        this.$$$loadButtonText$$$(tableAddBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.tableAddBtn.title"));
         panel3.add(tableAddBtn, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
         pagePanel = new JPanel();
         pagePanel.setLayout(new BorderLayout(0, 0));
@@ -952,17 +1017,13 @@ public class DataViewForm {
         final JPanel panel4 = new JPanel();
         panel4.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         pagePanel.add(panel4, BorderLayout.NORTH);
-        currentCountField = new JTextField();
         panel4.add(currentCountField, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(80, -1), null, 0, false));
-        allCountField = new JTextField();
         panel4.add(allCountField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(80, -1), null, 0, false));
         final JPanel panel5 = new JPanel();
         panel5.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         pagePanel.add(panel5, BorderLayout.SOUTH);
-        loadMoreBtn = new JButton();
-        loadMoreBtn.setText("加载更多");
+        this.$$$loadButtonText$$$(loadMoreBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.loadMoreBtn.title"));
         panel5.add(loadMoreBtn, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
-        tableScorePanel = new JScrollPane();
         panel2.add(tableScorePanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         dataTable = new JTable();
         tableScorePanel.setViewportView(dataTable);
@@ -993,10 +1054,55 @@ public class DataViewForm {
         return fontWithFallback instanceof FontUIResource ? fontWithFallback : new FontUIResource(fontWithFallback);
     }
 
+    private static Method $$$cachedGetBundleMethod$$$ = null;
+
+    private String $$$getMessageFromBundle$$$(String path, String key) {
+        ResourceBundle bundle;
+        try {
+            Class<?> thisClass = this.getClass();
+            if ($$$cachedGetBundleMethod$$$ == null) {
+                Class<?> dynamicBundleClass = thisClass.getClassLoader().loadClass("com.intellij.DynamicBundle");
+                $$$cachedGetBundleMethod$$$ = dynamicBundleClass.getMethod("getBundle", String.class, Class.class);
+            }
+            bundle = (ResourceBundle) $$$cachedGetBundleMethod$$$.invoke(null, path, thisClass);
+        } catch (Exception e) {
+            bundle = ResourceBundle.getBundle(path);
+        }
+        return bundle.getString(key);
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    private void $$$loadButtonText$$$(AbstractButton component, String text) {
+        StringBuffer result = new StringBuffer();
+        boolean haveMnemonic = false;
+        char mnemonic = '\0';
+        int mnemonicIndex = -1;
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i) == '&') {
+                i++;
+                if (i == text.length()) break;
+                if (!haveMnemonic && text.charAt(i) != '&') {
+                    haveMnemonic = true;
+                    mnemonic = text.charAt(i);
+                    mnemonicIndex = result.length();
+                }
+            }
+            result.append(text.charAt(i));
+        }
+        component.setText(result.toString());
+        if (haveMnemonic) {
+            component.setMnemonic(mnemonic);
+            component.setDisplayedMnemonicIndex(mnemonicIndex);
+        }
+    }
+
     /**
      * @noinspection ALL
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPanel;
     }
+
 }

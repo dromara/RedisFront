@@ -11,6 +11,7 @@ import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.handler.ProcessHandler;
 import com.redisfront.commons.ui.AbstractDialog;
+import com.redisfront.commons.util.LocaleUtils;
 import com.redisfront.commons.util.PrefUtils;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.*;
@@ -21,6 +22,8 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.lang.reflect.Method;
+import java.util.ResourceBundle;
 
 public class AddKeyDialog extends AbstractDialog<String> {
     private JPanel contentPane;
@@ -36,6 +39,9 @@ public class AddKeyDialog extends AbstractDialog<String> {
     private JLabel hashKeyLabel;
     private JLabel streamLabel;
     private JSpinner ttlSpinner;
+    private JLabel keyLabel;
+    private JLabel typeLabel;
+    private JLabel valueLabel;
 
     private final String parentKey;
 
@@ -56,7 +62,7 @@ public class AddKeyDialog extends AbstractDialog<String> {
         this.setMinimumSize(new Dimension(500, 400));
         this.setContentPane(contentPane);
         getRootPane().setDefaultButton(buttonOK);
-        setTitle("添加");
+        setTitle(LocaleUtils.getMessageFromBundle("AddKeyDialog.title"));
         this.connectInfo = connectInfo;
         this.processHandler = addSuccessProcessHandler;
         buttonOK.addActionListener(e -> onOK());
@@ -96,7 +102,7 @@ public class AddKeyDialog extends AbstractDialog<String> {
         streamField.setVisible(false);
         ttlSpinner.setValue(-1);
 
-        keyNameField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入键名");
+        keyNameField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, LocaleUtils.getMessageFromBundle("AddKeyDialog.keyNameField.placeholder.text"));
 
         initComponentListener();
     }
@@ -163,27 +169,27 @@ public class AddKeyDialog extends AbstractDialog<String> {
 
         if (Fn.isEmpty(keyNameField.getText())) {
             keyNameField.requestFocus();
-            throw new RedisFrontException("参数校验失败");
+            throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddKeyDialog.require.text"));
         }
 
         if (Fn.equal(Enum.KeyTypeEnum.HASH.typeName(), selectItem) && Fn.isEmpty(hashKeyField.getText())) {
             hashKeyField.requestFocus();
-            throw new RedisFrontException("参数校验失败");
+            throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddKeyDialog.require.text"));
         }
 
         if (Fn.equal(Enum.KeyTypeEnum.STREAM.typeName(), selectItem) && Fn.isEmpty(streamField.getText())) {
             streamField.requestFocus();
-            throw new RedisFrontException("参数校验失败");
+            throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddKeyDialog.require.text"));
         }
 
         if (Fn.equal(Enum.KeyTypeEnum.ZSET.typeName(), selectItem) && Fn.isEmpty(zSetScoreField.getText())) {
             zSetScoreField.requestFocus();
-            throw new RedisFrontException("参数校验失败");
+            throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddKeyDialog.require.text"));
         }
 
         if (Fn.isEmpty(keyValueField.getText())) {
             keyValueField.requestFocus();
-            throw new RedisFrontException("参数校验失败");
+            throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddKeyDialog.require.text"));
         }
     }
 
@@ -272,27 +278,71 @@ public class AddKeyDialog extends AbstractDialog<String> {
         streamField = new JTextField();
         contentPane.add(streamField, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         scoreLabel = new JLabel();
-        scoreLabel.setText("分数");
+        this.$$$loadLabelText$$$(scoreLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddKeyDialog.scoreLabel.title"));
         contentPane.add(scoreLabel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         hashKeyLabel = new JLabel();
-        hashKeyLabel.setText("键名");
+        this.$$$loadLabelText$$$(hashKeyLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddKeyDialog.hashKeyLabel.title"));
         contentPane.add(hashKeyLabel, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JLabel label2 = new JLabel();
-        label2.setText("键名");
-        contentPane.add(label2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JLabel label3 = new JLabel();
-        label3.setText("类型");
-        contentPane.add(label3, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        keyLabel = new JLabel();
+        this.$$$loadLabelText$$$(keyLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddKeyDialog.keyLabel.title"));
+        contentPane.add(keyLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        typeLabel = new JLabel();
+        this.$$$loadLabelText$$$(typeLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddKeyDialog.typeLabel.title"));
+        contentPane.add(typeLabel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         streamLabel = new JLabel();
         streamLabel.setText("ID");
         contentPane.add(streamLabel, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JLabel label4 = new JLabel();
-        label4.setText("值");
-        contentPane.add(label4, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        valueLabel = new JLabel();
+        this.$$$loadLabelText$$$(valueLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddKeyDialog.valueLabel.title"));
+        contentPane.add(valueLabel, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JScrollPane scrollPane1 = new JScrollPane();
         contentPane.add(scrollPane1, new GridConstraints(5, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         keyValueField = new JTextArea();
         scrollPane1.setViewportView(keyValueField);
+    }
+
+    private static Method $$$cachedGetBundleMethod$$$ = null;
+
+    private String $$$getMessageFromBundle$$$(String path, String key) {
+        ResourceBundle bundle;
+        try {
+            Class<?> thisClass = this.getClass();
+            if ($$$cachedGetBundleMethod$$$ == null) {
+                Class<?> dynamicBundleClass = thisClass.getClassLoader().loadClass("com.intellij.DynamicBundle");
+                $$$cachedGetBundleMethod$$$ = dynamicBundleClass.getMethod("getBundle", String.class, Class.class);
+            }
+            bundle = (ResourceBundle) $$$cachedGetBundleMethod$$$.invoke(null, path, thisClass);
+        } catch (Exception e) {
+            bundle = ResourceBundle.getBundle(path);
+        }
+        return bundle.getString(key);
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    private void $$$loadLabelText$$$(JLabel component, String text) {
+        StringBuffer result = new StringBuffer();
+        boolean haveMnemonic = false;
+        char mnemonic = '\0';
+        int mnemonicIndex = -1;
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i) == '&') {
+                i++;
+                if (i == text.length()) break;
+                if (!haveMnemonic && text.charAt(i) != '&') {
+                    haveMnemonic = true;
+                    mnemonic = text.charAt(i);
+                    mnemonicIndex = result.length();
+                }
+            }
+            result.append(text.charAt(i));
+        }
+        component.setText(result.toString());
+        if (haveMnemonic) {
+            component.setDisplayedMnemonic(mnemonic);
+            component.setDisplayedMnemonicIndex(mnemonicIndex);
+        }
     }
 
     /**
@@ -301,4 +351,5 @@ public class AddKeyDialog extends AbstractDialog<String> {
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
+
 }

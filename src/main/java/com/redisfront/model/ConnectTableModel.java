@@ -1,5 +1,7 @@
 package com.redisfront.model;
 
+import com.redisfront.commons.util.LocaleUtils;
+
 import javax.swing.table.DefaultTableModel;
 import java.util.List;
 
@@ -25,7 +27,14 @@ public class ConnectTableModel extends DefaultTableModel {
             dataVector[i][4] = dataList.get(i).ssl().toString();
             dataVector[i][5] = dataList.get(i).connectMode();
         }
-        this.setDataVector(dataVector, new String[]{"编号", "名称", "地址", "端口", "SSL", "连接模式"});
+        this.setDataVector(dataVector, new String[]{
+                LocaleUtils.getMessageFromBundle("OpenConnectDialog.ConnectTableModel.id"),
+                LocaleUtils.getMessageFromBundle("OpenConnectDialog.ConnectTableModel.name"),
+                LocaleUtils.getMessageFromBundle("OpenConnectDialog.ConnectTableModel.host"),
+                LocaleUtils.getMessageFromBundle("OpenConnectDialog.ConnectTableModel.port"),
+                LocaleUtils.getMessageFromBundle("OpenConnectDialog.ConnectTableModel.SSL"),
+                LocaleUtils.getMessageFromBundle("OpenConnectDialog.ConnectTableModel.connectType")
+        });
     }
 
 

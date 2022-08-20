@@ -15,6 +15,7 @@ import com.redisfront.commons.ui.AbstractDialog;
 import com.redisfront.commons.util.AlertUtils;
 import com.redisfront.commons.util.FutureUtils;
 import com.redisfront.commons.util.LoadingUtils;
+import com.redisfront.commons.util.LocaleUtils;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
 import io.lettuce.core.RedisConnectionException;
@@ -97,7 +98,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     public AddConnectDialog(Frame owner, ProcessHandler<ConnectInfo> callback) {
         super(owner, callback);
         $$$setupUI$$$();
-        this.setTitle(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.Title"));
+        this.setTitle(LocaleUtils.getMessageFromBundle("AddConnectDialog.Title"));
         this.setModal(true);
         this.setResizable(true);
         this.setMinimumSize(new Dimension(400, 280));
@@ -226,8 +227,8 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
             @Override
             public void mouseClicked(MouseEvent e) {
                 var fileChooser = new JFileChooser();
-                fileChooser.setFileFilter(new FileNameExtensionFilter("私钥文件", "pem", "crt"));
-                fileChooser.showDialog(AddConnectDialog.this, "选择私钥文件");
+                fileChooser.setFileFilter(new FileNameExtensionFilter(LocaleUtils.getMessageFromBundle("AddConnectDialog.FileChooser.sshPrivateKey.title"), "pem", "crt"));
+                fileChooser.showDialog(AddConnectDialog.this, LocaleUtils.getMessageFromBundle("AddConnectDialog.FileChooser.sshPrivateKey.btn"));
                 var selectedFile = fileChooser.getSelectedFile();
                 if (Fn.isNotNull(selectedFile)) {
                     sshPrivateKeyFile.setText(selectedFile.getAbsolutePath());
@@ -285,11 +286,11 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     private ConnectInfo validGetConnectInfo() {
         if (StringUtils.isEmpty(titleField.getText())) {
             titleField.requestFocus();
-            throw new RedisFrontException("名称不能为空！", false);
+            throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddConnectDialog.require.title.message"), false);
         }
         if (StringUtils.isEmpty(hostField.getText())) {
             titleField.requestFocus();
-            throw new RedisFrontException("主机不能为空", false);
+            throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddConnectDialog.require.host.message"), false);
         }
 
         var title = titleField.getText();
@@ -301,18 +302,18 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
             //valid sshHostField
             if (Fn.isEmpty(sshHostField.getText())) {
                 sshHostField.requestFocus();
-                throw new RedisFrontException("SSH主机不能为空", false);
+                throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddConnectDialog.require.sshHost.message"), false);
             }
             //valid sshUserField
             if (Fn.isEmpty(sshUserField.getText())) {
                 sshUserField.requestFocus();
-                throw new RedisFrontException("SSH用户不能为空", false);
+                throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddConnectDialog.require.sshUser.message"), false);
             }
             //valid enableSshPrivateKey
             if (enableSshPrivateKey.isSelected()) {
                 if (Fn.isEmpty(sshPrivateKeyFile.getText())) {
                     sshPrivateKeyFile.requestFocus();
-                    throw new RedisFrontException("SSH私钥不能为空", false);
+                    throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddConnectDialog.require.sshPrivateKey.message"), false);
                 }
             }
             //sshConfig

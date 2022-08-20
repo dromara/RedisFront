@@ -94,7 +94,7 @@ public class DataSearchForm {
 
     public synchronized void loadTreeModelData(String key) {
         try {
-            LoadingUtils.showDialog("加载key中...");
+            LoadingUtils.showDialog(LocaleUtils.getMessageFromBundle("DataSearchForm.showDialog.message"));
             scanBeforeProcess();
             var scanKeysContext = scanKeysContextMap.get(connectInfo.database());
 
@@ -115,7 +115,7 @@ public class DataSearchForm {
                 var scanInfo = all.split(SEPARATOR_FLAG);
                 if (scanInfo.length > 1) {
                     if (Fn.equal(scanInfo[1], "null")) {
-                        throw new RedisFrontException("当前数据库为空！", true);
+                        throw new RedisFrontException(LocaleUtils.getMessageFromBundle("DataSearchForm.exception.databaseIsNull.message"), true);
                     } else {
                         scanKeysContext.setLimit(Long.valueOf(scanInfo[1]));
                     }
@@ -144,7 +144,7 @@ public class DataSearchForm {
             if (Fn.equal(scanKeysContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanKeysContext.getKeyList())) {
                 if (scanKeysContext.getKeyList().size() >= 300000) {
                     System.gc();
-                    throw new RedisFrontException("数据加载上限，请使用正则模糊匹配查找！");
+                    throw new RedisFrontException(LocaleUtils.getMessageFromBundle("DataSearchForm.exception.loadUpperLimit.message"));
                 }
                 scanKeysContext.getKeyList().addAll(scanKeysList);
             } else {
@@ -166,23 +166,25 @@ public class DataSearchForm {
                     var allSize = NumberUtil.isNumber(scanInfo[1]) ? Long.parseLong(scanInfo[1]) : 0;
                     //如果全部扫描完成！
                     if (current >= allSize) {
-                        loadMoreBtn.setText("扫描完成");
+                        loadMoreBtn.setText(LocaleUtils.getMessageFromBundle("DataSearchForm.loadMoreBtn.complete.title"));
                         loadMoreBtn.setEnabled(false);
                         return;
                     } else {
                         allField.setText((current + scanKeysContext.getLimit()) + SEPARATOR_FLAG + allSize);
-                        allField.setToolTipText("游标：" + current + ", 全部Key：" + allSize);
+                        var title = LocaleUtils.getMessageFromBundle("DataSearchForm.allField.toolTipText.title");
+                        allField.setToolTipText(String.format(title, current, allSize));
                     }
 
                 } else {
-                    allField.setToolTipText("游标：".concat(String.valueOf(scanKeysContext.getLimit())) + ", 全部Key：".concat(all));
+                    var title = LocaleUtils.getMessageFromBundle("DataSearchForm.allField.toolTipText.title");
+                    allField.setToolTipText(String.format(title, scanKeysContext.getLimit(), all));
                     allField.setText(scanKeysContext.getLimit() + SEPARATOR_FLAG + all);
                 }
                 if (loadMoreBtn.isEnabled()) {
-                    loadMoreBtn.setText("扫描更多");
+                    loadMoreBtn.setText(LocaleUtils.getMessageFromBundle("DataSearchForm.loadMoreBtn.complete.title"));
                     loadMoreBtn.requestFocus();
                 } else {
-                    loadMoreBtn.setText("扫描完成");
+                    loadMoreBtn.setText(LocaleUtils.getMessageFromBundle("DataSearchForm.loadMoreBtn.title"));
                     loadMoreBtn.setEnabled(false);
                 }
                 keyTree.setModel(treeModel);
@@ -218,7 +220,7 @@ public class DataSearchForm {
                         if (cause instanceof RedisCommandExecutionException) {
                             scanBeforeProcess();
                             addBtn.setEnabled(false);
-                            AlertUtils.showInformationDialog("当前环境不支持该命令", cause);
+                            AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("DataSearchForm.showInformationDialog.message"), cause);
                         } else {
                             AlertUtils.showErrorDialog("ERROR", cause);
                         }
@@ -231,7 +233,7 @@ public class DataSearchForm {
                         if (cause instanceof RedisCommandExecutionException) {
                             scanBeforeProcess();
                             addBtn.setEnabled(false);
-                            AlertUtils.showInformationDialog("当前环境不支持该命令", cause);
+                            AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("DataSearchForm.showInformationDialog.message"), cause);
                         } else {
                             AlertUtils.showErrorDialog("ERROR", cause);
                         }
@@ -260,7 +262,7 @@ public class DataSearchForm {
             refreshBtn.setEnabled(true);
             searchBtn.setEnabled(true);
             keyTree.setEnabled(true);
-            if (Fn.notEqual(loadMoreBtn.getText(), "扫描完成")) {
+            if (Fn.notEqual(loadMoreBtn.getText(), LocaleUtils.getMessageFromBundle("DataSearchForm.loadMoreBtn.complete.title"))) {
                 loadMoreBtn.requestFocus();
                 loadMoreBtn.setEnabled(true);
             }
@@ -307,19 +309,31 @@ public class DataSearchForm {
         treePanel = new JPanel();
         treePanel.setBorder(new EmptyBorder(3, 2, 2, 2));
 
-        addBtn = new JButton();
-        addBtn.setToolTipText("新增一个key");
+        addBtn = new JButton() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setToolTipText(LocaleUtils.getMessageFromBundle("DataSearchForm.addBtn.title"));
+            }
+        };
         addBtn.setIcon(UI.PLUS_ICON);
         addBtn.addActionListener(e -> AddKeyDialog.showAddDialog(connectInfo, null, (key) -> {
-            var res = JOptionPane.showConfirmDialog(RedisFrontApplication.frame, "数据添加成功，是否刷新列表？", "是否刷新", JOptionPane.YES_NO_OPTION);
+            var res = JOptionPane.showConfirmDialog(RedisFrontApplication.frame,
+                    LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.message"),
+                    LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.title"), JOptionPane.YES_NO_OPTION);
             if (res == JOptionPane.YES_OPTION) {
                 scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
                 scanKeysAndInitScanInfo();
             }
         }));
 
-        refreshBtn = new JButton();
-        refreshBtn.setToolTipText("重新加载");
+        refreshBtn = new JButton() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setToolTipText(LocaleUtils.getMessageFromBundle("DataSearchForm.refreshBtn.title"));
+            }
+        };
         refreshBtn.addActionListener(e -> {
             SwingUtilities.invokeLater(() -> searchTextField.setText(""));
             scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
@@ -327,11 +341,17 @@ public class DataSearchForm {
         });
         refreshBtn.setIcon(UI.REFRESH_ICON);
 
-        deleteAllBtn = new JButton();
-        deleteAllBtn.setToolTipText("清空所有数据");
+        deleteAllBtn = new JButton() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setToolTipText(LocaleUtils.getMessageFromBundle("DataSearchForm.deleteAllBtn.title"));
+            }
+        };
+
         deleteAllBtn.addActionListener(e -> FutureUtils.runAsync(
                 () -> {
-                    String operation = JOptionPane.showInputDialog("请选择删除模式：\n 1.flushdb \n 2.flushall");
+                    String operation = JOptionPane.showInputDialog(LocaleUtils.getMessageFromBundle("DataSearchForm.showInputDialog.title") + "\n 1.flushdb \n 2.flushall");
                     if (Fn.equal(operation, "flushdb")) {
                         RedisBasicService.service.flushdb(connectInfo);
                     } else if (Fn.equal(operation, "flushall")) {
@@ -346,7 +366,13 @@ public class DataSearchForm {
 
         databaseComboBox = new JComboBox<>();
 
-        loadMoreBtn = new JButton("继续扫描");
+        loadMoreBtn = new JButton() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMessageFromBundle("DataSearchForm.loadMoreBtn.continue.title"));
+            }
+        };
         loadMoreBtn.setIcon(UI.LOAD_MORE_ICON);
         loadMoreBtn.addActionListener(e -> scanKeysActionPerformed());
 
@@ -406,8 +432,13 @@ public class DataSearchForm {
             scanKeysActionPerformed();
         });
 
-        searchTextField = new JTextField();
-        searchTextField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入搜索词...");
+        searchTextField = new JTextField() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, LocaleUtils.getMessageFromBundle("DataSearchForm.searchTextField.placeholder.text"));
+            }
+        };
         searchBtn = new JButton(new FlatSearchIcon());
         searchTextField.addKeyListener(new KeyAdapter() {
             @Override
@@ -453,12 +484,20 @@ public class DataSearchForm {
 
         var popupMenu = new JPopupMenu() {
             {
-                var addMenuItem = new JMenuItem("添加");
+                var addMenuItem = new JMenuItem() {
+                    @Override
+                    public void updateUI() {
+                        super.updateUI();
+                        setText(LocaleUtils.getMessageFromBundle("DataSearchForm.addMenuItem.title"));
+                    }
+                };
                 addMenuItem.addActionListener((e) -> {
                     var selectNode = keyTree.getLastSelectedPathComponent();
                     if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
                         AddKeyDialog.showAddDialog(connectInfo, treeNodeInfo.key(), (key) -> {
-                            var res = JOptionPane.showConfirmDialog(RedisFrontApplication.frame, "数据添加成功，是否刷新列表？", "是否刷新", JOptionPane.YES_NO_OPTION);
+                            var res = JOptionPane.showConfirmDialog(RedisFrontApplication.frame,
+                                    LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.message"),
+                                    LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.title"), JOptionPane.YES_NO_OPTION);
                             if (res == JOptionPane.YES_OPTION) {
                                 scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
                                 scanKeysAndInitScanInfo();
@@ -467,7 +506,13 @@ public class DataSearchForm {
                     }
                 });
                 add(addMenuItem);
-                var delMenuItem = new JMenuItem("删除");
+                var delMenuItem = new JMenuItem() {
+                    @Override
+                    public void updateUI() {
+                        super.updateUI();
+                        setText(LocaleUtils.getMessageFromBundle("DataSearchForm.delMenuItem.title"));
+                    }
+                };
                 delMenuItem.addActionListener((e) -> {
                     DefaultTreeModel treeModel = (DefaultTreeModel) keyTree.getModel();
                     var selectNode = keyTree.getLastSelectedPathComponent();
@@ -476,7 +521,7 @@ public class DataSearchForm {
                                 //前置方法
                                 () -> SwingUtilities.invokeLater(() -> {
                                     var title = treeNodeInfo.title();
-                                    treeNodeInfo.setTitle(title.concat("  删除中... "));
+                                    treeNodeInfo.setTitle(title.concat(" ").concat(LocaleUtils.getMessageFromBundle("DataSearchForm.treeNodeInfo.del.doing.message")));
                                     keyTree.updateUI();
                                 }),
                                 //后置方法
@@ -486,7 +531,13 @@ public class DataSearchForm {
                 add(delMenuItem);
 
 
-                var memoryMenuItem = new JMenuItem("内存分析");
+                var memoryMenuItem = new JMenuItem() {
+                    @Override
+                    public void updateUI() {
+                        super.updateUI();
+                        setText(LocaleUtils.getMessageFromBundle("DataSearchForm.memoryMenuItem.title"));
+                    }
+                };
                 memoryMenuItem.addActionListener((e) -> {
                     var selectionPath = keyTree.getLeadSelectionPath();
                     var selectNode = selectionPath.getLastPathComponent();
@@ -497,7 +548,7 @@ public class DataSearchForm {
                         });
                         FutureUtils.runAsync(() -> {
                             SwingUtilities.invokeLater(() -> {
-                                treeNodeInfo.setTitle(title.concat("  内存分析中... "));
+                                treeNodeInfo.setTitle(title.concat(" ").concat(LocaleUtils.getMessageFromBundle("DataSearchForm.treeNodeInfo.memory.doing.message")));
                                 expandPath(selectionPath);
                                 keyTree.updateUI();
                             });
@@ -629,16 +680,28 @@ public class DataSearchForm {
         });
 
         currentField = new JTextField();
-        var currentLabel = new JLabel();
-        currentLabel.setText("结果");
+        var currentLabel = new JLabel() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMessageFromBundle("DataSearchForm.currentLabel.title"));
+            }
+        };
+
         currentLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
         currentLabel.setSize(5, -1);
         currentField.setBorder(new EmptyBorder(0, 5, 0, 0));
         currentField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, currentLabel);
 
         allField = new JTextField();
-        var allLabel = new JLabel();
-        allLabel.setText("游标");
+        var allLabel = new JLabel() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMessageFromBundle("DataSearchForm.allLabel.title"));
+            }
+        };
+        ;
         allLabel.setOpaque(true);
         allLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
         allLabel.setSize(5, -1);
@@ -652,7 +715,7 @@ public class DataSearchForm {
         var scanInfo = all.split(SEPARATOR_FLAG);
         if (scanInfo.length > 1) {
             allField.setText("0" + SEPARATOR_FLAG + scanInfo[1]);
-            allField.setToolTipText("已扫描：" + 0 + ",全部：".concat(scanInfo[1]));
+            allField.setToolTipText(String.format(LocaleUtils.getMessageFromBundle("DataSearchForm.allLabel.toolTip.text"), 0, scanInfo[1]));
         }
         scanKeysActionPerformed();
     }

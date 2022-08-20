@@ -11,6 +11,7 @@ import com.redisfront.commons.ui.AbstractDialog;
 import com.redisfront.commons.util.AlertUtils;
 import com.redisfront.commons.util.FutureUtils;
 import com.redisfront.commons.util.LoadingUtils;
+import com.redisfront.commons.util.LocaleUtils;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.model.ConnectTableModel;
 import com.redisfront.service.ConnectService;
@@ -20,7 +21,9 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.*;
+import java.lang.reflect.Method;
 import java.util.List;
+import java.util.ResourceBundle;
 
 public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
     private JPanel contentPane;
@@ -47,7 +50,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
     public OpenConnectDialog(ProcessHandler<ConnectInfo> openProcessHandler, ProcessHandler<ConnectInfo> editProcessHandler, ProcessHandler<ConnectInfo> delProcessHandler) {
         super(RedisFrontApplication.frame);
         $$$setupUI$$$();
-        setTitle("打开连接");
+        setTitle(LocaleUtils.getMessageFromBundle("OpenConnectDialog.title"));
         setModal(true);
         setMinimumSize(new Dimension(500, 400));
         setResizable(false);
@@ -84,15 +87,15 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         var popupMenu = new JPopupMenu() {
             {
                 //表格打开链接操作
-                var openConnectMenu = new JMenuItem("打开链接");
+                var openConnectMenu = new JMenuItem(LocaleUtils.getMessageFromBundle("OpenConnectDialog.openConnectMenu.title"));
                 openConnectMenu.addActionListener(e -> onOK());
                 add(openConnectMenu);
                 //表格编辑链接操作
-                var editConnectMenu = new JMenuItem("编辑链接");
+                var editConnectMenu = new JMenuItem(LocaleUtils.getMessageFromBundle("OpenConnectDialog.editConnectMenu.title"));
                 editConnectMenu.addActionListener(e -> {
                     var row = connectTable.getSelectedRow();
                     if (row == -1) {
-                        AlertUtils.showInformationDialog("未选中编辑行或列");
+                        AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("OpenConnectDialog.editConnectMenu.noSelected.message"));
                         return;
                     }
                     var id = connectTable.getValueAt(row, 0);
@@ -102,11 +105,11 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                 });
                 add(editConnectMenu);
                 //表格删除操作
-                var deleteConnectMenu = new JMenuItem("删除链接");
+                var deleteConnectMenu = new JMenuItem(LocaleUtils.getMessageFromBundle("OpenConnectDialog.deleteConnectMenu.title"));
                 deleteConnectMenu.addActionListener(e -> {
                     int row = connectTable.getSelectedRow();
                     if (row == -1) {
-                        AlertUtils.showInformationDialog("未选中删除行或列");
+                        AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("OpenConnectDialog.deleteConnectMenu.noSelected.message"));
                         return;
                     }
                     var id = connectTable.getValueAt(row, 0);
@@ -148,13 +151,13 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
     private void onOK() {
         var row = connectTable.getSelectedRow();
         if (row == -1) {
-            AlertUtils.showInformationDialog("未选中编辑行或列");
+            AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("OpenConnectDialog.editConnectMenu.noSelected.message"));
             return;
         }
         var id = connectTable.getValueAt(row, 0);
         var connectInfo = ConnectService.service.getConnect(id);
         FutureUtils.runAsync(() -> {
-            LoadingUtils.showDialog(String.format("正在连接 - %s:%s", connectInfo.host(), connectInfo.port()));
+            LoadingUtils.showDialog(String.format(LocaleUtils.getMessageFromBundle("OpenConnectDialog.openConnection.message"), connectInfo.host(), connectInfo.port()));
             var redisMode = RedisBasicService.service.getRedisModeEnum(connectInfo);
             openProcessHandler.processHandler(connectInfo.setRedisModeEnum(redisMode));
         });
@@ -194,10 +197,10 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         panel2.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1, true, false));
         panel1.add(panel2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         buttonOK = new JButton();
-        buttonOK.setText("打开");
+        this.$$$loadButtonText$$$(buttonOK, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "OpenConnectDialog.buttonOK.title"));
         panel2.add(buttonOK, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         buttonCancel = new JButton();
-        buttonCancel.setText("取消");
+        this.$$$loadButtonText$$$(buttonCancel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "OpenConnectDialog.buttonCancel.title"));
         panel2.add(buttonCancel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new BorderLayout(0, 0));
@@ -210,10 +213,54 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         final JPanel panel4 = new JPanel();
         panel4.setLayout(new BorderLayout(0, 0));
         contentPane.add(panel4, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        addConnectBtn.setText("添加新连接");
+        this.$$$loadButtonText$$$(addConnectBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "OpenConnectDialog.addConnectBtn.title"));
         panel4.add(addConnectBtn, BorderLayout.WEST);
         final Spacer spacer2 = new Spacer();
         panel4.add(spacer2, BorderLayout.CENTER);
+    }
+
+    private static Method $$$cachedGetBundleMethod$$$ = null;
+
+    private String $$$getMessageFromBundle$$$(String path, String key) {
+        ResourceBundle bundle;
+        try {
+            Class<?> thisClass = this.getClass();
+            if ($$$cachedGetBundleMethod$$$ == null) {
+                Class<?> dynamicBundleClass = thisClass.getClassLoader().loadClass("com.intellij.DynamicBundle");
+                $$$cachedGetBundleMethod$$$ = dynamicBundleClass.getMethod("getBundle", String.class, Class.class);
+            }
+            bundle = (ResourceBundle) $$$cachedGetBundleMethod$$$.invoke(null, path, thisClass);
+        } catch (Exception e) {
+            bundle = ResourceBundle.getBundle(path);
+        }
+        return bundle.getString(key);
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    private void $$$loadButtonText$$$(AbstractButton component, String text) {
+        StringBuffer result = new StringBuffer();
+        boolean haveMnemonic = false;
+        char mnemonic = '\0';
+        int mnemonicIndex = -1;
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i) == '&') {
+                i++;
+                if (i == text.length()) break;
+                if (!haveMnemonic && text.charAt(i) != '&') {
+                    haveMnemonic = true;
+                    mnemonic = text.charAt(i);
+                    mnemonicIndex = result.length();
+                }
+            }
+            result.append(text.charAt(i));
+        }
+        component.setText(result.toString());
+        if (haveMnemonic) {
+            component.setMnemonic(mnemonic);
+            component.setDisplayedMnemonicIndex(mnemonicIndex);
+        }
     }
 
     /**
@@ -222,4 +269,5 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
+
 }

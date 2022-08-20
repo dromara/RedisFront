@@ -28,9 +28,6 @@ public class MainNoneForm {
     private JLabel infoLabel;
 
 
-    private static final LocaleUtils.BundleInfo NEW_LABEL = LocaleUtils.get("MainNoneForm.NewLabel");
-    private static final LocaleUtils.BundleInfo OPEN_LABEL = LocaleUtils.get("MainNoneForm.OpenLabel");
-
     public static MainNoneForm getInstance() {
         return new MainNoneForm();
     }
@@ -41,16 +38,33 @@ public class MainNoneForm {
 
     public MainNoneForm() {
         $$$setupUI$$$();
-        newLabel.putClientProperty("FlatLaf.styleClass", "h3");
-        newLabel.setText(NEW_LABEL.title());
-        newKeyLabel.putClientProperty("FlatLaf.styleClass", "h3");
-        openLabel.putClientProperty("FlatLaf.styleClass", "h3");
-        openLabel.setText(OPEN_LABEL.title());
-        openKeyLabel.putClientProperty("FlatLaf.styleClass", "h3");
     }
 
     private void createUIComponents() {
         logoLabel = new JLabel(UI.REDIS_ICON);
+        newLabel = new JLabel() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.get("MainNoneForm.NewLabel").title());
+                putClientProperty("FlatLaf.styleClass", "h3");
+            }
+        };
+
+        newKeyLabel = new JLabel();
+        newKeyLabel.putClientProperty("FlatLaf.styleClass", "h3");
+
+        openLabel = new JLabel() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.get("MainNoneForm.OpenLabel").title());
+                putClientProperty("FlatLaf.styleClass", "h3");
+            }
+        };
+
+        openKeyLabel = new JLabel();
+        openKeyLabel.putClientProperty("FlatLaf.styleClass", "h3");
     }
 
     /**
@@ -72,18 +86,10 @@ public class MainNoneForm {
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
         panel1.add(panel2, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        newLabel = new JLabel();
-        Font newLabelFont = UIManager.getFont("CheckBox.font");
-        if (newLabelFont != null) newLabel.setFont(newLabelFont);
-        newLabel.setText("新建连接");
         panel2.add(newLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_SOUTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        newKeyLabel = new JLabel();
         newKeyLabel.setText("Ctrl+A");
         panel2.add(newKeyLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_SOUTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        openLabel = new JLabel();
-        openLabel.setText("打开连接");
         panel2.add(openLabel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        openKeyLabel = new JLabel();
         openKeyLabel.setText("Ctrl+S");
         panel2.add(openKeyLabel, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         logoLabel.setText("");
@@ -141,4 +147,5 @@ public class MainNoneForm {
     public JComponent $$$getRootComponent$$$() {
         return contentPanel;
     }
+
 }

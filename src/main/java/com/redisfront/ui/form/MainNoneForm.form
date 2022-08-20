@@ -29,16 +29,12 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="d6f04" class="javax.swing.JLabel" binding="newLabel">
+              <component id="d6f04" class="javax.swing.JLabel" binding="newLabel" custom-create="true">
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="10" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
-                <properties>
-                  <font swing-font="CheckBox.font"/>
-                  <text value="新建连接"/>
-                </properties>
               </component>
-              <component id="2db2c" class="javax.swing.JLabel" binding="newKeyLabel">
+              <component id="2db2c" class="javax.swing.JLabel" binding="newKeyLabel" custom-create="true">
                 <constraints>
                   <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="10" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -46,15 +42,12 @@
                   <text value="Ctrl+A"/>
                 </properties>
               </component>
-              <component id="3589" class="javax.swing.JLabel" binding="openLabel">
+              <component id="3589" class="javax.swing.JLabel" binding="openLabel" custom-create="true">
                 <constraints>
                   <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="9" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
-                <properties>
-                  <text value="打开连接"/>
-                </properties>
               </component>
-              <component id="e566b" class="javax.swing.JLabel" binding="openKeyLabel">
+              <component id="e566b" class="javax.swing.JLabel" binding="openKeyLabel" custom-create="true">
                 <constraints>
                   <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="9" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>

@@ -51,20 +51,6 @@ public class SettingDialog extends AbstractDialog<Void> {
     private JLabel languageLabel;
     private JComboBox<Map.Entry<String, String>> languageComboBox;
 
-    private static final LocaleUtils.BundleInfo SETTING_DIALOG = LocaleUtils.get("SettingDialog.Window");
-    private static final LocaleUtils.BundleInfo THEME_PANEL = LocaleUtils.get("SettingDialog.ThemePanel");
-
-    private static final LocaleUtils.BundleInfo LANGUAGE_PANEL = LocaleUtils.get("SettingDialog.LanguagePanel");
-    private static final LocaleUtils.BundleInfo FONT_PANEL = LocaleUtils.get("SettingDialog.FontPanel");
-    private static final LocaleUtils.BundleInfo REDIS_PANEL = LocaleUtils.get("SettingDialog.RedisPanel");
-    private static final LocaleUtils.BundleInfo FONT_LABEL = LocaleUtils.get("SettingDialog.FontLabel");
-
-    private static final LocaleUtils.BundleInfo LANGUAGE_LABEL = LocaleUtils.get("SettingDialog.LanguageLabel");
-    private static final LocaleUtils.BundleInfo FONT_SIZE_LABEL = LocaleUtils.get("SettingDialog.FontSizeLabel");
-    private static final LocaleUtils.BundleInfo THEME_LABEL = LocaleUtils.get("SettingDialog.ThemeLabel");
-    private static final LocaleUtils.BundleInfo LOAD_NUM_LABEL = LocaleUtils.get("SettingDialog.LoadNumLabel");
-    private static final LocaleUtils.BundleInfo KEY_SEPARATOR_LABEL = LocaleUtils.get("SettingDialog.KeySeparatorLabel");
-
     public static void showSettingDialog() {
         var settingDialog = new SettingDialog(RedisFrontApplication.frame);
         settingDialog.setMinimumSize(new Dimension(550, 400));
@@ -76,7 +62,7 @@ public class SettingDialog extends AbstractDialog<Void> {
     public SettingDialog(Frame owner) {
         super(owner);
         $$$setupUI$$$();
-        setTitle(SETTING_DIALOG.title());
+        setTitle(LocaleUtils.get("SettingDialog.Window").title());
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
@@ -120,15 +106,15 @@ public class SettingDialog extends AbstractDialog<Void> {
     }
 
     private void initLabelText() {
-        fontLabel.setText(FONT_LABEL.title());
-        fontSizeLabel.setText(FONT_SIZE_LABEL.title());
-        themeLabel.setText(THEME_LABEL.title());
-        languageLabel.setText(LANGUAGE_LABEL.title());
+        fontLabel.setText(LocaleUtils.get("SettingDialog.FontLabel").title());
+        fontSizeLabel.setText(LocaleUtils.get("SettingDialog.FontSizeLabel").title());
+        themeLabel.setText(LocaleUtils.get("SettingDialog.ThemeLabel").title());
+        languageLabel.setText(LocaleUtils.get("SettingDialog.LanguageLabel").title());
 
-        keySeparatorLabel.setText(KEY_SEPARATOR_LABEL.title());
+        keySeparatorLabel.setText(LocaleUtils.get("SettingDialog.KeySeparatorLabel").title());
         keySeparator.setText(PrefUtils.getState().get(Const.KEY_KEY_SEPARATOR, ":"));
 
-        loadNumLabel.setText(LOAD_NUM_LABEL.title());
+        loadNumLabel.setText(LocaleUtils.get("SettingDialog.LoadNumLabel").title());
         keyMaxLoadNum.setText(PrefUtils.getState().get(Const.KEY_KEY_MAX_LOAD_NUM, "5000"));
 
 
@@ -247,11 +233,7 @@ public class SettingDialog extends AbstractDialog<Void> {
         if (Fn.notEqual(newLanguage.getValue(), oldLanguage)) {
             Locale.setDefault(Locale.forLanguageTag((String) newLanguage.getValue()));
             PrefUtils.getState().put(Const.KEY_LANGUAGE, (String) newLanguage.getValue());
-            var res = AlertUtils.showConfirmDialog("语言已变更，重启后生效！\n 是否立即重启？", JOptionPane.YES_NO_OPTION);
-            if (res == 0) {
-                RedisFrontApplication.frame.dispose();
-                System.exit(0);
-            }
+            FlatLaf.updateUI();
         }
         dispose();
     }
@@ -262,13 +244,13 @@ public class SettingDialog extends AbstractDialog<Void> {
 
     private void createUIComponents() {
         themePanel = new JPanel();
-        themePanel.setBorder(new TitledBorder(THEME_PANEL.title()));
+        themePanel.setBorder(new TitledBorder(LocaleUtils.get("SettingDialog.ThemePanel").title()));
         languagePanel = new JPanel();
-        languagePanel.setBorder(new TitledBorder(LANGUAGE_PANEL.title()));
+        languagePanel.setBorder(new TitledBorder(LocaleUtils.get("SettingDialog.LanguagePanel").title()));
         fontPanel = new JPanel();
-        fontPanel.setBorder(new TitledBorder(FONT_PANEL.title()));
+        fontPanel.setBorder(new TitledBorder(LocaleUtils.get("SettingDialog.FontPanel").title()));
         redisPanel = new JPanel();
-        redisPanel.setBorder(new TitledBorder(REDIS_PANEL.title()));
+        redisPanel.setBorder(new TitledBorder(LocaleUtils.get("SettingDialog.RedisPanel").title()));
         themeNameComboBox = new JComboBox<>() {
             @Override
             public void setSelectedItem(Object item) {

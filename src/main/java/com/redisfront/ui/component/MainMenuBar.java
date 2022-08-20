@@ -29,36 +29,48 @@ import java.net.URISyntaxException;
  */
 public class MainMenuBar extends JMenuBar {
 
-    private static final LocaleUtils.BundleInfo FILE_MENU = LocaleUtils.getMenu("Menu.File");
-    private static final LocaleUtils.BundleInfo FILE_MENU_NEW_ITEM = LocaleUtils.getMenu("Menu.File.New");
-    private static final LocaleUtils.BundleInfo FILE_MENU_OPEN_ITEM = LocaleUtils.getMenu("Menu.File.Open");
-    private static final LocaleUtils.BundleInfo FILE_MENU_IMPORT_ITEM = LocaleUtils.getMenu("Menu.File.Import");
-    private static final LocaleUtils.BundleInfo FILE_MENU_EXPORT_ITEM = LocaleUtils.getMenu("Menu.File.Export");
-    private static final LocaleUtils.BundleInfo FILE_MENU_EXIT_ITEM = LocaleUtils.getMenu("Menu.File.Exit");
-    private static final LocaleUtils.BundleInfo SETTING_MENU = LocaleUtils.getMenu("Menu.Setting");
-
-    private static final LocaleUtils.BundleInfo HELP_MENU = LocaleUtils.getMenu("Menu.Help");
-    private static final LocaleUtils.BundleInfo HELP_ABOUT_MENU = LocaleUtils.getMenu("Menu.Help.About");
-
-
     public static JMenuBar getInstance() {
         return new MainMenuBar();
     }
 
     public MainMenuBar() {
-
         FlatDesktop.setAboutHandler(this::aboutActionPerformed);
         FlatDesktop.setQuitHandler(FlatDesktop.QuitResponse::performQuit);
+        initMenu();
+    }
 
-        var fileMenu = new JMenu(FILE_MENU.title());
-        fileMenu.setMnemonic(FILE_MENU.mnemonic());
+    public void initMenu() {
+
+        var fileMenu = new JMenu() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMenu("Menu.File").title());
+            }
+        };
+        fileMenu.setMnemonic(LocaleUtils.getMenu("Menu.File").mnemonic());
         //新建连接
-        var addConnectMenu = new JMenuItem(FILE_MENU_NEW_ITEM.title(), FILE_MENU_NEW_ITEM.mnemonic());
+        var addConnectMenu = new JMenuItem() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMenu("Menu.File.New").title());
+                setMnemonic(LocaleUtils.getMenu("Menu.File.New").mnemonic());
+            }
+        };
         addConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK));
         addConnectMenu.addActionListener(e -> AddConnectDialog.showAddConnectDialog(((connectInfo) -> MainWindowForm.getInstance().addTabActionPerformed(connectInfo))));
         fileMenu.add(addConnectMenu);
+
         //打开连接
-        var openConnectMenu = new JMenuItem(FILE_MENU_OPEN_ITEM.title(), FILE_MENU_OPEN_ITEM.mnemonic());
+        var openConnectMenu = new JMenuItem(){
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMenu("Menu.File.Open").title());
+                setMnemonic(LocaleUtils.getMenu("Menu.File.Open").mnemonic());
+            }
+        };
         openConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
         openConnectMenu.addActionListener(e -> OpenConnectDialog.showOpenConnectDialog(
                 //打开连接回调
@@ -71,13 +83,33 @@ public class MainMenuBar extends JMenuBar {
         fileMenu.add(openConnectMenu);
         //配置菜单
         fileMenu.add(new JSeparator());
-        var importConfigMenu = new JMenuItem(FILE_MENU_IMPORT_ITEM.title());
+        var importConfigMenu = new JMenuItem(){
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMenu("Menu.File.Import").title());
+            }
+        };
         fileMenu.add(importConfigMenu);
-        var exportConfigMenu = new JMenuItem(FILE_MENU_EXPORT_ITEM.title());
+
+        var exportConfigMenu = new JMenuItem(){
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMenu("Menu.File.Export").title());
+            }
+        };
         fileMenu.add(exportConfigMenu);
+
         //退出程序
         fileMenu.add(new JSeparator());
-        var exitMenu = new JMenuItem(FILE_MENU_EXIT_ITEM.title());
+        var exitMenu = new JMenuItem(){
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMenu("Menu.File.Exit").title());
+            }
+        };
         exitMenu.addActionListener(e -> {
             RedisFrontApplication.frame.dispose();
             System.exit(0);
@@ -85,9 +117,21 @@ public class MainMenuBar extends JMenuBar {
         fileMenu.add(exitMenu);
         add(fileMenu);
 
-        var settingMenu = new JMenu(SETTING_MENU.title());
-        settingMenu.setMnemonic(SETTING_MENU.mnemonic());
-        var settingMenuItem = new JMenuItem("全局设置");
+        var settingMenu = new JMenu(){
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMenu("Menu.Setting").title());
+                setMnemonic(LocaleUtils.getMenu("Menu.Setting").mnemonic());
+            }
+        };
+        var settingMenuItem = new JMenuItem(){
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMenu("Menu.Setting.global").title());
+            }
+        };
         settingMenuItem.addActionListener(e -> FutureUtils.runAsync(SettingDialog::showSettingDialog));
         settingMenu.add(settingMenuItem);
 
@@ -101,10 +145,24 @@ public class MainMenuBar extends JMenuBar {
 
         add(settingMenu);
 
-        var aboutMenu = new JMenu(HELP_MENU.title());
-        aboutMenu.setMnemonic(HELP_MENU.mnemonic());
-        var aboutMenuItem = new JMenuItem(HELP_ABOUT_MENU.title());
-        aboutMenuItem.setMnemonic(HELP_ABOUT_MENU.mnemonic());
+        var aboutMenu = new JMenu(){
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMenu("Menu.Help").title());
+            }
+        };
+        aboutMenu.setMnemonic(LocaleUtils.getMenu("Menu.Help").mnemonic());
+
+        var aboutMenuItem = new JMenuItem(){
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(LocaleUtils.getMenu("Menu.Help.About").title());
+                setMnemonic(LocaleUtils.getMenu("Menu.Help.About").mnemonic());
+            }
+        };
+
         aboutMenuItem.addActionListener((e) -> FutureUtils.runAsync(this::aboutActionPerformed));
         aboutMenu.add(aboutMenuItem);
         add(aboutMenu);
@@ -127,7 +185,6 @@ public class MainMenuBar extends JMenuBar {
         add(gitBtn);
     }
 
-
     private void aboutActionPerformed() {
         var titleLabel = new JLabel("RedisFront");
         titleLabel.putClientProperty(FlatClientProperties.STYLE_CLASS, "h1");
@@ -145,7 +202,7 @@ public class MainMenuBar extends JMenuBar {
                 }
             }
         });
-        JOptionPane.showMessageDialog(RedisFrontApplication.frame, new Object[]{titleLabel, "一款 Redis GUI 工具", " ", linkLabel,}, HELP_ABOUT_MENU.title(),
+        JOptionPane.showMessageDialog(RedisFrontApplication.frame, new Object[]{titleLabel, "一款 Redis GUI 工具", " ", linkLabel,}, LocaleUtils.getMenu("Menu.Help.About").title(),
                 JOptionPane.PLAIN_MESSAGE);
     }
 }
