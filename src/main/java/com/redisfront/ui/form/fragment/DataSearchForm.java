@@ -313,6 +313,7 @@ public class DataSearchForm {
             @Override
             public void updateUI() {
                 super.updateUI();
+                setText(LocaleUtils.getMessageFromBundle("DataSearchForm.addBtn.title"));
                 setToolTipText(LocaleUtils.getMessageFromBundle("DataSearchForm.addBtn.title"));
             }
         };
@@ -745,7 +746,7 @@ public class DataSearchForm {
         panel2.add(databaseComboBox, BorderLayout.WEST);
         addBtn.setHorizontalAlignment(0);
         addBtn.setHorizontalTextPosition(11);
-        addBtn.setText("新增");
+        addBtn.setText("");
         panel2.add(addBtn, BorderLayout.CENTER);
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new BorderLayout(0, 0));
@@ -791,4 +792,5 @@ public class DataSearchForm {
     public JComponent $$$getRootComponent$$$() {
         return contentPanel;
     }
+
 }

@@ -23,7 +23,6 @@ import com.redisfront.ui.component.TextEditor;
 import com.redisfront.ui.dialog.AddOrUpdateItemDialog;
 import io.lettuce.core.*;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.jdesktop.swingx.JXTextField;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -111,9 +110,8 @@ public class DataViewForm {
         this.deleteActionHandler = handler;
     }
 
-    public DataViewForm setCloseActionHandler(ActionHandler closeActionHandler) {
+    public void setCloseActionHandler(ActionHandler closeActionHandler) {
         this.closeActionHandler = closeActionHandler;
-        return this;
     }
 
     private void refreshDisableBtn() {
