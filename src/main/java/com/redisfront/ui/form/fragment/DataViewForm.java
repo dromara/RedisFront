@@ -1,6 +1,7 @@
 package com.redisfront.ui.form.fragment;
 
 import cn.hutool.core.io.unit.DataSizeUtil;
+import cn.hutool.json.JSONUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.formdev.flatlaf.ui.FlatEmptyBorder;
@@ -617,6 +618,17 @@ public class DataViewForm {
         var jComboBox = new JComboBox<>();
         jComboBox.addItem(SyntaxConstants.SYNTAX_STYLE_NONE);
         jComboBox.addItem(SyntaxConstants.SYNTAX_STYLE_JSON);
+        jComboBox.addActionListener((event) -> {
+            var item = jComboBox.getSelectedItem();
+            String value = textEditor.textArea().getText();
+            if (item instanceof String itemValue) {
+                if (Fn.equal(itemValue, SyntaxConstants.SYNTAX_STYLE_JSON)) {
+                    if (JSONUtil.isTypeJSON(value)) {
+                        SwingUtilities.invokeLater(() -> textEditor.textArea().setText(JSONUtil.toJsonPrettyStr(value)));
+                    }
+                }
+            }
+        });
         jComboBox.setBackground(UIManager.getColor("FlatEditorPane.background"));
         jToolBar.add(jComboBox);
         valueUpdateSaveBtn = new JButton() {
