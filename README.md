@@ -23,6 +23,5 @@
 ![JenBrains logo](assets/jetbrains.svg)
 
 ![JDK](https://img.shields.io/badge/JDK-17-blue.svg)
-![Lettuce](https://img.shields.io/badge/Lettuce-6.x-green.svg)
-![FlatLaf](https://img.shields.io/badge/FlatLaf-2.x-yellow.svg)
-![Release](https://img.shields.io/badge/Release-1.0.0.B-red.svg)
+![Apache 2.0](https://img.shields.io/badge/Apache-2.0-4EB1BA.svg)
+![Release](https://img.shields.io/badge/Release-1.0.0.B-green.svg)
