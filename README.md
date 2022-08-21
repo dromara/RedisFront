@@ -1,4 +1,4 @@
-## ![logo](assets/logo.png)  RedisFront - Cross-platform redis desktop client
+## ![logo](assets/logo.png)  RedisFront - Cross-platform redis GUI
 
 -------
 
