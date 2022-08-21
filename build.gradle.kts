@@ -158,6 +158,11 @@ configure<PackagePluginExtension> {
     jreDirectoryName("runtimes")
 }
 
+val setupLanguageMap = LinkedHashMap<String,String>()
+setupLanguageMap["Chinese"] = "compiler:Languages\\ChineseSimplified.isl"
+setupLanguageMap["English"] = "compiler:Default.isl"
+
+
 tasks.register<PackageTask>("packageForWindows") {
     description = "package For Windows"
     platform = Platform.windows
@@ -165,11 +170,14 @@ tasks.register<PackageTask>("packageForWindows") {
     winConfig(closureOf<WindowsConfig> {
         icoFile = getIconFile("redisfront.ico")
         headerType = HeaderType.gui
+        setupLanguages = setupLanguageMap
         isDisableDirPage = false
         isDisableFinishedPage = false
         isDisableWelcomePage = false
         isGenerateSetup = true
         isCreateZipball = true
+        isGenerateMsi = false
+        isGenerateMsm = false
     } as Closure<WindowsConfig>)
     dependsOn(tasks.build)
 }
