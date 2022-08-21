@@ -202,7 +202,7 @@ public class MainMenuBar extends JMenuBar {
                 }
             }
         });
-        JOptionPane.showMessageDialog(RedisFrontApplication.frame, new Object[]{titleLabel, "一款 Redis GUI 工具", " ", linkLabel,}, LocaleUtils.getMenu("Menu.Help.About").title(),
+        JOptionPane.showMessageDialog(RedisFrontApplication.frame, new Object[]{titleLabel, "Cross-platform redis gui clinet", "Version 1.0.0.B ",linkLabel}, LocaleUtils.getMenu("Menu.Help.About").title(),
                 JOptionPane.PLAIN_MESSAGE);
     }
 }
