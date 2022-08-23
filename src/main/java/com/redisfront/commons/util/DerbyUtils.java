@@ -6,6 +6,7 @@ import com.redisfront.commons.exception.RedisFrontException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,10 +27,12 @@ public class DerbyUtils {
 
     public static void init() {
         try {
+            var created = new File(Const.DERBY_LOG_FILE_PATH).createNewFile();
+            log.info("create Derby Log File: {}", created);
             System.setProperty("derby.stream.error.file", Const.DERBY_LOG_FILE_PATH);
             Class.forName("org.apache.derby.iapi.jdbc.InternalDriver");
             conn = DriverManager.getConnection("jdbc:derby:" + Const.DERBY_DATA_PATH + "create=true");
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (Exception e) {
             throw new RedisFrontException(e, true);
         }
     }
