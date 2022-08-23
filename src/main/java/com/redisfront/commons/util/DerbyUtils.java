@@ -1,6 +1,7 @@
 package com.redisfront.commons.util;
 
 
+import cn.hutool.core.io.FileUtil;
 import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.exception.RedisFrontException;
 import org.slf4j.Logger;
@@ -27,9 +28,15 @@ public class DerbyUtils {
 
     public static void init() {
         try {
-            var created = new File(Const.DERBY_LOG_FILE_PATH).createNewFile();
-            log.info("create Derby Log File: {}", created);
-            System.setProperty("derby.stream.error.file", Const.DERBY_LOG_FILE_PATH);
+
+            var createdFile = new File(Const.DERBY_LOG_FILE_PATH);
+            if (FileUtil.isEmpty(createdFile)) {
+                var dirCreated = createdFile.mkdir();
+                log.info("create Derby Log dir created: {}", dirCreated);
+                var fileCreated = new File(Const.DERBY_LOG_FILE).createNewFile();
+                log.info("create Derby Log File created: {}", fileCreated);
+            }
+            System.setProperty("derby.stream.error.file", Const.DERBY_LOG_FILE);
             Class.forName("org.apache.derby.iapi.jdbc.InternalDriver");
             conn = DriverManager.getConnection("jdbc:derby:" + Const.DERBY_DATA_PATH + "create=true");
         } catch (Exception e) {

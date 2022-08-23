@@ -29,7 +29,8 @@ public class Const {
 
     public static final String LOG_FILE_PATH = Const.DATA_PATH + File.separator + "logs" + File.separator + "redis-front.log";
 
-    public static final String DERBY_LOG_FILE_PATH = Const.DATA_PATH + File.separator + "derby" + File.separator + "derby.log";
+    public static final String DERBY_LOG_FILE = Const.DATA_PATH + File.separator + "derby" + File.separator + "derby.log";
+    public static final String DERBY_LOG_FILE_PATH = Const.DATA_PATH + File.separator + "derby";
     public static final String DERBY_DATA_PATH = Const.DATA_PATH + File.separator + "derby" + File.separator + "data;";
 
     public static final String LOG_FILE = "LOG_FILE";
