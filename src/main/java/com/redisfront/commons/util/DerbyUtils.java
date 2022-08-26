@@ -4,15 +4,13 @@ package com.redisfront.commons.util;
 import cn.hutool.core.io.FileUtil;
 import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.exception.RedisFrontException;
+import com.redisfront.commons.func.Fn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DerbyUtils {
     private static final Logger log = LoggerFactory.getLogger(DerbyUtils.class);
@@ -28,18 +26,21 @@ public class DerbyUtils {
 
     public static void init() {
         try {
-
-            var createdFile = new File(Const.DERBY_LOG_FILE_PATH);
-            if (FileUtil.isEmpty(createdFile)) {
-                var dirCreated = createdFile.mkdir();
+            var derbyFolder = new File(Const.DERBY_LOG_FILE_PATH);
+            if (FileUtil.isEmpty(derbyFolder)) {
+                var dirCreated = derbyFolder.mkdir();
                 log.info("create Derby Log dir created: {}", dirCreated);
                 var fileCreated = new File(Const.DERBY_LOG_FILE).createNewFile();
                 log.info("create Derby Log File created: {}", fileCreated);
+            }
+            if (Arrays.stream(Objects.requireNonNull(derbyFolder.listFiles())).noneMatch(file -> Fn.equal(file.getName().toLowerCase(), "data"))) {
+                PrefUtils.getState().put(Const.KEY_APP_DATABASE_INIT, Boolean.TRUE.toString());
             }
             System.setProperty("derby.stream.error.file", Const.DERBY_LOG_FILE);
             Class.forName("org.apache.derby.iapi.jdbc.InternalDriver");
             conn = DriverManager.getConnection("jdbc:derby:" + Const.DERBY_DATA_PATH + "create=true");
         } catch (Exception e) {
+            log.error("Derby init failed - {}", e.getMessage());
             throw new RedisFrontException(e, true);
         }
     }

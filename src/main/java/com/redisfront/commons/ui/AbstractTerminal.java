@@ -10,6 +10,7 @@ import javax.swing.event.CaretListener;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
 
 public abstract class AbstractTerminal extends JPanel implements KeyListener, CaretListener {
     protected final JTextArea terminal;
@@ -18,6 +19,10 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
     private int currentKeyCode = 0;
     private boolean allowInputFlag = false;
     private boolean consumeFlag = false;
+
+    private final ArrayList<String> commandHistory;
+    private Integer commandHistoryIndex;
+
 
     public AbstractTerminal() {
         setLayout(new BorderLayout());
@@ -29,6 +34,8 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
         terminal.setBackground(Color.BLACK);
         terminal.addKeyListener(this);
         terminal.addCaretListener(this);
+        commandHistory = new ArrayList<>();
+        commandHistoryIndex = 0;
         add(new JScrollPane(terminal), BorderLayout.CENTER);
     }
 
@@ -41,12 +48,12 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
     protected void println(String message) {
         terminal.append(message);
         terminal.append("\n");
-        lastSelectionStart = terminal.getSelectionEnd();
+        lastSelectionStart = terminal.getText().length();
     }
 
     protected void print(String message) {
         terminal.append(message);
-        lastSelectionStart = terminal.getSelectionEnd();
+        lastSelectionStart = terminal.getText().length();
     }
 
     protected void printConnectedSuccessMessage() {
@@ -64,10 +71,25 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
         }
         if (currentKeyCode == KeyEvent.VK_ENTER && e.getKeyChar() == '\n') {
             var subStartLength = lastSelectionStart;
-            var subEndLength = terminal.getSelectionEnd() - 1;
+            var subEndLength = terminal.getText().length();
+
             if ((subStartLength < subEndLength)) {
                 String input = terminal.getText().substring(subStartLength, subEndLength);
                 if (Fn.isNotEmpty(input)) {
+                    if (input.contains("\n") && !input.endsWith("\n")) {
+                        var oldText = input;
+                        input = input.replace("\n", "").concat("\n");
+                        terminal.setText(terminal.getText().replace(oldText, input));
+                    } else {
+                        input = input.concat("\n");
+                    }
+
+                    var text = input.replace("\n", "");
+                    if (Fn.isNotEmpty(text)) {
+                        commandHistory.add(text);
+                        commandHistoryIndex = commandHistory.size() - 1;
+                    }
+
                     this.inputProcessHandler(input.trim());
                 }
             }
@@ -82,10 +104,39 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
     @Override
     public void keyPressed(KeyEvent e) {
         currentKeyCode = e.getKeyCode();
-        if ((currentKeyCode == KeyEvent.VK_BACK_SPACE || currentKeyCode == KeyEvent.VK_ENTER || currentKeyCode == KeyEvent.VK_UP || currentKeyCode == KeyEvent.VK_DOWN || currentKeyCode == KeyEvent.VK_LEFT) && currentDot <= lastSelectionStart) {
+        if ((currentKeyCode == KeyEvent.VK_BACK_SPACE || currentKeyCode == KeyEvent.VK_DOWN || currentKeyCode == KeyEvent.VK_LEFT) && currentDot <= lastSelectionStart) {
             e.consume();
             consumeFlag = true;
         }
+
+        if (currentKeyCode == KeyEvent.VK_UP) {
+            e.consume();
+            consumeFlag = true;
+            if (!commandHistory.isEmpty()) {
+                if (commandHistoryIndex > 0) {
+                    String input = terminal.getText().substring(0, lastSelectionStart);
+                    commandHistoryIndex = commandHistoryIndex - 1;
+                    System.out.println("commandCacheIndex:" + commandHistoryIndex);
+                    System.out.println("commandCache.size():" + commandHistory.size());
+                    terminal.setText(input.concat(commandHistory.get(commandHistoryIndex)));
+                }
+            }
+        }
+
+        if (currentKeyCode == KeyEvent.VK_DOWN && !commandHistory.isEmpty()) {
+            e.consume();
+            consumeFlag = true;
+            if (!commandHistory.isEmpty()) {
+                if (commandHistoryIndex < commandHistory.size() - 1) {
+                    String input = terminal.getText().substring(0, lastSelectionStart);
+                    commandHistoryIndex = commandHistoryIndex + 1;
+                    System.out.println("commandCacheIndex:" + commandHistoryIndex);
+                    System.out.println("commandCache.size():" + commandHistory.size());
+                    terminal.setText(input.concat(commandHistory.get(commandHistoryIndex)));
+                }
+            }
+        }
+
         if (allowInputFlag) {
             consumeFlag = false;
         }
