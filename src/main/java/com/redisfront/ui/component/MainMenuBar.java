@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatDesktop;
 import com.formdev.flatlaf.extras.components.FlatButton;
 import com.redisfront.RedisFrontApplication;
+import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.constant.UI;
 import com.redisfront.service.ConnectService;
 import com.redisfront.ui.dialog.AddConnectDialog;
@@ -63,7 +64,7 @@ public class MainMenuBar extends JMenuBar {
         fileMenu.add(addConnectMenu);
 
         //打开连接
-        var openConnectMenu = new JMenuItem(){
+        var openConnectMenu = new JMenuItem() {
             @Override
             public void updateUI() {
                 super.updateUI();
@@ -83,7 +84,7 @@ public class MainMenuBar extends JMenuBar {
         fileMenu.add(openConnectMenu);
         //配置菜单
         fileMenu.add(new JSeparator());
-        var importConfigMenu = new JMenuItem(){
+        var importConfigMenu = new JMenuItem() {
             @Override
             public void updateUI() {
                 super.updateUI();
@@ -92,7 +93,7 @@ public class MainMenuBar extends JMenuBar {
         };
         fileMenu.add(importConfigMenu);
 
-        var exportConfigMenu = new JMenuItem(){
+        var exportConfigMenu = new JMenuItem() {
             @Override
             public void updateUI() {
                 super.updateUI();
@@ -103,7 +104,7 @@ public class MainMenuBar extends JMenuBar {
 
         //退出程序
         fileMenu.add(new JSeparator());
-        var exitMenu = new JMenuItem(){
+        var exitMenu = new JMenuItem() {
             @Override
             public void updateUI() {
                 super.updateUI();
@@ -117,7 +118,7 @@ public class MainMenuBar extends JMenuBar {
         fileMenu.add(exitMenu);
         add(fileMenu);
 
-        var settingMenu = new JMenu(){
+        var settingMenu = new JMenu() {
             @Override
             public void updateUI() {
                 super.updateUI();
@@ -125,7 +126,7 @@ public class MainMenuBar extends JMenuBar {
                 setMnemonic(LocaleUtils.getMenu("Menu.Setting").mnemonic());
             }
         };
-        var settingMenuItem = new JMenuItem(){
+        var settingMenuItem = new JMenuItem() {
             @Override
             public void updateUI() {
                 super.updateUI();
@@ -145,7 +146,7 @@ public class MainMenuBar extends JMenuBar {
 
         add(settingMenu);
 
-        var aboutMenu = new JMenu(){
+        var aboutMenu = new JMenu() {
             @Override
             public void updateUI() {
                 super.updateUI();
@@ -154,7 +155,7 @@ public class MainMenuBar extends JMenuBar {
         };
         aboutMenu.setMnemonic(LocaleUtils.getMenu("Menu.Help").mnemonic());
 
-        var aboutMenuItem = new JMenuItem(){
+        var aboutMenuItem = new JMenuItem() {
             @Override
             public void updateUI() {
                 super.updateUI();
@@ -202,7 +203,7 @@ public class MainMenuBar extends JMenuBar {
                 }
             }
         });
-        JOptionPane.showMessageDialog(RedisFrontApplication.frame, new Object[]{titleLabel, "Cross-platform redis gui clinet", "Version 1.0.0.B ",linkLabel}, LocaleUtils.getMenu("Menu.Help.About").title(),
+        JOptionPane.showMessageDialog(RedisFrontApplication.frame, new Object[]{titleLabel, "Cross-platform redis gui clinet", "Version " + Const.APP_VERSION, linkLabel}, LocaleUtils.getMenu("Menu.Help.About").title(),
                 JOptionPane.PLAIN_MESSAGE);
     }
 }

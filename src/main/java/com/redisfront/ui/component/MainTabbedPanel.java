@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 public class MainTabbedPanel extends JPanel {
 
     private final JTabbedPane contentPanel;
-    private final FlatToolBar leftToolBar;
     private final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
     public static MainTabbedPanel newInstance(ConnectInfo connectInfo) {
@@ -60,7 +59,7 @@ public class MainTabbedPanel extends JPanel {
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
 
-        leftToolBar = new FlatToolBar();
+        FlatToolBar leftToolBar = new FlatToolBar();
         var leftToolBarLayout = new FlowLayout();
         leftToolBarLayout.setAlignment(FlowLayout.CENTER);
         leftToolBar.setLayout(leftToolBarLayout);

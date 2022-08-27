@@ -5,6 +5,7 @@ import io.github.fvarrui.javapackager.gradle.PackagePluginExtension
 import io.github.fvarrui.javapackager.gradle.PackageTask
 import io.github.fvarrui.javapackager.model.*
 import io.github.fvarrui.javapackager.model.Platform
+import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import java.lang.Boolean
 import java.time.LocalDateTime
@@ -40,7 +41,7 @@ val developmentVersion = "1.0.0.B"
 version = if (Boolean.getBoolean("release")) releaseVersion else developmentVersion
 
 val flatlafVersion = "2.4"
-val hutoolVersion = "5.8.3"
+val hutoolVersion = "5.8.5"
 val fifesoftVersion = "3.2.0"
 val derbyVersion = "10.15.2.0"
 val lettuceVersion = "6.2.0.RELEASE"
@@ -101,7 +102,6 @@ dependencies {
     implementation("com.jcraft:jsch:0.1.55")
 }
 
-
 tasks.test {
     useJUnitPlatform()
     testLogging.exceptionFormat = TestExceptionFormat.FULL
@@ -112,6 +112,17 @@ tasks.compileJava {
     targetCompatibility = "17"
     options.encoding = "utf-8"
     options.isDeprecation = false
+}
+
+tasks.processResources {
+    filesMatching("application.properties") {
+        filter<ReplaceTokens>(
+            "tokens" to mapOf(
+                "copyright" to "Copyright © 2022-${LocalDateTime.now().plusYears(1).year} $appName",
+                "version" to "$version"
+            )
+        )
+    }
 }
 
 tasks.jar {
@@ -158,7 +169,10 @@ configure<PackagePluginExtension> {
     jreDirectoryName("runtimes")
 }
 
-val setupLanguageMap = LinkedHashMap<String,String>()
+val setupLanguageMap = LinkedHashMap<String, String>()
+repositories {
+    mavenCentral()
+}
 setupLanguageMap["Chinese"] = "compiler:Languages\\ChineseSimplified.isl"
 setupLanguageMap["English"] = "compiler:Default.isl"
 
@@ -189,8 +203,8 @@ tasks.register<PackageTask>("packageForLinux") {
         closureOf<LinuxConfig> {
             pngFile = getIconFile("redisfront.png")
             isGenerateRpm = true
-            isCreateTarball=true
-            isGenerateInstaller=true
+            isCreateTarball = true
+            isGenerateInstaller = true
             categories = listOf("Office")
         } as Closure<LinuxConfig>
     )

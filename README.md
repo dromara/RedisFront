@@ -15,10 +15,10 @@
 ### 感谢
 
 * [FlatLaf](https://www.formdev.com/flatlaf/?from=RedisFront)
-* [Lettuce](https://lettuce.io/?from=RedisFront)
-* [Hutool](http://hutool.cn/?from=RedisFront)
-* [Iconfont](https://www.iconfont.cn/?from=RedisFront)
-* [JetBrains](https://www.jetbrains.com/?from=RedisFront)
+* [Lettuce](https://lettuce.io?from=RedisFront)
+* [HuTool](http://hutool.cn?from=RedisFront)
+* [Iconfont](https://www.iconfont.cn?from=RedisFront)
+* [JetBrains](https://www.jetbrains.com?from=RedisFront)
 
 ![JenBrains logo](assets/jetbrains.svg)
 

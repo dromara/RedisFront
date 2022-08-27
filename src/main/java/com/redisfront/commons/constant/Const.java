@@ -1,5 +1,7 @@
 package com.redisfront.commons.constant;
 
+import cn.hutool.setting.dialect.PropsUtil;
+
 import java.io.File;
 
 /**
@@ -10,6 +12,8 @@ import java.io.File;
 
 public class Const {
 
+    public static final String APP_VERSION = PropsUtil.get("application.properties").getProperty("version");
+    public static final String APP_COPYRIGHT = PropsUtil.get("application.properties").getProperty("copyright");
     public static final String KEY_THEME = "theme";
     public static final String KEY_THEME_SELECT_INDEX = "selectThemeIndex";
 
