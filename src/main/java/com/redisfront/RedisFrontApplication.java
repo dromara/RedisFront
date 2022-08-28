@@ -68,7 +68,7 @@ public class RedisFrontApplication {
             DerbyUtils.init();
 
             frame = new RedisFrontMainFrame();
-            frame.setMinimumSize(new Dimension(1150, 800));
+            frame.setMinimumSize(new Dimension(1200, 800));
             frame.pack();
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);

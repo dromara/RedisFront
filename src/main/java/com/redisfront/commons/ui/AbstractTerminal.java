@@ -1,11 +1,9 @@
 package com.redisfront.commons.ui;
 
-import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.model.ConnectInfo;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import java.awt.*;
@@ -35,10 +33,7 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
         terminal.addCaretListener(this);
         commandHistory = new ArrayList<>();
         commandHistoryIndex = 0;
-        var terminalPanel = new JPanel(new BorderLayout());
-        terminalPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
-        terminalPanel.add(new JScrollPane(terminal), BorderLayout.CENTER);
-        add(terminalPanel);
+        add(new JScrollPane(terminal), BorderLayout.CENTER);
     }
 
     protected abstract void inputProcessHandler(String input);
@@ -121,6 +116,9 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
                     System.out.println("commandCacheIndex:" + commandHistoryIndex);
                     System.out.println("commandCache.size():" + commandHistory.size());
                     terminal.setText(input.concat(commandHistory.get(commandHistoryIndex)));
+                } else if (commandHistoryIndex == 0) {
+                    String input = terminal.getText().substring(0, lastSelectionStart);
+                    terminal.setText(input.concat(commandHistory.get(commandHistoryIndex)));
                 }
             }
         }
@@ -136,6 +134,9 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
                     System.out.println("commandCache.size():" + commandHistory.size());
                     terminal.setText(input.concat(commandHistory.get(commandHistoryIndex)));
                 }
+            } else if (commandHistoryIndex == 0) {
+                String input = terminal.getText().substring(0, lastSelectionStart);
+                terminal.setText(input.concat(commandHistory.get(commandHistoryIndex)));
             }
         }
 
