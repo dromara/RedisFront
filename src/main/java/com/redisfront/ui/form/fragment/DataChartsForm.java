@@ -2,6 +2,7 @@ package com.redisfront.ui.form.fragment;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.unit.DataSizeUtil;
+import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -65,6 +66,13 @@ public class DataChartsForm extends ChartsPanel {
         this.connectInfo = connectInfo;
         scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
         $$$setupUI$$$();
+    }
+
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        var flatLineBorder = new FlatLineBorder(new Insets(0, 0, 0, 2), UIManager.getColor("Component.borderColor"));
+        setBorder(flatLineBorder);
     }
 
     private void createUIComponents() {

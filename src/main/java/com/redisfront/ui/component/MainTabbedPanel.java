@@ -14,6 +14,7 @@ import com.redisfront.service.RedisBasicService;
 import com.redisfront.ui.form.fragment.DataChartsForm;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -41,121 +42,147 @@ public class MainTabbedPanel extends JPanel {
 
     public MainTabbedPanel(ConnectInfo connectInfo) {
         setLayout(new BorderLayout());
-        contentPanel = new JTabbedPane() {
-            @Override
-            public void updateUI() {
-                super.updateUI();
-                var count = getTabCount();
-                if (count > 2) {
-                    contentPanel.setTitleAt(0, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.RedisTerminal.title"));
-                    contentPanel.setTitleAt(1, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataSplitPanel.title"));
-                    contentPanel.setTitleAt(2, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataChartsForm.title"));
+
+        {
+            var topPanel = new JPanel(new BorderLayout()) {
+                @Override
+                public void updateUI() {
+                    super.updateUI();
+                    add(new JSeparator(), BorderLayout.SOUTH);
                 }
+            };
+
+            Box horizontalBox = Box.createHorizontalBox();
+            horizontalBox.setBorder(new EmptyBorder(0, 10, 0, 10));
+            {
+                var leftToolBar = new FlatToolBar();
+                var leftToolBarLayout = new FlowLayout();
+                leftToolBarLayout.setAlignment(FlowLayout.RIGHT);
+                leftToolBar.setLayout(leftToolBarLayout);
+
+                //host info
+                var hostInfo = new JLabel(UI.CONTENT_TAB_HOST_ICON) {
+                    @Override
+                    public void updateUI() {
+                        super.updateUI();
+                        var buf = new StringBuilder(1500);
+                        buf.append("<html><style>");
+                        buf.append("td { padding: 0 10 0 0; }");
+                        buf.append("</style><table>");
+                        var serverInfo = RedisBasicService.service.getServerInfo(connectInfo);
+                        var version = (String) serverInfo.get("redis_version");
+                        appendRow(buf, LocaleUtils.getMessageFromBundle("MainTabbedPanel.redisVersion.title"), version);
+
+                        var port = (String) serverInfo.get("tcp_port");
+                        appendRow(buf, LocaleUtils.getMessageFromBundle("MainTabbedPanel.tcpPort.title"), port);
+
+                        var os = (String) serverInfo.get("os");
+                        appendRow(buf, LocaleUtils.getMessageFromBundle("MainTabbedPanel.os.title"), os);
+
+                        var redisMode = (String) serverInfo.get("redis_mode");
+                        appendRow(buf, LocaleUtils.getMessageFromBundle("MainTabbedPanel.redisMode.title"), redisMode);
+
+                        var configFile = (String) serverInfo.get("config_file");
+                        appendRow(buf, LocaleUtils.getMessageFromBundle("MainTabbedPanel.configFile.title"), configFile);
+
+                        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+                            List<ClusterNode> clusterNodes = RedisBasicService.service.getClusterNodes(connectInfo);
+                            clusterNodes.forEach(s -> appendRow(buf, s.flags().toUpperCase(), s.ipAndPort()));
+                        }
+
+                        buf.append("</td></tr>");
+                        buf.append("</table></html>");
+                        setToolTipText(buf.toString());
+                        setText(connectInfo.host() + ":" + connectInfo.port() + " - " + LocaleUtils.getMessageFromBundle(connectInfo.redisModeEnum().modeName));
+                    }
+                };
+                horizontalBox.add(hostInfo);
             }
-        };
-        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.CENTER);
-        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, false);
-        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_TRAILING);
-        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
-        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
+            horizontalBox.add(Box.createHorizontalGlue());
+            {
+                //host info
+                var rightToolBar = new FlatToolBar();
+                var rightToolBarLayout = new FlowLayout();
+                rightToolBarLayout.setAlignment(FlowLayout.LEADING);
+                rightToolBar.setLayout(rightToolBarLayout);
 
-        FlatToolBar leftToolBar = new FlatToolBar();
-        var leftToolBarLayout = new FlowLayout();
-        leftToolBarLayout.setAlignment(FlowLayout.CENTER);
-        leftToolBar.setLayout(leftToolBarLayout);
-        leftToolBar.setPreferredSize(new Dimension(50, -1));
+                //keysInfo
+                var keysInfo = new FlatLabel();
+                keysInfo.setText("0");
+                keysInfo.setIcon(UI.CONTENT_TAB_KEYS_ICON);
+                rightToolBar.add(keysInfo);
 
-        //host info
-        var hostInfo = new JLabel(UI.CONTENT_TAB_HOST_ICON) {
-            @Override
-            public void updateUI() {
-                super.updateUI();
-                var buf = new StringBuilder(1500);
-                buf.append("<html><style>");
-                buf.append("td { padding: 0 10 0 0; }");
-                buf.append("</style><table>");
-                var serverInfo = RedisBasicService.service.getServerInfo(connectInfo);
-                var version = (String) serverInfo.get("redis_version");
-                appendRow(buf, LocaleUtils.getMessageFromBundle("MainTabbedPanel.redisVersion.title"), version);
+                //cupInfo
+                var cupInfo = new FlatLabel();
+                cupInfo.setText("0");
+                cupInfo.setIcon(UI.CONTENT_TAB_CPU_ICON);
+                rightToolBar.add(cupInfo);
 
-                var port = (String) serverInfo.get("tcp_port");
-                appendRow(buf, LocaleUtils.getMessageFromBundle("MainTabbedPanel.tcpPort.title"), port);
+                //memoryInfo
+                var memoryInfo = new FlatLabel();
+                memoryInfo.setText("0.0");
+                memoryInfo.setIcon(UI.CONTENT_TAB_MEMORY_ICON);
+                rightToolBar.add(memoryInfo);
+                add(topPanel, BorderLayout.NORTH);
 
-                var os = (String) serverInfo.get("os");
-                appendRow(buf, LocaleUtils.getMessageFromBundle("MainTabbedPanel.os.title"), os);
+                threadInit(connectInfo, keysInfo, cupInfo, memoryInfo);
 
-                var redisMode = (String) serverInfo.get("redis_mode");
-                appendRow(buf, LocaleUtils.getMessageFromBundle("MainTabbedPanel.redisMode.title"), redisMode);
+                horizontalBox.add(rightToolBar);
+            }
 
-                var configFile = (String) serverInfo.get("config_file");
-                appendRow(buf, LocaleUtils.getMessageFromBundle("MainTabbedPanel.configFile.title"), configFile);
+            topPanel.add(horizontalBox, BorderLayout.CENTER);
+            add(topPanel, BorderLayout.NORTH);
 
-                if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
-                    List<ClusterNode> clusterNodes = RedisBasicService.service.getClusterNodes(connectInfo);
-                    clusterNodes.forEach(s -> appendRow(buf, s.flags().toUpperCase(), s.ipAndPort()));
+        }
+        {
+            contentPanel = new JTabbedPane() {
+                @Override
+                public void updateUI() {
+                    super.updateUI();
+                    var count = getTabCount();
+                    if (count > 2) {
+                        contentPanel.setToolTipTextAt(0, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataSplitPanel.title"));
+                        contentPanel.setToolTipTextAt(1, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.RedisTerminal.title"));
+                        contentPanel.setToolTipTextAt(2, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataChartsForm.title"));
+                    }
                 }
-
-                buf.append("</td></tr>");
-                buf.append("</table></html>");
-                setToolTipText(buf.toString());
-                setText(connectInfo.host() + ":" + connectInfo.port() + " - " + LocaleUtils.getMessageFromBundle(connectInfo.redisModeEnum().modeName));
-            }
-        };
-        leftToolBar.add(hostInfo);
-        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_LEADING_COMPONENT, leftToolBar);
-
-        //host info
-        var rightToolBar = new FlatToolBar();
-        var rightToolBarLayout = new FlowLayout();
-        rightToolBarLayout.setAlignment(FlowLayout.CENTER);
-        rightToolBar.setLayout(rightToolBarLayout);
-        rightToolBar.setPreferredSize(new Dimension(50, -1));
-
-        //keysInfo
-        var keysInfo = new FlatLabel();
-        keysInfo.setText("0");
-        keysInfo.setIcon(UI.CONTENT_TAB_KEYS_ICON);
-        rightToolBar.add(keysInfo);
-
-        //cupInfo
-        var cupInfo = new FlatLabel();
-        cupInfo.setText("0");
-        cupInfo.setIcon(UI.CONTENT_TAB_CPU_ICON);
-        rightToolBar.add(cupInfo);
-
-        //memoryInfo
-        var memoryInfo = new FlatLabel();
-        memoryInfo.setText("0.0");
-        memoryInfo.setIcon(UI.CONTENT_TAB_MEMORY_ICON);
-        rightToolBar.add(memoryInfo);
-
-        threadInit(connectInfo, keysInfo, cupInfo, memoryInfo);
-
-        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, rightToolBar);
-        contentPanel.addTab(LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.RedisTerminal.title"), UI.CONTENT_TAB_COMMAND_ICON, RedisTerminal.newInstance(connectInfo));
-        contentPanel.addTab(LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataSplitPanel.title"), UI.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(connectInfo));
-        contentPanel.addTab(LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataChartsForm.title"), UI.CONTENT_TAB_INFO_ICON, DataChartsForm.getInstance(connectInfo));
-        contentPanel.setSelectedIndex(1);
+            };
+            contentPanel.setTabPlacement(JTabbedPane.RIGHT);
+            contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.TOP);
+            contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, false);
+            contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
+            contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_LEADING);
+            contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
+            contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_CONTENT_SEPARATOR, false);
 
 
-        //tab 切换事件
-        contentPanel.addChangeListener(e -> {
-            var tabbedPane = (JTabbedPane) e.getSource();
-            var component = tabbedPane.getSelectedComponent();
-            if (component instanceof RedisTerminal terminal) {
-                terminal.ping();
-                chartsFormInit();
-            }
-            if (component instanceof DataSplitPanel dataSplitPanel) {
-                dataSplitPanel.ping();
-                chartsFormInit();
-            }
-            if (component instanceof DataChartsForm chartsForm) {
-                chartsForm.scheduleInit();
-            }
-        });
+            contentPanel.addTab(null, UI.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(connectInfo));
+            contentPanel.setToolTipTextAt(0, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataSplitPanel.title"));
+            contentPanel.addTab(null, UI.CONTENT_TAB_COMMAND_ICON, RedisTerminal.newInstance(connectInfo));
+            contentPanel.setToolTipTextAt(1, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.RedisTerminal.title"));
+            contentPanel.addTab(null, UI.CONTENT_TAB_INFO_ICON, DataChartsForm.getInstance(connectInfo));
+            contentPanel.setToolTipTextAt(2, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataChartsForm.title"));
 
-        add(contentPanel, BorderLayout.CENTER);
+
+            //tab 切换事件
+            contentPanel.addChangeListener(e -> {
+                var tabbedPane = (JTabbedPane) e.getSource();
+                var component = tabbedPane.getSelectedComponent();
+                if (component instanceof RedisTerminal terminal) {
+                    terminal.ping();
+                    chartsFormInit();
+                }
+                if (component instanceof DataSplitPanel dataSplitPanel) {
+                    dataSplitPanel.ping();
+                    chartsFormInit();
+                }
+                if (component instanceof DataChartsForm chartsForm) {
+                    chartsForm.scheduleInit();
+                }
+            });
+
+            add(contentPanel, BorderLayout.CENTER);
+        }
 
     }
 
@@ -202,19 +229,19 @@ public class MainTabbedPanel extends JPanel {
                         return keyInfo;
                     }, s ->
                             SwingUtilities.invokeLater(() -> {
-                                keysInfo.setText(s[0]);
+                                keysInfo.setText(LocaleUtils.getMessageFromBundle("MainTabbedPanel.keyInfoFuture.keySize.title") + s[0] + " ");
                                 keysInfo.setToolTipText(s[1]);
                             }));
 
                     CompletableFuture<Void> opsInfoFuture = FutureUtils.supplyAsync(() -> RedisBasicService.service.getStatInfo(connectInfo), stats ->
                             SwingUtilities.invokeLater(() -> {
-                                cupInfo.setText((String) stats.get("instantaneous_ops_per_sec"));
+                                cupInfo.setText(LocaleUtils.getMessageFromBundle("MainTabbedPanel.opsInfoFuture.opsPerSec.title") + stats.get("instantaneous_ops_per_sec") + " ");
                                 cupInfo.setToolTipText(LocaleUtils.getMessageFromBundle("MainTabbedPanel.opsInfoFuture.opsPerSec.title") + stats.get("instantaneous_ops_per_sec"));
                             }));
 
                     CompletableFuture<Void> memoryFuture = FutureUtils.supplyAsync(() -> RedisBasicService.service.getMemoryInfo(connectInfo), memory ->
                             SwingUtilities.invokeLater(() -> {
-                                memoryInfo.setText((Fn.isNotNull(memory.get("used_memory_human")) ? (String) memory.get("used_memory_human") : "0"));
+                                memoryInfo.setText(LocaleUtils.getMessageFromBundle("MainTabbedPanel.memoryFuture.usedMemoryHuman.title") + (Fn.isNotNull(memory.get("used_memory_human")) ? memory.get("used_memory_human") : 0) + " ");
                                 memoryInfo.setToolTipText(LocaleUtils.getMessageFromBundle("MainTabbedPanel.memoryFuture.usedMemoryHuman.title") + (Fn.isNotNull(memory.get("used_memory_human")) ? memory.get("used_memory_human") : 0));
                             }));
 

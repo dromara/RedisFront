@@ -1,12 +1,13 @@
 package com.redisfront;
 
 import com.formdev.flatlaf.FlatLaf;
-import com.formdev.flatlaf.extras.FlatInspector;
-import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
 import com.formdev.flatlaf.util.SystemInfo;
 import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.exception.GlobalExceptionHandler;
-import com.redisfront.commons.util.*;
+import com.redisfront.commons.util.DerbyUtils;
+import com.redisfront.commons.util.FutureUtils;
+import com.redisfront.commons.util.PrefUtils;
+import com.redisfront.commons.util.ThemeUtils;
 import com.redisfront.ui.frame.RedisFrontMainFrame;
 
 import javax.swing.*;
@@ -45,7 +46,9 @@ public class RedisFrontApplication {
 
         FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", "#d81e06"));
 
-        ToolTipManager.sharedInstance().setInitialDelay(0);
+        ToolTipManager.sharedInstance().setInitialDelay(3);
+        ToolTipManager.sharedInstance().setLightWeightPopupEnabled(true);
+
 
         SwingUtilities.invokeLater(() -> {
 

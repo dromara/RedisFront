@@ -747,7 +747,7 @@ public class DataSearchForm {
         panel2.add(databaseComboBox, BorderLayout.WEST);
         addBtn.setHorizontalAlignment(0);
         addBtn.setHorizontalTextPosition(11);
-        this.$$$loadButtonText$$$(addBtn, this.$$$getMessageFromBundle$$$());
+        this.$$$loadButtonText$$$(addBtn, this.$$$getMessageFromBundle$$$("DataSearchForm.addBtn.title"));
         panel2.add(addBtn, BorderLayout.CENTER);
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new BorderLayout(0, 0));
@@ -789,7 +789,7 @@ public class DataSearchForm {
 
     private static Method $$$cachedGetBundleMethod$$$ = null;
 
-    private String $$$getMessageFromBundle$$$() {
+    private String $$$getMessageFromBundle$$$(String key) {
         ResourceBundle bundle;
         try {
             Class<?> thisClass = this.getClass();
@@ -801,7 +801,7 @@ public class DataSearchForm {
         } catch (Exception e) {
             bundle = ResourceBundle.getBundle("com/redisfront/RedisFront");
         }
-        return bundle.getString("DataSearchForm.addBtn.title");
+        return bundle.getString(key);
     }
 
     /**

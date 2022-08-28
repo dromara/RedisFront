@@ -1,7 +1,8 @@
 package com.redisfront.commons.ui;
 
-import com.redisfront.model.ConnectInfo;
+import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.redisfront.commons.func.Fn;
+import com.redisfront.model.ConnectInfo;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -23,10 +24,15 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
     private final ArrayList<String> commandHistory;
     private Integer commandHistoryIndex;
 
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        var flatLineBorder = new FlatLineBorder(new Insets(0, 0, 0, 2), UIManager.getColor("Component.borderColor"));
+        setBorder(flatLineBorder);
+    }
 
     public AbstractTerminal() {
         setLayout(new BorderLayout());
-        setBorder(new EmptyBorder(10, 10, 10, 10));
         terminal = new JTextArea();
         terminal.requestFocus();
         terminal.setCaretColor(Color.WHITE);
@@ -36,7 +42,10 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
         terminal.addCaretListener(this);
         commandHistory = new ArrayList<>();
         commandHistoryIndex = 0;
-        add(new JScrollPane(terminal), BorderLayout.CENTER);
+        var terminalPanel = new JPanel(new BorderLayout());
+        terminalPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        terminalPanel.add(new JScrollPane(terminal), BorderLayout.CENTER);
+        add(terminalPanel);
     }
 
     protected abstract void inputProcessHandler(String input);
