@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.components.FlatLabel;
 import com.formdev.flatlaf.extras.components.FlatToolBar;
 import com.formdev.flatlaf.ui.FlatLineBorder;
+import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
 import com.redisfront.commons.func.Fn;
@@ -92,41 +93,60 @@ public class MainTabbedPanel extends JPanel {
                 leftToolBar.add(hostInfo);
                 horizontalBox.add(hostInfo);
             }
+
             horizontalBox.add(Box.createHorizontalGlue());
+
             {
                 //host info
-                var rightToolBar = new FlatToolBar();
+                var middleToolBar = new FlatToolBar();
                 var rightToolBarLayout = new FlowLayout();
-                rightToolBarLayout.setAlignment(FlowLayout.LEFT);
-                rightToolBar.setLayout(rightToolBarLayout);
+                rightToolBarLayout.setAlignment(FlowLayout.CENTER);
+                middleToolBar.setLayout(rightToolBarLayout);
 
                 //cupInfo
                 var cupInfo = new FlatLabel();
                 cupInfo.setText("0");
                 cupInfo.setIcon(UI.CONTENT_TAB_CPU_ICON);
-                rightToolBar.add(cupInfo);
-                rightToolBar.add(new JToolBar.Separator());
+                middleToolBar.add(cupInfo);
+                middleToolBar.add(new JToolBar.Separator());
                 //memoryInfo
                 var memoryInfo = new FlatLabel();
                 memoryInfo.setText("0.0");
                 memoryInfo.setIcon(UI.CONTENT_TAB_MEMORY_ICON);
-                rightToolBar.add(memoryInfo);
-                rightToolBar.add(new JToolBar.Separator());
+                middleToolBar.add(memoryInfo);
+                middleToolBar.add(new JToolBar.Separator());
                 //keysInfo
                 var keysInfo = new FlatLabel();
                 keysInfo.setText("0");
                 keysInfo.setIcon(UI.CONTENT_TAB_KEYS_ICON);
-                rightToolBar.add(keysInfo);
+                middleToolBar.add(keysInfo);
 
                 threadInit(connectInfo, keysInfo, cupInfo, memoryInfo);
 
+                horizontalBox.add(middleToolBar);
+            }
+
+            horizontalBox.add(Box.createHorizontalGlue());
+
+            {
+                var rightToolBar = new FlatToolBar();
+                var rightToolBarLayout = new FlowLayout();
+                rightToolBarLayout.setAlignment(FlowLayout.RIGHT);
+                rightToolBar.setLayout(rightToolBarLayout);
+                var info = new FlatLabel();
+                info.setText(Const.APP_VERSION);
+                info.setIcon(UI.INFO_ICON);
+                rightToolBar.add(info);
                 horizontalBox.add(rightToolBar);
             }
+
+
             var topPanel = new JPanel(new BorderLayout());
 
             topPanel.add(horizontalBox, BorderLayout.CENTER);
             add(topPanel, BorderLayout.NORTH);
         }
+
 
         {
             contentPanel = new JTabbedPane() {

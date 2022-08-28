@@ -20,6 +20,7 @@ public class UI {
     public static final Icon MAIN_TAB_DATABASE_ICON = new FlatSVGIcon("icons/icon_db5.svg");
     public static final Icon NEW_CONN_ICON = new FlatSVGIcon("icons/new_conn.svg");
     public static final Icon OPEN_CONN_ICON = new FlatSVGIcon("icons/open_conn.svg");
+    public static final Icon INFO_ICON = new FlatSVGIcon("icons/info.svg");
     public static final Icon CONNECTION_ICON = new FlatSVGIcon("icons/connection.svg");
     public static final Icon TEST_CONNECTION_ICON = new FlatSVGIcon("icons/lan-connect.svg");
 
