@@ -211,6 +211,19 @@ tasks.register<PackageTask>("packageForLinux") {
     dependsOn(tasks.build)
 }
 
+tasks.register<PackageTask>("packageForMac_M1") {
+    description = "package For Mac"
+    platform = Platform.mac
+    macConfig(
+        closureOf<MacConfig> {
+            icnsFile = getIconFile("redisfront.icns")
+            isGenerateDmg = true
+            macStartup = MacStartup.ARM64
+        } as Closure<MacConfig>
+    )
+    dependsOn(tasks.build)
+}
+
 tasks.register<PackageTask>("packageForMac") {
     description = "package For Mac"
     platform = Platform.mac
