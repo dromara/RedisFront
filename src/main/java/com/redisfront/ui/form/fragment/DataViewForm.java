@@ -579,7 +579,7 @@ public class DataViewForm {
             @Override
             public void updateUI() {
                 super.updateUI();
-                var flatLineBorder = new FlatLineBorder(new Insets(0, 2, 0, 2), UIManager.getColor("Component.borderColor"));
+                var flatLineBorder = new FlatLineBorder(new Insets(0, 2, 0, 0), UIManager.getColor("Component.borderColor"));
                 setBorder(flatLineBorder);
                 if (Fn.isNotNull(dataTable)) {
                     dataTableInit();
@@ -970,14 +970,14 @@ public class DataViewForm {
         basicPanel.add(keyTypeLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         keyField = new JTextField();
         basicPanel.add(keyField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-        this.$$$loadButtonText$$$(saveBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.saveBtn.title"));
-        saveBtn.setToolTipText(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.saveBtn.toolTip.Text"));
+        this.$$$loadButtonText$$$(saveBtn, this.$$$getMessageFromBundle$$$("DataViewForm.saveBtn.title"));
+        saveBtn.setToolTipText(this.$$$getMessageFromBundle$$$("DataViewForm.saveBtn.toolTip.Text"));
         basicPanel.add(saveBtn, new GridConstraints(0, 5, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        this.$$$loadButtonText$$$(delBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.delBtn.title"));
-        delBtn.setToolTipText(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.delBtn.toolTip.Text"));
+        this.$$$loadButtonText$$$(delBtn, this.$$$getMessageFromBundle$$$("DataViewForm.delBtn.title"));
+        delBtn.setToolTipText(this.$$$getMessageFromBundle$$$("DataViewForm.delBtn.toolTip.Text"));
         basicPanel.add(delBtn, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        this.$$$loadButtonText$$$(refBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.refBtn.title"));
-        refBtn.setToolTipText(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.refBtn.toolTip.Text"));
+        this.$$$loadButtonText$$$(refBtn, this.$$$getMessageFromBundle$$$("DataViewForm.refBtn.title"));
+        refBtn.setToolTipText(this.$$$getMessageFromBundle$$$("DataViewForm.refBtn.toolTip.Text"));
         basicPanel.add(refBtn, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         basicPanel.add(ttlField, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
         final JPanel panel1 = new JPanel();
@@ -992,8 +992,8 @@ public class DataViewForm {
         keySizeLabel = new JLabel();
         keySizeLabel.setText("");
         panel1.add(keySizeLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        this.$$$loadButtonText$$$(closeBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.closeBtn.title"));
-        closeBtn.setToolTipText(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.closeBtn.toolTip.Text"));
+        this.$$$loadButtonText$$$(closeBtn, this.$$$getMessageFromBundle$$$("DataViewForm.closeBtn.title"));
+        closeBtn.setToolTipText(this.$$$getMessageFromBundle$$$("DataViewForm.closeBtn.toolTip.Text"));
         basicPanel.add(closeBtn, new GridConstraints(1, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         dataPanel = new JPanel();
         dataPanel.setLayout(new BorderLayout(0, 0));
@@ -1015,11 +1015,11 @@ public class DataViewForm {
         final Spacer spacer2 = new Spacer();
         panel3.add(spacer2, new GridConstraints(5, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         tableDelBtn.setEnabled(true);
-        this.$$$loadButtonText$$$(tableDelBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.tableDelBtn.title"));
+        this.$$$loadButtonText$$$(tableDelBtn, this.$$$getMessageFromBundle$$$("DataViewForm.tableDelBtn.title"));
         panel3.add(tableDelBtn, new GridConstraints(3, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
-        this.$$$loadButtonText$$$(tableRefreshBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.tableRefreshBtn.title"));
+        this.$$$loadButtonText$$$(tableRefreshBtn, this.$$$getMessageFromBundle$$$("DataViewForm.tableRefreshBtn.title"));
         panel3.add(tableRefreshBtn, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
-        this.$$$loadButtonText$$$(tableAddBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.tableAddBtn.title"));
+        this.$$$loadButtonText$$$(tableAddBtn, this.$$$getMessageFromBundle$$$("DataViewForm.tableAddBtn.title"));
         panel3.add(tableAddBtn, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
         pagePanel = new JPanel();
         pagePanel.setLayout(new BorderLayout(0, 0));
@@ -1032,7 +1032,7 @@ public class DataViewForm {
         final JPanel panel5 = new JPanel();
         panel5.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         pagePanel.add(panel5, BorderLayout.SOUTH);
-        this.$$$loadButtonText$$$(loadMoreBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataViewForm.loadMoreBtn.title"));
+        this.$$$loadButtonText$$$(loadMoreBtn, this.$$$getMessageFromBundle$$$("DataViewForm.loadMoreBtn.title"));
         panel5.add(loadMoreBtn, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
         panel2.add(tableScorePanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         dataTable = new JTable();
@@ -1066,7 +1066,7 @@ public class DataViewForm {
 
     private static Method $$$cachedGetBundleMethod$$$ = null;
 
-    private String $$$getMessageFromBundle$$$(String path, String key) {
+    private String $$$getMessageFromBundle$$$(String key) {
         ResourceBundle bundle;
         try {
             Class<?> thisClass = this.getClass();
@@ -1074,9 +1074,9 @@ public class DataViewForm {
                 Class<?> dynamicBundleClass = thisClass.getClassLoader().loadClass("com.intellij.DynamicBundle");
                 $$$cachedGetBundleMethod$$$ = dynamicBundleClass.getMethod("getBundle", String.class, Class.class);
             }
-            bundle = (ResourceBundle) $$$cachedGetBundleMethod$$$.invoke(null, path, thisClass);
+            bundle = (ResourceBundle) $$$cachedGetBundleMethod$$$.invoke(null, "com/redisfront/RedisFront", thisClass);
         } catch (Exception e) {
-            bundle = ResourceBundle.getBundle(path);
+            bundle = ResourceBundle.getBundle("com/redisfront/RedisFront");
         }
         return bundle.getString(key);
     }

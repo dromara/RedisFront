@@ -1,6 +1,8 @@
 package com.redisfront;
 
 import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.extras.FlatInspector;
+import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
 import com.formdev.flatlaf.util.SystemInfo;
 import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.exception.GlobalExceptionHandler;
@@ -49,6 +51,9 @@ public class RedisFrontApplication {
         ToolTipManager.sharedInstance().setInitialDelay(3);
         ToolTipManager.sharedInstance().setLightWeightPopupEnabled(true);
 
+        FlatInspector.install("ctrl shift alt X");
+
+        FlatUIDefaultsInspector.install("ctrl shift alt Y");
 
         SwingUtilities.invokeLater(() -> {
 

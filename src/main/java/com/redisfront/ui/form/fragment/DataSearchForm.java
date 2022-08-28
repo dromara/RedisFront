@@ -186,7 +186,7 @@ public class DataSearchForm {
                     loadMoreBtn.setText(LocaleUtils.getMessageFromBundle("DataSearchForm.loadMoreBtn.title"));
                     loadMoreBtn.requestFocus();
                 } else {
-                    loadMoreBtn.setText(LocaleUtils.getMessageFromBundle("DataSearchForm.complete.title"));
+                    loadMoreBtn.setText(LocaleUtils.getMessageFromBundle("DataSearchForm.loadMoreBtn.complete.title"));
                     loadMoreBtn.setEnabled(false);
                 }
                 keyTree.setModel(treeModel);
@@ -747,7 +747,7 @@ public class DataSearchForm {
         panel2.add(databaseComboBox, BorderLayout.WEST);
         addBtn.setHorizontalAlignment(0);
         addBtn.setHorizontalTextPosition(11);
-        this.$$$loadButtonText$$$(addBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataSearchForm.addBtn.title"));
+        this.$$$loadButtonText$$$(addBtn, this.$$$getMessageFromBundle$$$());
         panel2.add(addBtn, BorderLayout.CENTER);
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new BorderLayout(0, 0));
@@ -789,7 +789,7 @@ public class DataSearchForm {
 
     private static Method $$$cachedGetBundleMethod$$$ = null;
 
-    private String $$$getMessageFromBundle$$$(String path, String key) {
+    private String $$$getMessageFromBundle$$$() {
         ResourceBundle bundle;
         try {
             Class<?> thisClass = this.getClass();
@@ -797,11 +797,11 @@ public class DataSearchForm {
                 Class<?> dynamicBundleClass = thisClass.getClassLoader().loadClass("com.intellij.DynamicBundle");
                 $$$cachedGetBundleMethod$$$ = dynamicBundleClass.getMethod("getBundle", String.class, Class.class);
             }
-            bundle = (ResourceBundle) $$$cachedGetBundleMethod$$$.invoke(null, path, thisClass);
+            bundle = (ResourceBundle) $$$cachedGetBundleMethod$$$.invoke(null, "com/redisfront/RedisFront", thisClass);
         } catch (Exception e) {
-            bundle = ResourceBundle.getBundle(path);
+            bundle = ResourceBundle.getBundle("com/redisfront/RedisFront");
         }
-        return bundle.getString(key);
+        return bundle.getString("DataSearchForm.addBtn.title");
     }
 
     /**

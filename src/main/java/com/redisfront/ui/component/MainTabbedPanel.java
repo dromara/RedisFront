@@ -42,18 +42,9 @@ public class MainTabbedPanel extends JPanel {
 
     public MainTabbedPanel(ConnectInfo connectInfo) {
         setLayout(new BorderLayout());
-
         {
-            var topPanel = new JPanel(new BorderLayout()) {
-                @Override
-                public void updateUI() {
-                    super.updateUI();
-                    add(new JSeparator(), BorderLayout.SOUTH);
-                }
-            };
-
             Box horizontalBox = Box.createHorizontalBox();
-            horizontalBox.setBorder(new EmptyBorder(0, 10, 0, 10));
+            horizontalBox.setBorder(new EmptyBorder(0, 10, 0, 0));
             {
                 var leftToolBar = new FlatToolBar();
                 var leftToolBarLayout = new FlowLayout();
@@ -96,6 +87,8 @@ public class MainTabbedPanel extends JPanel {
                         setText(connectInfo.host() + ":" + connectInfo.port() + " - " + LocaleUtils.getMessageFromBundle(connectInfo.redisModeEnum().modeName));
                     }
                 };
+
+                leftToolBar.add(hostInfo);
                 horizontalBox.add(hostInfo);
             }
             horizontalBox.add(Box.createHorizontalGlue());
@@ -103,37 +96,39 @@ public class MainTabbedPanel extends JPanel {
                 //host info
                 var rightToolBar = new FlatToolBar();
                 var rightToolBarLayout = new FlowLayout();
-                rightToolBarLayout.setAlignment(FlowLayout.LEADING);
+                rightToolBarLayout.setAlignment(FlowLayout.LEFT);
                 rightToolBar.setLayout(rightToolBarLayout);
-
-                //keysInfo
-                var keysInfo = new FlatLabel();
-                keysInfo.setText("0");
-                keysInfo.setIcon(UI.CONTENT_TAB_KEYS_ICON);
-                rightToolBar.add(keysInfo);
 
                 //cupInfo
                 var cupInfo = new FlatLabel();
                 cupInfo.setText("0");
                 cupInfo.setIcon(UI.CONTENT_TAB_CPU_ICON);
                 rightToolBar.add(cupInfo);
-
+                rightToolBar.add(new JToolBar.Separator());
                 //memoryInfo
                 var memoryInfo = new FlatLabel();
                 memoryInfo.setText("0.0");
                 memoryInfo.setIcon(UI.CONTENT_TAB_MEMORY_ICON);
                 rightToolBar.add(memoryInfo);
-                add(topPanel, BorderLayout.NORTH);
+                rightToolBar.add(new JToolBar.Separator());
+                //keysInfo
+                var keysInfo = new FlatLabel();
+                keysInfo.setText("0");
+                keysInfo.setIcon(UI.CONTENT_TAB_KEYS_ICON);
+                rightToolBar.add(keysInfo);
 
                 threadInit(connectInfo, keysInfo, cupInfo, memoryInfo);
 
                 horizontalBox.add(rightToolBar);
             }
+            var topPanel = new JPanel(new BorderLayout());
 
             topPanel.add(horizontalBox, BorderLayout.CENTER);
-            add(topPanel, BorderLayout.NORTH);
+            topPanel.add(new JSeparator(), BorderLayout.SOUTH);
 
+            add(topPanel, BorderLayout.NORTH);
         }
+
         {
             contentPanel = new JTabbedPane() {
                 @Override
@@ -144,6 +139,7 @@ public class MainTabbedPanel extends JPanel {
                         contentPanel.setToolTipTextAt(0, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataSplitPanel.title"));
                         contentPanel.setToolTipTextAt(1, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.RedisTerminal.title"));
                         contentPanel.setToolTipTextAt(2, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataChartsForm.title"));
+                        contentPanel.setToolTipTextAt(3, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataChartsForm.title"));
                     }
                 }
             };
@@ -153,15 +149,15 @@ public class MainTabbedPanel extends JPanel {
             contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
             contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_LEADING);
             contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
-            contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_CONTENT_SEPARATOR, false);
-
 
             contentPanel.addTab(null, UI.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(connectInfo));
             contentPanel.setToolTipTextAt(0, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataSplitPanel.title"));
             contentPanel.addTab(null, UI.CONTENT_TAB_COMMAND_ICON, RedisTerminal.newInstance(connectInfo));
             contentPanel.setToolTipTextAt(1, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.RedisTerminal.title"));
-            contentPanel.addTab(null, UI.CONTENT_TAB_INFO_ICON, DataChartsForm.getInstance(connectInfo));
+            contentPanel.addTab(null, UI.MQ_ICON, new JPanel());
             contentPanel.setToolTipTextAt(2, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataChartsForm.title"));
+            contentPanel.addTab(null, UI.CONTENT_TAB_INFO_ICON, DataChartsForm.getInstance(connectInfo));
+            contentPanel.setToolTipTextAt(3, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataChartsForm.title"));
 
 
             //tab 切换事件

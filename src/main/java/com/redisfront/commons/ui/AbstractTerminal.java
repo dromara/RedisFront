@@ -24,13 +24,6 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
     private final ArrayList<String> commandHistory;
     private Integer commandHistoryIndex;
 
-    @Override
-    public void updateUI() {
-        super.updateUI();
-        var flatLineBorder = new FlatLineBorder(new Insets(0, 0, 0, 2), UIManager.getColor("Component.borderColor"));
-        setBorder(flatLineBorder);
-    }
-
     public AbstractTerminal() {
         setLayout(new BorderLayout());
         terminal = new JTextArea();
