@@ -3,6 +3,7 @@ package com.redisfront.ui.component;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.components.FlatLabel;
 import com.formdev.flatlaf.extras.components.FlatToolBar;
+import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
 import com.redisfront.commons.func.Fn;
@@ -124,16 +125,19 @@ public class MainTabbedPanel extends JPanel {
             var topPanel = new JPanel(new BorderLayout());
 
             topPanel.add(horizontalBox, BorderLayout.CENTER);
-            topPanel.add(new JSeparator(), BorderLayout.SOUTH);
-
             add(topPanel, BorderLayout.NORTH);
         }
 
         {
             contentPanel = new JTabbedPane() {
+
                 @Override
                 public void updateUI() {
                     super.updateUI();
+
+                    var flatLineBorder = new FlatLineBorder(new Insets(2, 0, 0, 0), UIManager.getColor("Component.borderColor"));
+                    setBorder(flatLineBorder);
+
                     var count = getTabCount();
                     if (count > 2) {
                         contentPanel.setToolTipTextAt(0, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataSplitPanel.title"));
