@@ -4,6 +4,7 @@ import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.func.Fn;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * ConnectInfo
@@ -16,6 +17,9 @@ public class ConnectInfo implements Serializable, Cloneable {
     private String title;
     private String host;
     private Integer port;
+    private String localHost;
+    private Integer localPort;
+    private Map<Integer, Integer> clusterLocalPort;
     private String username;
     private String password;
     private Integer database;
@@ -24,6 +28,30 @@ public class ConnectInfo implements Serializable, Cloneable {
     private Enum.RedisMode redisMode;
     private SSLConfig sslConfig;
     private SSHConfig sshConfig;
+
+    public String getLocalHost() {
+        return localHost;
+    }
+
+    public void setLocalHost(String localHost) {
+        this.localHost = localHost;
+    }
+
+    public Map<Integer, Integer> getClusterLocalPort() {
+        return clusterLocalPort;
+    }
+
+    public void setClusterLocalPort(Map<Integer, Integer> clusterLocalPort) {
+        this.clusterLocalPort = clusterLocalPort;
+    }
+
+    public Integer getLocalPort() {
+        return localPort;
+    }
+
+    public void setLocalPort(Integer localPort) {
+        this.localPort = localPort;
+    }
 
     public ConnectInfo(String title, String host, Integer port, String username, String password, Integer database, Boolean ssl, Enum.Connect connectMode) {
         this(title, host, port, username, password, database, ssl, connectMode, null, null);

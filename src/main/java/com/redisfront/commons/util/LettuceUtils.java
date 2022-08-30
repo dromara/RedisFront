@@ -1,5 +1,7 @@
 package com.redisfront.commons.util;
 
+import cn.hutool.core.util.RandomUtil;
+import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.model.ConnectInfo;
 import io.lettuce.core.RedisClient;
@@ -10,9 +12,12 @@ import io.lettuce.core.cluster.ClusterClientOptions;
 import io.lettuce.core.cluster.ClusterTopologyRefreshOptions;
 import io.lettuce.core.cluster.RedisClusterClient;
 import io.lettuce.core.cluster.api.sync.RedisAdvancedClusterCommands;
+import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -27,7 +32,7 @@ public class LettuceUtils {
     private LettuceUtils() {
     }
 
-    private synchronized static RedisClusterClient getRedisClusterClient(RedisURI redisURI) {
+    private synchronized static RedisClusterClient getRedisClusterClient(RedisURI redisURI, ConnectInfo connectInfo) {
         var clusterClient = RedisClusterClient.create(redisURI);
         var clusterTopologyRefreshOptions = ClusterTopologyRefreshOptions.builder()
                 .enableAdaptiveRefreshTrigger(ClusterTopologyRefreshOptions.RefreshTrigger.MOVED_REDIRECT, ClusterTopologyRefreshOptions.RefreshTrigger.PERSISTENT_RECONNECTS)
@@ -37,12 +42,21 @@ public class LettuceUtils {
                 .topologyRefreshOptions(clusterTopologyRefreshOptions)
                 .build();
         clusterClient.setOptions(clusterClientOptions);
+        var isSSH = connectInfo.connectMode().equals(Enum.Connect.SSH);
+        if (isSSH) {
+            Map<Integer, Integer> clusterTempPort = new HashMap<>();
+            for (RedisClusterNode partition : clusterClient.getPartitions()) {
+                var remotePort = partition.getUri().getPort();
+                clusterTempPort.put(remotePort, RandomUtil.randomInt(32768, 65535));
+            }
+            connectInfo.setClusterLocalPort(clusterTempPort);
+        }
         return clusterClient;
     }
 
     public synchronized static void clusterRun(ConnectInfo connectInfo, Consumer<RedisAdvancedClusterCommands<String, String>> consumer) {
         var redisURI = getRedisURI(connectInfo);
-        var clusterClient = getRedisClusterClient(redisURI);
+        var clusterClient = getRedisClusterClient(redisURI, connectInfo);
         try {
             JschUtils.openSession(connectInfo, clusterClient);
             try (var connection = clusterClient.connect()) {
@@ -60,7 +74,7 @@ public class LettuceUtils {
 
     public synchronized static <T> T clusterExec(ConnectInfo connectInfo, Function<RedisAdvancedClusterCommands<String, String>, T> function) {
         var redisURI = getRedisURI(connectInfo);
-        var clusterClient = getRedisClusterClient(redisURI);
+        var clusterClient = getRedisClusterClient(redisURI, connectInfo);
         try {
             JschUtils.openSession(connectInfo, clusterClient);
             try (var connection = clusterClient.connect()) {
@@ -151,13 +165,19 @@ public class LettuceUtils {
 
 
     public synchronized static RedisURI getRedisURI(ConnectInfo connectInfo) {
+        var isSSH = connectInfo.connectMode().equals(Enum.Connect.SSH);
+        if (isSSH) {
+            connectInfo.setLocalHost("127.0.0.1");
+            connectInfo.setLocalPort(RandomUtil.randomInt(32768, 65535));
+        }
         var redisURI = RedisURI.builder()
-                .withHost(connectInfo.host())
-                .withPort(connectInfo.port())
+                .withHost(isSSH ? connectInfo.getLocalHost() : connectInfo.host())
+                .withPort(isSSH ? connectInfo.getLocalPort() : connectInfo.port())
                 .withSsl(connectInfo.ssl())
                 .withDatabase(connectInfo.database())
                 .withTimeout(Duration.ofMinutes(1))
                 .build();
+
         if (Fn.isNotEmpty(connectInfo.user()) && Fn.isNotEmpty(connectInfo.password())) {
             var staticCredentialsProvider = new StaticCredentialsProvider(connectInfo.user(), connectInfo.password().toCharArray());
             redisURI.setCredentialsProvider(staticCredentialsProvider);
