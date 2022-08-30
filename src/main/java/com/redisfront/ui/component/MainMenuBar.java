@@ -94,6 +94,7 @@ public class MainMenuBar extends JMenuBar {
                 setText(LocaleUtils.getMenu("Menu.File.Import").title());
             }
         };
+        importConfigMenu.addActionListener((e) -> FutureUtils.runAsync(this::showFileImportDialog));
         fileMenu.add(importConfigMenu);
 
         // 导出链接配置
@@ -237,5 +238,13 @@ public class MainMenuBar extends JMenuBar {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    private void showFileImportDialog() {
+        // 创建一个默认的文件选取器
+        var fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+        // 打开文件选择框（线程将被阻塞, 直到选择框被关闭）
+        var result = fileChooser.showDialog(MainNoneForm.getInstance().getContentPanel(), LocaleUtils.getMessageFromBundle("ConfigImport.saveBtn.title"));
     }
 }
