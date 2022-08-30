@@ -287,6 +287,53 @@ public class ConnectInfo implements Serializable, Cloneable {
         return this;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public Integer getDatabase() {
+        return database;
+    }
+
+    public Boolean getSsl() {
+        return ssl;
+    }
+
+    public Enum.Connect getConnectMode() {
+        return connectMode;
+    }
+
+    public Enum.RedisMode getRedisMode() {
+        return redisMode;
+    }
+
+    public SSLConfig getSslConfig() {
+        return sslConfig;
+    }
+
+    public SSHConfig getSshConfig() {
+        return sshConfig;
+    }
 
     @Override
     public String toString() {
