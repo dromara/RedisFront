@@ -12,8 +12,8 @@ import java.io.File;
 
 public class Const {
 
-    public static final String APP_VERSION = PropsUtil.get("application.properties").getProperty("version","1.0.0");
-    public static final String APP_COPYRIGHT = PropsUtil.get("application.properties").getProperty("copyright","RedisFront");
+    public static final String APP_VERSION = PropsUtil.get("application.properties").getProperty("version", "1.0.0");
+    public static final String APP_COPYRIGHT = PropsUtil.get("application.properties").getProperty("copyright", "RedisFront");
     public static final String KEY_THEME = "theme";
     public static final String KEY_THEME_SELECT_INDEX = "selectThemeIndex";
 
@@ -30,6 +30,7 @@ public class Const {
     public static final String KEY_LANGUAGE = "language";
 
     public static final String DATA_PATH = System.getProperty("user.home") + File.separator + "redis-front";
+    public static final String CONFIG_DATA_PATH = DATA_PATH + File.separator + "config";
 
     public static final String LOG_FILE_PATH = Const.DATA_PATH + File.separator + "logs" + File.separator + "redis-front.log";
 

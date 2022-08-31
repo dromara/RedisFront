@@ -37,7 +37,7 @@ public class FutureUtils {
         return CompletableFuture.runAsync(runnable);
     }
 
-    public static CompletableFuture<Void> runAsync(Runnable runnable,ExecutorService executorService) {
+    public static CompletableFuture<Void> runAsync(Runnable runnable, ExecutorService executorService) {
         return CompletableFuture.runAsync(runnable);
     }
 
@@ -61,6 +61,10 @@ public class FutureUtils {
                 consumer.accept(t);
             }
         });
+    }
+
+    public static <T> CompletableFuture<T> supplyAsync(Supplier<T> supplier) {
+        return CompletableFuture.supplyAsync(supplier, executorService);
     }
 
 }

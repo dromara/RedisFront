@@ -1,12 +1,6 @@
 package com.redisfront.ui.component;
 
-import cn.hutool.core.collection.ListUtil;
-import cn.hutool.core.io.IORuntimeException;
-import cn.hutool.core.io.file.FileReader;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONException;
-import cn.hutool.json.JSONObject;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.json.JSONUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatDesktop;
@@ -14,27 +8,23 @@ import com.formdev.flatlaf.extras.components.FlatButton;
 import com.redisfront.RedisFrontApplication;
 import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.constant.UI;
+import com.redisfront.commons.util.FutureUtils;
+import com.redisfront.commons.util.LocaleUtils;
 import com.redisfront.service.ConnectService;
 import com.redisfront.ui.dialog.AddConnectDialog;
 import com.redisfront.ui.dialog.ImportConfigDialog;
 import com.redisfront.ui.dialog.OpenConnectDialog;
 import com.redisfront.ui.dialog.SettingDialog;
-import com.redisfront.ui.form.MainNoneForm;
 import com.redisfront.ui.form.MainWindowForm;
-import com.redisfront.commons.util.FutureUtils;
-import com.redisfront.commons.util.LocaleUtils;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * MainMenuBar
@@ -230,25 +220,23 @@ public class MainMenuBar extends JMenuBar {
      * 选择文件保存路径
      */
     private void showFileSaveDialog() {
+        if (!FileUtil.exist(Const.CONFIG_DATA_PATH)) {
+            FileUtil.mkdir(Const.CONFIG_DATA_PATH);
+        }
         // 创建一个默认的文件选取器
-        var fileChooser = new JFileChooser();
-        var connectInfos = ConnectService.service.getAllConnectList();
-        var configure = JSONUtil.toJsonStr(connectInfos);
-        fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+        var fileChooser = new JFileChooser(Const.CONFIG_DATA_PATH);
+        var getAllConnectListFuture = FutureUtils.supplyAsync(ConnectService.service::getAllConnectList);
         // 设置打开文件选择框后默认输入的文件名
         fileChooser.setSelectedFile(new File("configure.json"));
         // 打开文件选择框（线程将被阻塞, 直到选择框被关闭）
-        var result = fileChooser.showSaveDialog(MainNoneForm.getInstance().getContentPanel());
-
+        var result = fileChooser.showSaveDialog(RedisFrontApplication.frame);
         if (result == JFileChooser.APPROVE_OPTION) {
-            // 如果点击了"保存", 则获取选择的保存路径
-            var file = fileChooser.getSelectedFile();
-            try (var writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
-                writer.write(configure);
-                writer.flush();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            getAllConnectListFuture.thenAccept(connectList -> {
+                // 如果点击了"保存", 则获取选择的保存路径
+                var configFile = fileChooser.getSelectedFile();
+                var configJson = JSONUtil.toJsonStr(connectList);
+                FileUtil.writeUtf8String(JSONUtil.toJsonPrettyStr(configJson), configFile);
+            });
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.redisfront.ui.dialog;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.util.StrUtil;
@@ -11,6 +12,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.RedisFrontApplication;
+import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.ui.AbstractDialog;
@@ -22,6 +24,7 @@ import com.redisfront.ui.form.MainNoneForm;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -72,30 +75,18 @@ public class ImportConfigDialog extends AbstractDialog<Void> {
     }
 
     private void onOk() {
+        if (!FileUtil.exist(Const.CONFIG_DATA_PATH)) {
+            FileUtil.mkdir(Const.CONFIG_DATA_PATH);
+        }
         var selectedItem = (String) importModel.getSelectedItem();
         // 创建一个默认的文件选取器
-        var fileChooser = new JFileChooser();
-        fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+        var fileChooser = new JFileChooser(Const.CONFIG_DATA_PATH);
         // 仅支持选择文件
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         // 设置文件过滤，仅支持json配置导入
-        fileChooser.setFileFilter(new FileFilter() {
-            @Override
-            public boolean accept(File f) {
-                if (f.getName().endsWith("json")) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-
-            @Override
-            public String getDescription() {
-                return ".json";
-            }
-        });
+        fileChooser.setFileFilter(new FileNameExtensionFilter(".json", "json"));
         // 打开文件选择框（线程将被阻塞, 直到选择框被关闭）
-        var result = fileChooser.showDialog(MainNoneForm.getInstance().getContentPanel(), LocaleUtils.getMessageFromBundle("ConfigImport.saveBtn.title"));
+        var result = fileChooser.showDialog(RedisFrontApplication.frame, LocaleUtils.getMessageFromBundle("ConfigImport.saveBtn.title"));
         if (result == JFileChooser.APPROVE_OPTION) {
             var configFile = fileChooser.getSelectedFile();
             var fileReader = new FileReader(configFile);
