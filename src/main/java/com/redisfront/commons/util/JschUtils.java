@@ -7,7 +7,8 @@ import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.model.ConnectInfo;
 import io.lettuce.core.cluster.RedisClusterClient;
-import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
+
+import java.util.Map;
 
 /**
  * JSchUtil
@@ -49,19 +50,16 @@ public class JschUtils {
     public synchronized static void openSession(ConnectInfo connectInfo, RedisClusterClient clusterClient) {
         if (Fn.isNotNull(connectInfo.sshConfig())) {
             try {
-                Session session = createSession(connectInfo);
+                Session session = sessionThreadLocal.get();
                 if (Fn.isNotNull(session)) {
                     session.disconnect();
                 }
                 session = createSession(connectInfo);
-
                 String remoteAddress = getRemoteAddress(connectInfo);
                 session.setTimeout(2000);
                 session.connect();
-                for (RedisClusterNode partition : clusterClient.getPartitions()) {
-                    var remotePort = partition.getUri().getPort();
-                    partition.getUri().setPort(remotePort);
-                    JschUtil.bindPort(session, remoteAddress, remotePort, partition.getUri().getPort());
+                for (Map.Entry<Integer, Integer> clusterTempPort : connectInfo.getClusterLocalPort().entrySet()) {
+                    JschUtil.bindPort(session, remoteAddress, clusterTempPort.getKey(), clusterTempPort.getValue());
                 }
                 sessionThreadLocal.set(session);
             } catch (Exception e) {
@@ -78,15 +76,15 @@ public class JschUtils {
     public synchronized static void openSession(ConnectInfo connectInfo) {
         if (Fn.isNotNull(connectInfo.sshConfig())) {
             try {
-                var session = createSession(connectInfo);
+                Session session = sessionThreadLocal.get();
                 if (Fn.isNotNull(session)) {
                     session.disconnect();
                 }
                 session = createSession(connectInfo);
+                var remoteHost = getRemoteAddress(connectInfo);
                 session.setTimeout(2000);
-                var remoteAddress = getRemoteAddress(connectInfo);
                 session.connect();
-                JschUtil.bindPort(session, remoteAddress, connectInfo.port(), connectInfo.port());
+                JschUtil.bindPort(session, remoteHost, connectInfo.port(), connectInfo.getLocalPort());
                 sessionThreadLocal.set(session);
             } catch (Exception e) {
                 if (e instanceof JSchException jSchException) {
