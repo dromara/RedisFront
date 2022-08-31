@@ -1,5 +1,12 @@
 package com.redisfront.ui.component;
 
+import cn.hutool.core.collection.ListUtil;
+import cn.hutool.core.io.IORuntimeException;
+import cn.hutool.core.io.file.FileReader;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONException;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatDesktop;
@@ -7,6 +14,7 @@ import com.formdev.flatlaf.extras.components.FlatButton;
 import com.redisfront.RedisFrontApplication;
 import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.constant.UI;
+import com.redisfront.commons.util.AlertUtils;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.ConnectService;
 import com.redisfront.ui.dialog.AddConnectDialog;
@@ -18,12 +26,15 @@ import com.redisfront.commons.util.FutureUtils;
 import com.redisfront.commons.util.LocaleUtils;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -87,6 +98,8 @@ public class MainMenuBar extends JMenuBar {
         fileMenu.add(openConnectMenu);
         //配置菜单
         fileMenu.add(new JSeparator());
+
+        // 导入配置
         var importConfigMenu = new JMenuItem() {
             @Override
             public void updateUI() {
@@ -94,10 +107,10 @@ public class MainMenuBar extends JMenuBar {
                 setText(LocaleUtils.getMenu("Menu.File.Import").title());
             }
         };
-        importConfigMenu.addActionListener((e) -> FutureUtils.runAsync(this::showFileImportDialog));
+        importConfigMenu.addActionListener((e) -> showFileImportDialog());
         fileMenu.add(importConfigMenu);
 
-        // 导出链接配置
+        // 导出配置
         var exportConfigMenu = new JMenuItem() {
             @Override
             public void updateUI() {
@@ -106,7 +119,7 @@ public class MainMenuBar extends JMenuBar {
             }
         };
         // 导出配置逻辑
-        exportConfigMenu.addActionListener((e) -> FutureUtils.runAsync(this::showFileSaveDialog));
+        exportConfigMenu.addActionListener((e) -> showFileSaveDialog());
         fileMenu.add(exportConfigMenu);
 
         //退出程序
@@ -220,8 +233,8 @@ public class MainMenuBar extends JMenuBar {
     private void showFileSaveDialog() {
         // 创建一个默认的文件选取器
         var fileChooser = new JFileChooser();
-        List<ConnectInfo> connectInfos = ConnectService.service.getAllConnectList();
-        String configure = JSONUtil.toJsonStr(connectInfos);
+        var connectInfos = ConnectService.service.getAllConnectList();
+        var configure = JSONUtil.toJsonStr(connectInfos);
         fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
         // 设置打开文件选择框后默认输入的文件名
         fileChooser.setSelectedFile(new File("configure.json"));
@@ -231,7 +244,7 @@ public class MainMenuBar extends JMenuBar {
         if (result == JFileChooser.APPROVE_OPTION) {
             // 如果点击了"保存", 则获取选择的保存路径
             var file = fileChooser.getSelectedFile();
-            try(Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
+            try (var writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
                 writer.write(configure);
                 writer.flush();
             } catch (IOException e) {
@@ -244,7 +257,50 @@ public class MainMenuBar extends JMenuBar {
         // 创建一个默认的文件选取器
         var fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+        // 仅支持选择文件
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        // 设置文件过滤，仅支持json配置导入
+        fileChooser.setFileFilter(new FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                if (f.getName().endsWith("json")) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+            @Override
+            public String getDescription() {
+                return ".json";
+            }
+        });
         // 打开文件选择框（线程将被阻塞, 直到选择框被关闭）
         var result = fileChooser.showDialog(MainNoneForm.getInstance().getContentPanel(), LocaleUtils.getMessageFromBundle("ConfigImport.saveBtn.title"));
+
+        if (result == JFileChooser.APPROVE_OPTION) { // 说明选中了文件
+            var configFile = fileChooser.getSelectedFile();
+            var fileReader = new FileReader(configFile);
+            if (!StrUtil.isBlankIfStr(fileReader.readString()) && JSONUtil.isTypeJSON(fileReader.readString())) {
+                try {
+                    if (JSONUtil.isTypeJSONObject(fileReader.readString())) {
+                        var connectInfo = JSONUtil.toBean(fileReader.readString(), ConnectInfo.class);
+                        ConnectService.service.save(connectInfo);
+                    } else {
+                        var connectInfos = JSONUtil.toList(fileReader.readString(), ConnectInfo.class);
+                        for (ConnectInfo connectInfo : connectInfos) {
+                            ConnectService.service.save(connectInfo);
+                        }
+                    }
+                    AlertUtils.showInformationDialog("导入完成");
+                } catch (IORuntimeException e) {
+                    AlertUtils.showErrorDialog("配置读取异常", e);
+                } catch (JSONException je) {
+                    AlertUtils.showErrorDialog("配置文件转换出现异常", je);
+                }
+            } else {
+                AlertUtils.showInformationDialog("配置无法正常读取");
+            }
+        }
     }
 }
