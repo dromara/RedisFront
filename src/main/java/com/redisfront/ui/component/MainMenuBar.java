@@ -14,10 +14,9 @@ import com.formdev.flatlaf.extras.components.FlatButton;
 import com.redisfront.RedisFrontApplication;
 import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.constant.UI;
-import com.redisfront.commons.util.AlertUtils;
-import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.ConnectService;
 import com.redisfront.ui.dialog.AddConnectDialog;
+import com.redisfront.ui.dialog.ImportConfigDialog;
 import com.redisfront.ui.dialog.OpenConnectDialog;
 import com.redisfront.ui.dialog.SettingDialog;
 import com.redisfront.ui.form.MainNoneForm;
@@ -107,7 +106,7 @@ public class MainMenuBar extends JMenuBar {
                 setText(LocaleUtils.getMenu("Menu.File.Import").title());
             }
         };
-        importConfigMenu.addActionListener((e) -> showFileImportDialog());
+        importConfigMenu.addActionListener(e -> ImportConfigDialog.showImportDialog());
         fileMenu.add(importConfigMenu);
 
         // 导出配置
@@ -249,57 +248,6 @@ public class MainMenuBar extends JMenuBar {
                 writer.flush();
             } catch (IOException e) {
                 throw new RuntimeException(e);
-            }
-        }
-    }
-
-    private void showFileImportDialog() {
-        // 创建一个默认的文件选取器
-        var fileChooser = new JFileChooser();
-        fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-        // 仅支持选择文件
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        // 设置文件过滤，仅支持json配置导入
-        fileChooser.setFileFilter(new FileFilter() {
-            @Override
-            public boolean accept(File f) {
-                if (f.getName().endsWith("json")) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-
-            @Override
-            public String getDescription() {
-                return ".json";
-            }
-        });
-        // 打开文件选择框（线程将被阻塞, 直到选择框被关闭）
-        var result = fileChooser.showDialog(MainNoneForm.getInstance().getContentPanel(), LocaleUtils.getMessageFromBundle("ConfigImport.saveBtn.title"));
-
-        if (result == JFileChooser.APPROVE_OPTION) { // 说明选中了文件
-            var configFile = fileChooser.getSelectedFile();
-            var fileReader = new FileReader(configFile);
-            if (!StrUtil.isBlankIfStr(fileReader.readString()) && JSONUtil.isTypeJSON(fileReader.readString())) {
-                try {
-                    if (JSONUtil.isTypeJSONObject(fileReader.readString())) {
-                        var connectInfo = JSONUtil.toBean(fileReader.readString(), ConnectInfo.class);
-                        ConnectService.service.save(connectInfo);
-                    } else {
-                        var connectInfos = JSONUtil.toList(fileReader.readString(), ConnectInfo.class);
-                        for (ConnectInfo connectInfo : connectInfos) {
-                            ConnectService.service.save(connectInfo);
-                        }
-                    }
-                    AlertUtils.showInformationDialog("导入完成");
-                } catch (IORuntimeException e) {
-                    AlertUtils.showErrorDialog("配置读取异常", e);
-                } catch (JSONException je) {
-                    AlertUtils.showErrorDialog("配置文件转换出现异常", je);
-                }
-            } else {
-                AlertUtils.showInformationDialog("配置无法正常读取");
             }
         }
     }
