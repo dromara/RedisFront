@@ -12,6 +12,8 @@ import com.formdev.flatlaf.FlatLaf;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.*;
 import java.util.function.Function;
@@ -144,6 +146,18 @@ public class Fn {
     public static String toJson(Object obj) {
         var s = JSONUtil.parse(obj).toStringPretty();
         return JSONUtil.parse(obj).toStringPretty();
+    }
+
+
+    public static int getByteSize(Object data) {
+        int byteSize = 0;
+        try (var byteArrayOutputStream = new ByteArrayOutputStream(); var os = new ObjectOutputStream(byteArrayOutputStream)) {
+            os.writeObject(data);
+            byteSize = byteArrayOutputStream.size();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return byteSize;
     }
 
     public static <T> T fromJson(String json, Class<T> type) {

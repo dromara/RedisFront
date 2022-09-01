@@ -84,6 +84,8 @@ public class DataViewForm {
 
     private final Map<String, ScanContext<String>> scanSetContextMap;
     private final Map<String, ScanContext<String>> scanListContextMap;
+
+    private final Map<String, ScanContext<StreamMessage<String, String>>> xRangeContextMap;
     private final Map<String, ScanContext<ScoredValue<String>>> scanZSetContextMap;
     private final Map<String, ScanContext<Map.Entry<String, String>>> scanHashContextMap;
 
@@ -132,6 +134,7 @@ public class DataViewForm {
         scanZSetContextMap = new LinkedHashMap<>();
         scanSetContextMap = new LinkedHashMap<>();
         scanListContextMap = new LinkedHashMap<>();
+        xRangeContextMap = new LinkedHashMap<>();
         scanHashContextMap = new LinkedHashMap<>();
         $$$setupUI$$$();
         dataTableInit();
@@ -179,6 +182,12 @@ public class DataViewForm {
                             fieldOrScoreField.setText(key.toString());
                             valueUpdateSaveBtn.setEnabled(true);
                             textEditor.textArea().setText(value.toString());
+                        });
+                    } else if (dataTable.getModel() instanceof StreamTableModel) {
+                        var value = dataTable.getValueAt(row, 2);
+                        SwingUtilities.invokeLater(() -> {
+                            valueUpdateSaveBtn.setEnabled(true);
+                            textEditor.textArea().setText(JSONUtil.toJsonPrettyStr(value));
                         });
                     } else {
                         var value = dataTable.getValueAt(row, 1);
@@ -250,6 +259,9 @@ public class DataViewForm {
                                     if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
                                         this.scanSetContextMap.put(key, new ScanContext<>());
                                     }
+                                    if (keyTypeEnum.equals(Enum.KeyTypeEnum.STREAM)) {
+                                        this.xRangeContextMap.put(key, new ScanContext<>());
+                                    }
                                 }
                             }, () -> SwingUtilities.invokeLater(() -> {
                                 refreshEnableBtn();
@@ -307,6 +319,11 @@ public class DataViewForm {
                     scanSetContextMap.put(key, new ScanContext<>());
                 loadSetDataActionPerformed(key);
             }
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.STREAM)) {
+                if (init)
+                    xRangeContextMap.put(key, new ScanContext<>());
+                loadStreamDataActionPerformed(key);
+            }
             SwingUtilities.invokeLater(() -> {
                 refreshBeforeHandler.handle();
                 refreshEnableBtn();
@@ -345,6 +362,8 @@ public class DataViewForm {
                 loadZSetDataActionPerformed(key);
             } else if (keyTypeEnum == Enum.KeyTypeEnum.LIST) {
                 loadListDataActionPerformed(key);
+            } else if (keyTypeEnum == Enum.KeyTypeEnum.STREAM) {
+                loadStreamDataActionPerformed(key);
             }
         } else {
             AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showInformationDialog.message"));
@@ -482,6 +501,47 @@ public class DataViewForm {
         final var finalListTableModel = listTableModel;
         SwingUtilities.invokeLater(() -> {
             LoadAfterUpdate(len, DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)), String.valueOf(scanContext.getKeyList().size()), scanContext.getScanCursor().isFinished());
+            tableViewPanel.setVisible(true);
+            dataTable.setModel(finalListTableModel);
+            Fn.removeAllComponent(dataPanel);
+            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
+        });
+    }
+
+    private void loadStreamDataActionPerformed(String key) {
+        var len = RedisStreamService.service.xlen(connectInfo, key);
+
+        var xRangeContext = xRangeContextMap.getOrDefault(key, new ScanContext<>());
+
+        var lastSearchKey = xRangeContext.getSearchKey();
+        xRangeContext.setSearchKey(tableSearchField.getText());
+        xRangeContext.setLimit(500L);
+        var start = Long.parseLong(xRangeContext.getScanCursor().getCursor());
+        var stop = start + (xRangeContext.getLimit() - 1);
+        var value = RedisStreamService.service.xrange(connectInfo, key, Range.unbounded(), Limit.create(start, stop));
+
+        var nextCursor = start + xRangeContext.getLimit();
+        if (nextCursor >= len) {
+            xRangeContext.setScanCursor(new ScanCursor(String.valueOf(len), true));
+        } else {
+            xRangeContext.setScanCursor(new ScanCursor(String.valueOf(nextCursor), false));
+        }
+
+        if (Fn.equal(xRangeContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(xRangeContext.getKeyList())) {
+            if (xRangeContext.getKeyList().size() >= 2000) {
+                System.gc();
+                throw new RedisFrontException(LocaleUtils.getMessageFromBundle("DataViewForm.redisFrontException.message"));
+            }
+            xRangeContext.getKeyList().addAll(value);
+        } else {
+            xRangeContext.setKeyList(value);
+        }
+
+        xRangeContextMap.put(key, xRangeContext);
+
+        final var finalListTableModel = new StreamTableModel(xRangeContext.getKeyList());
+        SwingUtilities.invokeLater(() -> {
+            LoadAfterUpdate(len, DataSizeUtil.format(xRangeContext.getKeyList().stream().map(e -> Fn.getByteSize(e.getBody())).reduce(Integer::sum).orElse(0)), String.valueOf(xRangeContext.getKeyList().size()), xRangeContext.getScanCursor().isFinished());
             tableViewPanel.setVisible(true);
             dataTable.setModel(finalListTableModel);
             Fn.removeAllComponent(dataPanel);
@@ -851,6 +911,10 @@ public class DataViewForm {
             if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
                 AddOrUpdateItemDialog.showAddOrUpdateItemDialog("插入元素", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
             }
+
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.STREAM)) {
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog("插入元素", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
+            }
         });
 
         tableDelBtn = new JButton(UI.DELETE_ICON) {
@@ -889,6 +953,12 @@ public class DataViewForm {
                 var value = (String) dataTable.getValueAt(row, 1);
                 RedisSetService.service.srem(connectInfo, key, value);
             }
+
+            if (keyTypeEnum.equals(Enum.KeyTypeEnum.STREAM)) {
+                var id = (String) dataTable.getValueAt(row, 1);
+                RedisStreamService.service.xdel(connectInfo, key, id);
+            }
+
             tableDelBtn.setEnabled(false);
             reloadTableDataActionPerformed(true);
         });

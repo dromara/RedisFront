@@ -1,5 +1,6 @@
 package com.redisfront.ui.dialog;
 
+import cn.hutool.json.JSONUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
@@ -11,6 +12,7 @@ import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.handler.ProcessHandler;
 import com.redisfront.commons.ui.AbstractDialog;
+import com.redisfront.commons.util.AlertUtils;
 import com.redisfront.commons.util.LocaleUtils;
 import com.redisfront.commons.util.PrefUtils;
 import com.redisfront.model.ConnectInfo;
@@ -23,6 +25,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.ResourceBundle;
 
 public class AddKeyDialog extends AbstractDialog<String> {
@@ -204,7 +207,16 @@ public class AddKeyDialog extends AbstractDialog<String> {
         if (Fn.equal(Enum.KeyTypeEnum.HASH.typeName(), selectItem)) {
             RedisHashService.service.hset(connectInfo, key, hashKeyField.getText(), keyValueField.getText());
         } else if (Fn.equal(Enum.KeyTypeEnum.STREAM.typeName(), selectItem)) {
-            System.out.println("STREAM");
+            if (JSONUtil.isTypeJSON(value)) {
+                HashMap<String, String> bodyMap = new HashMap<>();
+                JSONUtil.parseObj(value).forEach((key1, value1) -> bodyMap.put(key1, value1.toString()));
+                RedisStreamService.service.xadd(connectInfo, key, bodyMap);
+            } else {
+                AlertUtils.showInformationDialog("stream 请输入JSON格式数据！");
+                keyValueField.requestFocus();
+                return;
+            }
+
         } else if (Fn.equal(Enum.KeyTypeEnum.SET.typeName(), selectItem)) {
             RedisSetService.service.sadd(connectInfo, key, value);
         } else if (Fn.equal(Enum.KeyTypeEnum.LIST.typeName(), selectItem)) {
@@ -276,6 +288,9 @@ public class AddKeyDialog extends AbstractDialog<String> {
         hashKeyField = new JTextField();
         contentPane.add(hashKeyField, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         streamField = new JTextField();
+        streamField.setEditable(false);
+        streamField.setEnabled(false);
+        streamField.setText("*");
         contentPane.add(streamField, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         scoreLabel = new JLabel();
         this.$$$loadLabelText$$$(scoreLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddKeyDialog.scoreLabel.title"));

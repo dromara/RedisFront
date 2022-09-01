@@ -1,5 +1,6 @@
 package com.redisfront.ui.dialog;
 
+import cn.hutool.json.JSONUtil;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -7,17 +8,16 @@ import com.redisfront.RedisFrontApplication;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.handler.ActionHandler;
+import com.redisfront.commons.util.AlertUtils;
 import com.redisfront.model.ConnectInfo;
-import com.redisfront.service.RedisHashService;
-import com.redisfront.service.RedisListService;
-import com.redisfront.service.RedisSetService;
-import com.redisfront.service.RedisZSetService;
+import com.redisfront.service.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.HashMap;
 
 public class AddOrUpdateItemDialog extends JDialog {
     private JPanel contentPane;
@@ -65,6 +65,14 @@ public class AddOrUpdateItemDialog extends JDialog {
             nameLabel.setVisible(true);
             nameLabel.setText(typeEnum.equals(Enum.KeyTypeEnum.ZSET) ? "分数" : "键");
             nameField.setVisible(true);
+        }
+        if (typeEnum.equals(Enum.KeyTypeEnum.STREAM)) {
+            this.nameField.setText(fieldOrScore);
+            nameLabel.setVisible(true);
+            nameLabel.setText("ID");
+            nameField.setVisible(true);
+            nameField.setText("*");
+            nameField.setEnabled(false);
         } else {
             nameLabel.setVisible(false);
             nameField.setVisible(false);
@@ -126,6 +134,19 @@ public class AddOrUpdateItemDialog extends JDialog {
             }
             RedisSetService.service.sadd(connectInfo, key, valueTextArea.getText());
         }
+
+        if (typeEnum.equals(Enum.KeyTypeEnum.STREAM)) {
+            if (JSONUtil.isTypeJSON(valueTextArea.getText())) {
+                HashMap<String, String> bodyMap = new HashMap<>();
+                JSONUtil.parseObj(valueTextArea.getText()).forEach((k, v) -> bodyMap.put(k, v.toString()));
+                RedisStreamService.service.xadd(connectInfo, key, bodyMap);
+            } else {
+                AlertUtils.showInformationDialog("stream 请输入JSON格式数据！");
+                valueTextArea.requestFocus();
+                return;
+            }
+        }
+
         dispose();
         addSuccessHandler.handle();
     }

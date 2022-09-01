@@ -4,6 +4,7 @@ import com.redisfront.commons.func.Fn;
 import com.redisfront.model.ConnectInfo;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import java.awt.*;
@@ -24,6 +25,7 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
 
     public AbstractTerminal() {
         setLayout(new BorderLayout());
+        setBorder(new EmptyBorder(10, 10, 10, 10));
         terminal = new JTextArea();
         terminal.requestFocus();
         terminal.setCaretColor(Color.WHITE);

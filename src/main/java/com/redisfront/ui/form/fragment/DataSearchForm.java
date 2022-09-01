@@ -339,7 +339,6 @@ public class DataSearchForm {
         };
         refreshBtn.addActionListener(e -> {
             SwingUtilities.invokeLater(() -> searchTextField.setText(""));
-            scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
             scanKeysAndInitScanInfo();
         });
         refreshBtn.setIcon(UI.REFRESH_ICON);
