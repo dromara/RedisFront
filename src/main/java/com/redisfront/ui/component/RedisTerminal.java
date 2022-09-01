@@ -55,7 +55,6 @@ public class RedisTerminal extends AbstractTerminal {
     @Override
     protected void inputProcessHandler(String inputText) {
         try {
-
             var commandList = new ArrayList<>(List.of(inputText.split(" ")));
             var commandType = Arrays.stream(CommandType.values())
                     .filter(e -> Fn.equal(e.name(), commandList.get(0).toUpperCase()))
@@ -78,8 +77,20 @@ public class RedisTerminal extends AbstractTerminal {
                     if (CommandType.SELECT.equals(commandType)) {
                         connectInfo.setDatabase(Integer.valueOf(commandList.get(0)));
                     }
-                    var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
-                    println(format(res, ""));
+                    if (CommandType.PUBLISH.equals(commandType)) {
+                        //监听后期完善
+                        var newCommandList = new ArrayList<String>();
+                        newCommandList.add(commandList.get(0));
+                        commandList.remove(0);
+                        var message = commandList.toArray(new String[]{});
+                        newCommandList.add(String.join(" ", message));
+                        var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(newCommandList));
+                        println(format(res, ""));
+                    } else {
+                        var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
+                        println(format(res, ""));
+                    }
+
                 });
             }
         } catch (Exception e) {
