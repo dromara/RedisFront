@@ -178,7 +178,7 @@ tasks.register<PackageTask>("packageForWindows") {
     platform = Platform.windows
     isCreateZipball = false
     winConfig(closureOf<WindowsConfig> {
-        icoFile = getIconFile("redisfront.ico")
+        icoFile = getIconFile("RedisFront.ico")
         headerType = HeaderType.gui
         setupLanguages = setupLanguageMap
         isDisableDirPage = false
@@ -197,7 +197,8 @@ tasks.register<PackageTask>("packageForLinux") {
     platform = Platform.linux
     linuxConfig(
         closureOf<LinuxConfig> {
-            pngFile = getIconFile("redisfront.png")
+            pngFile = getIconFile("RedisFront.png")
+            isGenerateDeb = true
             isGenerateRpm = true
             isCreateTarball = true
             isGenerateInstaller = true
@@ -212,7 +213,7 @@ tasks.register<PackageTask>("packageForMac_M1") {
     platform = Platform.mac
     macConfig(
         closureOf<MacConfig> {
-            icnsFile = getIconFile("redisfront.icns")
+            icnsFile = getIconFile("RedisFront.icns")
             isGenerateDmg = true
             macStartup = MacStartup.ARM64
         } as Closure<MacConfig>
@@ -225,7 +226,7 @@ tasks.register<PackageTask>("packageForMac") {
     platform = Platform.mac
     macConfig(
         closureOf<MacConfig> {
-            icnsFile = getIconFile("redisfront.icns")
+            icnsFile = getIconFile("RedisFront.icns")
             isGenerateDmg = true
             macStartup = MacStartup.X86_64
         } as Closure<MacConfig>
