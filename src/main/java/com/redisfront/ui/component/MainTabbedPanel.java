@@ -134,7 +134,7 @@ public class MainTabbedPanel extends JPanel {
                 rightToolBarLayout.setAlignment(FlowLayout.RIGHT);
                 rightToolBar.setLayout(rightToolBarLayout);
                 var info = new FlatLabel();
-                info.setText(Const.APP_VERSION);
+                info.setText("V " + Const.APP_VERSION);
                 info.setIcon(UI.INFO_ICON);
                 rightToolBar.add(info);
                 horizontalBox.add(rightToolBar);

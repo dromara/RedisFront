@@ -1,4 +1,4 @@
-@file:Suppress("UNCHECKED_CAST", "PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+@file:Suppress("UNCHECKED_CAST")
 
 import groovy.lang.Closure
 import io.github.fvarrui.javapackager.gradle.PackagePluginExtension
@@ -7,7 +7,6 @@ import io.github.fvarrui.javapackager.model.*
 import io.github.fvarrui.javapackager.model.Platform
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import java.lang.Boolean
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.RuntimeException
@@ -35,10 +34,7 @@ buildscript {
 
 plugins.apply("io.github.fvarrui.javapackager.plugin")
 
-val releaseVersion = "1.0.0"
-val developmentVersion = "1.0.0.B"
-
-version = if (Boolean.getBoolean("release")) releaseVersion else developmentVersion
+version = "1.0.0"
 
 val flatlafVersion = "2.4"
 val hutoolVersion = "5.8.5"
@@ -47,7 +43,7 @@ val derbyVersion = "10.15.2.0"
 val lettuceVersion = "6.2.0.RELEASE"
 val logbackVersion = "1.2.11"
 
-val fatJar: kotlin.Boolean = false
+val fatJar = false
 
 
 val requireModules = listOf(
