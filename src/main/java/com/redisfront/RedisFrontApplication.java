@@ -72,11 +72,11 @@ public class RedisFrontApplication {
             Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
             if (screenSize.getWidth() > 1280) {
-                frame.setMinimumSize(new Dimension(1280, 800));
+                frame.setPreferredSize(new Dimension(1280, 800));
             } else if (screenSize.getWidth() > 1024) {
-                frame.setMinimumSize(new Dimension(1024, 768));
+                frame.setPreferredSize(new Dimension(1200, 768));
             } else {
-                frame.setMinimumSize(new Dimension(960, 640));
+                frame.setPreferredSize(new Dimension(960, 640));
             }
 
             frame.pack();
