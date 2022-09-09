@@ -73,6 +73,8 @@ public class RedisFrontApplication {
 
             if (screenSize.getWidth() > 1280) {
                 frame.setMinimumSize(new Dimension(1280, 800));
+            } else if (screenSize.getWidth() > 1024) {
+                frame.setMinimumSize(new Dimension(1024, 768));
             } else {
                 frame.setMinimumSize(new Dimension(960, 640));
             }
