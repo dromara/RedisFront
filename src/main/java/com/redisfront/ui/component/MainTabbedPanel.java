@@ -163,7 +163,7 @@ public class MainTabbedPanel extends JPanel {
                         contentPanel.setToolTipTextAt(0, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataSplitPanel.title"));
                         contentPanel.setToolTipTextAt(1, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.RedisTerminal.title"));
                         contentPanel.setToolTipTextAt(2, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataChartsForm.title"));
-                        contentPanel.setToolTipTextAt(3, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataChartsForm.title"));
+//                        contentPanel.setToolTipTextAt(3, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataChartsForm.title"));
                     }
                 }
             };
