@@ -7,15 +7,18 @@ import io.github.fvarrui.javapackager.model.*
 import io.github.fvarrui.javapackager.model.Platform
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import java.nio.charset.Charset
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.RuntimeException
 import kotlin.String
 import kotlin.Suppress
 import kotlin.to
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `java-library`
+    kotlin("jvm") version "1.7.20-RC"
 }
 
 val javaHome: String = System.getProperty("java.home")
@@ -72,6 +75,8 @@ println("Current Date:  ${LocalDateTime.now().format(dateTimeFormatter)}")
 println("-------------------------------------------------------------------------------")
 println()
 
+updateVersion()
+
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.0")
@@ -96,6 +101,7 @@ dependencies {
     implementation("org.bouncycastle:bcprov-jdk15on:1.70")
     implementation("com.intellij:forms_rt:7.0.3")
     implementation("com.jcraft:jsch:0.1.55")
+    implementation(kotlin("stdlib-jdk8"))
 }
 
 tasks.test {
@@ -120,6 +126,7 @@ tasks.processResources {
         )
     }
 }
+
 
 tasks.jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -236,4 +243,18 @@ tasks.register<PackageTask>("packageForMac") {
 
 fun getIconFile(fileName: String): File {
     return File(projectDir.absolutePath + File.separator + "assets" + File.separator + fileName)
+}
+
+fun updateVersion() {
+    val jsonFile = File(projectDir.absolutePath + File.separator + "assets" + File.separator + "version.json")
+    jsonFile.writeText("{\"version\": \"${version}\"}", Charset.forName("utf-8"))
+}
+
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.kotlinOptions {
+    jvmTarget = "1.8"
+}
+val compileTestKotlin: KotlinCompile by tasks
+compileTestKotlin.kotlinOptions {
+    jvmTarget = "1.8"
 }

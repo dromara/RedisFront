@@ -65,8 +65,7 @@ public class AddOrUpdateItemDialog extends JDialog {
             nameLabel.setVisible(true);
             nameLabel.setText(typeEnum.equals(Enum.KeyTypeEnum.ZSET) ? "分数" : "键");
             nameField.setVisible(true);
-        }
-        if (typeEnum.equals(Enum.KeyTypeEnum.STREAM)) {
+        } else if (typeEnum.equals(Enum.KeyTypeEnum.STREAM)) {
             this.nameField.setText(fieldOrScore);
             nameLabel.setVisible(true);
             nameLabel.setText("ID");
@@ -141,7 +140,7 @@ public class AddOrUpdateItemDialog extends JDialog {
                 JSONUtil.parseObj(valueTextArea.getText()).forEach((k, v) -> bodyMap.put(k, v.toString()));
                 RedisStreamService.service.xadd(connectInfo, key, bodyMap);
             } else {
-                AlertUtils.showInformationDialog("stream 请输入JSON格式数据！");
+                AlertUtils.showInformationDialog("stream 请输入JSON - {key:value} 格式数据！");
                 valueTextArea.requestFocus();
                 return;
             }

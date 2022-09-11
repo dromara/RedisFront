@@ -291,7 +291,7 @@ public class DataViewForm {
                 refreshBeforeHandler.handle();
                 refreshDisableBtn();
                 tableAddBtn.setEnabled(false);
-                tableAddBtn.setEnabled(false);
+                tableDelBtn.setEnabled(false);
                 tableRefreshBtn.setEnabled(false);
             });
 
