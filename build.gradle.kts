@@ -40,11 +40,11 @@ plugins.apply("io.github.fvarrui.javapackager.plugin")
 version = "1.0.0"
 
 val flatlafVersion = "2.4"
-val hutoolVersion = "5.8.5"
+val hutoolVersion = "5.8.6"
 val fifesoftVersion = "3.2.0"
 val derbyVersion = "10.15.2.0"
 val lettuceVersion = "6.2.0.RELEASE"
-val logbackVersion = "1.2.11"
+val logbackVersion = "1.4.0"
 
 val fatJar = false
 
@@ -75,14 +75,12 @@ println("Current Date:  ${LocalDateTime.now().format(dateTimeFormatter)}")
 println("-------------------------------------------------------------------------------")
 println()
 
-updateVersion()
-
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
     implementation("io.lettuce:lettuce-core:${lettuceVersion}")
-    implementation("io.netty:netty-common:4.1.79.Final")
+    implementation("io.netty:netty-common:4.1.80.Final")
     implementation("com.formdev:flatlaf:${flatlafVersion}")
     implementation("org.jfree:jfreechart:1.5.3")
     implementation("com.formdev:flatlaf-swingx:${flatlafVersion}")
@@ -90,6 +88,7 @@ dependencies {
     implementation("com.formdev:flatlaf-extras:${flatlafVersion}")
     implementation("cn.hutool:hutool-extra:${hutoolVersion}")
     implementation("cn.hutool:hutool-json:${hutoolVersion}")
+    implementation("cn.hutool:hutool-http:${hutoolVersion}")
     implementation("org.apache.derby:derby:${derbyVersion}")
     implementation("com.fifesoft:rsyntaxtextarea:${fifesoftVersion}")
     implementation("com.fifesoft:rstaui:${fifesoftVersion}")
@@ -125,6 +124,7 @@ tasks.processResources {
             )
         )
     }
+    updateVersion()
 }
 
 
@@ -252,9 +252,9 @@ fun updateVersion() {
 
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions {
-    jvmTarget = "1.8"
+    jvmTarget = "17"
 }
 val compileTestKotlin: KotlinCompile by tasks
 compileTestKotlin.kotlinOptions {
-    jvmTarget = "1.8"
+    jvmTarget = "17"
 }
