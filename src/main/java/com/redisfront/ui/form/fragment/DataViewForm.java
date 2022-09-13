@@ -79,7 +79,7 @@ public class DataViewForm {
     private JButton closeBtn;
     private TextEditor textEditor;
     private JTextField fieldOrScoreField;
-
+    private JComboBox<String> jComboBox;
     private final ConnectInfo connectInfo;
 
     private final Map<String, ScanContext<String>> scanSetContextMap;
@@ -173,7 +173,7 @@ public class DataViewForm {
                         SwingUtilities.invokeLater(() -> {
                             fieldOrScoreField.setText(score.toString());
                             valueUpdateSaveBtn.setEnabled(true);
-                            textEditor.textArea().setText((String) value);
+                            jsonValueFormat((String) value);
                         });
                     } else if (dataTable.getModel() instanceof HashTableModel) {
                         var value = dataTable.getValueAt(row, 1);
@@ -181,7 +181,7 @@ public class DataViewForm {
                         SwingUtilities.invokeLater(() -> {
                             fieldOrScoreField.setText(key.toString());
                             valueUpdateSaveBtn.setEnabled(true);
-                            textEditor.textArea().setText(value.toString());
+                            jsonValueFormat((String) value);
                         });
                     } else if (dataTable.getModel() instanceof StreamTableModel) {
                         var value = dataTable.getValueAt(row, 2);
@@ -193,7 +193,7 @@ public class DataViewForm {
                         var value = dataTable.getValueAt(row, 1);
                         SwingUtilities.invokeLater(() -> {
                             valueUpdateSaveBtn.setEnabled(true);
-                            textEditor.textArea().setText((String) value);
+                            jsonValueFormat((String) value);
                         });
                     }
                 } else if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2) {
@@ -201,6 +201,15 @@ public class DataViewForm {
                     updateValueActionPerformed();
                 } else {
                     tableDelBtn.setEnabled(false);
+                }
+            }
+
+            private void jsonValueFormat(String value) {
+                if (JSONUtil.isTypeJSON(value)) {
+                    jComboBox.setSelectedIndex(1);
+                    textEditor.textArea().setText(JSONUtil.toJsonPrettyStr(value));
+                } else {
+                    textEditor.textArea().setText(value);
                 }
             }
         });
@@ -675,7 +684,7 @@ public class DataViewForm {
         fieldOrScoreField.setBackground(UIManager.getColor("FlatEditorPane.background"));
         jToolBar.add(fieldOrScoreField);
 
-        var jComboBox = new JComboBox<>();
+        jComboBox = new JComboBox<String>();
         jComboBox.addItem(SyntaxConstants.SYNTAX_STYLE_NONE);
         jComboBox.addItem(SyntaxConstants.SYNTAX_STYLE_JSON);
         jComboBox.addActionListener((event) -> {

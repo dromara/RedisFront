@@ -131,6 +131,8 @@ public class DataSearchForm {
             scanKeysContext.setScanCursor(keyScanCursor);
             log.debug("本次扫描到：{}", keyScanCursor.getKeys().size());
 
+            LoadingUtils.closeDialog();
+
             var scanKeysList = new ArrayList<>(keyScanCursor.getKeys());
 
             //模糊匹配(模糊匹配在key数量小于 limit 的情况加全部查询出来)
@@ -192,7 +194,6 @@ public class DataSearchForm {
                 keyTree.setModel(treeModel);
             });
             scanAfterProcess();
-            LoadingUtils.closeDialog();
         } catch (Exception e) {
             e.printStackTrace();
             scanAfterProcess();
@@ -210,10 +211,8 @@ public class DataSearchForm {
     public void scanKeysActionPerformed() {
         new SwingWorker<>() {
 
-
             @Override
             protected Object doInBackground() {
-
                 if (Fn.isEmpty(searchTextField.getText())) {
                     try {
                         loadTreeModelData("*");
@@ -337,10 +336,10 @@ public class DataSearchForm {
                 setToolTipText(LocaleUtils.getMessageFromBundle("DataSearchForm.refreshBtn.title"));
             }
         };
-        refreshBtn.addActionListener(e -> {
-            SwingUtilities.invokeLater(() -> searchTextField.setText(""));
+        refreshBtn.addActionListener(e -> SwingUtilities.invokeLater(() -> {
+            searchTextField.setText("");
             scanKeysAndInitScanInfo();
-        });
+        }));
         refreshBtn.setIcon(UI.REFRESH_ICON);
 
         deleteAllBtn = new JButton() {
