@@ -228,8 +228,9 @@ public class AddKeyDialog extends AbstractDialog<String> {
         }
 
         if (ttl > 0) {
-            RedisBasicService.service.ttl(connectInfo, key);
+            RedisBasicService.service.expire(connectInfo, key, ttl.longValue());
         }
+
         dispose();
         //添加成功回調
         processHandler.processHandler(key);
