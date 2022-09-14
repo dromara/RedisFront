@@ -43,7 +43,7 @@ open class UpgradeUtils {
                     }
                 }
 
-                val value = JOptionPane.showConfirmDialog(RedisFrontApplication.frame, "检测新版本，快去看看?","升级提醒",JOptionPane.OK_CANCEL_OPTION)
+                val value = JOptionPane.showConfirmDialog(RedisFrontApplication.frame, "检测到有新版本，赶快快去看吧?","升级提醒",JOptionPane.OK_CANCEL_OPTION)
                 if (Fn.equal(value, JOptionPane.OK_OPTION)) {
                     DesktopUtil.browse(releaseUrl)
                 }

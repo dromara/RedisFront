@@ -48,10 +48,6 @@ public class RedisFrontApplication {
         ToolTipManager.sharedInstance().setInitialDelay(3);
         ToolTipManager.sharedInstance().setLightWeightPopupEnabled(true);
 
-        FlatInspector.install("ctrl shift alt X");
-
-        FlatUIDefaultsInspector.install("ctrl shift alt Y");
-
         SwingUtilities.invokeLater(() -> {
 
             PrefUtils.init(Const.ROOT_PATH);
