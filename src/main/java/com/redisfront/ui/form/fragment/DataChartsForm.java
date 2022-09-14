@@ -23,6 +23,7 @@ import org.jfree.data.time.TimeSeriesCollection;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.plaf.FontUIResource;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.text.DecimalFormat;
@@ -32,6 +33,7 @@ import java.util.Locale;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * DataChartsForm
@@ -163,35 +165,44 @@ public class DataChartsForm extends ChartsPanel {
         FutureUtils.runAsync(() -> {
             List<Object> objectList = LettuceUtils.exec(connectInfo, commands -> commands.slowlogGet(128));
             if (Fn.isNotEmpty(objectList)) {
+                var slowLogShowTextStrBuilder = new StringBuilder();
                 for (Object slowLogObj : objectList) {
                     if (slowLogObj instanceof List<?> slowLogs) {
-
-                        var stringBuilder = new StringBuilder();
                         var dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                         var unixTime = ((Long) slowLogs.get(1)) * 1000;
                         var dateTime = dateFormat.format(unixTime);
                         var processTime = ((Long) slowLogs.get(2));
 
-                        stringBuilder.append(dateTime)
+                        slowLogShowTextStrBuilder.append(dateTime)
                                 .append(" - ")
                                 .append("command")
                                 .append(" [ ");
 
                         if (slowLogs.get(3) instanceof List<?> commands) {
                             for (Object command : commands) {
-                                stringBuilder.append(command).append(" ");
+                                slowLogShowTextStrBuilder.append(command).append(" ");
                             }
                         }
 
-                        stringBuilder.append("] ")
+                        slowLogShowTextStrBuilder.append("] ")
                                 .append(" - ")
                                 .append(processTime)
                                 .append("\n");
 
-                        System.out.println(stringBuilder.toString());
-                        SwingUtilities.invokeLater(() -> slowLogTextArea.append(stringBuilder.toString()));
                     }
                 }
+                System.out.println(slowLogShowTextStrBuilder.toString());
+                SwingUtilities.invokeLater(() -> {
+                    int numLinesToTrunk = slowLogTextArea.getLineCount();
+                    int posOfLastLineToTrunk = 0 ;
+                    try {
+                        posOfLastLineToTrunk = slowLogTextArea.getLineEndOffset(numLinesToTrunk - 1);
+                    } catch (BadLocationException e) {
+                        throw new RuntimeException(e);
+                    }
+//                            slowLogTextArea.append(slowLogShowTextStrBuilder.toString()); 原来使用的是追加方式，预览效果不佳
+                    slowLogTextArea.replaceRange(slowLogShowTextStrBuilder.toString(), 0, posOfLastLineToTrunk);
+                });
 
             }
         });
