@@ -194,7 +194,7 @@ public class DataChartsForm extends ChartsPanel {
                 System.out.println(slowLogShowTextStrBuilder.toString());
                 SwingUtilities.invokeLater(() -> {
                     int numLinesToTrunk = slowLogTextArea.getLineCount();
-                    int posOfLastLineToTrunk = 0 ;
+                    int posOfLastLineToTrunk = 0;
                     try {
                         posOfLastLineToTrunk = slowLogTextArea.getLineEndOffset(numLinesToTrunk - 1);
                     } catch (BadLocationException e) {

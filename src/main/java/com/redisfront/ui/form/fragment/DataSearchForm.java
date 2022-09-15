@@ -209,41 +209,36 @@ public class DataSearchForm {
     }
 
     public void scanKeysActionPerformed() {
-        new SwingWorker<>() {
+        FutureUtils.runAsync(() -> {
 
-            @Override
-            protected Object doInBackground() {
-                if (Fn.isEmpty(searchTextField.getText())) {
-                    try {
-                        loadTreeModelData("*");
-                    } catch (Exception throwable) {
-                        var cause = throwable.getCause();
-                        if (cause instanceof RedisCommandExecutionException) {
-                            scanBeforeProcess();
-                            addBtn.setEnabled(false);
-                            AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("DataSearchForm.showInformationDialog.message"), cause);
-                        } else {
-                            AlertUtils.showErrorDialog("ERROR", cause);
-                        }
-                    }
-                } else {
-                    try {
-                        loadTreeModelData(searchTextField.getText());
-                    } catch (Exception throwable) {
-                        var cause = throwable.getCause();
-                        if (cause instanceof RedisCommandExecutionException) {
-                            scanBeforeProcess();
-                            addBtn.setEnabled(false);
-                            AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("DataSearchForm.showInformationDialog.message"), cause);
-                        } else {
-                            AlertUtils.showErrorDialog("ERROR", cause);
-                        }
+            if (Fn.isEmpty(searchTextField.getText())) {
+                try {
+                    loadTreeModelData("*");
+                } catch (Exception throwable) {
+                    var cause = throwable.getCause();
+                    if (cause instanceof RedisCommandExecutionException) {
+                        scanBeforeProcess();
+                        addBtn.setEnabled(false);
+                        AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("DataSearchForm.showInformationDialog.message"), cause);
+                    } else {
+                        AlertUtils.showErrorDialog("ERROR", cause);
                     }
                 }
-                return null;
+            } else {
+                try {
+                    loadTreeModelData(searchTextField.getText());
+                } catch (Exception throwable) {
+                    var cause = throwable.getCause();
+                    if (cause instanceof RedisCommandExecutionException) {
+                        scanBeforeProcess();
+                        addBtn.setEnabled(false);
+                        AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("DataSearchForm.showInformationDialog.message"), cause);
+                    } else {
+                        AlertUtils.showErrorDialog("ERROR", cause);
+                    }
+                }
             }
-        }.execute();
-
+        });
     }
 
     public void scanBeforeProcess() {
@@ -375,7 +370,10 @@ public class DataSearchForm {
             }
         };
         loadMoreBtn.setIcon(UI.LOAD_MORE_ICON);
-        loadMoreBtn.addActionListener(e -> scanKeysActionPerformed());
+        loadMoreBtn.addActionListener(e -> {
+            FutureUtils.runAsync(() -> LoadingUtils.showDialog(LocaleUtils.getMessageFromBundle("MainWindowForm.loading.title")));
+            scanKeysActionPerformed();
+        });
 
         var dbList = new ArrayList<DbInfo>() {
             {
@@ -430,6 +428,7 @@ public class DataSearchForm {
             var flag = !Fn.isNull(db.dbSize()) && (db.dbSize() > limit);
             allField.setText(String.valueOf(db.dbSize()));
             loadMorePanel.setVisible(flag);
+            FutureUtils.runAsync(() -> LoadingUtils.showDialog(LocaleUtils.getMessageFromBundle("MainWindowForm.loading.title")));
             scanKeysActionPerformed();
         });
 
@@ -717,6 +716,7 @@ public class DataSearchForm {
             allField.setText("0" + SEPARATOR_FLAG + scanInfo[1]);
             allField.setToolTipText(String.format(LocaleUtils.getMessageFromBundle("DataSearchForm.allLabel.toolTip.text"), 0, scanInfo[1]));
         }
+        FutureUtils.runAsync(() -> LoadingUtils.showDialog(LocaleUtils.getMessageFromBundle("MainWindowForm.loading.title")));
         scanKeysActionPerformed();
     }
 

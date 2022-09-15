@@ -53,13 +53,13 @@ public class MainWindowForm {
             @Override
             protected void done() {
                 try {
-                    var mainTabbedPanel = MainTabbedPanel.newInstance(get());
-                    LoadingUtils.closeDialog();
+                    var connectInfo = get();
+                    FutureUtils.runAsync(LoadingUtils::closeDialog);
+                    var mainTabbedPanel = MainTabbedPanel.newInstance(connectInfo);
                     tabPanel.addTab(get().title(), UI.MAIN_TAB_DATABASE_ICON, mainTabbedPanel);
                     tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
                     contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
                     toolBar.setVisible(true);
-                    LoadingUtils.showDialog(LocaleUtils.getMessageFromBundle("MainWindowForm.loading.title"));
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     LoadingUtils.closeDialog();

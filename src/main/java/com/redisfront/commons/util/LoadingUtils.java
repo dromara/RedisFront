@@ -17,36 +17,32 @@ public class LoadingUtils {
     private static LoadingDialog loadingDialog;
 
     public synchronized static void showDialog(String message) {
-        SwingUtilities.invokeLater(() -> {
-            if (loadingDialog == null) {
-                loadingDialog = new LoadingDialog(message);
-            }
-            loadingDialog.setMinimumSize(new Dimension(500, -1));
-            loadingDialog.setLocationRelativeTo(RedisFrontApplication.frame);
-            loadingDialog.pack();
-            loadingDialog.setVisible(true);
-        });
+        if (loadingDialog == null) {
+            loadingDialog = new LoadingDialog(message);
+        }
+        loadingDialog.setMinimumSize(new Dimension(500, -1));
+        loadingDialog.setLocationRelativeTo(RedisFrontApplication.frame);
+        loadingDialog.pack();
+        loadingDialog.setVisible(true);
+
     }
 
     public synchronized static void showDialog() {
-        SwingUtilities.invokeLater(() -> {
-            if (loadingDialog == null) {
-                loadingDialog = new LoadingDialog(null);
-            }
-            loadingDialog.setMinimumSize(new Dimension(500, -1));
-            loadingDialog.setLocationRelativeTo(RedisFrontApplication.frame);
-            loadingDialog.pack();
-            loadingDialog.setVisible(true);
-        });
+        if (loadingDialog == null) {
+            loadingDialog = new LoadingDialog(null);
+        }
+        loadingDialog.setMinimumSize(new Dimension(500, -1));
+        loadingDialog.setLocationRelativeTo(RedisFrontApplication.frame);
+        loadingDialog.pack();
+        loadingDialog.setVisible(true);
+
     }
 
     public synchronized static void closeDialog() {
-        SwingUtilities.invokeLater(() -> {
-            if (Fn.isNotNull(loadingDialog)) {
-                loadingDialog.dispose();
-                loadingDialog = null;
-            }
-        });
+        if (Fn.isNotNull(loadingDialog)) {
+            loadingDialog.dispose();
+            loadingDialog = null;
+        }
     }
 
 

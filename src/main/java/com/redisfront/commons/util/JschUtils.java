@@ -1,5 +1,6 @@
 package com.redisfront.commons.util;
 
+import cn.hutool.extra.ssh.JschRuntimeException;
 import cn.hutool.extra.ssh.JschUtil;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
@@ -66,6 +67,9 @@ public class JschUtils {
                 if (e instanceof JSchException jSchException) {
                     throw new RedisFrontException("SSH主机连接失败 - " + jSchException.getMessage());
                 }
+                if (e instanceof JschRuntimeException) {
+                    throw new RedisFrontException("SSH端口绑定失败，请重试!");
+                }
                 throw new RedisFrontException(e, true);
             }
         } else {
@@ -89,6 +93,9 @@ public class JschUtils {
             } catch (Exception e) {
                 if (e instanceof JSchException jSchException) {
                     throw new RedisFrontException("SSH主机连接失败 - " + jSchException.getMessage());
+                }
+                if (e instanceof JschRuntimeException) {
+                    throw new RedisFrontException("SSH端口绑定失败，请重试!");
                 }
                 throw new RedisFrontException(e, true);
             }
