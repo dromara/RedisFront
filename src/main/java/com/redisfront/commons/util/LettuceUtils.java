@@ -14,6 +14,7 @@ import io.lettuce.core.cluster.RedisClusterClient;
 import io.lettuce.core.cluster.api.sync.RedisAdvancedClusterCommands;
 import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
+import io.netty.util.internal.StringUtil;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -170,19 +171,28 @@ public class LettuceUtils {
             connectInfo.setLocalHost("127.0.0.1");
             connectInfo.setLocalPort(RandomUtil.randomInt(32768, 65535));
         }
+        String host = "";
+        String password = "";
+        if (!StringUtil.isNullOrEmpty(connectInfo.host())) {
+            host = connectInfo.host().replace("\uFEFF", "");
+        }
+        if (!StringUtil.isNullOrEmpty(connectInfo.password())) {
+            password = connectInfo.password().replace("\uFEFF", "");
+        }
+
         var redisURI = RedisURI.builder()
-                .withHost(isSSH ? connectInfo.getLocalHost() : connectInfo.host())
+                .withHost(isSSH ? connectInfo.getLocalHost() : host)
                 .withPort(isSSH ? connectInfo.getLocalPort() : connectInfo.port())
                 .withSsl(connectInfo.ssl())
                 .withDatabase(connectInfo.database())
                 .withTimeout(Duration.ofMinutes(1))
                 .build();
 
-        if (Fn.isNotEmpty(connectInfo.user()) && Fn.isNotEmpty(connectInfo.password())) {
-            var staticCredentialsProvider = new StaticCredentialsProvider(connectInfo.user(), connectInfo.password().toCharArray());
+        if (Fn.isNotEmpty(connectInfo.user()) && Fn.isNotEmpty(password)) {
+            var staticCredentialsProvider = new StaticCredentialsProvider(connectInfo.user(), password.toCharArray());
             redisURI.setCredentialsProvider(staticCredentialsProvider);
-        } else if (Fn.isNotEmpty(connectInfo.password())) {
-            var staticCredentialsProvider = new StaticCredentialsProvider(null, connectInfo.password().toCharArray());
+        } else if (Fn.isNotEmpty(password)) {
+            var staticCredentialsProvider = new StaticCredentialsProvider(null, password.toCharArray());
             redisURI.setCredentialsProvider(staticCredentialsProvider);
         }
         return redisURI;
