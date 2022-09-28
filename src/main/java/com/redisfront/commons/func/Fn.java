@@ -3,6 +3,7 @@ package com.redisfront.commons.func;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.io.unit.DataSizeUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -196,5 +197,14 @@ public class Fn {
         }
         return dataList.stream().collect(Collectors.toMap(keyMapper, Function.identity(), (a, b) -> a));
     }
+
+
+    public static String getDataSize(String str) {
+        if (isNotEmpty(str)) {
+            return DataSizeUtil.format(str.getBytes().length);
+        }
+        return DataSizeUtil.format(0);
+    }
+
 
 }

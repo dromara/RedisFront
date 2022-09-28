@@ -204,14 +204,7 @@ public class DataViewForm {
                 }
             }
 
-            private void jsonValueFormat(String value) {
-                if (JSONUtil.isTypeJSON(value)) {
-                    jComboBox.setSelectedIndex(1);
-                    textEditor.textArea().setText(JSONUtil.toJsonPrettyStr(value));
-                } else {
-                    textEditor.textArea().setText(value);
-                }
-            }
+
         });
         dataTable.addFocusListener(new FocusAdapter() {
             @Override
@@ -229,6 +222,15 @@ public class DataViewForm {
                 }
             }
         });
+    }
+
+    private void jsonValueFormat(String value) {
+        if (JSONUtil.isTypeJSON(value)) {
+            jComboBox.setSelectedIndex(1);
+            textEditor.textArea().setText(JSONUtil.toJsonPrettyStr(value));
+        } else {
+            textEditor.textArea().setText(value);
+        }
     }
 
     public JPanel contentPanel() {
@@ -390,8 +392,8 @@ public class DataViewForm {
             tableViewPanel.setVisible(false);
             valueUpdateSaveBtn.setEnabled(true);
             lengthLabel.setText("Length: " + strLen);
-            keySizeLabel.setText("Size: " + DataSizeUtil.format(value.getBytes().length));
-            textEditor.textArea().setText(value);
+            keySizeLabel.setText("Size: " + Fn.getDataSize(value));
+            jsonValueFormat(value);
         });
     }
 

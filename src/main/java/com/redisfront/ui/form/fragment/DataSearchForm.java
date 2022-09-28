@@ -73,6 +73,27 @@ public class DataSearchForm {
     private final ConnectInfo connectInfo;
     private JButton searchBtn;
 
+    private static final ArrayList<DbInfo> dbList = new ArrayList<DbInfo>() {
+        {
+            add(new DbInfo("DB0", 0));
+            add(new DbInfo("DB1", 1));
+            add(new DbInfo("DB2", 2));
+            add(new DbInfo("DB3", 3));
+            add(new DbInfo("DB4", 4));
+            add(new DbInfo("DB5", 5));
+            add(new DbInfo("DB6", 6));
+            add(new DbInfo("DB7", 7));
+            add(new DbInfo("DB8", 8));
+            add(new DbInfo("DB9", 9));
+            add(new DbInfo("DB10", 10));
+            add(new DbInfo("DB11", 11));
+            add(new DbInfo("DB12", 12));
+            add(new DbInfo("DB13", 13));
+            add(new DbInfo("DB14", 14));
+            add(new DbInfo("DB15", 15));
+        }
+    };
+
     static final ExecutorService executorService = Executors.newFixedThreadPool(5);
 
     public JPanel getContentPanel() {
@@ -111,6 +132,7 @@ public class DataSearchForm {
             if (Fn.isNull(scanKeysContext.getScanCursor())) {
                 scanKeysContext.setScanCursor(ScanCursor.INITIAL);
             }
+
 
             if (!key.contains("*")) {
                 var all = allField.getText();
@@ -333,7 +355,8 @@ public class DataSearchForm {
         };
         refreshBtn.addActionListener(e -> SwingUtilities.invokeLater(() -> {
             searchTextField.setText("");
-            scanKeysAndInitScanInfo();
+            databaseComboBox.removeAllItems();
+            databaseComboBoxInit();
         }));
         refreshBtn.setIcon(UI.REFRESH_ICON);
 
@@ -375,53 +398,16 @@ public class DataSearchForm {
             scanKeysActionPerformed();
         });
 
-        var dbList = new ArrayList<DbInfo>() {
-            {
-                add(new DbInfo("DB0", 0));
-                add(new DbInfo("DB1", 1));
-                add(new DbInfo("DB2", 2));
-                add(new DbInfo("DB3", 3));
-                add(new DbInfo("DB4", 4));
-                add(new DbInfo("DB5", 5));
-                add(new DbInfo("DB6", 6));
-                add(new DbInfo("DB7", 7));
-                add(new DbInfo("DB8", 8));
-                add(new DbInfo("DB9", 9));
-                add(new DbInfo("DB10", 10));
-                add(new DbInfo("DB11", 11));
-                add(new DbInfo("DB12", 12));
-                add(new DbInfo("DB13", 13));
-                add(new DbInfo("DB14", 14));
-                add(new DbInfo("DB15", 15));
-            }
-        };
 
         scanKeysContextMap = new ConcurrentHashMap<>();
 
-        if (Fn.notEqual(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
-            var keySpace = RedisBasicService.service.getKeySpace(connectInfo);
-            for (var dbInfo : dbList) {
-                var value = (String) keySpace.get(dbInfo.dbName().toLowerCase());
-                if (Fn.isNotEmpty(value)) {
-                    String[] s = value.split(",");
-                    String[] sub = s[0].split("=");
-                    dbInfo.setDbSize(Long.valueOf(sub[1]));
-                }
-                scanKeysContextMap.put(dbInfo.dbIndex(), new ScanContext<>());
-                databaseComboBox.addItem(dbInfo);
-            }
-        } else {
-            var dbInfo = dbList.get(0);
-            scanKeysContextMap.put(dbInfo.dbIndex(), new ScanContext<>());
-            var dbSize = RedisBasicService.service.dbSize(connectInfo);
-            dbInfo.setDbSize(dbSize);
-            databaseComboBox.addItem(dbInfo);
-            databaseComboBox.setEnabled(false);
-        }
+        databaseComboBoxInit();
 
         databaseComboBox.addActionListener(e -> {
             var db = (DbInfo) databaseComboBox.getSelectedItem();
-            assert db != null;
+            if (Fn.isNull(db)) {
+                return;
+            }
             connectInfo.setDatabase(db.dbIndex());
             scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
             var limit = PrefUtils.getState().getLong(Const.KEY_KEY_MAX_LOAD_NUM, 10000L);
@@ -707,6 +693,29 @@ public class DataSearchForm {
         allField.setBorder(new EmptyBorder(0, 5, 0, 0));
         allField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, allLabel);
 
+    }
+
+    private void databaseComboBoxInit() {
+        if (Fn.notEqual(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            var keySpace = RedisBasicService.service.getKeySpace(connectInfo);
+            for (var dbInfo : dbList) {
+                var value = (String) keySpace.get(dbInfo.dbName().toLowerCase());
+                if (Fn.isNotEmpty(value)) {
+                    String[] s = value.split(",");
+                    String[] sub = s[0].split("=");
+                    dbInfo.setDbSize(Long.valueOf(sub[1]));
+                }
+                scanKeysContextMap.put(dbInfo.dbIndex(), new ScanContext<>());
+                databaseComboBox.addItem(dbInfo);
+            }
+        } else {
+            var dbInfo = dbList.get(0);
+            scanKeysContextMap.put(dbInfo.dbIndex(), new ScanContext<>());
+            var dbSize = RedisBasicService.service.dbSize(connectInfo);
+            dbInfo.setDbSize(dbSize);
+            databaseComboBox.addItem(dbInfo);
+            databaseComboBox.setEnabled(false);
+        }
     }
 
     private void scanKeysAndInitScanInfo() {
