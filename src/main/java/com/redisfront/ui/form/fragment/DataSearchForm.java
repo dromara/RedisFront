@@ -129,11 +129,6 @@ public class DataSearchForm {
             var lastSearchKey = scanKeysContext.getSearchKey();
             scanKeysContext.setSearchKey(key);
 
-            if (Fn.isNull(scanKeysContext.getScanCursor())) {
-                scanKeysContext.setScanCursor(ScanCursor.INITIAL);
-            }
-
-
             if (!key.contains("*")) {
                 var all = allField.getText();
                 var scanInfo = all.split(SEPARATOR_FLAG);
@@ -191,7 +186,7 @@ public class DataSearchForm {
                     var current = Long.parseLong(scanInfo[0]);
                     var allSize = NumberUtil.isNumber(scanInfo[1]) ? Long.parseLong(scanInfo[1]) : 0;
                     //如果全部扫描完成！
-                    if (current >= allSize) {
+                    if (current >= allSize && scanKeysContext.getKeyList().size() == allSize) {
                         loadMoreBtn.setText(LocaleUtils.getMessageFromBundle("DataSearchForm.loadMoreBtn.complete.title"));
                         loadMoreBtn.setEnabled(false);
                         return;
@@ -214,6 +209,7 @@ public class DataSearchForm {
                     loadMoreBtn.setEnabled(false);
                 }
                 keyTree.setModel(treeModel);
+                keyTree.updateUI();
             });
             scanAfterProcess();
         } catch (Exception e) {
