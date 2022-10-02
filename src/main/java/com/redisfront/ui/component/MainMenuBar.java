@@ -198,7 +198,7 @@ public class MainMenuBar extends JMenuBar {
     private void aboutActionPerformed() {
         var titleLabel = new JLabel("RedisFront");
         titleLabel.putClientProperty(FlatClientProperties.STYLE_CLASS, "h1");
-        var link = "https://gitee.com/westboy/redis-front";
+        var link = "https://gitee.com/westboy/RedisFront";
         var linkLabel = new JLabel("<html><a href=\"#\">" + link + "</a></html>");
         linkLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         linkLabel.addMouseListener(new MouseAdapter() {

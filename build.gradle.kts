@@ -23,6 +23,7 @@ plugins {
 
 val javaHome: String = System.getProperty("java.home")
 val appName: String = "RedisFront"
+val appSite: String = "https://gitee.com/westboy/RedisFront"
 
 buildscript {
     repositories {
@@ -40,11 +41,11 @@ plugins.apply("io.github.fvarrui.javapackager.plugin")
 version = "1.0.1"
 
 val flatlafVersion = "2.4"
-val hutoolVersion = "5.8.6"
+val hutoolVersion = "5.8.7"
 val fifesoftVersion = "3.2.0"
 val derbyVersion = "10.15.2.0"
 val lettuceVersion = "6.2.0.RELEASE"
-val logbackVersion = "1.4.0"
+val logbackVersion = "1.4.1"
 
 val fatJar = false
 
@@ -80,7 +81,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
     implementation("io.lettuce:lettuce-core:${lettuceVersion}")
-    implementation("io.netty:netty-common:4.1.80.Final")
+    implementation("io.netty:netty-common:4.1.82.Final")
     implementation("com.formdev:flatlaf:${flatlafVersion}")
     implementation("org.jfree:jfreechart:1.5.3")
     implementation("com.formdev:flatlaf-swingx:${flatlafVersion}")
@@ -101,6 +102,9 @@ dependencies {
     implementation("com.intellij:forms_rt:7.0.3")
     implementation("com.jcraft:jsch:0.1.55")
     implementation(kotlin("stdlib-jdk8"))
+}
+repositories {
+    mavenCentral()
 }
 
 tasks.test {
@@ -172,21 +176,23 @@ configure<PackagePluginExtension> {
     jreDirectoryName("runtimes")
 }
 
-val setupLanguageMap = LinkedHashMap<String, String>()
-repositories {
-    mavenCentral()
-}
-setupLanguageMap["Chinese"] = "compiler:Languages\\ChineseSimplified.isl"
-setupLanguageMap["English"] = "compiler:Default.isl"
 
 
 tasks.register<PackageTask>("packageForWindows") {
+    val setupLanguageMap = LinkedHashMap<String, String>()
+    setupLanguageMap["Chinese"] = "compiler:Languages\\ChineseSimplified.isl"
+    setupLanguageMap["English"] = "compiler:Default.isl"
+
     description = "package For Windows"
     platform = Platform.windows
     isCreateZipball = false
     winConfig(closureOf<WindowsConfig> {
         icoFile = getIconFile("RedisFront.ico")
         headerType = HeaderType.gui
+        companyName = appSite
+        copyright = appName
+        productName = appName
+        productVersion = version
         setupLanguages = setupLanguageMap
         isDisableDirPage = false
         isDisableFinishedPage = false
@@ -194,6 +200,10 @@ tasks.register<PackageTask>("packageForWindows") {
         isGenerateSetup = true
         isCreateZipball = true
         isGenerateMsi = false
+        isDisableDirPage = false
+        isDisableFinishedPage = false
+        isDisableWelcomePage = false
+        msiUpgradeCode = version
         isGenerateMsm = false
     } as Closure<WindowsConfig>)
     dependsOn(tasks.build)

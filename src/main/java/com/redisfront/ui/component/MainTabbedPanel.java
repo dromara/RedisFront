@@ -135,6 +135,7 @@ public class MainTabbedPanel extends JPanel {
                 rightToolBar.setLayout(rightToolBarLayout);
                 var info = new FlatLabel();
                 info.setText("V " + Const.APP_VERSION);
+                info.setToolTipText("Version ".concat(Const.APP_VERSION));
                 info.setIcon(UI.INFO_ICON);
                 rightToolBar.add(info);
                 horizontalBox.add(rightToolBar);
@@ -149,56 +150,50 @@ public class MainTabbedPanel extends JPanel {
 
 
         {
-            contentPanel = new JTabbedPane() {
-
-                @Override
-                public void updateUI() {
-                    super.updateUI();
-
-                    var flatLineBorder = new FlatLineBorder(new Insets(2, 0, 0, 0), UIManager.getColor("Component.borderColor"));
-                    setBorder(flatLineBorder);
-
-                    var count = getTabCount();
-                    if (count > 2) {
-                        contentPanel.setToolTipTextAt(0, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataSplitPanel.title"));
-                        contentPanel.setToolTipTextAt(1, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.RedisTerminal.title"));
-                        contentPanel.setToolTipTextAt(2, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataChartsForm.title"));
-//                        contentPanel.setToolTipTextAt(3, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataChartsForm.title"));
+            {
+                contentPanel = new JTabbedPane() {
+                    @Override
+                    public void updateUI() {
+                        super.updateUI();
+                        var flatLineBorder = new FlatLineBorder(new Insets(2, 0, 0, 0), UIManager.getColor("Component.borderColor"));
+                        setBorder(flatLineBorder);
                     }
-                }
-            };
-            contentPanel.setTabPlacement(JTabbedPane.RIGHT);
-            contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.TOP);
-            contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, false);
-            contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
-            contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_LEADING);
-            contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
+                };
+                contentPanel.setTabPlacement(JTabbedPane.RIGHT);
+                contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.TOP);
+                contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, false);
+                contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
+                contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_LEADING);
+                contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
+            }
+            {
+                //主窗口
+                contentPanel.addTab(null, UI.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(connectInfo));
+                //命令窗口
+                contentPanel.addTab(null, UI.CONTENT_TAB_COMMAND_ICON, RedisTerminal.newInstance(connectInfo));
+                //数据窗口
+                contentPanel.addTab(null, UI.CONTENT_TAB_INFO_ICON, DataChartsForm.getInstance(connectInfo));
 
-            contentPanel.addTab(null, UI.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(connectInfo));
-            contentPanel.setToolTipTextAt(0, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataSplitPanel.title"));
-            contentPanel.addTab(null, UI.CONTENT_TAB_COMMAND_ICON, RedisTerminal.newInstance(connectInfo));
-            contentPanel.setToolTipTextAt(1, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.RedisTerminal.title"));
-            contentPanel.addTab(null, UI.CONTENT_TAB_INFO_ICON, DataChartsForm.getInstance(connectInfo));
-            contentPanel.setToolTipTextAt(2, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataChartsForm.title"));
 //            contentPanel.addTab(null, UI.MQ_ICON, new JPanel());
-//            contentPanel.setToolTipTextAt(3, LocaleUtils.getMessageFromBundle("MainTabbedPanel.contentPanel.DataChartsForm.title"));
 
-            //tab 切换事件
-            contentPanel.addChangeListener(e -> {
-                var tabbedPane = (JTabbedPane) e.getSource();
-                var component = tabbedPane.getSelectedComponent();
-                if (component instanceof RedisTerminal terminal) {
-                    terminal.ping();
-                    chartsFormInit();
-                }
-                if (component instanceof DataSplitPanel dataSplitPanel) {
-                    dataSplitPanel.ping();
-                    chartsFormInit();
-                }
-                if (component instanceof DataChartsForm chartsForm) {
-                    chartsForm.scheduleInit();
-                }
-            });
+
+                //tab 切换事件
+                contentPanel.addChangeListener(e -> {
+                    var tabbedPane = (JTabbedPane) e.getSource();
+                    var component = tabbedPane.getSelectedComponent();
+                    if (component instanceof RedisTerminal terminal) {
+                        terminal.ping();
+                        chartsFormInit();
+                    }
+                    if (component instanceof DataSplitPanel dataSplitPanel) {
+                        dataSplitPanel.ping();
+                        chartsFormInit();
+                    }
+                    if (component instanceof DataChartsForm chartsForm) {
+                        chartsForm.scheduleInit();
+                    }
+                });
+            }
 
             add(contentPanel, BorderLayout.CENTER);
         }

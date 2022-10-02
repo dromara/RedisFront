@@ -2,6 +2,8 @@ package com.redisfront.ui.form;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.icons.FlatTabbedPaneCloseIcon;
+import com.formdev.flatlaf.ui.FlatLineBorder;
+import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.redisfront.RedisFrontApplication;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
@@ -18,6 +20,7 @@ import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.util.function.BiConsumer;
 
@@ -130,55 +133,56 @@ public class MainWindowForm {
         UIManager.put("TabbedPane.closePressedForeground", Color.red);
         UIManager.put("TabbedPane.closeHoverBackground", new Color(0, true));
         UIManager.put("TabbedPane.closeIcon", new FlatTabbedPaneCloseIcon());
-        tabPanel = new JTabbedPane();
-        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.LEFT);
-        //SHOW LINE
-        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, true);
-        //SHOW CLOSE BUTTON
-        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSABLE, true);
+        {
+            tabPanel = new JTabbedPane();
+            tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.LEFT);
+            //SHOW LINE
+            tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, true);
+            //SHOW CLOSE BUTTON
+            tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSABLE, true);
 
-        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_SCROLL_BUTTONS_PLACEMENT, FlatClientProperties.TABBED_PANE_PLACEMENT_BOTH);
-        //SHOW CLOSE BUTTON
-        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_TOOLTIPTEXT, LocaleUtils.getMessageFromBundle("MainWindowForm.tabPanel.closeTooltip.text"));
-        //SHOW CLOSE BUTTON Callback
-        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
-            Component component = tabbedPane.getComponentAt(tabIndex);
-            if (component instanceof MainTabbedPanel mainTabbedPanel) {
-                mainTabbedPanel.shutdownScheduled();
-            }
-            tabbedPane.removeTabAt(tabIndex);
-            if (tabbedPane.getTabCount() == 0) {
-                toolBar.setVisible(false);
-                contentPanel.add(MainNoneForm.getInstance().getContentPanel(), BorderLayout.CENTER, 0);
-            }
-            System.gc();
-        });
+            tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_SCROLL_BUTTONS_PLACEMENT, FlatClientProperties.TABBED_PANE_PLACEMENT_BOTH);
+            //SHOW CLOSE BUTTON
+            tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_TOOLTIPTEXT, LocaleUtils.getMessageFromBundle("MainWindowForm.tabPanel.closeTooltip.text"));
+            //SHOW CLOSE BUTTON Callback
+            tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
+                Component component = tabbedPane.getComponentAt(tabIndex);
+                if (component instanceof MainTabbedPanel mainTabbedPanel) {
+                    mainTabbedPanel.shutdownScheduled();
+                }
+                tabbedPane.removeTabAt(tabIndex);
+                if (tabbedPane.getTabCount() == 0) {
+                    toolBar.setVisible(false);
+                    contentPanel.add(MainNoneForm.getInstance().getContentPanel(), BorderLayout.CENTER, 0);
+                }
+                System.gc();
+            });
+            tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, SwingConstants.LEADING);
+            tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_LEADING);
+            tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
+        }
+        {
+            toolBar = new JToolBar();
+            toolBar.setMinimumSize(new Dimension(-1, 200));
+            toolBar.setBorder(new EmptyBorder(10, 10, 10, 10));
+            toolBar.setLayout(new BorderLayout());
 
-        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, SwingConstants.LEADING);
-        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_LEADING);
-        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
-
-        toolBar = new JToolBar();
-        toolBar.setMinimumSize(new Dimension(-1, 200));
-        toolBar.setBorder(new EmptyBorder(10, 10, 10, 10));
-        toolBar.setLayout(new BorderLayout());
-
-        var newBtn = new JButton(UI.LOGS_ICON) {
-            @Override
-            public void updateUI() {
-                super.updateUI();
-                setText(LocaleUtils.getMessageFromBundle("MainWindowForm.newBtn.title"));
-                setToolTipText(LocaleUtils.getMessageFromBundle("MainWindowForm.newBtn.ToolTipText"));
-            }
-        };
-        newBtn.addActionListener((event) -> LogsDialog.showLogsDialog());
-        toolBar.add(new JPanel() {
-            {
-                setLayout(new BorderLayout());
-                add(newBtn, BorderLayout.CENTER);
-            }
-        }, BorderLayout.SOUTH);
-        tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, toolBar);
+            var logViewBtn = new JButton(UI.LOGS_ICON) {
+                @Override
+                public void updateUI() {
+                    super.updateUI();
+                    var newFont = UIManager.getFont("defaultFont").deriveFont(12f);
+                    setFont(newFont);
+                    setText(LocaleUtils.getMessageFromBundle("MainWindowForm.logViewBtn.title"));
+                    setToolTipText(LocaleUtils.getMessageFromBundle("MainWindowForm.logViewBtn.ToolTipText"));
+                    setForeground(new Color(112, 112, 112));
+                    setBorder(new FlatLineBorder(new Insets(2, 2, 2, 2), new Color(112, 112, 112), 1, 10));
+                }
+            };
+            logViewBtn.addActionListener((event) -> LogsDialog.showLogsDialog());
+            toolBar.add(logViewBtn, BorderLayout.SOUTH);
+            tabPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, toolBar);
+        }
     }
 
     /**
@@ -204,4 +208,5 @@ public class MainWindowForm {
     public JComponent $$$getRootComponent$$$() {
         return contentPanel;
     }
+
 }
