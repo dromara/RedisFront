@@ -43,7 +43,6 @@ public class DataSplitPanel extends JSplitPane {
             dataViewForm.setRefreshAfterHandler(dataSearchForm::scanAfterProcess);
 
             dataViewForm.setDeleteActionHandler(() -> {
-                log.info("删除Key");
                 dataSearchForm.deleteActionPerformed();
                 setRightComponent(newNonePanel());
             });
