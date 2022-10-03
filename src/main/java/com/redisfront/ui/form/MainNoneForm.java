@@ -64,7 +64,7 @@ public class MainNoneForm {
             public void updateUI() {
                 super.updateUI();
                 if (SystemInfo.isMacOS) {
-                    setBorder(new EmptyBorder(0, 0, 2, 0));
+                    setBorder(new EmptyBorder(0, 0, 1, 0));
                 }
                 putClientProperty("FlatLaf.styleClass", " h3");
             }
@@ -76,7 +76,7 @@ public class MainNoneForm {
             public void updateUI() {
                 super.updateUI();
                 if (SystemInfo.isMacOS) {
-                    putClientProperty("FlatLaf.styleClass", "h2");
+                    putClientProperty("FlatLaf.styleClass", "h3");
                 } else {
                     putClientProperty("FlatLaf.styleClass", "h3");
                 }
@@ -88,7 +88,7 @@ public class MainNoneForm {
             public void updateUI() {
                 super.updateUI();
                 if (SystemInfo.isMacOS) {
-                    setBorder(new EmptyBorder(0, 0, 2, 0));
+                    setBorder(new EmptyBorder(0, 0, 1, 0));
                 }
                 putClientProperty("FlatLaf.styleClass", " h3");
             }
@@ -107,7 +107,7 @@ public class MainNoneForm {
             public void updateUI() {
                 super.updateUI();
                 if (SystemInfo.isMacOS) {
-                    putClientProperty("FlatLaf.styleClass", "h2");
+                    putClientProperty("FlatLaf.styleClass", "h3");
                 } else {
                     putClientProperty("FlatLaf.styleClass", "h3");
                 }
