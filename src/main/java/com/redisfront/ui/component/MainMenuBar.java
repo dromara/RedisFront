@@ -65,9 +65,6 @@ public class MainMenuBar extends JMenuBar {
         };
         addConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | KeyEvent.CTRL_DOWN_MASK));
         addConnectMenu.addActionListener(e -> AddConnectDialog.showAddConnectDialog(((connectInfo) -> MainWindowForm.getInstance().addTabActionPerformed(connectInfo))));
-        if( SystemInfo.isMacOS ){
-
-        }
         fileMenu.add(addConnectMenu);
 
         //打开连接
