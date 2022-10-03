@@ -196,7 +196,7 @@ tasks.register<PackageTask>("packageForWindows") {
         productVersion = version
         copyright = appSite
         fileVersion = version
-        originalFilename = appName.plus(".exe")
+        originalFilename = appName
         isGenerateSetup = true
         setupLanguages = setupLanguageMap
         isCreateZipball = true
