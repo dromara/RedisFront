@@ -1,5 +1,6 @@
 package com.redisfront.ui.form;
 
+import com.formdev.flatlaf.util.SystemInfo;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -7,6 +8,7 @@ import com.redisfront.commons.constant.UI;
 import com.redisfront.commons.util.LocaleUtils;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
@@ -26,6 +28,8 @@ public class MainNoneForm {
     private JLabel openKeyLabel;
     private JProgressBar progressBar1;
     private JLabel infoLabel;
+    private JLabel aLabel;
+    private JLabel sLabel;
 
 
     public static MainNoneForm getInstance() {
@@ -38,6 +42,10 @@ public class MainNoneForm {
 
     public MainNoneForm() {
         $$$setupUI$$$();
+        if (SystemInfo.isMacOS) {
+            newKeyLabel.setText(" ⌘+");
+            openKeyLabel.setText(" ⌘+");
+        }
     }
 
     private void createUIComponents() {
@@ -47,24 +55,65 @@ public class MainNoneForm {
             public void updateUI() {
                 super.updateUI();
                 setText(LocaleUtils.get("MainNoneForm.NewLabel").title());
-                putClientProperty("FlatLaf.styleClass", "h3");
+                putClientProperty("FlatLaf.styleClass", " h3");
             }
         };
 
-        newKeyLabel = new JLabel();
-        newKeyLabel.putClientProperty("FlatLaf.styleClass", "h3");
+        aLabel = new JLabel() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                if (SystemInfo.isMacOS) {
+                    setBorder(new EmptyBorder(0, 0, 2, 0));
+                }
+                putClientProperty("FlatLaf.styleClass", " h3");
+            }
+        };
 
+
+        newKeyLabel = new JLabel() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                if (SystemInfo.isMacOS) {
+                    putClientProperty("FlatLaf.styleClass", "h2");
+                } else {
+                    putClientProperty("FlatLaf.styleClass", "h3");
+                }
+            }
+        };
+
+        sLabel = new JLabel() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                if (SystemInfo.isMacOS) {
+                    setBorder(new EmptyBorder(0, 0, 2, 0));
+                }
+                putClientProperty("FlatLaf.styleClass", " h3");
+            }
+        };
         openLabel = new JLabel() {
             @Override
             public void updateUI() {
                 super.updateUI();
                 setText(LocaleUtils.get("MainNoneForm.OpenLabel").title());
-                putClientProperty("FlatLaf.styleClass", "h3");
+                putClientProperty("FlatLaf.styleClass", " h3");
             }
         };
 
-        openKeyLabel = new JLabel();
-        openKeyLabel.putClientProperty("FlatLaf.styleClass", "h3");
+        openKeyLabel = new JLabel() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                if (SystemInfo.isMacOS) {
+                    putClientProperty("FlatLaf.styleClass", "h2");
+                } else {
+                    putClientProperty("FlatLaf.styleClass", "h3");
+                }
+            }
+        };
+
     }
 
     /**
@@ -84,14 +133,38 @@ public class MainNoneForm {
         final Spacer spacer1 = new Spacer();
         panel1.add(spacer1, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final JPanel panel2 = new JPanel();
-        panel2.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
+        panel2.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
         panel1.add(panel2, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        panel2.add(newLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_SOUTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        newKeyLabel.setText("Ctrl+A");
-        panel2.add(newKeyLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_SOUTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        panel2.add(openLabel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        openKeyLabel.setText("Ctrl+S");
-        panel2.add(openKeyLabel, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JPanel panel3 = new JPanel();
+        panel3.setLayout(new BorderLayout(0, 0));
+        panel2.add(panel3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        newLabel.setHorizontalAlignment(0);
+        newLabel.setHorizontalTextPosition(0);
+        panel3.add(newLabel, BorderLayout.WEST);
+        newKeyLabel.setHorizontalAlignment(4);
+        newKeyLabel.setHorizontalTextPosition(4);
+        newKeyLabel.setText(" Ctrl+");
+        panel3.add(newKeyLabel, BorderLayout.CENTER);
+        aLabel.setHorizontalAlignment(2);
+        aLabel.setHorizontalTextPosition(2);
+        aLabel.setText("A");
+        aLabel.setVerticalAlignment(3);
+        panel3.add(aLabel, BorderLayout.EAST);
+        final JPanel panel4 = new JPanel();
+        panel4.setLayout(new BorderLayout(0, 0));
+        panel2.add(panel4, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        openLabel.setHorizontalAlignment(0);
+        openLabel.setHorizontalTextPosition(0);
+        panel4.add(openLabel, BorderLayout.WEST);
+        openKeyLabel.setHorizontalAlignment(4);
+        openKeyLabel.setHorizontalTextPosition(4);
+        openKeyLabel.setText(" Ctrl+");
+        panel4.add(openKeyLabel, BorderLayout.CENTER);
+        sLabel.setHorizontalAlignment(2);
+        sLabel.setHorizontalTextPosition(2);
+        sLabel.setText("S");
+        sLabel.setVerticalAlignment(3);
+        panel4.add(sLabel, BorderLayout.EAST);
         logoLabel.setText("");
         panel1.add(logoLabel, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer2 = new Spacer();
