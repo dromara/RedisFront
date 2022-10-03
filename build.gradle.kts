@@ -179,6 +179,7 @@ configure<PackagePluginExtension> {
 
 
 tasks.register<PackageTask>("packageForWindows") {
+
     val setupLanguageMap = LinkedHashMap<String, String>()
     setupLanguageMap["Chinese"] = "compiler:Languages\\ChineseSimplified.isl"
     setupLanguageMap["English"] = "compiler:Default.isl"
@@ -193,18 +194,18 @@ tasks.register<PackageTask>("packageForWindows") {
         copyright = appName
         productName = appName
         productVersion = version
-        setupLanguages = setupLanguageMap
-        isDisableDirPage = false
-        isDisableFinishedPage = false
-        isDisableWelcomePage = false
+        copyright = appSite
+        fileVersion = version
+        originalFilename = appName.plus(".exe")
         isGenerateSetup = true
+        setupLanguages = setupLanguageMap
         isCreateZipball = true
         isGenerateMsi = false
+        isGenerateMsm = false
+        msiUpgradeCode = version
         isDisableDirPage = false
         isDisableFinishedPage = false
         isDisableWelcomePage = false
-        msiUpgradeCode = version
-        isGenerateMsm = false
     } as Closure<WindowsConfig>)
     dependsOn(tasks.build)
 }
