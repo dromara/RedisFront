@@ -11,7 +11,7 @@ RedisFront is a cross-platform redis desktop client tool developed based on swin
 
 [https://github.com/westboy/RedisFront/releases](https://github.com/westboy/RedisFront/releases)
 
-[https://pan.baidu.com/s/1Gjdbr4U_NyIDFeDHJJfbWw?pwd=rf88](https://pan.baidu.com/s/1Gjdbr4U_NyIDFeDHJJfbWw?pwd=rf88)  `verifyCode：rf88`
+[https://caiyun.139.com/m/i?185C6ylXGJ3yM](https://caiyun.139.com/m/i?185C6ylXGJ3yM)  `verifyCode：kXZw`
 
 ### Thank
 
