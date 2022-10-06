@@ -349,10 +349,14 @@ public class DataSearchForm {
                 setToolTipText(LocaleUtils.getMessageFromBundle("DataSearchForm.refreshBtn.title"));
             }
         };
+
+        //刷新按钮事件
         refreshBtn.addActionListener(e -> SwingUtilities.invokeLater(() -> {
+            var selectedIndex = databaseComboBox.getSelectedIndex();
             searchTextField.setText("");
             databaseComboBox.removeAllItems();
-            databaseComboBoxInit();
+            databaseComboBoxInit(selectedIndex);
+
         }));
         refreshBtn.setIcon(UI.REFRESH_ICON);
 
@@ -397,7 +401,7 @@ public class DataSearchForm {
 
         scanKeysContextMap = new ConcurrentHashMap<>();
 
-        databaseComboBoxInit();
+        databaseComboBoxInit(0);
 
         databaseComboBox.addActionListener(e -> {
             var db = (DbInfo) databaseComboBox.getSelectedItem();
@@ -691,27 +695,31 @@ public class DataSearchForm {
 
     }
 
-    private void databaseComboBoxInit() {
+    private void databaseComboBoxInit(int selectedIndex) {
         if (Fn.notEqual(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             var keySpace = RedisBasicService.service.getKeySpace(connectInfo);
-            for (var dbInfo : dbList) {
+            for (int i = 0; i < dbList.size(); i++) {
+                var dbInfo = dbList.get(i);
                 var value = (String) keySpace.get(dbInfo.dbName().toLowerCase());
                 if (Fn.isNotEmpty(value)) {
                     String[] s = value.split(",");
                     String[] sub = s[0].split("=");
                     dbInfo.setDbSize(Long.valueOf(sub[1]));
+                } else {
+                    dbInfo.setDbSize(0L);
                 }
                 scanKeysContextMap.put(dbInfo.dbIndex(), new ScanContext<>());
-                databaseComboBox.addItem(dbInfo);
+                databaseComboBox.insertItemAt(dbInfo, i);
             }
         } else {
             var dbInfo = dbList.get(0);
             scanKeysContextMap.put(dbInfo.dbIndex(), new ScanContext<>());
             var dbSize = RedisBasicService.service.dbSize(connectInfo);
             dbInfo.setDbSize(dbSize);
-            databaseComboBox.addItem(dbInfo);
+            databaseComboBox.insertItemAt(dbInfo, 0);
             databaseComboBox.setEnabled(false);
         }
+        databaseComboBox.setSelectedIndex(selectedIndex);
     }
 
     private void scanKeysAndInitScanInfo() {
