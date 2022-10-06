@@ -16,9 +16,14 @@ open class UpgradeUtils {
     companion object {
         private const val checkUrl = "https://gitee.com/westboy/RedisFront/raw/master/assets/version.json"
         private const val releaseUrl = "https://gitee.com/westboy/RedisFront/releases/"
+
         @JvmStatic
         fun checkVersion() {
             val currentVersion = Const.APP_VERSION
+            if (currentVersion.startsWith("@")) {
+                return
+            }
+
             val httpRequest = HttpUtil.createGet(checkUrl)
             val httpResponse = httpRequest.execute()
 
@@ -43,7 +48,12 @@ open class UpgradeUtils {
                     }
                 }
 
-                val value = JOptionPane.showConfirmDialog(RedisFrontApplication.frame, "检测到有新版本，赶快快去看吧?","升级提醒",JOptionPane.OK_CANCEL_OPTION)
+                val value = JOptionPane.showConfirmDialog(
+                    RedisFrontApplication.frame,
+                    "检测到有新版本，赶快快去看吧?",
+                    "升级提醒",
+                    JOptionPane.OK_CANCEL_OPTION
+                )
                 if (Fn.equal(value, JOptionPane.OK_OPTION)) {
                     DesktopUtil.browse(releaseUrl)
                 }

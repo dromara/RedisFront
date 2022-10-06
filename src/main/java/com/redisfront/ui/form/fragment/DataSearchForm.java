@@ -366,7 +366,7 @@ public class DataSearchForm {
 
         deleteAllBtn.addActionListener(e -> FutureUtils.runAsync(
                 () -> {
-                    String operation = JOptionPane.showInputDialog(LocaleUtils.getMessageFromBundle("DataSearchForm.showInputDialog.title") + "\n 1.flushdb \n 2.flushall");
+                    String operation = JOptionPane.showInputDialog(LocaleUtils.getMessageFromBundle("DataSearchForm.showInputDialog.title") + "\n “flushdb” or “flushall” ");
                     if (Fn.equal(operation, "flushdb")) {
                         RedisBasicService.service.flushdb(connectInfo);
                     } else if (Fn.equal(operation, "flushall")) {
