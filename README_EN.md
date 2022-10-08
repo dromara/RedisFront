@@ -14,11 +14,6 @@ RedisFront is a cross-platform redis desktop client tool developed based on swin
 [https://caiyun.139.com/m/i?185C6ylXGJ3yM](https://caiyun.139.com/m/i?185C6ylXGJ3yM)  `verifyCode：kXZw`
 
 ### Thank
-
-* [FlatLaf](https://www.formdev.com/flatlaf/?from=RedisFront)
-* [Lettuce](https://lettuce.io?from=RedisFront)
-* [HuTool](http://hutool.cn?from=RedisFront)
-* [Iconfont](https://www.iconfont.cn?from=RedisFront)
 * [JetBrains](https://www.jetbrains.com?from=RedisFront)
 
 ![JenBrains logo](assets/jetbrains.svg)
