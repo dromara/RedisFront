@@ -17,10 +17,6 @@ RedisFront 是基于 Swing 和 Lettuce 开发的跨平台 Redis 桌面客户端�
 
 ### 感谢
 
-* [FlatLaf](https://www.formdev.com/flatlaf/?from=RedisFront)
-* [Lettuce](https://lettuce.io?from=RedisFront)
-* [HuTool](http://hutool.cn?from=RedisFront)
-* [Iconfont](https://www.iconfont.cn?from=RedisFront)
 * [JetBrains](https://www.jetbrains.com?from=RedisFront)
 
 ![JenBrains logo](assets/jetbrains.svg)
