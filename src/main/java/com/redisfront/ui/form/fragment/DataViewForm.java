@@ -226,8 +226,8 @@ public class DataViewForm {
 
     private void jsonValueFormat(String value) {
         if (JSONUtil.isTypeJSON(value)) {
-            jComboBox.setSelectedIndex(1);
             textEditor.textArea().setText(JSONUtil.toJsonPrettyStr(value));
+            jComboBox.setSelectedIndex(1);
         } else {
             textEditor.textArea().setText(value);
         }
