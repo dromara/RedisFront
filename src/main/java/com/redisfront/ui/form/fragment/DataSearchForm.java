@@ -351,13 +351,15 @@ public class DataSearchForm {
         };
 
         //刷新按钮事件
-        refreshBtn.addActionListener(e -> SwingUtilities.invokeLater(() -> {
-            var selectedIndex = databaseComboBox.getSelectedIndex();
-            searchTextField.setText("");
-            databaseComboBox.removeAllItems();
-            databaseComboBoxInit(selectedIndex);
-
-        }));
+        refreshBtn.addActionListener(e -> {
+            refreshBtn.setEnabled(false);
+            SwingUtilities.invokeLater(() -> {
+                var selectedIndex = databaseComboBox.getSelectedIndex();
+                searchTextField.setText("");
+                databaseComboBox.removeAllItems();
+                databaseComboBoxInit(selectedIndex);
+            });
+        });
         refreshBtn.setIcon(UI.REFRESH_ICON);
 
         deleteAllBtn = new JButton() {
