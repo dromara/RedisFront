@@ -8,7 +8,6 @@ RedisFront 是基于 Swing 和 Lettuce 开发的跨平台 Redis 桌面客户端�
 
 ### 下载
 
-[https://gitee.com/westboy/RedisFront/releases](https://gitee.com/westboy/RedisFront/releases)
 
 [https://github.com/westboy/RedisFront/releases](https://github.com/westboy/RedisFront/releases)
 
@@ -23,4 +22,4 @@ RedisFront 是基于 Swing 和 Lettuce 开发的跨平台 Redis 桌面客户端�
 
 ![JDK](https://img.shields.io/badge/JDK-17-blue.svg)
 ![Apache 2.0](https://img.shields.io/badge/Apache-2.0-4EB1BA.svg)
-![Release](https://img.shields.io/badge/Release-1.0.2-green.svg)
+![Release](https://img.shields.io/badge/Release-1.0.3-green.svg)
