@@ -306,35 +306,35 @@ public class DataViewForm {
                 tableRefreshBtn.setEnabled(false);
             });
 
-            if (keyTypeEnum == Enum.KeyTypeEnum.STRING || keyTypeEnum == Enum.KeyTypeEnum.JSON) {
-                loadStringActionPerformed(key);
+            switch (keyTypeEnum) {
+                case ZSET -> {
+                    if (init)
+                        scanZSetContextMap.put(key, new ScanContext<>());
+                    loadZSetDataActionPerformed(key);
+                }
+                case HASH -> {
+                    if (init)
+                        scanHashContextMap.put(key, new ScanContext<>());
+                    loadHashDataActionPerformed(key);
+                }
+                case LIST -> {
+                    if (init)
+                        scanListContextMap.put(key, new ScanContext<>());
+                    loadListDataActionPerformed(key);
+                }
+                case SET -> {
+                    if (init)
+                        scanSetContextMap.put(key, new ScanContext<>());
+                    loadSetDataActionPerformed(key);
+                }
+                case STREAM -> {
+                    if (init)
+                        xRangeContextMap.put(key, new ScanContext<>());
+                    loadStreamDataActionPerformed(key);
+                }
+                default -> loadStringActionPerformed(key);
             }
 
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.ZSET)) {
-                if (init)
-                    scanZSetContextMap.put(key, new ScanContext<>());
-                loadZSetDataActionPerformed(key);
-            }
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.HASH)) {
-                if (init)
-                    scanHashContextMap.put(key, new ScanContext<>());
-                loadHashDataActionPerformed(key);
-            }
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.LIST)) {
-                if (init)
-                    scanListContextMap.put(key, new ScanContext<>());
-                loadListDataActionPerformed(key);
-            }
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
-                if (init)
-                    scanSetContextMap.put(key, new ScanContext<>());
-                loadSetDataActionPerformed(key);
-            }
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.STREAM)) {
-                if (init)
-                    xRangeContextMap.put(key, new ScanContext<>());
-                loadStreamDataActionPerformed(key);
-            }
             SwingUtilities.invokeLater(() -> {
                 refreshBeforeHandler.handle();
                 refreshEnableBtn();
@@ -354,6 +354,7 @@ public class DataViewForm {
         if (Fn.notEqual(type, "none")) {
             var keyTypeEnum = Enum.KeyTypeEnum.valueOf(type.toUpperCase());
             var ttl = RedisBasicService.service.ttl(connectInfo, key);
+
             SwingUtilities.invokeLater(() -> {
                 fieldOrScoreField.setVisible(keyTypeEnum == Enum.KeyTypeEnum.ZSET || keyTypeEnum == Enum.KeyTypeEnum.HASH);
                 keyTypeLabel.setText(keyTypeEnum.typeName());
@@ -363,18 +364,14 @@ public class DataViewForm {
                 this.lastKeyName = key;
                 this.lastKeyTTL = ttl;
             });
-            if (keyTypeEnum == Enum.KeyTypeEnum.STRING || keyTypeEnum == Enum.KeyTypeEnum.JSON) {
-                loadStringActionPerformed(key);
-            } else if (keyTypeEnum == Enum.KeyTypeEnum.HASH) {
-                loadHashDataActionPerformed(key);
-            } else if (keyTypeEnum == Enum.KeyTypeEnum.SET) {
-                loadSetDataActionPerformed(key);
-            } else if (keyTypeEnum == Enum.KeyTypeEnum.ZSET) {
-                loadZSetDataActionPerformed(key);
-            } else if (keyTypeEnum == Enum.KeyTypeEnum.LIST) {
-                loadListDataActionPerformed(key);
-            } else if (keyTypeEnum == Enum.KeyTypeEnum.STREAM) {
-                loadStreamDataActionPerformed(key);
+
+            switch (keyTypeEnum) {
+                case ZSET -> loadZSetDataActionPerformed(key);
+                case HASH -> loadHashDataActionPerformed(key);
+                case SET -> loadSetDataActionPerformed(key);
+                case LIST -> loadListDataActionPerformed(key);
+                case STREAM -> loadStreamDataActionPerformed(key);
+                default -> loadStringActionPerformed(key);
             }
         } else {
             AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showInformationDialog.message"));
@@ -622,27 +619,23 @@ public class DataViewForm {
         var keyType = keyTypeLabel.getText();
         Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(keyType.toUpperCase());
 
-        if (keyTypeEnum.equals(Enum.KeyTypeEnum.ZSET)) {
-            var score = (Double) dataTable.getValueAt(row, 1);
-            var value = (String) dataTable.getValueAt(row, 2);
-            AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), score.toString(), value, connectInfo, keyTypeEnum, () -> System.out.println("OK"));
+        switch (keyTypeEnum) {
+            case ZSET -> {
+                var score = (Double) dataTable.getValueAt(row, 1);
+                var value = (String) dataTable.getValueAt(row, 2);
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), score.toString(), value, connectInfo, keyTypeEnum, () -> System.out.println("OK"));
+            }
+            case HASH -> {
+                var key = (String) dataTable.getValueAt(row, 0);
+                var value = (String) dataTable.getValueAt(row, 1);
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), key, value, connectInfo, keyTypeEnum, () -> System.out.println("OK"));
+            }
+            case LIST, SET -> {
+                var value = (String) dataTable.getValueAt(row, 1);
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), null, value, connectInfo, keyTypeEnum, () -> System.out.println("OK"));
+            }
         }
 
-        if (keyTypeEnum.equals(Enum.KeyTypeEnum.HASH)) {
-            var key = (String) dataTable.getValueAt(row, 0);
-            var value = (String) dataTable.getValueAt(row, 1);
-            AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), key, value, connectInfo, keyTypeEnum, () -> System.out.println("OK"));
-        }
-
-        if (keyTypeEnum.equals(Enum.KeyTypeEnum.LIST)) {
-            var value = (String) dataTable.getValueAt(row, 1);
-            AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), null, value, connectInfo, keyTypeEnum, () -> System.out.println("OK"));
-        }
-
-        if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
-            var value = (String) dataTable.getValueAt(row, 1);
-            AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), null, value, connectInfo, keyTypeEnum, () -> System.out.println("OK"));
-        }
     }
 
     private void createUIComponents() {
@@ -731,30 +724,29 @@ public class DataViewForm {
                         return;
                     }
 
-                    if (typeEnum.equals(Enum.KeyTypeEnum.ZSET)) {
-                        var fieldOrScore = fieldOrScoreField.getText();
-                        var value = (String) dataTable.getValueAt(row, 2);
-                        RedisZSetService.service.zrem(connectInfo, key, value);
-                        RedisZSetService.service.zadd(connectInfo, key, Double.parseDouble(fieldOrScore), newValue);
-                    }
-
-                    if (typeEnum.equals(Enum.KeyTypeEnum.HASH)) {
-                        var fieldOrScore = fieldOrScoreField.getText();
-                        var filed = (String) dataTable.getValueAt(row, 0);
-                        RedisHashService.service.hdel(connectInfo, key, filed);
-                        RedisHashService.service.hset(connectInfo, key, fieldOrScore, newValue);
-                    }
-
-                    if (typeEnum.equals(Enum.KeyTypeEnum.LIST)) {
-                        var value = (String) dataTable.getValueAt(row, 1);
-                        RedisListService.service.lrem(connectInfo, key, 1, value);
-                        RedisListService.service.lpush(connectInfo, key, newValue);
-                    }
-
-                    if (typeEnum.equals(Enum.KeyTypeEnum.SET)) {
-                        var value = (String) dataTable.getValueAt(row, 1);
-                        RedisSetService.service.srem(connectInfo, key, value);
-                        RedisSetService.service.sadd(connectInfo, key, newValue);
+                    switch (typeEnum) {
+                        case HASH -> {
+                            var fieldOrScore = fieldOrScoreField.getText();
+                            var filed = (String) dataTable.getValueAt(row, 0);
+                            RedisHashService.service.hdel(connectInfo, key, filed);
+                            RedisHashService.service.hset(connectInfo, key, fieldOrScore, newValue);
+                        }
+                        case ZSET -> {
+                            var fieldOrScore = fieldOrScoreField.getText();
+                            var value = (String) dataTable.getValueAt(row, 2);
+                            RedisZSetService.service.zrem(connectInfo, key, value);
+                            RedisZSetService.service.zadd(connectInfo, key, Double.parseDouble(fieldOrScore), newValue);
+                        }
+                        case LIST -> {
+                            var value = (String) dataTable.getValueAt(row, 1);
+                            RedisListService.service.lrem(connectInfo, key, 1, value);
+                            RedisListService.service.lpush(connectInfo, key, newValue);
+                        }
+                        case SET -> {
+                            var value = (String) dataTable.getValueAt(row, 1);
+                            RedisSetService.service.srem(connectInfo, key, value);
+                            RedisSetService.service.sadd(connectInfo, key, newValue);
+                        }
                     }
                 }
             });
@@ -907,24 +899,17 @@ public class DataViewForm {
             var keyType = keyTypeLabel.getText();
             Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(keyType.toUpperCase());
 
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.ZSET)) {
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog("插入元素", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
-            }
-
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.HASH)) {
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog("插入元素", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
-            }
-
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.LIST)) {
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog("插入元素", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
-            }
-
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog("插入元素", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
-            }
-
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.STREAM)) {
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog("插入元素", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
+            switch (keyTypeEnum) {
+                case ZSET ->
+                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("ZSET", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
+                case HASH ->
+                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("HASH", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
+                case LIST ->
+                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("LIST", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
+                case SET ->
+                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("SET", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
+                case STREAM ->
+                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("STREAM", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
             }
         });
 
@@ -945,31 +930,29 @@ public class DataViewForm {
             var keyType = keyTypeLabel.getText();
             Enum.KeyTypeEnum keyTypeEnum = Enum.KeyTypeEnum.valueOf(keyType.toUpperCase());
             String key = keyField.getText();
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.ZSET)) {
-                var value = (String) dataTable.getValueAt(row, 2);
-                RedisZSetService.service.zrem(connectInfo, key, value);
-            }
 
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.HASH)) {
-                var field = (String) dataTable.getValueAt(row, 0);
-                RedisHashService.service.hdel(connectInfo, key, field);
+            switch (keyTypeEnum) {
+                case ZSET -> {
+                    var value = (String) dataTable.getValueAt(row, 2);
+                    RedisZSetService.service.zrem(connectInfo, key, value);
+                }
+                case HASH -> {
+                    var field = (String) dataTable.getValueAt(row, 0);
+                    RedisHashService.service.hdel(connectInfo, key, field);
+                }
+                case LIST -> {
+                    var value = (String) dataTable.getValueAt(row, 1);
+                    RedisListService.service.lrem(connectInfo, key, 1, value);
+                }
+                case SET -> {
+                    var value = (String) dataTable.getValueAt(row, 1);
+                    RedisSetService.service.srem(connectInfo, key, value);
+                }
+                case STREAM -> {
+                    var id = (String) dataTable.getValueAt(row, 1);
+                    RedisStreamService.service.xdel(connectInfo, key, id);
+                }
             }
-
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.LIST)) {
-                var value = (String) dataTable.getValueAt(row, 1);
-                RedisListService.service.lrem(connectInfo, key, 1, value);
-            }
-
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.SET)) {
-                var value = (String) dataTable.getValueAt(row, 1);
-                RedisSetService.service.srem(connectInfo, key, value);
-            }
-
-            if (keyTypeEnum.equals(Enum.KeyTypeEnum.STREAM)) {
-                var id = (String) dataTable.getValueAt(row, 1);
-                RedisStreamService.service.xdel(connectInfo, key, id);
-            }
-
             tableDelBtn.setEnabled(false);
             reloadTableDataActionPerformed(true);
         });
