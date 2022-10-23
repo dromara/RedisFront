@@ -623,16 +623,19 @@ public class DataViewForm {
             case ZSET -> {
                 var score = (Double) dataTable.getValueAt(row, 1);
                 var value = (String) dataTable.getValueAt(row, 2);
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), score.toString(), value, connectInfo, keyTypeEnum, () -> System.out.println("OK"));
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), score.toString(), value, connectInfo, keyTypeEnum, () -> {
+                });
             }
             case HASH -> {
                 var key = (String) dataTable.getValueAt(row, 0);
                 var value = (String) dataTable.getValueAt(row, 1);
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), key, value, connectInfo, keyTypeEnum, () -> System.out.println("OK"));
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), key, value, connectInfo, keyTypeEnum, () -> {
+                });
             }
             case LIST, SET -> {
                 var value = (String) dataTable.getValueAt(row, 1);
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), null, value, connectInfo, keyTypeEnum, () -> System.out.println("OK"));
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), null, value, connectInfo, keyTypeEnum, () -> {
+                });
             }
         }
 
@@ -901,15 +904,15 @@ public class DataViewForm {
 
             switch (keyTypeEnum) {
                 case ZSET ->
-                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("ZSET", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
+                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("ZSET", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> tableRefreshBtn.doClick());
                 case HASH ->
-                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("HASH", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
+                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("HASH", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> tableRefreshBtn.doClick());
                 case LIST ->
-                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("LIST", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
+                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("LIST", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> tableRefreshBtn.doClick());
                 case SET ->
-                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("SET", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
+                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("SET", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> tableRefreshBtn.doClick());
                 case STREAM ->
-                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("STREAM", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> System.out.println("添加成功！"));
+                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("STREAM", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> tableRefreshBtn.doClick());
             }
         });
 
@@ -935,22 +938,45 @@ public class DataViewForm {
                 case ZSET -> {
                     var value = (String) dataTable.getValueAt(row, 2);
                     RedisZSetService.service.zrem(connectInfo, key, value);
+                    {
+                        fieldOrScoreField.setText("");
+                        textEditor.textArea().setText("");
+                        valueUpdateSaveBtn.setEnabled(false);
+                    }
                 }
                 case HASH -> {
                     var field = (String) dataTable.getValueAt(row, 0);
                     RedisHashService.service.hdel(connectInfo, key, field);
+                    {
+                        fieldOrScoreField.setText("");
+                        textEditor.textArea().setText("");
+                        valueUpdateSaveBtn.setEnabled(false);
+                    }
                 }
                 case LIST -> {
                     var value = (String) dataTable.getValueAt(row, 1);
                     RedisListService.service.lrem(connectInfo, key, 1, value);
+                    {
+                        textEditor.textArea().setText("");
+                        valueUpdateSaveBtn.setEnabled(false);
+                    }
                 }
                 case SET -> {
                     var value = (String) dataTable.getValueAt(row, 1);
                     RedisSetService.service.srem(connectInfo, key, value);
+                    {
+                        textEditor.textArea().setText("");
+                        valueUpdateSaveBtn.setEnabled(false);
+                    }
                 }
                 case STREAM -> {
                     var id = (String) dataTable.getValueAt(row, 1);
                     RedisStreamService.service.xdel(connectInfo, key, id);
+                    {
+                        fieldOrScoreField.setText("");
+                        textEditor.textArea().setText("");
+                        valueUpdateSaveBtn.setEnabled(false);
+                    }
                 }
             }
             tableDelBtn.setEnabled(false);
