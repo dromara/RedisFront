@@ -4,7 +4,7 @@
 
 ![Screenshot](screenshot/redisfront-win11.png)
 
-RedisFront 是基于 Swing 和 Lettuce 开发的跨平台 Redis 桌面客户端工具, 支持 Redis 单机模式, 集群模式, 哨兵模式以及 SSH 隧道连接,  可轻松管理百万级数据.
+RedisFront 是基于 Swing 和 Lettuce 开发的跨平台 Redis 桌面客户端工具, 支持 Redis 单机模式, 集群模式, 哨兵模式以及 SSH 隧道连接, 可轻松管理Redis数据.
 
 ### 下载
 
@@ -22,4 +22,5 @@ RedisFront 是基于 Swing 和 Lettuce 开发的跨平台 Redis 桌面客户端�
 
 ![JDK](https://img.shields.io/badge/JDK-17-blue.svg)
 ![Apache 2.0](https://img.shields.io/badge/Apache-2.0-4EB1BA.svg)
-![Release](https://img.shields.io/badge/Release-1.0.3-green.svg)
+![Release](https://img.shields.io/badge/Release-1.0.4-green.svg)
+

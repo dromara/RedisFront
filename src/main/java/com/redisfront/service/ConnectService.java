@@ -49,12 +49,8 @@ public interface ConnectService {
                 "port =" +
                 connectInfo.port() +
                 "," +
-                "username ='" +
-                (Fn.isNull(connectInfo.user()) ? "" : connectInfo.user()) +
-                "'," +
-                "password ='" +
-                connectInfo.password() +
-                "'," +
+                (Fn.isNull(connectInfo.user()) ? "" : "username ='" + connectInfo.user() + "',") +
+                (Fn.isNull(connectInfo.password()) ? "" : "password ='" + connectInfo.password() + "',") +
                 "ssl ='" +
                 connectInfo.ssl() +
                 "'," +
