@@ -41,6 +41,11 @@ public class TreeUtils {
         for (var row : rows.stream().parallel().sorted().toList()) {
             var node = root;
             var cells = row.split(delim);
+            //如果以分隔符结尾 结尾给补上！
+            if (Fn.endsWith(row, delim)) {
+                var lastStr = cells[cells.length - 1];
+                cells[cells.length - 1] = lastStr.concat(delim);
+            }
             for (int i = 0; i < cells.length; i++) {
                 String cell = cells[i];
                 var child = node.get(cell);
