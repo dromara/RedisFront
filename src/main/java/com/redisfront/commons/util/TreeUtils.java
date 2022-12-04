@@ -1,5 +1,6 @@
 package com.redisfront.commons.util;
 
+import cn.hutool.core.util.StrUtil;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.model.TreeNodeInfo;
 
@@ -39,12 +40,22 @@ public class TreeUtils {
     public static StringTreeMap toStringTreeMap(Set<String> rows, String delim) {
         var root = new StringTreeMap();
         for (var row : rows.stream().parallel().sorted().toList()) {
+
             var node = root;
             var cells = row.split(delim);
-            //如果以分隔符结尾 结尾给补上！
-            if (Fn.endsWith(row, delim)) {
+
+            var tmpStr = StrUtil.join("", (Object) cells);
+            var keyLength = (tmpStr.toCharArray().length + cells.length - 1);
+
+            if (row.contains(delim) && row.toCharArray().length - keyLength >= 2) {
+                var lastStr = StrUtil.sub(row, keyLength, row.toCharArray().length - 1);
+                ArrayList<String> tmpList = new ArrayList<>(Arrays.asList(cells));
+                tmpList.add(lastStr);
+                cells = tmpList.toArray(new String[]{});
+            } else if (Fn.endsWith(row, delim)) {
                 cells[cells.length - 1] = cells[cells.length - 1].concat(delim);
             }
+
             for (int i = 0; i < cells.length; i++) {
                 String cell = cells[i];
                 var child = node.get(cell);
