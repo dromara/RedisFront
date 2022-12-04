@@ -40,10 +40,6 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     private JRadioButton enableSSHBtn;
     private JTextField publicKeyField;
     private JButton publicKeyFileBtn;
-    private JTextField privateKeyField;
-    private JButton privateKeyFileBtn;
-    private JTextField grantField;
-    private JButton grantFileBtn;
     private JPanel sslPanel;
     private JLabel passwordLabel;
     private JLabel hostLabel;
@@ -164,9 +160,9 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
             sshPanel.setVisible(false);
             sslPanel.setVisible(enableSSLBtn.isSelected());
             if (enableSSLBtn.isSelected()) {
-                setSize(new Dimension(getWidth(), getHeight() + 130));
+                setSize(new Dimension(getWidth(), getHeight() + 80));
             } else {
-                setSize(new Dimension(getWidth(), getHeight() - 130));
+                setSize(new Dimension(getWidth(), getHeight() - 80));
             }
         });
 
@@ -185,40 +181,15 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         });
 
 
-        privateKeyFileBtn.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                var fileChooser = new JFileChooser();
-                fileChooser.setFileFilter(new FileNameExtensionFilter("密钥文件", "pem", "crt"));
-                fileChooser.showDialog(AddConnectDialog.this, "选择私钥文件");
-                var selectedFile = fileChooser.getSelectedFile();
-                if (Fn.isNotNull(selectedFile)) {
-                    privateKeyField.setText(selectedFile.getAbsolutePath());
-                }
-            }
-        });
         publicKeyFileBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 var fileChooser = new JFileChooser();
-                fileChooser.setFileFilter(new FileNameExtensionFilter("公钥文件", "pem", "crt"));
+                fileChooser.setFileFilter(new FileNameExtensionFilter("*.jks", "pem", "jks"));
                 fileChooser.showDialog(AddConnectDialog.this, "选择公钥文件");
                 var selectedFile = fileChooser.getSelectedFile();
                 if (Fn.isNotNull(selectedFile)) {
                     publicKeyField.setText(selectedFile.getAbsolutePath());
-                }
-            }
-        });
-
-        grantFileBtn.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                var fileChooser = new JFileChooser();
-                fileChooser.setFileFilter(new FileNameExtensionFilter("授权文件", "pem", "crt"));
-                fileChooser.showDialog(AddConnectDialog.this, "选择授权文件");
-                var selectedFile = fileChooser.getSelectedFile();
-                if (Fn.isNotNull(selectedFile)) {
-                    grantField.setText(selectedFile.getAbsolutePath());
                 }
             }
         });
@@ -339,9 +310,9 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
 
         } else if (enableSSLBtn.isSelected()) {
             var sslConfig = new ConnectInfo.SSLConfig(
-                    privateKeyField.getText(),
+                    null,
                     publicKeyField.getText(),
-                    grantField.getText(),
+                    null,
                     String.valueOf(sslPasswordField.getPassword())
             );
             return new ConnectInfo(title,
@@ -385,9 +356,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         if (enableSSLBtn.isSelected()) {
             sslPanel.setVisible(true);
             sslPasswordField.setText(connectInfo.sslConfig().getPassword());
-            privateKeyField.setText(connectInfo.sslConfig().getPrivateKeyFilePath());
             publicKeyField.setText(connectInfo.sslConfig().getPublicKeyFilePath());
-            grantField.setText(connectInfo.sslConfig().getGrantFilePath());
         }
         if (enableSSHBtn.isSelected()) {
             sshPanel.setVisible(true);
@@ -454,41 +423,25 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new GridLayoutManager(4, 3, new Insets(0, 0, 0, 0), -1, -1));
         contentPane.add(panel3, new GridConstraints(0, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        sslPanel.setLayout(new GridLayoutManager(4, 4, new Insets(0, 0, 0, 0), -1, -1));
+        sslPanel.setLayout(new GridLayoutManager(2, 4, new Insets(0, 0, 0, 0), -1, -1));
         panel3.add(sslPanel, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JLabel label1 = new JLabel();
-        label1.setText("公钥");
+        label1.setText("证书");
         sslPanel.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         publicKeyField = new JTextField();
         sslPanel.add(publicKeyField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-        final JLabel label2 = new JLabel();
-        label2.setText("私钥");
-        sslPanel.add(label2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        privateKeyField = new JTextField();
-        sslPanel.add(privateKeyField, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-        final JLabel label3 = new JLabel();
-        label3.setText("授权");
-        sslPanel.add(label3, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        grantField = new JTextField();
-        sslPanel.add(grantField, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         publicKeyFileBtn = new JButton();
         publicKeyFileBtn.setText("选择文件");
         sslPanel.add(publicKeyFileBtn, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        privateKeyFileBtn = new JButton();
-        privateKeyFileBtn.setText("选择文件");
-        sslPanel.add(privateKeyFileBtn, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        grantFileBtn = new JButton();
-        grantFileBtn.setText("选择文件");
-        sslPanel.add(grantFileBtn, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer2 = new Spacer();
         sslPanel.add(spacer2, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        final JLabel label4 = new JLabel();
-        label4.setText("密码");
-        sslPanel.add(label4, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        sslPanel.add(sslPasswordField, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        final JLabel label2 = new JLabel();
+        label2.setText("密码");
+        sslPanel.add(label2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        sslPanel.add(sslPasswordField, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         showSslPassword = new JCheckBox();
         showSslPassword.setText("显示密码");
-        sslPanel.add(showSslPassword, new GridConstraints(3, 2, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        sslPanel.add(showSslPassword, new GridConstraints(1, 2, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         sshPanel.setLayout(new GridLayoutManager(5, 5, new Insets(0, 0, 0, 0), -1, -1));
         panel3.add(sshPanel, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         sshHostLabel = new JLabel();
@@ -549,7 +502,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         showPasswordCheckBox = new JCheckBox();
         this.$$$loadButtonText$$$(showPasswordCheckBox, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.showPasswordCheckBox.Title"));
         basicPanel.add(showPasswordCheckBox, new GridConstraints(2, 2, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        enableSSLBtn.setEnabled(false);
+        enableSSLBtn.setEnabled(true);
         enableSSLBtn.setText("SSL/TLS");
         basicPanel.add(enableSSLBtn, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer3 = new Spacer();
