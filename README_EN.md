@@ -12,7 +12,7 @@ RedisFront is an open source and free cross platform Redis desktop client tool, 
 
 [https://github.com/westboy/RedisFront/releases](https://github.com/westboy/RedisFront/releases)
 
-[https://caiyun.139.com/m/i?185C6ylXGJ3yM](https://caiyun.139.com/m/i?185C6ylXGJ3yM)  `verifyCode：kXZw`
+[https://caiyun.139.com/m/i?185C6uQsGKnE0](https://caiyun.139.com/m/i?185C6uQsGKnE0)  `verifyCode：weBe`
 
 ### Thank
 * [JetBrains](https://www.jetbrains.com?from=RedisFront)
