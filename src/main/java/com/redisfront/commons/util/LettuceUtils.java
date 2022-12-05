@@ -4,9 +4,7 @@ import cn.hutool.core.util.RandomUtil;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.model.ConnectInfo;
-import io.lettuce.core.RedisClient;
-import io.lettuce.core.RedisURI;
-import io.lettuce.core.StaticCredentialsProvider;
+import io.lettuce.core.*;
 import io.lettuce.core.api.sync.RedisCommands;
 import io.lettuce.core.cluster.ClusterClientOptions;
 import io.lettuce.core.cluster.ClusterTopologyRefreshOptions;
@@ -16,6 +14,7 @@ import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
 import io.netty.util.internal.StringUtil;
 
+import java.io.File;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,12 +38,24 @@ public class LettuceUtils {
                 .enableAdaptiveRefreshTrigger(ClusterTopologyRefreshOptions.RefreshTrigger.MOVED_REDIRECT, ClusterTopologyRefreshOptions.RefreshTrigger.PERSISTENT_RECONNECTS)
                 .enablePeriodicRefresh(Duration.ofMinutes(30))
                 .build();
-        var clusterClientOptions = ClusterClientOptions.builder()
+        var clientOptions = ClusterClientOptions.builder()
                 .topologyRefreshOptions(clusterTopologyRefreshOptions)
                 .build();
-        clusterClient.setOptions(clusterClientOptions);
-        var isSSH = connectInfo.connectMode().equals(Enum.Connect.SSH);
-        if (isSSH) {
+
+        if (connectInfo.ssl()) {
+            if (Fn.isNotEmpty(connectInfo.sslConfig().getPassword()) || Fn.isNotEmpty(connectInfo.sslConfig().getPublicKeyFilePath())) {
+                clientOptions = clientOptions
+                        .mutate()
+                        .sslOptions(SslOptions.builder()
+                                .jdkSslProvider()
+                                .truststore(new File(connectInfo.sslConfig().getPublicKeyFilePath()), connectInfo.sslConfig().getPassword())
+                                .build())
+                        .build();
+            }
+        }
+
+        clusterClient.setOptions(clientOptions);
+        if (Fn.equal(connectInfo.connectMode(), Enum.Connect.SSH)) {
             Map<Integer, Integer> clusterTempPort = new HashMap<>();
             for (RedisClusterNode partition : clusterClient.getPartitions()) {
                 var remotePort = partition.getUri().getPort();
@@ -130,6 +141,15 @@ public class LettuceUtils {
     public synchronized static void run(ConnectInfo connectInfo, Consumer<RedisCommands<String, String>> consumer) {
         var redisURI = getRedisURI(connectInfo);
         var redisClient = RedisClient.create(redisURI);
+        if (connectInfo.ssl()) {
+            if (Fn.isNotEmpty(connectInfo.sslConfig().getPassword()) || Fn.isNotEmpty(connectInfo.sslConfig().getPublicKeyFilePath())) {
+                var sslOptions = SslOptions.builder()
+                        .jdkSslProvider()
+                        .truststore(new File(connectInfo.sslConfig().getPublicKeyFilePath()), connectInfo.sslConfig().getPassword())
+                        .build();
+                redisClient.setOptions(ClientOptions.builder().sslOptions(sslOptions).build());
+            }
+        }
         try {
             JschUtils.openSession(connectInfo);
             try (var connection = redisClient.connect()) {
@@ -149,6 +169,15 @@ public class LettuceUtils {
     public synchronized static <T> T exec(ConnectInfo connectInfo, Function<RedisCommands<String, String>, T> function) {
         var redisURI = getRedisURI(connectInfo);
         var redisClient = RedisClient.create(redisURI);
+        if (connectInfo.ssl()) {
+            if (Fn.isNotEmpty(connectInfo.sslConfig().getPassword()) || Fn.isNotEmpty(connectInfo.sslConfig().getPublicKeyFilePath())) {
+                var sslOptions = SslOptions.builder()
+                        .jdkSslProvider()
+                        .truststore(new File(connectInfo.sslConfig().getPublicKeyFilePath()), connectInfo.sslConfig().getPassword())
+                        .build();
+                redisClient.setOptions(ClientOptions.builder().sslOptions(sslOptions).build());
+            }
+        }
         try {
             JschUtils.openSession(connectInfo);
             try (var connection = redisClient.connect()) {
@@ -166,8 +195,7 @@ public class LettuceUtils {
 
 
     public synchronized static RedisURI getRedisURI(ConnectInfo connectInfo) {
-        var isSSH = connectInfo.connectMode().equals(Enum.Connect.SSH);
-        if (isSSH) {
+        if (Fn.equal(connectInfo.connectMode(), Enum.Connect.SSH)) {
             connectInfo.setLocalHost("127.0.0.1");
             connectInfo.setLocalPort(RandomUtil.randomInt(32768, 65535));
         }
@@ -181,8 +209,8 @@ public class LettuceUtils {
         }
 
         var redisURI = RedisURI.builder()
-                .withHost(isSSH ? connectInfo.getLocalHost() : host)
-                .withPort(isSSH ? connectInfo.getLocalPort() : connectInfo.port())
+                .withHost(Fn.equal(connectInfo.connectMode(), Enum.Connect.SSH) ? connectInfo.getLocalHost() : host)
+                .withPort(Fn.equal(connectInfo.connectMode(), Enum.Connect.SSH) ? connectInfo.getLocalPort() : connectInfo.port())
                 .withSsl(connectInfo.ssl())
                 .withDatabase(connectInfo.database())
                 .withTimeout(Duration.ofMinutes(1))

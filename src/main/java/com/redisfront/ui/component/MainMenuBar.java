@@ -76,7 +76,7 @@ public class MainMenuBar extends JMenuBar {
                 setMnemonic(LocaleUtils.getMenu("Menu.File.Open").mnemonic());
             }
         };
-        openConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | KeyEvent.CTRL_DOWN_MASK));
+        openConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | KeyEvent.CTRL_DOWN_MASK));
         openConnectMenu.addActionListener(e -> OpenConnectDialog.showOpenConnectDialog(
                 //打开连接回调
                 ((connectInfo) -> MainWindowForm.getInstance().addTabActionPerformed(connectInfo)),
@@ -176,6 +176,23 @@ public class MainMenuBar extends JMenuBar {
 
         aboutMenuItem.addActionListener((e) -> FutureUtils.runAsync(this::aboutActionPerformed));
         aboutMenu.add(aboutMenuItem);
+
+        aboutMenu.add(new JSeparator());
+        var aliYunItem = new JMenuItem() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText("<html><b color=\"red\">阿里云</b><i color=\"orange\">~新人特惠</i></html>");
+            }
+        };
+        aliYunItem.addActionListener((e) -> FutureUtils.runAsync(() -> {
+            try {
+                Desktop.getDesktop().browse(new URI("https://www.aliyun.com/daily-act/ecs/activity_selection?userCode=fdfwuy9i"));
+            } catch (IOException | URISyntaxException ex) {
+            }
+        }));
+        aboutMenu.add(aliYunItem);
+
         add(aboutMenu);
 
         add(Box.createGlue());

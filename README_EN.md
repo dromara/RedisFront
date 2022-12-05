@@ -4,7 +4,8 @@
 
 ![Screenshot](screenshot/redisfront-win11.png)
 
-RedisFront is a cross-platform redis desktop client tool developed based on swing and lattice supports redis stand-alone mode, cluster mode, sentinel mode and SSH tunnel connection, and can easily manage redis data
+RedisFront is an open source and free cross platform Redis desktop client tool, which supports stand-alone mode, cluster mode, sentinel mode and SSH tunnel connection, and can easily manage Redis cache data
+
 ### Download
 
 [https://github.com/westboy/RedisFront/releases](https://github.com/westboy/RedisFront/releases)
