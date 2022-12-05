@@ -44,8 +44,7 @@ public class TreeUtils {
             var node = root;
             var cells = row.split(delim);
 
-            var tmpStr = StrUtil.join("", (Object) cells);
-            var keyLength = (tmpStr.toCharArray().length + cells.length - 1);
+            var keyLength = (StrUtil.join("", (Object) cells).toCharArray().length + cells.length - 1);
 
             if (row.contains(delim) && row.toCharArray().length - keyLength >= 2) {
                 var lastStr = StrUtil.sub(row, keyLength, row.toCharArray().length - 1);

@@ -503,21 +503,25 @@ public class DataSearchForm {
                 };
                 delMenuItem.addActionListener((e) -> {
                     DefaultTreeModel treeModel = (DefaultTreeModel) keyTree.getModel();
-                    var selectNode = keyTree.getLastSelectedPathComponent();
-                    if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
-                        FutureUtils.runAsync(() -> deleteActionPerformed(treeNodeInfo),
-                                //前置方法
-                                () -> SwingUtilities.invokeLater(() -> {
-                                    var title = treeNodeInfo.title();
-                                    treeNodeInfo.setTitle(title.concat(" ").concat(LocaleUtils.getMessageFromBundle("DataSearchForm.treeNodeInfo.del.doing.message")));
-                                    keyTree.updateUI();
-                                }),
-                                //后置方法
-                                () -> SwingUtilities.invokeLater(() -> treeModel.removeNodeFromParent(treeNodeInfo)));
+                    var selectionPaths = keyTree.getSelectionModel().getSelectionPaths();
+                    if (Fn.isNotEmpty(selectionPaths)) {
+                        for (TreePath selectionPath : selectionPaths) {
+                            if (selectionPath.getLastPathComponent() instanceof TreeNodeInfo treeNodeInfo) {
+                                FutureUtils.runAsync(() -> deleteActionPerformed(treeNodeInfo),
+                                        //前置方法
+                                        () -> SwingUtilities.invokeLater(() -> {
+                                            var title = treeNodeInfo.title();
+                                            treeNodeInfo.setTitle(title.concat(" ").concat(LocaleUtils.getMessageFromBundle("DataSearchForm.treeNodeInfo.del.doing.message")));
+                                            keyTree.updateUI();
+                                        }),
+                                        //后置方法
+                                        () -> SwingUtilities.invokeLater(() -> treeModel.removeNodeFromParent(treeNodeInfo)));
+                            }
+                        }
+
                     }
                 });
                 add(delMenuItem);
-
 
                 var memoryMenuItem = new JMenuItem() {
                     @Override

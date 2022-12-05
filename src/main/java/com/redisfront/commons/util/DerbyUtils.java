@@ -26,19 +26,20 @@ public class DerbyUtils {
 
     public static void init() {
         try {
-            var derbyFolder = new File(Const.DERBY_LOG_FILE_PATH);
+            var isCurrentDir = FileUtil.exist(Const.CURRENT_DIR_DERBY_LOG_FILE_PATH);
+            var derbyFolder = new File(isCurrentDir ? Const.CURRENT_DIR_DERBY_LOG_FILE_PATH : Const.DERBY_LOG_FILE_PATH);
             if (FileUtil.isEmpty(derbyFolder)) {
                 var dirCreated = derbyFolder.mkdir();
                 log.info("create Derby Log dir created: {}", dirCreated);
-                var fileCreated = new File(Const.DERBY_LOG_FILE).createNewFile();
+                var fileCreated = new File(isCurrentDir ? Const.CURRENT_DIR_DERBY_LOG_FILE : Const.DERBY_LOG_FILE).createNewFile();
                 log.info("create Derby Log File created: {}", fileCreated);
             }
             if (Arrays.stream(Objects.requireNonNull(derbyFolder.listFiles())).noneMatch(file -> Fn.equal(file.getName().toLowerCase(), "data"))) {
                 PrefUtils.getState().put(Const.KEY_APP_DATABASE_INIT, Boolean.TRUE.toString());
             }
-            System.setProperty("derby.stream.error.file", Const.DERBY_LOG_FILE);
+            System.setProperty("derby.stream.error.file", (isCurrentDir ? Const.CURRENT_DIR_DERBY_LOG_FILE : Const.DERBY_LOG_FILE));
             Class.forName("org.apache.derby.iapi.jdbc.InternalDriver");
-            conn = DriverManager.getConnection("jdbc:derby:" + Const.DERBY_DATA_PATH + "create=true");
+            conn = DriverManager.getConnection("jdbc:derby:" + (isCurrentDir ? Const.CURRENT_DIR_DERBY_DATA_PATH : Const.DERBY_DATA_PATH) + "create=true");
         } catch (Exception e) {
             log.error("Derby init failed - {}", e.getMessage());
             throw new RedisFrontException(e, true);
