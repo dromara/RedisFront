@@ -454,12 +454,9 @@ public class DataSearchForm {
         keyTree.setModel(null);
         keyTree.setBorder(new EmptyBorder(5, 5, 5, 5));
         keyTree.setCellRenderer(new DefaultXTreeCellRenderer() {
-            @Override
-            public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-                return super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+            {
+                setLeafIcon(UI.TREE_KEY_ICON);
             }
-
-
         });
         keyTree.addTreeSelectionListener(e -> {
             var selectNode = keyTree.getLastSelectedPathComponent();
