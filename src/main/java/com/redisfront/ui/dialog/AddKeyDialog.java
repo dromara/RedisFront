@@ -1,5 +1,6 @@
 package com.redisfront.ui.dialog;
 
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.json.JSONUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.intellij.uiDesigner.core.GridConstraints;
@@ -25,6 +26,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.ResourceBundle;
 
@@ -102,7 +104,24 @@ public class AddKeyDialog extends AbstractDialog<String> {
         streamLabel.setVisible(false);
         hashKeyField.setVisible(false);
         zSetScoreField.setVisible(false);
+        zSetScoreField.setInputVerifier(new InputVerifier() {
+            @Override
+            public boolean verify(JComponent input) {
+                JTextField jTextField = (JTextField) input;
+                return NumberUtil.isNumber(jTextField.getText());
+            }
+        });
         streamField.setVisible(false);
+        streamField.setInputVerifier(new InputVerifier() {
+            @Override
+            public boolean verify(JComponent input) {
+                JTextField jTextField = (JTextField) input;
+                if (Fn.notEqual("*", jTextField.getText()) && jTextField.getText().contains("-")) {
+                    return Arrays.stream(jTextField.getText().split("-")).allMatch(NumberUtil::isNumber);
+                }
+                return NumberUtil.isNumber(jTextField.getText()) || Fn.equal("*", jTextField.getText());
+            }
+        });
         ttlSpinner.setValue(-1);
 
         keyNameField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, LocaleUtils.getMessageFromBundle("AddKeyDialog.keyNameField.placeholder.text"));
@@ -207,10 +226,20 @@ public class AddKeyDialog extends AbstractDialog<String> {
         if (Fn.equal(Enum.KeyTypeEnum.HASH.typeName(), selectItem)) {
             RedisHashService.service.hset(connectInfo, key, hashKeyField.getText(), keyValueField.getText());
         } else if (Fn.equal(Enum.KeyTypeEnum.STREAM.typeName(), selectItem)) {
-            if (JSONUtil.isTypeJSON(value)) {
+            var serverInfo = RedisBasicService.service.getServerInfo(connectInfo);
+            var redisVersion = serverInfo.get("redis_version");
+            var x = redisVersion.toString().split("\\.")[0];
+            if (Integer.parseInt(x) < 5) {
+                AlertUtils.showInformationDialog("Redis版本过低，不支持Stream - [ 当前版本：" + redisVersion + " ]");
+                return;
+            } else if (JSONUtil.isTypeJSON(value)) {
                 HashMap<String, String> bodyMap = new HashMap<>();
                 JSONUtil.parseObj(value).forEach((key1, value1) -> bodyMap.put(key1, value1.toString()));
-                RedisStreamService.service.xadd(connectInfo, key, bodyMap);
+                if (Fn.equal(streamField.getText(), "*")) {
+                    RedisStreamService.service.xadd(connectInfo, key, bodyMap);
+                } else {
+                    RedisStreamService.service.xadd(connectInfo, streamField.getText(), key, bodyMap);
+                }
             } else {
                 AlertUtils.showInformationDialog("stream 请输入JSON格式数据！");
                 keyValueField.requestFocus();
@@ -289,8 +318,8 @@ public class AddKeyDialog extends AbstractDialog<String> {
         hashKeyField = new JTextField();
         contentPane.add(hashKeyField, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         streamField = new JTextField();
-        streamField.setEditable(false);
-        streamField.setEnabled(false);
+        streamField.setEditable(true);
+        streamField.setEnabled(true);
         streamField.setText("*");
         contentPane.add(streamField, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         scoreLabel = new JLabel();
