@@ -20,13 +20,10 @@ public class TreeUtils {
     }
 
     public static synchronized DefaultTreeModel toTreeModel(Set<String> rows, String delim) {
-        var startTime = System.currentTimeMillis();
         var rootNode = new TreeNodeInfo();
         var stringTreeMap = toStringTreeMap(rows, delim);
         var treeNodeInfos = convertTreeNodeInfoSet(stringTreeMap, "");
         treeNodeInfos.forEach(rootNode::add);
-        var endTime = System.currentTimeMillis();
-        System.out.println("转换树耗时：" + (endTime - startTime));
         return new DefaultTreeModel(rootNode);
     }
 
