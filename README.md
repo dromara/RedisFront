@@ -11,8 +11,7 @@ RedisFront 是一款开源免费的跨平台 Redis 桌面客户端工具, 支持
 
 [https://github.com/westboy/RedisFront/releases](https://github.com/westboy/RedisFront/releases)
 
-[https://caiyun.139.com/m/i?185C6ylXGJ3yM](https://caiyun.139.com/m/i?185C6ylXGJ3yM)  `提取码：kXZw`
-
+[https://caiyun.139.com/m/i?185C6uQsGKnE0](https://caiyun.139.com/m/i?185C6uQsGKnE0)  `提取码：weBe`
 
 ### 感谢
 

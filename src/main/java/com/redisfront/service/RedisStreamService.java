@@ -22,7 +22,9 @@ public interface RedisStreamService {
 
     String xadd(ConnectInfo connectInfo, String key, Map<String, String> body);
 
-    List<StreamMessage<String, String>> xrange(ConnectInfo connectInfo,String key, Range<String> range, Limit limit);
+    String xadd(ConnectInfo connectInfo, String id, String key, Map<String, String> body);
+
+    List<StreamMessage<String, String>> xrange(ConnectInfo connectInfo, String key, Range<String> range, Limit limit);
 
     String xadd(ConnectInfo connectInfo, String key, XAddArgs args, Object... keysAndValues);
 
