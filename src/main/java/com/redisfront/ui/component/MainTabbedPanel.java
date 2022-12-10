@@ -14,6 +14,7 @@ import com.redisfront.model.ClusterNode;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisBasicService;
 import com.redisfront.ui.form.fragment.DataChartsForm;
+import com.redisfront.ui.form.fragment.PubSubForm;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -171,26 +172,32 @@ public class MainTabbedPanel extends JPanel {
                 contentPanel.addTab(null, UI.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(connectInfo));
                 //命令窗口
                 contentPanel.addTab(null, UI.CONTENT_TAB_COMMAND_ICON, RedisTerminal.newInstance(connectInfo));
+                contentPanel.addTab(null, UI.MQ_ICON, PubSubForm.newInstance(connectInfo));
                 //数据窗口
                 contentPanel.addTab(null, UI.CONTENT_TAB_INFO_ICON, DataChartsForm.getInstance(connectInfo));
-
-//            contentPanel.addTab(null, UI.MQ_ICON, new JPanel());
 
 
                 //tab 切换事件
                 contentPanel.addChangeListener(e -> {
                     var tabbedPane = (JTabbedPane) e.getSource();
+                    PubSubForm pubSubForm = (PubSubForm) tabbedPane.getComponentAt(2);
                     var component = tabbedPane.getSelectedComponent();
                     if (component instanceof RedisTerminal terminal) {
                         terminal.ping();
                         chartsFormInit();
+                        pubSubForm.disConnection();
                     }
                     if (component instanceof DataSplitPanel dataSplitPanel) {
                         dataSplitPanel.ping();
                         chartsFormInit();
+                        pubSubForm.disConnection();
+                    }
+                    if (component instanceof PubSubForm pubSubForm1) {
+                        pubSubForm1.openConnection();
                     }
                     if (component instanceof DataChartsForm chartsForm) {
                         chartsForm.scheduleInit();
+                        pubSubForm.disConnection();
                     }
                 });
             }
