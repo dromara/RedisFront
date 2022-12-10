@@ -10,9 +10,11 @@ import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.util.AlertUtils;
 import com.redisfront.commons.util.JschUtils;
 import com.redisfront.commons.util.LettuceUtils;
-import com.redisfront.commons.util.LocaleUtils;
 import com.redisfront.model.ConnectInfo;
 import com.redisfront.service.RedisPubSubService;
+import io.lettuce.core.AbstractRedisClient;
+import io.lettuce.core.RedisClient;
+import io.lettuce.core.cluster.RedisClusterClient;
 import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
 import io.lettuce.core.cluster.pubsub.RedisClusterPubSubListener;
 import io.lettuce.core.pubsub.RedisPubSubListener;
@@ -33,6 +35,7 @@ import java.time.format.DateTimeFormatter;
 public class PubSubForm extends JPanel implements RedisPubSubListener<String, String>, RedisClusterPubSubListener<String, String> {
 
     private RedisPubSubAsyncCommands<String, String> pubsub;
+    private AbstractRedisClient redisClient;
     private JPanel rootPanel;
     private JToggleButton enableSubscribe;
     private JTextField channelField;
@@ -99,22 +102,23 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
     public void openConnection() {
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
             var redisUrl = LettuceUtils.getRedisURI(connectInfo);
-            var redisClient = LettuceUtils.getRedisClusterClient(redisUrl, connectInfo);
-            JschUtils.openSession(connectInfo, redisClient);
-            var connection = redisClient.connectPubSub();
+            redisClient = LettuceUtils.getRedisClusterClient(redisUrl, connectInfo);
+            JschUtils.openSession(connectInfo, (RedisClusterClient) redisClient);
+            var connection = ((RedisClusterClient) redisClient).connectPubSub();
             pubsub = connection.async();
         } else {
             JschUtils.openSession(connectInfo);
-            var connection = LettuceUtils.getRedisClient(connectInfo).connectPubSub();
+            redisClient = LettuceUtils.getRedisClient(connectInfo);
+            var connection = (((RedisClient) redisClient).connectPubSub());
             pubsub = connection.async();
-
         }
         pubsub.getStatefulConnection().addListener(this);
     }
 
     public void disConnection() {
+        enableSubscribe.setSelected(false);
         if (Fn.isNotNull(pubsub)) {
-            pubsub.getStatefulConnection().closeAsync().thenRun(JschUtils::closeSession);
+            pubsub.getStatefulConnection().closeAsync().thenRun(() -> redisClient.shutdownAsync().thenRun(JschUtils::closeSession));
         }
     }
 
