@@ -68,6 +68,8 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
             }
         });
         subscribeChannel.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入需要监听的通道名称！");
+        channelField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入通道名称！");
+        messageField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入消息内容！");
 
         enableSubscribe.setInputVerifier(new InputVerifier() {
             @Override
@@ -193,6 +195,7 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
 
         publishBtn = new JButton();
         publishBtn.setIcon(UI.PUBLISH_ICON);
+        publishBtn.setFocusable(false);
 
         numLabel = new JLabel();
         numLabel.setOpaque(true);
@@ -201,7 +204,6 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
         numLabel.setBorder(new EmptyBorder(2, 3, 2, 3));
 
         subscribeChannel = new JTextField();
-
         subscribeChannel.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, enableSubscribe);
         subscribeChannel.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         subscribeChannel.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> {
@@ -249,12 +251,12 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
 
     @Override
     public void message(RedisClusterNode node, String channel, String message) {
-
+        System.out.println("channel:" + channel + "  " + message);
     }
 
     @Override
     public void message(RedisClusterNode node, String pattern, String channel, String message) {
-
+        System.out.println("channel:" + channel + "  " + message);
     }
 
     @Override

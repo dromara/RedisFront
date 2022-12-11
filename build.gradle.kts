@@ -38,7 +38,7 @@ buildscript {
 
 plugins.apply("io.github.fvarrui.javapackager.plugin")
 
-version = "1.0.5"
+version = "1.0.6"
 
 val flatlafVersion = "2.6"
 val hutoolVersion = "5.8.7"
