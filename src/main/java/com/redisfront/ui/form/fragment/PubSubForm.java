@@ -191,7 +191,6 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
         enableSubscribe.setFocusable(false);
         enableSubscribe.setIcon(UI.SUBSCRIBE_ICON);
         enableSubscribe.setSelectedIcon(UI.UNSUBSCRIBE_ICON);
-        enableSubscribe.setDisabledIcon(UI.SUBSCRIBE_ICON);
 
         publishBtn = new JButton();
         publishBtn.setIcon(UI.PUBLISH_ICON);
