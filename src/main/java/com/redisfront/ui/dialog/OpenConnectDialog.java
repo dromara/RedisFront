@@ -170,6 +170,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
 
     private void createUIComponents() {
         addConnectBtn = new JButton();
+        addConnectBtn.setFocusable(false);
         addConnectBtn.addActionListener(e -> {
             dispose();
             AddConnectDialog.showAddConnectDialog(openProcessHandler);
