@@ -86,6 +86,8 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
                 subscribeChannel.setFocusable(true);
                 pubsub.unsubscribe(channel);
                 infoLabel.setText("  监听已关闭 ");
+                enableSubscribe.setText("开启监听 ");
+                enableSubscribe.setToolTipText("点击开始监听！");
             } else {
                 subscribeChannel.setFocusable(false);
                 if (Fn.isEmpty(lastSubscribeChanel)) {
@@ -95,6 +97,8 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
                 }
                 pubsub.subscribe(channel);
                 infoLabel.setText("  开始监听中....  ");
+                enableSubscribe.setText("停止监听 ");
+                enableSubscribe.setToolTipText("点击停止监听！");
             }
         });
         publishBtn.addActionListener(e -> {
@@ -138,14 +142,11 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
         createUIComponents();
         rootPanel.setLayout(new BorderLayout(0, 0));
         final JPanel panel1 = new JPanel();
-        panel1.setLayout(new GridLayoutManager(1, 5, new Insets(0, 0, 0, 0), -1, -1));
+        panel1.setLayout(new GridLayoutManager(1, 4, new Insets(0, 0, 0, 0), -1, -1));
         rootPanel.add(panel1, BorderLayout.NORTH);
         numLabel.setText("消息数量: 0 ");
         panel1.add(numLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        panel1.add(subscribeChannel, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-        final JLabel label1 = new JLabel();
-        label1.setText("监听通道:");
-        panel1.add(label1, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel1.add(subscribeChannel, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         infoLabel = new JLabel();
         infoLabel.setText("");
         panel1.add(infoLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -164,12 +165,12 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
         rootPanel.add(panel2, BorderLayout.SOUTH);
         channelField = new JTextField();
         panel2.add(channelField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        final JLabel label1 = new JLabel();
+        label1.setText("通道");
+        panel2.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label2 = new JLabel();
-        label2.setText("通道");
-        panel2.add(label2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JLabel label3 = new JLabel();
-        label3.setText("消息");
-        panel2.add(label3, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        label2.setText("消息");
+        panel2.add(label2, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         messageField = new JTextField();
         panel2.add(messageField, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         publishBtn.setText("发布消息");
@@ -189,6 +190,7 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
         rootPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
         enableSubscribe = new JToggleButton();
         enableSubscribe.setFocusable(false);
+        enableSubscribe.setText("开启监听 ");
         enableSubscribe.setIcon(UI.SUBSCRIBE_ICON);
         enableSubscribe.setSelectedIcon(UI.UNSUBSCRIBE_ICON);
 
