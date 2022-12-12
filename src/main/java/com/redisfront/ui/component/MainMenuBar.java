@@ -183,7 +183,7 @@ public class MainMenuBar extends JMenuBar {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setText("<html><b color=\"red\">阿里云</b><i color=\"orange\">~新人特惠</i></html>");
+                setText("<html><b color=\"orange\">阿里云</b><i color=\"red\">~新人特惠</i></html>");
             }
         };
         aliYunItem.addActionListener((e) -> FutureUtils.runAsync(() -> {
@@ -194,6 +194,21 @@ public class MainMenuBar extends JMenuBar {
             }
         }));
         aboutMenu.add(aliYunItem);
+        var qiNiuItem = new JMenuItem() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText("<html><b color=\"#07BEFF\">七牛云存储</b><i color=\"red\">~免费20G</i></html>");
+            }
+        };
+        qiNiuItem.addActionListener((e) -> FutureUtils.runAsync(() -> {
+            try {
+                Desktop.getDesktop().browse(new URI("https://s.qiniu.com/7V7vAb"));
+            } catch (IOException | URISyntaxException ex) {
+                AlertUtils.showInformationDialog("打开浏览器失败！");
+            }
+        }));
+        aboutMenu.add(qiNiuItem);
 
         add(aboutMenu);
 
