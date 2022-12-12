@@ -96,7 +96,7 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
                     SwingUtilities.invokeLater(() -> numLabel.setText("消息数量: 0 "));
                 }
                 pubsub.subscribe(channel);
-                infoLabel.setText("  开始监听中....  ");
+                infoLabel.setText("  消息监听中....  ");
                 enableSubscribe.setText("停止监听 ");
                 enableSubscribe.setToolTipText("点击停止监听！");
             }
