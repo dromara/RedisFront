@@ -38,9 +38,18 @@ public class RedisStreamServiceImpl implements RedisStreamService {
     @Override
     public String xadd(ConnectInfo connectInfo, String key, Map<String, String> body) {
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectInfo, commands -> commands.xadd(key, body));
+            return LettuceUtils.clusterExec(connectInfo, commands -> commands.xadd(key, new XAddArgs(), body));
         } else {
             return LettuceUtils.exec(connectInfo, commands -> commands.xadd(key, body));
+        }
+    }
+
+    @Override
+    public String xadd(ConnectInfo connectInfo, String id, String key, Map<String, String> body) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectInfo, commands -> commands.xadd(key, XAddArgs.Builder.minId(id), body));
+        } else {
+            return LettuceUtils.exec(connectInfo, commands -> commands.xadd(key, XAddArgs.Builder.minId(id), body));
         }
     }
 

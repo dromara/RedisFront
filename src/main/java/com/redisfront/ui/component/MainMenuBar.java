@@ -5,10 +5,10 @@ import cn.hutool.json.JSONUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatDesktop;
 import com.formdev.flatlaf.extras.components.FlatButton;
-import com.formdev.flatlaf.util.SystemInfo;
 import com.redisfront.RedisFrontApplication;
 import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.constant.UI;
+import com.redisfront.commons.util.AlertUtils;
 import com.redisfront.commons.util.FutureUtils;
 import com.redisfront.commons.util.LocaleUtils;
 import com.redisfront.service.ConnectService;
@@ -23,7 +23,8 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -182,30 +183,45 @@ public class MainMenuBar extends JMenuBar {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setText("<html><b color=\"red\">阿里云</b><i color=\"orange\">~新人特惠</i></html>");
+                setText("<html><b color=\"orange\">阿里云</b><i color=\"red\">~新人特惠</i></html>");
             }
         };
         aliYunItem.addActionListener((e) -> FutureUtils.runAsync(() -> {
             try {
                 Desktop.getDesktop().browse(new URI("https://www.aliyun.com/daily-act/ecs/activity_selection?userCode=fdfwuy9i"));
             } catch (IOException | URISyntaxException ex) {
+                AlertUtils.showInformationDialog("打开浏览器失败！");
             }
         }));
         aboutMenu.add(aliYunItem);
+        var qiNiuItem = new JMenuItem() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText("<html><b color=\"#07BEFF\">七牛云存储</b><i color=\"red\">~免费20G</i></html>");
+            }
+        };
+        qiNiuItem.addActionListener((e) -> FutureUtils.runAsync(() -> {
+            try {
+                Desktop.getDesktop().browse(new URI("https://s.qiniu.com/7V7vAb"));
+            } catch (IOException | URISyntaxException ex) {
+                AlertUtils.showInformationDialog("打开浏览器失败！");
+            }
+        }));
+        aboutMenu.add(qiNiuItem);
 
         add(aboutMenu);
 
         add(Box.createGlue());
 
         var gitBtn = new FlatButton();
-        gitBtn.setIcon(UI.GITEE_ICON);
+        gitBtn.setIcon(UI.GITHUB_ICON);
         gitBtn.setButtonType(FlatButton.ButtonType.toolBarButton);
         gitBtn.setFocusable(false);
-        gitBtn.setToolTipText(" 去码云给个star吧 :) ");
-        gitBtn.setRolloverIcon(UI.GITEE_RED_ICON);
+        gitBtn.setToolTipText("https://github.com/westboy/redisfront");
         gitBtn.addActionListener(e -> {
             try {
-                Desktop.getDesktop().browse(new URI("https://gitee.com/westboy/redis-front"));
+                Desktop.getDesktop().browse(new URI("https://github.com/westboy/redisfront"));
             } catch (IOException | URISyntaxException ex) {
                 throw new RuntimeException(ex);
             }
@@ -216,7 +232,7 @@ public class MainMenuBar extends JMenuBar {
     private void aboutActionPerformed() {
         var titleLabel = new JLabel("RedisFront");
         titleLabel.putClientProperty(FlatClientProperties.STYLE_CLASS, "h1");
-        var link = "https://gitee.com/westboy/RedisFront";
+        var link = "https://www.redisfront.com";
         var linkLabel = new JLabel("<html><a href=\"#\">" + link + "</a></html>");
         linkLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         linkLabel.addMouseListener(new MouseAdapter() {

@@ -27,7 +27,7 @@ val appSite: String = "https://gitee.com/westboy/RedisFront"
 
 buildscript {
     repositories {
-        maven("https://maven.aliyun.com/repository/public/")
+//        maven("https://maven.aliyun.com/repository/public/")
         mavenLocal()
         mavenCentral()
         dependencies {
@@ -38,9 +38,9 @@ buildscript {
 
 plugins.apply("io.github.fvarrui.javapackager.plugin")
 
-version = "1.0.5"
+version = "1.0.6"
 
-val flatlafVersion = "2.4"
+val flatlafVersion = "2.6"
 val hutoolVersion = "5.8.7"
 val fifesoftVersion = "3.2.0"
 val derbyVersion = "10.15.2.0"

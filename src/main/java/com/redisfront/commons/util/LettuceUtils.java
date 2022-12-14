@@ -11,6 +11,9 @@ import io.lettuce.core.cluster.ClusterTopologyRefreshOptions;
 import io.lettuce.core.cluster.RedisClusterClient;
 import io.lettuce.core.cluster.api.sync.RedisAdvancedClusterCommands;
 import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
+import io.lettuce.core.cluster.pubsub.api.async.RedisClusterPubSubAsyncCommands;
+import io.lettuce.core.pubsub.RedisPubSubListener;
+import io.lettuce.core.pubsub.api.async.RedisPubSubAsyncCommands;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
 import io.netty.util.internal.StringUtil;
 
@@ -32,7 +35,7 @@ public class LettuceUtils {
     private LettuceUtils() {
     }
 
-    private synchronized static RedisClusterClient getRedisClusterClient(RedisURI redisURI, ConnectInfo connectInfo) {
+    public synchronized static RedisClusterClient getRedisClusterClient(RedisURI redisURI, ConnectInfo connectInfo) {
         var clusterClient = RedisClusterClient.create(redisURI);
         var clusterTopologyRefreshOptions = ClusterTopologyRefreshOptions.builder()
                 .enableAdaptiveRefreshTrigger(ClusterTopologyRefreshOptions.RefreshTrigger.MOVED_REDIRECT, ClusterTopologyRefreshOptions.RefreshTrigger.PERSISTENT_RECONNECTS)
@@ -102,9 +105,10 @@ public class LettuceUtils {
         }
     }
 
+
     public synchronized static void sentinelRun(ConnectInfo connectInfo, Consumer<RedisSentinelCommands<String, String>> consumer) {
         var redisURI = getRedisURI(connectInfo);
-        var redisClient = RedisClient.create(redisURI);
+        var redisClient = io.lettuce.core.RedisClient.create(redisURI);
         try {
             JschUtils.openSession(connectInfo);
             try (var connection = redisClient.connectSentinel()) {
@@ -122,7 +126,7 @@ public class LettuceUtils {
 
     public synchronized static <T> T sentinelExec(ConnectInfo connectInfo, Function<RedisSentinelCommands<String, String>, T> function) {
         var redisURI = getRedisURI(connectInfo);
-        var redisClient = RedisClient.create(redisURI);
+        var redisClient = io.lettuce.core.RedisClient.create(redisURI);
         try {
             JschUtils.openSession(connectInfo);
             try (var connection = redisClient.connectSentinel()) {
@@ -140,7 +144,7 @@ public class LettuceUtils {
 
     public synchronized static void run(ConnectInfo connectInfo, Consumer<RedisCommands<String, String>> consumer) {
         var redisURI = getRedisURI(connectInfo);
-        var redisClient = RedisClient.create(redisURI);
+        var redisClient = io.lettuce.core.RedisClient.create(redisURI);
         if (connectInfo.ssl()) {
             if (Fn.isNotEmpty(connectInfo.sslConfig().getPassword()) || Fn.isNotEmpty(connectInfo.sslConfig().getPublicKeyFilePath())) {
                 var sslOptions = SslOptions.builder()
@@ -165,6 +169,20 @@ public class LettuceUtils {
         }
     }
 
+    public synchronized static RedisClient getRedisClient(ConnectInfo connectInfo) {
+        var redisURI = getRedisURI(connectInfo);
+        var redisClient = RedisClient.create(redisURI);
+        if (connectInfo.ssl()) {
+            if (Fn.isNotEmpty(connectInfo.sslConfig().getPassword()) || Fn.isNotEmpty(connectInfo.sslConfig().getPublicKeyFilePath())) {
+                var sslOptions = SslOptions.builder()
+                        .jdkSslProvider()
+                        .truststore(new File(connectInfo.sslConfig().getPublicKeyFilePath()), connectInfo.sslConfig().getPassword())
+                        .build();
+                redisClient.setOptions(ClientOptions.builder().sslOptions(sslOptions).build());
+            }
+        }
+        return redisClient;
+    }
 
     public synchronized static <T> T exec(ConnectInfo connectInfo, Function<RedisCommands<String, String>, T> function) {
         var redisURI = getRedisURI(connectInfo);

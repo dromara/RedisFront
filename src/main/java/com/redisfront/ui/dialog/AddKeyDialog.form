@@ -110,8 +110,8 @@
           </grid>
         </constraints>
         <properties>
-          <editable value="false"/>
-          <enabled value="false"/>
+          <editable value="true"/>
+          <enabled value="true"/>
           <text value="*"/>
         </properties>
       </component>

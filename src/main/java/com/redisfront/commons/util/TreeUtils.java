@@ -20,13 +20,10 @@ public class TreeUtils {
     }
 
     public static synchronized DefaultTreeModel toTreeModel(Set<String> rows, String delim) {
-        var startTime = System.currentTimeMillis();
         var rootNode = new TreeNodeInfo();
         var stringTreeMap = toStringTreeMap(rows, delim);
         var treeNodeInfos = convertTreeNodeInfoSet(stringTreeMap, "");
         treeNodeInfos.forEach(rootNode::add);
-        var endTime = System.currentTimeMillis();
-        System.out.println("转换树耗时：" + (endTime - startTime));
         return new DefaultTreeModel(rootNode);
     }
 
@@ -44,8 +41,7 @@ public class TreeUtils {
             var node = root;
             var cells = row.split(delim);
 
-            var tmpStr = StrUtil.join("", (Object) cells);
-            var keyLength = (tmpStr.toCharArray().length + cells.length - 1);
+            var keyLength = (StrUtil.join("", (Object) cells).toCharArray().length + cells.length - 1);
 
             if (row.contains(delim) && row.toCharArray().length - keyLength >= 2) {
                 var lastStr = StrUtil.sub(row, keyLength, row.toCharArray().length - 1);

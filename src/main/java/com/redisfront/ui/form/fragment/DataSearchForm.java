@@ -332,6 +332,7 @@ public class DataSearchForm {
             }
         };
         addBtn.setIcon(UI.PLUS_ICON);
+        addBtn.setFocusable(false);
         addBtn.addActionListener(e -> AddKeyDialog.showAddDialog(connectInfo, null, (key) -> {
             var res = JOptionPane.showConfirmDialog(RedisFrontApplication.frame,
                     LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.message"),
@@ -360,6 +361,7 @@ public class DataSearchForm {
                 databaseComboBoxInit(selectedIndex);
             });
         });
+        refreshBtn.setFocusable(false);
         refreshBtn.setIcon(UI.REFRESH_ICON);
 
         deleteAllBtn = new JButton() {
@@ -369,6 +371,7 @@ public class DataSearchForm {
                 setToolTipText(LocaleUtils.getMessageFromBundle("DataSearchForm.deleteAllBtn.title"));
             }
         };
+        deleteAllBtn.setFocusable(false);
 
         deleteAllBtn.addActionListener(e -> FutureUtils.runAsync(
                 () -> {
@@ -386,7 +389,7 @@ public class DataSearchForm {
 
 
         databaseComboBox = new JComboBox<>();
-
+        databaseComboBox.setFocusable(false);
         loadMoreBtn = new JButton() {
             @Override
             public void updateUI() {
@@ -394,6 +397,7 @@ public class DataSearchForm {
                 setText(LocaleUtils.getMessageFromBundle("DataSearchForm.loadMoreBtn.continue.title"));
             }
         };
+        loadMoreBtn.setFocusable(false);
         loadMoreBtn.setIcon(UI.LOAD_MORE_ICON);
         loadMoreBtn.addActionListener(e -> {
             FutureUtils.runAsync(() -> LoadingUtils.showDialog(LocaleUtils.getMessageFromBundle("MainWindowForm.loading.title")));
@@ -427,7 +431,7 @@ public class DataSearchForm {
                 putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, LocaleUtils.getMessageFromBundle("DataSearchForm.searchTextField.placeholder.text"));
             }
         };
-        searchBtn = new JButton(new FlatSearchIcon());
+
         searchTextField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -437,10 +441,14 @@ public class DataSearchForm {
                 }
             }
         });
+
+        searchBtn = new JButton(new FlatSearchIcon());
+        searchBtn.setFocusable(false);
         searchBtn.addActionListener(actionEvent -> {
             scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
             scanKeysAndInitScanInfo();
         });
+
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchBtn);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> {
@@ -449,17 +457,17 @@ public class DataSearchForm {
             scanKeysAndInitScanInfo();
         });
 
+
+
         keyTree = new JXTree();
+        keyTree.setFocusable(false);
         keyTree.setRootVisible(false);
         keyTree.setModel(null);
         keyTree.setBorder(new EmptyBorder(5, 5, 5, 5));
         keyTree.setCellRenderer(new DefaultXTreeCellRenderer() {
-            @Override
-            public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-                return super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+            {
+                setLeafIcon(UI.TREE_KEY_ICON);
             }
-
-
         });
         keyTree.addTreeSelectionListener(e -> {
             var selectNode = keyTree.getLastSelectedPathComponent();
@@ -503,21 +511,25 @@ public class DataSearchForm {
                 };
                 delMenuItem.addActionListener((e) -> {
                     DefaultTreeModel treeModel = (DefaultTreeModel) keyTree.getModel();
-                    var selectNode = keyTree.getLastSelectedPathComponent();
-                    if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
-                        FutureUtils.runAsync(() -> deleteActionPerformed(treeNodeInfo),
-                                //前置方法
-                                () -> SwingUtilities.invokeLater(() -> {
-                                    var title = treeNodeInfo.title();
-                                    treeNodeInfo.setTitle(title.concat(" ").concat(LocaleUtils.getMessageFromBundle("DataSearchForm.treeNodeInfo.del.doing.message")));
-                                    keyTree.updateUI();
-                                }),
-                                //后置方法
-                                () -> SwingUtilities.invokeLater(() -> treeModel.removeNodeFromParent(treeNodeInfo)));
+                    var selectionPaths = keyTree.getSelectionModel().getSelectionPaths();
+                    if (Fn.isNotEmpty(selectionPaths)) {
+                        for (TreePath selectionPath : selectionPaths) {
+                            if (selectionPath.getLastPathComponent() instanceof TreeNodeInfo treeNodeInfo) {
+                                FutureUtils.runAsync(() -> deleteActionPerformed(treeNodeInfo),
+                                        //前置方法
+                                        () -> SwingUtilities.invokeLater(() -> {
+                                            var title = treeNodeInfo.title();
+                                            treeNodeInfo.setTitle(title.concat(" ").concat(LocaleUtils.getMessageFromBundle("DataSearchForm.treeNodeInfo.del.doing.message")));
+                                            keyTree.updateUI();
+                                        }),
+                                        //后置方法
+                                        () -> SwingUtilities.invokeLater(() -> treeModel.removeNodeFromParent(treeNodeInfo)));
+                            }
+                        }
+
                     }
                 });
                 add(delMenuItem);
-
 
                 var memoryMenuItem = new JMenuItem() {
                     @Override
