@@ -364,6 +364,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
             sshHostField.setText(connectInfo.sshConfig().getHost());
             sshPasswordField.setText(connectInfo.sshConfig().getPassword());
             sshPortField.setValue(connectInfo.sshConfig().getPort());
+            enableSshPrivateKey.setSelected(Fn.isNotEmpty(connectInfo.sshConfig().getPrivateKeyPath()));
             sshPrivateKeyFile.setText(connectInfo.sshConfig().getPrivateKeyPath());
         }
     }
@@ -390,6 +391,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         testBtn.setText("测试连接");
         testBtn.setIcon(UI.TEST_CONNECTION_ICON);
         sshPortField = new JSpinner();
+        sshPortField.setEditor(new JSpinner.NumberEditor(portField, "####"));
         sshPortField.setValue(22);
     }
 

@@ -73,7 +73,7 @@ public class DataSearchForm {
     private final ConnectInfo connectInfo;
     private JButton searchBtn;
 
-    private final ArrayList<DbInfo> dbList = new ArrayList<>() {
+    private static final ArrayList<DbInfo> dbList = new ArrayList<>() {
         {
             add(new DbInfo("DB0", 0));
             add(new DbInfo("DB1", 1));
@@ -458,7 +458,6 @@ public class DataSearchForm {
         });
 
 
-
         keyTree = new JXTree();
         keyTree.setFocusable(false);
         keyTree.setRootVisible(false);
@@ -711,6 +710,13 @@ public class DataSearchForm {
 
     private void databaseComboBoxInit(int selectedIndex) {
         if (Fn.notEqual(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            Map<String, String> databases = RedisBasicService.service.configGet(connectInfo, "databases");
+            var dbNum = Integer.parseInt(databases.get("databases"));
+            if (dbNum > 16) {
+                for (int i = 16; i < dbNum; i++) {
+                    dbList.add(new DbInfo("DB" + i, i));
+                }
+            }
             var keySpace = RedisBasicService.service.getKeySpace(connectInfo);
             for (int i = 0; i < dbList.size(); i++) {
                 var dbInfo = dbList.get(i);

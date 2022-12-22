@@ -39,7 +39,7 @@ public interface RedisBasicService {
 
     StreamScanCursor scan(ConnectInfo connectInfo, KeyStreamingChannel<String> channel, ScanCursor scanCursor, ScanArgs scanArgs);
 
-
+    Map<String, String> configGet(ConnectInfo connectInfo, String... keys);
     StreamScanCursor scan(ConnectInfo connectInfo, KeyStreamingChannel<String> channel, ScanCursor scanCursor);
 
     /**
