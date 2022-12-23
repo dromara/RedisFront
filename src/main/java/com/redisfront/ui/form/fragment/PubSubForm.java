@@ -8,6 +8,7 @@ import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.constant.UI;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.util.AlertUtils;
+import com.redisfront.commons.util.FutureUtils;
 import com.redisfront.commons.util.JschUtils;
 import com.redisfront.commons.util.LettuceUtils;
 import com.redisfront.model.ConnectInfo;
@@ -101,33 +102,41 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
                 enableSubscribe.setToolTipText("点击停止监听！");
             }
         });
-        publishBtn.addActionListener(e -> {
+        publishBtn.addActionListener(e -> FutureUtils.runAsync(() -> {
             var count = RedisPubSubService.service.publish(connectInfo, channelField.getText(), messageField.getText());
-            messageField.setText("");
-            AlertUtils.showInformationDialog("成功发布 " + count + " 条消息！");
-        });
+            SwingUtilities.invokeLater(() -> {
+                messageField.setText("");
+                AlertUtils.showInformationDialog("成功发布 " + count + " 条消息！");
+            });
+        }));
     }
 
     public void openConnection() {
         if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
-            var redisUrl = LettuceUtils.getRedisURI(connectInfo);
-            redisClient = LettuceUtils.getRedisClusterClient(redisUrl, connectInfo);
-            JschUtils.openSession(connectInfo, (RedisClusterClient) redisClient);
-            var connection = ((RedisClusterClient) redisClient).connectPubSub();
-            pubsub = connection.async();
+            FutureUtils.runAsync(() -> {
+                var redisUrl = LettuceUtils.getRedisURI(connectInfo);
+                redisClient = LettuceUtils.getRedisClusterClient(redisUrl, connectInfo);
+                var connection = ((RedisClusterClient) redisClient).connectPubSub();
+                JschUtils.openSession(connectInfo, (RedisClusterClient) redisClient);
+                pubsub = connection.async();
+            }).thenRun(() -> pubsub.getStatefulConnection().addListener(this));
         } else {
-            JschUtils.openSession(connectInfo);
-            redisClient = LettuceUtils.getRedisClient(connectInfo);
-            var connection = (((RedisClient) redisClient).connectPubSub());
-            pubsub = connection.async();
+            FutureUtils.runAsync(() -> {
+                redisClient = LettuceUtils.getRedisClient(connectInfo);
+                JschUtils.openSession(connectInfo);
+                var connection = (((RedisClient) redisClient).connectPubSub());
+                pubsub = connection.async();
+            }).thenRun(() -> pubsub.getStatefulConnection().addListener(this));
         }
-        pubsub.getStatefulConnection().addListener(this);
     }
 
     public void disConnection() {
         enableSubscribe.setSelected(false);
         if (Fn.isNotNull(pubsub)) {
-            pubsub.getStatefulConnection().closeAsync().thenRun(() -> redisClient.shutdownAsync().thenRun(JschUtils::closeSession));
+            pubsub.getStatefulConnection().closeAsync().thenRun(() -> redisClient.shutdownAsync().thenRun(() -> {
+                JschUtils.closeSession();
+                System.out.println("关闭SSH连接");
+            }));
         }
     }
 
