@@ -180,11 +180,15 @@ configure<PackagePluginExtension> {
 
 tasks.register<PackageTask>("packageForWindows") {
 
-    val setupLanguageMap = LinkedHashMap<String, String>()
-    setupLanguageMap["Chinese"] = "compiler:Languages\\ChineseSimplified.isl"
-    setupLanguageMap["English"] = "compiler:Default.isl"
+    val innoSetupLanguageMap = LinkedHashMap<String, String>()
+    innoSetupLanguageMap["Chinese"] = "compiler:Languages\\ChineseSimplified.isl"
+    innoSetupLanguageMap["English"] = "compiler:Default.isl"
 
     description = "package For Windows"
+    organizationName = "dromara"
+    organizationEmail = "jin@westboy.net"
+    organizationUrl="https://dromara.org"
+
     platform = Platform.windows
     isCreateZipball = false
     winConfig(closureOf<WindowsConfig> {
@@ -198,7 +202,7 @@ tasks.register<PackageTask>("packageForWindows") {
         fileVersion = version
         originalFilename = appName
         isGenerateSetup = true
-        setupLanguages = setupLanguageMap
+        setupLanguages = innoSetupLanguageMap
         isCreateZipball = true
         isGenerateMsi = false
         isGenerateMsm = false
@@ -213,6 +217,11 @@ tasks.register<PackageTask>("packageForWindows") {
 tasks.register<PackageTask>("packageForLinux") {
     description = "package For Linux"
     platform = Platform.linux
+
+    organizationName = "dromara"
+    organizationEmail = "jin@westboy.net"
+    organizationUrl="https://dromara.org"
+
     linuxConfig(
         closureOf<LinuxConfig> {
             pngFile = getIconFile("RedisFront.png")
@@ -229,6 +238,11 @@ tasks.register<PackageTask>("packageForLinux") {
 tasks.register<PackageTask>("packageForMac_M1") {
     description = "package For Mac"
     platform = Platform.mac
+
+    organizationName = "dromara"
+    organizationEmail = "jin@westboy.net"
+    organizationUrl="https://dromara.org"
+
     macConfig(
         closureOf<MacConfig> {
             icnsFile = getIconFile("RedisFront.icns")
@@ -242,6 +256,11 @@ tasks.register<PackageTask>("packageForMac_M1") {
 tasks.register<PackageTask>("packageForMac") {
     description = "package For Mac"
     platform = Platform.mac
+
+    organizationName = "dromara"
+    organizationEmail = "jin@westboy.net"
+    organizationUrl="https://dromara.org"
+
     macConfig(
         closureOf<MacConfig> {
             icnsFile = getIconFile("RedisFront.icns")
