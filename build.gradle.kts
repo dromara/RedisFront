@@ -32,9 +32,9 @@ plugins.apply("io.github.fvarrui.javapackager.plugin")
 
 version = "1.0.6"
 
-val APPLICATION_NAME: String = "RedisFront"
-val ORGANIZATION_NAME: String = "dromara.org"
-val ORGANIZATION_URL: String = "https://dromara.org"
+val applicationName: String = "RedisFront"
+val organization: String = "dromara.org"
+val supportUrl: String = "https://dromara.org"
 
 val flatlafVersion = "2.6"
 val hutoolVersion = "5.8.7"
@@ -116,7 +116,7 @@ tasks.processResources {
     filesMatching("application.properties") {
         filter<ReplaceTokens>(
             "tokens" to mapOf(
-                "copyright" to "Copyright © 2022-${LocalDateTime.now().plusYears(1).year} $APPLICATION_NAME",
+                "copyright" to "Copyright © 2022-${LocalDateTime.now().plusYears(1).year} $applicationName",
                 "version" to "$version"
             )
         )
@@ -179,17 +179,17 @@ tasks.register<PackageTask>("packageForWindows") {
 
     description = "package For Windows"
 
-    organizationName = ORGANIZATION_NAME
-    organizationUrl = ORGANIZATION_URL
+    organizationName = organization
+    organizationUrl = supportUrl
 
     platform = Platform.windows
     isCreateZipball = false
     winConfig(closureOf<WindowsConfig> {
         icoFile = getIconFile("RedisFront.ico")
         headerType = HeaderType.gui
-        originalFilename = APPLICATION_NAME
-        copyright = APPLICATION_NAME
-        productName = APPLICATION_NAME
+        originalFilename = applicationName
+        copyright = applicationName
+        productName = applicationName
         productVersion = version
         fileVersion = version
         isGenerateSetup = true
@@ -209,8 +209,8 @@ tasks.register<PackageTask>("packageForLinux") {
     description = "package For Linux"
     platform = Platform.linux
 
-    organizationName = ORGANIZATION_NAME
-    organizationUrl = ORGANIZATION_URL
+    organizationName = organization
+    organizationUrl = supportUrl
 
     linuxConfig(
         closureOf<LinuxConfig> {
@@ -229,8 +229,8 @@ tasks.register<PackageTask>("packageForMac_M1") {
     description = "package For Mac"
     platform = Platform.mac
 
-    organizationName =ORGANIZATION_NAME
-    organizationUrl = ORGANIZATION_URL
+    organizationName = organization
+    organizationUrl = supportUrl
 
     macConfig(
         closureOf<MacConfig> {
@@ -246,8 +246,8 @@ tasks.register<PackageTask>("packageForMac") {
     description = "package For Mac"
     platform = Platform.mac
 
-    organizationName = ORGANIZATION_NAME
-    organizationUrl = ORGANIZATION_URL
+    organizationName = organization
+    organizationUrl = supportUrl
 
     macConfig(
         closureOf<MacConfig> {

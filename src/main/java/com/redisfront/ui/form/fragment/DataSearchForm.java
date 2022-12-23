@@ -73,7 +73,7 @@ public class DataSearchForm {
     private final ConnectInfo connectInfo;
     private JButton searchBtn;
 
-    private static final ArrayList<DbInfo> dbList = new ArrayList<>() {
+    private final ArrayList<DbInfo> dbList = new ArrayList<>() {
         {
             add(new DbInfo("DB0", 0));
             add(new DbInfo("DB1", 1));

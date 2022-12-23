@@ -1,15 +1,15 @@
-## ![logo](assets/logo.png)  RedisFront - Cross-platform redis GUI
+# <img src="assets/logo.png" alt="logo" width="32"/>  RedisFront - Cross-platform redis GUI
 
--------
+
 ![JDK](https://img.shields.io/badge/JDK-17-blue.svg)
 ![Apache 2.0](https://img.shields.io/badge/Apache-2.0-4green.svg)
-![Release](https://img.shields.io/badge/Release-1.0.6-red.svg)
+![Release](https://img.shields.io/badge/Release-1.0.6-green.svg)
 
-RedisFront是一款开源跨平台的Redis桌面客户端工具，基于Java Swing开发，其特点是简单易用，功能丰富；支持String、Hash、Set、List、ZSet、Stream等多种数据类型的管理，同时支持SSH隧道连接以及 SSL/TLS连接，对于Redis Cluster、Sentinel模式也有非常完善的支持，可轻松管理百万甚至千万级缓存数据。
+RedisFront是一款基于Java Swing开发的跨平台Redis桌面客户端工具,简单易用,功能完善,支持单机模式, 集群模式, 哨兵模式以及 SSH 隧道连接.
 
 ![Screenshot](screenshot/redisfront-win11.png)
 
-### 🌱下载
+### 🌱 下载
 
 [https://gitee.com/westboy/RedisFront/releases](https://gitee.com/westboy/RedisFront/releases)
 
