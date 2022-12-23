@@ -25,6 +25,7 @@ RedisFront is a cross platform Redis desktop client tool developed based on Java
 
 ![JenBrains logo](assets/jetbrains.svg)
 
+
 ### 📚 Dromara member project
 
 <p align="center">
