@@ -7,27 +7,19 @@ import io.github.fvarrui.javapackager.model.*
 import io.github.fvarrui.javapackager.model.Platform
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.nio.charset.Charset
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import kotlin.RuntimeException
-import kotlin.String
-import kotlin.Suppress
-import kotlin.to
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `java-library`
     kotlin("jvm") version "1.7.20-RC"
 }
 
-val javaHome: String = System.getProperty("java.home")
-val appName: String = "RedisFront"
-val appSite: String = "https://gitee.com/westboy/RedisFront"
-
 buildscript {
     repositories {
-//        maven("https://maven.aliyun.com/repository/public/")
+        maven("https://maven.aliyun.com/repository/public/")
         mavenLocal()
         mavenCentral()
         dependencies {
@@ -40,6 +32,10 @@ plugins.apply("io.github.fvarrui.javapackager.plugin")
 
 version = "1.0.6"
 
+val applicationName: String = "RedisFront"
+val organization: String = "dromara.org"
+val supportUrl: String = "https://dromara.org"
+
 val flatlafVersion = "2.6"
 val hutoolVersion = "5.8.7"
 val fifesoftVersion = "3.2.0"
@@ -49,7 +45,6 @@ val logbackVersion = "1.4.1"
 
 val fatJar = false
 
-
 val requireModules = listOf(
     "java.desktop",
     "java.prefs",
@@ -58,8 +53,6 @@ val requireModules = listOf(
     "java.sql",
     "java.naming"
 )
-
-val currentJdk = File(javaHome)
 
 if (JavaVersion.current() < JavaVersion.VERSION_17)
     throw RuntimeException("compile required Java ${JavaVersion.VERSION_17}, current Java ${JavaVersion.current()}")
@@ -123,7 +116,7 @@ tasks.processResources {
     filesMatching("application.properties") {
         filter<ReplaceTokens>(
             "tokens" to mapOf(
-                "copyright" to "Copyright © 2022-${LocalDateTime.now().plusYears(1).year} $appName",
+                "copyright" to "Copyright © 2022-${LocalDateTime.now().plusYears(1).year} $applicationName",
                 "version" to "$version"
             )
         )
@@ -169,7 +162,7 @@ tasks.jar {
 
 configure<PackagePluginExtension> {
     mainClass("com.redisfront.RedisFrontApplication")
-    packagingJdk(currentJdk)
+    packagingJdk(File(System.getProperty("java.home")))
     bundleJre(true)
     customizedJre(true)
     modules(requireModules)
@@ -180,25 +173,27 @@ configure<PackagePluginExtension> {
 
 tasks.register<PackageTask>("packageForWindows") {
 
-    val setupLanguageMap = LinkedHashMap<String, String>()
-    setupLanguageMap["Chinese"] = "compiler:Languages\\ChineseSimplified.isl"
-    setupLanguageMap["English"] = "compiler:Default.isl"
+    val innoSetupLanguageMap = LinkedHashMap<String, String>()
+    innoSetupLanguageMap["Chinese"] = "compiler:Languages\\ChineseSimplified.isl"
+    innoSetupLanguageMap["English"] = "compiler:Default.isl"
 
     description = "package For Windows"
+
+    organizationName = organization
+    organizationUrl = supportUrl
+
     platform = Platform.windows
     isCreateZipball = false
     winConfig(closureOf<WindowsConfig> {
         icoFile = getIconFile("RedisFront.ico")
         headerType = HeaderType.gui
-        companyName = appSite
-        copyright = appName
-        productName = appName
+        originalFilename = applicationName
+        copyright = applicationName
+        productName = applicationName
         productVersion = version
-        copyright = appSite
         fileVersion = version
-        originalFilename = appName
         isGenerateSetup = true
-        setupLanguages = setupLanguageMap
+        setupLanguages = innoSetupLanguageMap
         isCreateZipball = true
         isGenerateMsi = false
         isGenerateMsm = false
@@ -213,6 +208,10 @@ tasks.register<PackageTask>("packageForWindows") {
 tasks.register<PackageTask>("packageForLinux") {
     description = "package For Linux"
     platform = Platform.linux
+
+    organizationName = organization
+    organizationUrl = supportUrl
+
     linuxConfig(
         closureOf<LinuxConfig> {
             pngFile = getIconFile("RedisFront.png")
@@ -229,6 +228,10 @@ tasks.register<PackageTask>("packageForLinux") {
 tasks.register<PackageTask>("packageForMac_M1") {
     description = "package For Mac"
     platform = Platform.mac
+
+    organizationName = organization
+    organizationUrl = supportUrl
+
     macConfig(
         closureOf<MacConfig> {
             icnsFile = getIconFile("RedisFront.icns")
@@ -242,6 +245,10 @@ tasks.register<PackageTask>("packageForMac_M1") {
 tasks.register<PackageTask>("packageForMac") {
     description = "package For Mac"
     platform = Platform.mac
+
+    organizationName = organization
+    organizationUrl = supportUrl
+
     macConfig(
         closureOf<MacConfig> {
             icnsFile = getIconFile("RedisFront.icns")

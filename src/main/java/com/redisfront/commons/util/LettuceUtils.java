@@ -215,7 +215,7 @@ public class LettuceUtils {
     public synchronized static RedisURI getRedisURI(ConnectInfo connectInfo) {
         if (Fn.equal(connectInfo.connectMode(), Enum.Connect.SSH)) {
             connectInfo.setLocalHost("127.0.0.1");
-            connectInfo.setLocalPort(RandomUtil.randomInt(32768, 65535));
+            connectInfo.setLocalPort(RandomUtil.randomInt(32768, 65535) + 5);
         }
         String host = "";
         String password = "";

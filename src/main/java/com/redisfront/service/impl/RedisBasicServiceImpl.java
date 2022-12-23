@@ -43,6 +43,15 @@ public class RedisBasicServiceImpl implements RedisBasicService {
     }
 
     @Override
+    public Map<String, String> configGet(ConnectInfo connectInfo, String... keys) {
+        if (Fn.equal(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.configGet(keys));
+        } else {
+            return LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.configGet(keys));
+        }
+    }
+
+    @Override
     public String flushall(ConnectInfo connectInfo) {
 
         var logInfo = RedisBasicService.buildLogInfo(connectInfo)
