@@ -1,12 +1,15 @@
 ## ![logo](assets/logo.png)  RedisFront - Cross-platform redis GUI
 
 -------
+![JDK](https://img.shields.io/badge/JDK-17-blue.svg)
+![Apache 2.0](https://img.shields.io/badge/Apache-2.0-4green.svg)
+![Release](https://img.shields.io/badge/Release-1.0.6-red.svg)
+
+RedisFront是一款开源跨平台的Redis桌面客户端工具，基于Java Swing开发，其特点是简单易用，功能丰富；支持String、Hash、Set、List、ZSet、Stream等多种数据类型的管理，同时支持SSH隧道连接以及 SSL/TLS连接，对于Redis Cluster、Sentinel模式也有非常完善的支持，可轻松管理百万甚至千万级缓存数据。
 
 ![Screenshot](screenshot/redisfront-win11.png)
 
-RedisFront 是一款开源免费的跨平台 Redis 桌面客户端工具, 支持单机模式, 集群模式, 哨兵模式以及 SSH 隧道连接, 可轻松管理Redis缓存数据.
-
-### 🌏下载
+### 🌱下载
 
 [https://gitee.com/westboy/RedisFront/releases](https://gitee.com/westboy/RedisFront/releases)
 
@@ -14,19 +17,15 @@ RedisFront 是一款开源免费的跨平台 Redis 桌面客户端工具, 支持
 
 [https://caiyun.139.com/m/i?185C6uQsGKnE0](https://caiyun.139.com/m/i?185C6uQsGKnE0)  `提取码：weBe`
 
-### 🍑 感谢
-
+### ❤️ 感谢
+* [FlatLaf](https://github.com/JFormDesigner/FlatLaf?from=RedisFront)
+* [Lettuce](https://github.com/lettuce-io/lettuce-core?from=RedisFront)
+* [Hutool](https://hutool.cn?from=RedisFront)
 * [JetBrains](https://www.jetbrains.com?from=RedisFront)
 
 ![JenBrains logo](assets/jetbrains.svg)
 
-## ❤️支持
-### 如果你觉得electron-egg不错，可以捐赠请维护者吃包辣条~，在此表示感谢^_^
-[Gitee上捐赠](https://gitee.com/dromara/electron-egg)
-
-[捐赠给Dromara组织](https://dromara.gitee.io/donate.html)
-
-## 📚 Dromara 成员项目
+### 📚 Dromara 成员项目
 
 <p align="center">
 <a href="https://gitee.com/dromara/TLog" target="_blank">
