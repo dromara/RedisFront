@@ -34,12 +34,14 @@ public class DerbyUtils {
                 log.info("create Derby Log dir created: {}", dirCreated);
                 var fileCreated = FileUtil.newFile(isCurrentDir ? Const.CURRENT_DIR_DERBY_LOG_FILE : Const.DERBY_LOG_FILE);
                 log.info("create Derby Log File created: {}", fileCreated);
-                System.setProperty("derby.stream.error.file", (isCurrentDir ? Const.CURRENT_DIR_DERBY_LOG_FILE : Const.DERBY_LOG_FILE));
             }
+
+            System.setProperty("derby.stream.error.file", (isCurrentDir ? Const.CURRENT_DIR_DERBY_LOG_FILE : Const.DERBY_LOG_FILE));
 
             if (Arrays.stream(Objects.requireNonNull(derbyFolder.listFiles())).noneMatch(file -> Fn.equal(file.getName().toLowerCase(), "data"))) {
                 PrefUtils.getState().put(Const.KEY_APP_DATABASE_INIT, Boolean.TRUE.toString());
             }
+
             Class.forName("org.apache.derby.iapi.jdbc.InternalDriver");
             conn = DriverManager.getConnection("jdbc:derby:" + (isCurrentDir ? Const.CURRENT_DIR_DERBY_DATA_PATH : Const.DERBY_DATA_PATH) + "create=true");
         } catch (Exception e) {
