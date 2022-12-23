@@ -6,7 +6,7 @@
 
 RedisFront 是一款开源免费的跨平台 Redis 桌面客户端工具, 支持单机模式, 集群模式, 哨兵模式以及 SSH 隧道连接, 可轻松管理Redis缓存数据.
 
-### 下载
+### 🌏下载
 
 [https://gitee.com/westboy/RedisFront/releases](https://gitee.com/westboy/RedisFront/releases)
 
@@ -14,11 +14,17 @@ RedisFront 是一款开源免费的跨平台 Redis 桌面客户端工具, 支持
 
 [https://caiyun.139.com/m/i?185C6uQsGKnE0](https://caiyun.139.com/m/i?185C6uQsGKnE0)  `提取码：weBe`
 
-### 感谢
+### 🍑 感谢
 
 * [JetBrains](https://www.jetbrains.com?from=RedisFront)
 
 ![JenBrains logo](assets/jetbrains.svg)
+
+## ❤️支持
+### 如果你觉得electron-egg不错，可以捐赠请维护者吃包辣条~，在此表示感谢^_^
+[Gitee上捐赠](https://gitee.com/dromara/electron-egg)
+
+[捐赠给Dromara组织](https://dromara.gitee.io/donate.html)
 
 ## 📚 Dromara 成员项目
 
