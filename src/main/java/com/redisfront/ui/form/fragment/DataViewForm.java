@@ -1,6 +1,7 @@
 package com.redisfront.ui.form.fragment;
 
 import cn.hutool.core.io.unit.DataSizeUtil;
+import cn.hutool.json.JSONException;
 import cn.hutool.json.JSONUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
@@ -187,7 +188,13 @@ public class DataViewForm {
                         var value = dataTable.getValueAt(row, 2);
                         SwingUtilities.invokeLater(() -> {
                             valueUpdateSaveBtn.setEnabled(true);
-                            textEditor.textArea().setText(JSONUtil.toJsonPrettyStr(value));
+                            try {
+                                String prettyStr = JSONUtil.toJsonPrettyStr(value);
+                                textEditor.textArea().setText(prettyStr);
+                            } catch (Exception ex) {
+                                //json格式化异常
+                                textEditor.textArea().setText(value.toString());
+                            }
                         });
                     } else {
                         var value = dataTable.getValueAt(row, 1);
@@ -226,8 +233,14 @@ public class DataViewForm {
 
     private void jsonValueFormat(String value) {
         if (JSONUtil.isTypeJSON(value)) {
-            textEditor.textArea().setText(JSONUtil.toJsonPrettyStr(value));
-            jComboBox.setSelectedIndex(1);
+            try {
+                String prettyStr = JSONUtil.toJsonPrettyStr(value);
+                textEditor.textArea().setText(prettyStr);
+                jComboBox.setSelectedIndex(1);
+            } catch (JSONException e) {
+                //json格式化异常
+                textEditor.textArea().setText(value);
+            }
         } else {
             textEditor.textArea().setText(value);
         }
@@ -691,7 +704,13 @@ public class DataViewForm {
             if (item instanceof String itemValue) {
                 if (Fn.equal(itemValue, SyntaxConstants.SYNTAX_STYLE_JSON)) {
                     if (JSONUtil.isTypeJSON(value)) {
-                        SwingUtilities.invokeLater(() -> textEditor.textArea().setText(JSONUtil.toJsonPrettyStr(value)));
+                        try {
+                            String prettyStr = JSONUtil.toJsonPrettyStr(value);
+                            SwingUtilities.invokeLater(() -> textEditor.textArea().setText(prettyStr));
+                        } catch (JSONException e) {
+                            //json格式化异常
+                            SwingUtilities.invokeLater(() -> textEditor.textArea().setText(value));
+                        }
                     }
                 }
             }
