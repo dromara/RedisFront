@@ -479,6 +479,7 @@ public class DataSearchForm {
 
         var popupMenu = new JPopupMenu() {
             {
+                //添加 Add
                 var addMenuItem = new JMenuItem() {
                     @Override
                     public void updateUI() {
@@ -501,6 +502,8 @@ public class DataSearchForm {
                     }
                 });
                 add(addMenuItem);
+
+                //删除 Delete
                 var delMenuItem = new JMenuItem() {
                     @Override
                     public void updateUI() {
@@ -509,6 +512,15 @@ public class DataSearchForm {
                     }
                 };
                 delMenuItem.addActionListener((e) -> {
+                    //删除，需要进行弹框确认，生产项目，如果大规模删除，就是灾难
+                    int reply = AlertUtils.showConfirmDialog(
+                            LocaleUtils.getMessageFromBundle("DataSearchForm.delMenuItem.confirm"),
+                            JOptionPane.YES_NO_OPTION);
+                    if (reply != JOptionPane.YES_OPTION) {
+                        //用户：确认的不是YES, 返回
+                        return;
+                    }
+
                     DefaultTreeModel treeModel = (DefaultTreeModel) keyTree.getModel();
                     var selectionPaths = keyTree.getSelectionModel().getSelectionPaths();
                     if (Fn.isNotEmpty(selectionPaths)) {
@@ -530,6 +542,7 @@ public class DataSearchForm {
                 });
                 add(delMenuItem);
 
+                //内存分析 Memory analysis
                 var memoryMenuItem = new JMenuItem() {
                     @Override
                     public void updateUI() {
