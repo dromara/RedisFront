@@ -37,7 +37,7 @@ val organization: String = "dromara.org"
 val supportUrl: String = "https://dromara.org"
 
 val flatlafVersion = "2.6"
-val hutoolVersion = "5.8.7"
+val hutoolVersion = "5.8.10"
 val fifesoftVersion = "3.2.0"
 val derbyVersion = "10.15.2.0"
 val lettuceVersion = "6.2.0.RELEASE"
