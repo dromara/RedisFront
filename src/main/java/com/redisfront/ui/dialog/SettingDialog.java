@@ -9,12 +9,14 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import com.redisfront.RedisFrontApplication;
-import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.constant.Const;
+import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.theme.RedisFrontDarkLaf;
 import com.redisfront.commons.theme.RedisFrontLightLaf;
 import com.redisfront.commons.ui.AbstractDialog;
-import com.redisfront.commons.util.*;
+import com.redisfront.commons.util.LocaleUtils;
+import com.redisfront.commons.util.PrefUtils;
+import com.redisfront.commons.util.ThemeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -182,9 +184,8 @@ public class SettingDialog extends AbstractDialog<Void> {
 
 
     private void initThemeNameComboBox() {
-        themeNameComboBox.addItem(new ThemeUtils.ThemeInfo(RedisFrontLightLaf.NAME, null, true, null, null, null, null, null, RedisFrontLightLaf.class.getName()));
+        themeNameComboBox.addItem(new ThemeUtils.ThemeInfo(RedisFrontLightLaf.NAME, null, false, null, null, null, null, null, RedisFrontLightLaf.class.getName()));
         themeNameComboBox.addItem(new ThemeUtils.ThemeInfo(RedisFrontDarkLaf.NAME, null, true, null, null, null, null, null, RedisFrontDarkLaf.class.getName()));
-
         themeNameComboBox.addActionListener(e -> {
             JComboBox<?> selected = (JComboBox<?>) e.getSource();
             ThemeUtils.ThemeInfo themeInfo = (ThemeUtils.ThemeInfo) selected.getSelectedItem();

@@ -162,7 +162,7 @@ public class MainNoneForm {
         panel4.add(openKeyLabel, BorderLayout.CENTER);
         sLabel.setHorizontalAlignment(2);
         sLabel.setHorizontalTextPosition(2);
-        sLabel.setText("S");
+        sLabel.setText("O");
         sLabel.setVerticalAlignment(3);
         panel4.add(sLabel, BorderLayout.EAST);
         logoLabel.setText("");

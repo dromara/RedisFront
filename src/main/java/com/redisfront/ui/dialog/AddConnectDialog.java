@@ -174,7 +174,11 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
             sslPanel.setVisible(false);
             sshPanel.setVisible(enableSSHBtn.isSelected());
             if (enableSSHBtn.isSelected()) {
-                setSize(new Dimension(getWidth(), getHeight() + 120));
+                if (enableSshPrivateKey.isSelected()) {
+                    setSize(new Dimension(getWidth(), getHeight() + 140));
+                } else {
+                    setSize(new Dimension(getWidth(), getHeight() + 120));
+                }
             } else {
                 setSize(new Dimension(getWidth(), getHeight() - 120));
             }
@@ -354,17 +358,23 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         this.enableSSLBtn.setSelected(connectInfo.ssl());
         this.enableSSHBtn.setSelected(Enum.Connect.SSH.equals(connectInfo.connectMode()));
         if (enableSSLBtn.isSelected()) {
+            setSize(new Dimension(getWidth(), getHeight() - 130));
             sslPanel.setVisible(true);
             sslPasswordField.setText(connectInfo.sslConfig().getPassword());
             publicKeyField.setText(connectInfo.sslConfig().getPublicKeyFilePath());
         }
         if (enableSSHBtn.isSelected()) {
+            setSize(new Dimension(getWidth(), getHeight() + 140));
             sshPanel.setVisible(true);
             sshUserField.setText(connectInfo.sshConfig().getUser());
             sshHostField.setText(connectInfo.sshConfig().getHost());
             sshPasswordField.setText(connectInfo.sshConfig().getPassword());
             sshPortField.setValue(connectInfo.sshConfig().getPort());
+
             enableSshPrivateKey.setSelected(Fn.isNotEmpty(connectInfo.sshConfig().getPrivateKeyPath()));
+            sshPrivateKeyFile.setVisible(enableSshPrivateKey.isSelected());
+            sshPrivateKeyBtn.setVisible(enableSshPrivateKey.isSelected());
+
             sshPrivateKeyFile.setText(connectInfo.sshConfig().getPrivateKeyPath());
         }
     }

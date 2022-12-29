@@ -84,9 +84,9 @@ public class MainMenuBar extends JMenuBar {
             }
         };
         if (SystemInfo.isMacOS) {
-            openConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | KeyEvent.CTRL_DOWN_MASK));
+            openConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | KeyEvent.CTRL_DOWN_MASK));
         }else {
-            openConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
+            openConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK));
         }
 
         openConnectMenu.addActionListener(e -> OpenConnectDialog.showOpenConnectDialog(

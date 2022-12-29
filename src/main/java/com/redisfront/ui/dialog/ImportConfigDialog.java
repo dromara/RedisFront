@@ -165,7 +165,7 @@ public class ImportConfigDialog extends AbstractDialog<Void> {
         }
         if (Fn.isNotNull(raw.get("ssh_port"))) {
             connectInfo.getSshConfig().setPort((Integer) raw.get("ssh_port"));
-            connectInfo.setConnectMode(Enum.Connect.SSH);
+            ///connectInfo.setConnectMode(Enum.Connect.SSH);
         }
         if (!StrUtil.isBlankIfStr(raw.get("ssh_user"))) {
             connectInfo.getSshConfig().setUser((String) raw.get("ssh_user"));
