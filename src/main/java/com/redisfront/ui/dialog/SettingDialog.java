@@ -3,6 +3,8 @@ package com.redisfront.ui.dialog;
 
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
+import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.StringUtils;
 import com.intellij.uiDesigner.core.GridConstraints;
@@ -13,6 +15,8 @@ import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.theme.RedisFrontDarkLaf;
 import com.redisfront.commons.theme.RedisFrontLightLaf;
+import com.redisfront.commons.theme.RedisFrontMacDarkLaf;
+import com.redisfront.commons.theme.RedisFrontMacLightLaf;
 import com.redisfront.commons.ui.AbstractDialog;
 import com.redisfront.commons.util.LocaleUtils;
 import com.redisfront.commons.util.PrefUtils;
@@ -186,12 +190,13 @@ public class SettingDialog extends AbstractDialog<Void> {
     private void initThemeNameComboBox() {
         themeNameComboBox.addItem(new ThemeUtils.ThemeInfo(RedisFrontLightLaf.NAME, null, false, null, null, null, null, null, RedisFrontLightLaf.class.getName()));
         themeNameComboBox.addItem(new ThemeUtils.ThemeInfo(RedisFrontDarkLaf.NAME, null, true, null, null, null, null, null, RedisFrontDarkLaf.class.getName()));
+        themeNameComboBox.addItem(new ThemeUtils.ThemeInfo(RedisFrontMacDarkLaf.NAME, null, true, null, null, null, null, null, RedisFrontMacDarkLaf.class.getName()));
+        themeNameComboBox.addItem(new ThemeUtils.ThemeInfo(RedisFrontMacLightLaf.NAME, null, true, null, null, null, null, null, RedisFrontMacLightLaf.class.getName()));
         themeNameComboBox.addActionListener(e -> {
             JComboBox<?> selected = (JComboBox<?>) e.getSource();
             ThemeUtils.ThemeInfo themeInfo = (ThemeUtils.ThemeInfo) selected.getSelectedItem();
             ThemeUtils.changeTheme(themeInfo);
         });
-
         themeNameComboBox.setSelectedIndex(Integer.parseInt(PrefUtils.getState().get(Const.KEY_THEME_SELECT_INDEX, "0")));
     }
 
