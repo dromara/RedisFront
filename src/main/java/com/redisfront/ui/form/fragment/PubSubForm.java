@@ -134,8 +134,9 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
         enableSubscribe.setSelected(false);
         if (Fn.isNotNull(pubsub)) {
             pubsub.getStatefulConnection().closeAsync().thenRun(() -> redisClient.shutdownAsync().thenRun(() -> {
-                JschUtils.closeSession();
-                System.out.println("关闭SSH连接");
+                if (connectInfo.getSshConfig() != null) {
+                    JschUtils.closeSession();
+                }
             }));
         }
     }

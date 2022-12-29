@@ -36,7 +36,7 @@ val applicationName: String = "RedisFront"
 val organization: String = "dromara.org"
 val supportUrl: String = "https://dromara.org"
 
-val flatlafVersion = "2.6"
+val flatlafVersion = "3.0"
 val hutoolVersion = "5.8.10"
 val fifesoftVersion = "3.2.0"
 val derbyVersion = "10.15.2.0"
