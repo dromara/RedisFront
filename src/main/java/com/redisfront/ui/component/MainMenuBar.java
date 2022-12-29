@@ -20,6 +20,7 @@ import com.redisfront.ui.dialog.SettingDialog;
 import com.redisfront.ui.form.MainWindowForm;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -67,8 +68,8 @@ public class MainMenuBar extends JMenuBar {
         };
         if (SystemInfo.isMacOS) {
             addConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | KeyEvent.CTRL_DOWN_MASK));
-        }else {
-            addConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A,  KeyEvent.CTRL_DOWN_MASK));
+        } else {
+            addConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK));
         }
 
         addConnectMenu.addActionListener(e -> AddConnectDialog.showAddConnectDialog(((connectInfo) -> MainWindowForm.getInstance().addTabActionPerformed(connectInfo))));
@@ -85,7 +86,7 @@ public class MainMenuBar extends JMenuBar {
         };
         if (SystemInfo.isMacOS) {
             openConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | KeyEvent.CTRL_DOWN_MASK));
-        }else {
+        } else {
             openConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK));
         }
 
@@ -188,8 +189,24 @@ public class MainMenuBar extends JMenuBar {
 
         aboutMenuItem.addActionListener((e) -> FutureUtils.runAsync(this::aboutActionPerformed));
         aboutMenu.add(aboutMenuItem);
-
         aboutMenu.add(new JSeparator());
+        var dromaraItem = new JMenuItem() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText("Dromara - 开源技术社区");
+            }
+        };
+        dromaraItem.addActionListener((e) -> FutureUtils.runAsync(() -> {
+            try {
+                Desktop.getDesktop().browse(new URI("https://dromara.org/"));
+            } catch (IOException | URISyntaxException ex) {
+                AlertUtils.showInformationDialog("打开浏览器失败！");
+            }
+        }));
+        aboutMenu.add(dromaraItem);
+
+//        aboutMenu.add(new JSeparator());
         var aliYunItem = new JMenuItem() {
             @Override
             public void updateUI() {
@@ -204,7 +221,7 @@ public class MainMenuBar extends JMenuBar {
                 AlertUtils.showInformationDialog("打开浏览器失败！");
             }
         }));
-        aboutMenu.add(aliYunItem);
+//        aboutMenu.add(aliYunItem);
         var qiNiuItem = new JMenuItem() {
             @Override
             public void updateUI() {
@@ -219,7 +236,7 @@ public class MainMenuBar extends JMenuBar {
                 AlertUtils.showInformationDialog("打开浏览器失败！");
             }
         }));
-        aboutMenu.add(qiNiuItem);
+//        aboutMenu.add(qiNiuItem);
 
         add(aboutMenu);
 
@@ -257,7 +274,31 @@ public class MainMenuBar extends JMenuBar {
                 }
             }
         });
-        JOptionPane.showMessageDialog(RedisFrontApplication.frame, new Object[]{titleLabel, "Cross-platform redis gui clinet", "Version " + Const.APP_VERSION, linkLabel}, LocaleUtils.getMenu("Menu.Help.About").title(),
+
+        JOptionPane.showMessageDialog(RedisFrontApplication.frame, new Object[]{
+                        new JPanel() {
+                            {
+                                setLayout(new BorderLayout());
+                                add(new JLabel(UI.REDIS_ICON), BorderLayout.WEST);
+                                add(new JPanel() {
+                                    {
+                                        setLayout(new BorderLayout());
+                                        setBorder(new EmptyBorder(10, 10, 10, 10));
+                                        add(titleLabel, BorderLayout.NORTH);
+                                        add(new JLabel("Cross-platform redis gui clinet"), BorderLayout.CENTER);
+                                        add(new JPanel() {
+                                            {
+                                                setLayout(new BorderLayout());
+                                                add(new JLabel("Version " + Const.APP_VERSION), BorderLayout.NORTH);
+                                                add(linkLabel, BorderLayout.CENTER);
+                                            }
+                                        }, BorderLayout.SOUTH);
+
+                                    }
+                                }, BorderLayout.CENTER);
+                            }
+                        }
+                }, LocaleUtils.getMenu("Menu.Help.About").title(),
                 JOptionPane.PLAIN_MESSAGE);
     }
 
