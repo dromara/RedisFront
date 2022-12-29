@@ -89,7 +89,7 @@
                     <properties>
                       <horizontalAlignment value="2"/>
                       <horizontalTextPosition value="2"/>
-                      <text value="S"/>
+                      <text value="O"/>
                       <verticalAlignment value="3"/>
                     </properties>
                   </component>
