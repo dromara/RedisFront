@@ -14,6 +14,8 @@ import io.lettuce.core.cluster.api.sync.RedisAdvancedClusterCommands;
 import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
 import io.netty.util.internal.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.time.Duration;
@@ -29,6 +31,8 @@ import java.util.function.Function;
  * @author Jin
  */
 public class LettuceUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(LettuceUtils.class);
 
     private LettuceUtils() {
     }
@@ -79,6 +83,7 @@ public class LettuceUtils {
                 JschUtils.closeSession();
             }
         } catch (Exception exception) {
+            log.error("redis连接失败！", exception);
             clusterClient.shutdown();
             JschUtils.closeSession();
             throw exception;
@@ -97,6 +102,7 @@ public class LettuceUtils {
                 JschUtils.closeSession();
             }
         } catch (Exception exception) {
+            log.error("redis连接失败！", exception);
             clusterClient.shutdown();
             JschUtils.closeSession();
             throw exception;
@@ -116,6 +122,7 @@ public class LettuceUtils {
                 JschUtils.closeSession();
             }
         } catch (Exception exception) {
+            log.error("redis连接失败！", exception);
             redisClient.shutdown();
             JschUtils.closeSession();
             throw exception;
@@ -134,6 +141,7 @@ public class LettuceUtils {
                 JschUtils.closeSession();
             }
         } catch (Exception exception) {
+            log.error("redis连接失败！", exception);
             redisClient.shutdown();
             JschUtils.closeSession();
             throw exception;
@@ -151,6 +159,7 @@ public class LettuceUtils {
                 JschUtils.closeSession();
             }
         } catch (Exception exception) {
+            log.error("redis连接失败！", exception);
             redisClient.shutdown();
             JschUtils.closeSession();
             throw exception;

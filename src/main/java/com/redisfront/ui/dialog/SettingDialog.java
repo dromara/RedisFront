@@ -35,8 +35,6 @@ import java.util.List;
 import java.util.*;
 
 public class SettingDialog extends AbstractDialog<Void> {
-
-    private static final Logger log = LoggerFactory.getLogger(SettingDialog.class);
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -101,7 +99,7 @@ public class SettingDialog extends AbstractDialog<Void> {
                 return NumberUtil.isNumber(textField.getText());
             }
         });
-
+        redisTimeoutTextField.setText(PrefUtils.getState().get(Const.KEY_REDIS_TIMEOUT, "1000"));
         sshTimeoutTextField.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
@@ -109,6 +107,7 @@ public class SettingDialog extends AbstractDialog<Void> {
                 return NumberUtil.isNumber(textField.getText());
             }
         });
+        sshTimeoutTextField.setText(PrefUtils.getState().get(Const.KEY_SSH_TIMEOUT, "1000"));
     }
 
     private void initLanguageComboBox() {

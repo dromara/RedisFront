@@ -401,7 +401,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         testBtn.setText("测试连接");
         testBtn.setIcon(UI.TEST_CONNECTION_ICON);
         sshPortField = new JSpinner();
-        sshPortField.setEditor(new JSpinner.NumberEditor(portField, "####"));
+        sshPortField.setEditor(new JSpinner.NumberEditor(sshPortField, "####"));
         sshPortField.setValue(22);
     }
 
