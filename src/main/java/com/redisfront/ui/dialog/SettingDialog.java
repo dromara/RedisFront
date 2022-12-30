@@ -1,6 +1,7 @@
 package com.redisfront.ui.dialog;
 
 
+import cn.hutool.core.util.NumberUtil;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.ui.FlatUIUtils;
@@ -13,6 +14,8 @@ import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.commons.theme.RedisFrontDarkLaf;
 import com.redisfront.commons.theme.RedisFrontLightLaf;
+import com.redisfront.commons.theme.RedisFrontMacDarkLaf;
+import com.redisfront.commons.theme.RedisFrontMacLightLaf;
 import com.redisfront.commons.ui.AbstractDialog;
 import com.redisfront.commons.util.LocaleUtils;
 import com.redisfront.commons.util.PrefUtils;
@@ -27,12 +30,11 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.*;
 
 public class SettingDialog extends AbstractDialog<Void> {
-
-    private static final Logger log = LoggerFactory.getLogger(SettingDialog.class);
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -52,6 +54,10 @@ public class SettingDialog extends AbstractDialog<Void> {
     private JPanel languagePanel;
     private JLabel languageLabel;
     private JComboBox<Map.Entry<String, String>> languageComboBox;
+    private JTextField redisTimeoutTextField;
+    private JTextField sshTimeoutTextField;
+    private JLabel sshTimeoutLabel;
+    private JLabel redisTimeoutLabel;
 
     public static void showSettingDialog() {
         var settingDialog = new SettingDialog(RedisFrontApplication.frame);
@@ -82,6 +88,26 @@ public class SettingDialog extends AbstractDialog<Void> {
         initFontSizeComboBox();
         initLanguageComboBox();
         initLabelText();
+        initTimeoutConfig();
+    }
+
+    private void initTimeoutConfig() {
+        redisTimeoutTextField.setInputVerifier(new InputVerifier() {
+            @Override
+            public boolean verify(JComponent input) {
+                var textField = (JTextField) input;
+                return NumberUtil.isNumber(textField.getText());
+            }
+        });
+        redisTimeoutTextField.setText(PrefUtils.getState().get(Const.KEY_REDIS_TIMEOUT, "1000"));
+        sshTimeoutTextField.setInputVerifier(new InputVerifier() {
+            @Override
+            public boolean verify(JComponent input) {
+                var textField = (JTextField) input;
+                return NumberUtil.isNumber(textField.getText());
+            }
+        });
+        sshTimeoutTextField.setText(PrefUtils.getState().get(Const.KEY_SSH_TIMEOUT, "1000"));
     }
 
     private void initLanguageComboBox() {
@@ -186,12 +212,13 @@ public class SettingDialog extends AbstractDialog<Void> {
     private void initThemeNameComboBox() {
         themeNameComboBox.addItem(new ThemeUtils.ThemeInfo(RedisFrontLightLaf.NAME, null, false, null, null, null, null, null, RedisFrontLightLaf.class.getName()));
         themeNameComboBox.addItem(new ThemeUtils.ThemeInfo(RedisFrontDarkLaf.NAME, null, true, null, null, null, null, null, RedisFrontDarkLaf.class.getName()));
+        themeNameComboBox.addItem(new ThemeUtils.ThemeInfo(RedisFrontMacDarkLaf.NAME, null, true, null, null, null, null, null, RedisFrontMacDarkLaf.class.getName()));
+        themeNameComboBox.addItem(new ThemeUtils.ThemeInfo(RedisFrontMacLightLaf.NAME, null, true, null, null, null, null, null, RedisFrontMacLightLaf.class.getName()));
         themeNameComboBox.addActionListener(e -> {
             JComboBox<?> selected = (JComboBox<?>) e.getSource();
             ThemeUtils.ThemeInfo themeInfo = (ThemeUtils.ThemeInfo) selected.getSelectedItem();
             ThemeUtils.changeTheme(themeInfo);
         });
-
         themeNameComboBox.setSelectedIndex(Integer.parseInt(PrefUtils.getState().get(Const.KEY_THEME_SELECT_INDEX, "0")));
     }
 
@@ -227,6 +254,9 @@ public class SettingDialog extends AbstractDialog<Void> {
         //字体大小
         String fontSizeStr = (String) fontSizeComboBox.getSelectedItem();
         PrefUtils.getState().put(Const.KEY_FONT_SIZE, fontSizeStr);
+        PrefUtils.getState().put(Const.KEY_SSH_TIMEOUT, sshTimeoutTextField.getText());
+        PrefUtils.getState().put(Const.KEY_REDIS_TIMEOUT, redisTimeoutTextField.getText());
+
         //语言
         var newLanguage = (Map.Entry<?, ?>) languageComboBox.getSelectedItem();
         var oldLanguage = PrefUtils.getState().get(Const.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
@@ -325,7 +355,7 @@ public class SettingDialog extends AbstractDialog<Void> {
         themePanel.add(spacer2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final Spacer spacer3 = new Spacer();
         themePanel.add(spacer3, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        redisPanel.setLayout(new GridLayoutManager(1, 6, new Insets(0, 0, 0, 0), -1, -1));
+        redisPanel.setLayout(new GridLayoutManager(2, 6, new Insets(0, 0, 0, 0), -1, -1));
         panel3.add(redisPanel, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         keySeparatorLabel = new JLabel();
         keySeparatorLabel.setText("分隔符");
@@ -341,6 +371,18 @@ public class SettingDialog extends AbstractDialog<Void> {
         redisPanel.add(spacer4, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final Spacer spacer5 = new Spacer();
         redisPanel.add(spacer5, new GridConstraints(0, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        sshTimeoutLabel = new JLabel();
+        this.$$$loadLabelText$$$(sshTimeoutLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "SettingDialog.sshTimeoutLabel.Title"));
+        redisPanel.add(sshTimeoutLabel, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        redisTimeoutLabel = new JLabel();
+        this.$$$loadLabelText$$$(redisTimeoutLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "SettingDialog.redisTimeoutLabel.Title"));
+        redisPanel.add(redisTimeoutLabel, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        redisTimeoutTextField = new JTextField();
+        redisTimeoutTextField.setText("1000");
+        redisPanel.add(redisTimeoutTextField, new GridConstraints(1, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        sshTimeoutTextField = new JTextField();
+        sshTimeoutTextField.setText("1000");
+        redisPanel.add(sshTimeoutTextField, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         fontPanel.setLayout(new GridLayoutManager(1, 6, new Insets(0, 0, 0, 0), -1, -1));
         panel3.add(fontPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         fontLabel = new JLabel();
@@ -370,10 +412,55 @@ public class SettingDialog extends AbstractDialog<Void> {
         languagePanel.add(spacer9, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
     }
 
+    private static Method $$$cachedGetBundleMethod$$$ = null;
+
+    private String $$$getMessageFromBundle$$$(String path, String key) {
+        ResourceBundle bundle;
+        try {
+            Class<?> thisClass = this.getClass();
+            if ($$$cachedGetBundleMethod$$$ == null) {
+                Class<?> dynamicBundleClass = thisClass.getClassLoader().loadClass("com.intellij.DynamicBundle");
+                $$$cachedGetBundleMethod$$$ = dynamicBundleClass.getMethod("getBundle", String.class, Class.class);
+            }
+            bundle = (ResourceBundle) $$$cachedGetBundleMethod$$$.invoke(null, path, thisClass);
+        } catch (Exception e) {
+            bundle = ResourceBundle.getBundle(path);
+        }
+        return bundle.getString(key);
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    private void $$$loadLabelText$$$(JLabel component, String text) {
+        StringBuffer result = new StringBuffer();
+        boolean haveMnemonic = false;
+        char mnemonic = '\0';
+        int mnemonicIndex = -1;
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i) == '&') {
+                i++;
+                if (i == text.length()) break;
+                if (!haveMnemonic && text.charAt(i) != '&') {
+                    haveMnemonic = true;
+                    mnemonic = text.charAt(i);
+                    mnemonicIndex = result.length();
+                }
+            }
+            result.append(text.charAt(i));
+        }
+        component.setText(result.toString());
+        if (haveMnemonic) {
+            component.setDisplayedMnemonic(mnemonic);
+            component.setDisplayedMnemonicIndex(mnemonicIndex);
+        }
+    }
+
     /**
      * @noinspection ALL
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
+
 }

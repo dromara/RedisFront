@@ -4,10 +4,14 @@ import cn.hutool.extra.ssh.JschRuntimeException;
 import cn.hutool.extra.ssh.JschUtil;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.model.ConnectInfo;
+import com.redisfront.ui.dialog.SettingDialog;
 import io.lettuce.core.cluster.RedisClusterClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -18,7 +22,7 @@ import java.util.Map;
  * @author Jin
  */
 public class JschUtils {
-
+    private static final Logger log = LoggerFactory.getLogger(JschUtils.class);
     static ThreadLocal<Session> sessionThreadLocal = new ThreadLocal<>();
 
     public static Session createSession(ConnectInfo connectInfo) {
@@ -57,20 +61,21 @@ public class JschUtils {
                 }
                 session = createSession(connectInfo);
                 String remoteAddress = getRemoteAddress(connectInfo);
-                session.setTimeout(2000);
+                session.setTimeout(PrefUtils.getState().getInt(Const.KEY_SSH_TIMEOUT, 1000));
                 session.connect();
                 for (Map.Entry<Integer, Integer> clusterTempPort : connectInfo.getClusterLocalPort().entrySet()) {
                     JschUtil.bindPort(session, remoteAddress, clusterTempPort.getKey(), clusterTempPort.getValue());
                 }
                 sessionThreadLocal.set(session);
             } catch (Exception e) {
+                log.error("SSH连接失败！", e);
                 if (e instanceof JSchException jSchException) {
                     throw new RedisFrontException("SSH主机连接失败 - " + jSchException.getMessage());
-                }
-                if (e instanceof JschRuntimeException) {
+                } else if (e instanceof JschRuntimeException) {
                     throw new RedisFrontException("SSH端口绑定失败，请重试!");
+                } else {
+                    throw new RedisFrontException(e, true);
                 }
-                throw new RedisFrontException(e, true);
             }
         } else {
             clusterClient.getPartitions().forEach(redisClusterNode -> redisClusterNode.getUri().setHost(connectInfo.host()));
@@ -86,18 +91,19 @@ public class JschUtils {
                 }
                 session = createSession(connectInfo);
                 var remoteHost = getRemoteAddress(connectInfo);
-                session.setTimeout(2000);
+                session.setTimeout(PrefUtils.getState().getInt(Const.KEY_SSH_TIMEOUT, 1000));
                 session.connect();
                 JschUtil.bindPort(session, remoteHost, connectInfo.port(), connectInfo.getLocalPort());
                 sessionThreadLocal.set(session);
             } catch (Exception e) {
+                log.error("SSH连接失败！", e);
                 if (e instanceof JSchException jSchException) {
                     throw new RedisFrontException("SSH主机连接失败 - " + jSchException.getMessage());
-                }
-                if (e instanceof JschRuntimeException) {
+                } else if (e instanceof JschRuntimeException) {
                     throw new RedisFrontException("SSH端口绑定失败，请重试!");
+                } else {
+                    throw new RedisFrontException(e, true);
                 }
-                throw new RedisFrontException(e, true);
             }
         }
     }

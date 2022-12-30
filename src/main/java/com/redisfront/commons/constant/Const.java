@@ -21,6 +21,8 @@ public class Const {
     public static final String KEY_FONT_NAME = "fontName";
 
     public static final String KEY_FONT_SIZE = "fontSize";
+    public static final String KEY_SSH_TIMEOUT = "sshTimeout";
+    public static final String KEY_REDIS_TIMEOUT = "redisTimeout";
 
     public static final String KEY_KEY_SEPARATOR = "keySeparator";
 
