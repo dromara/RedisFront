@@ -4,6 +4,7 @@ import cn.hutool.extra.ssh.JschRuntimeException;
 import cn.hutool.extra.ssh.JschUtil;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.exception.RedisFrontException;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.model.ConnectInfo;
@@ -57,7 +58,7 @@ public class JschUtils {
                 }
                 session = createSession(connectInfo);
                 String remoteAddress = getRemoteAddress(connectInfo);
-                session.setTimeout(2000);
+                session.setTimeout(PrefUtils.getState().getInt(Const.KEY_SSH_TIMEOUT, 1000));
                 session.connect();
                 for (Map.Entry<Integer, Integer> clusterTempPort : connectInfo.getClusterLocalPort().entrySet()) {
                     JschUtil.bindPort(session, remoteAddress, clusterTempPort.getKey(), clusterTempPort.getValue());
@@ -86,7 +87,7 @@ public class JschUtils {
                 }
                 session = createSession(connectInfo);
                 var remoteHost = getRemoteAddress(connectInfo);
-                session.setTimeout(2000);
+                session.setTimeout(PrefUtils.getState().getInt(Const.KEY_SSH_TIMEOUT, 1000));
                 session.connect();
                 JschUtil.bindPort(session, remoteHost, connectInfo.port(), connectInfo.getLocalPort());
                 sessionThreadLocal.set(session);
