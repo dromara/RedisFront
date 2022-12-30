@@ -1,6 +1,7 @@
 package com.redisfront.commons.util;
 
 import cn.hutool.core.util.RandomUtil;
+import com.redisfront.commons.constant.Const;
 import com.redisfront.commons.constant.Enum;
 import com.redisfront.commons.func.Fn;
 import com.redisfront.model.ConnectInfo;
@@ -11,11 +12,10 @@ import io.lettuce.core.cluster.ClusterTopologyRefreshOptions;
 import io.lettuce.core.cluster.RedisClusterClient;
 import io.lettuce.core.cluster.api.sync.RedisAdvancedClusterCommands;
 import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
-import io.lettuce.core.cluster.pubsub.api.async.RedisClusterPubSubAsyncCommands;
-import io.lettuce.core.pubsub.RedisPubSubListener;
-import io.lettuce.core.pubsub.api.async.RedisPubSubAsyncCommands;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
 import io.netty.util.internal.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.time.Duration;
@@ -31,6 +31,8 @@ import java.util.function.Function;
  * @author Jin
  */
 public class LettuceUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(LettuceUtils.class);
 
     private LettuceUtils() {
     }
@@ -81,6 +83,7 @@ public class LettuceUtils {
                 JschUtils.closeSession();
             }
         } catch (Exception exception) {
+            log.error("redis连接失败！", exception);
             clusterClient.shutdown();
             JschUtils.closeSession();
             throw exception;
@@ -99,6 +102,7 @@ public class LettuceUtils {
                 JschUtils.closeSession();
             }
         } catch (Exception exception) {
+            log.error("redis连接失败！", exception);
             clusterClient.shutdown();
             JschUtils.closeSession();
             throw exception;
@@ -118,6 +122,7 @@ public class LettuceUtils {
                 JschUtils.closeSession();
             }
         } catch (Exception exception) {
+            log.error("redis连接失败！", exception);
             redisClient.shutdown();
             JschUtils.closeSession();
             throw exception;
@@ -136,6 +141,7 @@ public class LettuceUtils {
                 JschUtils.closeSession();
             }
         } catch (Exception exception) {
+            log.error("redis连接失败！", exception);
             redisClient.shutdown();
             JschUtils.closeSession();
             throw exception;
@@ -143,17 +149,7 @@ public class LettuceUtils {
     }
 
     public synchronized static void run(ConnectInfo connectInfo, Consumer<RedisCommands<String, String>> consumer) {
-        var redisURI = getRedisURI(connectInfo);
-        var redisClient = io.lettuce.core.RedisClient.create(redisURI);
-        if (connectInfo.ssl()) {
-            if (Fn.isNotEmpty(connectInfo.sslConfig().getPassword()) || Fn.isNotEmpty(connectInfo.sslConfig().getPublicKeyFilePath())) {
-                var sslOptions = SslOptions.builder()
-                        .jdkSslProvider()
-                        .truststore(new File(connectInfo.sslConfig().getPublicKeyFilePath()), connectInfo.sslConfig().getPassword())
-                        .build();
-                redisClient.setOptions(ClientOptions.builder().sslOptions(sslOptions).build());
-            }
-        }
+        var redisClient = getRedisClient(connectInfo);
         try {
             JschUtils.openSession(connectInfo);
             try (var connection = redisClient.connect()) {
@@ -163,6 +159,7 @@ public class LettuceUtils {
                 JschUtils.closeSession();
             }
         } catch (Exception exception) {
+            log.error("redis连接失败！", exception);
             redisClient.shutdown();
             JschUtils.closeSession();
             throw exception;
@@ -185,17 +182,7 @@ public class LettuceUtils {
     }
 
     public synchronized static <T> T exec(ConnectInfo connectInfo, Function<RedisCommands<String, String>, T> function) {
-        var redisURI = getRedisURI(connectInfo);
-        var redisClient = RedisClient.create(redisURI);
-        if (connectInfo.ssl()) {
-            if (Fn.isNotEmpty(connectInfo.sslConfig().getPassword()) || Fn.isNotEmpty(connectInfo.sslConfig().getPublicKeyFilePath())) {
-                var sslOptions = SslOptions.builder()
-                        .jdkSslProvider()
-                        .truststore(new File(connectInfo.sslConfig().getPublicKeyFilePath()), connectInfo.sslConfig().getPassword())
-                        .build();
-                redisClient.setOptions(ClientOptions.builder().sslOptions(sslOptions).build());
-            }
-        }
+        var redisClient = getRedisClient(connectInfo);
         try {
             JschUtils.openSession(connectInfo);
             try (var connection = redisClient.connect()) {
@@ -231,7 +218,7 @@ public class LettuceUtils {
                 .withPort(Fn.equal(connectInfo.connectMode(), Enum.Connect.SSH) ? connectInfo.getLocalPort() : connectInfo.port())
                 .withSsl(connectInfo.ssl())
                 .withDatabase(connectInfo.database())
-                .withTimeout(Duration.ofMinutes(1))
+                .withTimeout(Duration.ofMillis(PrefUtils.getState().getInt(Const.KEY_REDIS_TIMEOUT, 1000)))
                 .build();
 
         if (Fn.isNotEmpty(connectInfo.user()) && Fn.isNotEmpty(password)) {

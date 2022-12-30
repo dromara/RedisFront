@@ -14,8 +14,8 @@ import javax.swing.JOptionPane
  */
 open class UpgradeUtils {
     companion object {
-        private const val checkUrl = "https://gitee.com/westboy/RedisFront/raw/master/assets/version.json"
-        private const val releaseUrl = "https://gitee.com/westboy/RedisFront/releases/"
+        private const val checkUrl = "https://gitee.com/dromara/RedisFront/raw/master/assets/version.json"
+        private const val releaseUrl = "https://gitee.com/dromara/RedisFront/releases/"
 
         @JvmStatic
         fun checkVersion() {
