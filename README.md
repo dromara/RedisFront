@@ -1,5 +1,6 @@
 # <img src="assets/logo.png" alt="logo" width="32"/>  RedisFront - Cross-platform redis GUI
 
+-------
 
 ![JDK](https://img.shields.io/badge/JDK-17-blue.svg)
 ![Apache 2.0](https://img.shields.io/badge/Apache-2.0-4green.svg)
