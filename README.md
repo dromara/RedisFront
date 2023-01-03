@@ -1,4 +1,4 @@
-# <img src="assets/logo.png" alt="logo" width="32"/>  RedisFront - Cross-platform redis GUI
+# <img src="assets/logo.png" alt="logo" width="64"/>  RedisFront - Cross-platform redis GUI
 
 -------
 
