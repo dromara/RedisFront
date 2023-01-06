@@ -20,6 +20,16 @@ RedisFront是一款基于Java Swing开发的跨平台Redis桌面客户端工具,
 
 [https://caiyun.139.com/m/i?185C6uQsGKnE0](https://caiyun.139.com/m/i?185C6uQsGKnE0)  `提取码：weBe`
 
+### ⛳ 反馈
+
+- 微信 `capf4xj`
+
+<img src="assets/weixin.jpg" alt="capf4xj" width="180"/>
+
+- QQ群号 `579454329` `验证信息：RedisFront`
+
+<img src="assets/qq.jpg" alt="capf4xj" width="180"/>
+
 ### ❤️ 感谢
 * [FlatLaf](https://github.com/JFormDesigner/FlatLaf?from=RedisFront)
 * [Lettuce](https://github.com/lettuce-io/lettuce-core?from=RedisFront)
@@ -27,16 +37,6 @@ RedisFront是一款基于Java Swing开发的跨平台Redis桌面客户端工具,
 * [JetBrains](https://www.jetbrains.com?from=RedisFront)
 
 ![JenBrains logo](assets/jetbrains.svg)
-
-### ⛳ 交流
-
-- 微信搜索 `capf4xj` 或 扫描下面账号二维码拉您进微信群。
-
-<img src="assets/weixin.jpg" alt="capf4xj" width="180"/>
-
-- QQ搜索群号 `579454329` 或 扫描下面二维码进入QQ群 `验证信息：RedisFront`。
-
-<img src="assets/qq.jpg" alt="capf4xj" width="180"/>
 
 ### 📚 Dromara 成员项目
 
