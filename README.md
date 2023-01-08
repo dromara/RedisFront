@@ -26,7 +26,7 @@ RedisFront是一款基于Java Swing开发的跨平台Redis桌面客户端工具,
 
 <img src="assets/weixin.jpg" alt="capf4xj" width="180"/>
 
-- QQ群号 `579454329` `验证信息：RedisFront`
+- QQ群 `579454329` `验证信息：RedisFront`
 
 <img src="assets/qq.jpg" alt="capf4xj" width="180"/>
 
