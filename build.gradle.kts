@@ -30,7 +30,7 @@ buildscript {
 
 plugins.apply("io.github.fvarrui.javapackager.plugin")
 
-version = "1.0.6"
+version = "1.0.7"
 
 val applicationName: String = "RedisFront"
 val organization: String = "dromara.org"
