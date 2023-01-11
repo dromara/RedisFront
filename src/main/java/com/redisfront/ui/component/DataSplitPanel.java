@@ -48,29 +48,34 @@ public class DataSplitPanel extends JSplitPane {
             });
 
             dataViewForm.setCloseActionHandler(() -> setRightComponent(newNonePanel()));
-
+            var startTime = System.currentTimeMillis();
             //加载数据并展示
-            dataViewForm.dataChangeActionPerformed(treeNodeInfo.key(), () -> SwingUtilities.invokeLater(() -> setRightComponent(new JPanel() {
-                {
-                    setLayout(new BorderLayout());
-                    setBorder(new EmptyBorder(0, 5, 0, 0));
-                    add(new JPanel() {
-                        @Override
-                        public void updateUI() {
-                            super.updateUI();
-                            var flatLineBorder = new FlatLineBorder(new Insets(0, 2, 0, 2), UIManager.getColor("Component.borderColor"));
-                            setBorder(flatLineBorder);
-                            setLayout(new BorderLayout());
-                            add(LoadingPanel.newInstance(), BorderLayout.CENTER);
-                        }
-                    }, BorderLayout.CENTER);
-                }
-            })), () -> SwingUtilities.invokeLater(() -> setRightComponent(dataViewForm.contentPanel())));
+            dataViewForm.dataChangeActionPerformed(treeNodeInfo.key(),
+                    () -> SwingUtilities.invokeLater(() -> setRightComponent(commonNonPanel)),
+                    () -> SwingUtilities.invokeLater(() -> setRightComponent(dataViewForm.contentPanel())));
+            System.out.println("加载key用时：" + (System.currentTimeMillis() - startTime) / 1000);
         });
 
         this.setLeftComponent(dataSearchForm.getContentPanel());
         this.setRightComponent(newNonePanel());
     }
+
+    private final JPanel commonNonPanel = new JPanel() {
+        {
+            setLayout(new BorderLayout());
+            setBorder(new EmptyBorder(0, 5, 0, 0));
+            add(new JPanel() {
+                @Override
+                public void updateUI() {
+                    super.updateUI();
+                    var flatLineBorder = new FlatLineBorder(new Insets(0, 2, 0, 2), UIManager.getColor("Component.borderColor"));
+                    setBorder(flatLineBorder);
+                    setLayout(new BorderLayout());
+                    add(LoadingPanel.newInstance(), BorderLayout.CENTER);
+                }
+            }, BorderLayout.CENTER);
+        }
+    };
 
     private JPanel newNonePanel() {
         return new JPanel() {

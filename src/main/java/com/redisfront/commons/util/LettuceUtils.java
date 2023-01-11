@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -33,6 +34,8 @@ import java.util.function.Function;
 public class LettuceUtils {
 
     private static final Logger log = LoggerFactory.getLogger(LettuceUtils.class);
+
+    private static final HashSet<Integer> portHashSet = new HashSet<>();
 
     private LettuceUtils() {
     }
@@ -64,7 +67,8 @@ public class LettuceUtils {
             Map<Integer, Integer> clusterTempPort = new HashMap<>();
             for (RedisClusterNode partition : clusterClient.getPartitions()) {
                 var remotePort = partition.getUri().getPort();
-                clusterTempPort.put(remotePort, RandomUtil.randomInt(32768, 65535));
+                int port = getTempLocalPort();
+                clusterTempPort.put(remotePort, port);
             }
             connectInfo.setClusterLocalPort(clusterTempPort);
         }
@@ -198,11 +202,11 @@ public class LettuceUtils {
         }
     }
 
-
     public synchronized static RedisURI getRedisURI(ConnectInfo connectInfo) {
         if (Fn.equal(connectInfo.connectMode(), Enum.Connect.SSH)) {
             connectInfo.setLocalHost("127.0.0.1");
-            connectInfo.setLocalPort(RandomUtil.randomInt(32768, 65535) + 5);
+            int port = getTempLocalPort();
+            connectInfo.setLocalPort(port);
         }
         String host = "";
         String password = "";
@@ -229,6 +233,16 @@ public class LettuceUtils {
             redisURI.setCredentialsProvider(staticCredentialsProvider);
         }
         return redisURI;
+    }
+
+    private static int getTempLocalPort() {
+        int port = RandomUtil.randomInt(32768, 65535);
+        if (!portHashSet.contains(port)) {
+            portHashSet.add(port);
+        } else {
+            port = getTempLocalPort();
+        }
+        return port;
     }
 
 }
