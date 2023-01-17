@@ -360,6 +360,7 @@ public class DataViewForm {
     }
 
     public synchronized void dataChangeActionPerformed(String key, ActionHandler beforeActionHandler, ActionHandler afterActionHandler) {
+        var startTime = System.currentTimeMillis();
         refreshBeforeHandler.handle();
         beforeActionHandler.handle();
 
@@ -377,6 +378,7 @@ public class DataViewForm {
                 this.lastKeyName = key;
                 this.lastKeyTTL = ttl;
             });
+            System.out.println("初始化key 1 用时：" + (System.currentTimeMillis() - startTime) / 1000);
 
             switch (keyTypeEnum) {
                 case ZSET -> loadZSetDataActionPerformed(key);
@@ -386,6 +388,8 @@ public class DataViewForm {
                 case STREAM -> loadStreamDataActionPerformed(key);
                 default -> loadStringActionPerformed(key);
             }
+
+            System.out.println("初始化key 2 用时：" + (System.currentTimeMillis() - startTime) / 1000);
         } else {
             AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showInformationDialog.message"));
             refreshDisableBtn();
@@ -393,6 +397,7 @@ public class DataViewForm {
 
         refreshAfterHandler.handle();
         afterActionHandler.handle();
+        System.out.println("初始化key 3 用时：" + (System.currentTimeMillis() - startTime) / 1000);
     }
 
     private void loadStringActionPerformed(String key) {
@@ -695,7 +700,7 @@ public class DataViewForm {
         fieldOrScoreField.setBackground(UIManager.getColor("FlatEditorPane.background"));
         jToolBar.add(fieldOrScoreField);
 
-        jComboBox = new JComboBox<String>();
+        jComboBox = new JComboBox<>();
         jComboBox.addItem(SyntaxConstants.SYNTAX_STYLE_NONE);
         jComboBox.addItem(SyntaxConstants.SYNTAX_STYLE_JSON);
         jComboBox.addActionListener((event) -> {
