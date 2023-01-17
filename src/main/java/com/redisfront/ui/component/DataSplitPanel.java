@@ -32,8 +32,14 @@ public class DataSplitPanel extends JSplitPane {
     }
 
     public DataSplitPanel(ConnectInfo connectInfo) {
+
         this.connectInfo = connectInfo;
+
         var dataSearchForm = DataSearchForm.newInstance(connectInfo);
+
+        this.setLeftComponent(dataSearchForm.getContentPanel());
+        this.setRightComponent(commonNonePanel);
+
         //节点点击事件
         dataSearchForm.setNodeClickProcessHandler((treeNodeInfo) -> {
             var dataViewForm = DataViewForm.newInstance(connectInfo);
@@ -44,23 +50,21 @@ public class DataSplitPanel extends JSplitPane {
 
             dataViewForm.setDeleteActionHandler(() -> {
                 dataSearchForm.deleteActionPerformed();
-                setRightComponent(newNonePanel());
+                setRightComponent(commonNonePanel);
             });
 
-            dataViewForm.setCloseActionHandler(() -> setRightComponent(newNonePanel()));
+            dataViewForm.setCloseActionHandler(() -> setRightComponent(commonNonePanel));
             var startTime = System.currentTimeMillis();
             //加载数据并展示
             dataViewForm.dataChangeActionPerformed(treeNodeInfo.key(),
-                    () -> SwingUtilities.invokeLater(() -> setRightComponent(commonNonPanel)),
+                    () -> SwingUtilities.invokeLater(() -> setRightComponent(commonLoadingPanel)),
                     () -> SwingUtilities.invokeLater(() -> setRightComponent(dataViewForm.contentPanel())));
-            System.out.println("加载key用时：" + (System.currentTimeMillis() - startTime) / 1000);
-        });
 
-        this.setLeftComponent(dataSearchForm.getContentPanel());
-        this.setRightComponent(newNonePanel());
+            log.info("加载key用时：{}/ms", (System.currentTimeMillis() - startTime) / 1000);
+        });
     }
 
-    private final JPanel commonNonPanel = new JPanel() {
+    private static final JPanel commonLoadingPanel = new JPanel() {
         {
             setLayout(new BorderLayout());
             setBorder(new EmptyBorder(0, 5, 0, 0));
@@ -77,24 +81,22 @@ public class DataSplitPanel extends JSplitPane {
         }
     };
 
-    private JPanel newNonePanel() {
-        return new JPanel() {
-            {
-                setLayout(new BorderLayout());
-                setBorder(new EmptyBorder(0, 5, 0, 0));
-                add(new JPanel() {
-                    @Override
-                    public void updateUI() {
-                        super.updateUI();
-                        var flatLineBorder = new FlatLineBorder(new Insets(0, 2, 0, 0), UIManager.getColor("Component.borderColor"));
-                        setBorder(flatLineBorder);
-                        setLayout(new BorderLayout());
-                        add(MainNoneForm.getInstance().getContentPanel(), BorderLayout.CENTER);
-                    }
-                }, BorderLayout.CENTER);
-            }
-        };
-    }
+    private static final JPanel commonNonePanel = new JPanel() {
+        {
+            setLayout(new BorderLayout());
+            setBorder(new EmptyBorder(0, 5, 0, 0));
+            add(new JPanel() {
+                @Override
+                public void updateUI() {
+                    super.updateUI();
+                    var flatLineBorder = new FlatLineBorder(new Insets(0, 2, 0, 0), UIManager.getColor("Component.borderColor"));
+                    setBorder(flatLineBorder);
+                    setLayout(new BorderLayout());
+                    add(MainNoneForm.getInstance().getContentPanel(), BorderLayout.CENTER);
+                }
+            }, BorderLayout.CENTER);
+        }
+    };
 
 
     public void ping() {
