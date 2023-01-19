@@ -6,7 +6,7 @@
 ![Apache 2.0](https://img.shields.io/badge/Apache-2.0-4green.svg)
 ![Release](https://img.shields.io/badge/Release-1.0.7-green.svg)
 
-RedisFront是一款基于Java Swing开发的跨平台Redis桌面客户端工具,简单易用,功能完善,支持单机模式, 集群模式, 哨兵模式以及 SSH 隧道连接.
+RedisFront是一款基于Java Swing开发的跨平台Redis桌面客户端工具,简单易用,功能完善,支持单机模式, 集群模式, 哨兵模式以及 SSH 隧道连接,欢迎下载使用.
 
 ![Screenshot](screenshot/redisfront-win11.png)
 
