@@ -405,7 +405,7 @@ public class DataViewForm {
             }
         } catch (Exception e) {
             log.error("数据加载失败", e);
-            AlertUtils.showErrorDialog("数据加载失败", e);
+            AlertUtils.showErrorDialog(LocaleUtils.getMessageFromBundle("DataViewForm.fail.message"), e);
         }
         refreshAfterHandler.handle();
         afterActionHandler.handle();
