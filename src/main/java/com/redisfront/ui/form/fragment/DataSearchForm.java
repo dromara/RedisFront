@@ -38,10 +38,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -723,7 +720,13 @@ public class DataSearchForm {
 
     private void databaseComboBoxInit(int selectedIndex) {
         if (Fn.notEqual(connectInfo.redisModeEnum(), Enum.RedisMode.CLUSTER)) {
-            Map<String, String> databases = RedisBasicService.service.configGet(connectInfo, "databases");
+            Map<String, String> databases = new HashMap<>();
+            try {
+                databases.putAll(RedisBasicService.service.configGet(connectInfo, "databases"));
+            } catch (Exception e) {
+                log.warn("configGet 失败，将默认 databases=16", e);
+                databases.put("databases", "16");
+            }
             var dbNum = Integer.parseInt(databases.get("databases"));
             if (dbNum > 16) {
                 for (int i = 16; i < dbNum; i++) {
