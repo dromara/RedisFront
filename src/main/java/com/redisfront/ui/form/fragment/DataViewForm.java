@@ -18,6 +18,7 @@ import com.redisfront.commons.handler.ActionHandler;
 import com.redisfront.commons.util.AlertUtils;
 import com.redisfront.commons.util.FutureUtils;
 import com.redisfront.commons.util.LocaleUtils;
+import com.redisfront.commons.util.SwingStrUtils;
 import com.redisfront.model.*;
 import com.redisfront.service.*;
 import com.redisfront.ui.component.LoadingPanel;
@@ -25,6 +26,8 @@ import com.redisfront.ui.component.TextEditor;
 import com.redisfront.ui.dialog.AddOrUpdateItemDialog;
 import io.lettuce.core.*;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -97,6 +100,8 @@ public class DataViewForm {
 
     private String lastKeyName;
     private Long lastKeyTTL;
+
+    private static final Logger log = LoggerFactory.getLogger(DataViewForm.class);
 
     public void setRefreshBeforeHandler(ActionHandler refreshBeforeHandler) {
         this.refreshBeforeHandler = refreshBeforeHandler;
@@ -242,7 +247,10 @@ public class DataViewForm {
                 textEditor.textArea().setText(value);
             }
         } else {
-            textEditor.textArea().setText(value);
+            if (SwingStrUtils.isAllUnknownChar(value)) {
+                AlertUtils.showInformationDialog("不支持的展示内容，数据将被截断");
+            }
+            textEditor.textArea().setText(SwingStrUtils.formatTextArea(value));
         }
     }
 
@@ -364,37 +372,41 @@ public class DataViewForm {
         refreshBeforeHandler.handle();
         beforeActionHandler.handle();
 
-        var type = RedisBasicService.service.type(connectInfo, key);
-        if (Fn.notEqual(type, "none")) {
-            var keyTypeEnum = Enum.KeyTypeEnum.valueOf(type.toUpperCase());
-            var ttl = RedisBasicService.service.ttl(connectInfo, key);
+        try {
+            var type = RedisBasicService.service.type(connectInfo, key);
+            if (Fn.notEqual(type, "none")) {
+                var keyTypeEnum = Enum.KeyTypeEnum.valueOf(type.toUpperCase());
+                var ttl = RedisBasicService.service.ttl(connectInfo, key);
 
-            SwingUtilities.invokeLater(() -> {
-                fieldOrScoreField.setVisible(keyTypeEnum == Enum.KeyTypeEnum.ZSET || keyTypeEnum == Enum.KeyTypeEnum.HASH);
-                keyTypeLabel.setText(keyTypeEnum.typeName());
-                keyTypeLabel.setBackground(keyTypeEnum.color());
-                ttlField.setText(ttl.toString());
-                keyField.setText(key);
-                this.lastKeyName = key;
-                this.lastKeyTTL = ttl;
-            });
-            System.out.println("初始化key 1 用时：" + (System.currentTimeMillis() - startTime) / 1000);
+                SwingUtilities.invokeLater(() -> {
+                    fieldOrScoreField.setVisible(keyTypeEnum == Enum.KeyTypeEnum.ZSET || keyTypeEnum == Enum.KeyTypeEnum.HASH);
+                    keyTypeLabel.setText(keyTypeEnum.typeName());
+                    keyTypeLabel.setBackground(keyTypeEnum.color());
+                    ttlField.setText(ttl.toString());
+                    keyField.setText(key);
+                    this.lastKeyName = key;
+                    this.lastKeyTTL = ttl;
+                });
+                System.out.println("初始化key 1 用时：" + (System.currentTimeMillis() - startTime) / 1000);
 
-            switch (keyTypeEnum) {
-                case ZSET -> loadZSetDataActionPerformed(key);
-                case HASH -> loadHashDataActionPerformed(key);
-                case SET -> loadSetDataActionPerformed(key);
-                case LIST -> loadListDataActionPerformed(key);
-                case STREAM -> loadStreamDataActionPerformed(key);
-                default -> loadStringActionPerformed(key);
+                switch (keyTypeEnum) {
+                    case ZSET -> loadZSetDataActionPerformed(key);
+                    case HASH -> loadHashDataActionPerformed(key);
+                    case SET -> loadSetDataActionPerformed(key);
+                    case LIST -> loadListDataActionPerformed(key);
+                    case STREAM -> loadStreamDataActionPerformed(key);
+                    default -> loadStringActionPerformed(key);
+                }
+
+                System.out.println("初始化key 2 用时：" + (System.currentTimeMillis() - startTime) / 1000);
+            } else {
+                AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showInformationDialog.message"));
+                refreshDisableBtn();
             }
-
-            System.out.println("初始化key 2 用时：" + (System.currentTimeMillis() - startTime) / 1000);
-        } else {
-            AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showInformationDialog.message"));
-            refreshDisableBtn();
+        } catch (Exception e) {
+            log.error("数据加载失败", e);
+            AlertUtils.showErrorDialog("数据加载失败", e);
         }
-
         refreshAfterHandler.handle();
         afterActionHandler.handle();
         System.out.println("初始化key 3 用时：" + (System.currentTimeMillis() - startTime) / 1000);
