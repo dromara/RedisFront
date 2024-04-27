@@ -13,7 +13,7 @@ import java.awt.*;
 public class MainComponent extends Background {
 
     private final MainWidget owner;
-
+    private DrawerPanel drawerPanel;
     public MainComponent(MainWidget owner) {
         this.owner = owner;
         this.setLayout(new BorderLayout());
@@ -22,7 +22,7 @@ public class MainComponent extends Background {
 
     private void initComponents() {
         JPanel mainPanel = new JPanel(new BorderLayout());
-        DrawerPanel drawerPanel = new DrawerPanel(new LeftDrawer());
+        drawerPanel = new DrawerPanel(new LeftDrawer());
         drawerPanel.setPreferredSize(new Dimension(250, -1));
         drawerPanel.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
         mainPanel.add(drawerPanel, BorderLayout.WEST);
@@ -30,7 +30,15 @@ public class MainComponent extends Background {
         button.addActionListener(new DrawerAction(owner, drawerPanel));
         mainPanel.add(button, BorderLayout.CENTER);
         add(mainPanel, BorderLayout.CENTER);
+    }
 
+    @Override
+    public void updateUI(){
+        super.updateUI();
+        if(drawerPanel!=null) {
+            drawerPanel.updateUI();
+            drawerPanel.revalidate();
+        }
     }
 
 }

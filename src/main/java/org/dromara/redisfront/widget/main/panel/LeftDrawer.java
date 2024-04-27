@@ -1,26 +1,55 @@
 package org.dromara.redisfront.widget.main.panel;
 
-import cn.hutool.core.img.ImgUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import lombok.Getter;
 import org.dromara.redisfront.commons.constant.UI;
 import raven.drawer.component.DrawerPanel;
 import raven.drawer.component.SimpleDrawerBuilder;
 import raven.drawer.component.footer.SimpleFooterData;
 import raven.drawer.component.header.SimpleHeaderData;
-import raven.drawer.component.menu.*;
+import raven.drawer.component.menu.MenuValidation;
+import raven.drawer.component.menu.SimpleMenuOption;
+import raven.drawer.component.menu.SimpleMenuStyle;
 import raven.drawer.component.menu.data.Item;
 import raven.drawer.component.menu.data.MenuItem;
-import raven.swing.AvatarIcon;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.geom.RoundRectangle2D;
 import java.util.Arrays;
 
+@Getter
 public class LeftDrawer extends SimpleDrawerBuilder {
 
+    public static LeftDrawer leftDrawer;
+
+    public static LeftDrawer getInstance() {
+        if (leftDrawer == null) {
+            leftDrawer = new LeftDrawer();
+        }
+        return leftDrawer;
+    }
+
     private final JPanel headerPanel;
+
+    public static class LogoPanel extends JPanel {
+        public LogoPanel() {
+            this.setOpaque(false);
+            this.setLayout(new FlowLayout());
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            RoundRectangle2D roundRect = new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 10, 10);
+            g2d.setColor(getBackground());
+            g2d.fill(roundRect);
+        }
+    }
 
     public LeftDrawer() {
         this.headerPanel = new JPanel();
@@ -36,19 +65,23 @@ public class LeftDrawer extends SimpleDrawerBuilder {
         return new ThemesChange();
     }
 
+
     @Override
     public Component getHeader() {
-        AvatarIcon icon = new AvatarIcon(UI.REDIS_ICON, 55, 50, 80);
-        icon.setBorder(5);
-        Image image = ImgUtil.getImage(this.getClass().getResource("/images/RedisFront.png"));
-        Image scaledInstance = image.getScaledInstance(155, 45, Image.SCALE_DEFAULT);
-        JPanel logoPanel = new JPanel();
-        logoPanel.setLayout(new BorderLayout());
-        logoPanel.add(new JLabel(icon),BorderLayout.WEST);
-        logoPanel.add(new JLabel(new ImageIcon(scaledInstance)),BorderLayout.CENTER);
+        JPanel logoPanel = getLogoPanel(UI.LOGO_ICON_DARK);
         headerPanel.add(logoPanel, BorderLayout.CENTER);
         return headerPanel;
     }
+    
+    private JPanel getLogoPanel(Icon icon) {
+        JPanel logoPanel = new LogoPanel();
+        JLabel logo1 = new JLabel(UI.REDIS_ICON_45x45);
+        logoPanel.add(logo1);
+        JLabel logo2 = new JLabel(icon);
+        logoPanel.add(logo2);
+        return logoPanel;
+    }
+
 
     @Override
     public SimpleHeaderData getSimpleHeaderData() {
@@ -132,7 +165,7 @@ public class LeftDrawer extends SimpleDrawerBuilder {
     @Override
     public void build(DrawerPanel drawerPanel) {
         drawerPanel.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
-        
+
     }
 
     @Override
