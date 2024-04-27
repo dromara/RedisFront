@@ -12,6 +12,26 @@ import java.nio.charset.Charset
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+allprojects {
+    repositories {
+        mavenLocal()
+        maven {
+            url = uri("https://packages.aliyun.com/maven/repository/2048752-snapshot-C7TcE7")
+            credentials {
+                username = "662c9a1d2df38b0129acf288"
+                password = "pub-user"
+            }
+        }
+        maven {
+            url = uri("https://packages.aliyun.com/maven/repository/2048752-release-f1IHDo")
+            credentials {
+                username = "662c9a1d2df38b0129acf288"
+                password = "pub-user"
+            }
+        }
+    }
+}
+
 plugins {
     `java-library`
     kotlin("jvm") version "1.7.20-RC"
@@ -19,16 +39,14 @@ plugins {
 
 buildscript {
     repositories {
-        maven("https://maven.aliyun.com/repository/public/")
         mavenLocal()
-        mavenCentral()
         dependencies {
             classpath("io.github.fvarrui:javapackager:1.6.7")
         }
     }
 }
-
 plugins.apply("io.github.fvarrui.javapackager.plugin")
+
 
 version = "1.0.7"
 
@@ -36,7 +54,6 @@ val applicationName: String = "RedisFront"
 val organization: String = "dromara.org"
 val supportUrl: String = "https://dromara.org"
 
-val flatlafVersion = "3.0"
 val hutoolVersion = "5.8.10"
 val fifesoftVersion = "3.2.0"
 val derbyVersion = "10.15.2.0"
@@ -70,16 +87,14 @@ println("-----------------------------------------------------------------------
 println()
 
 dependencies {
+    compileOnly("org.projectlombok:lombok:1.18.32")
+    annotationProcessor("org.projectlombok:lombok:1.18.32")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
     implementation("io.lettuce:lettuce-core:${lettuceVersion}")
     implementation("io.netty:netty-common:4.1.82.Final")
-    implementation("com.formdev:flatlaf:${flatlafVersion}")
     implementation("org.jfree:jfreechart:1.5.3")
-    implementation("com.formdev:flatlaf-swingx:${flatlafVersion}")
-    implementation("com.formdev:flatlaf-intellij-themes:${flatlafVersion}")
-    implementation("com.formdev:flatlaf-extras:${flatlafVersion}")
     implementation("cn.hutool:hutool-extra:${hutoolVersion}")
     implementation("cn.hutool:hutool-json:${hutoolVersion}")
     implementation("cn.hutool:hutool-http:${hutoolVersion}")
@@ -88,12 +103,13 @@ dependencies {
     implementation("com.fifesoft:rstaui:${fifesoftVersion}")
     implementation("ch.qos.logback:logback-classic:${logbackVersion}")
     implementation("at.swimmesberger:swingx-core:1.6.8")
-    implementation("com.jgoodies:jgoodies-forms:1.9.0")
     implementation("commons-net:commons-net:3.8.0")
     implementation("org.bouncycastle:bcpkix-jdk15on:1.70")
     implementation("org.bouncycastle:bcprov-jdk15on:1.70")
     implementation("com.intellij:forms_rt:7.0.3")
     implementation("com.jcraft:jsch:0.1.55")
+    implementation("com.jcraft:jsch:0.1.55")
+    implementation("org.dromara:quick-swing:1.1-SNAPSHOT")
     implementation(kotlin("stdlib-jdk8"))
 }
 repositories {
