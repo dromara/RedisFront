@@ -48,11 +48,14 @@ public class DrawerAction extends AppAction<MainWidget> {
     TimingTarget target = new TimingTargetAdapter() {
         @Override
         public void timingEvent(Animator source, double fraction) {
+            int width;
             if (drawerOpen) {
-                drawerPanel.setPreferredSize(new Dimension((int) (250 - 250 * fraction), -1));
+                width = (int) (250 - 250 * fraction);
             } else {
-                drawerPanel.setPreferredSize(new Dimension((int) (250 * fraction), -1));
+                width = (int) (250 * fraction);
             }
+            System.out.println(width);
+            drawerPanel.setPreferredSize(new Dimension(width , -1));
             drawerPanel.revalidate();
             app.revalidate();
         }

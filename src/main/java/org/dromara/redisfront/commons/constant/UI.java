@@ -1,6 +1,5 @@
 package org.dromara.redisfront.commons.constant;
 
-import cn.hutool.core.img.ImgUtil;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.FlatSVGUtils;
 
@@ -10,13 +9,7 @@ import java.util.List;
 
 public class UI {
 
-
-    public static final Image IMAGE_LIGHT = ImgUtil.getImage(UI.class.getResource("/images/RedisFront_light.png"));
-    public static final Image IMAGE_DARK = ImgUtil.getImage(UI.class.getResource("/images/RedisFront_dark.png"));
-
-    public static final Icon LOGO_ICON_LIGHT = new ImageIcon(IMAGE_LIGHT.getScaledInstance(155, 45, Image.SCALE_DEFAULT));
-    public static final Icon LOGO_ICON_DARK = new ImageIcon(IMAGE_DARK.getScaledInstance(155, 45, Image.SCALE_DEFAULT));
-
+    public static final Icon LOGO_TEXT_ICON = new FlatSVGIcon("svg/redisfront_text.svg");
     public static final List<Image> MAIN_FRAME_ICON_IMAGES = FlatSVGUtils.createWindowIconImages("/svg/redisfront.svg");
     public static final Icon REDIS_ICON = new FlatSVGIcon("svg/redisfront.svg");
     public static final Icon REDIS_ICON_45x45 = new FlatSVGIcon("svg/redisfront.svg",45,45);
@@ -45,5 +38,7 @@ public class UI {
     public static final Icon CONTENT_TAB_CPU_ICON = new FlatSVGIcon("icons/process.svg");
     public static final Icon CONTENT_TAB_KEYS_ICON = new FlatSVGIcon("icons/key.svg");
     public static final Icon CONTENT_TAB_HOST_ICON = new FlatSVGIcon("icons/host.svg");
+    public static final Icon DRAWER_CLOSE_ICON = new FlatSVGIcon("svg/open_.svg",16,16);
+    public static final Icon DRAWER_OPEN_ICON = new FlatSVGIcon("svg/close_.svg",16,16);
 
 }
