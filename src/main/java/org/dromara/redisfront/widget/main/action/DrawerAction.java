@@ -1,6 +1,7 @@
 package org.dromara.redisfront.widget.main.action;
 
 
+import lombok.Setter;
 import org.dromara.quickswing.ui.app.AppAction;
 import org.dromara.redisfront.widget.main.MainWidget;
 import org.jdesktop.core.animation.timing.Animator;
@@ -11,23 +12,23 @@ import raven.drawer.component.DrawerPanel;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.function.Consumer;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class DrawerAction extends AppAction<MainWidget> {
-    protected DrawerAction(MainWidget app) {
-        super(app);
-    }
-
     private Animator animator;
-    private DrawerPanel drawerPanel;
+    private final DrawerPanel drawerPanel;
     private boolean drawerOpen = true;
-
+    @Setter
+    private Consumer<Boolean> beforeProcess;
+    @Setter
+    private Consumer<Boolean> afterProcess;
     public DrawerAction(MainWidget app, DrawerPanel drawerPanel) {
         super(app);
         this.drawerPanel = drawerPanel;
-
     }
+
 
     @Override
     public void handleAction(ActionEvent e) {
@@ -46,6 +47,13 @@ public class DrawerAction extends AppAction<MainWidget> {
     }
 
     TimingTarget target = new TimingTargetAdapter() {
+
+        public void begin(Animator source) {
+            if(beforeProcess !=null){
+                beforeProcess.accept(drawerOpen);
+            }
+        }
+
         @Override
         public void timingEvent(Animator source, double fraction) {
             int width;
@@ -54,15 +62,19 @@ public class DrawerAction extends AppAction<MainWidget> {
             } else {
                 width = (int) (250 * fraction);
             }
-            System.out.println(width);
             drawerPanel.setPreferredSize(new Dimension(width , -1));
             drawerPanel.revalidate();
             app.revalidate();
+
         }
 
         @Override
         public void end(Animator source) {
+            if(beforeProcess !=null){
+                afterProcess.accept(drawerOpen);
+            }
             drawerOpen = !drawerOpen;
+
         }
 
     };

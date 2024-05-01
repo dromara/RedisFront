@@ -3,8 +3,9 @@ package org.dromara.redisfront.widget.main;
 import com.formdev.flatlaf.FlatClientProperties;
 import org.dromara.quickswing.ui.swing.Background;
 import org.dromara.redisfront.widget.main.action.DrawerAction;
-import org.dromara.redisfront.widget.main.panel.DrawerPanel;
+import org.dromara.redisfront.widget.main.panel.MainDrawerPanel;
 import org.dromara.redisfront.widget.main.panel.MainTabbedPanel;
+import raven.drawer.component.DrawerPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,7 +14,7 @@ import java.awt.*;
 public class MainComponent extends Background {
 
     private final MainWidget owner;
-    private raven.drawer.component.DrawerPanel drawerPanel;
+    private DrawerPanel drawerPanel;
     public MainComponent(MainWidget owner) {
         this.owner = owner;
         this.setLayout(new BorderLayout());
@@ -22,13 +23,12 @@ public class MainComponent extends Background {
 
     private void initComponents() {
         JPanel mainPanel = new JPanel(new BorderLayout());
-        drawerPanel = new raven.drawer.component.DrawerPanel(new DrawerPanel());
+        drawerPanel = new DrawerPanel(new MainDrawerPanel());
         drawerPanel.setMinimumSize(new Dimension(250, -1));
         drawerPanel.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
         mainPanel.add(drawerPanel, BorderLayout.WEST);
-        JButton button = new JButton();
-        button.addActionListener(new DrawerAction(owner, drawerPanel));
-        mainPanel.add(MainTabbedPanel.newInstance(button), BorderLayout.CENTER);
+        MainTabbedPanel mainTabbedPanel = new MainTabbedPanel(new DrawerAction(owner, drawerPanel));
+        mainPanel.add(mainTabbedPanel, BorderLayout.CENTER);
         add(mainPanel, BorderLayout.CENTER);
     }
 

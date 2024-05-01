@@ -38,7 +38,6 @@ public class UI {
     public static final Icon CONTENT_TAB_CPU_ICON = new FlatSVGIcon("icons/process.svg");
     public static final Icon CONTENT_TAB_KEYS_ICON = new FlatSVGIcon("icons/key.svg");
     public static final Icon CONTENT_TAB_HOST_ICON = new FlatSVGIcon("icons/host.svg");
-    public static final Icon DRAWER_CLOSE_ICON = new FlatSVGIcon("svg/open_.svg",16,16);
-    public static final Icon DRAWER_OPEN_ICON = new FlatSVGIcon("svg/close_.svg",16,16);
+    public static final Icon DRAWER_SHOW_OR_CLOSE_ICON = new FlatSVGIcon("icons/listFiles.svg",16,16);
 
 }

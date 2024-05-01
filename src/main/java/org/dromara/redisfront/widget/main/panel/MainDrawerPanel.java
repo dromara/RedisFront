@@ -7,6 +7,7 @@ import lombok.Getter;
 import org.dromara.redisfront.widget.main.panel.drawer.Logo;
 import org.dromara.redisfront.widget.main.panel.drawer.ThemesChange;
 import org.jetbrains.annotations.NotNull;
+import raven.drawer.component.DrawerPanel;
 import raven.drawer.component.SimpleDrawerBuilder;
 import raven.drawer.component.footer.SimpleFooterData;
 import raven.drawer.component.header.SimpleHeaderData;
@@ -22,15 +23,15 @@ import java.awt.*;
 import java.util.Arrays;
 
 @Getter
-public class DrawerPanel extends SimpleDrawerBuilder {
+public class MainDrawerPanel extends SimpleDrawerBuilder {
 
-    public static final DrawerPanel drawer = new DrawerPanel();
+    public static final MainDrawerPanel drawer = new MainDrawerPanel();
 
-    public static DrawerPanel getInstance() {
+    public static MainDrawerPanel getInstance() {
         return drawer;
     }
 
-    public DrawerPanel() {
+    public MainDrawerPanel() {
 
     }
 
@@ -136,7 +137,7 @@ public class DrawerPanel extends SimpleDrawerBuilder {
     }
 
     @Override
-    public void build(raven.drawer.component.DrawerPanel drawerPanel) {
+    public void build(DrawerPanel drawerPanel) {
         drawerPanel.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
 
     }

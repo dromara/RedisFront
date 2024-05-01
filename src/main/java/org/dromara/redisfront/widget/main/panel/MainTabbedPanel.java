@@ -7,20 +7,22 @@ import com.formdev.flatlaf.ui.FlatLineBorder;
 import org.dromara.redisfront.commons.constant.Const;
 import org.dromara.redisfront.commons.constant.UI;
 import org.dromara.redisfront.ui.form.fragment.DataChartsForm;
+import org.dromara.redisfront.widget.main.action.DrawerAction;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import static java.awt.Cursor.HAND_CURSOR;
 
 public class MainTabbedPanel extends JPanel {
 
     private final JTabbedPane contentPanel;
-    public static MainTabbedPanel newInstance(JButton jButton) {
-        return new MainTabbedPanel(jButton);
-    }
 
-
-    public MainTabbedPanel(JButton jButton) {
+    public MainTabbedPanel(DrawerAction action) {
         setLayout(new BorderLayout());
         {
             Box horizontalBox = Box.createHorizontalBox();
@@ -30,7 +32,6 @@ public class MainTabbedPanel extends JPanel {
                 var leftToolBarLayout = new FlowLayout();
                 leftToolBarLayout.setAlignment(FlowLayout.RIGHT);
                 leftToolBar.setLayout(leftToolBarLayout);
-
                 //host info
                 var hostInfo = new JLabel("127.0.0.1:6379 - 单机模式");
 
@@ -81,10 +82,19 @@ public class MainTabbedPanel extends JPanel {
                     var leftToolBar = new FlatToolBar();
                     leftToolBar.setLayout(new BorderLayout());
                     leftToolBar.setPreferredSize(new Dimension(50, -1));
-                    leftToolBar.setMargin(new Insets(-1, 5, -1, 10));
 
                     //host info
-                    var closeDrawerBtn = new JLabel(UI.DRAWER_CLOSE_ICON);
+                    var closeDrawerBtn = new JButton(UI.DRAWER_SHOW_OR_CLOSE_ICON);
+                    closeDrawerBtn.addActionListener(action);
+                    action.setBeforeProcess(state -> closeDrawerBtn.setVisible(false));
+                    action.setAfterProcess(state ->{
+                        if(state){
+                            leftToolBar.setMargin(new Insets(0,65,0,0));
+                        }else {
+                            leftToolBar.setMargin(new Insets(0,0,0,0));
+                        }
+                        closeDrawerBtn.setVisible(true);
+                    });
                     leftToolBar.add(closeDrawerBtn, BorderLayout.WEST);
                     contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_LEADING_COMPONENT, leftToolBar);
                 }
@@ -116,7 +126,7 @@ public class MainTabbedPanel extends JPanel {
             }
             {
                 //主窗口
-                contentPanel.addTab("主页", UI.CONTENT_TAB_DATA_ICON, jButton);
+                contentPanel.addTab("主页", UI.CONTENT_TAB_DATA_ICON, new JPanel());
                 //命令窗口
                 contentPanel.addTab("命令", UI.CONTENT_TAB_COMMAND_ICON, new JPanel());
                 contentPanel.addTab("订阅", UI.MQ_ICON, new JPanel());
@@ -131,21 +141,5 @@ public class MainTabbedPanel extends JPanel {
         }
 
     }
-
-    private void chartsFormInit() {
-
-        if (contentPanel.getTabCount() > 2 && contentPanel.getComponentAt(2) instanceof DataChartsForm dataChartsForm) {
-            dataChartsForm.scheduleInit();
-        }
-    }
-
-    private void appendRow(StringBuilder buf, String key, String value) {
-        buf.append("<tr><td valign=\"top\">")
-                .append(key)
-                .append(":</td><td>")
-                .append(value)
-                .append("</td></tr>");
-    }
-
 
 }
