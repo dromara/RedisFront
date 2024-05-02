@@ -107,7 +107,6 @@ public class MainTabbedPanel extends JPanel {
                     cupInfo.setText("0");
                     cupInfo.setIcon(UI.CONTENT_TAB_CPU_ICON);
                     middleToolBar.add(cupInfo);
-                    middleToolBar.add(new JToolBar.Separator());
                     //memoryInfo
                     var memoryInfo = new FlatLabel();
                     memoryInfo.setText("0.0");
