@@ -46,7 +46,7 @@ public class MainDrawerPanel extends SimpleDrawerBuilder {
         JPanel headerPanel = new JPanel();
         headerPanel.setLayout(new BorderLayout());
         if(SystemInfo.isMacOS) {
-            headerPanel.setBorder(new EmptyBorder(30, 15, 5, 15));
+            headerPanel.setBorder(new EmptyBorder(35, 15, 5, 15));
         }else {
             headerPanel.setBorder(new EmptyBorder(15, 15, 5, 15));
         }

@@ -22,6 +22,8 @@ public class MainWidget extends AppWidget<RedisFrontPrefs> {
             this.rootPane.putClientProperty("apple.awt.fullWindowContent", true);
             this.rootPane.putClientProperty("apple.awt.transparentTitleBar", true);
             this.rootPane.putClientProperty("apple.awt.windowTitleVisible", false);
+            this.rootPane.putClientProperty( FlatClientProperties.MACOS_WINDOW_BUTTONS_SPACING,
+                    FlatClientProperties.MACOS_WINDOW_BUTTONS_SPACING_MEDIUM );
         }
         this.setSize(960, 600);
         this.setIconImages(UI.MAIN_FRAME_ICON_IMAGES);

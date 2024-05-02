@@ -29,6 +29,7 @@ public class RedisFrontContext extends AppContext<AppWidget<RedisFrontPrefs>, Re
         ToolTipManager.sharedInstance().setInitialDelay(5);
         ToolTipManager.sharedInstance().setLightWeightPopupEnabled(true);
         FlatLaf.registerCustomDefaultsSource("org.dromara.redisfront.theme");
+        UIManager.put( "FlatLaf.debug.panel.showPlaceholders", true );
 //        FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", "#d81e06"));
         FlatMacLightLaf.setup();
         if (SystemInfo.isLinux) {

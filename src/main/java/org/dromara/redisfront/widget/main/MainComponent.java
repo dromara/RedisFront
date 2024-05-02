@@ -8,6 +8,7 @@ import org.dromara.redisfront.widget.main.panel.MainTabbedPanel;
 import raven.drawer.component.DrawerPanel;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 

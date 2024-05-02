@@ -20,12 +20,11 @@ import static java.awt.Cursor.HAND_CURSOR;
 
 public class MainTabbedPanel extends JPanel {
 
-    private final JTabbedPane contentPanel;
-
     public MainTabbedPanel(DrawerAction action) {
         setLayout(new BorderLayout());
         {
             Box horizontalBox = Box.createHorizontalBox();
+            horizontalBox.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
             horizontalBox.setBorder(new EmptyBorder(0, 10, 0, 0));
             {
                 var leftToolBar = new FlatToolBar();
@@ -63,23 +62,19 @@ public class MainTabbedPanel extends JPanel {
 
 
         {
+            JTabbedPane contentPanel;
             {
-                contentPanel = new JTabbedPane() {
-                    @Override
-                    public void updateUI() {
-                        super.updateUI();
-                        var flatLineBorder = new FlatLineBorder(new Insets(2, 0, 0, 0), UIManager.getColor("Component.borderColor"));
-                        setBorder(flatLineBorder);
-                    }
-                };
+                contentPanel = new JTabbedPane();
+                contentPanel.setBorder(new EmptyBorder(3, 0, 0, 0));
                 contentPanel.setTabPlacement(JTabbedPane.TOP);
                 contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.RIGHT);
-                contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, true);
                 contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
                 contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
                 contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_CARD);
                 {
+
                     var leftToolBar = new FlatToolBar();
+                    leftToolBar.setOpaque(false);
                     leftToolBar.setLayout(new BorderLayout());
                     leftToolBar.setPreferredSize(new Dimension(50, -1));
 
@@ -102,6 +97,7 @@ public class MainTabbedPanel extends JPanel {
                 {
                     //host info
                     var middleToolBar = new FlatToolBar();
+                    middleToolBar.setOpaque(false);
                     var rightToolBarLayout = new FlowLayout();
                     rightToolBarLayout.setAlignment(FlowLayout.CENTER);
                     middleToolBar.setLayout(rightToolBarLayout);
@@ -117,10 +113,9 @@ public class MainTabbedPanel extends JPanel {
                     memoryInfo.setText("0.0");
                     memoryInfo.setIcon(UI.CONTENT_TAB_MEMORY_ICON);
                     middleToolBar.add(memoryInfo);
-                    middleToolBar.add(new JToolBar.Separator());
 
 
-//                    contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, middleToolBar);
+                    contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, middleToolBar);
                 }
 
             }
@@ -132,11 +127,7 @@ public class MainTabbedPanel extends JPanel {
                 contentPanel.addTab("订阅", UI.MQ_ICON, new JPanel());
                 //数据窗口
                 contentPanel.addTab("数据", UI.CONTENT_TAB_INFO_ICON, new JPanel());
-
-
-
             }
-
             add(contentPanel, BorderLayout.CENTER);
         }
 
