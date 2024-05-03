@@ -1,9 +1,11 @@
 package org.dromara.redisfront.widget.main.panel;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import com.formdev.flatlaf.extras.components.FlatLabel;
 import com.formdev.flatlaf.extras.components.FlatToolBar;
 import com.formdev.flatlaf.util.SystemInfo;
+import com.intellij.uiDesigner.core.Spacer;
+import org.dromara.quickswing.constant.OS;
+import org.dromara.quickswing.ui.swing.Background;
 import org.dromara.redisfront.commons.constant.Const;
 import org.dromara.redisfront.commons.constant.UI;
 import org.dromara.redisfront.widget.main.MainWidget;
@@ -12,122 +14,129 @@ import org.dromara.redisfront.widget.main.action.DrawerAction;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 public class MainTabbedPanel extends JPanel {
 
     private final MainWidget owner;
+    private final DrawerAction action;
+    private JTabbedPane contentPanel;
 
     public MainTabbedPanel(DrawerAction action, MainWidget owner) {
         this.owner = owner;
-        setLayout(new BorderLayout());
-        {
-            Box horizontalBox = Box.createHorizontalBox();
-            horizontalBox.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
-            horizontalBox.setBorder(new EmptyBorder(0, 10, 0, 0));
-            {
-                var leftToolBar = new FlatToolBar();
-                var leftToolBarLayout = new FlowLayout();
-                leftToolBarLayout.setAlignment(FlowLayout.RIGHT);
-                leftToolBar.setLayout(leftToolBarLayout);
-                //host info
-                var hostInfo = new JLabel("127.0.0.1:6379 - 单机模式");
-
-                leftToolBar.add(hostInfo);
-                horizontalBox.add(hostInfo);
-            }
-
-            horizontalBox.add(Box.createHorizontalGlue());
-
-            {
-                var rightToolBar = new FlatToolBar();
-                var rightToolBarLayout = new FlowLayout();
-                rightToolBarLayout.setAlignment(FlowLayout.RIGHT);
-                rightToolBar.setLayout(rightToolBarLayout);
-                var info = new FlatLabel();
-                info.setText("V " + Const.APP_VERSION);
-                info.setToolTipText("Version ".concat(Const.APP_VERSION));
-                info.setIcon(UI.INFO_ICON);
-                rightToolBar.add(info);
-                horizontalBox.add(rightToolBar);
-            }
-
-
-            var topPanel = new JPanel(new BorderLayout());
-
-            topPanel.add(horizontalBox, BorderLayout.CENTER);
-            add(topPanel, BorderLayout.SOUTH);
-        }
-
-
-        {
-            JTabbedPane contentPanel;
-            {
-                contentPanel = new JTabbedPane();
-                contentPanel.setBorder(new EmptyBorder(3, 0, 0, 0));
-                contentPanel.setTabPlacement(JTabbedPane.TOP);
-                contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.RIGHT);
-                contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
-                contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
-                contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_CARD);
-                {
-
-                    var leftToolBar = new FlatToolBar();
-                    leftToolBar.setOpaque(false);
-                    leftToolBar.setLayout(new BorderLayout());
-                    leftToolBar.setPreferredSize(new Dimension(50, -1));
-
-                    //host info
-                    var closeDrawerBtn = new JButton(UI.DRAWER_SHOW_OR_CLOSE_ICON);
-                    closeDrawerBtn.addActionListener(action);
-                    action.setBeforeProcess(state -> closeDrawerBtn.setVisible(false));
-                    action.setAfterProcess(state -> {
-                        if (SystemInfo.isMacOS && state && owner.getExtendedState() != Frame.MAXIMIZED_BOTH) {
-                            leftToolBar.setMargin(new Insets(0, 65, 0, 0));
-                        } else {
-                            leftToolBar.setMargin(new Insets(0, 0, 0, 0));
-                        }
-                        closeDrawerBtn.setVisible(true);
-                    });
-                    leftToolBar.add(closeDrawerBtn, BorderLayout.WEST);
-                    contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_LEADING_COMPONENT, leftToolBar);
+        this.action = action;
+        this.setLayout(new BorderLayout());
+        this.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                super.componentResized(e);
+                if (owner.getOS() == OS.WINDOWS) {
+                    if ((owner.getExtendedState() & JFrame.MAXIMIZED_BOTH) != JFrame.NORMAL) {
+                        System.out.println("窗口处于最大化状态");
+                    } else {
+                        System.out.println("窗口未处于最大化状态");
+                    }
                 }
-
-                {
-                    //host info
-                    var middleToolBar = new FlatToolBar();
-                    middleToolBar.setOpaque(false);
-                    var rightToolBarLayout = new FlowLayout();
-                    rightToolBarLayout.setAlignment(FlowLayout.CENTER);
-                    middleToolBar.setLayout(rightToolBarLayout);
-
-                    //cupInfo
-                    var cupInfo = new FlatLabel();
-                    cupInfo.setText("0");
-                    cupInfo.setIcon(UI.CONTENT_TAB_CPU_ICON);
-                    middleToolBar.add(cupInfo);
-                    //memoryInfo
-                    var memoryInfo = new FlatLabel();
-                    memoryInfo.setText("0.0");
-                    memoryInfo.setIcon(UI.CONTENT_TAB_MEMORY_ICON);
-                    middleToolBar.add(memoryInfo);
-
-
-                    contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, middleToolBar);
-                }
-
             }
-            {
-                //主窗口
-                contentPanel.addTab("主页", UI.CONTENT_TAB_DATA_ICON, new JPanel());
-                //命令窗口
-                contentPanel.addTab("命令", UI.CONTENT_TAB_COMMAND_ICON, new JPanel());
-                contentPanel.addTab("订阅", UI.MQ_ICON, new JPanel());
-                //数据窗口
-                contentPanel.addTab("数据", UI.CONTENT_TAB_INFO_ICON, new JPanel());
-            }
-            add(contentPanel, BorderLayout.CENTER);
-        }
+        });
+        this.initComponents();
 
     }
+
+    private void initComponents() {
+        this.initMainTabbedUI();
+        this.initTopBar();
+        this.initMainTabbedItem();
+        this.initMainToolbar();
+    }
+
+    private void initTopBar() {
+        var toolBar = new FlatToolBar();
+        var closeDrawerBtn = new JButton(UI.DRAWER_SHOW_OR_CLOSE_ICON);
+        closeDrawerBtn.addActionListener(action);
+        action.setBeforeProcess(state -> closeDrawerBtn.setVisible(false));
+        action.setAfterProcess(state -> {
+            if (SystemInfo.isMacOS && state && owner.getExtendedState() != Frame.MAXIMIZED_BOTH) {
+                toolBar.setMargin(new Insets(0, 65, 0, 0));
+            } else {
+                toolBar.setMargin(new Insets(0, 0, 0, 0));
+            }
+            closeDrawerBtn.setVisible(true);
+        });
+        toolBar.add(closeDrawerBtn);
+
+        JPanel topBarPanel = new JPanel(new BorderLayout());
+        topBarPanel.setPreferredSize(new Dimension(-1, 40));
+        topBarPanel.setBorder(new EmptyBorder(5, 0, 5, 0));
+        topBarPanel.add(toolBar, BorderLayout.WEST);
+
+        JLabel host = new JLabel("127.0.0.1");
+        host.setHorizontalAlignment(SwingConstants.CENTER);
+        topBarPanel.add(host, BorderLayout.CENTER);
+
+        topBarPanel.add(new JSeparator(), BorderLayout.SOUTH);
+        this.add(topBarPanel, BorderLayout.NORTH);
+    }
+
+
+    private void initMainToolbar() {
+        Box horizontalBox = Box.createHorizontalBox();
+        horizontalBox.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
+        var rightToolBar = new FlatToolBar();
+        rightToolBar.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        var info = new JLabel();
+        info.setText("V " + Const.APP_VERSION);
+        info.setToolTipText("Version ".concat(Const.APP_VERSION));
+        info.setIcon(UI.INFO_ICON);
+        rightToolBar.add(info);
+        horizontalBox.add(rightToolBar);
+        this.add(horizontalBox, BorderLayout.SOUTH);
+    }
+
+    private void initMainTabbedUI() {
+        contentPanel = new JTabbedPane();
+        contentPanel.setTabPlacement(JTabbedPane.TOP);
+        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.LEADING);
+        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
+        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
+        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_CARD);
+        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_HAS_FULL_BORDER, false);
+        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_CONTENT_SEPARATOR, true);
+
+        Background background = new Background();
+        background.setSize(new Dimension(500,600));
+        background.add(contentPanel,BorderLayout.CENTER);
+        this.add(contentPanel, BorderLayout.CENTER);
+
+
+        {
+            var leftToolBar = new FlatToolBar();
+            leftToolBar.setLayout(new FlowLayout(FlowLayout.CENTER));
+            var cupInfo = new JLabel("0.5%", UI.CONTENT_TAB_CPU_ICON, SwingConstants.CENTER);
+            leftToolBar.add(cupInfo);
+            contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_LEADING_COMPONENT, leftToolBar);
+
+            var rightToolBar = new FlatToolBar();
+            rightToolBar.setLayout(new FlowLayout(FlowLayout.CENTER));
+            var memoryInfo = new JLabel("120MB", UI.CONTENT_TAB_MEMORY_ICON, SwingConstants.CENTER);
+            rightToolBar.add(memoryInfo);
+
+            contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, rightToolBar);
+        }
+
+
+    }
+
+    private void initMainTabbedItem() {
+        //主窗口
+        contentPanel.addTab("主页", UI.CONTENT_TAB_DATA_ICON, new JPanel());
+        //命令窗口
+        contentPanel.addTab("命令", UI.CONTENT_TAB_COMMAND_ICON, new JPanel());
+        contentPanel.addTab("订阅", UI.MQ_ICON, new JPanel());
+        //数据窗口
+        contentPanel.addTab("数据", UI.CONTENT_TAB_INFO_ICON, new JPanel());
+    }
+
 
 }

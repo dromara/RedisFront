@@ -52,7 +52,7 @@ version = "1.0.7"
 
 val applicationName: String = "RedisFront"
 val organization: String = "dromara.org"
-val supportUrl: String = "https://dromara.org"
+val supportUrl: String = "https://redisfront.dromara.org"
 
 val hutoolVersion = "5.8.10"
 val fifesoftVersion = "3.2.0"

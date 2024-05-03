@@ -14,7 +14,6 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 public class MainWidget extends AppWidget<RedisFrontPrefs> {
-    private boolean maximized = false;
     public MainWidget(AppContext<? extends AppWidget<RedisFrontPrefs>, RedisFrontPrefs> context, String title, RedisFrontPrefs prefs) throws HeadlessException {
         super(context, title, prefs);
         if (SystemInfo.isWindows) {
@@ -32,17 +31,6 @@ public class MainWidget extends AppWidget<RedisFrontPrefs> {
         this.setSize(960, 600);
         this.setIconImages(UI.MAIN_FRAME_ICON_IMAGES);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                super.componentResized(e);
-                JFrame frame = (JFrame) e.getComponent();
-                if (isMacOSMaximized(frame)) {
-                    System.out.println("Window is maximized");
-                }
-            }
-
-        });
         this.setContentPane(new MainComponent(this));
     }
     private static boolean isMacOSMaximized(JFrame frame) {
