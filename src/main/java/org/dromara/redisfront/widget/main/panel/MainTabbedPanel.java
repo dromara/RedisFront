@@ -3,24 +3,22 @@ package org.dromara.redisfront.widget.main.panel;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.components.FlatLabel;
 import com.formdev.flatlaf.extras.components.FlatToolBar;
-import com.formdev.flatlaf.ui.FlatLineBorder;
+import com.formdev.flatlaf.util.SystemInfo;
 import org.dromara.redisfront.commons.constant.Const;
 import org.dromara.redisfront.commons.constant.UI;
-import org.dromara.redisfront.ui.form.fragment.DataChartsForm;
+import org.dromara.redisfront.widget.main.MainWidget;
 import org.dromara.redisfront.widget.main.action.DrawerAction;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
-import static java.awt.Cursor.HAND_CURSOR;
 
 public class MainTabbedPanel extends JPanel {
 
-    public MainTabbedPanel(DrawerAction action) {
+    private final MainWidget owner;
+
+    public MainTabbedPanel(DrawerAction action, MainWidget owner) {
+        this.owner = owner;
         setLayout(new BorderLayout());
         {
             Box horizontalBox = Box.createHorizontalBox();
@@ -82,11 +80,11 @@ public class MainTabbedPanel extends JPanel {
                     var closeDrawerBtn = new JButton(UI.DRAWER_SHOW_OR_CLOSE_ICON);
                     closeDrawerBtn.addActionListener(action);
                     action.setBeforeProcess(state -> closeDrawerBtn.setVisible(false));
-                    action.setAfterProcess(state ->{
-                        if(state){
-                            leftToolBar.setMargin(new Insets(0,65,0,0));
-                        }else {
-                            leftToolBar.setMargin(new Insets(0,0,0,0));
+                    action.setAfterProcess(state -> {
+                        if (SystemInfo.isMacOS && state && owner.getExtendedState() != Frame.MAXIMIZED_BOTH) {
+                            leftToolBar.setMargin(new Insets(0, 65, 0, 0));
+                        } else {
+                            leftToolBar.setMargin(new Insets(0, 0, 0, 0));
                         }
                         closeDrawerBtn.setVisible(true);
                     });

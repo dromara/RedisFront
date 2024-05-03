@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.SystemInfo;
 import lombok.Getter;
+import org.dromara.redisfront.widget.main.MainWidget;
 import org.dromara.redisfront.widget.main.panel.drawer.Logo;
 import org.dromara.redisfront.widget.main.panel.drawer.ThemesChange;
 import org.jetbrains.annotations.NotNull;
@@ -25,14 +26,10 @@ import java.util.Arrays;
 @Getter
 public class MainDrawerPanel extends SimpleDrawerBuilder {
 
-    public static final MainDrawerPanel drawer = new MainDrawerPanel();
+    private final MainWidget owner;
 
-    public static MainDrawerPanel getInstance() {
-        return drawer;
-    }
-
-    public MainDrawerPanel() {
-
+    public MainDrawerPanel(MainWidget owner) {
+        this.owner = owner;
     }
 
     @Override

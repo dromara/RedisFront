@@ -24,11 +24,11 @@ public class MainComponent extends Background {
 
     private void initComponents() {
         JPanel mainPanel = new JPanel(new BorderLayout());
-        drawerPanel = new DrawerPanel(new MainDrawerPanel());
+        drawerPanel = new DrawerPanel(new MainDrawerPanel(owner));
         drawerPanel.setMinimumSize(new Dimension(250, -1));
         drawerPanel.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
         mainPanel.add(drawerPanel, BorderLayout.WEST);
-        MainTabbedPanel mainTabbedPanel = new MainTabbedPanel(new DrawerAction(owner, drawerPanel));
+        MainTabbedPanel mainTabbedPanel = new MainTabbedPanel(new DrawerAction(owner, drawerPanel),owner);
         mainPanel.add(mainTabbedPanel, BorderLayout.CENTER);
         add(mainPanel, BorderLayout.CENTER);
     }
