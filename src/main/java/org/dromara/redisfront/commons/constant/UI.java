@@ -18,7 +18,7 @@ public class UI {
     public static final Icon UNSUBSCRIBE_ICON = new FlatSVGIcon("svg/unSubscribe.svg");
     public static final Icon PUBLISH_ICON = new FlatSVGIcon("svg/publish.svg");
     public static final Icon TREE_KEY_ICON = new FlatSVGIcon("icons/tree_key.svg");
-    public static final Icon MQ_ICON = new FlatSVGIcon("icons/mq.svg");
+    public static final Icon MQ_ICON = new FlatSVGIcon("icons/mq.svg",24,24);
     public static final Icon CLOSE_ICON = new FlatSVGIcon("icons/close.svg");
     public static final Icon LOGS_ICON = new FlatSVGIcon("icons/RecentlyUsed.svg");
     public static final Icon PLUS_ICON = new FlatSVGIcon("icons/add.svg");
@@ -32,13 +32,13 @@ public class UI {
     public static final Icon REFRESH_ICON = new FlatSVGIcon("icons/refresh.svg");
     public static final Icon DELETE_ICON = new FlatSVGIcon("icons/delete.svg");
     public static final Icon SAVE_ICON = new FlatSVGIcon("icons/save.svg");
-    public static final Icon CONTENT_TAB_DATA_ICON = new FlatSVGIcon("icons/db_key2.svg");
-    public static final Icon CONTENT_TAB_COMMAND_ICON = new FlatSVGIcon("icons/db_cli2.svg");
-    public static final Icon CONTENT_TAB_INFO_ICON = new FlatSVGIcon("icons/db_report2.svg");
+    public static final Icon CONTENT_TAB_DATA_ICON = new FlatSVGIcon("icons/db_key2.svg",24,24);
+    public static final Icon CONTENT_TAB_COMMAND_ICON = new FlatSVGIcon("icons/db_cli2.svg",24,24);
+    public static final Icon CONTENT_TAB_INFO_ICON = new FlatSVGIcon("icons/db_report2.svg",24,24);
     public static final Icon CONTENT_TAB_MEMORY_ICON = new FlatSVGIcon("icons/memory.svg");
     public static final Icon CONTENT_TAB_CPU_ICON = new FlatSVGIcon("icons/process.svg");
     public static final Icon CONTENT_TAB_KEYS_ICON = new FlatSVGIcon("icons/key.svg");
     public static final Icon CONTENT_TAB_HOST_ICON = new FlatSVGIcon("icons/host.svg");
-    public static final Icon DRAWER_SHOW_OR_CLOSE_ICON = new FlatSVGIcon("icons/listFiles.svg",16,16);
+    public static final Icon DRAWER_SHOW_OR_CLOSE_ICON = new FlatSVGIcon("icons/listFiles.svg",24,24);
 
 }

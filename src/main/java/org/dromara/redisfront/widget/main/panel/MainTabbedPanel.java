@@ -51,19 +51,26 @@ public class MainTabbedPanel extends JPanel {
         this.initMainToolbar();
     }
 
+
+
     private void initTopBar() {
         var toolBar = new FlatToolBar();
         var closeDrawerBtn = new JButton(UI.DRAWER_SHOW_OR_CLOSE_ICON);
         closeDrawerBtn.addActionListener(action);
         action.setBeforeProcess(state -> closeDrawerBtn.setVisible(false));
         action.setAfterProcess(state -> {
-            if (SystemInfo.isMacOS && state && owner.getExtendedState() != Frame.MAXIMIZED_BOTH) {
-                toolBar.setMargin(new Insets(0, 65, 0, 0));
+            if (SystemInfo.isMacOS && state) {
+                toolBar.setMargin(new Insets(2, 73, 0, 0));
             } else {
-                toolBar.setMargin(new Insets(0, 0, 0, 0));
+                toolBar.setMargin(new Insets(2, 6, 0, 0));
             }
             closeDrawerBtn.setVisible(true);
         });
+        if (SystemInfo.isMacOS) {
+            toolBar.setMargin(new Insets(2, 73, 0, 0));
+        } else {
+            toolBar.setMargin(new Insets(2, 6, 0, 0));
+        }
         toolBar.add(closeDrawerBtn);
 
         JPanel topBarPanel = new JPanel(new BorderLayout());
