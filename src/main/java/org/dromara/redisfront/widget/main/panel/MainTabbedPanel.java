@@ -67,7 +67,7 @@ public class MainTabbedPanel extends JPanel {
             closeDrawerBtn.setVisible(true);
         });
         if (SystemInfo.isMacOS) {
-            toolBar.setMargin(new Insets(2, 73, 0, 0));
+            toolBar.setMargin(new Insets(2, 5, 0, 0));
         } else {
             toolBar.setMargin(new Insets(2, 6, 0, 0));
         }
@@ -81,7 +81,8 @@ public class MainTabbedPanel extends JPanel {
             topBarPanel.setPreferredSize(new Dimension(-1, 33));
         }
         topBarPanel.add(toolBar, BorderLayout.WEST);
-        JLabel host = new JLabel("阿里云REDIS(127.0.0.1) - 集群模式");
+        JLabel host = new JLabel(UI.REDIS_ICON_14x14);
+        host.setText("阿里云REDIS (127.0.0.1) - 集群模式");
         host.setVerticalAlignment(SwingConstants.CENTER);
         host.setHorizontalAlignment(SwingConstants.CENTER);
         topBarPanel.add(host, BorderLayout.CENTER);
@@ -98,9 +99,9 @@ public class MainTabbedPanel extends JPanel {
         var rightToolBar = new FlatToolBar();
         rightToolBar.setLayout(new FlowLayout(FlowLayout.RIGHT));
         var info = new JLabel();
-        info.setText("RedisFront " + Const.APP_VERSION);
+        info.setText( Const.APP_VERSION);
         info.setToolTipText("Version ".concat(Const.APP_VERSION));
-        info.setIcon(UI.REDIS_ICON_14x14);
+        info.setIcon(UI.REDIS_TEXT_80x16);
         rightToolBar.add(info);
         horizontalBox.add(rightToolBar);
         this.add(horizontalBox, BorderLayout.SOUTH);

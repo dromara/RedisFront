@@ -13,7 +13,8 @@ public class UI {
     public static final List<Image> MAIN_FRAME_ICON_IMAGES = FlatSVGUtils.createWindowIconImages("/svg/redisfront.svg");
     public static final Icon REDIS_ICON = new FlatSVGIcon("svg/redisfront.svg");
     public static final Icon REDIS_ICON_45x45 = new FlatSVGIcon("svg/redisfront.svg",45,45);
-    public static final Icon REDIS_ICON_14x14 = new FlatSVGIcon("svg/redisfront.svg",14,14);
+    public static final Icon REDIS_ICON_14x14 = new FlatSVGIcon("svg/redisfront.svg",18,18);
+    public static final Icon REDIS_TEXT_80x16 = new FlatSVGIcon("svg/redisfront_text.svg",80,16);
     public static final Icon SUBSCRIBE_ICON = new FlatSVGIcon("svg/subscribe.svg");
     public static final Icon UNSUBSCRIBE_ICON = new FlatSVGIcon("svg/unSubscribe.svg");
     public static final Icon PUBLISH_ICON = new FlatSVGIcon("svg/publish.svg");
@@ -32,7 +33,7 @@ public class UI {
     public static final Icon REFRESH_ICON = new FlatSVGIcon("icons/refresh.svg");
     public static final Icon DELETE_ICON = new FlatSVGIcon("icons/delete.svg");
     public static final Icon SAVE_ICON = new FlatSVGIcon("icons/save.svg");
-    public static final Icon CONTENT_TAB_DATA_ICON = new FlatSVGIcon("icons/db_key2.svg",24,24);
+    public static final Icon CONTENT_TAB_DATA_ICON = new FlatSVGIcon("icons/home.svg",24,24);
     public static final Icon CONTENT_TAB_COMMAND_ICON = new FlatSVGIcon("icons/db_cli2.svg",24,24);
     public static final Icon CONTENT_TAB_INFO_ICON = new FlatSVGIcon("icons/db_report2.svg",24,24);
     public static final Icon CONTENT_TAB_MEMORY_ICON = new FlatSVGIcon("icons/memory.svg");
