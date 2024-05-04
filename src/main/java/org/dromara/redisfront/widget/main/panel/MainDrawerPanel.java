@@ -66,11 +66,11 @@ public class MainDrawerPanel extends SimpleDrawerBuilder {
     public SimpleMenuOption getSimpleMenuOption() {
 
         MenuItem[] items = new MenuItem[]{
-                new Item("127.0.0.1", "project.svg"),
-                new Item("127.0.0.1", "project.svg"),
-                new Item("127.0.0.1", "project.svg"),
-                new Item("127.0.0.1", "project.svg"),
-                new Item("127.0.0.1", "project.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
         };
 
         SimpleMenuOption simpleMenuOption = getMenuOption();
@@ -114,7 +114,7 @@ public class MainDrawerPanel extends SimpleDrawerBuilder {
 
         simpleMenuOption.setMenus(items)
                 .setBaseIconPath("icons")
-                .setIconScale(0.45f);
+                .setIconScale(0.08f);
         return simpleMenuOption;
     }
 
