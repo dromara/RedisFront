@@ -31,7 +31,7 @@ public class MainTabbedPanel extends JPanel {
             @Override
             public void componentResized(ComponentEvent e) {
                 super.componentResized(e);
-                if (owner.getOS() == OS.WINDOWS) {
+                if (owner.getOS() == OS.WINDOWS||owner.getOS() == OS.MAC_OS_X) {
                     if ((owner.getExtendedState() & JFrame.MAXIMIZED_BOTH) != JFrame.NORMAL) {
                         System.out.println("窗口处于最大化状态");
                     } else {
@@ -67,13 +67,14 @@ public class MainTabbedPanel extends JPanel {
         toolBar.add(closeDrawerBtn);
 
         JPanel topBarPanel = new JPanel(new BorderLayout());
-        topBarPanel.setPreferredSize(new Dimension(-1, 40));
-        topBarPanel.setBorder(new EmptyBorder(5, 0, 5, 0));
+        topBarPanel.setPreferredSize(new Dimension(-1, 39));
+        topBarPanel.setBorder(new EmptyBorder(3, 0, 0, 0));
         topBarPanel.add(toolBar, BorderLayout.WEST);
 
         JLabel host = new JLabel("127.0.0.1");
-        host.setHorizontalAlignment(SwingConstants.CENTER);
-        topBarPanel.add(host, BorderLayout.CENTER);
+        JPanel hostPanel = new JPanel(new BorderLayout());
+        hostPanel.add(host, BorderLayout.CENTER);
+        topBarPanel.add(hostPanel, BorderLayout.CENTER);
 
         topBarPanel.add(new JSeparator(), BorderLayout.SOUTH);
         this.add(topBarPanel, BorderLayout.NORTH);
@@ -91,7 +92,7 @@ public class MainTabbedPanel extends JPanel {
         info.setIcon(UI.INFO_ICON);
         rightToolBar.add(info);
         horizontalBox.add(rightToolBar);
-        this.add(horizontalBox, BorderLayout.SOUTH);
+//        this.add(horizontalBox, BorderLayout.SOUTH);
     }
 
     private void initMainTabbedUI() {
@@ -100,7 +101,7 @@ public class MainTabbedPanel extends JPanel {
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.LEADING);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
-        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_CARD);
+        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_HAS_FULL_BORDER, false);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_CONTENT_SEPARATOR, true);
 

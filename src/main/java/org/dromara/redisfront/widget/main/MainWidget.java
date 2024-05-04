@@ -10,8 +10,6 @@ import org.dromara.redisfront.RedisFrontPrefs;
 import org.dromara.redisfront.commons.constant.UI;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 
 public class MainWidget extends AppWidget<RedisFrontPrefs> {
     public MainWidget(AppContext<? extends AppWidget<RedisFrontPrefs>, RedisFrontPrefs> context, String title, RedisFrontPrefs prefs) throws HeadlessException {
