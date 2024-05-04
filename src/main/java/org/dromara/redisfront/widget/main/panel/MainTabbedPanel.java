@@ -3,8 +3,6 @@ package org.dromara.redisfront.widget.main.panel;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.components.FlatToolBar;
 import com.formdev.flatlaf.util.SystemInfo;
-import com.intellij.uiDesigner.core.Spacer;
-import org.dromara.quickswing.constant.OS;
 import org.dromara.quickswing.ui.swing.Background;
 import org.dromara.redisfront.commons.constant.Const;
 import org.dromara.redisfront.commons.constant.UI;
@@ -21,27 +19,39 @@ public class MainTabbedPanel extends JPanel {
 
     private final MainWidget owner;
     private final DrawerAction action;
-    private JTabbedPane contentPanel;
-
+    private JTabbedPane tabbedPane;
+    private FlatToolBar toolBar;
+    private Boolean drawerState = false;
     public MainTabbedPanel(DrawerAction action, MainWidget owner) {
         this.owner = owner;
         this.action = action;
         this.setLayout(new BorderLayout());
+        this.initComponentListener();
+        this.initComponents();
+    }
+
+    private void initComponentListener() {
         this.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
                 super.componentResized(e);
-                if (owner.getOS() == OS.WINDOWS||owner.getOS() == OS.MAC_OS_X) {
-                    if ((owner.getExtendedState() & JFrame.MAXIMIZED_BOTH) != JFrame.NORMAL) {
-                        System.out.println("窗口处于最大化状态");
-                    } else {
-                        System.out.println("窗口未处于最大化状态");
-                    }
-                }
+//                if(owner.isFullScreen()) {
+//                    if(drawerState) {
+//                        toolBar.setMargin(new Insets(2, 15, 0, 0));
+//                    }else {
+//                        toolBar.setMargin(new Insets(2, 5, 0, 0));
+//                    }
+//                }else{
+//                    if(drawerState) {
+//                        toolBar.setMargin(new Insets(2, 73, 0, 0));
+//                    }else {
+//
+//                        toolBar.setMargin(new Insets(2, 10, 0, 0));
+//                    }
+//
+//                }
             }
         });
-        this.initComponents();
-
     }
 
     private void initComponents() {
@@ -54,24 +64,42 @@ public class MainTabbedPanel extends JPanel {
 
 
     private void initTopBar() {
-        var toolBar = new FlatToolBar();
-        var closeDrawerBtn = new JButton(UI.DRAWER_SHOW_OR_CLOSE_ICON);
-        closeDrawerBtn.addActionListener(action);
-        action.setBeforeProcess(state -> closeDrawerBtn.setVisible(false));
-        action.setAfterProcess(state -> {
-            if (SystemInfo.isMacOS && state) {
-                toolBar.setMargin(new Insets(2, 73, 0, 0));
-            } else {
-                toolBar.setMargin(new Insets(2, 6, 0, 0));
-            }
-            closeDrawerBtn.setVisible(true);
-        });
+
+        toolBar = new FlatToolBar();
+
         if (SystemInfo.isMacOS) {
             toolBar.setMargin(new Insets(2, 5, 0, 0));
         } else {
             toolBar.setMargin(new Insets(2, 6, 0, 0));
         }
+
+        var closeDrawerBtn = new JButton(UI.DRAWER_SHOW_OR_CLOSE_ICON);
+        closeDrawerBtn.addActionListener(action);
         toolBar.add(closeDrawerBtn);
+        action.setBeforeProcess(state -> closeDrawerBtn.setVisible(false));
+        action.setAfterProcess(state -> {
+            drawerState = state;
+            if (SystemInfo.isMacOS) {
+                if(owner.isFullScreen()) {
+                    if(drawerState) {
+                        toolBar.setMargin(new Insets(2, 15, 0, 0));
+                    }else {
+                        toolBar.setMargin(new Insets(2, 5, 0, 0));
+                    }
+                }else{
+                    if(drawerState) {
+                        toolBar.setMargin(new Insets(2, 70, 0, 0));
+                    }else {
+                        toolBar.setMargin(new Insets(2, 15, 0, 0));
+                    }
+                }
+                tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_INSETS,new Insets(10,22,10,22));
+            } else {
+                toolBar.setMargin(new Insets(2, 6, 0, 0));
+                tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_INSETS,new Insets(10,10,10,10));
+            }
+            closeDrawerBtn.setVisible(true);
+        });
 
         JPanel topBarPanel = new JPanel(new BorderLayout());
         if(SystemInfo.isMacOS) {
@@ -80,13 +108,13 @@ public class MainTabbedPanel extends JPanel {
         }else {
             topBarPanel.setPreferredSize(new Dimension(-1, 33));
         }
+
         topBarPanel.add(toolBar, BorderLayout.WEST);
         JLabel host = new JLabel(UI.REDIS_ICON_14x14);
         host.setText("阿里云REDIS (127.0.0.1) - 集群模式");
         host.setVerticalAlignment(SwingConstants.CENTER);
         host.setHorizontalAlignment(SwingConstants.CENTER);
         topBarPanel.add(host, BorderLayout.CENTER);
-        topBarPanel.add(new Spacer(), BorderLayout.EAST);
         topBarPanel.add(new JSeparator(), BorderLayout.SOUTH);
         this.add(topBarPanel, BorderLayout.NORTH);
     }
@@ -108,20 +136,20 @@ public class MainTabbedPanel extends JPanel {
     }
 
     private void initMainTabbedUI() {
-        contentPanel = new JTabbedPane();
-        contentPanel.setTabPlacement(JTabbedPane.LEFT);
-        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.TOP);
-        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_FILL);
-        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_LEADING);
-        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
-        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_CONTENT_SEPARATOR, true);
-        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ROTATION,FlatClientProperties.TABBED_PANE_TAB_ROTATION_NONE);
-        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_WIDTH_MODE,FlatClientProperties.TABBED_PANE_TAB_WIDTH_MODE_COMPACT);
-
+        tabbedPane = new JTabbedPane();
+        tabbedPane.setTabPlacement(JTabbedPane.LEFT);
+        tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.TOP);
+        tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_FILL);
+        tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_LEADING);
+        tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
+        tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_CONTENT_SEPARATOR, true);
+        tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ROTATION,FlatClientProperties.TABBED_PANE_TAB_ROTATION_NONE);
+        tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_WIDTH_MODE,FlatClientProperties.TABBED_PANE_TAB_WIDTH_MODE_COMPACT);
+        tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_HEIGHT,70);
         Background background = new Background();
         background.setSize(new Dimension(500,600));
-        background.add(contentPanel,BorderLayout.CENTER);
-        this.add(contentPanel, BorderLayout.CENTER);
+        background.add(tabbedPane,BorderLayout.CENTER);
+        this.add(tabbedPane, BorderLayout.CENTER);
 
 
         {
@@ -129,7 +157,7 @@ public class MainTabbedPanel extends JPanel {
             leftToolBar.setLayout(new FlowLayout(FlowLayout.CENTER));
             var cupInfo = new JLabel("0.5%", UI.CONTENT_TAB_CPU_ICON, SwingConstants.CENTER);
             leftToolBar.add(cupInfo);
-//            contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_LEADING_COMPONENT, leftToolBar);
+//            tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_LEADING_COMPONENT, new JLabel(UI.REDIS_ICON_45x45));
 
             var rightToolBar = new FlatToolBar();
             rightToolBar.setLayout(new FlowLayout(FlowLayout.CENTER));
@@ -144,12 +172,12 @@ public class MainTabbedPanel extends JPanel {
 
     private void initMainTabbedItem() {
         //主窗口
-        contentPanel.addTab("主页", UI.CONTENT_TAB_DATA_ICON, new JPanel());
+        tabbedPane.addTab("主页", UI.CONTENT_TAB_DATA_ICON, new JPanel());
         //命令窗口
-        contentPanel.addTab("命令", UI.CONTENT_TAB_COMMAND_ICON, new JPanel());
-        contentPanel.addTab("订阅", UI.MQ_ICON, new JPanel());
+        tabbedPane.addTab("命令", UI.CONTENT_TAB_COMMAND_ICON, new JPanel());
+        tabbedPane.addTab("订阅", UI.MQ_ICON, new JPanel());
         //数据窗口
-        contentPanel.addTab("数据", UI.CONTENT_TAB_INFO_ICON, new JPanel());
+        tabbedPane.addTab("数据", UI.CONTENT_TAB_INFO_ICON, new JPanel());
     }
 
 

@@ -4,10 +4,12 @@ package org.dromara.redisfront.widget.main;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.util.SystemInfo;
+import org.dromara.quickswing.constant.OS;
 import org.dromara.quickswing.ui.app.AppContext;
 import org.dromara.quickswing.ui.app.AppWidget;
 import org.dromara.redisfront.RedisFrontPrefs;
 import org.dromara.redisfront.commons.constant.UI;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -22,8 +24,8 @@ public class MainWidget extends AppWidget<RedisFrontPrefs> {
             this.rootPane.putClientProperty("apple.awt.fullWindowContent", true);
             this.rootPane.putClientProperty("apple.awt.transparentTitleBar", true);
             this.rootPane.putClientProperty("apple.awt.windowTitleVisible", false);
-            this.rootPane.putClientProperty( FlatClientProperties.MACOS_WINDOW_BUTTONS_SPACING,
-                    FlatClientProperties.MACOS_WINDOW_BUTTONS_SPACING_MEDIUM );
+            this.rootPane.putClientProperty(FlatClientProperties.MACOS_WINDOW_BUTTONS_SPACING,
+                    FlatClientProperties.MACOS_WINDOW_BUTTONS_SPACING_MEDIUM);
         }
         this.setResizable(true);
         this.setSize(960, 600);
@@ -31,22 +33,25 @@ public class MainWidget extends AppWidget<RedisFrontPrefs> {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setContentPane(new MainComponent(this));
     }
-    private static boolean isMacOSMaximized(JFrame frame) {
-        GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        GraphicsDevice device = env.getDefaultScreenDevice();
-        DisplayMode displayMode = device.getDisplayMode();
-        Dimension screenSize = new Dimension(displayMode.getWidth(), displayMode.getHeight());
 
-        Insets screenInsets = Toolkit.getDefaultToolkit().getScreenInsets(frame.getGraphicsConfiguration());
-        int menuBarHeight = screenInsets.top; // 菜单栏的高度
-        int dockHeight = screenInsets.bottom; // Dock 的高度
 
-        // 获取屏幕工作区域大小，去除菜单栏和 Dock 的高度
-        int screenWidth = screenSize.width - screenInsets.left - screenInsets.right;
-        int screenHeight = screenSize.height - screenInsets.top - screenInsets.bottom;
-
-        return frame.getWidth() == screenWidth && frame.getHeight() == screenHeight - menuBarHeight - dockHeight;
+    public boolean isFullScreen() {
+        boolean isFullScreen = false;
+        if (this.getOS() == OS.WINDOWS) {
+            isFullScreen = (getExtendedState() & JFrame.MAXIMIZED_BOTH) != JFrame.NORMAL;
+        } else if (getOS() == OS.MAC_OS_X) {
+            GraphicsEnvironment evn = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            GraphicsDevice defaultScreenDevice = evn.getDefaultScreenDevice();
+            int screenWidth = (int) defaultScreenDevice.getDefaultConfiguration().getBounds().getWidth();
+            int screenHeight = (int) defaultScreenDevice.getDefaultConfiguration().getBounds().getHeight();
+            int screenMenuBarHeight = Toolkit.getDefaultToolkit().getScreenInsets(this.getGraphicsConfiguration()).top;
+            int ownerWidth = this.getWidth();
+            int ownerHeight = this.getHeight();
+            isFullScreen = (screenWidth == ownerWidth) && ((screenHeight - (screenMenuBarHeight - 1)) == ownerHeight);
+        }
+        return isFullScreen;
     }
+
     @Override
     protected void preMenuBarInit(RedisFrontPrefs redisFrontPrefs, SplashScreen splashScreen) {
 
