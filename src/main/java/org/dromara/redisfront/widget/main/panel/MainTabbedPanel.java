@@ -67,43 +67,48 @@ public class MainTabbedPanel extends JPanel {
         toolBar.add(closeDrawerBtn);
 
         JPanel topBarPanel = new JPanel(new BorderLayout());
-        topBarPanel.setPreferredSize(new Dimension(-1, 39));
-        topBarPanel.setBorder(new EmptyBorder(3, 0, 0, 0));
+        if(SystemInfo.isMacOS) {
+            topBarPanel.setPreferredSize(new Dimension(-1, 39));
+            topBarPanel.setBorder(new EmptyBorder(3, 0, 0, 0));
+        }else {
+            topBarPanel.setPreferredSize(new Dimension(-1, 33));
+        }
         topBarPanel.add(toolBar, BorderLayout.WEST);
-
-        JLabel host = new JLabel("127.0.0.1");
-        JPanel hostPanel = new JPanel(new BorderLayout());
-        hostPanel.add(host, BorderLayout.CENTER);
-        topBarPanel.add(hostPanel, BorderLayout.CENTER);
-
+        JLabel host = new JLabel("阿里云REDIS(127.0.0.1) - 集群模式");
+        host.setVerticalAlignment(SwingConstants.CENTER);
+        host.setHorizontalAlignment(SwingConstants.CENTER);
+        topBarPanel.add(host, BorderLayout.CENTER);
+        topBarPanel.add(new Spacer(), BorderLayout.EAST);
         topBarPanel.add(new JSeparator(), BorderLayout.SOUTH);
         this.add(topBarPanel, BorderLayout.NORTH);
     }
 
 
     private void initMainToolbar() {
-        Box horizontalBox = Box.createHorizontalBox();
+        Box horizontalBox = Box.createVerticalBox();
         horizontalBox.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
+        horizontalBox.add(new JSeparator());
         var rightToolBar = new FlatToolBar();
         rightToolBar.setLayout(new FlowLayout(FlowLayout.RIGHT));
         var info = new JLabel();
-        info.setText("V " + Const.APP_VERSION);
+        info.setText("RedisFront " + Const.APP_VERSION);
         info.setToolTipText("Version ".concat(Const.APP_VERSION));
-        info.setIcon(UI.INFO_ICON);
+        info.setIcon(UI.REDIS_ICON_14x14);
         rightToolBar.add(info);
         horizontalBox.add(rightToolBar);
-//        this.add(horizontalBox, BorderLayout.SOUTH);
+        this.add(horizontalBox, BorderLayout.SOUTH);
     }
 
     private void initMainTabbedUI() {
         contentPanel = new JTabbedPane();
-        contentPanel.setTabPlacement(JTabbedPane.TOP);
-        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.LEADING);
-        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
-        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_CENTER);
+        contentPanel.setTabPlacement(JTabbedPane.LEFT);
+        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.TOP);
+        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_FILL);
+        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_LEADING);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
-        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_HAS_FULL_BORDER, false);
         contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_CONTENT_SEPARATOR, true);
+        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ROTATION,FlatClientProperties.TABBED_PANE_TAB_ROTATION_NONE);
+        contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_WIDTH_MODE,FlatClientProperties.TABBED_PANE_TAB_WIDTH_MODE_COMPACT);
 
         Background background = new Background();
         background.setSize(new Dimension(500,600));
@@ -116,14 +121,14 @@ public class MainTabbedPanel extends JPanel {
             leftToolBar.setLayout(new FlowLayout(FlowLayout.CENTER));
             var cupInfo = new JLabel("0.5%", UI.CONTENT_TAB_CPU_ICON, SwingConstants.CENTER);
             leftToolBar.add(cupInfo);
-            contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_LEADING_COMPONENT, leftToolBar);
+//            contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_LEADING_COMPONENT, leftToolBar);
 
             var rightToolBar = new FlatToolBar();
             rightToolBar.setLayout(new FlowLayout(FlowLayout.CENTER));
             var memoryInfo = new JLabel("120MB", UI.CONTENT_TAB_MEMORY_ICON, SwingConstants.CENTER);
             rightToolBar.add(memoryInfo);
 
-            contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, rightToolBar);
+//            contentPanel.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, rightToolBar);
         }
 
 

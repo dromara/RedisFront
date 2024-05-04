@@ -13,6 +13,7 @@ public class UI {
     public static final List<Image> MAIN_FRAME_ICON_IMAGES = FlatSVGUtils.createWindowIconImages("/svg/redisfront.svg");
     public static final Icon REDIS_ICON = new FlatSVGIcon("svg/redisfront.svg");
     public static final Icon REDIS_ICON_45x45 = new FlatSVGIcon("svg/redisfront.svg",45,45);
+    public static final Icon REDIS_ICON_14x14 = new FlatSVGIcon("svg/redisfront.svg",14,14);
     public static final Icon SUBSCRIBE_ICON = new FlatSVGIcon("svg/subscribe.svg");
     public static final Icon UNSUBSCRIBE_ICON = new FlatSVGIcon("svg/unSubscribe.svg");
     public static final Icon PUBLISH_ICON = new FlatSVGIcon("svg/publish.svg");

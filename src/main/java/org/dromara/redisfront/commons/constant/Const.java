@@ -13,7 +13,7 @@ import java.io.File;
 
 public class Const {
 
-    public static final String APP_VERSION = PropsUtil.get("application.properties").getProperty("version", "1.0.0");
+    public static final String APP_VERSION = PropsUtil.get("application.properties").getProperty("version", "2024.1");
     public static final String APP_COPYRIGHT = PropsUtil.get("application.properties").getProperty("copyright", "RedisFront");
     public static final String KEY_THEME = "theme1";
     public static final String KEY_THEME_SELECT_INDEX = "selectThemeIndex";
