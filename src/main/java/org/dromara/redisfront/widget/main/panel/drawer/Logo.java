@@ -14,7 +14,7 @@ public class Logo extends JPanel {
     public Logo() {
         this.setOpaque(false);
         this.setLayout(new FlowLayout());
-        this.setMinimumSize(new Dimension(220,-1));
+        this.setMinimumSize(new Dimension(220,55));
         this.add(new JLabel(UI.REDIS_ICON_45x45));
         JLabel logoFont = new JLabel(UI.LOGO_TEXT_ICON);
         this.add(logoFont);

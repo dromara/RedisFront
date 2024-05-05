@@ -27,8 +27,7 @@ public class ThemesChange extends JPanel {
     }
 
     private void init() {
-        putClientProperty(FlatClientProperties.STYLE, ""
-                + "background:null");
+        putClientProperty(FlatClientProperties.STYLE,  "background:null");
         setLayout(new MigLayout("al center", "[fill,200]", "fill"));
         JPanel panel = new JPanel(new MigLayout("fill", "[fill]10[fill]", "fill"));
         panel.putClientProperty(FlatClientProperties.STYLE, "arc:999;"

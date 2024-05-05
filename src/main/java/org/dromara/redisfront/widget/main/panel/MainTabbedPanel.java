@@ -88,12 +88,14 @@ public class MainTabbedPanel extends JPanel {
                     }
                 }else{
                     if(drawerState) {
-                        toolBar.setMargin(new Insets(2, 70, 0, 0));
+                        toolBar.setMargin(new Insets(2, 73, 0, 0));
+                        tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_INSETS,new Insets(10,22,10,22));
                     }else {
-                        toolBar.setMargin(new Insets(2, 15, 0, 0));
+                        toolBar.setMargin(new Insets(2, 6, 0, 0));
+                        tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_INSETS,new Insets(10,10,10,10));
                     }
                 }
-                tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_INSETS,new Insets(10,22,10,22));
+
             } else {
                 toolBar.setMargin(new Insets(2, 6, 0, 0));
                 tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_INSETS,new Insets(10,10,10,10));
@@ -146,6 +148,7 @@ public class MainTabbedPanel extends JPanel {
         tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ROTATION,FlatClientProperties.TABBED_PANE_TAB_ROTATION_NONE);
         tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_WIDTH_MODE,FlatClientProperties.TABBED_PANE_TAB_WIDTH_MODE_COMPACT);
         tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_HEIGHT,70);
+
         Background background = new Background();
         background.setSize(new Dimension(500,600));
         background.add(tabbedPane,BorderLayout.CENTER);

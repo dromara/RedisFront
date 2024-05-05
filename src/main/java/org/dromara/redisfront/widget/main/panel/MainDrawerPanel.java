@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.SystemInfo;
 import lombok.Getter;
+import net.miginfocom.swing.MigLayout;
 import org.dromara.redisfront.widget.main.MainWidget;
 import org.dromara.redisfront.widget.main.panel.drawer.Logo;
 import org.dromara.redisfront.widget.main.panel.drawer.ThemesChange;
@@ -34,21 +35,26 @@ public class MainDrawerPanel extends SimpleDrawerBuilder {
 
     @Override
     public Component getFooter() {
-        return new ThemesChange();
+        JPanel footerPanel = new JPanel();
+        footerPanel.putClientProperty(FlatClientProperties.STYLE,  "background:null");
+        footerPanel.setLayout(new MigLayout("al center", "[fill,200]", "fill"));
+        footerPanel.add(new JButton("添加新连接"),", wrap");
+        footerPanel.add(new ThemesChange());
+        return footerPanel;
     }
 
 
     @Override
     public Component getHeader() {
         JPanel headerPanel = new JPanel();
+        headerPanel.putClientProperty(FlatClientProperties.STYLE,  "background:null");
         headerPanel.setLayout(new BorderLayout());
         if(SystemInfo.isMacOS) {
             headerPanel.setBorder(new EmptyBorder(35, 15, 5, 15));
         }else {
             headerPanel.setBorder(new EmptyBorder(15, 15, 5, 15));
         }
-        headerPanel.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
-        headerPanel.add(Logo.getInstance(),BorderLayout.CENTER);
+        headerPanel.add(Logo.getInstance());
         return headerPanel;
     }
 
@@ -62,10 +68,40 @@ public class MainDrawerPanel extends SimpleDrawerBuilder {
         return new SimpleFooterData();
     }
 
+
     @Override
     public SimpleMenuOption getSimpleMenuOption() {
 
         MenuItem[] items = new MenuItem[]{
+                new Item("阿里云服务器", "folder.svg")
+                        .subMenu(new Item("127.0.0.1", "link.svg"))
+                        .subMenu(new Item("127.0.0.1", "link.svg"))
+                        .subMenu(new Item("127.0.0.1", "link.svg")),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
+                new Item("127.0.0.1", "link.svg"),
                 new Item("127.0.0.1", "link.svg"),
                 new Item("127.0.0.1", "link.svg"),
                 new Item("127.0.0.1", "link.svg"),
@@ -77,7 +113,6 @@ public class MainDrawerPanel extends SimpleDrawerBuilder {
         simpleMenuOption.setMenuStyle(new SimpleMenuStyle() {
             @Override
             public void styleMenuPanel(JPanel panel, int[] index) {
-                // style submenu panel here
                 panel.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
             }
 
@@ -114,12 +149,14 @@ public class MainDrawerPanel extends SimpleDrawerBuilder {
 
         simpleMenuOption.setMenus(items)
                 .setBaseIconPath("icons")
-                .setIconScale(0.08f);
+                .setIconScale(0.08f)
+        ;
         return simpleMenuOption;
     }
 
     private static @NotNull SimpleMenuOption getMenuOption() {
         SimpleMenuOption simpleMenuOption = new SimpleMenuOption() {
+
             @Override
             public Icon buildMenuIcon(String path, float scale) {
                 FlatSVGIcon icon = new FlatSVGIcon(path, scale);
@@ -131,6 +168,11 @@ public class MainDrawerPanel extends SimpleDrawerBuilder {
         };
         simpleMenuOption.addMenuEvent((action, index) -> System.out.println("Drawer menu selected " + Arrays.toString(index)));
         return simpleMenuOption;
+    }
+
+    @Override
+    protected JScrollPane createScroll(JComponent component) {
+        return super.createScroll(component);
     }
 
     @Override
