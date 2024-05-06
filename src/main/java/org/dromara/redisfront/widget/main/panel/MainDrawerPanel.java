@@ -5,6 +5,7 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.SystemInfo;
 import lombok.Getter;
 import net.miginfocom.swing.MigLayout;
+import org.dromara.redisfront.commons.constant.UI;
 import org.dromara.redisfront.widget.main.MainWidget;
 import org.dromara.redisfront.widget.main.panel.drawer.Logo;
 import org.dromara.redisfront.widget.main.panel.drawer.ThemesChange;
@@ -37,8 +38,7 @@ public class MainDrawerPanel extends SimpleDrawerBuilder {
     public Component getFooter() {
         JPanel footerPanel = new JPanel();
         footerPanel.putClientProperty(FlatClientProperties.STYLE,  "background:null");
-        footerPanel.setLayout(new MigLayout("al center", "[fill,200]", "fill"));
-        footerPanel.add(new JButton("添加新连接"),", wrap");
+        footerPanel.setLayout(new MigLayout("al center", "[fill,fill]", "fill"));
         footerPanel.add(new ThemesChange());
         return footerPanel;
     }
@@ -77,35 +77,6 @@ public class MainDrawerPanel extends SimpleDrawerBuilder {
                         .subMenu(new Item("127.0.0.1", "link.svg"))
                         .subMenu(new Item("127.0.0.1", "link.svg"))
                         .subMenu(new Item("127.0.0.1", "link.svg")),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
-                new Item("127.0.0.1", "link.svg"),
                 new Item("127.0.0.1", "link.svg"),
         };
 
@@ -168,11 +139,6 @@ public class MainDrawerPanel extends SimpleDrawerBuilder {
         };
         simpleMenuOption.addMenuEvent((action, index) -> System.out.println("Drawer menu selected " + Arrays.toString(index)));
         return simpleMenuOption;
-    }
-
-    @Override
-    protected JScrollPane createScroll(JComponent component) {
-        return super.createScroll(component);
     }
 
     @Override

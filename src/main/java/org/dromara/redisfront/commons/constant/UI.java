@@ -15,6 +15,7 @@ public class UI {
     public static final Icon REDIS_ICON_45x45 = new FlatSVGIcon("svg/redisfront.svg",45,45);
     public static final Icon REDIS_ICON_14x14 = new FlatSVGIcon("svg/redisfront.svg",18,18);
     public static final Icon REDIS_TEXT_80x16 = new FlatSVGIcon("svg/redisfront_text.svg",80,16);
+    public static final Icon ADD_CONN_ICON_45x45 = new FlatSVGIcon("icons/add_conn.svg",80,16);
     public static final Icon SUBSCRIBE_ICON = new FlatSVGIcon("svg/subscribe.svg");
     public static final Icon UNSUBSCRIBE_ICON = new FlatSVGIcon("svg/unSubscribe.svg");
     public static final Icon PUBLISH_ICON = new FlatSVGIcon("svg/publish.svg");
