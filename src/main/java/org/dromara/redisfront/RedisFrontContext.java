@@ -26,13 +26,6 @@ public class RedisFrontContext extends AppContext<AppWidget<RedisFrontPrefs>, Re
 
     @Override
     protected MainWidget createApplication(String[] args, RedisFrontPrefs preferences) {
-        ToolTipManager.sharedInstance().setInitialDelay(5);
-        ToolTipManager.sharedInstance().setLightWeightPopupEnabled(true);
-        FlatLaf.registerCustomDefaultsSource("org.dromara.redisfront.theme");
-        UIManager.put( "FlatLaf.debug.panel.showPlaceholders", true );
-        FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", "#b30404"));
-        FlatLaf.setUseNativeWindowDecorations(true);
-        FlatMacLightLaf.setup();
         if (SystemInfo.isLinux) {
             JFrame.setDefaultLookAndFeelDecorated(true);
             JDialog.setDefaultLookAndFeelDecorated(true);
@@ -42,6 +35,13 @@ public class RedisFrontContext extends AppContext<AppWidget<RedisFrontPrefs>, Re
             System.setProperty("apple.awt.application.name", "RedisFront");
             System.setProperty("apple.awt.application.appearance", "system");
         }
+        ToolTipManager.sharedInstance().setInitialDelay(5);
+        ToolTipManager.sharedInstance().setLightWeightPopupEnabled(true);
+        FlatLaf.registerCustomDefaultsSource("org.dromara.redisfront.theme");
+        UIManager.put( "FlatLaf.debug.panel.showPlaceholders", true );
+        FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", "#b30404"));
+        FlatLaf.setUseNativeWindowDecorations(true);
+        FlatMacLightLaf.setup();
         return new MainWidget(this, "RedisFront", preferences);
     }
 
