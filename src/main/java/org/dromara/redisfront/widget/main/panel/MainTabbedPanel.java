@@ -2,6 +2,7 @@ package org.dromara.redisfront.widget.main.panel;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.components.FlatToolBar;
+import com.formdev.flatlaf.ui.FlatTabbedPaneUI;
 import com.formdev.flatlaf.util.SystemInfo;
 import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
@@ -13,6 +14,7 @@ import org.dromara.redisfront.widget.main.action.DrawerAction;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.ComponentUI;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -96,11 +98,11 @@ public class MainTabbedPanel extends JPanel {
         }
 
         topBarPanel.add(toolBar, BorderLayout.WEST);
-        JLabel host = new JLabel(UI.REDIS_ICON_14x14);
-        host.setText("阿里云REDIS (127.0.0.1) - 集群模式");
-        host.setVerticalAlignment(SwingConstants.CENTER);
-        host.setHorizontalAlignment(SwingConstants.CENTER);
-        topBarPanel.add(host, BorderLayout.CENTER);
+        JLabel title = new JLabel(UI.REDIS_ICON_14x14);
+        title.setText("阿里云REDIS (127.0.0.1) - 集群模式");
+        title.setVerticalAlignment(SwingConstants.CENTER);
+        title.setHorizontalAlignment(SwingConstants.CENTER);
+        topBarPanel.add(title, BorderLayout.CENTER);
         topBarPanel.add(new JSeparator(), BorderLayout.SOUTH);
         this.add(topBarPanel, BorderLayout.NORTH);
     }
@@ -122,9 +124,20 @@ public class MainTabbedPanel extends JPanel {
         this.add(horizontalBox, BorderLayout.SOUTH);
     }
 
+    final FlatTabbedPaneUI flatTabbedPaneUI = new FlatTabbedPaneUI(){
+        @Override
+        protected void paintText(Graphics g, int tabPlacement, Font font, FontMetrics metrics, int tabIndex, String title, Rectangle textRect, boolean isSelected) {
+            if(isSelected){
+                font = font.deriveFont(Font.BOLD);
+            }
+            super.paintText(g, tabPlacement, font, metrics, tabIndex, title, textRect, isSelected);
+        }
+    };
+
     private void initMainTabbedUI() {
         //tabbedPane init
         tabbedPane = new JTabbedPane();
+        tabbedPane.setUI(flatTabbedPaneUI);
         tabbedPane.setTabPlacement(JTabbedPane.LEFT);
         tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
         tabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_HEIGHT, 70);
