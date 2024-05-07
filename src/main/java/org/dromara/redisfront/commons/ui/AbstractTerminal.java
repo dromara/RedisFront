@@ -30,7 +30,7 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
         terminal.requestFocus();
         terminal.setCaretColor(Color.WHITE);
         terminal.setForeground(Color.WHITE);
-        terminal.setBackground(Color.BLACK);
+        terminal.setBackground(UIManager.getColor("TextArea.background"));
         terminal.addKeyListener(this);
         terminal.addCaretListener(this);
         commandHistory = new ArrayList<>();

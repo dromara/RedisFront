@@ -33,6 +33,7 @@ public class RedisTerminal extends AbstractTerminal {
         super();
         this.connectInfo = connectInfo.clone();
         terminal.setEnabled(false);
+        printConnectedSuccessMessage();
     }
 
     public void ping() {
