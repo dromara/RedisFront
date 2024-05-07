@@ -118,8 +118,8 @@ public class MainTabbedPanel extends JPanel {
         verticalBox.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
         verticalBox.add(new JSeparator());
         var rightToolBar = new FlatToolBar();
-        rightToolBar.setMargin(new Insets(5,5,5,5));
         rightToolBar.setLayout(new BorderLayout());
+        rightToolBar.setMargin(new Insets(0,3,0,3));
 
         var mode = new JLabel(UI.COLORS_ICON_45x45);
         mode.setText("单机模式");
