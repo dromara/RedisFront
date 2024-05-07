@@ -5,7 +5,6 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.SystemInfo;
 import lombok.Getter;
 import net.miginfocom.swing.MigLayout;
-import org.dromara.redisfront.commons.constant.UI;
 import org.dromara.redisfront.widget.main.MainWidget;
 import org.dromara.redisfront.widget.main.panel.drawer.Logo;
 import org.dromara.redisfront.widget.main.panel.drawer.ThemesChange;
@@ -74,10 +73,11 @@ public class MainDrawerPanel extends SimpleDrawerBuilder {
 
         MenuItem[] items = new MenuItem[]{
                 new Item("阿里云服务器", "folder.svg")
-                        .subMenu(new Item("127.0.0.1", "link.svg"))
-                        .subMenu(new Item("127.0.0.1", "link.svg"))
-                        .subMenu(new Item("127.0.0.1", "link.svg")),
+                        .subMenu(new Item("2.127.231.79", "link.svg"))
+                        .subMenu(new Item("47.22.5.98", "link.svg"))
+                        .subMenu(new Item("5.48.77.19", "link.svg")),
                 new Item("127.0.0.1", "link.svg"),
+                new Item("阿里云主机", "link.svg"),
         };
 
         SimpleMenuOption simpleMenuOption = getMenuOption();

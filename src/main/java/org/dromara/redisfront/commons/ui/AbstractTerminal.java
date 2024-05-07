@@ -27,9 +27,6 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
         setLayout(new BorderLayout());
         setBorder(new EmptyBorder(10, 10, 10, 10));
         terminal = new JTextArea();
-        terminal.requestFocus();
-        terminal.setCaretColor(Color.WHITE);
-        terminal.setForeground(Color.WHITE);
         terminal.setBackground(UIManager.getColor("TextArea.background"));
         terminal.addKeyListener(this);
         terminal.addCaretListener(this);
@@ -59,7 +56,7 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
         this.println("");
         this.println("connection ".concat(connectInfo().host()).concat(":") + connectInfo().port() + " redis server success...");
         this.println("");
-        this.print(connectInfo().host().concat(":").concat(String.valueOf(connectInfo().port())).concat(Fn.equal("0", databaseName()) ? "" : "[" + databaseName() + "]").concat(">"));
+        this.print(connectInfo().host().concat(":").concat(String.valueOf(connectInfo().port())).concat(Fn.equal("0", databaseName()) ? "" : " [" + databaseName() + "] ").concat(">"));
     }
 
     @Override

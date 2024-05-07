@@ -32,7 +32,7 @@ public class RedisTerminal extends AbstractTerminal {
     public RedisTerminal(final ConnectInfo connectInfo) {
         super();
         this.connectInfo = connectInfo.clone();
-        terminal.setEnabled(false);
+        terminal.setEnabled(true);
         printConnectedSuccessMessage();
     }
 

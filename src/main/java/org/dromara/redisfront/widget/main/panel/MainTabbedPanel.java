@@ -114,19 +114,39 @@ public class MainTabbedPanel extends JPanel {
 
 
     private void initBottomBar() {
-        Box horizontalBox = Box.createVerticalBox();
-        horizontalBox.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
-        horizontalBox.add(new JSeparator());
+        Box verticalBox = Box.createVerticalBox();
+        verticalBox.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
+        verticalBox.add(new JSeparator());
         var rightToolBar = new FlatToolBar();
-        rightToolBar.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        rightToolBar.setMargin(new Insets(5,5,5,5));
+        rightToolBar.setLayout(new BorderLayout());
+
+        var mode = new JLabel(UI.COLORS_ICON_45x45);
+        mode.setText("单机模式");
+        rightToolBar.add(mode,BorderLayout.WEST);
+
+        JPanel horizontalBox = new JPanel();
+        horizontalBox.setLayout(new FlowLayout());
+        var cpu = new JLabel(UI.CPU_ICON_45x45);
+        cpu.setToolTipText("CPU使用率0.07%");
+        cpu.setText("0.07%");
+        horizontalBox.add(cpu);
+
+        var memory = new JLabel(UI.MEMORY_ICON_45x45);
+        memory.setToolTipText("CPU使用率0.07%");
+        memory.setText("11MB");
+        horizontalBox.add(memory);
+        rightToolBar.add(horizontalBox,BorderLayout.CENTER);
+
+
         var version = new JLabel();
         version.setText(Const.APP_VERSION);
         RedisFrontContext context = (RedisFrontContext) owner.getContext();
         version.setToolTipText("Current Version " + context.version());
         version.setIcon(UI.REDIS_TEXT_80x16);
-        rightToolBar.add(version);
-        horizontalBox.add(rightToolBar);
-        this.add(horizontalBox, BorderLayout.SOUTH);
+        rightToolBar.add(version,BorderLayout.EAST);
+        verticalBox.add(rightToolBar);
+        this.add(verticalBox, BorderLayout.SOUTH);
     }
 
     private void initMainTabbedUI() {
