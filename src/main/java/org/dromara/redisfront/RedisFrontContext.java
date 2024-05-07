@@ -68,4 +68,8 @@ public class RedisFrontContext extends AppContext<AppWidget<RedisFrontPrefs>, Re
     public <T> void taskExecute(Callable<T> callable, BiConsumer<T, Exception> consumer) {
 
     }
+
+    public String version(){
+        return "2024.1";
+    }
 }
