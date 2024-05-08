@@ -1,14 +1,17 @@
 package org.dromara.redisfront.widget.main.panel;
 
+import cn.hutool.core.util.ArrayUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.SystemInfo;
 import lombok.Getter;
+import lombok.Setter;
 import net.miginfocom.swing.MigLayout;
+import org.dromara.redisfront.ui.form.MainNoneForm;
 import org.dromara.redisfront.widget.main.MainWidget;
+import org.dromara.redisfront.widget.main.action.DrawerAction;
 import org.dromara.redisfront.widget.main.panel.drawer.Logo;
 import org.dromara.redisfront.widget.main.panel.drawer.ThemesChange;
-import org.jetbrains.annotations.NotNull;
 import raven.drawer.component.DrawerPanel;
 import raven.drawer.component.SimpleDrawerBuilder;
 import raven.drawer.component.footer.SimpleFooterData;
@@ -23,20 +26,27 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.Arrays;
+import java.util.Optional;
 
 @Getter
-public class MainDrawerPanel extends SimpleDrawerBuilder {
+public class MainDrawerBuilder extends SimpleDrawerBuilder {
 
     private final MainWidget owner;
+    private final JPanel mainContentPane;
 
-    public MainDrawerPanel(MainWidget owner) {
+    @Setter
+    private DrawerAction drawerAction;
+
+    public MainDrawerBuilder(MainWidget owner, JPanel mainContentPane) {
+        super();
         this.owner = owner;
+        this.mainContentPane = mainContentPane;
     }
 
     @Override
     public Component getFooter() {
         JPanel footerPanel = new JPanel();
-        footerPanel.putClientProperty(FlatClientProperties.STYLE,  "background:null");
+        footerPanel.putClientProperty(FlatClientProperties.STYLE, "background:null");
         footerPanel.setLayout(new MigLayout("al center", "[fill,fill]", "fill"));
         footerPanel.add(new ThemesChange());
         return footerPanel;
@@ -46,11 +56,11 @@ public class MainDrawerPanel extends SimpleDrawerBuilder {
     @Override
     public Component getHeader() {
         JPanel headerPanel = new JPanel();
-        headerPanel.putClientProperty(FlatClientProperties.STYLE,  "background:null");
+        headerPanel.putClientProperty(FlatClientProperties.STYLE, "background:null");
         headerPanel.setLayout(new BorderLayout());
-        if(SystemInfo.isMacOS) {
+        if (SystemInfo.isMacOS) {
             headerPanel.setBorder(new EmptyBorder(35, 15, 5, 15));
-        }else {
+        } else {
             headerPanel.setBorder(new EmptyBorder(15, 15, 5, 15));
         }
         headerPanel.add(Logo.getInstance());
@@ -125,7 +135,7 @@ public class MainDrawerPanel extends SimpleDrawerBuilder {
         return simpleMenuOption;
     }
 
-    private static @NotNull SimpleMenuOption getMenuOption() {
+    private SimpleMenuOption getMenuOption() {
         SimpleMenuOption simpleMenuOption = new SimpleMenuOption() {
 
             @Override
@@ -137,7 +147,32 @@ public class MainDrawerPanel extends SimpleDrawerBuilder {
                 return icon;
             }
         };
-        simpleMenuOption.addMenuEvent((action, index) -> System.out.println("Drawer menu selected " + Arrays.toString(index)));
+        simpleMenuOption.addMenuEvent((source, index) -> {
+            Component[] components = mainContentPane.getComponents();
+            if (ArrayUtil.isNotEmpty(components)) {
+                Optional<Component> first = Arrays.stream(components).findFirst();
+                if (first.isPresent()) {
+                    if (first.get() instanceof MainTabbedPanel) {
+                        //todo add tab
+                        System.out.println("JTabbedPane " + first.get());
+                    } else {
+                        mainContentPane.removeAll();
+                        MainTabbedPanel mainTabbedPanel = new MainTabbedPanel(drawerAction, owner);
+                        mainTabbedPanel.setTabCloseProcess(count -> {
+                            if (count == 0) {
+                                mainContentPane.removeAll();
+                                mainContentPane.add(MainNoneForm.getInstance().getContentPanel(), BorderLayout.CENTER);
+                                mainContentPane.revalidate();
+                            }
+                        });
+                        mainContentPane.add(mainTabbedPanel, BorderLayout.CENTER);
+                        mainContentPane.revalidate();
+
+                    }
+                }
+            }
+
+        });
         return simpleMenuOption;
     }
 

@@ -3,7 +3,7 @@ package org.dromara.redisfront.widget.main.panel;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.components.FlatToolBar;
 import com.formdev.flatlaf.util.SystemInfo;
-import com.intellij.uiDesigner.core.Spacer;
+import lombok.Setter;
 import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
 import org.dromara.quickswing.constant.OS;
@@ -21,8 +21,8 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-
-import static javax.swing.JTabbedPane.WRAP_TAB_LAYOUT;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class MainTabbedPanel extends JPanel {
 
@@ -31,7 +31,9 @@ public class MainTabbedPanel extends JPanel {
     private JTabbedPane topTabbedPane;
     private JTabbedPane contentTabbedPane;
     private FlatToolBar toolBar;
-    private Boolean drawerState = false;
+    @Setter
+    private Consumer<Integer> tabCloseProcess;
+
 
     public MainTabbedPanel(DrawerAction action, MainWidget owner) {
         this.owner = owner;
@@ -92,18 +94,22 @@ public class MainTabbedPanel extends JPanel {
                 toolBar.setMargin(new Insets(2, 3, 0, 0));
                 contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_INSETS, new Insets(10, 10, 10, 10));
             }
-            topTabbedPane.updateUI();
             closeDrawerBtn.setVisible(true);
+            topTabbedPane.updateUI();
+            topTabbedPane.revalidate();
         });
 
         //tabbedPane init
-        topTabbedPane = new RedisFrontTabbedPane(JTabbedPane.TOP,JTabbedPane.SCROLL_TAB_LAYOUT);
+        topTabbedPane = new RedisFrontTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_SCROLL_BUTTONS_POLICY, FlatClientProperties.TABBED_PANE_POLICY_AS_NEEDED);
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_LEADING);
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, true);
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSABLE, true);
-        topTabbedPane.putClientProperty("JTabbedPane.hideTabAreaWithOneTab", true);
+        topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
+            topTabbedPane.removeTabAt(tabIndex);
+            tabCloseProcess.accept(tabbedPane.getTabCount());
+        });
 
         FlatToolBar settingToolBar = new FlatToolBar();
         if (SystemInfo.isMacOS) {
@@ -112,11 +118,11 @@ public class MainTabbedPanel extends JPanel {
         } else {
             settingToolBar.setPreferredSize(new Dimension(-1, 33));
         }
-        settingToolBar.setLayout(new MigLayout(new LC().align("center","bottom")));
+        settingToolBar.setLayout(new MigLayout(new LC().align("center", "bottom")));
         settingToolBar.add(new JButton(UI.SETTING_ICON_40x40));
-        topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_LEADING_COMPONENT,toolBar);
-        if(owner.getOS() == OS.WINDOWS){
-            topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_INSETS,new Insets(0,0,0,130));
+        topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_LEADING_COMPONENT, toolBar);
+        if (owner.getOS() == OS.WINDOWS) {
+            topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_INSETS, new Insets(0, 0, 0, 130));
         }
         this.add(topTabbedPane, BorderLayout.CENTER);
     }
@@ -128,15 +134,15 @@ public class MainTabbedPanel extends JPanel {
         verticalBox.add(new JSeparator());
         var rightToolBar = new FlatToolBar();
         rightToolBar.setLayout(new BorderLayout());
-        rightToolBar.setMargin(new Insets(0,3,0,3));
+        rightToolBar.setMargin(new Insets(0, 3, 0, 3));
 
         var mode = new JLabel(UI.MODE_ICON_45x45);
         mode.setText("单机模式");
-        rightToolBar.add(mode,BorderLayout.WEST);
+        rightToolBar.add(mode, BorderLayout.WEST);
 
         JPanel horizontalBox = new JPanel();
         horizontalBox.setLayout(new FlowLayout());
-        rightToolBar.add(horizontalBox,BorderLayout.CENTER);
+        rightToolBar.add(horizontalBox, BorderLayout.CENTER);
 
         var cpu = new JLabel(UI.CPU_ICON_45x45);
         cpu.setToolTipText("CPU使用率0.07%");
@@ -154,14 +160,12 @@ public class MainTabbedPanel extends JPanel {
         horizontalBox.add(network);
 
 
-
-
         var version = new JLabel();
         version.setText(Const.APP_VERSION);
         RedisFrontContext context = (RedisFrontContext) owner.getContext();
         version.setToolTipText("Current Version " + context.version());
         version.setIcon(UI.REDIS_TEXT_80x16);
-        rightToolBar.add(version,BorderLayout.EAST);
+        rightToolBar.add(version, BorderLayout.EAST);
         verticalBox.add(rightToolBar);
         this.add(verticalBox, BorderLayout.SOUTH);
     }
@@ -178,7 +182,7 @@ public class MainTabbedPanel extends JPanel {
         contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, true);
 
         FlatToolBar settingToolBar = new FlatToolBar();
-        settingToolBar.setLayout(new MigLayout(new LC().align("center","bottom")));
+        settingToolBar.setLayout(new MigLayout(new LC().align("center", "bottom")));
         settingToolBar.add(new JButton(UI.SETTING_ICON_40x40));
         contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, settingToolBar);
 
@@ -188,10 +192,10 @@ public class MainTabbedPanel extends JPanel {
             System.out.println(tabbedPane.getSelectedIndex());
         });
 
-        topTabbedPane.addTab("阿里云主机",UI.REDIS_ICON_14x14, new JLabel("测试"));
-        topTabbedPane.addTab("192.168.1.1",UI.REDIS_ICON_14x14, new JPanel());
-        topTabbedPane.addTab("172.0.0.6",UI.REDIS_ICON_14x14, new JPanel());
-        topTabbedPane.addTab("127.0.0.1",UI.REDIS_ICON_14x14,contentTabbedPane);
+        topTabbedPane.addTab("阿里云主机", UI.REDIS_ICON_14x14, new JLabel("测试"));
+        topTabbedPane.addTab("192.168.1.1", UI.REDIS_ICON_14x14, new JPanel());
+        topTabbedPane.addTab("172.0.0.6", UI.REDIS_ICON_14x14, new JPanel());
+        topTabbedPane.addTab("127.0.0.1", UI.REDIS_ICON_14x14, contentTabbedPane);
     }
 
     private void initMainTabbedItem() {

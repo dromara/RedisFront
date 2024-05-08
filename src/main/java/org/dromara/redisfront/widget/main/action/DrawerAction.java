@@ -10,23 +10,25 @@ import org.jdesktop.core.animation.timing.TimingTargetAdapter;
 import org.jdesktop.swing.animation.timing.sources.SwingTimerTimingSource;
 import raven.drawer.component.DrawerPanel;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class DrawerAction extends AppAction<MainWidget> {
     private Animator animator;
-    private final DrawerPanel drawerPanel;
     private boolean drawerOpen = true;
     @Setter
     private Consumer<Boolean> beforeProcess;
     @Setter
+    private BiConsumer<Double,Boolean> process;
+    @Setter
     private Consumer<Boolean> afterProcess;
-    public DrawerAction(MainWidget app, DrawerPanel drawerPanel) {
+    public DrawerAction(MainWidget app) {
         super(app);
-        this.drawerPanel = drawerPanel;
     }
 
 
@@ -56,16 +58,8 @@ public class DrawerAction extends AppAction<MainWidget> {
 
         @Override
         public void timingEvent(Animator source, double fraction) {
-            int width;
-            if (drawerOpen) {
-                width = (int) (250 - 250 * fraction);
-            } else {
-                width = (int) (250 * fraction);
-            }
-            drawerPanel.setPreferredSize(new Dimension(width , -1));
-            drawerPanel.revalidate();
+            process.accept(fraction,drawerOpen);
             app.revalidate();
-
         }
 
         @Override

@@ -17,10 +17,6 @@ public class LocaleUtils {
 
     private static Method cachedGetBundleMethod = null;
 
-    static {
-        var languageTag = PrefUtils.getState().get(Const.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
-        Locale.setDefault(Locale.forLanguageTag(languageTag));
-    }
 
     public static String getMessageFromBundle(String key) {
         ResourceBundle bundle;
