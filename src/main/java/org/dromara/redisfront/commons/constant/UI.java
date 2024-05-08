@@ -18,8 +18,10 @@ public class UI {
     public static final Icon SETTING_ICON_40x40 = new FlatSVGIcon("icons/setting.svg",24,24);
     public static final Icon ADD_CONN_ICON_45x45 = new FlatSVGIcon("icons/add_conn.svg",80,16);
     public static final Icon COLORS_ICON_45x45 = new FlatSVGIcon("svg/actions/colors.svg",14,14);
-    public static final Icon CPU_ICON_45x45 = new FlatSVGIcon("icons/CPU.svg",18,20);
-    public static final Icon MEMORY_ICON_45x45 = new FlatSVGIcon("icons/memory.svg",12,11);
+    public static final Icon MODE_ICON_45x45 = new FlatSVGIcon("icons/mode.svg",16,16);
+    public static final Icon CPU_ICON_45x45 = new FlatSVGIcon("icons/CPU.svg",14,14);
+    public static final Icon MEMORY_ICON_45x45 = new FlatSVGIcon("icons/memory.svg",14,14);
+    public static final Icon WIFI_ICON_45x45 = new FlatSVGIcon("icons/wifi.svg",14,14);
     public static final Icon SUBSCRIBE_ICON = new FlatSVGIcon("svg/subscribe.svg");
     public static final Icon UNSUBSCRIBE_ICON = new FlatSVGIcon("svg/unSubscribe.svg");
     public static final Icon PUBLISH_ICON = new FlatSVGIcon("svg/publish.svg");
