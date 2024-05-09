@@ -1,6 +1,7 @@
 package org.dromara.redisfront.widget.main.action;
 
 
+import lombok.Getter;
 import lombok.Setter;
 import org.dromara.quickswing.ui.app.AppAction;
 import org.dromara.redisfront.widget.main.MainWidget;
@@ -20,6 +21,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class DrawerAction extends AppAction<MainWidget> {
     private Animator animator;
+    @Getter
     private boolean drawerOpen = true;
     @Setter
     private Consumer<Boolean> beforeProcess;
@@ -30,7 +32,6 @@ public class DrawerAction extends AppAction<MainWidget> {
     public DrawerAction(MainWidget app) {
         super(app);
     }
-
 
     @Override
     public void handleAction(ActionEvent e) {
@@ -60,6 +61,7 @@ public class DrawerAction extends AppAction<MainWidget> {
         public void timingEvent(Animator source, double fraction) {
             process.accept(fraction,drawerOpen);
             app.revalidate();
+            app.repaint();
         }
 
         @Override
@@ -68,7 +70,6 @@ public class DrawerAction extends AppAction<MainWidget> {
                 afterProcess.accept(drawerOpen);
             }
             drawerOpen = !drawerOpen;
-
         }
 
     };

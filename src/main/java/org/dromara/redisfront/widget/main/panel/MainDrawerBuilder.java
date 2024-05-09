@@ -2,6 +2,7 @@ package org.dromara.redisfront.widget.main.panel;
 
 import cn.hutool.core.util.ArrayUtil;
 import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.SystemInfo;
 import lombok.Getter;
@@ -12,6 +13,7 @@ import org.dromara.redisfront.widget.main.MainWidget;
 import org.dromara.redisfront.widget.main.action.DrawerAction;
 import org.dromara.redisfront.widget.main.panel.drawer.Logo;
 import org.dromara.redisfront.widget.main.panel.drawer.ThemesChange;
+import org.jetbrains.annotations.NotNull;
 import raven.drawer.component.DrawerPanel;
 import raven.drawer.component.SimpleDrawerBuilder;
 import raven.drawer.component.footer.SimpleFooterData;
@@ -157,23 +159,30 @@ public class MainDrawerBuilder extends SimpleDrawerBuilder {
                         System.out.println("JTabbedPane " + first.get());
                     } else {
                         mainContentPane.removeAll();
-                        MainTabbedPanel mainTabbedPanel = new MainTabbedPanel(drawerAction, owner);
-                        mainTabbedPanel.setTabCloseProcess(count -> {
-                            if (count == 0) {
-                                mainContentPane.removeAll();
-                                mainContentPane.add(MainNoneForm.getInstance().getContentPanel(), BorderLayout.CENTER);
-                                mainContentPane.revalidate();
-                            }
-                        });
-                        mainContentPane.add(mainTabbedPanel, BorderLayout.CENTER);
-                        mainContentPane.revalidate();
-
+                        mainContentPane.add(getMainTabbedPanel(), BorderLayout.CENTER);
+                        FlatLaf.updateUI();
                     }
                 }
             }
 
         });
         return simpleMenuOption;
+    }
+
+    private @NotNull MainTabbedPanel getMainTabbedPanel() {
+        MainTabbedPanel mainTabbedPanel = new MainTabbedPanel(drawerAction, owner);
+        mainTabbedPanel.setTabCloseProcess(count -> {
+            System.out.println(Thread.currentThread().getName());
+            if (count == 0) {
+                if(!drawerAction.isDrawerOpen()){
+                    drawerAction.handleAction(null);
+                }
+                mainContentPane.removeAll();
+                mainContentPane.add(MainNoneForm.getInstance().getContentPanel(), BorderLayout.CENTER);
+                FlatLaf.updateUI();
+            }
+        });
+        return mainTabbedPanel;
     }
 
     @Override

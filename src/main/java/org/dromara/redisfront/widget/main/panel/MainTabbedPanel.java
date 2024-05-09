@@ -1,6 +1,7 @@
 package org.dromara.redisfront.widget.main.panel;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.components.FlatToolBar;
 import com.formdev.flatlaf.util.SystemInfo;
 import lombok.Setter;
@@ -14,10 +15,11 @@ import org.dromara.redisfront.model.ConnectInfo;
 import org.dromara.redisfront.ui.component.RedisTerminal;
 import org.dromara.redisfront.widget.main.MainWidget;
 import org.dromara.redisfront.widget.main.action.DrawerAction;
-import org.dromara.redisfront.widget.main.ui.RedisFrontTabbedPane;
+import org.dromara.redisfront.widget.main.ui.ActiveTitleBoldTabbedPaneUI;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.TabbedPaneUI;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -25,7 +27,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class MainTabbedPanel extends JPanel {
-
     private final MainWidget owner;
     private final DrawerAction action;
     private JTabbedPane topTabbedPane;
@@ -95,19 +96,23 @@ public class MainTabbedPanel extends JPanel {
                 contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_INSETS, new Insets(10, 10, 10, 10));
             }
             closeDrawerBtn.setVisible(true);
-            topTabbedPane.updateUI();
-            topTabbedPane.revalidate();
+            FlatLaf.updateUI();
         });
 
         //tabbedPane init
-        topTabbedPane = new RedisFrontTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+        topTabbedPane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT){
+            @Override
+            public void setUI(TabbedPaneUI ui) {
+                super.setUI(new ActiveTitleBoldTabbedPaneUI());
+            }
+        };
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_SCROLL_BUTTONS_POLICY, FlatClientProperties.TABBED_PANE_POLICY_AS_NEEDED);
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_LEADING);
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, true);
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSABLE, true);
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
-            topTabbedPane.removeTabAt(tabIndex);
+            tabbedPane.removeTabAt(tabIndex);
             tabCloseProcess.accept(tabbedPane.getTabCount());
         });
 
@@ -172,7 +177,12 @@ public class MainTabbedPanel extends JPanel {
 
     private void initMainTabbedUI() {
         //tabbedPane init
-        contentTabbedPane = new RedisFrontTabbedPane();
+        contentTabbedPane = new JTabbedPane(){
+            @Override
+            public void setUI(TabbedPaneUI ui) {
+                super.setUI(new ActiveTitleBoldTabbedPaneUI());
+            }
+        };
         contentTabbedPane.setTabPlacement(JTabbedPane.LEFT);
         contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
         contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_HEIGHT, 70);
@@ -193,8 +203,8 @@ public class MainTabbedPanel extends JPanel {
         });
 
         topTabbedPane.addTab("阿里云主机", UI.REDIS_ICON_14x14, new JLabel("测试"));
-        topTabbedPane.addTab("192.168.1.1", UI.REDIS_ICON_14x14, new JPanel());
-        topTabbedPane.addTab("172.0.0.6", UI.REDIS_ICON_14x14, new JPanel());
+        topTabbedPane.addTab("192.168.1.1", UI.REDIS_ICON_14x14, new JLabel("b"));
+        topTabbedPane.addTab("172.0.0.6", UI.REDIS_ICON_14x14, new JLabel("a"));
         topTabbedPane.addTab("127.0.0.1", UI.REDIS_ICON_14x14, contentTabbedPane);
     }
 

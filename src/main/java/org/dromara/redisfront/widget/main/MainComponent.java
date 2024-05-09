@@ -52,7 +52,7 @@ public class MainComponent extends Background {
                 width = (int) (250 * fraction);
             }
             drawerPanel.setPreferredSize(new Dimension(width, -1));
-            drawerPanel.revalidate();
+            drawerPanel.updateUI();
         });
         mainDrawerBuilder.setDrawerAction(drawerAction);
         return mainDrawerBuilder;
