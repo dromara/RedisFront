@@ -46,7 +46,7 @@ public class MainWindowForm {
 
     public MainWindowForm() {
         $$$setupUI$$$();
-        contentPanel.add(MainNoneForm.getInstance().getContentPanel(), BorderLayout.CENTER);
+        contentPanel.add(MainNoneForm.getInstance(), BorderLayout.CENTER);
     }
 
     public void addTabActionPerformed(final ConnectInfo connectInfo) {
@@ -151,7 +151,7 @@ public class MainWindowForm {
                 tabbedPane.removeTabAt(tabIndex);
                 if (tabbedPane.getTabCount() == 0) {
                     toolBar.setVisible(false);
-                    contentPanel.add(MainNoneForm.getInstance().getContentPanel(), BorderLayout.CENTER, 0);
+                    contentPanel.add(MainNoneForm.getInstance(), BorderLayout.CENTER, 0);
                 }
                 System.gc();
             });

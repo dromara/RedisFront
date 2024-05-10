@@ -33,9 +33,10 @@ public class MainNoneForm {
     private JLabel aLabel;
     private JLabel sLabel;
 
+    private final static MainNoneForm mainNoneForm = new MainNoneForm();
 
-    public static MainNoneForm getInstance() {
-        return new MainNoneForm();
+    public static JPanel getInstance() {
+        return mainNoneForm.getContentPanel();
     }
 
     public JPanel getContentPanel() {
@@ -45,8 +46,8 @@ public class MainNoneForm {
     public MainNoneForm() {
         $$$setupUI$$$();
         if (SystemInfo.isMacOS) {
-            newKeyLabel.setIcon(COMMAND_ICON_45x45);
-            openKeyLabel.setIcon(COMMAND_ICON_45x45);
+            newLabel.setIcon(COMMAND_ICON_45x45);
+
         }
     }
 
@@ -140,12 +141,13 @@ public class MainNoneForm {
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new BorderLayout(0, 0));
         panel2.add(panel3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        newLabel.setHorizontalAlignment(0);
+        newLabel.setHorizontalAlignment(2);
         newLabel.setHorizontalTextPosition(0);
+        newLabel.setText("添加连接");
         panel3.add(newLabel, BorderLayout.WEST);
-        newKeyLabel.setHorizontalAlignment(4);
+        newKeyLabel.setHorizontalAlignment(0);
         newKeyLabel.setHorizontalTextPosition(4);
-        newKeyLabel.setText(" Ctrl+");
+        newKeyLabel.setText("+");
         panel3.add(newKeyLabel, BorderLayout.CENTER);
         aLabel.setHorizontalAlignment(2);
         aLabel.setHorizontalTextPosition(2);
@@ -157,14 +159,15 @@ public class MainNoneForm {
         panel2.add(panel4, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         openLabel.setHorizontalAlignment(0);
         openLabel.setHorizontalTextPosition(0);
+        openLabel.setText("打开连接");
         panel4.add(openLabel, BorderLayout.WEST);
         openKeyLabel.setHorizontalAlignment(4);
         openKeyLabel.setHorizontalTextPosition(4);
-        openKeyLabel.setText(" Ctrl+");
+        openKeyLabel.setText("");
         panel4.add(openKeyLabel, BorderLayout.CENTER);
         sLabel.setHorizontalAlignment(2);
         sLabel.setHorizontalTextPosition(2);
-        sLabel.setText("O");
+        sLabel.setText("");
         sLabel.setVerticalAlignment(3);
         panel4.add(sLabel, BorderLayout.EAST);
         logoLabel.setText("");

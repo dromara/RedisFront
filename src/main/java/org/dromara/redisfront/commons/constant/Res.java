@@ -18,7 +18,7 @@ public class Res {
     public static final Icon SETTING_ICON_40x40 = new FlatSVGIcon("icons/setting.svg",24,24);
     public static final Icon ADD_CONN_ICON_45x45 = new FlatSVGIcon("icons/add_conn.svg",80,16);
     public static final Icon COLORS_ICON_45x45 = new FlatSVGIcon("svg/actions/colors.svg",14,14);
-    public static final Icon COMMAND_ICON_45x45 = new FlatSVGIcon("icons/command.svg",14,14);
+    public static final Icon COMMAND_ICON_45x45 = new FlatSVGIcon("icons/command.svg",16,16);
     public static final Icon MODE_ICON_45x45 = new FlatSVGIcon("icons/mode.svg",16,16);
     public static final Icon CPU_ICON_45x45 = new FlatSVGIcon("icons/CPU.svg",14,14);
     public static final Icon MEMORY_ICON_45x45 = new FlatSVGIcon("icons/memory.svg",14,14);

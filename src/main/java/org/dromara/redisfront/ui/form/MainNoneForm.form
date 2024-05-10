@@ -39,16 +39,17 @@
                   <component id="d6f04" class="javax.swing.JLabel" binding="newLabel" custom-create="true">
                     <constraints border-constraint="West"/>
                     <properties>
-                      <horizontalAlignment value="0"/>
+                      <horizontalAlignment value="2"/>
                       <horizontalTextPosition value="0"/>
+                      <text value="添加连接"/>
                     </properties>
                   </component>
                   <component id="2db2c" class="javax.swing.JLabel" binding="newKeyLabel" custom-create="true">
                     <constraints border-constraint="Center"/>
                     <properties>
-                      <horizontalAlignment value="4"/>
+                      <horizontalAlignment value="0"/>
                       <horizontalTextPosition value="4"/>
-                      <text value=" Ctrl+"/>
+                      <text value="+"/>
                     </properties>
                   </component>
                   <component id="17121" class="javax.swing.JLabel" binding="aLabel" custom-create="true">
@@ -74,6 +75,7 @@
                     <properties>
                       <horizontalAlignment value="0"/>
                       <horizontalTextPosition value="0"/>
+                      <text value="打开连接"/>
                     </properties>
                   </component>
                   <component id="e566b" class="javax.swing.JLabel" binding="openKeyLabel" custom-create="true">
@@ -81,7 +83,7 @@
                     <properties>
                       <horizontalAlignment value="4"/>
                       <horizontalTextPosition value="4"/>
-                      <text value=" Ctrl+"/>
+                      <text value=""/>
                     </properties>
                   </component>
                   <component id="745a9" class="javax.swing.JLabel" binding="sLabel" custom-create="true">
@@ -89,7 +91,7 @@
                     <properties>
                       <horizontalAlignment value="2"/>
                       <horizontalTextPosition value="2"/>
-                      <text value="O"/>
+                      <text value=""/>
                       <verticalAlignment value="3"/>
                     </properties>
                   </component>

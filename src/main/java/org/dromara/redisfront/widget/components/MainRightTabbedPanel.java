@@ -15,7 +15,7 @@ import org.dromara.redisfront.model.ConnectInfo;
 import org.dromara.redisfront.ui.component.RedisTerminal;
 import org.dromara.redisfront.widget.MainWidget;
 import org.dromara.redisfront.widget.action.DrawerAction;
-import org.dromara.redisfront.widget.components.ui.ActiveTitleBoldTabbedPaneUI;
+import org.dromara.redisfront.widget.components.ui.BoldTitleTabbedPaneUI;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -56,7 +56,7 @@ public class MainRightTabbedPanel extends JPanel {
     private void initComponents() {
         this.initTopBar();
         this.initMainTabbedUI();
-        this.initBottomBar();
+        this.initBottomToolBar();
         this.initMainTabbedItem();
 
     }
@@ -103,7 +103,7 @@ public class MainRightTabbedPanel extends JPanel {
         topTabbedPane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT){
             @Override
             public void setUI(TabbedPaneUI ui) {
-                super.setUI(new ActiveTitleBoldTabbedPaneUI());
+                super.setUI(new BoldTitleTabbedPaneUI());
             }
         };
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_SCROLL_BUTTONS_POLICY, FlatClientProperties.TABBED_PANE_POLICY_AS_NEEDED);
@@ -133,7 +133,7 @@ public class MainRightTabbedPanel extends JPanel {
     }
 
 
-    private void initBottomBar() {
+    private void initBottomToolBar() {
         Box verticalBox = Box.createVerticalBox();
         verticalBox.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
         verticalBox.add(new JSeparator());
@@ -180,7 +180,7 @@ public class MainRightTabbedPanel extends JPanel {
         contentTabbedPane = new JTabbedPane(){
             @Override
             public void setUI(TabbedPaneUI ui) {
-                super.setUI(new ActiveTitleBoldTabbedPaneUI());
+                super.setUI(new BoldTitleTabbedPaneUI());
             }
         };
         contentTabbedPane.setTabPlacement(JTabbedPane.LEFT);

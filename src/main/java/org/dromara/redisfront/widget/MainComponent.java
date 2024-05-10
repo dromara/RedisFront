@@ -8,6 +8,7 @@ import org.dromara.redisfront.ui.form.MainNoneForm;
 import org.dromara.redisfront.widget.action.DrawerAction;
 import org.dromara.redisfront.widget.components.MainLeftDrawerPanel;
 import org.dromara.redisfront.widget.components.MainRightTabbedPanel;
+import org.dromara.redisfront.widget.components.ui.MainNonePanel;
 import raven.drawer.component.menu.MenuEvent;
 
 import javax.swing.*;
@@ -22,7 +23,7 @@ public class MainComponent extends Background {
     public static final int DEFAULT_DRAWER_WIDTH = 250;
 
     private final MainWidget owner;
-    private JPanel drawerPanel;
+    private JPanel mainDrawerPanel;
     private JPanel mainContentPane;
     private DrawerAction drawerAction;
 
@@ -52,7 +53,7 @@ public class MainComponent extends Background {
                     drawerAction.handleAction(null);
                 }
                 mainContentPane.removeAll();
-                mainContentPane.add(MainNoneForm.getInstance().getContentPanel(), BorderLayout.CENTER);
+                mainContentPane.add(MainNoneForm.getInstance(), BorderLayout.CENTER);
                 FlatLaf.updateUI();
             }
         });
@@ -61,14 +62,14 @@ public class MainComponent extends Background {
 
     private final BiConsumer<Double, Boolean> process = (fraction, drawerOpen) -> {
         int width = getDrawerWidth(fraction, drawerOpen);
-        drawerPanel.setPreferredSize(new Dimension(width, -1));
-        drawerPanel.updateUI();
+        this.mainDrawerPanel.setPreferredSize(new Dimension(width, -1));
+        this.mainDrawerPanel.updateUI();
     };
 
     public MainComponent(MainWidget owner) {
         this.owner = owner;
         this.setLayout(new BorderLayout());
-        initComponents();
+        this.initComponents();
     }
 
     private void initComponents() {
@@ -77,13 +78,13 @@ public class MainComponent extends Background {
 
         this.mainContentPane = new JPanel();
         this.mainContentPane.setLayout(new BorderLayout());
-        mainContentPane.add(MainNoneForm.getInstance().getContentPanel(), BorderLayout.CENTER);
+        this.mainContentPane.add(new MainNonePanel().$$$getRootComponent$$$(), BorderLayout.CENTER);
         parentPanel.add(mainContentPane, BorderLayout.CENTER);
 
-        drawerPanel = new MainLeftDrawerPanel(owner, menuEvent, drawerAction).buildDrawerPanel();
-        drawerPanel.setMinimumSize(new Dimension(250, -1));
-        drawerPanel.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
-        parentPanel.add(drawerPanel, BorderLayout.WEST);
+        this.mainDrawerPanel = new MainLeftDrawerPanel(owner, menuEvent, drawerAction).buildDrawerPanel();
+        this.mainDrawerPanel.setMinimumSize(new Dimension(250, -1));
+        this.mainDrawerPanel.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
+        parentPanel.add(mainDrawerPanel, BorderLayout.WEST);
 
         this.add(parentPanel, BorderLayout.CENTER);
     }
@@ -101,8 +102,8 @@ public class MainComponent extends Background {
     @Override
     public void updateUI() {
         super.updateUI();
-        if (drawerPanel != null) {
-            drawerPanel.updateUI();
+        if (mainDrawerPanel != null) {
+            mainDrawerPanel.updateUI();
         }
     }
 

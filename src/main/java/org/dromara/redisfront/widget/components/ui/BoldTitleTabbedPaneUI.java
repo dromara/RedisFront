@@ -4,7 +4,7 @@ import com.formdev.flatlaf.ui.FlatTabbedPaneUI;
 
 import java.awt.*;
 
-public class ActiveTitleBoldTabbedPaneUI extends FlatTabbedPaneUI {
+public class BoldTitleTabbedPaneUI extends FlatTabbedPaneUI {
 
         @Override
         protected void paintText(Graphics g, int tabPlacement, Font font, FontMetrics metrics, int tabIndex, String title, Rectangle textRect, boolean isSelected) {

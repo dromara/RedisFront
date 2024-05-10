@@ -92,7 +92,7 @@ public class DataSplitPanel extends JSplitPane {
                     var flatLineBorder = new FlatLineBorder(new Insets(0, 2, 0, 0), UIManager.getColor("Component.borderColor"));
                     setBorder(flatLineBorder);
                     setLayout(new BorderLayout());
-                    add(MainNoneForm.getInstance().getContentPanel(), BorderLayout.CENTER);
+                    add(MainNoneForm.getInstance(), BorderLayout.CENTER);
                 }
             }, BorderLayout.CENTER);
         }
