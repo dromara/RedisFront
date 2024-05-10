@@ -16,7 +16,7 @@ import org.dromara.redisfront.service.*;
 import org.dromara.redisfront.ui.dialog.AddKeyDialog;
 import io.lettuce.core.*;
 import org.dromara.redisfront.commons.constant.Const;
-import org.dromara.redisfront.commons.constant.UI;
+import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.commons.handler.ProcessHandler;
@@ -330,7 +330,7 @@ public class DataSearchForm {
                 setToolTipText(LocaleUtils.getMessageFromBundle("DataSearchForm.addBtn.title"));
             }
         };
-        addBtn.setIcon(UI.PLUS_ICON);
+        addBtn.setIcon(Res.PLUS_ICON);
         addBtn.setFocusable(false);
         addBtn.addActionListener(e -> AddKeyDialog.showAddDialog(connectInfo, null, (key) -> {
             var res = JOptionPane.showConfirmDialog(Application.frame,
@@ -361,7 +361,7 @@ public class DataSearchForm {
             });
         });
         refreshBtn.setFocusable(false);
-        refreshBtn.setIcon(UI.REFRESH_ICON);
+        refreshBtn.setIcon(Res.REFRESH_ICON);
 
         deleteAllBtn = new JButton() {
             @Override
@@ -384,7 +384,7 @@ public class DataSearchForm {
                 this::scanBeforeProcess,
                 this::scanAfterProcess
         ));
-        deleteAllBtn.setIcon(UI.DELETE_ICON);
+        deleteAllBtn.setIcon(Res.DELETE_ICON);
 
 
         databaseComboBox = new JComboBox<>();
@@ -397,7 +397,7 @@ public class DataSearchForm {
             }
         };
         loadMoreBtn.setFocusable(false);
-        loadMoreBtn.setIcon(UI.LOAD_MORE_ICON);
+        loadMoreBtn.setIcon(Res.LOAD_MORE_ICON);
         loadMoreBtn.addActionListener(e -> {
             FutureUtils.runAsync(() -> LoadingUtils.showDialog(LocaleUtils.getMessageFromBundle("MainWindowForm.loading.title")));
             scanKeysActionPerformed();
@@ -464,7 +464,7 @@ public class DataSearchForm {
         keyTree.setBorder(new EmptyBorder(5, 5, 5, 5));
         keyTree.setCellRenderer(new DefaultXTreeCellRenderer() {
             {
-                setLeafIcon(UI.TREE_KEY_ICON);
+                setLeafIcon(Res.TREE_KEY_ICON);
             }
         });
         keyTree.addTreeSelectionListener(e -> {

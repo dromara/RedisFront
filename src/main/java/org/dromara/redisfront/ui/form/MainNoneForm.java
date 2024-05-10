@@ -4,7 +4,7 @@ import com.formdev.flatlaf.util.SystemInfo;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import org.dromara.redisfront.commons.constant.UI;
+import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.commons.util.LocaleUtils;
 
 import javax.swing.*;
@@ -13,6 +13,8 @@ import javax.swing.plaf.FontUIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.util.Locale;
+
+import static org.dromara.redisfront.commons.constant.Res.COMMAND_ICON_45x45;
 
 /**
  * MainNoneForm
@@ -43,13 +45,13 @@ public class MainNoneForm {
     public MainNoneForm() {
         $$$setupUI$$$();
         if (SystemInfo.isMacOS) {
-            newKeyLabel.setText(" ⌘+");
-            openKeyLabel.setText(" ⌘+");
+            newKeyLabel.setIcon(COMMAND_ICON_45x45);
+            openKeyLabel.setIcon(COMMAND_ICON_45x45);
         }
     }
 
     private void createUIComponents() {
-        logoLabel = new JLabel(UI.REDIS_ICON);
+        logoLabel = new JLabel(Res.REDIS_ICON);
         newLabel = new JLabel() {
             @Override
             public void updateUI() {

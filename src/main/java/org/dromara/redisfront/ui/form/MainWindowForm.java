@@ -5,7 +5,7 @@ import com.formdev.flatlaf.icons.FlatTabbedPaneCloseIcon;
 import com.formdev.flatlaf.ui.FlatLineBorder;
 import org.dromara.redisfront.application.Application;
 import org.dromara.redisfront.commons.constant.Enums;
-import org.dromara.redisfront.commons.constant.UI;
+import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.commons.util.*;
 import org.dromara.redisfront.model.ConnectInfo;
@@ -57,7 +57,7 @@ public class MainWindowForm {
                     var connectInfo = get();
                     FutureUtils.runAsync(LoadingUtils::closeDialog);
                     var mainTabbedPanel = MainTabbedPanel.newInstance(connectInfo);
-                    tabPanel.addTab(get().title(), UI.MAIN_TAB_DATABASE_ICON, mainTabbedPanel);
+                    tabPanel.addTab(get().title(), Res.MAIN_TAB_DATABASE_ICON, mainTabbedPanel);
                     tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
                     contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
                     toolBar.setVisible(true);
@@ -165,7 +165,7 @@ public class MainWindowForm {
             toolBar.setBorder(new EmptyBorder(10, 10, 10, 10));
             toolBar.setLayout(new BorderLayout());
 
-            var logViewBtn = new JButton(UI.LOGS_ICON) {
+            var logViewBtn = new JButton(Res.LOGS_ICON) {
                 @Override
                 public void updateUI() {
                     super.updateUI();

@@ -11,7 +11,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.redisfront.commons.constant.Enums;
-import org.dromara.redisfront.commons.constant.UI;
+import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.commons.handler.ActionHandler;
@@ -731,7 +731,7 @@ public class DataViewForm {
             }
         };
         valueUpdateSaveBtn.setEnabled(false);
-        valueUpdateSaveBtn.setIcon(UI.SAVE_ICON);
+        valueUpdateSaveBtn.setIcon(Res.SAVE_ICON);
         valueUpdateSaveBtn.addActionListener((e) -> {
             SwingUtilities.invokeLater(this::refreshDisableBtn);
             FutureUtils.runAsync(() -> {
@@ -806,7 +806,7 @@ public class DataViewForm {
         basicPanel = new JPanel();
 
         loadMoreBtn = new JButton();
-        loadMoreBtn.setIcon(UI.LOAD_MORE_ICON);
+        loadMoreBtn.setIcon(Res.LOAD_MORE_ICON);
         loadMoreBtn.addActionListener((e) -> {
             if (loadMoreBtn.isEnabled()) {
                 loadMoreBtn.setEnabled(false);
@@ -851,7 +851,7 @@ public class DataViewForm {
         ttlField = new JTextField();
         ttlField.setSize(5, -1);
         ttlField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, ttlLabel);
-        delBtn = new JButton(UI.DELETE_ICON) {
+        delBtn = new JButton(Res.DELETE_ICON) {
             @Override
             public void updateUI() {
                 super.updateUI();
@@ -861,7 +861,7 @@ public class DataViewForm {
         };
         delBtn.addActionListener(e -> deleteActionHandler.handle());
 
-        refBtn = new JButton(UI.REFRESH_ICON) {
+        refBtn = new JButton(Res.REFRESH_ICON) {
             @Override
             public void updateUI() {
                 super.updateUI();
@@ -871,7 +871,7 @@ public class DataViewForm {
         };
         refBtn.addActionListener(e -> reloadAllActionPerformed());
 
-        saveBtn = new JButton(UI.SAVE_ICON) {
+        saveBtn = new JButton(Res.SAVE_ICON) {
             @Override
             public void updateUI() {
                 super.updateUI();
@@ -914,7 +914,7 @@ public class DataViewForm {
             tableSearchField.setText("");
             reloadTableDataActionPerformed(true);
         });
-        tableAddBtn = new JButton(UI.PLUS_ICON) {
+        tableAddBtn = new JButton(Res.PLUS_ICON) {
             @Override
             public void updateUI() {
                 super.updateUI();
@@ -940,7 +940,7 @@ public class DataViewForm {
             }
         });
 
-        tableDelBtn = new JButton(UI.DELETE_ICON) {
+        tableDelBtn = new JButton(Res.DELETE_ICON) {
             @Override
             public void updateUI() {
                 super.updateUI();
@@ -1006,7 +1006,7 @@ public class DataViewForm {
             tableDelBtn.setEnabled(false);
             reloadTableDataActionPerformed(true);
         });
-        tableRefreshBtn = new JButton(UI.REFRESH_ICON) {
+        tableRefreshBtn = new JButton(Res.REFRESH_ICON) {
             @Override
             public void updateUI() {
                 super.updateUI();
@@ -1047,7 +1047,7 @@ public class DataViewForm {
         allCountField.setEnabled(false);
         allCountField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, pageSizeLabel);
 
-        closeBtn = new JButton(UI.CLOSE_ICON) {
+        closeBtn = new JButton(Res.CLOSE_ICON) {
             @Override
             public void updateUI() {
                 super.updateUI();

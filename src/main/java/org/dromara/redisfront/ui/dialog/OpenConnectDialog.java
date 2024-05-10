@@ -4,7 +4,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.redisfront.application.Application;
-import org.dromara.redisfront.commons.constant.UI;
+import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.commons.handler.ProcessHandler;
 import org.dromara.redisfront.commons.ui.AbstractDialog;
@@ -174,7 +174,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
             dispose();
             AddConnectDialog.showAddConnectDialog(openProcessHandler);
         });
-        addConnectBtn.setIcon(UI.CONNECTION_ICON);
+        addConnectBtn.setIcon(Res.CONNECTION_ICON);
     }
 
     /**

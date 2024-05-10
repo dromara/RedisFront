@@ -12,10 +12,6 @@ import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.redisfront.application.Application;
 import org.dromara.redisfront.commons.constant.Const;
 import org.dromara.redisfront.commons.func.Fn;
-import org.dromara.redisfront.commons.theme.RedisFrontDarkLaf;
-import org.dromara.redisfront.commons.theme.RedisFrontLightLaf;
-import org.dromara.redisfront.commons.theme.RedisFrontMacDarkLaf;
-import org.dromara.redisfront.commons.theme.RedisFrontMacLightLaf;
 import org.dromara.redisfront.commons.ui.AbstractDialog;
 import org.dromara.redisfront.commons.util.LocaleUtils;
 import org.dromara.redisfront.commons.util.PrefUtils;
@@ -208,11 +204,7 @@ public class SettingDialog extends AbstractDialog<Void> {
 
 
     private void initThemeNameComboBox() {
-        themeNameComboBox.addItem(new ThemeUtils.ThemeInfo(RedisFrontLightLaf.NAME, null, false, null, null, null, null, null, RedisFrontLightLaf.class.getName()));
-        themeNameComboBox.addItem(new ThemeUtils.ThemeInfo(RedisFrontDarkLaf.NAME, null, true, null, null, null, null, null, RedisFrontDarkLaf.class.getName()));
-        themeNameComboBox.addItem(new ThemeUtils.ThemeInfo(RedisFrontMacDarkLaf.NAME, null, true, null, null, null, null, null, RedisFrontMacDarkLaf.class.getName()));
-        themeNameComboBox.addItem(new ThemeUtils.ThemeInfo(RedisFrontMacLightLaf.NAME, null, true, null, null, null, null, null, RedisFrontMacLightLaf.class.getName()));
-        themeNameComboBox.addActionListener(e -> {
+     themeNameComboBox.addActionListener(e -> {
             JComboBox<?> selected = (JComboBox<?>) e.getSource();
             ThemeUtils.ThemeInfo themeInfo = (ThemeUtils.ThemeInfo) selected.getSelectedItem();
             ThemeUtils.changeTheme(themeInfo);

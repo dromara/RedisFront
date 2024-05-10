@@ -1,18 +1,15 @@
-package org.dromara.redisfront.widget.main.action;
+package org.dromara.redisfront.widget.action;
 
 
 import lombok.Getter;
 import lombok.Setter;
 import org.dromara.quickswing.ui.app.AppAction;
-import org.dromara.redisfront.widget.main.MainWidget;
+import org.dromara.redisfront.widget.MainWidget;
 import org.jdesktop.core.animation.timing.Animator;
 import org.jdesktop.core.animation.timing.TimingTarget;
 import org.jdesktop.core.animation.timing.TimingTargetAdapter;
 import org.jdesktop.swing.animation.timing.sources.SwingTimerTimingSource;
-import raven.drawer.component.DrawerPanel;
 
-import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -29,8 +26,9 @@ public class DrawerAction extends AppAction<MainWidget> {
     private BiConsumer<Double,Boolean> process;
     @Setter
     private Consumer<Boolean> afterProcess;
-    public DrawerAction(MainWidget app) {
+    public DrawerAction(MainWidget app,BiConsumer<Double,Boolean> process) {
         super(app);
+        this.process = process;
     }
 
     @Override

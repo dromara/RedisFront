@@ -1,4 +1,4 @@
-package org.dromara.redisfront.widget.main;
+package org.dromara.redisfront.widget;
 
 
 import com.formdev.flatlaf.FlatClientProperties;
@@ -8,7 +8,7 @@ import org.dromara.quickswing.constant.OS;
 import org.dromara.quickswing.ui.app.AppContext;
 import org.dromara.quickswing.ui.app.AppWidget;
 import org.dromara.redisfront.RedisFrontPrefs;
-import org.dromara.redisfront.commons.constant.UI;
+import org.dromara.redisfront.commons.constant.Res;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,7 +29,7 @@ public class MainWidget extends AppWidget<RedisFrontPrefs> {
         }
         this.setResizable(true);
         this.setSize(960, 600);
-        this.setIconImages(UI.MAIN_FRAME_ICON_IMAGES);
+        this.setIconImages(Res.MAIN_FRAME_ICON_IMAGES);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setContentPane(new MainComponent(this));
     }

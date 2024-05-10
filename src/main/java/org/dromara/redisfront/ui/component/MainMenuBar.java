@@ -8,7 +8,7 @@ import com.formdev.flatlaf.extras.components.FlatButton;
 import com.formdev.flatlaf.util.SystemInfo;
 import org.dromara.redisfront.application.Application;
 import org.dromara.redisfront.commons.constant.Const;
-import org.dromara.redisfront.commons.constant.UI;
+import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.commons.util.AlertUtils;
 import org.dromara.redisfront.commons.util.FutureUtils;
 import org.dromara.redisfront.commons.util.LocaleUtils;
@@ -244,7 +244,7 @@ public class MainMenuBar extends JMenuBar {
         add(Box.createGlue());
 
         var gitBtn = new FlatButton();
-        gitBtn.setIcon(UI.GITHUB_ICON);
+        gitBtn.setIcon(Res.GITHUB_ICON);
         gitBtn.setButtonType(FlatButton.ButtonType.toolBarButton);
         gitBtn.setFocusable(false);
         gitBtn.setToolTipText("https://github.com/westboy/redisfront");
@@ -280,7 +280,7 @@ public class MainMenuBar extends JMenuBar {
                         new JPanel() {
                             {
                                 setLayout(new BorderLayout());
-                                add(new JLabel(UI.REDIS_ICON), BorderLayout.WEST);
+                                add(new JLabel(Res.REDIS_ICON), BorderLayout.WEST);
                                 add(new JPanel() {
                                     {
                                         setLayout(new BorderLayout());

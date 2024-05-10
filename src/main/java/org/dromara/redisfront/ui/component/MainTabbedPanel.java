@@ -9,7 +9,7 @@ import org.dromara.redisfront.model.ClusterNode;
 import org.dromara.redisfront.model.ConnectInfo;
 import org.dromara.redisfront.ui.form.fragment.PubSubForm;
 import org.dromara.redisfront.commons.constant.Const;
-import org.dromara.redisfront.commons.constant.UI;
+import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.commons.util.FutureUtils;
 import org.dromara.redisfront.commons.util.LocaleUtils;
@@ -55,7 +55,7 @@ public class MainTabbedPanel extends JPanel {
                 leftToolBar.setLayout(leftToolBarLayout);
 
                 //host info
-                var hostInfo = new JLabel(UI.CONTENT_TAB_HOST_ICON) {
+                var hostInfo = new JLabel(Res.CONTENT_TAB_HOST_ICON) {
                     @Override
                     public void updateUI() {
                         super.updateUI();
@@ -107,19 +107,19 @@ public class MainTabbedPanel extends JPanel {
                 //cupInfo
                 var cupInfo = new FlatLabel();
                 cupInfo.setText("0");
-                cupInfo.setIcon(UI.CONTENT_TAB_CPU_ICON);
+                cupInfo.setIcon(Res.CONTENT_TAB_CPU_ICON);
                 middleToolBar.add(cupInfo);
                 middleToolBar.add(new JToolBar.Separator());
                 //memoryInfo
                 var memoryInfo = new FlatLabel();
                 memoryInfo.setText("0.0");
-                memoryInfo.setIcon(UI.CONTENT_TAB_MEMORY_ICON);
+                memoryInfo.setIcon(Res.CONTENT_TAB_MEMORY_ICON);
                 middleToolBar.add(memoryInfo);
                 middleToolBar.add(new JToolBar.Separator());
                 //keysInfo
                 var keysInfo = new FlatLabel();
                 keysInfo.setText("0");
-                keysInfo.setIcon(UI.CONTENT_TAB_KEYS_ICON);
+                keysInfo.setIcon(Res.CONTENT_TAB_KEYS_ICON);
                 middleToolBar.add(keysInfo);
 
                 threadInit(connectInfo, keysInfo, cupInfo, memoryInfo);
@@ -137,7 +137,7 @@ public class MainTabbedPanel extends JPanel {
                 var info = new FlatLabel();
                 info.setText("V " + Const.APP_VERSION);
                 info.setToolTipText("Version ".concat(Const.APP_VERSION));
-                info.setIcon(UI.INFO_ICON);
+                info.setIcon(Res.INFO_ICON);
                 rightToolBar.add(info);
                 horizontalBox.add(rightToolBar);
             }
@@ -169,12 +169,12 @@ public class MainTabbedPanel extends JPanel {
             }
             {
                 //主窗口
-                contentPanel.addTab(null, UI.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(connectInfo));
+                contentPanel.addTab(null, Res.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(connectInfo));
                 //命令窗口
-                contentPanel.addTab(null, UI.CONTENT_TAB_COMMAND_ICON, RedisTerminal.newInstance(connectInfo));
-                contentPanel.addTab(null, UI.MQ_ICON, PubSubForm.newInstance(connectInfo));
+                contentPanel.addTab(null, Res.CONTENT_TAB_COMMAND_ICON, RedisTerminal.newInstance(connectInfo));
+                contentPanel.addTab(null, Res.MQ_ICON, PubSubForm.newInstance(connectInfo));
                 //数据窗口
-                contentPanel.addTab(null, UI.CONTENT_TAB_INFO_ICON, DataChartsForm.getInstance(connectInfo));
+                contentPanel.addTab(null, Res.CONTENT_TAB_INFO_ICON, DataChartsForm.getInstance(connectInfo));
 
 
                 //tab 切换事件

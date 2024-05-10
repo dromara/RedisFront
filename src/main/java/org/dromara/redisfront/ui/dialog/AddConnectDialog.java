@@ -7,7 +7,7 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.redisfront.application.Application;
 import org.dromara.redisfront.commons.constant.Enums;
-import org.dromara.redisfront.commons.constant.UI;
+import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.func.Fn;
 
@@ -400,7 +400,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         hostField.setText("127.0.0.1");
         testBtn = new JButton();
         testBtn.setText("测试连接");
-        testBtn.setIcon(UI.TEST_CONNECTION_ICON);
+        testBtn.setIcon(Res.TEST_CONNECTION_ICON);
         sshPortField = new JSpinner();
         sshPortField.setEditor(new JSpinner.NumberEditor(sshPortField, "####"));
         sshPortField.setValue(22);

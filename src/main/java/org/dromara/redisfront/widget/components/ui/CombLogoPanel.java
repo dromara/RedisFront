@@ -1,23 +1,22 @@
-package org.dromara.redisfront.widget.main.panel.drawer;
+package org.dromara.redisfront.widget.components.ui;
 
-import org.dromara.redisfront.commons.constant.UI;
+import org.dromara.redisfront.commons.constant.Res;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 
-public class Logo extends JPanel {
-    private static final Logo INSTANCE = new Logo();
-    public static Logo getInstance() {
+public class CombLogoPanel extends JPanel {
+    private static final CombLogoPanel INSTANCE = new CombLogoPanel();
+    public static CombLogoPanel getInstance() {
         return INSTANCE;
     }
 
-    public Logo() {
+    public CombLogoPanel() {
         this.setOpaque(false);
         this.setLayout(new FlowLayout());
         this.setMinimumSize(new Dimension(220,55));
-        this.add(new JLabel(UI.REDIS_ICON_45x45));
-        JLabel logoFont = new JLabel(UI.LOGO_TEXT_ICON);
-        this.add(logoFont);
+        this.add(new JLabel(Res.REDIS_ICON_45x45));
+        this.add(new JLabel(Res.LOGO_TEXT_ICON));
     }
 
 

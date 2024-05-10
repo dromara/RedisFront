@@ -1,4 +1,4 @@
-package org.dromara.redisfront.widget.main.panel.drawer;
+package org.dromara.redisfront.widget.components.ui;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
@@ -6,6 +6,7 @@ import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
+import com.jthemedetecor.OsThemeDetector;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -13,9 +14,13 @@ import java.awt.*;
 
 
 public class ThemesChange extends JPanel {
-
+    final OsThemeDetector detector;
     public ThemesChange() {
         init();
+        detector = OsThemeDetector.getDetector();
+        detector.registerListener(isDark -> SwingUtilities.invokeLater(() -> {
+            this.changeMode(isDark);
+        }));
     }
 
     private Icon createIcon(String path) {

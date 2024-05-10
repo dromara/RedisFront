@@ -8,10 +8,7 @@ import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.json.Json;
 import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.LoggingFacade;
-import org.dromara.redisfront.application.Application;
 import org.dromara.redisfront.commons.constant.Const;
-import org.dromara.redisfront.commons.theme.RedisFrontLightLaf;
-
 import javax.swing.*;
 import javax.swing.text.StyleContext;
 import java.io.File;
@@ -81,22 +78,6 @@ public class ThemeUtils {
     }
 
     public static void setupTheme(String[] args) {
-        try {
-            if (args.length > 0) {
-                UIManager.setLookAndFeel(args[0]);
-            } else {
-                String theme = PrefUtils.getState().get(Const.KEY_THEME, RedisFrontLightLaf.class.getName());
-                if (theme.startsWith("R_")) {
-                    IntelliJTheme.setup(ThemeUtils.class.getResourceAsStream(THEMES_PACKAGE + theme.replace("R_", "")));
-                } else {
-                    UIManager.setLookAndFeel(theme);
-                }
-            }
-            fontInit();
-        } catch (Throwable ex) {
-            LoggingFacade.INSTANCE.logSevere(null, ex);
-            FlatLightLaf.setup();
-        }
     }
 
 
