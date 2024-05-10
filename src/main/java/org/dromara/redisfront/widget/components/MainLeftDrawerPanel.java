@@ -1,18 +1,15 @@
 package org.dromara.redisfront.widget.components;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.SystemInfo;
 import lombok.Getter;
-import lombok.Setter;
 import net.miginfocom.swing.MigLayout;
-import org.dromara.redisfront.ui.form.MainNoneForm;
+import org.dromara.redisfront.widget.MainComponent;
 import org.dromara.redisfront.widget.MainWidget;
 import org.dromara.redisfront.widget.action.DrawerAction;
 import org.dromara.redisfront.widget.components.ui.CombLogoPanel;
 import org.dromara.redisfront.widget.components.ui.ThemesChange;
-import org.jetbrains.annotations.NotNull;
 import raven.drawer.component.DrawerPanel;
 import raven.drawer.component.SimpleDrawerBuilder;
 import raven.drawer.component.footer.SimpleFooter;
@@ -54,7 +51,7 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
     }
 
     private void initializeUI() {
-        SimpleMenuOption simpleMenuOption = this.getSimpleMenuOption();
+        var simpleMenuOption = this.getSimpleMenuOption();
         simpleMenuOption.addMenuEvent(menuEvent);
         this.menu = new SimpleMenu(simpleMenuOption);
         this.menuScroll = createScroll(menu);
@@ -65,7 +62,7 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
 
     @Override
     public Component getFooter() {
-        JPanel footerPanel = new JPanel();
+        var footerPanel = new JPanel();
         footerPanel.putClientProperty(FlatClientProperties.STYLE, "background:null");
         footerPanel.setLayout(new MigLayout("al center", "[fill,fill]", "fill"));
         footerPanel.add(new ThemesChange());
@@ -75,7 +72,7 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
 
     @Override
     public Component getHeader() {
-        JPanel headerPanel = new JPanel();
+        var headerPanel = new JPanel();
         headerPanel.putClientProperty(FlatClientProperties.STYLE, "background:null");
         headerPanel.setLayout(new BorderLayout());
         if (SystemInfo.isMacOS) {
@@ -100,7 +97,7 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
 
     @Override
     public SimpleMenuOption getSimpleMenuOption() {
-        SimpleMenuOption simpleMenuOption = getMenuOption();
+        var simpleMenuOption = getMenuOption();
         simpleMenuOption.setMenuStyle(new SimpleMenuStyle() {
             @Override
             public void styleMenuPanel(JPanel panel, int[] index) {
@@ -162,11 +159,10 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
     @Override
     public void build(DrawerPanel drawerPanel) {
         drawerPanel.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
-
     }
 
     @Override
     public int getDrawerWidth() {
-        return 250;
+        return MainComponent.DEFAULT_DRAWER_WIDTH;
     }
 }

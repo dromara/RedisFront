@@ -19,7 +19,7 @@ import java.util.function.BiConsumer;
 
 public class MainComponent extends Background {
 
-    private static final int DEFAULT_DRAWER_WIDTH = 250;
+    public static final int DEFAULT_DRAWER_WIDTH = 250;
 
     private final MainWidget owner;
     private JPanel drawerPanel;
