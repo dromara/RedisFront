@@ -52,6 +52,8 @@ public class MainWidget extends AppWidget<RedisFrontPrefs> {
         return isFullScreen;
     }
 
+
+
     @Override
     protected void preMenuBarInit(RedisFrontPrefs redisFrontPrefs, SplashScreen splashScreen) {
 

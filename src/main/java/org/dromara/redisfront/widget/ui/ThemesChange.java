@@ -14,14 +14,14 @@ import java.awt.*;
 
 
 public class ThemesChange extends JPanel {
-    final OsThemeDetector detector;
+    public final static OsThemeDetector DETECTOR = OsThemeDetector.getDetector();
     public ThemesChange() {
         init();
-        detector = OsThemeDetector.getDetector();
-        detector.registerListener(isDark -> SwingUtilities.invokeLater(() -> {
-            this.changeMode(isDark);
-        }));
+        ThemesChange.changeMode(ThemesChange.isDark());
+        ThemesChange.DETECTOR.registerListener(isDark -> SwingUtilities.invokeLater(() -> changeMode(isDark)));
     }
+
+
 
     private Icon createIcon(String path) {
         FlatSVGIcon icon = new FlatSVGIcon(path, 0.7f);
@@ -62,7 +62,11 @@ public class ThemesChange extends JPanel {
         add(panel);
     }
 
-    private void changeMode(boolean dark) {
+    public static boolean isDark(){
+        return DETECTOR.isDark();
+    }
+
+    public static void changeMode(boolean dark) {
         if (dark != FlatLaf.isLafDark()) {
             if (dark) {
                 EventQueue.invokeLater(() -> {

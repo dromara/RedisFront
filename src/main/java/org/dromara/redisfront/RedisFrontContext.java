@@ -2,12 +2,15 @@ package org.dromara.redisfront;
 
 import cn.hutool.core.io.FileUtil;
 import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import com.formdev.flatlaf.util.SystemInfo;
+import com.jthemedetecor.OsThemeDetector;
 import org.dromara.redisfront.widget.MainWidget;
 import lombok.Getter;
 import org.dromara.quickswing.ui.app.AppContext;
 import org.dromara.quickswing.ui.app.AppWidget;
+import org.dromara.redisfront.widget.ui.ThemesChange;
 
 import javax.swing.*;
 import java.io.File;
