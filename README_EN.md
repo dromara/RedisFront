@@ -17,8 +17,6 @@ RedisFront is a cross platform Redis desktop client tool developed based on Java
 
 [https://github.com/dromara/RedisFront/releases](https://github.com/dromara/RedisFront/releases)
 
-[https://caiyun.139.com/m/i?185C6uQsGKnE0](https://caiyun.139.com/m/i?185C6uQsGKnE0)  `提取码：weBe`
-
 ### ❤️ Thanks
 * [FlatLaf](https://github.com/JFormDesigner/FlatLaf?from=RedisFront)
 * [Lettuce](https://github.com/lettuce-io/lettuce-core?from=RedisFront)
