@@ -8,7 +8,6 @@ import io.github.fvarrui.javapackager.model.Platform
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.nio.charset.Charset
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -48,7 +47,7 @@ buildscript {
 plugins.apply("io.github.fvarrui.javapackager.plugin")
 
 
-version = "1.0.7"
+version = "2024.1"
 
 val applicationName: String = "RedisFront"
 val organization: String = "dromara.org"
@@ -122,8 +121,8 @@ tasks.test {
 }
 
 tasks.compileJava {
-    sourceCompatibility = "17"
-    targetCompatibility = "17"
+    sourceCompatibility = "21"
+    targetCompatibility = "21"
     options.encoding = "utf-8"
     options.isDeprecation = false
 }
@@ -137,7 +136,6 @@ tasks.processResources {
             )
         )
     }
-    updateVersion()
 }
 
 
@@ -146,7 +144,7 @@ tasks.jar {
 
     manifest {
         attributes("Main-Class" to "com.redisfront.RedisFrontApplication")
-        attributes("Implementation-Vendor" to "www.redisfront.com")
+        attributes("Implementation-Vendor" to "redisfront.dromara.org")
         attributes("Implementation-Copyright" to "redisfront")
         attributes("Implementation-Version" to project.version)
         attributes("Multi-Release" to "true")
@@ -279,16 +277,11 @@ fun getIconFile(fileName: String): File {
     return File(projectDir.absolutePath + File.separator + "assets" + File.separator + fileName)
 }
 
-fun updateVersion() {
-    val jsonFile = File(projectDir.absolutePath + File.separator + "assets" + File.separator + "version.json")
-    jsonFile.writeText("{\"version\": \"${version}\"}", Charset.forName("utf-8"))
-}
-
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions {
-    jvmTarget = "17"
+    jvmTarget = "21"
 }
 val compileTestKotlin: KotlinCompile by tasks
 compileTestKotlin.kotlinOptions {
-    jvmTarget = "17"
+    jvmTarget = "21"
 }
