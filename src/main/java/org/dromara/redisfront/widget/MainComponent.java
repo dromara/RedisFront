@@ -4,11 +4,10 @@ import cn.hutool.core.util.ArrayUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
 import org.dromara.quickswing.ui.swing.Background;
-import org.dromara.redisfront.ui.form.MainNoneForm;
-import org.dromara.redisfront.widget.action.DrawerAction;
+import org.dromara.redisfront.widget.components.action.DrawerAction;
 import org.dromara.redisfront.widget.components.MainLeftDrawerPanel;
 import org.dromara.redisfront.widget.components.MainRightTabbedPanel;
-import org.dromara.redisfront.widget.components.ui.MainNonePanel;
+import org.dromara.redisfront.widget.ui.DefaultNonePanel;
 import raven.drawer.component.menu.MenuEvent;
 
 import javax.swing.*;
@@ -53,7 +52,7 @@ public class MainComponent extends Background {
                     drawerAction.handleAction(null);
                 }
                 mainContentPane.removeAll();
-                mainContentPane.add(MainNoneForm.getInstance(), BorderLayout.CENTER);
+                mainContentPane.add(DefaultNonePanel.getInstance(), BorderLayout.CENTER);
                 FlatLaf.updateUI();
             }
         });
@@ -78,7 +77,7 @@ public class MainComponent extends Background {
 
         this.mainContentPane = new JPanel();
         this.mainContentPane.setLayout(new BorderLayout());
-        this.mainContentPane.add(new MainNonePanel().$$$getRootComponent$$$(), BorderLayout.CENTER);
+        this.mainContentPane.add(DefaultNonePanel.getInstance(), BorderLayout.CENTER);
         parentPanel.add(mainContentPane, BorderLayout.CENTER);
 
         this.mainDrawerPanel = new MainLeftDrawerPanel(owner, menuEvent, drawerAction).buildDrawerPanel();

@@ -14,7 +14,7 @@ import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.util.Locale;
 
-import static org.dromara.redisfront.commons.constant.Res.COMMAND_ICON_45x45;
+import static org.dromara.redisfront.commons.constant.Res.COMMAND_ICON_16x16;
 
 /**
  * MainNoneForm
@@ -46,7 +46,7 @@ public class MainNoneForm {
     public MainNoneForm() {
         $$$setupUI$$$();
         if (SystemInfo.isMacOS) {
-            newLabel.setIcon(COMMAND_ICON_45x45);
+            newLabel.setIcon(COMMAND_ICON_16x16);
 
         }
     }

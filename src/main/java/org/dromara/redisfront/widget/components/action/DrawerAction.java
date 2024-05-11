@@ -1,4 +1,4 @@
-package org.dromara.redisfront.widget.action;
+package org.dromara.redisfront.widget.components.action;
 
 
 import lombok.Getter;
