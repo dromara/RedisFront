@@ -9,6 +9,7 @@ import org.dromara.quickswing.ui.app.AppContext;
 import org.dromara.quickswing.ui.app.AppWidget;
 import org.dromara.redisfront.RedisFrontPrefs;
 import org.dromara.redisfront.commons.constant.Res;
+import org.dromara.redisfront.widget.action.ShowOpenDialogAction;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,9 +32,14 @@ public class MainWidget extends AppWidget<RedisFrontPrefs> {
         this.setSize(960, 600);
         this.setIconImages(Res.MAIN_FRAME_ICON_IMAGES);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setContentPane(new MainComponent(this));
+        MainComponent mainComponent = new MainComponent(this);
+        this.setContentPane(mainComponent);
     }
 
+    @Override
+    protected void initializeActions() {
+        addAction("showOpenConnectDialog", new ShowOpenDialogAction(this, "showOpenConnectDialog"));
+    }
 
     public boolean isFullScreen() {
         boolean isFullScreen = false;
@@ -51,7 +57,6 @@ public class MainWidget extends AppWidget<RedisFrontPrefs> {
         }
         return isFullScreen;
     }
-
 
 
     @Override

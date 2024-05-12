@@ -7,7 +7,7 @@ import lombok.Getter;
 import net.miginfocom.swing.MigLayout;
 import org.dromara.redisfront.widget.MainComponent;
 import org.dromara.redisfront.widget.MainWidget;
-import org.dromara.redisfront.widget.components.action.DrawerAction;
+import org.dromara.redisfront.widget.action.DrawerAction;
 import org.dromara.redisfront.widget.ui.CombLogoPanel;
 import org.dromara.redisfront.widget.ui.ThemesChange;
 import raven.drawer.component.DrawerPanel;

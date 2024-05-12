@@ -4,7 +4,7 @@ import cn.hutool.core.util.ArrayUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
 import org.dromara.quickswing.ui.swing.Background;
-import org.dromara.redisfront.widget.components.action.DrawerAction;
+import org.dromara.redisfront.widget.action.DrawerAction;
 import org.dromara.redisfront.widget.components.MainLeftDrawerPanel;
 import org.dromara.redisfront.widget.components.MainRightTabbedPanel;
 import org.dromara.redisfront.widget.ui.DefaultNonePanel;
@@ -69,12 +69,20 @@ public class MainComponent extends Background {
         this.owner = owner;
         this.setLayout(new BorderLayout());
         this.initComponents();
+        this.initializeActions();
+    }
+
+
+    private void initializeActions() {
+        InputMap inputMap = this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        this.owner.fillInputMap("showOpenConnectDialog",inputMap);
+        ActionMap actionMap = this.getActionMap();
+        this.owner.fillActionMap("showOpenConnectDialog",actionMap);
     }
 
     private void initComponents() {
         this.drawerAction = new DrawerAction(owner, process);
         JPanel parentPanel = new JPanel(new BorderLayout());
-
         this.mainContentPane = new JPanel();
         this.mainContentPane.setLayout(new BorderLayout());
         this.mainContentPane.add(DefaultNonePanel.getInstance(), BorderLayout.CENTER);

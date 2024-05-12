@@ -14,7 +14,7 @@ import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.model.ConnectInfo;
 import org.dromara.redisfront.ui.component.RedisTerminal;
 import org.dromara.redisfront.widget.MainWidget;
-import org.dromara.redisfront.widget.components.action.DrawerAction;
+import org.dromara.redisfront.widget.action.DrawerAction;
 import org.dromara.redisfront.widget.ui.BoldTitleTabbedPaneUI;
 
 import javax.swing.*;
@@ -202,10 +202,8 @@ public class MainRightTabbedPanel extends JPanel {
             System.out.println(tabbedPane.getSelectedIndex());
         });
 
-        topTabbedPane.addTab("阿里云主机", Res.REDIS_ICON_14x14, new JLabel("测试"));
-        topTabbedPane.addTab("192.168.1.1", Res.REDIS_ICON_14x14, new JLabel("b"));
-        topTabbedPane.addTab("172.0.0.6", Res.REDIS_ICON_14x14, new JLabel("a"));
         topTabbedPane.addTab("127.0.0.1", Res.REDIS_ICON_14x14, contentTabbedPane);
+
     }
 
     private void initMainTabbedItem() {
@@ -220,6 +218,7 @@ public class MainRightTabbedPanel extends JPanel {
         contentTabbedPane.addTab("订阅", Res.MQ_ICON, new JPanel());
         //数据窗口
         contentTabbedPane.addTab("数据", Res.CONTENT_TAB_INFO_ICON, new JPanel());
+
     }
 
 
