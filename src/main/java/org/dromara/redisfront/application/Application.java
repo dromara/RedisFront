@@ -9,7 +9,6 @@ import org.dromara.redisfront.commons.constant.Const;
 import org.dromara.redisfront.commons.exception.GlobalExceptionHandler;
 import org.dromara.redisfront.commons.util.*;
 import org.dromara.redisfront.ui.frame.RedisFrontMainFrame;
-import org.dromara.redisfront.widget.ui.ThemesChange;
 
 import javax.swing.*;
 import java.awt.*;

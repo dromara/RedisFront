@@ -7,9 +7,30 @@ import io.github.fvarrui.javapackager.model.*
 import io.github.fvarrui.javapackager.model.Platform
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+
+plugins {
+    `java-library`
+    kotlin("jvm") version "1.9.20-RC"
+}
+
+buildscript {
+    repositories {
+        mavenLocal()
+        maven {
+            url = uri("https://packages.aliyun.com/maven/repository/2048752-snapshot-C7TcE7")
+            credentials {
+                username = "662c9a1d2df38b0129acf288"
+                password = "pub-user"
+            }
+        }
+        dependencies {
+            classpath("io.github.fvarrui:javapackager:1.7.5")
+        }
+    }
+}
+plugins.apply("io.github.fvarrui.javapackager.plugin")
 
 allprojects {
     repositories {
@@ -30,22 +51,6 @@ allprojects {
         }
     }
 }
-
-plugins {
-    `java-library`
-    kotlin("jvm") version "1.7.20-RC"
-}
-
-buildscript {
-    repositories {
-        mavenLocal()
-        dependencies {
-            classpath("io.github.fvarrui:javapackager:1.6.7")
-        }
-    }
-}
-plugins.apply("io.github.fvarrui.javapackager.plugin")
-
 
 version = "2024.1"
 
@@ -121,8 +126,6 @@ tasks.test {
 }
 
 tasks.compileJava {
-    sourceCompatibility = "21"
-    targetCompatibility = "21"
     options.encoding = "utf-8"
     options.isDeprecation = false
 }
@@ -143,7 +146,7 @@ tasks.jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     manifest {
-        attributes("Main-Class" to "com.redisfront.RedisFrontApplication")
+        attributes("Main-Class" to "org.dromara.redisfront.application.Application")
         attributes("Implementation-Vendor" to "redisfront.dromara.org")
         attributes("Implementation-Copyright" to "redisfront")
         attributes("Implementation-Version" to project.version)
@@ -175,7 +178,7 @@ tasks.jar {
 }
 
 configure<PackagePluginExtension> {
-    mainClass("com.redisfront.RedisFrontApplication")
+    mainClass("org.dromara.redisfront.application.Application")
     packagingJdk(File(System.getProperty("java.home")))
     bundleJre(true)
     customizedJre(true)
@@ -199,7 +202,7 @@ tasks.register<PackageTask>("packageForWindows") {
     platform = Platform.windows
     isCreateZipball = false
     winConfig(closureOf<WindowsConfig> {
-        icoFile = getIconFile("RedisFront.ico")
+        icoFile = getIcon("RedisFront.ico")
         headerType = HeaderType.gui
         originalFilename = applicationName
         copyright = applicationName
@@ -228,7 +231,7 @@ tasks.register<PackageTask>("packageForLinux") {
 
     linuxConfig(
         closureOf<LinuxConfig> {
-            pngFile = getIconFile("RedisFront.png")
+            pngFile = getIcon("RedisFront.png")
             isGenerateDeb = true
             isGenerateRpm = true
             isCreateTarball = true
@@ -248,7 +251,7 @@ tasks.register<PackageTask>("packageForMac_M1") {
 
     macConfig(
         closureOf<MacConfig> {
-            icnsFile = getIconFile("RedisFront.icns")
+            icnsFile = getIcon("RedisFront.icns")
             isGenerateDmg = true
             macStartup = MacStartup.ARM64
         } as Closure<MacConfig>
@@ -265,7 +268,7 @@ tasks.register<PackageTask>("packageForMac") {
 
     macConfig(
         closureOf<MacConfig> {
-            icnsFile = getIconFile("RedisFront.icns")
+            icnsFile = getIcon("RedisFront.icns")
             isGenerateDmg = true
             macStartup = MacStartup.X86_64
         } as Closure<MacConfig>
@@ -273,15 +276,6 @@ tasks.register<PackageTask>("packageForMac") {
     dependsOn(tasks.build)
 }
 
-fun getIconFile(fileName: String): File {
+fun getIcon(fileName: String): File {
     return File(projectDir.absolutePath + File.separator + "assets" + File.separator + fileName)
-}
-
-val compileKotlin: KotlinCompile by tasks
-compileKotlin.kotlinOptions {
-    jvmTarget = "18"
-}
-val compileTestKotlin: KotlinCompile by tasks
-compileTestKotlin.kotlinOptions {
-    jvmTarget = "18"
 }
