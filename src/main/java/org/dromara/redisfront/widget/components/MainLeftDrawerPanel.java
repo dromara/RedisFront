@@ -127,22 +127,22 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
             }
         });
 
-        JScrollPane scrollPane = new JScrollPane(tree);
-        scrollPane.putClientProperty(FlatClientProperties.STYLE, "background:null");
-        scrollPane.setBorder(new EmptyBorder(5, 10, 0, 10));
+        JScrollPane scrollPane = createScroll(tree);
+        scrollPane.setBorder(new EmptyBorder(0, 10, 0, 10));
         return scrollPane;
     }
 
     private static @NotNull JTree createConnectTree() {
         JTree tree = new JTree();
         tree.setRootVisible(false);
+        tree.setShowsRootHandles(true);
         tree.setDragEnabled(true);
         tree.putClientProperty(FlatClientProperties.STYLE,
                 "selectionArc:10;" +
                         "rowHeight:25;" +
                         "background:$RedisFront.main.background;" +
                         "foreground:#ffffff;" +
-                        "[light]selectionBackground:darken(#FAFAFA,18%);" +
+                        "[light]selectionBackground:darken(#FAFAFA,15%);" +
                         "[light]selectionForeground:darken($Label.foreground,50%);" +
                         "[dark]selectionBackground:darken($Label.foreground,50%);" +
                         "showCellFocusIndicator:false;"
