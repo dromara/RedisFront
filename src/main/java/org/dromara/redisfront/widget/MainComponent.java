@@ -8,6 +8,7 @@ import org.dromara.redisfront.widget.action.DrawerAction;
 import org.dromara.redisfront.widget.components.MainLeftDrawerPanel;
 import org.dromara.redisfront.widget.components.MainRightTabbedPanel;
 import org.dromara.redisfront.widget.ui.DefaultNonePanel;
+import org.dromara.redisfront.widget.ui.DrawerMenuItemEvent;
 import raven.drawer.component.menu.MenuEvent;
 
 import javax.swing.*;
@@ -80,6 +81,11 @@ public class MainComponent extends Background {
         this.owner.fillActionMap("showOpenConnectDialog",actionMap);
     }
 
+    DrawerMenuItemEvent drawerMenuItemEvent = (key,index)->{
+        System.out.println("drawerMenuItemEvent"+" key:"+key);
+        System.out.println("drawerMenuItemEvent"+" index:"+ Arrays.toString(index));
+    };
+
     private void initComponents() {
         this.drawerAction = new DrawerAction(owner, process);
         JPanel parentPanel = new JPanel(new BorderLayout());
@@ -88,7 +94,7 @@ public class MainComponent extends Background {
         this.mainContentPane.add(DefaultNonePanel.getInstance(), BorderLayout.CENTER);
         parentPanel.add(mainContentPane, BorderLayout.CENTER);
 
-        this.mainDrawerPanel = new MainLeftDrawerPanel(owner, menuEvent, drawerAction).buildDrawerPanel();
+        this.mainDrawerPanel = new MainLeftDrawerPanel(owner, menuEvent, drawerAction,drawerMenuItemEvent).buildDrawerPanel();
         this.mainDrawerPanel.setMinimumSize(new Dimension(250, -1));
         this.mainDrawerPanel.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
         parentPanel.add(mainDrawerPanel, BorderLayout.WEST);

@@ -1,4 +1,4 @@
-package org.dromara.redisfront.widget.components.worker;
+package org.dromara.redisfront.widget.worker;
 
 import javax.swing.*;
 import java.util.List;

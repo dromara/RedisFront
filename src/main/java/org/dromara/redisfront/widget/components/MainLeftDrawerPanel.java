@@ -1,21 +1,25 @@
 package org.dromara.redisfront.widget.components;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.util.SystemInfo;
 import lombok.Getter;
 import net.miginfocom.swing.MigLayout;
+import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.widget.MainComponent;
 import org.dromara.redisfront.widget.MainWidget;
 import org.dromara.redisfront.widget.action.DrawerAction;
-import org.dromara.redisfront.widget.ui.CombLogoPanel;
-import org.dromara.redisfront.widget.ui.ThemesChange;
+import org.dromara.redisfront.widget.ui.*;
+import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer;
+import org.jetbrains.annotations.NotNull;
 import raven.drawer.component.DrawerPanel;
 import raven.drawer.component.SimpleDrawerBuilder;
 import raven.drawer.component.footer.SimpleFooter;
 import raven.drawer.component.footer.SimpleFooterData;
 import raven.drawer.component.header.SimpleHeaderData;
-import raven.drawer.component.menu.*;
+import raven.drawer.component.menu.MenuEvent;
+import raven.drawer.component.menu.MenuValidation;
+import raven.drawer.component.menu.SimpleMenuOption;
+import raven.drawer.component.menu.SimpleMenuStyle;
 import raven.drawer.component.menu.data.Item;
 import raven.drawer.component.menu.data.MenuItem;
 
@@ -38,27 +42,35 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
     private final MainWidget owner;
     private final MenuEvent menuEvent;
     private final DrawerAction drawerAction;
+    private final DrawerMenuItemEvent drawerMenuItemEvent;
+
 
     public DrawerPanel buildDrawerPanel() {
         return new DrawerPanel(this);
     }
 
-    public MainLeftDrawerPanel(MainWidget owner, MenuEvent menuEvent, DrawerAction drawerAction) {
+    public MainLeftDrawerPanel(MainWidget owner, MenuEvent menuEvent, DrawerAction drawerAction, DrawerMenuItemEvent drawerMenuItemEvent) {
         this.owner = owner;
         this.menuEvent = menuEvent;
         this.drawerAction = drawerAction;
+        this.drawerMenuItemEvent = drawerMenuItemEvent;
         initializeUI();
     }
 
     private void initializeUI() {
         var simpleMenuOption = this.getSimpleMenuOption();
+        if (simpleMenuOption instanceof DrawerMenuOption drawerMenuOption) {
+            drawerMenuOption.setDrawerMenuItemEvent(drawerMenuItemEvent);
+        }
         simpleMenuOption.addMenuEvent(menuEvent);
-        this.menu = new SimpleMenu(simpleMenuOption);
+        this.menu = new DrawerMenu(simpleMenuOption);
+        JPopupMenu popupMenu = new JPopupMenu();
+        popupMenu.add(new JMenuItem("导入"));
+        popupMenu.add(new JMenuItem("导出"));
+        menu.setComponentPopupMenu(popupMenu);
         this.menuScroll = createScroll(menu);
         this.footer = new SimpleFooter(getSimpleFooterData());
     }
-
-
 
     @Override
     public Component getFooter() {
@@ -94,10 +106,56 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
         return new SimpleFooterData();
     }
 
+    @Override
+    public Component getMenu() {
+        JTree tree = createConnectTree();
+        tree.setCellRenderer(new DefaultXTreeCellRenderer() {
+            @Override
+            public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+                Component c = super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+                this.setFont(new Font("Microsoft YaHei", Font.PLAIN, 16));
+                if (!leaf) {
+                    this.setIcon(Res.FOLDER_ICON_14x14);
+                } else {
+                    this.setIcon(Res.LINK_ICON_14x14);
+                }
+                return c;
+            }
+
+            {
+                setTextNonSelectionColor(Color.WHITE);
+            }
+        });
+
+        JScrollPane scrollPane = new JScrollPane(tree);
+        scrollPane.putClientProperty(FlatClientProperties.STYLE, "background:null");
+        scrollPane.setBorder(new EmptyBorder(5, 10, 0, 10));
+        return scrollPane;
+    }
+
+    private static @NotNull JTree createConnectTree() {
+        JTree tree = new JTree();
+        tree.setRootVisible(false);
+        tree.setDragEnabled(true);
+        tree.putClientProperty(FlatClientProperties.STYLE,
+                "selectionArc:10;" +
+                        "rowHeight:25;" +
+                        "background:$RedisFront.main.background;" +
+                        "foreground:#ffffff;" +
+                        "[light]selectionBackground:darken(#FAFAFA,18%);" +
+                        "[light]selectionForeground:darken($Label.foreground,50%);" +
+                        "[dark]selectionBackground:darken($Label.foreground,50%);" +
+                        "showCellFocusIndicator:false;"
+
+        );
+        return tree;
+    }
 
     @Override
     public SimpleMenuOption getSimpleMenuOption() {
-        var simpleMenuOption = getMenuOption();
+        var simpleMenuOption = new DrawerMenuOption().setMenus(items)
+                .setBaseIconPath("icons")
+                .setIconScale(0.08f);
         simpleMenuOption.setMenuStyle(new SimpleMenuStyle() {
             @Override
             public void styleMenuPanel(JPanel panel, int[] index) {
@@ -121,8 +179,6 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
                         "[dark]foreground:darken($Label.foreground,30%)");
             }
         });
-
-
         simpleMenuOption.setMenuValidation(new MenuValidation() {
             @Override
             public boolean menuValidation(int[] index) {
@@ -134,27 +190,9 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
                 return true;
             }
         });
-
-        simpleMenuOption.setMenus(items)
-                .setBaseIconPath("icons")
-                .setIconScale(0.08f)
-        ;
         return simpleMenuOption;
     }
 
-    private SimpleMenuOption getMenuOption() {
-
-        return new SimpleMenuOption() {
-            @Override
-            public Icon buildMenuIcon(String path, float scale) {
-                FlatSVGIcon icon = new FlatSVGIcon(path, scale);
-                FlatSVGIcon.ColorFilter colorFilter = new FlatSVGIcon.ColorFilter();
-                colorFilter.add(Color.decode("#969696"), Color.decode("#FAFAFA"), Color.decode("#969696"));
-                icon.setColorFilter(colorFilter);
-                return icon;
-            }
-        };
-    }
 
     @Override
     public void build(DrawerPanel drawerPanel) {

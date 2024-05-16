@@ -3,6 +3,7 @@ package org.dromara.redisfront;
 import cn.hutool.core.io.FileUtil;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
+import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.SystemInfo;
 import org.dromara.quickswing.excutor.TaskExecutor;
 import org.dromara.redisfront.widget.MainWidget;
@@ -11,6 +12,8 @@ import org.dromara.quickswing.ui.app.AppContext;
 import org.dromara.quickswing.ui.app.AppWidget;
 
 import javax.swing.*;
+import javax.swing.text.StyleContext;
+import java.awt.*;
 import java.io.File;
 import java.util.Collections;
 import java.util.concurrent.Callable;

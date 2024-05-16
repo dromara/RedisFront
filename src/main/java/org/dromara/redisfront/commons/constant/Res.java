@@ -20,7 +20,9 @@ public class Res {
     public static final Icon COLORS_ICON_45x45 = new FlatSVGIcon("svg/actions/colors.svg",14,14);
     public static final Icon COMMAND_ICON_16x16 = new FlatSVGIcon("icons/command.svg",14,14);
     public static final Icon CMD_PLUS_ICON_16x16 = new FlatSVGIcon("icons/cmd_add.svg",14,14);
-    public static final Icon MODE_ICON_45x45 = new FlatSVGIcon("icons/mode.svg",16,16);
+    public static final Icon FOLDER_ICON_14x14 = new FlatSVGIcon("icons/folder.svg",16,16);
+    public static final Icon LINK_ICON_14x14 = new FlatSVGIcon("icons/link.svg",18,18);
+    public static final Icon MODE_ICON_45x45 = new FlatSVGIcon("icons/mode.svg",18,18);
     public static final Icon CPU_ICON_45x45 = new FlatSVGIcon("icons/CPU.svg",14,14);
     public static final Icon MEMORY_ICON_45x45 = new FlatSVGIcon("icons/memory.svg",14,14);
     public static final Icon WIFI_ICON_45x45 = new FlatSVGIcon("icons/wifi.svg",14,14);
