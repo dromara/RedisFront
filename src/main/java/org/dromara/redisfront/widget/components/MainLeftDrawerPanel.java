@@ -12,7 +12,6 @@ import org.dromara.redisfront.widget.action.DrawerAnimationAction;
 import org.dromara.redisfront.widget.components.extend.DefaultLogoPanel;
 import org.dromara.redisfront.widget.components.extend.DrawerMenuItemEvent;
 import org.dromara.redisfront.widget.components.extend.ThemesChangePanel;
-import org.dromara.redisfront.widget.ui.*;
 import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer;
 import org.jetbrains.annotations.NotNull;
 import raven.drawer.component.DrawerPanel;
@@ -35,6 +34,10 @@ import java.awt.event.MouseEvent;
 @Getter
 public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
 
+    JPopupMenu treePopupMenu;
+    JPopupMenu treeNodePopupMenu;
+    JPopupMenu treeNodeGroupPopupMenu;
+
     MenuItem[] items = new MenuItem[]{
             new Item("阿里云服务器", "folder.svg")
                     .subMenu(new Item("2.127.231.79", "link.svg"))
@@ -51,7 +54,17 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
 
 
     public DrawerPanel buildDrawerPanel() {
-        return new DrawerPanel(this);
+        return new DrawerPanel(this) {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                if (treePopupMenu != null && treeNodePopupMenu != null && treeNodeGroupPopupMenu != null) {
+                    treePopupMenu.updateUI();
+                    treeNodePopupMenu.updateUI();
+                    treeNodeGroupPopupMenu.updateUI();
+                }
+            }
+        };
     }
 
     public MainLeftDrawerPanel(MainWidget owner, MenuEvent menuEvent, DrawerAnimationAction drawerAnimationAction, DrawerMenuItemEvent drawerMenuItemEvent) {
@@ -127,22 +140,8 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
             }
         });
 
-        JPopupMenu treePopupMenu = new JPopupMenu();
-        treePopupMenu.add(new JMenuItem("新建分组"));
-        treePopupMenu.add(new JMenuItem("添加连接"));
-        treePopupMenu.addSeparator();
-        treePopupMenu.add(new JMenuItem("导入连接"));
-        treePopupMenu.add(new JMenuItem("导出连接"));
 
-        JPopupMenu treeNodePopupMenu = new JPopupMenu();
-        treeNodePopupMenu.add(new JMenuItem("打开连接"));
-        treeNodePopupMenu.addSeparator();
-        treeNodePopupMenu.add(new JMenuItem("编辑连接"));
-        treeNodePopupMenu.add(new JMenuItem("删除连接"));
-
-        JPopupMenu treeNodeGroupPopupMenu = new JPopupMenu();
-        treeNodeGroupPopupMenu.add(new JMenuItem("编辑分组"));
-        treeNodeGroupPopupMenu.add(new JMenuItem("删除分组"));
+        initPopupMenus();
 
         tree.addMouseListener(new MouseAdapter() {
             @Override
@@ -194,6 +193,33 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
         JScrollPane scrollPane = createScroll(tree);
         scrollPane.setBorder(new EmptyBorder(0, 10, 0, 10));
         return scrollPane;
+    }
+
+    private void initPopupMenus() {
+        treePopupMenu = new JPopupMenu();
+        treePopupMenu.putClientProperty(FlatClientProperties.STYLE,
+                        "[dark]background:darken(#FFFFFF,50%);" );
+        treePopupMenu.add(new JMenuItem("新建分组"));
+        treePopupMenu.add(new JMenuItem("添加连接"));
+        treePopupMenu.addSeparator();
+        treePopupMenu.add(new JMenuItem("导入连接"));
+        treePopupMenu.add(new JMenuItem("导出连接"));
+
+
+        treeNodePopupMenu = new JPopupMenu();
+        treeNodePopupMenu.putClientProperty(FlatClientProperties.STYLE,
+                "[dark]background:darken(#FFFFFF,50%);" );
+        treeNodePopupMenu.add(new JMenuItem("打开连接"));
+        treeNodePopupMenu.addSeparator();
+        treeNodePopupMenu.add(new JMenuItem("编辑连接"));
+        treeNodePopupMenu.add(new JMenuItem("删除连接"));
+
+
+        treeNodeGroupPopupMenu = new JPopupMenu();
+        treeNodeGroupPopupMenu.putClientProperty(FlatClientProperties.STYLE,
+                "[dark]background:darken(#FFFFFF,50%);" );
+        treeNodeGroupPopupMenu.add(new JMenuItem("编辑分组"));
+        treeNodeGroupPopupMenu.add(new JMenuItem("删除分组"));
     }
 
     private static @NotNull JTree createConnectTree() {

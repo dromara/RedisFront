@@ -51,14 +51,9 @@ public class DefaultNonePanel extends JPanel {
             newOptPanel.add(newCmdLabel);
         }else {
             JLabel newCmdLabel = new JLabel("Ctrl");
-            newCmdLabel.setBorder(new EmptyBorder(0, 5, 0, 0));
+            newCmdLabel.setBorder(new EmptyBorder(0, 5, 0, 5));
             newCmdLabel.putClientProperty("FlatLaf.styleClass", " h3");
             newOptPanel.add(newCmdLabel);
-        }
-
-        if(!SystemInfo.isMacOS) {
-            JLabel newPlusLabel = new JLabel(Res.CMD_PLUS_ICON_16x16);
-            newOptPanel.add(newPlusLabel);
         }
 
         JLabel newKeyLabel = new JLabel("A");
@@ -81,14 +76,9 @@ public class DefaultNonePanel extends JPanel {
             openOptPanel.add(openCmdLabel);
         }else {
             JLabel openCmdLabel = new JLabel("Ctrl");
-            openCmdLabel.setBorder(new EmptyBorder(0, 5, 0, 0));
+            openCmdLabel.setBorder(new EmptyBorder(0, 5, 0, 5));
             openCmdLabel.putClientProperty("FlatLaf.styleClass", " h3");
             openOptPanel.add(openCmdLabel);
-        }
-
-        if(!SystemInfo.isMacOS) {
-            JLabel openPlusLabel = new JLabel(Res.CMD_PLUS_ICON_16x16);
-            openOptPanel.add(openPlusLabel);
         }
 
         JLabel openKeyLabel = new JLabel("S");
