@@ -4,7 +4,7 @@ import cn.hutool.core.util.ArrayUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
 import org.dromara.quickswing.ui.swing.Background;
-import org.dromara.redisfront.widget.action.DrawerAction;
+import org.dromara.redisfront.widget.action.DrawerAnimationAction;
 import org.dromara.redisfront.widget.components.MainLeftDrawerPanel;
 import org.dromara.redisfront.widget.components.MainRightTabbedPanel;
 import org.dromara.redisfront.widget.ui.DefaultNonePanel;
@@ -25,7 +25,7 @@ public class MainComponent extends Background {
     private final MainWidget owner;
     private JPanel mainDrawerPanel;
     private JPanel mainContentPane;
-    private DrawerAction drawerAction;
+    private DrawerAnimationAction drawerAnimationAction;
 
     private final MenuEvent menuEvent = (source, index) -> {
         Component[] components = mainContentPane.getComponents();
@@ -37,7 +37,7 @@ public class MainComponent extends Background {
                     System.out.println("JTabbedPane " + first.get());
                 } else {
                     mainContentPane.removeAll();
-                    MainRightTabbedPanel mainRightTabbedPanel = createMainTabbedPanel(drawerAction);
+                    MainRightTabbedPanel mainRightTabbedPanel = createMainTabbedPanel(drawerAnimationAction);
                     mainContentPane.add(mainRightTabbedPanel, BorderLayout.CENTER);
                     FlatLaf.updateUI();
                 }
@@ -45,12 +45,12 @@ public class MainComponent extends Background {
         }
     };
 
-    private MainRightTabbedPanel createMainTabbedPanel(DrawerAction drawerAction) {
-        MainRightTabbedPanel mainRightTabbedPanel = new MainRightTabbedPanel(drawerAction, owner);
+    private MainRightTabbedPanel createMainTabbedPanel(DrawerAnimationAction drawerAnimationAction) {
+        MainRightTabbedPanel mainRightTabbedPanel = new MainRightTabbedPanel(drawerAnimationAction, owner);
         mainRightTabbedPanel.setTabCloseProcess(count -> {
             if (count == 0) {
-                if (!drawerAction.isDrawerOpen()) {
-                    drawerAction.handleAction(null);
+                if (!drawerAnimationAction.isDrawerOpen()) {
+                    drawerAnimationAction.handleAction(null);
                 }
                 mainContentPane.removeAll();
                 mainContentPane.add(DefaultNonePanel.getInstance(), BorderLayout.CENTER);
@@ -87,14 +87,14 @@ public class MainComponent extends Background {
     };
 
     private void initComponents() {
-        this.drawerAction = new DrawerAction(owner, process);
+        this.drawerAnimationAction = new DrawerAnimationAction(owner, process);
         JPanel parentPanel = new JPanel(new BorderLayout());
         this.mainContentPane = new JPanel();
         this.mainContentPane.setLayout(new BorderLayout());
         this.mainContentPane.add(DefaultNonePanel.getInstance(), BorderLayout.CENTER);
         parentPanel.add(mainContentPane, BorderLayout.CENTER);
 
-        this.mainDrawerPanel = new MainLeftDrawerPanel(owner, menuEvent, drawerAction,drawerMenuItemEvent).buildDrawerPanel();
+        this.mainDrawerPanel = new MainLeftDrawerPanel(owner, menuEvent, drawerAnimationAction,drawerMenuItemEvent).buildDrawerPanel();
         this.mainDrawerPanel.setMinimumSize(new Dimension(250, -1));
         this.mainDrawerPanel.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
         parentPanel.add(mainDrawerPanel, BorderLayout.WEST);

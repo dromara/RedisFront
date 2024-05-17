@@ -14,7 +14,7 @@ import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.model.ConnectInfo;
 import org.dromara.redisfront.ui.component.RedisTerminal;
 import org.dromara.redisfront.widget.MainWidget;
-import org.dromara.redisfront.widget.action.DrawerAction;
+import org.dromara.redisfront.widget.action.DrawerAnimationAction;
 import org.dromara.redisfront.widget.ui.BoldTitleTabbedPaneUI;
 
 import javax.swing.*;
@@ -28,7 +28,7 @@ import java.util.function.Consumer;
 
 public class MainRightTabbedPanel extends JPanel {
     private final MainWidget owner;
-    private final DrawerAction action;
+    private final DrawerAnimationAction action;
     private JTabbedPane topTabbedPane;
     private JTabbedPane contentTabbedPane;
     private FlatToolBar toolBar;
@@ -36,7 +36,7 @@ public class MainRightTabbedPanel extends JPanel {
     private Consumer<Integer> tabCloseProcess;
 
 
-    public MainRightTabbedPanel(DrawerAction action, MainWidget owner) {
+    public MainRightTabbedPanel(DrawerAnimationAction action, MainWidget owner) {
         this.owner = owner;
         this.action = action;
         this.setLayout(new BorderLayout());

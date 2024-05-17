@@ -40,7 +40,7 @@ public class MainWidget extends AppWidget<RedisFrontPrefs> {
 
     @Override
     protected void initializeActions() {
-        addAction("showOpenConnectDialog", new ShowOpenDialogAction(this, "showOpenConnectDialog"));
+        registerAction("showOpenConnectDialog", new ShowOpenDialogAction(this, "showOpenConnectDialog"));
     }
 
     public boolean isFullScreen() {

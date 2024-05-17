@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-public class DrawerAction extends AppAction<MainWidget> {
+public class DrawerAnimationAction extends AppAction<MainWidget> {
     private Animator animator;
     @Getter
     private boolean drawerOpen = true;
@@ -26,7 +26,7 @@ public class DrawerAction extends AppAction<MainWidget> {
     private BiConsumer<Double,Boolean> process;
     @Setter
     private Consumer<Boolean> afterProcess;
-    public DrawerAction(MainWidget app,BiConsumer<Double,Boolean> process) {
+    public DrawerAnimationAction(MainWidget app, BiConsumer<Double,Boolean> process) {
         super(app);
         this.process = process;
     }

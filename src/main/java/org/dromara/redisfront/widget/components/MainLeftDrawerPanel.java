@@ -8,7 +8,7 @@ import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.model.ConnectionTreeNodeInfo;
 import org.dromara.redisfront.widget.MainComponent;
 import org.dromara.redisfront.widget.MainWidget;
-import org.dromara.redisfront.widget.action.DrawerAction;
+import org.dromara.redisfront.widget.action.DrawerAnimationAction;
 import org.dromara.redisfront.widget.ui.*;
 import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +43,7 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
 
     private final MainWidget owner;
     private final MenuEvent menuEvent;
-    private final DrawerAction drawerAction;
+    private final DrawerAnimationAction drawerAnimationAction;
     private final DrawerMenuItemEvent drawerMenuItemEvent;
 
 
@@ -51,10 +51,10 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
         return new DrawerPanel(this);
     }
 
-    public MainLeftDrawerPanel(MainWidget owner, MenuEvent menuEvent, DrawerAction drawerAction, DrawerMenuItemEvent drawerMenuItemEvent) {
+    public MainLeftDrawerPanel(MainWidget owner, MenuEvent menuEvent, DrawerAnimationAction drawerAnimationAction, DrawerMenuItemEvent drawerMenuItemEvent) {
         this.owner = owner;
         this.menuEvent = menuEvent;
-        this.drawerAction = drawerAction;
+        this.drawerAnimationAction = drawerAnimationAction;
         this.drawerMenuItemEvent = drawerMenuItemEvent;
         initializeUI();
     }
