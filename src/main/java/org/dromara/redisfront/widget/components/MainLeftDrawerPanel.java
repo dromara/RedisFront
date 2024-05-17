@@ -14,6 +14,7 @@ import org.dromara.redisfront.widget.components.extend.DrawerMenuItemEvent;
 import org.dromara.redisfront.widget.components.extend.ThemesChangePanel;
 import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer;
 import org.jetbrains.annotations.NotNull;
+import raven.alerts.MessageAlerts;
 import raven.drawer.component.DrawerPanel;
 import raven.drawer.component.SimpleDrawerBuilder;
 import raven.drawer.component.footer.SimpleFooterData;
@@ -28,6 +29,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -199,7 +202,20 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
         treePopupMenu = new JPopupMenu();
         treePopupMenu.putClientProperty(FlatClientProperties.STYLE,
                         "[dark]background:darken(#FFFFFF,30%);" );
-        treePopupMenu.add(new JMenuItem("新建分组"));
+        treePopupMenu.add(new JMenuItem("新建分组"){
+            {
+                addActionListener(new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        MessageAlerts.getInstance().showMessage(
+                                "数据库初始化失败",
+                                "AAAAAA",
+                                MessageAlerts.MessageType.ERROR, MessageAlerts.YES_OPTION, null);
+                    }
+                });
+            }
+        });
         treePopupMenu.add(new JMenuItem("添加连接"));
         treePopupMenu.addSeparator();
         treePopupMenu.add(new JMenuItem("导入连接"));

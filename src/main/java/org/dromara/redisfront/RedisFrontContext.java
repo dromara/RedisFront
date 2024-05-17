@@ -1,6 +1,7 @@
 package org.dromara.redisfront;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.db.DbUtil;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import org.dromara.quickswing.excutor.TaskExecutor;
@@ -9,7 +10,6 @@ import org.dromara.redisfront.widget.MainWidget;
 import lombok.Getter;
 import org.dromara.quickswing.ui.app.AppContext;
 import org.dromara.quickswing.ui.app.AppWidget;
-
 import javax.swing.*;
 import java.io.File;
 import java.util.Collections;
@@ -48,7 +48,6 @@ public class RedisFrontContext extends AppContext<AppWidget<RedisFrontPrefs>, Re
         return FileUtil.getUserHomePath() + File.separator + "." + Const.APP_NAME.toLowerCase();
     }
 
-
     @Override
     protected String getAppResourceBundlePath() {
         return "org.dromara.redisfront.RedisFront";
@@ -63,7 +62,6 @@ public class RedisFrontContext extends AppContext<AppWidget<RedisFrontPrefs>, Re
     public <T> void taskExecute(Callable<T> callable, BiConsumer<T, Exception> consumer) {
         TASK_EXECUTOR.execute(callable, consumer);
     }
-
 
     public String version() {
         return "2024.1";

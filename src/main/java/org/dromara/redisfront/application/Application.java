@@ -1,7 +1,9 @@
 package org.dromara.redisfront.application;
 
+import cn.hutool.db.DbUtil;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.util.SystemInfo;
+import org.dromara.quickswing.database.DatabaseManager;
 import org.dromara.quickswing.evn.QSInitializer;
 import org.dromara.quickswing.ui.app.AppWidget;
 import org.dromara.redisfront.RedisFrontContext;
@@ -10,9 +12,12 @@ import org.dromara.redisfront.commons.constant.Const;
 import org.dromara.redisfront.commons.exception.GlobalExceptionHandler;
 import org.dromara.redisfront.commons.util.*;
 import org.dromara.redisfront.ui.frame.RedisFrontMainFrame;
+import raven.alerts.MessageAlerts;
+import raven.popup.GlassPanePopup;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.SQLException;
 import java.util.Collections;
 
 /**
@@ -84,13 +89,30 @@ public class Application {
     }
 
     public static void main(String[] args) {
-        QSInitializer.initialize(args,Const.APP_NAME);
+        QSInitializer.initialize(args, Const.APP_NAME);
         SwingUtilities.invokeLater(() -> {
-            RedisFrontContext redisFrontContext = new RedisFrontContext();
-            AppWidget<RedisFrontPrefs> application = redisFrontContext.createApplication(args);
+            RedisFrontContext context = new RedisFrontContext();
+            AppWidget<RedisFrontPrefs> application = context.createApplication(args);
             application.setLocationRelativeTo(null);
             application.setVisible(true);
+            GlassPanePopup.install(application);
+            context.taskExecute(() -> {
+                if (application.getPrefs().getDBInitialized()) {
+                    return 0;
+                } else {
+                    return DbUtil.use(context.getDatabaseManager().getDatasource()).execute("select 1");
+                }
+            }, (integer, exception) -> {
+                if (exception != null) {
+                    MessageAlerts.getInstance().showMessage(
+                            "数据库初始化失败",
+                            exception.getMessage(),
+                            MessageAlerts.MessageType.WARNING);
+                }
+            });
+
         });
     }
+
 
 }

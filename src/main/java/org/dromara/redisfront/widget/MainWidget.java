@@ -4,12 +4,14 @@ package org.dromara.redisfront.widget;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.util.SystemInfo;
+import net.miginfocom.swing.MigLayout;
 import org.dromara.quickswing.constant.OS;
 import org.dromara.quickswing.ui.app.AppContext;
 import org.dromara.quickswing.ui.app.AppWidget;
 import org.dromara.redisfront.RedisFrontPrefs;
 import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.widget.action.ShowOpenDialogAction;
+import raven.popup.GlassPanePopup;
 
 import javax.swing.*;
 import java.awt.*;
