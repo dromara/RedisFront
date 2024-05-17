@@ -198,7 +198,7 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
     private void initPopupMenus() {
         treePopupMenu = new JPopupMenu();
         treePopupMenu.putClientProperty(FlatClientProperties.STYLE,
-                        "[dark]background:darken(#FFFFFF,50%);" );
+                        "[dark]background:darken(#FFFFFF,30%);" );
         treePopupMenu.add(new JMenuItem("新建分组"));
         treePopupMenu.add(new JMenuItem("添加连接"));
         treePopupMenu.addSeparator();
@@ -208,7 +208,7 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
 
         treeNodePopupMenu = new JPopupMenu();
         treeNodePopupMenu.putClientProperty(FlatClientProperties.STYLE,
-                "[dark]background:darken(#FFFFFF,50%);" );
+                "[dark]background:darken(#FFFFFF,30%);" );
         treeNodePopupMenu.add(new JMenuItem("打开连接"));
         treeNodePopupMenu.addSeparator();
         treeNodePopupMenu.add(new JMenuItem("编辑连接"));
@@ -217,7 +217,7 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
 
         treeNodeGroupPopupMenu = new JPopupMenu();
         treeNodeGroupPopupMenu.putClientProperty(FlatClientProperties.STYLE,
-                "[dark]background:darken(#FFFFFF,50%);" );
+                "[dark]background:darken(#FFFFFF,30%);" );
         treeNodeGroupPopupMenu.add(new JMenuItem("编辑分组"));
         treeNodeGroupPopupMenu.add(new JMenuItem("删除分组"));
     }
