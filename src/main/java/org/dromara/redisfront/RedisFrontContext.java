@@ -9,6 +9,7 @@ import org.dromara.redisfront.widget.MainWidget;
 import lombok.Getter;
 import org.dromara.quickswing.ui.app.AppContext;
 import org.dromara.quickswing.ui.app.AppWidget;
+
 import javax.swing.*;
 import java.io.File;
 import java.util.Collections;
@@ -44,7 +45,7 @@ public class RedisFrontContext extends AppContext<AppWidget<RedisFrontPrefs>, Re
 
     @Override
     protected String getAppDataPath() {
-        return FileUtil.getUserHomePath() + File.separator + "." + "RedisFront";
+        return FileUtil.getUserHomePath() + File.separator + "." + Const.APP_NAME.toLowerCase();
     }
 
 
