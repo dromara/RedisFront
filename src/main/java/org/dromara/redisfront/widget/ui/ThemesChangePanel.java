@@ -13,12 +13,12 @@ import javax.swing.*;
 import java.awt.*;
 
 
-public class ThemesChange extends JPanel {
+public class ThemesChangePanel extends JPanel {
     public final static OsThemeDetector DETECTOR = OsThemeDetector.getDetector();
-    public ThemesChange() {
+    public ThemesChangePanel() {
         init();
-        ThemesChange.changeMode(ThemesChange.isDark());
-        ThemesChange.DETECTOR.registerListener(isDark -> SwingUtilities.invokeLater(() -> changeMode(isDark)));
+        ThemesChangePanel.changeMode(ThemesChangePanel.isDark());
+        ThemesChangePanel.DETECTOR.registerListener(isDark -> SwingUtilities.invokeLater(() -> changeMode(isDark)));
     }
 
 

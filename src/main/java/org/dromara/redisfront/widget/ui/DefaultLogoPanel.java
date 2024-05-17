@@ -5,13 +5,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 
-public class CombLogoPanel extends JPanel {
-    private static final CombLogoPanel INSTANCE = new CombLogoPanel();
-    public static CombLogoPanel getInstance() {
+public class DefaultLogoPanel extends JPanel {
+    private static final DefaultLogoPanel INSTANCE = new DefaultLogoPanel();
+    public static DefaultLogoPanel getInstance() {
         return INSTANCE;
     }
 
-    public CombLogoPanel() {
+    public DefaultLogoPanel() {
         this.setOpaque(false);
         this.setLayout(new FlowLayout());
         this.setMinimumSize(new Dimension(220,55));

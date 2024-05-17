@@ -14,13 +14,10 @@ import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer;
 import org.jetbrains.annotations.NotNull;
 import raven.drawer.component.DrawerPanel;
 import raven.drawer.component.SimpleDrawerBuilder;
-import raven.drawer.component.footer.SimpleFooter;
 import raven.drawer.component.footer.SimpleFooterData;
 import raven.drawer.component.header.SimpleHeaderData;
 import raven.drawer.component.menu.MenuEvent;
-import raven.drawer.component.menu.MenuValidation;
 import raven.drawer.component.menu.SimpleMenuOption;
-import raven.drawer.component.menu.SimpleMenuStyle;
 import raven.drawer.component.menu.data.Item;
 import raven.drawer.component.menu.data.MenuItem;
 
@@ -28,8 +25,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -66,9 +61,6 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
 
     private void initializeUI() {
         var simpleMenuOption = this.getSimpleMenuOption();
-        if (simpleMenuOption instanceof DrawerMenuOption drawerMenuOption) {
-            drawerMenuOption.setDrawerMenuItemEvent(drawerMenuItemEvent);
-        }
         simpleMenuOption.addMenuEvent(menuEvent);
     }
 
@@ -77,7 +69,7 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
         var footerPanel = new JPanel();
         footerPanel.putClientProperty(FlatClientProperties.STYLE, "background:null");
         footerPanel.setLayout(new MigLayout("al center", "[fill,fill]", "fill"));
-        footerPanel.add(new ThemesChange());
+        footerPanel.add(new ThemesChangePanel());
         return footerPanel;
     }
 
@@ -92,7 +84,7 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
         } else {
             headerPanel.setBorder(new EmptyBorder(15, 15, 5, 15));
         }
-        headerPanel.add(CombLogoPanel.getInstance());
+        headerPanel.add(DefaultLogoPanel.getInstance());
         return headerPanel;
     }
 
