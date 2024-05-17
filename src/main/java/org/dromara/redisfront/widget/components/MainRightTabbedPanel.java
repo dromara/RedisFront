@@ -15,7 +15,7 @@ import org.dromara.redisfront.model.ConnectInfo;
 import org.dromara.redisfront.ui.component.RedisTerminal;
 import org.dromara.redisfront.widget.MainWidget;
 import org.dromara.redisfront.widget.action.DrawerAnimationAction;
-import org.dromara.redisfront.widget.ui.BoldTitleTabbedPaneUI;
+import org.dromara.redisfront.widget.components.extend.BoldTitleTabbedPaneUI;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

@@ -1,4 +1,4 @@
-package org.dromara.redisfront.widget.ui;
+package org.dromara.redisfront.widget.components.extend;
 
 import org.dromara.redisfront.commons.constant.Res;
 import javax.swing.*;

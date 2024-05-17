@@ -7,8 +7,8 @@ import org.dromara.quickswing.ui.swing.Background;
 import org.dromara.redisfront.widget.action.DrawerAnimationAction;
 import org.dromara.redisfront.widget.components.MainLeftDrawerPanel;
 import org.dromara.redisfront.widget.components.MainRightTabbedPanel;
-import org.dromara.redisfront.widget.ui.DefaultNonePanel;
-import org.dromara.redisfront.widget.ui.DrawerMenuItemEvent;
+import org.dromara.redisfront.widget.components.extend.DefaultNonePanel;
+import org.dromara.redisfront.widget.components.extend.DrawerMenuItemEvent;
 import raven.drawer.component.menu.MenuEvent;
 
 import javax.swing.*;

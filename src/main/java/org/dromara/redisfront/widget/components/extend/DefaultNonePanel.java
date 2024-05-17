@@ -1,4 +1,4 @@
-package org.dromara.redisfront.widget.ui;
+package org.dromara.redisfront.widget.components.extend;
 
 import com.formdev.flatlaf.util.SystemInfo;
 import com.intellij.uiDesigner.core.GridConstraints;
