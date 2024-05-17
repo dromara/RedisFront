@@ -2,6 +2,7 @@ package org.dromara.redisfront.application;
 
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.util.SystemInfo;
+import org.dromara.quickswing.evn.QSInitializer;
 import org.dromara.quickswing.ui.app.AppWidget;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.RedisFrontPrefs;
@@ -83,6 +84,7 @@ public class Application {
     }
 
     public static void main(String[] args) {
+        QSInitializer.initialize(args,Const.APP_NAME);
         SwingUtilities.invokeLater(() -> {
             RedisFrontContext redisFrontContext = new RedisFrontContext();
             AppWidget<RedisFrontPrefs> application = redisFrontContext.createApplication(args);

@@ -12,6 +12,7 @@ import java.io.File;
  */
 
 public class Const {
+    public static final String APP_NAME = "RedisFront";
 
     public static final String APP_VERSION = PropsUtil.get("application.properties").getProperty("version", "2024.1");
     public static final String APP_COPYRIGHT = PropsUtil.get("application.properties").getProperty("copyright", "RedisFront");
@@ -19,6 +20,7 @@ public class Const {
     public static final String KEY_THEME_SELECT_INDEX = "selectThemeIndex";
 
     public static final String KEY_FONT_NAME = "fontName";
+
 
     public static final String KEY_FONT_SIZE = "fontSize";
     public static final String KEY_SSH_TIMEOUT = "sshTimeout";

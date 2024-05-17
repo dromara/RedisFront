@@ -3,7 +3,6 @@ package org.dromara.redisfront.widget;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
-import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.SystemInfo;
 import org.dromara.quickswing.constant.OS;
 import org.dromara.quickswing.ui.app.AppContext;
@@ -13,7 +12,6 @@ import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.widget.action.ShowOpenDialogAction;
 
 import javax.swing.*;
-import javax.swing.text.StyleContext;
 import java.awt.*;
 
 public class MainWidget extends AppWidget<RedisFrontPrefs> {
