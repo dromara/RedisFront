@@ -87,7 +87,7 @@ public class TreeUtils {
         }).sorted(Comparator.comparing(TreeNodeInfo::key)).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    static class StringTreeMap extends TreeMap<String, StringTreeMap> {
+   public static class StringTreeMap extends TreeMap<String, StringTreeMap> {
         @Serial
         private static final long serialVersionUID = 1L;
 

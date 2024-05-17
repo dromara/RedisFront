@@ -5,6 +5,7 @@ import com.formdev.flatlaf.util.SystemInfo;
 import lombok.Getter;
 import net.miginfocom.swing.MigLayout;
 import org.dromara.redisfront.commons.constant.Res;
+import org.dromara.redisfront.model.ConnectionTreeNodeInfo;
 import org.dromara.redisfront.widget.MainComponent;
 import org.dromara.redisfront.widget.MainWidget;
 import org.dromara.redisfront.widget.action.DrawerAction;
@@ -25,7 +26,13 @@ import raven.drawer.component.menu.data.MenuItem;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 @Getter
 public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
@@ -63,13 +70,6 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
             drawerMenuOption.setDrawerMenuItemEvent(drawerMenuItemEvent);
         }
         simpleMenuOption.addMenuEvent(menuEvent);
-        this.menu = new DrawerMenu(simpleMenuOption);
-        JPopupMenu popupMenu = new JPopupMenu();
-        popupMenu.add(new JMenuItem("导入"));
-        popupMenu.add(new JMenuItem("导出"));
-        menu.setComponentPopupMenu(popupMenu);
-        this.menuScroll = createScroll(menu);
-        this.footer = new SimpleFooter(getSimpleFooterData());
     }
 
     @Override
@@ -102,6 +102,11 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
     }
 
     @Override
+    public SimpleMenuOption getSimpleMenuOption() {
+        return new SimpleMenuOption();
+    }
+
+    @Override
     public SimpleFooterData getSimpleFooterData() {
         return new SimpleFooterData();
     }
@@ -127,6 +132,70 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
             }
         });
 
+        JPopupMenu treePopupMenu = new JPopupMenu();
+        treePopupMenu.add(new JMenuItem("新建分组"));
+        treePopupMenu.add(new JMenuItem("添加连接"));
+        treePopupMenu.addSeparator();
+        treePopupMenu.add(new JMenuItem("导入连接"));
+        treePopupMenu.add(new JMenuItem("导出连接"));
+
+        JPopupMenu treeNodePopupMenu = new JPopupMenu();
+        treeNodePopupMenu.add(new JMenuItem("打开连接"));
+        treeNodePopupMenu.addSeparator();
+        treeNodePopupMenu.add(new JMenuItem("编辑连接"));
+        treeNodePopupMenu.add(new JMenuItem("删除连接"));
+
+        JPopupMenu treeNodeGroupPopupMenu = new JPopupMenu();
+        treeNodeGroupPopupMenu.add(new JMenuItem("编辑分组"));
+        treeNodeGroupPopupMenu.add(new JMenuItem("删除分组"));
+
+        tree.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    showMenu(e);
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    showMenu(e);
+                }
+            }
+
+            private void showMenu(MouseEvent e) {
+                tree.setSelectionPath(tree.getPathForLocation(e.getX(), e.getY()));
+                if (tree.getSelectionPath() != null) {
+                    Object component = tree.getSelectionPath().getLastPathComponent();
+                    if (component instanceof ConnectionTreeNodeInfo connectionTreeNodeInfo) {
+                        if (connectionTreeNodeInfo.getIsFolder()) {
+                            treeNodeGroupPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+                        } else {
+                            treeNodePopupMenu.show(e.getComponent(), e.getX(), e.getY());
+                        }
+                    }
+                } else {
+                    treePopupMenu.show(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+        });
+
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("root", true);
+
+        ConnectionTreeNodeInfo connectionTreeNodeInfo = new ConnectionTreeNodeInfo("阿里云主机", null, true);
+
+        ConnectionTreeNodeInfo connectionTreeNodeInfo1 = new ConnectionTreeNodeInfo("47.10.25.37", null, false);
+
+        connectionTreeNodeInfo.add(connectionTreeNodeInfo1);
+
+        ConnectionTreeNodeInfo connectionTreeNodeInfo2 = new ConnectionTreeNodeInfo("47.10.25.38", null, false);
+
+        connectionTreeNodeInfo.add(connectionTreeNodeInfo2);
+
+        root.add(connectionTreeNodeInfo);
+        tree.setModel(new DefaultTreeModel(root));
+
         JScrollPane scrollPane = createScroll(tree);
         scrollPane.setBorder(new EmptyBorder(0, 10, 0, 10));
         return scrollPane;
@@ -142,7 +211,7 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
                         "rowHeight:25;" +
                         "background:$RedisFront.main.background;" +
                         "foreground:#ffffff;" +
-                        "[light]selectionBackground:darken(#FAFAFA,15%);" +
+                        "[light]selectionBackground:darken(#FFFFFF,20%);" +
                         "[light]selectionForeground:darken($Label.foreground,50%);" +
                         "[dark]selectionBackground:darken($Label.foreground,50%);" +
                         "showCellFocusIndicator:false;"
@@ -150,49 +219,6 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
         );
         return tree;
     }
-
-    @Override
-    public SimpleMenuOption getSimpleMenuOption() {
-        var simpleMenuOption = new DrawerMenuOption().setMenus(items)
-                .setBaseIconPath("icons")
-                .setIconScale(0.08f);
-        simpleMenuOption.setMenuStyle(new SimpleMenuStyle() {
-            @Override
-            public void styleMenuPanel(JPanel panel, int[] index) {
-                panel.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
-            }
-
-            @Override
-            public void styleMenuItem(JButton menu, int[] index) {
-                menu.putClientProperty(FlatClientProperties.STYLE, "[light]foreground:#f8fafc;" +
-                        "[dark]foreground:@foreground");
-            }
-
-            @Override
-            public void styleMenu(JComponent component) {
-                component.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
-            }
-
-            @Override
-            public void styleLabel(JLabel label) {
-                label.putClientProperty(FlatClientProperties.STYLE, "[light]foreground:darken(#FAFAFA,15%);" +
-                        "[dark]foreground:darken($Label.foreground,30%)");
-            }
-        });
-        simpleMenuOption.setMenuValidation(new MenuValidation() {
-            @Override
-            public boolean menuValidation(int[] index) {
-                if (index.length == 1) {
-                    return index[0] != 3;
-                } else if (index.length == 3) {
-                    return index[0] != 1 || index[1] != 1 || index[2] != 4;
-                }
-                return true;
-            }
-        });
-        return simpleMenuOption;
-    }
-
 
     @Override
     public void build(DrawerPanel drawerPanel) {
