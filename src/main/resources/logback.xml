@@ -28,6 +28,6 @@
         <appender-ref ref="FILE"/>
     </root>
 
-    <logger name="com.redisfront" level="ERROR"/>
+    <logger name="org.dromara.redisfront" level="debug"/>
 
 </configuration>

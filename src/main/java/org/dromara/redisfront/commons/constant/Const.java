@@ -12,7 +12,40 @@ import java.io.File;
  */
 
 public class Const {
+
     public static final String APP_NAME = "RedisFront";
+    public static final String APP_THEME_PACKAGE = "org.dromara.redisfront.theme";
+    public static final String APP_RESOURCE_BUNDLE = "org.dromara.redisfront.RedisFront";
+
+    public static final String SQL_CREATE_CONNECT_DETAIL = """
+            create table connect_detail
+            (
+                id           integer not null
+                    constraint connect_detail_pk
+                        primary key autoincrement,
+                name         TEXT,
+                group_id     integer,
+                host         TEXT,
+                port         integer,
+                username     TEXT,
+                password     TEXT,
+                connect_mode TEXT,
+                ssl_config   TEXT,
+                ssh_config   TEXT
+            );
+            """;
+    public static final String SQL_CREATE_CONNECT_GROUP = """
+            create table connect_group
+            (
+                group_id   integer not null
+                    constraint connect_group_pk
+                        primary key autoincrement,
+                group_name TEXT,
+                enable_ssh integer default 0,
+                ssh_config TEXT
+            );
+            """;
+
 
     public static final String APP_VERSION = PropsUtil.get("application.properties").getProperty("version", "2024.1");
     public static final String APP_COPYRIGHT = PropsUtil.get("application.properties").getProperty("copyright", "RedisFront");
