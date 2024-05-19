@@ -8,7 +8,7 @@ import org.dromara.quickswing.database.QSDbManager;
 import org.dromara.quickswing.ui.app.QSAction;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.widget.MainWidget;
-import org.dromara.redisfront.widget.event.ConnectTreeEvent;
+import org.dromara.redisfront.widget.event.RefreshConnectTreeEvent;
 import raven.toast.Notifications;
 
 import javax.swing.*;
@@ -34,7 +34,7 @@ public class AddConnectGroupAction extends QSAction<MainWidget> {
             Entity connectGroup = Entity.create("connect_group");
             connectGroup.set("group_name", value);
             DbUtil.use(databaseManager.getDatasource()).insert(connectGroup);
-            context.getEventBus().publish(new ConnectTreeEvent(null));
+            context.getEventBus().publish(new RefreshConnectTreeEvent(null));
             return null;
         }, (result, exception) -> {
             if (exception != null) {
