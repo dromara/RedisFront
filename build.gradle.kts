@@ -249,7 +249,7 @@ tasks.register<PackageTask>("packageForLinux") {
     dependsOn(tasks.build)
 }
 
-tasks.register<PackageTask>("packageForMac_M1") {
+tasks.register<PackageTask>("packageForMac_arm") {
     description = "package For Mac"
     platform = Platform.mac
 
@@ -266,7 +266,7 @@ tasks.register<PackageTask>("packageForMac_M1") {
     dependsOn(tasks.build)
 }
 
-tasks.register<PackageTask>("packageForMac") {
+tasks.register<PackageTask>("packageForMac_x86") {
     description = "package For Mac"
     platform = Platform.mac
 
