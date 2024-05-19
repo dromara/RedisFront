@@ -1,9 +1,9 @@
 package org.dromara.redisfront;
 
 
-import org.dromara.quickswing.ui.app.AppPrefs;
+import org.dromara.quickswing.ui.app.QSPrefs;
 
-public class RedisFrontPrefs extends AppPrefs {
+public class RedisFrontPrefs extends QSPrefs {
     public RedisFrontPrefs(String rootPath) {
         super(rootPath);
     }

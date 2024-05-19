@@ -1,7 +1,7 @@
 package org.dromara.redisfront.widget.action;
 
 import com.formdev.flatlaf.util.SystemInfo;
-import org.dromara.quickswing.ui.app.AppAction;
+import org.dromara.quickswing.ui.app.QSAction;
 import org.dromara.redisfront.widget.MainWidget;
 
 import javax.swing.*;
@@ -9,7 +9,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
-public class ShowOpenDialogAction extends AppAction<MainWidget> {
+public class ShowOpenDialogAction extends QSAction<MainWidget> {
 
     public ShowOpenDialogAction(MainWidget app, String key) {
         super(app, key);

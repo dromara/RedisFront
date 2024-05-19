@@ -7,7 +7,7 @@ import com.formdev.flatlaf.util.SystemInfo;
 import lombok.Setter;
 import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
-import org.dromara.quickswing.constant.OS;
+import org.dromara.quickswing.constant.QSOs;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.commons.constant.Const;
 import org.dromara.redisfront.commons.constant.Res;
@@ -126,7 +126,7 @@ public class MainRightTabbedPanel extends JPanel {
         settingToolBar.setLayout(new MigLayout(new LC().align("center", "bottom")));
         settingToolBar.add(new JButton(Res.SETTING_ICON_40x40));
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_LEADING_COMPONENT, toolBar);
-        if (owner.getOS() == OS.WINDOWS) {
+        if (owner.getOS() == QSOs.WINDOWS) {
             topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_INSETS, new Insets(0, 0, 0, 130));
         }
         this.add(topTabbedPane, BorderLayout.CENTER);

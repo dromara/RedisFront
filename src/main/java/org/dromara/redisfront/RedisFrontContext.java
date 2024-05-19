@@ -6,9 +6,9 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.quickswing.excutor.TaskExecutor;
-import org.dromara.quickswing.ui.app.AppContext;
-import org.dromara.quickswing.ui.app.AppWidget;
+import org.dromara.quickswing.excutor.QSTaskExecutor;
+import org.dromara.quickswing.ui.app.QSContext;
+import org.dromara.quickswing.ui.app.QSWidget;
 import org.dromara.redisfront.commons.constant.Const;
 import org.dromara.redisfront.widget.MainWidget;
 import raven.popup.GlassPanePopup;
@@ -27,9 +27,9 @@ import java.util.function.BiFunction;
  */
 @Getter
 @Slf4j
-public class RedisFrontContext extends AppContext<AppWidget<RedisFrontPrefs>, RedisFrontPrefs> {
+public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, RedisFrontPrefs> {
 
-    public final static TaskExecutor TASK_EXECUTOR = new TaskExecutor(Executors.newVirtualThreadPerTaskExecutor());
+    public final static QSTaskExecutor TASK_EXECUTOR = new QSTaskExecutor(Executors.newVirtualThreadPerTaskExecutor());
 
     @Override
     protected MainWidget createApplication(String[] args, RedisFrontPrefs preferences) {
@@ -68,7 +68,7 @@ public class RedisFrontContext extends AppContext<AppWidget<RedisFrontPrefs>, Re
     }
 
     @Override
-    protected void performPostInitialization(AppWidget<RedisFrontPrefs> application, RedisFrontPrefs preferences) {
+    protected void performPostInitialization(QSWidget<RedisFrontPrefs> application, RedisFrontPrefs preferences) {
         GlassPanePopup.install(application);
         if (!preferences.getDBInitialized()) {
             DataSource datasource = getDatabaseManager().getDatasource();

@@ -3,10 +3,11 @@ package org.dromara.redisfront.widget;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.extras.FlatDesktop;
 import com.formdev.flatlaf.util.SystemInfo;
-import org.dromara.quickswing.constant.OS;
-import org.dromara.quickswing.ui.app.AppContext;
-import org.dromara.quickswing.ui.app.AppWidget;
+import org.dromara.quickswing.constant.QSOs;
+import org.dromara.quickswing.ui.app.QSContext;
+import org.dromara.quickswing.ui.app.QSWidget;
 import org.dromara.redisfront.RedisFrontPrefs;
 import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.widget.action.AddConnectGroupAction;
@@ -14,8 +15,8 @@ import org.dromara.redisfront.widget.action.ShowOpenDialogAction;
 import javax.swing.*;
 import java.awt.*;
 
-public class MainWidget extends AppWidget<RedisFrontPrefs> {
-    public MainWidget(AppContext<? extends AppWidget<RedisFrontPrefs>, RedisFrontPrefs> context, String title, RedisFrontPrefs prefs) throws HeadlessException {
+public class MainWidget extends QSWidget<RedisFrontPrefs> {
+    public MainWidget(QSContext<? extends QSWidget<RedisFrontPrefs>, RedisFrontPrefs> context, String title, RedisFrontPrefs prefs) throws HeadlessException {
         super(context, title, prefs);
         if (SystemInfo.isWindows) {
             FlatLaf.setUseNativeWindowDecorations(true);
@@ -44,9 +45,9 @@ public class MainWidget extends AppWidget<RedisFrontPrefs> {
 
     public boolean isFullScreen() {
         boolean isFullScreen = false;
-        if (this.getOS() == OS.WINDOWS) {
+        if (this.getOS() == QSOs.WINDOWS) {
             isFullScreen = (getExtendedState() & JFrame.MAXIMIZED_BOTH) != JFrame.NORMAL;
-        } else if (getOS() == OS.MAC_OS_X) {
+        } else if (getOS() == QSOs.MAC_OS_X) {
             GraphicsEnvironment evn = GraphicsEnvironment.getLocalGraphicsEnvironment();
             GraphicsDevice defaultScreenDevice = evn.getDefaultScreenDevice();
             int screenWidth = (int) defaultScreenDevice.getDefaultConfiguration().getBounds().getWidth();
@@ -62,6 +63,6 @@ public class MainWidget extends AppWidget<RedisFrontPrefs> {
 
     @Override
     protected void preMenuBarInit(RedisFrontPrefs redisFrontPrefs, SplashScreen splashScreen) {
-
+        FlatDesktop.setQuitHandler(FlatDesktop.QuitResponse::performQuit);
     }
 }

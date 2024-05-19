@@ -4,7 +4,7 @@ import cn.hutool.db.DbUtil;
 import cn.hutool.db.Entity;
 import com.formdev.flatlaf.FlatClientProperties;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.quickswing.database.DatabaseManager;
+import org.dromara.quickswing.database.QSDbManager;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.model.ConnectionTreeNodeInfo;
@@ -20,7 +20,6 @@ import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.sql.SQLException;
 import java.util.List;
 
 @Slf4j
@@ -66,7 +65,7 @@ public class DefaultConnectTree extends JXTree {
 
         });
         RedisFrontContext context = (RedisFrontContext) owner.getContext();
-        DatabaseManager databaseManager = context.getDatabaseManager();
+        QSDbManager databaseManager = context.getDatabaseManager();
         context.getEventBus().subscribe(event -> {
             if (event instanceof ConnectTreeEvent) {
                 context.taskExecute(() -> {

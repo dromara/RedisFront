@@ -3,7 +3,7 @@ package org.dromara.redisfront.widget.action;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.dromara.quickswing.ui.app.AppAction;
+import org.dromara.quickswing.ui.app.QSAction;
 import org.dromara.redisfront.widget.MainWidget;
 import org.jdesktop.core.animation.timing.Animator;
 import org.jdesktop.core.animation.timing.TimingTarget;
@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-public class DrawerAnimationAction extends AppAction<MainWidget> {
+public class DrawerAnimationAction extends QSAction<MainWidget> {
     private Animator animator;
     @Getter
     private boolean drawerOpen = true;

@@ -25,6 +25,13 @@ buildscript {
                 password = "pub-user"
             }
         }
+        maven {
+            url = uri("https://packages.aliyun.com/maven/repository/2048752-release-f1IHDo")
+            credentials {
+                username = "662c9a1d2df38b0129acf288"
+                password = "pub-user"
+            }
+        }
         dependencies {
             classpath("io.github.fvarrui:javapackager:1.7.5")
         }

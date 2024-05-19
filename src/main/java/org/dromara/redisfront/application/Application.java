@@ -1,24 +1,23 @@
 package org.dromara.redisfront.application;
-
-import org.dromara.quickswing.evn.QSInitializer;
-import org.dromara.quickswing.ui.app.AppWidget;
+import org.dromara.quickswing.QSApplicationInitializer;
+import org.dromara.quickswing.ui.app.QSWidget;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.RedisFrontPrefs;
 import org.dromara.redisfront.commons.constant.Const;
 
 /**
- * RedisFrontApplication
+ * RedisFrontQSlication
  *
  * @author Jin
  */
 public class Application {
 
-    public static AppWidget<RedisFrontPrefs> frame;
+    public static QSWidget<RedisFrontPrefs> frame;
 
     public static void main(String[] args) {
-        QSInitializer.initialize(args, Const.APP_NAME, () -> {
+        QSApplicationInitializer.initialize(args, Const.APP_NAME, () -> {
             RedisFrontContext context = new RedisFrontContext();
-            AppWidget<RedisFrontPrefs> application = context.createApplication(args);
+            QSWidget<RedisFrontPrefs> application = context.createApplication(args);
             application.setLocationRelativeTo(null);
             application.setVisible(true);
         });
