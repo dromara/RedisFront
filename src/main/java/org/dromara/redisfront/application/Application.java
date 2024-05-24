@@ -6,7 +6,7 @@ import org.dromara.redisfront.RedisFrontPrefs;
 import org.dromara.redisfront.commons.constant.Const;
 
 /**
- * RedisFrontQSlication
+ * Application
  *
  * @author Jin
  */

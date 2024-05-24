@@ -121,7 +121,7 @@ dependencies {
     implementation("com.jcraft:jsch:0.1.55")
     implementation("com.jcraft:jsch:0.1.55")
     implementation("org.dromara:quick-swing:1.1-SNAPSHOT")
-    implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("stdlib-jdk21"))
 }
 repositories {
     mavenCentral()

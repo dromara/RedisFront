@@ -13,10 +13,8 @@ import org.dromara.redisfront.commons.util.AlertUtils;
 import org.dromara.redisfront.commons.util.FutureUtils;
 import org.dromara.redisfront.commons.util.LocaleUtils;
 import org.dromara.redisfront.service.ConnectService;
-import org.dromara.redisfront.ui.dialog.AddConnectDialog;
 import org.dromara.redisfront.ui.dialog.ImportConfigDialog;
 import org.dromara.redisfront.ui.dialog.SettingDialog;
-import org.dromara.redisfront.ui.form.MainWindowForm;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -28,8 +26,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
-import static org.dromara.redisfront.ui.dialog.OpenConnectDialog.showOpenConnectDialog;
 
 /**
  * MainMenuBar
@@ -73,8 +69,7 @@ public class MainMenuBar extends JMenuBar {
             addConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK));
         }
 
-        addConnectMenu.addActionListener(e -> AddConnectDialog.showAddConnectDialog(((connectInfo) -> MainWindowForm.getInstance().addTabActionPerformed(connectInfo))));
-        fileMenu.add(addConnectMenu);
+       fileMenu.add(addConnectMenu);
 
         //打开连接
         var openConnectMenu = new JMenuItem() {
@@ -91,14 +86,7 @@ public class MainMenuBar extends JMenuBar {
             openConnectMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK));
         }
 
-        openConnectMenu.addActionListener(e -> showOpenConnectDialog(
-                //打开连接回调
-                ((connectInfo) -> MainWindowForm.getInstance().addTabActionPerformed(connectInfo)),
-                //编辑连接回调
-                (connectInfo -> AddConnectDialog.showEditConnectDialog(connectInfo, (connectInfo1) -> MainWindowForm.getInstance().addTabActionPerformed(connectInfo1))),
-                //删除连接回调
-                (connectInfo -> ConnectService.service.delete(connectInfo.id())))
-        );
+
         fileMenu.add(openConnectMenu);
         //配置菜单
         fileMenu.add(new JSeparator());

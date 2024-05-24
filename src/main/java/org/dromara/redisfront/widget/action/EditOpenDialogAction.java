@@ -9,9 +9,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
-public class ShowOpenDialogAction extends QSAction<MainWidget> {
+public class EditOpenDialogAction extends QSAction<MainWidget> {
 
-    public ShowOpenDialogAction(MainWidget app, String key) {
+    public EditOpenDialogAction(MainWidget app, String key) {
         super(app, key);
     }
 
@@ -23,7 +23,7 @@ public class ShowOpenDialogAction extends QSAction<MainWidget> {
     @Override
     public KeyStroke getKeyStroke() {
         return SystemInfo.isMacOS ?
-                KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()):
-                KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK);
+                KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()):
+                KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK);
     }
 }

@@ -10,7 +10,6 @@ import org.dromara.quickswing.ui.app.QSContext;
 import org.dromara.quickswing.ui.app.QSWidget;
 import org.dromara.redisfront.RedisFrontPrefs;
 import org.dromara.redisfront.commons.constant.Res;
-import org.dromara.redisfront.widget.action.AddConnectGroupAction;
 import org.dromara.redisfront.widget.action.ShowOpenDialogAction;
 import javax.swing.*;
 import java.awt.*;
@@ -40,7 +39,6 @@ public class MainWidget extends QSWidget<RedisFrontPrefs> {
     @Override
     protected void initializeActions() {
         registerAction("showOpenConnectDialog", new ShowOpenDialogAction(this, "showOpenConnectDialog"));
-        registerAction("addConnectGroupAction", new AddConnectGroupAction(this, "addConnectGroupAction"));
     }
 
     public boolean isFullScreen() {

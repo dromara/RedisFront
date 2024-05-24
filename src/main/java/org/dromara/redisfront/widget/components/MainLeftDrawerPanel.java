@@ -8,7 +8,6 @@ import net.miginfocom.swing.MigLayout;
 import org.dromara.redisfront.widget.MainComponent;
 import org.dromara.redisfront.widget.MainWidget;
 import org.dromara.redisfront.widget.action.DrawerAnimationAction;
-import org.dromara.redisfront.widget.components.extend.DefaultConnectTree;
 import org.dromara.redisfront.widget.components.extend.DefaultLogoPanel;
 import org.dromara.redisfront.widget.components.extend.DrawerMenuItemEvent;
 import org.dromara.redisfront.widget.components.extend.ThemesChangePanel;
@@ -95,7 +94,7 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
 
     @Override
     public Component getMenu() {
-        JTree tree = new DefaultConnectTree(owner);
+        JTree tree = new MainLeftConnectTree(owner);
         JScrollPane scrollPane = createScroll(tree);
         scrollPane.setBorder(new EmptyBorder(0, 10, 0, 10));
         return scrollPane;

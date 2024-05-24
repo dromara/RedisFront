@@ -172,7 +172,6 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         addConnectBtn.setFocusable(false);
         addConnectBtn.addActionListener(e -> {
             dispose();
-            AddConnectDialog.showAddConnectDialog(openProcessHandler);
         });
         addConnectBtn.setIcon(Res.CONNECTION_ICON);
     }
