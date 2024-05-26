@@ -270,7 +270,7 @@ public class MainLeftConnectTree extends JXTree {
             {
                 addActionListener(e -> {
                     AddConnectDialog addConnectDialog = new AddConnectDialog(owner, "添加连接");
-                    addConnectDialog.setLocationRelativeTo(null);
+                    addConnectDialog.setLocationRelativeTo(owner);
                     addConnectDialog.setVisible(true);
                     addConnectDialog.pack();
                 });

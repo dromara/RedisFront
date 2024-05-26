@@ -214,11 +214,6 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public Boolean ping(ConnectInfo connectInfo) {
-
-        var logInfo = RedisBasicService.buildLogInfo(connectInfo)
-                .setInfo("ping".toUpperCase());
-        LogsDialog.appendLog(logInfo);
-
         String ping = LettuceUtils.exec(connectInfo, BaseRedisCommands::ping);
         return Fn.equal(ping, "PONG");
     }
@@ -234,21 +229,12 @@ public class RedisBasicServiceImpl implements RedisBasicService {
     @Override
     public List<ClusterNode> getClusterNodes(ConnectInfo connectInfo) {
 
-        var logInfo = RedisBasicService.buildLogInfo(connectInfo)
-                .setInfo("cluster nodes".toUpperCase());
-        LogsDialog.appendLog(logInfo);
-
         String clusterNodes = LettuceUtils.exec(connectInfo, RedisClusterCommands::clusterNodes);
         return strToClusterNodes(clusterNodes);
     }
 
     @Override
     public Map<String, Object> getClusterInfo(ConnectInfo connectInfo) {
-
-        var logInfo = RedisBasicService.buildLogInfo(connectInfo)
-                .setInfo("cluster info".toUpperCase());
-        LogsDialog.appendLog(logInfo);
-
         var clusterInfo = LettuceUtils.exec(connectInfo, RedisClusterCommands::clusterInfo);
         log.info("获取到Redis [ {}:{} ] ClusterInfo - {}", connectInfo.host(), connectInfo.port(), clusterInfo);
         return strToMap(clusterInfo);
@@ -256,11 +242,6 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public Map<String, Object> getInfo(ConnectInfo connectInfo) {
-
-        var logInfo = RedisBasicService.buildLogInfo(connectInfo)
-                .setInfo("info".toUpperCase());
-        LogsDialog.appendLog(logInfo);
-
         var info = LettuceUtils.exec(connectInfo, RedisServerCommands::info);
         log.info("获取到Redis [ {}:{} ] Info - {}", connectInfo.host(), connectInfo.port(), info);
         return strToMap(info);
@@ -268,23 +249,13 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public Map<String, Object> getCpuInfo(ConnectInfo connectInfo) {
-
-        var logInfo = RedisBasicService.buildLogInfo(connectInfo)
-                .setInfo("info cpu".toUpperCase());
-        LogsDialog.appendLog(logInfo);
-
         var cpuInfo = LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.info("cpu"));
-        log.info("获取到Redis [ {}:{} ] serverInfo - {}", connectInfo.host(), connectInfo.port(), cpuInfo);
+        log.info("获取到Redis [ {}:{} ] cpuInfo - {}", connectInfo.host(), connectInfo.port(), cpuInfo);
         return strToMap(cpuInfo);
     }
 
     @Override
     public Map<String, Object> getMemoryInfo(ConnectInfo connectInfo) {
-
-        var logInfo = RedisBasicService.buildLogInfo(connectInfo)
-                .setInfo("info memory".toUpperCase());
-        LogsDialog.appendLog(logInfo);
-
         var memoryInfo = LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.info("memory"));
         log.info("获取到Redis [ {}:{} ] memoryInfo - {}", connectInfo.host(), connectInfo.port(), memoryInfo);
         return strToMap(memoryInfo);
@@ -292,11 +263,6 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public Map<String, Object> getServerInfo(ConnectInfo connectInfo) {
-
-        var logInfo = RedisBasicService.buildLogInfo(connectInfo)
-                .setInfo("info server".toUpperCase());
-        LogsDialog.appendLog(logInfo);
-
         var server = LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.info("server"));
         log.info("获取到Redis [ {}:{} ] serverInfo - {}", connectInfo.host(), connectInfo.port(), server);
         return strToMap(server);
@@ -304,11 +270,6 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public Map<String, Object> getKeySpace(ConnectInfo connectInfo) {
-
-        var logInfo = RedisBasicService.buildLogInfo(connectInfo)
-                .setInfo("info keyspace".toUpperCase());
-        LogsDialog.appendLog(logInfo);
-
         var keyspace = LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.info("keyspace"));
         log.info("获取到Redis [ {}:{} ] keyspace - {}", connectInfo.host(), connectInfo.port(), keyspace);
         return strToMap(keyspace);
@@ -316,11 +277,6 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public Map<String, Object> getClientInfo(ConnectInfo connectInfo) {
-
-        var logInfo = RedisBasicService.buildLogInfo(connectInfo)
-                .setInfo("info clients".toUpperCase());
-        LogsDialog.appendLog(logInfo);
-
         var clientInfo = LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.info("clients"));
         log.info("获取到Redis [ {}:{} ] clientInfo - {}", connectInfo.host(), connectInfo.port(), clientInfo);
         return strToMap(clientInfo);
@@ -328,11 +284,6 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public Map<String, Object> getStatInfo(ConnectInfo connectInfo) {
-
-        var logInfo = RedisBasicService.buildLogInfo(connectInfo)
-                .setInfo("info stats".toUpperCase());
-        LogsDialog.appendLog(logInfo);
-
         var statInfo = LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.info("stats"));
         log.info("获取到Redis [ {}:{} ] statInfo - {}", connectInfo.host(), connectInfo.port(), statInfo);
         return strToMap(statInfo);
@@ -340,11 +291,6 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public Boolean isClusterMode(ConnectInfo connectInfo) {
-
-        var logInfo = RedisBasicService.buildLogInfo(connectInfo)
-                .setInfo("info Cluster".toUpperCase());
-        LogsDialog.appendLog(logInfo);
-
         var cluster = LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.info("Cluster"));
         return (Fn.equal(strToMap(cluster).get("cluster_enabled"), "1"));
     }
@@ -352,11 +298,6 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public Long dbSize(ConnectInfo connectInfo) {
-
-        var logInfo = RedisBasicService.buildLogInfo(connectInfo)
-                .setInfo("dbsize".toUpperCase());
-        LogsDialog.appendLog(logInfo);
-
         if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, RedisAdvancedClusterCommands::dbsize);
         } else {

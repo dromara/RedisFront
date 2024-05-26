@@ -6,7 +6,12 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import io.lettuce.core.RedisConnectionException;
+import lombok.SneakyThrows;
+import org.dromara.quickswing.ui.app.QSContext;
 import org.dromara.quickswing.ui.app.QSDialog;
+import org.dromara.quickswing.ui.app.QSWidget;
+import org.dromara.redisfront.RedisFrontContext;
+import org.dromara.redisfront.RedisFrontPrefs;
 import org.dromara.redisfront.commons.constant.Enums;
 import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
@@ -18,13 +23,17 @@ import org.dromara.redisfront.commons.util.LocaleUtils;
 import org.dromara.redisfront.model.ConnectInfo;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.widget.MainWidget;
+import org.httprpc.sierra.ActivityIndicator;
+import raven.toast.Notifications;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.concurrent.Future;
 
 public class AddConnectDialog extends QSDialog<MainWidget> {
+    private final static ActivityIndicator activityIndicator = new ActivityIndicator();
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -178,30 +187,37 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
         testBtn.addActionListener(e -> testConnect());
     }
 
-    private Boolean testConnect() {
-        var connectSuccess = false;
-        try {
-            var connectInfo = validGetConnectInfo();
-            if (RedisBasicService.service.ping(connectInfo)) {
-                AlertUtils.showInformationDialog("ok");
-                connectSuccess = true;
-            } else {
-                AlertUtils.showInformationDialog("error");
-            }
-        } catch (Exception exception) {
-            if (exception instanceof RedisFrontException) {
-                if (exception.getCause() instanceof JschRuntimeException jschRuntimeException) {
-                    AlertUtils.showInformationDialog("error",jschRuntimeException);
+    @SneakyThrows
+    private void testConnect() {
+        MainWidget parent = (MainWidget) getParent();
+        RedisFrontContext context = (RedisFrontContext) parent.getContext();
+        var connectInfo = validGetConnectInfo();
+        testBtn.setText("");
+        testBtn.add(activityIndicator);
+        activityIndicator.start();
+        context.taskSubmit(
+                () -> {
+                    Thread.sleep(50*1002);
+                    return RedisBasicService.service.ping(connectInfo);
+                },(connected, exception) -> {
+            if (exception != null) {
+                if (exception instanceof RedisFrontException) {
+                    if (exception.getCause() instanceof JschRuntimeException jschRuntimeException) {
+                        Notifications.getInstance().show(Notifications.Type.ERROR, jschRuntimeException.getMessage());
+                    } else {
+                        Notifications.getInstance().show(Notifications.Type.ERROR, exception.getMessage());
+                    }
+                } else if (exception instanceof RedisConnectionException) {
+                    Notifications.getInstance().show(Notifications.Type.ERROR, "连接失败！");
                 } else {
-                    AlertUtils.showInformationDialog("error");
+                    Notifications.getInstance().show(Notifications.Type.ERROR, "连接失败！");
                 }
-            } else if (exception instanceof RedisConnectionException) {
-                AlertUtils.showInformationDialog("error");
             } else {
-                AlertUtils.showInformationDialog("error");
+                Notifications.getInstance().show(Notifications.Type.SUCCESS, "连接成功！");
             }
-        }
-        return connectSuccess;
+            activityIndicator.stop();
+            return connected;
+        });
     }
 
     private void cancelActionPerformed(ActionEvent actionEvent) {
@@ -211,15 +227,6 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
 
     private void submitActionPerformed(ActionEvent actionEvent) {
         var connectInfo = validGetConnectInfo();
-        var connectSuccess = testConnect();
-        if (connectSuccess) {
-            FutureUtils.runAsync(() -> {
-                LoadingUtils.showDialog();
-                var redisMode = RedisBasicService.service.getRedisModeEnum(connectInfo);
-
-            });
-            dispose();
-        }
     }
 
     private ConnectInfo validGetConnectInfo() {
@@ -331,6 +338,7 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
 
         testBtn = new JButton("测试连接");
         testBtn.setIcon(Res.TEST_CONNECTION_ICON);
+        testBtn.setMinimumSize(new Dimension(50, 25));
         bodyPanel.add(testBtn, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 
         final JPanel mainPanel = new JPanel();
