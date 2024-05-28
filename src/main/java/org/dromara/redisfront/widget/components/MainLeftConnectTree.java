@@ -83,7 +83,7 @@ public class MainLeftConnectTree extends JXTree {
 
     private void registerEventListener(RedisFrontContext context) {
         DataSource datasource = context.getDatabaseManager().getDatasource();
-        context.getEventBus().subscribe(new QSEventListener<>() {
+        context.getEventBus().subscribe(new QSEventListener<>(owner) {
             @Override
             protected void onEvent(QSEvent event) {
                 if (event instanceof RefreshConnectTreeEvent) {
@@ -129,6 +129,11 @@ public class MainLeftConnectTree extends JXTree {
         this.initTreeNodePopupMenu(context, datasource);
         this.initTreeNodeGroupPopupMenu(context, datasource);
         this.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                mouseReleased(e);
+            }
+
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.isPopupTrigger()) {

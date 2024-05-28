@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter
 
 plugins {
     `java-library`
-    kotlin("jvm") version "1.9.20-RC"
+    kotlin("jvm") version "2.0.0-RC3"
 }
 
 buildscript {
@@ -121,7 +121,7 @@ dependencies {
     implementation("com.jcraft:jsch:0.1.55")
     implementation("com.jcraft:jsch:0.1.55")
     implementation("org.dromara:quick-swing:1.1-SNAPSHOT")
-    implementation(kotlin("stdlib-jdk21"))
+    implementation(kotlin("stdlib-jdk8"))
 }
 repositories {
     mavenCentral()

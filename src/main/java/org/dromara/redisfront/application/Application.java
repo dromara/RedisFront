@@ -31,6 +31,8 @@ public class Application {
             log.error("Thread {} ", thread.getName(), throwable);
             if (throwable instanceof RedisFrontException redisFrontException) {
                 Notifications.getInstance().show(Notifications.Type.ERROR, redisFrontException.getMessage());
+            } else {
+
             }
         });
     }
