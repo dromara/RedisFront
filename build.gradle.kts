@@ -197,9 +197,9 @@ configure<PackagePluginExtension> {
 
 tasks.register<PackageTask>("packageForWindows") {
 
-    val innoSetupLanguageMap = LinkedHashMap<String, String>()
-    innoSetupLanguageMap["Chinese"] = "compiler:Languages\\ChineseSimplified.isl"
-    innoSetupLanguageMap["English"] = "compiler:Default.isl"
+    val setupLanguage = LinkedHashMap<String, String>()
+    setupLanguage["Chinese"] = "compiler:Languages\\ChineseSimplified.isl"
+    setupLanguage["English"] = "compiler:Default.isl"
 
     description = "package For Windows"
 
@@ -217,7 +217,7 @@ tasks.register<PackageTask>("packageForWindows") {
         productVersion = version
         fileVersion = version
         isGenerateSetup = true
-        setupLanguages = innoSetupLanguageMap
+        setupLanguages = setupLanguage
         isCreateZipball = true
         isGenerateMsi = false
         isGenerateMsm = false
