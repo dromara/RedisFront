@@ -1,6 +1,6 @@
 package org.dromara.redisfront.commons.util;
 
-import org.dromara.redisfront.application.Application;
+import org.dromara.redisfront.Application;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.ui.component.LoadingDialog;
 

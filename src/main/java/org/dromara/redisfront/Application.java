@@ -1,15 +1,7 @@
-package org.dromara.redisfront.application;
-import cn.hutool.core.stream.StreamUtil;
-import cn.hutool.core.util.ByteUtil;
-import cn.hutool.core.util.CharUtil;
-import cn.hutool.core.util.CharsetUtil;
+package org.dromara.redisfront;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.derby.iapi.util.UTF8Util;
-import org.bouncycastle.util.encoders.UTF8;
 import org.dromara.quickswing.QSApplicationInitializer;
 import org.dromara.quickswing.ui.app.QSWidget;
-import org.dromara.redisfront.RedisFrontContext;
-import org.dromara.redisfront.RedisFrontPrefs;
 import org.dromara.redisfront.commons.constant.Const;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import raven.toast.Notifications;

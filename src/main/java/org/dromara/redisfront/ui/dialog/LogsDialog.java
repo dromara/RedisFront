@@ -4,7 +4,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 
-import org.dromara.redisfront.application.Application;
+import org.dromara.redisfront.Application;
 import org.dromara.redisfront.commons.util.LocaleUtils;
 import org.dromara.redisfront.model.LogInfo;
 

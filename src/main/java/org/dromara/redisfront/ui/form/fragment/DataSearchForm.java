@@ -6,7 +6,7 @@ import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import org.dromara.redisfront.application.Application;
+import org.dromara.redisfront.Application;
 import org.dromara.redisfront.commons.constant.Enums;
 import org.dromara.redisfront.model.ConnectInfo;
 import org.dromara.redisfront.model.DbInfo;

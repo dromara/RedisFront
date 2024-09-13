@@ -12,8 +12,8 @@ import org.dromara.redisfront.model.RedisConnectTreeItem;
 import org.dromara.redisfront.widget.MainWidget;
 import org.dromara.redisfront.widget.components.extend.ConnectTreeCellRenderer;
 import org.dromara.redisfront.widget.dialog.AddConnectDialog;
-import org.dromara.redisfront.widget.event.DeleteConnectTreeEvent;
-import org.dromara.redisfront.widget.event.RefreshConnectTreeEvent;
+import org.dromara.redisfront.event.DeleteConnectTreeEvent;
+import org.dromara.redisfront.event.RefreshConnectTreeEvent;
 import org.jdesktop.swingx.JXTree;
 import raven.toast.Notifications;
 
@@ -40,6 +40,7 @@ public class MainLeftConnectTree extends JXTree {
         this.setRootVisible(false);
         this.setShowsRootHandles(true);
         this.setDragEnabled(true);
+        this.setFocusable(false);
         this.putClientProperty(FlatClientProperties.STYLE,
                 "selectionArc:10;" +
                         "rowHeight:25;" +

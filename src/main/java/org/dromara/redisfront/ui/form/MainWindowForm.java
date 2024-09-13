@@ -3,7 +3,7 @@ package org.dromara.redisfront.ui.form;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.icons.FlatTabbedPaneCloseIcon;
 import com.formdev.flatlaf.ui.FlatLineBorder;
-import org.dromara.redisfront.application.Application;
+import org.dromara.redisfront.Application;
 import org.dromara.redisfront.commons.constant.Enums;
 import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.commons.func.Fn;

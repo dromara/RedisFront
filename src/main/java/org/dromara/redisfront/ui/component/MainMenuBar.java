@@ -6,7 +6,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatDesktop;
 import com.formdev.flatlaf.extras.components.FlatButton;
 import com.formdev.flatlaf.util.SystemInfo;
-import org.dromara.redisfront.application.Application;
+import org.dromara.redisfront.Application;
 import org.dromara.redisfront.commons.constant.Const;
 import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.commons.util.AlertUtils;

@@ -4,6 +4,11 @@ package org.dromara.redisfront;
 import org.dromara.quickswing.ui.app.QSPrefs;
 
 public class RedisFrontPrefs extends QSPrefs {
+    @Override
+    protected String getKeyPrefix() {
+        return "rdf";
+    }
+
     public RedisFrontPrefs(String rootPath) {
         super(rootPath);
     }

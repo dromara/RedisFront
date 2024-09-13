@@ -1,4 +1,4 @@
-package org.dromara.redisfront.widget.event;
+package org.dromara.redisfront.event;
 
 import org.dromara.quickswing.events.QSEvent;
 
