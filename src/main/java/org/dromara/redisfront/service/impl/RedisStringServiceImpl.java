@@ -2,7 +2,7 @@ package org.dromara.redisfront.service.impl;
 
 import org.dromara.redisfront.commons.constant.Enums;
 import org.dromara.redisfront.model.ConnectInfo;
-import org.dromara.redisfront.ui.dialog.LogsDialog;
+import org.dromara.redisfront.widget.dialog.LogsDialog;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.commons.util.LettuceUtils;
 import org.dromara.redisfront.service.RedisBasicService;

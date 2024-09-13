@@ -2,7 +2,7 @@ package org.dromara.redisfront.service.impl;
 import org.dromara.redisfront.commons.constant.Enums;
 import org.dromara.redisfront.model.ConnectInfo;
 import org.dromara.redisfront.model.ScanContext;
-import org.dromara.redisfront.ui.dialog.LogsDialog;
+import org.dromara.redisfront.widget.dialog.LogsDialog;
 import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
 import io.lettuce.core.ValueScanCursor;

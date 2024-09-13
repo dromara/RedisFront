@@ -10,7 +10,7 @@ import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.commons.util.LettuceUtils;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.service.RedisHashService;
-import org.dromara.redisfront.ui.dialog.LogsDialog;
+import org.dromara.redisfront.widget.dialog.LogsDialog;
 
 import java.util.Arrays;
 import java.util.List;

@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.dialog;
+package org.dromara.redisfront.widget.dialog;
 
 import cn.hutool.json.JSONUtil;
 import com.intellij.uiDesigner.core.GridConstraints;

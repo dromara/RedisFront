@@ -4,7 +4,7 @@ import org.dromara.redisfront.commons.constant.Enums;
 import org.dromara.redisfront.model.ConnectInfo;
 import org.dromara.redisfront.model.ScanContext;
 import org.dromara.redisfront.service.RedisZSetService;
-import org.dromara.redisfront.ui.dialog.LogsDialog;
+import org.dromara.redisfront.widget.dialog.LogsDialog;
 import io.lettuce.core.*;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.commons.util.LettuceUtils;

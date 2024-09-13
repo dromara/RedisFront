@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.quickswing.events.QSEvent;
 import org.dromara.quickswing.events.QSEventListener;
 import org.dromara.redisfront.RedisFrontContext;
+import org.dromara.redisfront.commons.handler.ProcessHandler;
+import org.dromara.redisfront.model.ConnectInfo;
 import org.dromara.redisfront.model.RedisConnectTreeItem;
 import org.dromara.redisfront.widget.MainWidget;
 import org.dromara.redisfront.widget.components.extend.ConnectTreeCellRenderer;
@@ -275,10 +277,12 @@ public class MainLeftConnectTree extends JXTree {
         JMenuItem addConnectMenuItem = new JMenuItem("添加连接") {
             {
                 addActionListener(e -> {
-                    AddConnectDialog addConnectDialog = new AddConnectDialog(owner, "添加连接");
-                    addConnectDialog.setLocationRelativeTo(owner);
-                    addConnectDialog.setVisible(true);
-                    addConnectDialog.pack();
+                    AddConnectDialog.showAddConnectDialog(new ProcessHandler<ConnectInfo>() {
+                        @Override
+                        public void processHandler(ConnectInfo connectInfo) {
+
+                        }
+                    });
                 });
             }
         };

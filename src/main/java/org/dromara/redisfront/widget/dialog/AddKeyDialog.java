@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.dialog;
+package org.dromara.redisfront.widget.dialog;
 
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.json.JSONUtil;

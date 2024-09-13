@@ -13,8 +13,8 @@ import org.dromara.redisfront.commons.util.AlertUtils;
 import org.dromara.redisfront.commons.util.FutureUtils;
 import org.dromara.redisfront.commons.util.LocaleUtils;
 import org.dromara.redisfront.service.ConnectService;
-import org.dromara.redisfront.ui.dialog.ImportConfigDialog;
-import org.dromara.redisfront.ui.dialog.SettingDialog;
+import org.dromara.redisfront.widget.dialog.ImportConfigDialog;
+import org.dromara.redisfront.widget.dialog.SettingDialog;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

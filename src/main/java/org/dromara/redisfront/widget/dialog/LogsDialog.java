@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.dialog;
+package org.dromara.redisfront.widget.dialog;
 
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;

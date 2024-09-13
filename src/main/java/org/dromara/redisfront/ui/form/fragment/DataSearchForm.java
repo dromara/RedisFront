@@ -13,7 +13,7 @@ import org.dromara.redisfront.model.DbInfo;
 import org.dromara.redisfront.model.ScanContext;
 import org.dromara.redisfront.model.TreeNodeInfo;
 import org.dromara.redisfront.service.*;
-import org.dromara.redisfront.ui.dialog.AddKeyDialog;
+import org.dromara.redisfront.widget.dialog.AddKeyDialog;
 import io.lettuce.core.*;
 import org.dromara.redisfront.commons.constant.Const;
 import org.dromara.redisfront.commons.constant.Res;
