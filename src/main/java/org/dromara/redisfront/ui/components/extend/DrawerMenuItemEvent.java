@@ -1,4 +1,4 @@
-package org.dromara.redisfront.widget.components.extend;
+package org.dromara.redisfront.ui.components.extend;
 
 public interface DrawerMenuItemEvent {
     void apply(String key, int[] index);

@@ -41,6 +41,8 @@ public class MainWidget extends QSWidget<RedisFrontPrefs> {
         registerAction("showOpenConnectDialog", new ShowOpenDialogAction(this, "showOpenConnectDialog"));
     }
 
+
+
     public boolean isFullScreen() {
         boolean isFullScreen = false;
         if (this.getOS() == QSOs.WINDOWS) {

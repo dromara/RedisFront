@@ -45,8 +45,8 @@
                   <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text resource-bundle="com/redisfront/RedisFront" key="DataViewForm.saveBtn.title"/>
-                  <toolTipText resource-bundle="com/redisfront/RedisFront" key="DataViewForm.saveBtn.toolTip.Text"/>
+                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.saveBtn.title"/>
+                  <toolTipText resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.saveBtn.toolTip.Text"/>
                 </properties>
               </component>
               <component id="447d7" class="javax.swing.JButton" binding="delBtn" custom-create="true">
@@ -54,8 +54,8 @@
                   <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text resource-bundle="com/redisfront/RedisFront" key="DataViewForm.delBtn.title"/>
-                  <toolTipText resource-bundle="com/redisfront/RedisFront" key="DataViewForm.delBtn.toolTip.Text"/>
+                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.delBtn.title"/>
+                  <toolTipText resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.delBtn.toolTip.Text"/>
                 </properties>
               </component>
               <component id="7670d" class="javax.swing.JButton" binding="refBtn" custom-create="true">
@@ -63,8 +63,8 @@
                   <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text resource-bundle="com/redisfront/RedisFront" key="DataViewForm.refBtn.title"/>
-                  <toolTipText resource-bundle="com/redisfront/RedisFront" key="DataViewForm.refBtn.toolTip.Text"/>
+                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.refBtn.title"/>
+                  <toolTipText resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.refBtn.toolTip.Text"/>
                 </properties>
               </component>
               <component id="85ead" class="javax.swing.JTextField" binding="ttlField" custom-create="true">
@@ -113,8 +113,8 @@
                   <grid row="1" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text resource-bundle="com/redisfront/RedisFront" key="DataViewForm.closeBtn.title"/>
-                  <toolTipText resource-bundle="com/redisfront/RedisFront" key="DataViewForm.closeBtn.toolTip.Text"/>
+                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.closeBtn.title"/>
+                  <toolTipText resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.closeBtn.toolTip.Text"/>
                 </properties>
               </component>
             </children>
@@ -177,7 +177,7 @@
                                 </constraints>
                                 <properties>
                                   <enabled value="true"/>
-                                  <text resource-bundle="com/redisfront/RedisFront" key="DataViewForm.tableDelBtn.title"/>
+                                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.tableDelBtn.title"/>
                                 </properties>
                               </component>
                               <component id="cfb7b" class="javax.swing.JButton" binding="tableRefreshBtn" custom-create="true">
@@ -187,7 +187,7 @@
                                   </grid>
                                 </constraints>
                                 <properties>
-                                  <text resource-bundle="com/redisfront/RedisFront" key="DataViewForm.tableRefreshBtn.title"/>
+                                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.tableRefreshBtn.title"/>
                                 </properties>
                               </component>
                               <component id="cb934" class="javax.swing.JButton" binding="tableAddBtn" custom-create="true">
@@ -197,7 +197,7 @@
                                   </grid>
                                 </constraints>
                                 <properties>
-                                  <text resource-bundle="com/redisfront/RedisFront" key="DataViewForm.tableAddBtn.title"/>
+                                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.tableAddBtn.title"/>
                                 </properties>
                               </component>
                               <grid id="117ff" binding="pagePanel" layout-manager="BorderLayout" hgap="0" vgap="0">
@@ -244,7 +244,7 @@
                                           </grid>
                                         </constraints>
                                         <properties>
-                                          <text resource-bundle="com/redisfront/RedisFront" key="DataViewForm.loadMoreBtn.title"/>
+                                          <text resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.loadMoreBtn.title"/>
                                         </properties>
                                       </component>
                                     </children>

@@ -12,7 +12,7 @@ import org.dromara.redisfront.model.ConnectInfo;
 import org.dromara.redisfront.service.ConnectService;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.ui.component.MainTabbedPanel;
-import org.dromara.redisfront.widget.dialog.LogsDialog;
+import org.dromara.redisfront.dialog.LogsDialog;
 import io.lettuce.core.RedisException;
 import io.lettuce.core.api.sync.BaseRedisCommands;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;

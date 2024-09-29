@@ -1,16 +1,16 @@
-package org.dromara.redisfront.widget.components;
+package org.dromara.redisfront.ui.components;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.util.SystemInfo;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
+import org.dromara.redisfront.ui.components.extend.DrawerMenuItemEvent;
 import org.dromara.redisfront.widget.MainComponent;
 import org.dromara.redisfront.widget.MainWidget;
 import org.dromara.redisfront.widget.action.DrawerAnimationAction;
-import org.dromara.redisfront.widget.components.extend.DefaultLogoPanel;
-import org.dromara.redisfront.widget.components.extend.DrawerMenuItemEvent;
-import org.dromara.redisfront.widget.components.extend.ThemesChangePanel;
+import org.dromara.redisfront.ui.components.extend.DefaultLogoPanel;
+import org.dromara.redisfront.ui.components.extend.ThemesChangePanel;
 import raven.drawer.component.DrawerPanel;
 import raven.drawer.component.SimpleDrawerBuilder;
 import raven.drawer.component.footer.SimpleFooterData;

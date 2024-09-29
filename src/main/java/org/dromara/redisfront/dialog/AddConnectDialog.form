@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="org.dromara.redisfront.widget.dialog.AddConnectDialog">
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="org.dromara.redisfront.dialog.AddConnectDialog">
   <grid id="cbd77" binding="contentPane" layout-manager="GridLayoutManager" row-count="2" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="10" left="10" bottom="10" right="10"/>
     <constraints>
@@ -29,12 +29,12 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="e7465" class="javax.swing.JButton" binding="buttonOK">
+              <component id="e7465" class="javax.swing.JButton" binding="submitBtn">
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text resource-bundle="com/redisfront/RedisFront" key="AddConnectDialog.buttonOK.Title"/>
+                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="AddConnectDialog.buttonOK.Title"/>
                 </properties>
               </component>
               <component id="5723f" class="javax.swing.JButton" binding="buttonCancel">
@@ -42,7 +42,7 @@
                   <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text resource-bundle="com/redisfront/RedisFront" key="AddConnectDialog.buttonCancel.Title"/>
+                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="AddConnectDialog.buttonCancel.Title"/>
                 </properties>
               </component>
             </children>
@@ -52,7 +52,7 @@
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text resource-bundle="com/redisfront/RedisFront" key="AddConnectDialog.testBtn.Title"/>
+              <text resource-bundle="org/dromara/redisfront/RedisFront" key="AddConnectDialog.testBtn.Title"/>
             </properties>
           </component>
         </children>
@@ -141,7 +141,7 @@
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text resource-bundle="com/redisfront/RedisFront" key="AddConnectDialog.sshHostLabel.Title"/>
+                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="AddConnectDialog.sshHostLabel.Title"/>
                 </properties>
               </component>
               <component id="b2abe" class="javax.swing.JTextField" binding="sshHostField">
@@ -157,7 +157,7 @@
                   <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text resource-bundle="com/redisfront/RedisFront" key="AddConnectDialog.sshUserLabel.Title"/>
+                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="AddConnectDialog.sshUserLabel.Title"/>
                 </properties>
               </component>
               <component id="b50cb" class="javax.swing.JTextField" binding="sshUserField">
@@ -173,7 +173,7 @@
                   <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text resource-bundle="com/redisfront/RedisFront" key="AddConnectDialog.enableSshPrivateKey.Title"/>
+                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="AddConnectDialog.enableSshPrivateKey.Title"/>
                 </properties>
               </component>
               <component id="a1fd8" class="javax.swing.JLabel" binding="sshPortLabel">
@@ -181,7 +181,7 @@
                   <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text resource-bundle="com/redisfront/RedisFront" key="AddConnectDialog.sshPortLabel.Title"/>
+                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="AddConnectDialog.sshPortLabel.Title"/>
                 </properties>
               </component>
               <component id="1e636" class="javax.swing.JTextField" binding="sshPrivateKeyFile">
@@ -197,7 +197,7 @@
                   <grid row="3" column="2" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text resource-bundle="com/redisfront/RedisFront" key="AddConnectDialog.sshPrivateKeyBtn.Title"/>
+                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="AddConnectDialog.sshPrivateKeyBtn.Title"/>
                 </properties>
               </component>
               <component id="ed362" class="javax.swing.JCheckBox" binding="showShhPassword">
@@ -205,7 +205,7 @@
                   <grid row="4" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text resource-bundle="com/redisfront/RedisFront" key="AddConnectDialog.showShhPassword.Title"/>
+                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="AddConnectDialog.showShhPassword.Title"/>
                 </properties>
               </component>
               <component id="de36f" class="javax.swing.JLabel" binding="sshPasswordLabel">
@@ -213,7 +213,7 @@
                   <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text resource-bundle="com/redisfront/RedisFront" key="AddConnectDialog.sshPasswordLabel.Title"/>
+                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="AddConnectDialog.sshPasswordLabel.Title"/>
                 </properties>
               </component>
               <component id="79d7e" class="javax.swing.JSpinner" binding="sshPortField" custom-create="true">
@@ -245,8 +245,8 @@
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text resource-bundle="com/redisfront/RedisFront" key="AddConnectDialog.titleLabel.Title"/>
-                  <toolTipText resource-bundle="com/redisfront/RedisFront" key="AddConnectDialog.titleLabel.Desc"/>
+                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="AddConnectDialog.titleLabel.Title"/>
+                  <toolTipText resource-bundle="org/dromara/redisfront/RedisFront" key="AddConnectDialog.titleLabel.Desc"/>
                 </properties>
               </component>
               <component id="c50a" class="javax.swing.JTextField" binding="titleField">
@@ -262,7 +262,7 @@
                   <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text resource-bundle="com/redisfront/RedisFront" key="AddConnectDialog.hostLabel.Title"/>
+                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="AddConnectDialog.hostLabel.Title"/>
                 </properties>
               </component>
               <component id="43879" class="javax.swing.JLabel" binding="passwordLabel">
@@ -270,7 +270,7 @@
                   <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text resource-bundle="com/redisfront/RedisFront" key="AddConnectDialog.passwordLabel.Title"/>
+                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="AddConnectDialog.passwordLabel.Title"/>
                 </properties>
               </component>
               <component id="8a3c5" class="javax.swing.JLabel" binding="userLabel">
@@ -278,7 +278,7 @@
                   <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text resource-bundle="com/redisfront/RedisFront" key="AddConnectDialog.userLabel.Title"/>
+                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="AddConnectDialog.userLabel.Title"/>
                 </properties>
               </component>
               <component id="e0322" class="javax.swing.JTextField" binding="hostField" custom-create="true">
@@ -302,7 +302,7 @@
                   <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text resource-bundle="com/redisfront/RedisFront" key="AddConnectDialog.portLabel.Title"/>
+                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="AddConnectDialog.portLabel.Title"/>
                 </properties>
               </component>
               <component id="29fd2" class="javax.swing.JSpinner" binding="portField" custom-create="true">
@@ -316,7 +316,7 @@
                   <grid row="2" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text resource-bundle="com/redisfront/RedisFront" key="AddConnectDialog.showPasswordCheckBox.Title"/>
+                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="AddConnectDialog.showPasswordCheckBox.Title"/>
                 </properties>
               </component>
               <component id="54296" class="javax.swing.JRadioButton" binding="enableSSLBtn" custom-create="true">

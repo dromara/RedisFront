@@ -38,7 +38,7 @@
                     <properties>
                       <horizontalAlignment value="0"/>
                       <horizontalTextPosition value="11"/>
-                      <text resource-bundle="com/redisfront/RedisFront" key="DataSearchForm.addBtn.title"/>
+                      <text resource-bundle="org/dromara/redisfront/RedisFront" key="DataSearchForm.addBtn.title"/>
                     </properties>
                   </component>
                   <grid id="7e0b4" layout-manager="BorderLayout" hgap="0" vgap="0">

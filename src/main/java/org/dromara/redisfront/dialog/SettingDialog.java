@@ -1,4 +1,4 @@
-package org.dromara.redisfront.widget.dialog;
+package org.dromara.redisfront.dialog;
 
 
 import cn.hutool.core.util.NumberUtil;
@@ -362,10 +362,10 @@ public class SettingDialog extends AbstractDialog<Void> {
         final Spacer spacer5 = new Spacer();
         redisPanel.add(spacer5, new GridConstraints(0, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         sshTimeoutLabel = new JLabel();
-        this.$$$loadLabelText$$$(sshTimeoutLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "SettingDialog.sshTimeoutLabel.Title"));
+        this.$$$loadLabelText$$$(sshTimeoutLabel, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "SettingDialog.sshTimeoutLabel.Title"));
         redisPanel.add(sshTimeoutLabel, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         redisTimeoutLabel = new JLabel();
-        this.$$$loadLabelText$$$(redisTimeoutLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "SettingDialog.redisTimeoutLabel.Title"));
+        this.$$$loadLabelText$$$(redisTimeoutLabel, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "SettingDialog.redisTimeoutLabel.Title"));
         redisPanel.add(redisTimeoutLabel, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         redisTimeoutTextField = new JTextField();
         redisTimeoutTextField.setText("1000");

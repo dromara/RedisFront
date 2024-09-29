@@ -1,4 +1,4 @@
-package org.dromara.redisfront.widget.components;
+package org.dromara.redisfront.ui.components;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
@@ -15,7 +15,7 @@ import org.dromara.redisfront.model.ConnectInfo;
 import org.dromara.redisfront.ui.component.RedisTerminal;
 import org.dromara.redisfront.widget.MainWidget;
 import org.dromara.redisfront.widget.action.DrawerAnimationAction;
-import org.dromara.redisfront.widget.components.extend.BoldTitleTabbedPaneUI;
+import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

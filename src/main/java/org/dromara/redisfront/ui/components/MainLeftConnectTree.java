@@ -1,4 +1,4 @@
-package org.dromara.redisfront.widget.components;
+package org.dromara.redisfront.ui.components;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.DbUtil;
@@ -8,12 +8,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.quickswing.events.QSEvent;
 import org.dromara.quickswing.events.QSEventListener;
 import org.dromara.redisfront.RedisFrontContext;
-import org.dromara.redisfront.commons.handler.ProcessHandler;
-import org.dromara.redisfront.model.ConnectInfo;
+import org.dromara.redisfront.dialog.AddConnectDialog;
 import org.dromara.redisfront.model.RedisConnectTreeItem;
+import org.dromara.redisfront.ui.components.extend.ConnectTreeCellRenderer;
 import org.dromara.redisfront.widget.MainWidget;
-import org.dromara.redisfront.widget.components.extend.ConnectTreeCellRenderer;
-import org.dromara.redisfront.widget.dialog.AddConnectDialog;
 import org.dromara.redisfront.event.DeleteConnectTreeEvent;
 import org.dromara.redisfront.event.RefreshConnectTreeEvent;
 import org.jdesktop.swingx.JXTree;
@@ -57,8 +55,8 @@ public class MainLeftConnectTree extends JXTree {
         this.setCellRenderer(new ConnectTreeCellRenderer());
         RedisFrontContext context = (RedisFrontContext) owner.getContext();
         this.initPopupMenus(context);
-        this.registerEventListener(context);
         this.loadTreeNodeData(context);
+        this.registerEventListener(context);
     }
 
     @Override
@@ -183,7 +181,7 @@ public class MainLeftConnectTree extends JXTree {
                             DbUtil.use(datasource).update(Entity.create("connect_group").set("group_name", value), Entity.create("connect_group").set("group_id", redisConnectTreeItem.id()));
                             context.getEventBus().publish(new RefreshConnectTreeEvent(null));
                             return null;
-                        }, (result, exception) -> {
+                        }, (_, exception) -> {
                             if (exception != null) {
                                 log.error(exception.getMessage());
                                 Notifications.getInstance().show(Notifications.Type.ERROR, exception.getMessage());
@@ -276,13 +274,11 @@ public class MainLeftConnectTree extends JXTree {
 
         JMenuItem addConnectMenuItem = new JMenuItem("添加连接") {
             {
-                addActionListener(e -> {
-                    AddConnectDialog.showAddConnectDialog(new ProcessHandler<ConnectInfo>() {
-                        @Override
-                        public void processHandler(ConnectInfo connectInfo) {
-
-                        }
-                    });
+                addActionListener(_ -> {
+                    AddConnectDialog addConnectDialog =  new AddConnectDialog(owner);
+                    addConnectDialog.setLocationRelativeTo(null);
+                    addConnectDialog.setVisible(true);
+                    addConnectDialog.pack();
                 });
             }
         };

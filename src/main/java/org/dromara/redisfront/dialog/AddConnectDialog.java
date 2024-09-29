@@ -1,25 +1,20 @@
-package org.dromara.redisfront.widget.dialog;
+package org.dromara.redisfront.dialog;
 
 import cn.hutool.extra.ssh.JschRuntimeException;
 import com.formdev.flatlaf.util.StringUtils;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import org.dromara.redisfront.Application;
+import io.lettuce.core.RedisConnectionException;
+import org.dromara.quickswing.ui.app.QSDialog;
 import org.dromara.redisfront.commons.constant.Enums;
-import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.func.Fn;
-
-import org.dromara.redisfront.commons.handler.ProcessHandler;
-import org.dromara.redisfront.commons.ui.AbstractDialog;
 import org.dromara.redisfront.commons.util.AlertUtils;
 import org.dromara.redisfront.commons.util.FutureUtils;
-import org.dromara.redisfront.commons.util.LoadingUtils;
-import org.dromara.redisfront.commons.util.LocaleUtils;
 import org.dromara.redisfront.model.ConnectInfo;
 import org.dromara.redisfront.service.RedisBasicService;
-import io.lettuce.core.RedisConnectionException;
+import org.dromara.redisfront.widget.MainWidget;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -28,9 +23,9 @@ import java.awt.event.*;
 import java.lang.reflect.Method;
 import java.util.ResourceBundle;
 
-public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
+public class AddConnectDialog extends QSDialog<MainWidget> {
     private JPanel contentPane;
-    private JButton buttonOK;
+    private JButton submitBtn;
     private JButton buttonCancel;
     private JTextField titleField;
     private JTextField hostField;
@@ -65,61 +60,36 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     private JLabel sshUserLabel;
     private JLabel sshPortLabel;
     private JLabel sshPasswordLabel;
-    private Integer id;
-
-    /***
-     * 打开添加连接窗口
-     */
-    public static void showAddConnectDialog(ProcessHandler<ConnectInfo> callback) {
-        var addConnectDialog = new AddConnectDialog(Application.frame, callback);
-        addConnectDialog.setResizable(false);
-        addConnectDialog.setLocationRelativeTo(Application.frame);
-        addConnectDialog.pack();
-        addConnectDialog.setVisible(true);
-    }
-
-    /**
-     * 打开编辑连接窗口
-     */
-    public static void showEditConnectDialog(ConnectInfo connectInfo, ProcessHandler<ConnectInfo> callback) {
-        var addConnectDialog = new AddConnectDialog(Application.frame, callback);
-        //数据初始化
-        addConnectDialog.componentsDataInit(connectInfo);
-        addConnectDialog.setResizable(false);
-        addConnectDialog.setLocationRelativeTo(Application.frame);
-        addConnectDialog.pack();
-        addConnectDialog.setVisible(true);
-    }
 
 
-    public AddConnectDialog(Frame owner, ProcessHandler<ConnectInfo> callback) {
-        super(owner, callback);
+    public AddConnectDialog(MainWidget app) {
+        super(app, app.$tr("AddConnectDialog.Title"));
         $$$setupUI$$$();
-        this.setTitle(LocaleUtils.getMessageFromBundle("AddConnectDialog.Title"));
         this.setModal(true);
         this.setResizable(true);
         this.setMinimumSize(new Dimension(400, 280));
         this.setContentPane(contentPane);
-        this.getRootPane().setDefaultButton(buttonOK);
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        this.id = 0;
+        this.getRootPane().setDefaultButton(submitBtn);
+        this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 dispose();
             }
         });
+        this.initializeComponents();
+    }
+
+    private void initializeComponents() {
+
+
         this.contentPane.registerKeyboardAction(e -> dispose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         this.sshPrivateKeyFile.setVisible(enableSshPrivateKey.isSelected());
         this.sshPrivateKeyBtn.setVisible(enableSshPrivateKey.isSelected());
-        this.initComponentListener();
-    }
 
-    private void initComponentListener() {
-
-        buttonOK.addActionListener(this::submitActionPerformed);
+        submitBtn.addActionListener(this::submitActionPerformed);
         buttonCancel.addActionListener(this::cancelActionPerformed);
 
-        showPasswordCheckBox.addActionListener(e -> {
+        showPasswordCheckBox.addActionListener(_ -> {
             if (showPasswordCheckBox.isSelected()) {
                 passwordField.setEchoChar((char) 0);
             } else {
@@ -135,7 +105,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
             }
         });
 
-        showSslPassword.addActionListener(e -> {
+        showSslPassword.addActionListener(_ -> {
             if (showPasswordCheckBox.isSelected()) {
                 sslPasswordField.setEchoChar((char) 0);
             } else {
@@ -143,7 +113,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
             }
         });
 
-        enableSshPrivateKey.addActionListener(e -> {
+        enableSshPrivateKey.addActionListener(_ -> {
             if (enableSshPrivateKey.isSelected()) {
                 setSize(new Dimension(getWidth(), getHeight() + 20));
             } else {
@@ -153,7 +123,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
             sshPrivateKeyBtn.setVisible(enableSshPrivateKey.isSelected());
         });
 
-        enableSSLBtn.addActionListener(e -> {
+        enableSSLBtn.addActionListener(_ -> {
             if (enableSSHBtn.isSelected()) {
                 enableSSHBtn.setSelected(false);
                 setSize(new Dimension(getWidth(), getHeight() - 120));
@@ -203,8 +173,8 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
             @Override
             public void mouseClicked(MouseEvent e) {
                 var fileChooser = new JFileChooser();
-                fileChooser.setFileFilter(new FileNameExtensionFilter(LocaleUtils.getMessageFromBundle("AddConnectDialog.FileChooser.sshPrivateKey.title"), "pem", "crt"));
-                fileChooser.showDialog(AddConnectDialog.this, LocaleUtils.getMessageFromBundle("AddConnectDialog.FileChooser.sshPrivateKey.btn"));
+                fileChooser.setFileFilter(new FileNameExtensionFilter($tr("AddConnectDialog.FileChooser.sshPrivateKey.title"), "pem", "crt"));
+                fileChooser.showDialog(AddConnectDialog.this, $tr("AddConnectDialog.FileChooser.sshPrivateKey.btn"));
                 var selectedFile = fileChooser.getSelectedFile();
                 if (Fn.isNotNull(selectedFile)) {
                     sshPrivateKeyFile.setText(selectedFile.getAbsolutePath());
@@ -220,22 +190,22 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         try {
             var connectInfo = validGetConnectInfo();
             if (RedisBasicService.service.ping(connectInfo)) {
-                AlertUtils.showInformationDialog(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.test.success.message"));
+                getOwner().displayMessage($tr("AddConnectDialog.test.success.title"),$tr("AddConnectDialog.test.success.message"));
                 connectSuccess = true;
             } else {
-                AlertUtils.showInformationDialog(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.test.fail.message"));
+                getOwner().displayMessage($tr("AddConnectDialog.test.fail.title"),$tr( "AddConnectDialog.test.fail.message"));
             }
         } catch (Exception exception) {
             if (exception instanceof RedisFrontException) {
                 if (exception.getCause() instanceof JschRuntimeException jschRuntimeException) {
-                    AlertUtils.showErrorDialog(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.test.fail.message"), jschRuntimeException.getCause());
+                    getOwner().displayException($tr( "AddConnectDialog.test.fail.message"), jschRuntimeException.getCause());
                 } else {
-                    AlertUtils.showErrorDialog(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.test.fail.message"), exception);
+                    getOwner().displayException($tr( "AddConnectDialog.test.fail.message"), exception);
                 }
             } else if (exception instanceof RedisConnectionException) {
-                AlertUtils.showErrorDialog(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.test.fail.message"), exception.getCause());
+                getOwner().displayException($tr( "AddConnectDialog.test.fail.message"), exception.getCause());
             } else {
-                AlertUtils.showErrorDialog(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.test.fail.message"), exception);
+                getOwner().displayException($tr( "AddConnectDialog.test.fail.message"), exception);
             }
         }
         return connectSuccess;
@@ -251,9 +221,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         var connectSuccess = testConnect();
         if (connectSuccess) {
             FutureUtils.runAsync(() -> {
-                LoadingUtils.showDialog();
-                var redisMode = RedisBasicService.service.getRedisModeEnum(connectInfo);
-                processHandler.processHandler(connectInfo.setRedisModeEnum(redisMode));
+
             });
             dispose();
         }
@@ -262,37 +230,37 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
     private ConnectInfo validGetConnectInfo() {
         if (StringUtils.isEmpty(titleField.getText())) {
             titleField.requestFocus();
-            throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddConnectDialog.require.title.message"), false);
+            throw new RedisFrontException($tr("AddConnectDialog.require.title.message"), false);
         }
         if (StringUtils.isEmpty(hostField.getText())) {
             titleField.requestFocus();
-            throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddConnectDialog.require.host.message"), false);
+            throw new RedisFrontException($tr("AddConnectDialog.require.host.message"), false);
         }
 
         var title = titleField.getText();
         if (title.length() < 4) {
             title = title + "(" + hostField.getText() + ")";
         }
-        //SSH Connection
+
         if (enableSSHBtn.isSelected()) {
-            //valid sshHostField
+
             if (Fn.isEmpty(sshHostField.getText())) {
                 sshHostField.requestFocus();
-                throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddConnectDialog.require.sshHost.message"), false);
+                throw new RedisFrontException($tr("AddConnectDialog.require.sshHost.message"), false);
             }
-            //valid sshUserField
+
             if (Fn.isEmpty(sshUserField.getText())) {
                 sshUserField.requestFocus();
-                throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddConnectDialog.require.sshUser.message"), false);
+                throw new RedisFrontException($tr("AddConnectDialog.require.sshUser.message"), false);
             }
-            //valid enableSshPrivateKey
+
             if (enableSshPrivateKey.isSelected()) {
                 if (Fn.isEmpty(sshPrivateKeyFile.getText())) {
                     sshPrivateKeyFile.requestFocus();
-                    throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddConnectDialog.require.sshPrivateKey.message"), false);
+                    throw new RedisFrontException($tr("AddConnectDialog.require.sshPrivateKey.message"), false);
                 }
             }
-            //sshConfig
+
             var sshConfig = new ConnectInfo.SSHConfig(
                     sshPrivateKeyFile.getText(),
                     sshUserField.getText(),
@@ -310,7 +278,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                     enableSSLBtn.isSelected(),
                     Enums.Connect.SSH,
                     sshConfig)
-                    .setId(id);
+                    ;
 
 
         } else if (enableSSLBtn.isSelected()) {
@@ -329,7 +297,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                     enableSSLBtn.isSelected(),
                     Enums.Connect.NORMAL,
                     sslConfig)
-                    .setId(id);
+                    ;
 
         } else {
 
@@ -341,7 +309,7 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
                     0,
                     enableSSLBtn.isSelected(),
                     Enums.Connect.NORMAL)
-                    .setId(id);
+                    ;
 
         }
     }
@@ -350,7 +318,6 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
      * 数据初始化
      */
     public void componentsDataInit(ConnectInfo connectInfo) {
-        this.id = connectInfo.id();
         this.titleField.setText(connectInfo.title());
         this.hostField.setText(connectInfo.host());
         this.portField.setValue(connectInfo.port());
@@ -400,7 +367,6 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         hostField.setText("127.0.0.1");
         testBtn = new JButton();
         testBtn.setText("测试连接");
-        testBtn.setIcon(Res.TEST_CONNECT_ICON);
         sshPortField = new JSpinner();
         sshPortField.setEditor(new JSpinner.NumberEditor(sshPortField, "####"));
         sshPortField.setValue(22);
@@ -425,13 +391,13 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1, true, false));
         panel1.add(panel2, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        buttonOK = new JButton();
-        this.$$$loadButtonText$$$(buttonOK, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.buttonOK.Title"));
-        panel2.add(buttonOK, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        submitBtn = new JButton();
+        this.$$$loadButtonText$$$(submitBtn, $tr( "AddConnectDialog.buttonOK.Title"));
+        panel2.add(submitBtn, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         buttonCancel = new JButton();
-        this.$$$loadButtonText$$$(buttonCancel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.buttonCancel.Title"));
+        this.$$$loadButtonText$$$(buttonCancel, $tr( "AddConnectDialog.buttonCancel.Title"));
         panel2.add(buttonCancel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        this.$$$loadButtonText$$$(testBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.testBtn.Title"));
+        this.$$$loadButtonText$$$(testBtn, $tr( "AddConnectDialog.testBtn.Title"));
         panel1.add(testBtn, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new GridLayoutManager(4, 3, new Insets(0, 0, 0, 0), -1, -1));
@@ -458,31 +424,31 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         sshPanel.setLayout(new GridLayoutManager(5, 5, new Insets(0, 0, 0, 0), -1, -1));
         panel3.add(sshPanel, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         sshHostLabel = new JLabel();
-        this.$$$loadLabelText$$$(sshHostLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.sshHostLabel.Title"));
+        this.$$$loadLabelText$$$(sshHostLabel, $tr( "AddConnectDialog.sshHostLabel.Title"));
         sshPanel.add(sshHostLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         sshHostField = new JTextField();
         sshPanel.add(sshHostField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         sshUserLabel = new JLabel();
-        this.$$$loadLabelText$$$(sshUserLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.sshUserLabel.Title"));
+        this.$$$loadLabelText$$$(sshUserLabel, $tr( "AddConnectDialog.sshUserLabel.Title"));
         sshPanel.add(sshUserLabel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         sshUserField = new JTextField();
         sshPanel.add(sshUserField, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         enableSshPrivateKey = new JCheckBox();
-        this.$$$loadButtonText$$$(enableSshPrivateKey, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.enableSshPrivateKey.Title"));
+        this.$$$loadButtonText$$$(enableSshPrivateKey, $tr( "AddConnectDialog.enableSshPrivateKey.Title"));
         sshPanel.add(enableSshPrivateKey, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         sshPortLabel = new JLabel();
-        this.$$$loadLabelText$$$(sshPortLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.sshPortLabel.Title"));
+        this.$$$loadLabelText$$$(sshPortLabel, $tr( "AddConnectDialog.sshPortLabel.Title"));
         sshPanel.add(sshPortLabel, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         sshPrivateKeyFile = new JTextField();
         sshPanel.add(sshPrivateKeyFile, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         sshPrivateKeyBtn = new JButton();
-        this.$$$loadButtonText$$$(sshPrivateKeyBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.sshPrivateKeyBtn.Title"));
+        this.$$$loadButtonText$$$(sshPrivateKeyBtn, $tr( "AddConnectDialog.sshPrivateKeyBtn.Title"));
         sshPanel.add(sshPrivateKeyBtn, new GridConstraints(3, 2, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         showShhPassword = new JCheckBox();
-        this.$$$loadButtonText$$$(showShhPassword, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.showShhPassword.Title"));
+        this.$$$loadButtonText$$$(showShhPassword, $tr( "AddConnectDialog.showShhPassword.Title"));
         sshPanel.add(showShhPassword, new GridConstraints(4, 2, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         sshPasswordLabel = new JLabel();
-        this.$$$loadLabelText$$$(sshPasswordLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.sshPasswordLabel.Title"));
+        this.$$$loadLabelText$$$(sshPasswordLabel, $tr( "AddConnectDialog.sshPasswordLabel.Title"));
         sshPanel.add(sshPasswordLabel, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         sshPanel.add(sshPortField, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         sshPasswordField = new JPasswordField();
@@ -491,29 +457,29 @@ public class AddConnectDialog extends AbstractDialog<ConnectInfo> {
         basicPanel.setLayout(new GridLayoutManager(7, 4, new Insets(0, 0, 0, 0), -1, -1));
         panel3.add(basicPanel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         titleLabel = new JLabel();
-        this.$$$loadLabelText$$$(titleLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.titleLabel.Title"));
-        titleLabel.setToolTipText(this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.titleLabel.Desc"));
+        this.$$$loadLabelText$$$(titleLabel, $tr( "AddConnectDialog.titleLabel.Title"));
+        titleLabel.setToolTipText($tr( "AddConnectDialog.titleLabel.Desc"));
         basicPanel.add(titleLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         titleField = new JTextField();
         basicPanel.add(titleField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         hostLabel = new JLabel();
-        this.$$$loadLabelText$$$(hostLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.hostLabel.Title"));
+        this.$$$loadLabelText$$$(hostLabel, $tr( "AddConnectDialog.hostLabel.Title"));
         basicPanel.add(hostLabel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         passwordLabel = new JLabel();
-        this.$$$loadLabelText$$$(passwordLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.passwordLabel.Title"));
+        this.$$$loadLabelText$$$(passwordLabel, $tr( "AddConnectDialog.passwordLabel.Title"));
         basicPanel.add(passwordLabel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         userLabel = new JLabel();
-        this.$$$loadLabelText$$$(userLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.userLabel.Title"));
+        this.$$$loadLabelText$$$(userLabel, $tr( "AddConnectDialog.userLabel.Title"));
         basicPanel.add(userLabel, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         basicPanel.add(hostField, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         userField = new JTextField();
         basicPanel.add(userField, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         portLabel = new JLabel();
-        this.$$$loadLabelText$$$(portLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.portLabel.Title"));
+        this.$$$loadLabelText$$$(portLabel, $tr( "AddConnectDialog.portLabel.Title"));
         basicPanel.add(portLabel, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         basicPanel.add(portField, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         showPasswordCheckBox = new JCheckBox();
-        this.$$$loadButtonText$$$(showPasswordCheckBox, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddConnectDialog.showPasswordCheckBox.Title"));
+        this.$$$loadButtonText$$$(showPasswordCheckBox, $tr( "AddConnectDialog.showPasswordCheckBox.Title"));
         basicPanel.add(showPasswordCheckBox, new GridConstraints(2, 2, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         enableSSLBtn.setEnabled(true);
         enableSSLBtn.setText("SSL/TLS");

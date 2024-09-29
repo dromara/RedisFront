@@ -1,4 +1,4 @@
-package org.dromara.redisfront.widget.dialog;
+package org.dromara.redisfront.dialog;
 
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
@@ -196,10 +196,10 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         panel2.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1, true, false));
         panel1.add(panel2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         buttonOK = new JButton();
-        this.$$$loadButtonText$$$(buttonOK, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "OpenConnectDialog.buttonOK.title"));
+        this.$$$loadButtonText$$$(buttonOK, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "OpenConnectDialog.buttonOK.title"));
         panel2.add(buttonOK, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         buttonCancel = new JButton();
-        this.$$$loadButtonText$$$(buttonCancel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "OpenConnectDialog.buttonCancel.title"));
+        this.$$$loadButtonText$$$(buttonCancel, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "OpenConnectDialog.buttonCancel.title"));
         panel2.add(buttonCancel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new BorderLayout(0, 0));
@@ -212,7 +212,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         final JPanel panel4 = new JPanel();
         panel4.setLayout(new BorderLayout(0, 0));
         contentPane.add(panel4, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        this.$$$loadButtonText$$$(addConnectBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "OpenConnectDialog.addConnectBtn.title"));
+        this.$$$loadButtonText$$$(addConnectBtn, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "OpenConnectDialog.addConnectBtn.title"));
         panel4.add(addConnectBtn, BorderLayout.WEST);
         final Spacer spacer2 = new Spacer();
         panel4.add(spacer2, BorderLayout.CENTER);

@@ -1,4 +1,4 @@
-package org.dromara.redisfront.widget.dialog;
+package org.dromara.redisfront.dialog;
 
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.json.JSONUtil;
@@ -323,22 +323,22 @@ public class AddKeyDialog extends AbstractDialog<String> {
         streamField.setText("*");
         contentPane.add(streamField, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         scoreLabel = new JLabel();
-        this.$$$loadLabelText$$$(scoreLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddKeyDialog.scoreLabel.title"));
+        this.$$$loadLabelText$$$(scoreLabel, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "AddKeyDialog.scoreLabel.title"));
         contentPane.add(scoreLabel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         hashKeyLabel = new JLabel();
-        this.$$$loadLabelText$$$(hashKeyLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddKeyDialog.hashKeyLabel.title"));
+        this.$$$loadLabelText$$$(hashKeyLabel, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "AddKeyDialog.hashKeyLabel.title"));
         contentPane.add(hashKeyLabel, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         keyLabel = new JLabel();
-        this.$$$loadLabelText$$$(keyLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddKeyDialog.keyLabel.title"));
+        this.$$$loadLabelText$$$(keyLabel, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "AddKeyDialog.keyLabel.title"));
         contentPane.add(keyLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         typeLabel = new JLabel();
-        this.$$$loadLabelText$$$(typeLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddKeyDialog.typeLabel.title"));
+        this.$$$loadLabelText$$$(typeLabel, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "AddKeyDialog.typeLabel.title"));
         contentPane.add(typeLabel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         streamLabel = new JLabel();
         streamLabel.setText("ID");
         contentPane.add(streamLabel, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         valueLabel = new JLabel();
-        this.$$$loadLabelText$$$(valueLabel, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "AddKeyDialog.valueLabel.title"));
+        this.$$$loadLabelText$$$(valueLabel, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "AddKeyDialog.valueLabel.title"));
         contentPane.add(valueLabel, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JScrollPane scrollPane1 = new JScrollPane();
         contentPane.add(scrollPane1, new GridConstraints(5, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));

@@ -13,7 +13,7 @@ import org.dromara.redisfront.model.DbInfo;
 import org.dromara.redisfront.model.ScanContext;
 import org.dromara.redisfront.model.TreeNodeInfo;
 import org.dromara.redisfront.service.*;
-import org.dromara.redisfront.widget.dialog.AddKeyDialog;
+import org.dromara.redisfront.dialog.AddKeyDialog;
 import io.lettuce.core.*;
 import org.dromara.redisfront.commons.constant.Const;
 import org.dromara.redisfront.commons.constant.Res;
@@ -790,7 +790,7 @@ public class DataSearchForm {
         panel2.add(databaseComboBox, BorderLayout.WEST);
         addBtn.setHorizontalAlignment(0);
         addBtn.setHorizontalTextPosition(11);
-        this.$$$loadButtonText$$$(addBtn, this.$$$getMessageFromBundle$$$("com/redisfront/RedisFront", "DataSearchForm.addBtn.title"));
+        this.$$$loadButtonText$$$(addBtn, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "DataSearchForm.addBtn.title"));
         panel2.add(addBtn, BorderLayout.CENTER);
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new BorderLayout(0, 0));

@@ -36,8 +36,6 @@ public class Res {
     public static final Icon PLUS_ICON = new FlatSVGIcon("icons/add.svg");
     public static final Icon LOAD_MORE_ICON = new FlatSVGIcon("svg/testBtn.svg");
 
-    public static final Icon TEST_CONNECT_ICON = new FlatSVGIcon("test-connect.svg",24,24);
-
     public static final Icon GITHUB_ICON = new FlatSVGIcon("icons/github.svg");
     public static final Icon MAIN_TAB_DATABASE_ICON = new FlatSVGIcon("icons/icon_db5.svg");
     public static final Icon INFO_ICON = new FlatSVGIcon("icons/info.svg");
