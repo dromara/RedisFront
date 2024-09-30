@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.components;
+package org.dromara.redisfront.ui.widget;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
@@ -13,9 +13,8 @@ import org.dromara.redisfront.commons.constant.Const;
 import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.model.ConnectInfo;
 import org.dromara.redisfront.ui.component.RedisTerminal;
-import org.dromara.redisfront.widget.MainWidget;
-import org.dromara.redisfront.widget.action.DrawerAnimationAction;
-import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
+import org.dromara.redisfront.ui.action.DrawerAnimationAction;
+import org.dromara.redisfront.ui.extend.BoldTitleTabbedPaneUI;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -26,7 +25,7 @@ import java.awt.event.ComponentEvent;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-public class MainRightTabbedPanel extends JPanel {
+public class MainRightComponent extends JPanel {
     private final MainWidget owner;
     private final DrawerAnimationAction action;
     private JTabbedPane topTabbedPane;
@@ -36,7 +35,7 @@ public class MainRightTabbedPanel extends JPanel {
     private Consumer<Integer> tabCloseProcess;
 
 
-    public MainRightTabbedPanel(DrawerAnimationAction action, MainWidget owner) {
+    public MainRightComponent(DrawerAnimationAction action, MainWidget owner) {
         this.owner = owner;
         this.action = action;
         this.setLayout(new BorderLayout());

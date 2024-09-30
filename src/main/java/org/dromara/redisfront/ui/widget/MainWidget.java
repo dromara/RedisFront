@@ -1,4 +1,4 @@
-package org.dromara.redisfront.widget;
+package org.dromara.redisfront.ui.widget;
 
 
 import com.formdev.flatlaf.FlatClientProperties;
@@ -10,7 +10,8 @@ import org.dromara.quickswing.ui.app.QSContext;
 import org.dromara.quickswing.ui.app.QSWidget;
 import org.dromara.redisfront.RedisFrontPrefs;
 import org.dromara.redisfront.commons.constant.Res;
-import org.dromara.redisfront.widget.action.ShowOpenDialogAction;
+import org.dromara.redisfront.ui.action.ShowOpenDialogAction;
+
 import javax.swing.*;
 import java.awt.*;
 

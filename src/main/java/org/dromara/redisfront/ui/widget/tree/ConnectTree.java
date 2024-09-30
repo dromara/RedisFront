@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.components;
+package org.dromara.redisfront.ui.widget.tree;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.DbUtil;
@@ -10,11 +10,12 @@ import org.dromara.quickswing.events.QSEventListener;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.dialog.AddConnectDialog;
 import org.dromara.redisfront.model.RedisConnectTreeItem;
-import org.dromara.redisfront.ui.components.extend.ConnectTreeCellRenderer;
-import org.dromara.redisfront.widget.MainWidget;
-import org.dromara.redisfront.event.DeleteConnectTreeEvent;
-import org.dromara.redisfront.event.RefreshConnectTreeEvent;
+import org.dromara.redisfront.ui.extend.ConnectTreeCellRenderer;
+import org.dromara.redisfront.ui.widget.MainWidget;
+import org.dromara.redisfront.ui.event.DeleteConnectTreeEvent;
+import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
 import org.jdesktop.swingx.JXTree;
+import raven.drawer.component.menu.MenuEvent;
 import raven.toast.Notifications;
 
 import javax.sql.DataSource;
@@ -28,15 +29,16 @@ import java.sql.SQLException;
 import java.util.List;
 
 @Slf4j
-public class MainLeftConnectTree extends JXTree {
+public class ConnectTree extends JXTree {
     private final MainWidget owner;
+    private final MenuEvent menuEvent;
     private JPopupMenu treePopupMenu;
     private JPopupMenu treeNodePopupMenu;
     private JPopupMenu treeNodeGroupPopupMenu;
 
-    public MainLeftConnectTree(MainWidget owner) {
+    public ConnectTree(MainWidget owner, MenuEvent menuEvent) {
         this.owner = owner;
-        Notifications.getInstance().setJFrame(owner);
+        this.menuEvent = menuEvent;
         this.setRootVisible(false);
         this.setShowsRootHandles(true);
         this.setDragEnabled(true);
@@ -256,9 +258,9 @@ public class MainLeftConnectTree extends JXTree {
                             Entity connectGroup = Entity.create("connect_group");
                             connectGroup.set("group_name", value);
                             DbUtil.use(datasource).insert(connectGroup);
-                            context.getEventBus().publish(new RefreshConnectTreeEvent(null));
+                            context.getEventBus().publish(new RefreshConnectTreeEvent(connectGroup));
                             return null;
-                        }, (result, exception) -> {
+                        }, (_, exception) -> {
                             if (exception != null) {
                                 log.error(exception.getMessage());
                                 Notifications.getInstance().show(Notifications.Type.ERROR, exception.getMessage());

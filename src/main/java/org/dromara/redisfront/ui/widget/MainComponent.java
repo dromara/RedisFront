@@ -1,14 +1,12 @@
-package org.dromara.redisfront.widget;
+package org.dromara.redisfront.ui.widget;
 
 import cn.hutool.core.util.ArrayUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
 import org.dromara.quickswing.ui.swing.Background;
-import org.dromara.redisfront.widget.action.DrawerAnimationAction;
-import org.dromara.redisfront.ui.components.MainLeftDrawerPanel;
-import org.dromara.redisfront.ui.components.MainRightTabbedPanel;
-import org.dromara.redisfront.ui.components.extend.DefaultNonePanel;
-import org.dromara.redisfront.ui.components.extend.DrawerMenuItemEvent;
+import org.dromara.redisfront.ui.action.DrawerAnimationAction;
+import org.dromara.redisfront.ui.extend.DefaultNonePanel;
+import org.dromara.redisfront.ui.extend.DrawerMenuItemEvent;
 import raven.drawer.component.menu.MenuEvent;
 
 import javax.swing.*;
@@ -27,17 +25,17 @@ public class MainComponent extends Background {
     private JPanel mainContentPane;
     private DrawerAnimationAction drawerAnimationAction;
 
-    private final MenuEvent menuEvent = (source, index) -> {
+    private final MenuEvent menuEvent = (_, _) -> {
         Component[] components = mainContentPane.getComponents();
         if (ArrayUtil.isNotEmpty(components)) {
             Optional<Component> first = Arrays.stream(components).findFirst();
             if (first.isPresent()) {
-                if (first.get() instanceof MainRightTabbedPanel mainRightTabbedPanel) {
+                if (first.get() instanceof MainRightComponent mainRightTabbedPanel) {
                     //todo add tab
                     System.out.println("JTabbedPane " + first.get());
                 } else {
                     mainContentPane.removeAll();
-                    MainRightTabbedPanel mainRightTabbedPanel = createMainTabbedPanel(drawerAnimationAction);
+                    MainRightComponent mainRightTabbedPanel = createMainTabbedPanel(drawerAnimationAction);
                     mainContentPane.add(mainRightTabbedPanel, BorderLayout.CENTER);
                     FlatLaf.updateUI();
                 }
@@ -45,8 +43,8 @@ public class MainComponent extends Background {
         }
     };
 
-    private MainRightTabbedPanel createMainTabbedPanel(DrawerAnimationAction drawerAnimationAction) {
-        MainRightTabbedPanel mainRightTabbedPanel = new MainRightTabbedPanel(drawerAnimationAction, owner);
+    private MainRightComponent createMainTabbedPanel(DrawerAnimationAction drawerAnimationAction) {
+        MainRightComponent mainRightTabbedPanel = new MainRightComponent(drawerAnimationAction, owner);
         mainRightTabbedPanel.setTabCloseProcess(count -> {
             if (count == 0) {
                 if (!drawerAnimationAction.isDrawerOpen()) {
@@ -73,7 +71,6 @@ public class MainComponent extends Background {
         this.initializeActions();
     }
 
-
     private void initializeActions() {
         InputMap inputMap = this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         this.owner.fillInputMap("showOpenConnectDialog",inputMap);
@@ -94,7 +91,7 @@ public class MainComponent extends Background {
         this.mainContentPane.add(DefaultNonePanel.getInstance(), BorderLayout.CENTER);
         parentPanel.add(mainContentPane, BorderLayout.CENTER);
 
-        this.mainDrawerPanel = new MainLeftDrawerPanel(owner, menuEvent, drawerAnimationAction,drawerMenuItemEvent).buildDrawerPanel();
+        this.mainDrawerPanel = new MainLeftComponent(owner, menuEvent, drawerAnimationAction,drawerMenuItemEvent).buildDrawerPanel();
         this.mainDrawerPanel.setMinimumSize(new Dimension(250, -1));
         this.mainDrawerPanel.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
         parentPanel.add(mainDrawerPanel, BorderLayout.WEST);

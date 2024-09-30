@@ -1,16 +1,15 @@
-package org.dromara.redisfront.ui.components;
+package org.dromara.redisfront.ui.widget;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.util.SystemInfo;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
-import org.dromara.redisfront.ui.components.extend.DrawerMenuItemEvent;
-import org.dromara.redisfront.widget.MainComponent;
-import org.dromara.redisfront.widget.MainWidget;
-import org.dromara.redisfront.widget.action.DrawerAnimationAction;
-import org.dromara.redisfront.ui.components.extend.DefaultLogoPanel;
-import org.dromara.redisfront.ui.components.extend.ThemesChangePanel;
+import org.dromara.redisfront.ui.extend.DrawerMenuItemEvent;
+import org.dromara.redisfront.ui.action.DrawerAnimationAction;
+import org.dromara.redisfront.ui.extend.DefaultLogoPanel;
+import org.dromara.redisfront.ui.extend.ThemesChangePanel;
+import org.dromara.redisfront.ui.widget.tree.ConnectTree;
 import raven.drawer.component.DrawerPanel;
 import raven.drawer.component.SimpleDrawerBuilder;
 import raven.drawer.component.footer.SimpleFooterData;
@@ -24,9 +23,10 @@ import java.awt.*;
 
 @Getter
 @Slf4j
-public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
+public class MainLeftComponent extends SimpleDrawerBuilder {
 
     private final MainWidget owner;
+    private final MenuEvent menuEvent;
     private final DrawerAnimationAction drawerAnimationAction;
     private final DrawerMenuItemEvent drawerMenuItemEvent;
 
@@ -42,8 +42,9 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
         };
     }
 
-    public MainLeftDrawerPanel(MainWidget owner, MenuEvent menuEvent, DrawerAnimationAction drawerAnimationAction, DrawerMenuItemEvent drawerMenuItemEvent) {
+    public MainLeftComponent(MainWidget owner, MenuEvent menuEvent, DrawerAnimationAction drawerAnimationAction, DrawerMenuItemEvent drawerMenuItemEvent) {
         this.owner = owner;
+        this.menuEvent = menuEvent;
         this.drawerAnimationAction = drawerAnimationAction;
         this.drawerMenuItemEvent = drawerMenuItemEvent;
         initializeUI();
@@ -94,7 +95,7 @@ public class MainLeftDrawerPanel extends SimpleDrawerBuilder {
 
     @Override
     public Component getMenu() {
-        JTree tree = new MainLeftConnectTree(owner);
+        JTree tree = new ConnectTree(owner, menuEvent);
         JScrollPane scrollPane = createScroll(tree);
         scrollPane.setBorder(new EmptyBorder(0, 10, 0, 10));
         return scrollPane;
