@@ -85,7 +85,7 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
     private void initializeComponents() {
 
 
-        this.contentPane.registerKeyboardAction(e -> dispose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        this.contentPane.registerKeyboardAction(_ -> dispose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         this.sshPrivateKeyFile.setVisible(enableSshPrivateKey.isSelected());
         this.sshPrivateKeyBtn.setVisible(enableSshPrivateKey.isSelected());
 
@@ -100,7 +100,7 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
             }
         });
 
-        showShhPassword.addActionListener(e -> {
+        showShhPassword.addActionListener(_ -> {
             if (showShhPassword.isSelected()) {
                 sshPasswordField.setEchoChar((char) 0);
             } else {
@@ -140,7 +140,7 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
             }
         });
 
-        enableSSHBtn.addActionListener(e -> {
+        enableSSHBtn.addActionListener(_ -> {
             if (enableSSLBtn.isSelected()) {
                 enableSSLBtn.setSelected(false);
                 setSize(new Dimension(getWidth(), getHeight() - 130));
@@ -185,7 +185,7 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
             }
         });
 
-        testBtn.addActionListener(e -> testConnect());
+        testBtn.addActionListener(_ -> testConnect());
     }
 
     private Boolean testConnect() {
