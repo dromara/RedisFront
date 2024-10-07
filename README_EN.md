@@ -13,6 +13,8 @@ RedisFront is a cross platform Redis desktop client tool developed based on Java
 
 ### 🌱 Download
 
+[https://gitcode.com/dromara/RedisFront/releases](https://gitcode.com/dromara/RedisFront/releases)
+
 [https://gitee.com/dromara/RedisFront/releases](https://gitee.com/dromara/RedisFront/releases)
 
 [https://github.com/dromara/RedisFront/releases](https://github.com/dromara/RedisFront/releases)
