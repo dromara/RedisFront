@@ -5,7 +5,6 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import org.dromara.redisfront.model.ConnectInfo;
 import io.lettuce.core.cluster.RedisClusterClient;
-import org.dromara.redisfront.commons.constant.Const;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.func.Fn;
 import org.slf4j.Logger;
@@ -59,7 +58,7 @@ public class JschUtils {
                 }
                 session = createSession(connectInfo);
                 String remoteAddress = getRemoteAddress(connectInfo);
-                session.setTimeout(PrefUtils.getState().getInt(Const.KEY_SSH_TIMEOUT, 1000));
+                session.setTimeout(1000);
                 session.connect();
                 for (Map.Entry<Integer, Integer> clusterTempPort : connectInfo.getClusterLocalPort().entrySet()) {
                     JschUtil.bindPort(session, remoteAddress, clusterTempPort.getKey(), clusterTempPort.getValue());
@@ -86,7 +85,7 @@ public class JschUtils {
                 }
                 session = createSession(connectInfo);
                 var remoteHost = getRemoteAddress(connectInfo);
-                session.setTimeout(PrefUtils.getState().getInt(Const.KEY_SSH_TIMEOUT, 1000));
+                session.setTimeout(1000);
                 session.connect();
                 JschUtil.bindPort(session, remoteHost, connectInfo.port(), connectInfo.getLocalPort());
                 sessionThreadLocal.set(session);

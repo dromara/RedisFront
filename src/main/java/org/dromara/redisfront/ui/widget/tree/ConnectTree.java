@@ -4,9 +4,11 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.DbUtil;
 import cn.hutool.db.Entity;
 import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.util.SystemInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.quickswing.events.QSEvent;
 import org.dromara.quickswing.events.QSEventListener;
+import org.dromara.quickswing.ui.app.QSAction;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.dialog.AddConnectDialog;
 import org.dromara.redisfront.model.RedisConnectTreeItem;
@@ -23,6 +25,9 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.SQLException;
@@ -292,6 +297,23 @@ public class ConnectTree extends JXTree {
 
         JMenuItem exportConnectMenuItem = new JMenuItem("导出连接");
         treePopupMenu.add(exportConnectMenuItem);
+
+        owner.registerAction(this, new QSAction<>(owner) {
+            @Override
+            public void handleAction(ActionEvent actionEvent) {
+                TreePath selectionPath = getSelectionPath();
+                if (selectionPath == null) {
+                    Notifications.getInstance().show(Notifications.Type.INFO, "请选择要打开的连接！");
+                }
+            }
+
+            @Override
+            public KeyStroke getKeyStroke() {
+                return SystemInfo.isMacOS ?
+                        KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()):
+                        KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK);
+            }
+        });
     }
 
 

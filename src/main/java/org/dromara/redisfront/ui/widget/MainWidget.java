@@ -5,6 +5,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatDesktop;
 import com.formdev.flatlaf.util.SystemInfo;
+import lombok.Getter;
 import org.dromara.quickswing.constant.QSOs;
 import org.dromara.quickswing.ui.app.QSContext;
 import org.dromara.quickswing.ui.app.QSWidget;
@@ -15,7 +16,11 @@ import org.dromara.redisfront.ui.action.ShowOpenDialogAction;
 import javax.swing.*;
 import java.awt.*;
 
+@Getter
 public class MainWidget extends QSWidget<RedisFrontPrefs> {
+
+    private final MainComponent mainComponent;
+
     public MainWidget(QSContext<? extends QSWidget<RedisFrontPrefs>, RedisFrontPrefs> context, String title, RedisFrontPrefs prefs) throws HeadlessException {
         super(context, title, prefs);
         if (SystemInfo.isWindows) {
@@ -33,16 +38,9 @@ public class MainWidget extends QSWidget<RedisFrontPrefs> {
         this.setSize(960, 600);
         this.setIconImages(Res.MAIN_FRAME_ICON_IMAGES);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        MainComponent mainComponent = new MainComponent(this);
+        mainComponent = new MainComponent(this);
         this.setContentPane(mainComponent);
     }
-
-    @Override
-    protected void initializeActions() {
-        registerAction("showOpenConnectDialog", new ShowOpenDialogAction(this, "showOpenConnectDialog"));
-    }
-
-
 
     public boolean isFullScreen() {
         boolean isFullScreen = false;

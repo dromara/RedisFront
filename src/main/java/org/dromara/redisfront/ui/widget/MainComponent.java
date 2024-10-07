@@ -3,14 +3,21 @@ package org.dromara.redisfront.ui.widget;
 import cn.hutool.core.util.ArrayUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.util.SystemInfo;
+import org.dromara.quickswing.ui.app.QSAction;
+import org.dromara.quickswing.ui.app.QSWidget;
 import org.dromara.quickswing.ui.swing.Background;
+import org.dromara.redisfront.dialog.AddConnectDialog;
 import org.dromara.redisfront.ui.action.DrawerAnimationAction;
+import org.dromara.redisfront.ui.action.ShowOpenDialogAction;
 import org.dromara.redisfront.ui.extend.DefaultNonePanel;
 import org.dromara.redisfront.ui.extend.DrawerMenuItemEvent;
 import raven.drawer.component.menu.MenuEvent;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -72,10 +79,22 @@ public class MainComponent extends Background {
     }
 
     private void initializeActions() {
-        InputMap inputMap = this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        this.owner.fillInputMap("showOpenConnectDialog",inputMap);
-        ActionMap actionMap = this.getActionMap();
-        this.owner.fillActionMap("showOpenConnectDialog",actionMap);
+        this.owner.registerAction(this, new QSAction<>(owner) {
+            @Override
+            public void handleAction(ActionEvent actionEvent) {
+                AddConnectDialog addConnectDialog =  new AddConnectDialog(getApp());
+                addConnectDialog.setLocationRelativeTo(null);
+                addConnectDialog.setVisible(true);
+                addConnectDialog.pack();
+            }
+
+            @Override
+            public KeyStroke getKeyStroke() {
+                return SystemInfo.isMacOS ?
+                        KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()):
+                        KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK);
+            }
+        });
     }
 
     DrawerMenuItemEvent drawerMenuItemEvent = (key,index)->{

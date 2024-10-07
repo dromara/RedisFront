@@ -29,7 +29,7 @@ public class Application {
             if (throwable instanceof RedisFrontException redisFrontException) {
                 Notifications.getInstance().show(Notifications.Type.ERROR, redisFrontException.getMessage());
             } else {
-                log.error("Thread {} ", thread.getName(), throwable);
+                log.error("Thread {}", thread.getName(), throwable);
             }
         });
     }

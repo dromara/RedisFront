@@ -18,13 +18,8 @@ public class ShowOpenDialogAction extends QSAction<MainWidget> {
 
     @Override
     public void handleAction(ActionEvent e) {
-        new AddConnectDialog(getApp()).setVisible(true);
+
     }
 
-    @Override
-    public KeyStroke getKeyStroke() {
-        return SystemInfo.isMacOS ?
-                KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()):
-                KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK);
-    }
+
 }
