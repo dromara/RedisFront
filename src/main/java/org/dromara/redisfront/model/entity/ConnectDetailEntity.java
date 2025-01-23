@@ -1,4 +1,4 @@
-package org.dromara.redisfront.dao.entity;
+package org.dromara.redisfront.model.entity;
 
 import lombok.Data;
 
@@ -6,7 +6,7 @@ import lombok.Data;
 public class ConnectDetailEntity {
     private Integer id;
     private String name;
-    private Integer group_id;
+    private Integer groupId;
     private String host;
     private Integer port;
     private String username;

@@ -300,7 +300,7 @@ public class MainMenuBar extends JMenuBar {
         }
         // 创建一个默认的文件选取器
         var fileChooser = new JFileChooser(Constants.CONFIG_DATA_PATH);
-        var getAllConnectListFuture = FutureUtils.supplyAsync(ConnectDetailDao.DAO::getAllConnectList);
+        var getAllConnectListFuture = FutureUtils.supplyAsync(ConnectDetailDao.DAO::loadAll);
         // 设置打开文件选择框后默认输入的文件名
         fileChooser.setSelectedFile(new File("configure.json"));
         // 打开文件选择框（线程将被阻塞, 直到选择框被关闭）

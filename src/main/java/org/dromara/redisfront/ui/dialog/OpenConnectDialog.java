@@ -98,7 +98,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                         return;
                     }
                     var id = connectTable.getValueAt(row, 0);
-                    var connectInfo = ConnectDetailDao.DAO.getConnect(id);
+                    var connectInfo = ConnectDetailDao.DAO.getById(id);
                     onCancel();
                     FutureUtils.runAsync(() -> editProcessHandler.processHandler(connectInfo));
                 });
@@ -112,7 +112,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                         return;
                     }
                     var id = connectTable.getValueAt(row, 0);
-                    var connectInfo = ConnectDetailDao.DAO.getConnect(id);
+                    var connectInfo = ConnectDetailDao.DAO.getById(id);
                     if (Fn.isNotNull(connectInfo)) {
                         FutureUtils.runAsync(() -> {
                             delProcessHandler.processHandler(connectInfo);
@@ -143,7 +143,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         });
 
         //查询数据连接列表
-        var connectInfoList = ConnectDetailDao.DAO.getAllConnectList();
+        var connectInfoList = ConnectDetailDao.DAO.loadAll();
         connectTable.setModel(new ConnectTableModel(connectInfoList));
     }
 
@@ -154,7 +154,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
             return;
         }
         var id = connectTable.getValueAt(row, 0);
-        var connectInfo = ConnectDetailDao.DAO.getConnect(id);
+        var connectInfo = ConnectDetailDao.DAO.getById(id);
         FutureUtils.runAsync(() -> {
             LoadingUtils.showDialog(String.format(LocaleUtils.getMessageFromBundle("OpenConnectDialog.openConnection.message"), connectInfo.host(), connectInfo.port()));
             var redisMode = RedisBasicService.service.getRedisModeEnum(connectInfo);

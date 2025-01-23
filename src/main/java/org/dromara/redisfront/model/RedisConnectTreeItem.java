@@ -1,10 +1,11 @@
 package org.dromara.redisfront.model;
 
-import cn.hutool.db.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.dromara.redisfront.model.entity.ConnectDetailEntity;
+import org.dromara.redisfront.model.entity.ConnectGroupEntity;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
@@ -22,21 +23,22 @@ import java.util.Comparator;
 public class RedisConnectTreeItem extends DefaultMutableTreeNode implements Comparator<TreeNode> {
 
     private Boolean isGroup;
-    private Entity origin;
+    private ConnectGroupEntity group;
+    private ConnectDetailEntity detail;
 
     public Integer id() {
         if (isGroup) {
-            return origin.getInt("group_id");
+            return group.getGroupId();
         }
-        return origin.getInt("id");
+        return detail.getGroupId();
     }
 
     @Override
     public String toString() {
         if (isGroup) {
-            return origin.getStr("group_name");
+            return group.getGroupName();
         }
-        return origin.getStr("name");
+        return detail.getName();
     }
 
     @Override

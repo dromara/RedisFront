@@ -1,10 +1,10 @@
-package org.dromara.redisfront.dao.entity;
+package org.dromara.redisfront.model.entity;
 
 import lombok.Data;
 
 @Data
 public class ConnectGroupEntity {
-    private String groupId;
+    private Integer groupId;
     private String groupName;
     private Integer enableSsh;
     private String sshConfig;

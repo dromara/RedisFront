@@ -12,6 +12,7 @@ import org.dromara.quickswing.ui.app.QSAction;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.dao.ConnectGroupDao;
 import org.dromara.redisfront.model.RedisConnectTreeItem;
+import org.dromara.redisfront.model.entity.ConnectGroupEntity;
 import org.dromara.redisfront.ui.dialog.AddConnectDialog;
 import org.dromara.redisfront.ui.widget.main.left.event.DeleteConnectTreeEvent;
 import org.dromara.redisfront.ui.widget.main.left.event.RefreshConnectTreeEvent;
@@ -121,11 +122,12 @@ public class MainLeftConnectTree extends JXTree {
 
     public DefaultMutableTreeNode buildConnectTreeItem(DataSource dataSource) throws SQLException {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("root", true);
-        List<Entity> connectGroup = DbUtil.use(dataSource).find(Entity.create("connect_group"));
-        for (Entity entity : connectGroup) {
+        List<ConnectGroupEntity> connectGroupEntityList = ConnectGroupDao.newInstance(dataSource).loadAll();
+        for (ConnectGroupEntity entity : connectGroupEntityList) {
             RedisConnectTreeItem treeNodeInfo = new RedisConnectTreeItem(
                     true,
-                    entity.clone()
+                    entity,
+                    null
             );
             root.add(treeNodeInfo);
         }
@@ -180,7 +182,7 @@ public class MainLeftConnectTree extends JXTree {
                         AddConnectDialog addConnectDialog = new AddConnectDialog(owner);
                         addConnectDialog.setSubmitHandler(connectInfo -> {
                             Integer id = redisConnectTreeItem.id();
-
+                            //todo
                         });
                         addConnectDialog.setLocationRelativeTo(null);
                         addConnectDialog.setVisible(true);
@@ -201,13 +203,13 @@ public class MainLeftConnectTree extends JXTree {
                     }
                     Object lastPathComponent = selectionPath.getLastPathComponent();
                     if (lastPathComponent instanceof RedisConnectTreeItem redisConnectTreeItem) {
-                        String groupName = redisConnectTreeItem.getOrigin().getStr("group_name");
+                        String groupName = redisConnectTreeItem.toString();
                         String value = (String) JOptionPane.showInputDialog(owner, "分组名称", "修改分组", JOptionPane.PLAIN_MESSAGE, null, null, groupName);
                         if (StrUtil.isEmpty(value) || StrUtil.equals(value, groupName)) {
                             return;
                         }
                         context.taskExecute(() -> {
-                            DbUtil.use(datasource).update(Entity.create("connect_group").set("group_name", value), Entity.create("connect_group").set("group_id", redisConnectTreeItem.id()));
+                            ConnectGroupDao.newInstance(datasource).update(redisConnectTreeItem.id(), value);
                             context.getEventBus().publish(new RefreshConnectTreeEvent(null));
                             return null;
                         }, (_, exception) -> {
@@ -279,10 +281,8 @@ public class MainLeftConnectTree extends JXTree {
                             return;
                         }
                         context.taskExecute(() -> {
-                            Entity connectGroup = Entity.create("connect_group");
-                            connectGroup.set("group_name", value);
-                            DbUtil.use(datasource).insert(connectGroup);
-                            context.getEventBus().publish(new RefreshConnectTreeEvent(connectGroup));
+                            ConnectGroupDao.newInstance(datasource).save(value);
+                            context.getEventBus().publish(new RefreshConnectTreeEvent(null));
                             return null;
                         }, (_, exception) -> {
                             if (exception != null) {
