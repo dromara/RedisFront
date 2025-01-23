@@ -7,7 +7,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.redisfront.RedisFrontMain;
-import org.dromara.redisfront.commons.constant.Const;
+import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.constant.Enums;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.func.Fn;
@@ -85,7 +85,7 @@ public class AddKeyDialog extends AbstractDialog<String> {
 
         if (Fn.isNotEmpty(parent)) {
             var separatorLabel = new JLabel();
-            var separator = PrefUtils.getState().get(Const.KEY_KEY_SEPARATOR, ":");
+            var separator = PrefUtils.getState().get(Constants.KEY_KEY_SEPARATOR, ":");
             parentKey = parent + separator;
             separatorLabel.setText(parentKey);
             separatorLabel.setOpaque(true);

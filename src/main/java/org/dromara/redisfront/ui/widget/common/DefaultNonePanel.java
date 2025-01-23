@@ -5,7 +5,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import lombok.Getter;
-import org.dromara.redisfront.commons.constant.Res;
+import org.dromara.redisfront.commons.constant.Icons;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -34,7 +34,7 @@ public class DefaultNonePanel extends JPanel {
         controlPanel.setLayout(new GridLayoutManager(4, 1, new Insets(0, 0, 0, 0), -1, -1));
         this.add(controlPanel, new GridConstraints(1, 2, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
 
-        JLabel logoLabel = new JLabel(Res.REDIS_ICON);
+        JLabel logoLabel = new JLabel(Icons.REDIS_ICON);
         this.add(logoLabel, new GridConstraints(1, 1, 2, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 
 
@@ -46,7 +46,7 @@ public class DefaultNonePanel extends JPanel {
         newLabel.putClientProperty("FlatLaf.styleClass", " h3");
         newOptPanel.add(newLabel);
         if(SystemInfo.isMacOS) {
-            JLabel newCmdLabel = new JLabel(Res.COMMAND_ICON_16x16);
+            JLabel newCmdLabel = new JLabel(Icons.COMMAND_ICON_16x16);
             newCmdLabel.setBorder(new EmptyBorder(0, 5, 0, 0));
             newOptPanel.add(newCmdLabel);
         }else {
@@ -71,7 +71,7 @@ public class DefaultNonePanel extends JPanel {
         openLabel.putClientProperty("FlatLaf.styleClass", "h3");
         openOptPanel.add(openLabel);
         if(SystemInfo.isMacOS) {
-            JLabel openCmdLabel = new JLabel(Res.COMMAND_ICON_16x16);
+            JLabel openCmdLabel = new JLabel(Icons.COMMAND_ICON_16x16);
             openCmdLabel.setBorder(new EmptyBorder(0, 5, 0, 0));
             openOptPanel.add(openCmdLabel);
         }else {

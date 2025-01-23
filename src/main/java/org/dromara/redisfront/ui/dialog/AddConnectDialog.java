@@ -6,12 +6,13 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import io.lettuce.core.RedisConnectionException;
+import lombok.Getter;
+import lombok.Setter;
 import org.dromara.quickswing.ui.app.QSDialog;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.commons.constant.Enums;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.func.Fn;
-import org.dromara.redisfront.commons.util.FutureUtils;
 import org.dromara.redisfront.model.ConnectInfo;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.ui.widget.main.MainWidget;
@@ -22,6 +23,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.lang.reflect.Method;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 public class AddConnectDialog extends QSDialog<MainWidget> {
     private final RedisFrontContext context;
@@ -61,6 +63,9 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
     private JLabel sshUserLabel;
     private JLabel sshPortLabel;
     private JLabel sshPasswordLabel;
+    @Getter
+    @Setter
+    private Consumer<ConnectInfo> submitHandler;
 
 
     public AddConnectDialog(MainWidget app) {
@@ -79,12 +84,9 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
             }
         });
         this.initializeComponents();
-
     }
 
     private void initializeComponents() {
-
-
         this.contentPane.registerKeyboardAction(_ -> dispose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         this.sshPrivateKeyFile.setVisible(enableSshPrivateKey.isSelected());
         this.sshPrivateKeyBtn.setVisible(enableSshPrivateKey.isSelected());
@@ -223,9 +225,7 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
         var connectInfo = validGetConnectInfo();
         var connectSuccess = testConnect();
         if (connectSuccess) {
-            FutureUtils.runAsync(() -> {
-
-            });
+            submitHandler.accept(connectInfo);
             dispose();
         }
     }
@@ -300,7 +300,6 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
                     ;
 
         } else {
-
             return new ConnectInfo(title,
                     hostField.getText(),
                     (Integer) portField.getValue(),

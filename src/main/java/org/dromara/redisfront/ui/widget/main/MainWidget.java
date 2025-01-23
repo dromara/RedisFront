@@ -10,7 +10,7 @@ import org.dromara.quickswing.constant.QSOs;
 import org.dromara.quickswing.ui.app.QSContext;
 import org.dromara.quickswing.ui.app.QSWidget;
 import org.dromara.redisfront.RedisFrontPrefs;
-import org.dromara.redisfront.commons.constant.Res;
+import org.dromara.redisfront.commons.constant.Icons;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,7 +35,7 @@ public class MainWidget extends QSWidget<RedisFrontPrefs> {
         }
         this.setResizable(true);
         this.setSize(960, 600);
-        this.setIconImages(Res.MAIN_FRAME_ICON_IMAGES);
+        this.setIconImages(Icons.MAIN_FRAME_ICON_IMAGES);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainComponent = new MainComponent(this);
         this.setContentPane(mainComponent);

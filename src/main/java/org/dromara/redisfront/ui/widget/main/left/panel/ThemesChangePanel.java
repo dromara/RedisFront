@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.main.left;
+package org.dromara.redisfront.ui.widget.main.left.panel;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
@@ -13,12 +13,12 @@ import javax.swing.*;
 import java.awt.*;
 
 
-public class MainLeftThemesChange extends JPanel {
+public class ThemesChangePanel extends JPanel {
     public final static OsThemeDetector DETECTOR = OsThemeDetector.getDetector();
-    public MainLeftThemesChange() {
+    public ThemesChangePanel() {
         init();
-        MainLeftThemesChange.changeMode(MainLeftThemesChange.isDark());
-        MainLeftThemesChange.DETECTOR.registerListener(isDark -> SwingUtilities.invokeLater(() -> changeMode(isDark)));
+        ThemesChangePanel.changeMode(ThemesChangePanel.isDark());
+        ThemesChangePanel.DETECTOR.registerListener(isDark -> SwingUtilities.invokeLater(() -> changeMode(isDark)));
     }
 
 

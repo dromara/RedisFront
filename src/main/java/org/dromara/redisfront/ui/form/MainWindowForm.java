@@ -5,11 +5,11 @@ import com.formdev.flatlaf.icons.FlatTabbedPaneCloseIcon;
 import com.formdev.flatlaf.ui.FlatLineBorder;
 import org.dromara.redisfront.RedisFrontMain;
 import org.dromara.redisfront.commons.constant.Enums;
-import org.dromara.redisfront.commons.constant.Res;
+import org.dromara.redisfront.commons.constant.Icons;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.commons.util.*;
 import org.dromara.redisfront.model.ConnectInfo;
-import org.dromara.redisfront.service.ConnectService;
+import org.dromara.redisfront.dao.ConnectDetailDao;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.ui.component.MainTabbedPanel;
 import org.dromara.redisfront.ui.dialog.LogsDialog;
@@ -57,7 +57,7 @@ public class MainWindowForm {
                     var connectInfo = get();
                     FutureUtils.runAsync(LoadingUtils::closeDialog);
                     var mainTabbedPanel = MainTabbedPanel.newInstance(connectInfo);
-                    tabPanel.addTab(get().title(), Res.MAIN_TAB_DATABASE_ICON, mainTabbedPanel);
+                    tabPanel.addTab(get().title(), Icons.MAIN_TAB_DATABASE_ICON, mainTabbedPanel);
                     tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
                     contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
                     toolBar.setVisible(true);
@@ -80,9 +80,9 @@ public class MainWindowForm {
 
                 FutureUtils.runAsync(() -> {
                     if (Fn.equal(prototype.id(), 0)) {
-                        ConnectService.service.save(prototype);
+                        ConnectDetailDao.DAO.save(prototype);
                     } else {
-                        ConnectService.service.update(prototype);
+                        ConnectDetailDao.DAO.update(prototype);
                     }
                 });
 
@@ -165,7 +165,7 @@ public class MainWindowForm {
             toolBar.setBorder(new EmptyBorder(10, 10, 10, 10));
             toolBar.setLayout(new BorderLayout());
 
-            var logViewBtn = new JButton(Res.LOGS_ICON) {
+            var logViewBtn = new JButton(Icons.LOGS_ICON) {
                 @Override
                 public void updateUI() {
                     super.updateUI();

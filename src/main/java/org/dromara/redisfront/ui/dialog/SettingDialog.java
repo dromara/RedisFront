@@ -10,7 +10,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.redisfront.RedisFrontMain;
-import org.dromara.redisfront.commons.constant.Const;
+import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.commons.ui.AbstractDialog;
 import org.dromara.redisfront.commons.util.LocaleUtils;
@@ -93,7 +93,7 @@ public class SettingDialog extends AbstractDialog<Void> {
                 return NumberUtil.isNumber(textField.getText());
             }
         });
-        redisTimeoutTextField.setText(PrefUtils.getState().get(Const.KEY_REDIS_TIMEOUT, "1000"));
+        redisTimeoutTextField.setText(PrefUtils.getState().get(Constants.KEY_REDIS_TIMEOUT, "1000"));
         sshTimeoutTextField.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
@@ -101,7 +101,7 @@ public class SettingDialog extends AbstractDialog<Void> {
                 return NumberUtil.isNumber(textField.getText());
             }
         });
-        sshTimeoutTextField.setText(PrefUtils.getState().get(Const.KEY_SSH_TIMEOUT, "1000"));
+        sshTimeoutTextField.setText(PrefUtils.getState().get(Constants.KEY_SSH_TIMEOUT, "1000"));
     }
 
     private void initLanguageComboBox() {
@@ -122,7 +122,7 @@ public class SettingDialog extends AbstractDialog<Void> {
                 .entrySet()
                 .stream()
                 .filter(e -> {
-                    String languageTag = PrefUtils.getState().get(Const.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
+                    String languageTag = PrefUtils.getState().get(Constants.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
                     return Fn.equal(e.getValue(), languageTag);
                 }).findAny().orElseThrow());
     }
@@ -134,10 +134,10 @@ public class SettingDialog extends AbstractDialog<Void> {
         languageLabel.setText(LocaleUtils.get("SettingDialog.LanguageLabel").title());
 
         keySeparatorLabel.setText(LocaleUtils.get("SettingDialog.KeySeparatorLabel").title());
-        keySeparator.setText(PrefUtils.getState().get(Const.KEY_KEY_SEPARATOR, ":"));
+        keySeparator.setText(PrefUtils.getState().get(Constants.KEY_KEY_SEPARATOR, ":"));
 
         loadNumLabel.setText(LocaleUtils.get("SettingDialog.LoadNumLabel").title());
-        keyMaxLoadNum.setText(PrefUtils.getState().get(Const.KEY_KEY_MAX_LOAD_NUM, "5000"));
+        keyMaxLoadNum.setText(PrefUtils.getState().get(Constants.KEY_KEY_MAX_LOAD_NUM, "5000"));
 
 
     }
@@ -150,12 +150,12 @@ public class SettingDialog extends AbstractDialog<Void> {
         }
         fontSizeComboBox.addActionListener(e -> {
             String fontSizeStr = (String) fontSizeComboBox.getSelectedItem();
-            if (Fn.equal(fontSizeStr, PrefUtils.getState().get(Const.KEY_FONT_SIZE, getDefaultFontSize()))) {
+            if (Fn.equal(fontSizeStr, PrefUtils.getState().get(Constants.KEY_FONT_SIZE, getDefaultFontSize()))) {
                 return;
             }
             this.updateFontSizeHandler(fontSizeStr);
         });
-        fontSizeComboBox.setSelectedItem(PrefUtils.getState().get(Const.KEY_FONT_SIZE, getDefaultFontSize()));
+        fontSizeComboBox.setSelectedItem(PrefUtils.getState().get(Constants.KEY_FONT_SIZE, getDefaultFontSize()));
     }
 
     //获取默认字体大小
@@ -189,12 +189,12 @@ public class SettingDialog extends AbstractDialog<Void> {
         });
         fontNameComboBox.addActionListener(e -> {
             String fontFamily = (String) fontNameComboBox.getSelectedItem();
-            if (Fn.equal(fontFamily, PrefUtils.getState().get(Const.KEY_FONT_NAME, getDefaultFontFamily()))) {
+            if (Fn.equal(fontFamily, PrefUtils.getState().get(Constants.KEY_FONT_NAME, getDefaultFontFamily()))) {
                 return;
             }
             this.updateFontNameHandler(fontFamily);
         });
-        fontNameComboBox.setSelectedItem(PrefUtils.getState().get(Const.KEY_FONT_NAME, getDefaultFontFamily()));
+        fontNameComboBox.setSelectedItem(PrefUtils.getState().get(Constants.KEY_FONT_NAME, getDefaultFontFamily()));
     }
 
     //获取默认字体大小
@@ -209,7 +209,7 @@ public class SettingDialog extends AbstractDialog<Void> {
             ThemeUtils.ThemeInfo themeInfo = (ThemeUtils.ThemeInfo) selected.getSelectedItem();
             ThemeUtils.changeTheme(themeInfo);
         });
-        themeNameComboBox.setSelectedIndex(Integer.parseInt(PrefUtils.getState().get(Const.KEY_THEME_SELECT_INDEX, "0")));
+        themeNameComboBox.setSelectedIndex(Integer.parseInt(PrefUtils.getState().get(Constants.KEY_THEME_SELECT_INDEX, "0")));
     }
 
     private void updateFontSizeHandler(String fontSize) {
@@ -231,29 +231,29 @@ public class SettingDialog extends AbstractDialog<Void> {
 
     private void onOK() {
 
-        PrefUtils.getState().put(Const.KEY_KEY_SEPARATOR, keySeparator.getText());
-        PrefUtils.getState().put(Const.KEY_KEY_MAX_LOAD_NUM, keyMaxLoadNum.getText());
+        PrefUtils.getState().put(Constants.KEY_KEY_SEPARATOR, keySeparator.getText());
+        PrefUtils.getState().put(Constants.KEY_KEY_MAX_LOAD_NUM, keyMaxLoadNum.getText());
         //风格
         ThemeUtils.ThemeInfo themeInfo = (ThemeUtils.ThemeInfo) themeNameComboBox.getSelectedItem();
         String themeName = StringUtils.isEmpty(Objects.requireNonNull(themeInfo).lafClassName()) ? "R_" + themeInfo.resourceName() : themeInfo.lafClassName();
-        PrefUtils.getState().put(Const.KEY_THEME, themeName);
-        PrefUtils.getState().put(Const.KEY_THEME_SELECT_INDEX, String.valueOf(themeNameComboBox.getSelectedIndex()));
+        PrefUtils.getState().put(Constants.KEY_THEME, themeName);
+        PrefUtils.getState().put(Constants.KEY_THEME_SELECT_INDEX, String.valueOf(themeNameComboBox.getSelectedIndex()));
         //字体名称
         String fontFamily = (String) fontNameComboBox.getSelectedItem();
-        PrefUtils.getState().put(Const.KEY_FONT_NAME, fontFamily);
+        PrefUtils.getState().put(Constants.KEY_FONT_NAME, fontFamily);
         //字体大小
         String fontSizeStr = (String) fontSizeComboBox.getSelectedItem();
-        PrefUtils.getState().put(Const.KEY_FONT_SIZE, fontSizeStr);
-        PrefUtils.getState().put(Const.KEY_SSH_TIMEOUT, sshTimeoutTextField.getText());
-        PrefUtils.getState().put(Const.KEY_REDIS_TIMEOUT, redisTimeoutTextField.getText());
+        PrefUtils.getState().put(Constants.KEY_FONT_SIZE, fontSizeStr);
+        PrefUtils.getState().put(Constants.KEY_SSH_TIMEOUT, sshTimeoutTextField.getText());
+        PrefUtils.getState().put(Constants.KEY_REDIS_TIMEOUT, redisTimeoutTextField.getText());
 
         //语言
         var newLanguage = (Map.Entry<?, ?>) languageComboBox.getSelectedItem();
-        var oldLanguage = PrefUtils.getState().get(Const.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
+        var oldLanguage = PrefUtils.getState().get(Constants.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
         assert newLanguage != null;
         if (Fn.notEqual(newLanguage.getValue(), oldLanguage)) {
             Locale.setDefault(Locale.forLanguageTag((String) newLanguage.getValue()));
-            PrefUtils.getState().put(Const.KEY_LANGUAGE, (String) newLanguage.getValue());
+            PrefUtils.getState().put(Constants.KEY_LANGUAGE, (String) newLanguage.getValue());
             FlatLaf.updateUI();
         }
         dispose();

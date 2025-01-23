@@ -2,7 +2,7 @@ package com.redisfront.commons.util
 
 import cn.hutool.http.HttpUtil
 import cn.hutool.json.JSONUtil
-import org.dromara.redisfront.commons.constant.Const
+import org.dromara.redisfront.commons.constant.Constants
 import org.dromara.redisfront.commons.func.Fn
 
 /**
@@ -16,7 +16,7 @@ open class UpgradeUtils {
 
         @JvmStatic
         fun checkVersion() {
-            val currentVersion = Const.APP_VERSION
+            val currentVersion = Constants.APP_VERSION
             if (currentVersion.startsWith("@")) {
                 return
             }

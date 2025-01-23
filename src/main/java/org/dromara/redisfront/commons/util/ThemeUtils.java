@@ -1,14 +1,13 @@
 package org.dromara.redisfront.commons.util;
 
 import com.formdev.flatlaf.FlatLaf;
-import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.FlatPropertiesLaf;
 import com.formdev.flatlaf.IntelliJTheme;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.json.Json;
 import com.formdev.flatlaf.ui.FlatUIUtils;
 import com.formdev.flatlaf.util.LoggingFacade;
-import org.dromara.redisfront.commons.constant.Const;
+import org.dromara.redisfront.commons.constant.Constants;
 import javax.swing.*;
 import javax.swing.text.StyleContext;
 import java.io.File;
@@ -71,8 +70,8 @@ public class ThemeUtils {
 
     public static void fontInit() {
         var font = UIManager.getFont("defaultFont");
-        var fontSizeStr = PrefUtils.getState().get(Const.KEY_FONT_SIZE, String.valueOf(font.getSize()));
-        var fontNameStr = PrefUtils.getState().get(Const.KEY_FONT_NAME, font.getFontName());
+        var fontSizeStr = PrefUtils.getState().get(Constants.KEY_FONT_SIZE, String.valueOf(font.getSize()));
+        var fontNameStr = PrefUtils.getState().get(Constants.KEY_FONT_NAME, font.getFontName());
         var newFont = StyleContext.getDefaultStyleContext().getFont(fontNameStr, font.getStyle(), Integer.parseInt(fontSizeStr));
         UIManager.put("defaultFont", FlatUIUtils.nonUIResource(newFont));
     }

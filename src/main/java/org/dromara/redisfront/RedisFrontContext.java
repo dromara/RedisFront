@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.quickswing.excutor.QSTaskExecutor;
 import org.dromara.quickswing.ui.app.QSContext;
 import org.dromara.quickswing.ui.app.QSWidget;
-import org.dromara.redisfront.commons.constant.Const;
+import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.ui.widget.main.MainWidget;
 import raven.popup.GlassPanePopup;
 import javax.sql.DataSource;
@@ -35,10 +35,10 @@ public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, Redi
     protected MainWidget createApplication(String[] args, RedisFrontPrefs preferences) {
         ToolTipManager.sharedInstance().setInitialDelay(5);
         ToolTipManager.sharedInstance().setLightWeightPopupEnabled(true);
-        FlatLaf.registerCustomDefaultsSource(Const.APP_THEME_PACKAGE);
+        FlatLaf.registerCustomDefaultsSource(Constants.APP_THEME_PACKAGE);
         FlatLaf.setUseNativeWindowDecorations(true);
         FlatMacLightLaf.setup();
-        return new MainWidget(this, Const.APP_NAME, preferences);
+        return new MainWidget(this, Constants.APP_NAME, preferences);
     }
 
     @Override
@@ -48,12 +48,12 @@ public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, Redi
 
     @Override
     protected String getAppDataPath() {
-        return FileUtil.getUserHomePath() + File.separator + "." + Const.APP_NAME.toLowerCase();
+        return FileUtil.getUserHomePath() + File.separator + "." + Constants.APP_NAME.toLowerCase();
     }
 
     @Override
     protected String getAppResourceBundlePath() {
-        return Const.APP_RESOURCE_BUNDLE;
+        return Constants.APP_RESOURCE_BUNDLE;
     }
 
     @Override
@@ -77,9 +77,9 @@ public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, Redi
         if (!preferences.getDBInitialized()) {
             DataSource datasource = getDatabaseManager().getDatasource();
             try {
-                DbUtil.use(datasource).execute(Const.SQL_CREATE_CONNECT_GROUP);
+                DbUtil.use(datasource).execute(Constants.SQL_CREATE_CONNECT_GROUP);
                 log.info("创建 connect_group 表完成！");
-                DbUtil.use(datasource).execute(Const.SQL_CREATE_CONNECT_DETAIL);
+                DbUtil.use(datasource).execute(Constants.SQL_CREATE_CONNECT_DETAIL);
                 log.info("创建 connect_detail 表完成！");
                 preferences.setDBInitialized(true);
             } catch (SQLException e) {

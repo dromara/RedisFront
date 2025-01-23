@@ -9,8 +9,8 @@ import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
 import org.dromara.quickswing.constant.QSOs;
 import org.dromara.redisfront.RedisFrontContext;
-import org.dromara.redisfront.commons.constant.Const;
-import org.dromara.redisfront.commons.constant.Res;
+import org.dromara.redisfront.commons.constant.Constants;
+import org.dromara.redisfront.commons.constant.Icons;
 import org.dromara.redisfront.model.ConnectInfo;
 import org.dromara.redisfront.ui.component.RedisTerminal;
 import org.dromara.redisfront.ui.widget.common.DrawerAnimationAction;
@@ -69,7 +69,7 @@ public class MainRightComponent extends JPanel {
         } else {
             toolBar.setMargin(new Insets(2, 6, 0, 0));
         }
-        var closeDrawerBtn = new JButton(Res.DRAWER_SHOW_OR_CLOSE_ICON);
+        var closeDrawerBtn = new JButton(Icons.DRAWER_SHOW_OR_CLOSE_ICON);
         closeDrawerBtn.addActionListener(action);
         toolBar.add(closeDrawerBtn);
         action.setBeforeProcess(state -> closeDrawerBtn.setVisible(false));
@@ -124,7 +124,7 @@ public class MainRightComponent extends JPanel {
             settingToolBar.setPreferredSize(new Dimension(-1, 33));
         }
         settingToolBar.setLayout(new MigLayout(new LC().align("center", "bottom")));
-        settingToolBar.add(new JButton(Res.SETTING_ICON_40x40));
+        settingToolBar.add(new JButton(Icons.SETTING_ICON_40x40));
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_LEADING_COMPONENT, toolBar);
         if (owner.getOS() == QSOs.WINDOWS) {
             topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_INSETS, new Insets(0, 0, 0, 130));
@@ -141,7 +141,7 @@ public class MainRightComponent extends JPanel {
         rightToolBar.setLayout(new BorderLayout());
         rightToolBar.setMargin(new Insets(0, 3, 0, 3));
 
-        var mode = new JLabel(Res.MODE_ICON_45x45);
+        var mode = new JLabel(Icons.MODE_ICON_45x45);
         mode.setText("单机模式");
         rightToolBar.add(mode, BorderLayout.WEST);
 
@@ -149,27 +149,27 @@ public class MainRightComponent extends JPanel {
         horizontalBox.setLayout(new FlowLayout());
         rightToolBar.add(horizontalBox, BorderLayout.CENTER);
 
-        var cpu = new JLabel(Res.CPU_ICON_45x45);
+        var cpu = new JLabel(Icons.CPU_ICON_45x45);
         cpu.setToolTipText("CPU使用率0.07%");
         cpu.setText("0.07%");
         horizontalBox.add(cpu);
 
-        var memory = new JLabel(Res.MEMORY_ICON_45x45);
+        var memory = new JLabel(Icons.MEMORY_ICON_45x45);
         memory.setToolTipText("CPU使用率0.07%");
         memory.setText("11MB");
         horizontalBox.add(memory);
 
-        var network = new JLabel(Res.WIFI_ICON_45x45);
+        var network = new JLabel(Icons.WIFI_ICON_45x45);
         network.setToolTipText("CPU使用率0.07%");
         network.setText("25KB/s");
         horizontalBox.add(network);
 
 
         var version = new JLabel();
-        version.setText(Const.APP_VERSION);
+        version.setText(Constants.APP_VERSION);
         RedisFrontContext context = (RedisFrontContext) owner.getContext();
         version.setToolTipText("Current Version " + context.version());
-        version.setIcon(Res.REDIS_TEXT_80x16);
+        version.setIcon(Icons.REDIS_TEXT_80x16);
         rightToolBar.add(version, BorderLayout.EAST);
         verticalBox.add(rightToolBar);
         this.add(verticalBox, BorderLayout.SOUTH);
@@ -193,7 +193,7 @@ public class MainRightComponent extends JPanel {
 
         FlatToolBar settingToolBar = new FlatToolBar();
         settingToolBar.setLayout(new MigLayout(new LC().align("center", "bottom")));
-        settingToolBar.add(new JButton(Res.SETTING_ICON_40x40));
+        settingToolBar.add(new JButton(Icons.SETTING_ICON_40x40));
         contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, settingToolBar);
 
         //tab 切换事件
@@ -202,22 +202,22 @@ public class MainRightComponent extends JPanel {
             System.out.println(tabbedPane.getSelectedIndex());
         });
 
-        topTabbedPane.addTab("127.0.0.1", Res.REDIS_ICON_14x14, contentTabbedPane);
+        topTabbedPane.addTab("127.0.0.1", Icons.REDIS_ICON_14x14, contentTabbedPane);
 
     }
 
     private void initMainTabbedItem() {
         //主窗口
-        contentTabbedPane.addTab("主页", Res.CONTENT_TAB_DATA_ICON, new JPanel());
+        contentTabbedPane.addTab("主页", Icons.CONTENT_TAB_DATA_ICON, new JPanel());
         ConnectInfo connectInfo = new ConnectInfo();
         connectInfo.setHost("127.0.0.1");
         connectInfo.setPort(3306);
         connectInfo.setDatabase(2);
         //命令窗口
-        contentTabbedPane.addTab("命令", Res.CONTENT_TAB_COMMAND_ICON, new RedisTerminal(connectInfo));
-        contentTabbedPane.addTab("订阅", Res.MQ_ICON, new JPanel());
+        contentTabbedPane.addTab("命令", Icons.CONTENT_TAB_COMMAND_ICON, new RedisTerminal(connectInfo));
+        contentTabbedPane.addTab("订阅", Icons.MQ_ICON, new JPanel());
         //数据窗口
-        contentTabbedPane.addTab("数据", Res.CONTENT_TAB_INFO_ICON, new JPanel());
+        contentTabbedPane.addTab("数据", Icons.CONTENT_TAB_INFO_ICON, new JPanel());
 
     }
 

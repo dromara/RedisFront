@@ -1,7 +1,7 @@
 package org.dromara.redisfront.ui.widget.common;
 
 import com.formdev.flatlaf.util.SystemInfo;
-import org.dromara.redisfront.commons.constant.Res;
+import org.dromara.redisfront.commons.constant.Icons;
 import org.dromara.redisfront.model.RedisConnectTreeItem;
 import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer;
 
@@ -21,9 +21,9 @@ public class ConnectTreeCellRenderer extends DefaultXTreeCellRenderer {
         }
         if (value instanceof RedisConnectTreeItem redisConnectTreeItem) {
             if (redisConnectTreeItem.getIsGroup()) {
-                this.setIcon(Res.FOLDER_ICON_14x14);
+                this.setIcon(Icons.FOLDER_ICON_14x14);
             } else {
-                this.setIcon(Res.LINK_ICON_14x14);
+                this.setIcon(Icons.LINK_ICON_14x14);
             }
         }
         return c;

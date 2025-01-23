@@ -11,14 +11,14 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.redisfront.RedisFrontMain;
-import org.dromara.redisfront.commons.constant.Const;
+import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.constant.Enums;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.commons.ui.AbstractDialog;
 import org.dromara.redisfront.commons.util.AlertUtils;
 import org.dromara.redisfront.commons.util.LocaleUtils;
 import org.dromara.redisfront.model.ConnectInfo;
-import org.dromara.redisfront.service.ConnectService;
+import org.dromara.redisfront.dao.ConnectDetailDao;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -71,12 +71,12 @@ public class ImportConfigDialog extends AbstractDialog<Void> {
     }
 
     private void onOk() {
-        if (!FileUtil.exist(Const.CONFIG_DATA_PATH)) {
-            FileUtil.mkdir(Const.CONFIG_DATA_PATH);
+        if (!FileUtil.exist(Constants.CONFIG_DATA_PATH)) {
+            FileUtil.mkdir(Constants.CONFIG_DATA_PATH);
         }
         var selectedItem = (String) importModel.getSelectedItem();
         // 创建一个默认的文件选取器
-        var fileChooser = new JFileChooser(Const.CONFIG_DATA_PATH);
+        var fileChooser = new JFileChooser(Constants.CONFIG_DATA_PATH);
         // 仅支持选择文件
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         // 设置文件过滤，仅支持json配置导入
@@ -91,11 +91,11 @@ public class ImportConfigDialog extends AbstractDialog<Void> {
                     try {
                         if (JSONUtil.isTypeJSONObject(fileReader.readString())) {
                             var connectInfo = JSONUtil.toBean(fileReader.readString(), ConnectInfo.class);
-                            ConnectService.service.save(connectInfo);
+                            ConnectDetailDao.DAO.save(connectInfo);
                         } else {
                             var connectInfos = JSONUtil.toList(fileReader.readString(), ConnectInfo.class);
                             for (ConnectInfo connectInfo : connectInfos) {
-                                ConnectService.service.save(connectInfo);
+                                ConnectDetailDao.DAO.save(connectInfo);
                             }
                         }
                         AlertUtils.showInformationDialog("导入完成");
@@ -116,11 +116,11 @@ public class ImportConfigDialog extends AbstractDialog<Void> {
                                     for (Object connection : connections) {
                                         var groupConnection = (JSONObject) connection;
                                         var connectInfo = genConnectInfo(groupConnection.getRaw());
-                                        ConnectService.service.save(connectInfo);
+                                        ConnectDetailDao.DAO.save(connectInfo);
                                     }
                                 } else {
                                     var connectInfo = genConnectInfo(data.getRaw());
-                                    ConnectService.service.save(connectInfo);
+                                    ConnectDetailDao.DAO.save(connectInfo);
                                 }
                             }
                         }

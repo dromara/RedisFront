@@ -15,8 +15,8 @@ import org.dromara.redisfront.model.TreeNodeInfo;
 import org.dromara.redisfront.service.*;
 import org.dromara.redisfront.ui.dialog.AddKeyDialog;
 import io.lettuce.core.*;
-import org.dromara.redisfront.commons.constant.Const;
-import org.dromara.redisfront.commons.constant.Res;
+import org.dromara.redisfront.commons.constant.Constants;
+import org.dromara.redisfront.commons.constant.Icons;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.commons.handler.ProcessHandler;
@@ -122,7 +122,7 @@ public class DataSearchForm {
             var scanKeysContext = scanKeysContextMap.get(connectInfo.database());
 
             if (Fn.isNull(scanKeysContext.getLimit())) {
-                Long limit = PrefUtils.getState().getLong(Const.KEY_KEY_MAX_LOAD_NUM, 10000L);
+                Long limit = PrefUtils.getState().getLong(Constants.KEY_KEY_MAX_LOAD_NUM, 10000L);
                 scanKeysContext.setLimit(limit);
             }
 
@@ -172,7 +172,7 @@ public class DataSearchForm {
                 scanKeysContext.setKeyList(scanKeysList);
             }
 
-            var delim = PrefUtils.getState().get(Const.KEY_KEY_SEPARATOR, ":");
+            var delim = PrefUtils.getState().get(Constants.KEY_KEY_SEPARATOR, ":");
 
             var treeModel = TreeUtils.toTreeModel(new HashSet<>(scanKeysContext.getKeyList()), delim);
 
@@ -330,7 +330,7 @@ public class DataSearchForm {
                 setToolTipText(LocaleUtils.getMessageFromBundle("DataSearchForm.addBtn.title"));
             }
         };
-        addBtn.setIcon(Res.PLUS_ICON);
+        addBtn.setIcon(Icons.PLUS_ICON);
         addBtn.setFocusable(false);
         addBtn.addActionListener(e -> AddKeyDialog.showAddDialog(connectInfo, null, (key) -> {
             var res = JOptionPane.showConfirmDialog(RedisFrontMain.frame,
@@ -361,7 +361,7 @@ public class DataSearchForm {
             });
         });
         refreshBtn.setFocusable(false);
-        refreshBtn.setIcon(Res.REFRESH_ICON);
+        refreshBtn.setIcon(Icons.REFRESH_ICON);
 
         deleteAllBtn = new JButton() {
             @Override
@@ -384,7 +384,7 @@ public class DataSearchForm {
                 this::scanBeforeProcess,
                 this::scanAfterProcess
         ));
-        deleteAllBtn.setIcon(Res.DELETE_ICON);
+        deleteAllBtn.setIcon(Icons.DELETE_ICON);
 
 
         databaseComboBox = new JComboBox<>();
@@ -397,7 +397,7 @@ public class DataSearchForm {
             }
         };
         loadMoreBtn.setFocusable(false);
-        loadMoreBtn.setIcon(Res.LOAD_MORE_ICON);
+        loadMoreBtn.setIcon(Icons.LOAD_MORE_ICON);
         loadMoreBtn.addActionListener(e -> {
             FutureUtils.runAsync(() -> LoadingUtils.showDialog(LocaleUtils.getMessageFromBundle("MainWindowForm.loading.title")));
             scanKeysActionPerformed();
@@ -415,7 +415,7 @@ public class DataSearchForm {
             }
             connectInfo.setDatabase(db.dbIndex());
             scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
-            var limit = PrefUtils.getState().getLong(Const.KEY_KEY_MAX_LOAD_NUM, 10000L);
+            var limit = PrefUtils.getState().getLong(Constants.KEY_KEY_MAX_LOAD_NUM, 10000L);
             var flag = !Fn.isNull(db.dbSize()) && (db.dbSize() > limit);
             allField.setText(String.valueOf(db.dbSize()));
             loadMorePanel.setVisible(flag);
@@ -464,7 +464,7 @@ public class DataSearchForm {
         keyTree.setBorder(new EmptyBorder(5, 5, 5, 5));
         keyTree.setCellRenderer(new DefaultXTreeCellRenderer() {
             {
-                setLeafIcon(Res.TREE_KEY_ICON);
+                setLeafIcon(Icons.TREE_KEY_ICON);
             }
         });
         keyTree.addTreeSelectionListener(e -> {

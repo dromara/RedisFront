@@ -2,7 +2,7 @@ package org.dromara.redisfront;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.quickswing.QSApplicationInitializer;
 import org.dromara.quickswing.ui.app.QSWidget;
-import org.dromara.redisfront.commons.constant.Const;
+import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import raven.toast.Notifications;
 
@@ -18,7 +18,7 @@ public class RedisFrontMain {
 
     public static void main(String[] args) {
 
-        QSApplicationInitializer.initialize(args, Const.APP_NAME, () -> {
+        QSApplicationInitializer.initialize(args, Constants.APP_NAME, () -> {
             RedisFrontContext context = new RedisFrontContext();
             QSWidget<RedisFrontPrefs> application = context.createApplication(args);
             application.setLocationRelativeTo(null);

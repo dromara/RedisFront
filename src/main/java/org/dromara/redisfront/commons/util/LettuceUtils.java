@@ -12,7 +12,7 @@ import io.lettuce.core.cluster.api.sync.RedisAdvancedClusterCommands;
 import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
 import io.netty.util.internal.StringUtil;
-import org.dromara.redisfront.commons.constant.Const;
+import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.func.Fn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -222,7 +222,7 @@ public class LettuceUtils {
                 .withPort(Fn.equal(connectInfo.connectMode(), Enums.Connect.SSH) ? connectInfo.getLocalPort() : connectInfo.port())
                 .withSsl(connectInfo.ssl())
                 .withDatabase(connectInfo.database())
-                .withTimeout(Duration.ofMillis(PrefUtils.getState().getInt(Const.KEY_REDIS_TIMEOUT, 1000)))
+                .withTimeout(Duration.ofMillis(PrefUtils.getState().getInt(Constants.KEY_REDIS_TIMEOUT, 1000)))
                 .build();
 
         if (Fn.isNotEmpty(connectInfo.user()) && Fn.isNotEmpty(password)) {

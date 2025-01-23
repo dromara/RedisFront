@@ -9,6 +9,8 @@ import org.dromara.redisfront.ui.widget.common.DrawerMenuItemEvent;
 import org.dromara.redisfront.ui.widget.common.DrawerAnimationAction;
 import org.dromara.redisfront.ui.widget.main.MainComponent;
 import org.dromara.redisfront.ui.widget.main.MainWidget;
+import org.dromara.redisfront.ui.widget.main.left.panel.LogoPanel;
+import org.dromara.redisfront.ui.widget.main.left.panel.ThemesChangePanel;
 import raven.drawer.component.DrawerPanel;
 import raven.drawer.component.SimpleDrawerBuilder;
 import raven.drawer.component.footer.SimpleFooterData;
@@ -58,7 +60,7 @@ public class MainLeftComponent extends SimpleDrawerBuilder {
         var footerPanel = new JPanel();
         footerPanel.putClientProperty(FlatClientProperties.STYLE, "background:null");
         footerPanel.setLayout(new MigLayout("al center", "[fill,fill]", "fill"));
-        footerPanel.add(new MainLeftThemesChange());
+        footerPanel.add(new ThemesChangePanel());
         return footerPanel;
     }
 
@@ -73,7 +75,7 @@ public class MainLeftComponent extends SimpleDrawerBuilder {
         } else {
             headerPanel.setBorder(new EmptyBorder(15, 15, 5, 15));
         }
-        headerPanel.add(MainLeftLogo.getInstance());
+        headerPanel.add(LogoPanel.getInstance());
         return headerPanel;
     }
 

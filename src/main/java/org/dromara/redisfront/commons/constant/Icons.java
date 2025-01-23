@@ -7,7 +7,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-public class Res {
+public class Icons {
 
     public static final Icon LOGO_TEXT_ICON = new FlatSVGIcon("svg/redisfront_text.svg");
     public static final List<Image> MAIN_FRAME_ICON_IMAGES = FlatSVGUtils.createWindowIconImages("/svg/redisfront.svg");

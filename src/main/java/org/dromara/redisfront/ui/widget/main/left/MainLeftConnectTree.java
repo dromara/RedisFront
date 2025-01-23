@@ -10,12 +10,13 @@ import org.dromara.quickswing.events.QSEvent;
 import org.dromara.quickswing.events.QSEventListener;
 import org.dromara.quickswing.ui.app.QSAction;
 import org.dromara.redisfront.RedisFrontContext;
-import org.dromara.redisfront.ui.dialog.AddConnectDialog;
+import org.dromara.redisfront.dao.ConnectGroupDao;
 import org.dromara.redisfront.model.RedisConnectTreeItem;
+import org.dromara.redisfront.ui.dialog.AddConnectDialog;
+import org.dromara.redisfront.ui.widget.main.left.event.DeleteConnectTreeEvent;
+import org.dromara.redisfront.ui.widget.main.left.event.RefreshConnectTreeEvent;
 import org.dromara.redisfront.ui.widget.common.ConnectTreeCellRenderer;
 import org.dromara.redisfront.ui.widget.main.MainWidget;
-import org.dromara.redisfront.ui.event.DeleteConnectTreeEvent;
-import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
 import org.jdesktop.swingx.JXTree;
 import raven.drawer.component.menu.MenuEvent;
 import raven.toast.Notifications;
@@ -101,7 +102,7 @@ public class MainLeftConnectTree extends JXTree {
                     Object message = deleteConnectTreeEvent.getMessage();
                     if (message instanceof RedisConnectTreeItem RedisConnectTreeItem) {
                         context.taskExecute(() -> {
-                            DbUtil.use(datasource).del(Entity.create("connect_group").set("group_id", RedisConnectTreeItem.id()));
+                            ConnectGroupDao.newInstance(datasource).delete(RedisConnectTreeItem.id());
                             return buildConnectTreeItem(datasource);
                         }, (r, e) -> {
                             if (e != null) {
@@ -167,12 +168,33 @@ public class MainLeftConnectTree extends JXTree {
         treeNodeGroupPopupMenu = new JPopupMenu();
         treeNodeGroupPopupMenu.putClientProperty(FlatClientProperties.STYLE,
                 "[dark]background:darken(#FFFFFF,30%);");
-        treeNodeGroupPopupMenu.add(new JMenuItem("添加连接"));
+        JMenuItem addConnectMenuItem = new JMenuItem("添加连接") {
+            {
+                addActionListener(_ -> {
+                    TreePath selectionPath = getSelectionPath();
+                    if (selectionPath == null) {
+                        return;
+                    }
+                    Object pathComponent = selectionPath.getLastPathComponent();
+                    if (pathComponent instanceof RedisConnectTreeItem redisConnectTreeItem) {
+                        AddConnectDialog addConnectDialog = new AddConnectDialog(owner);
+                        addConnectDialog.setSubmitHandler(connectInfo -> {
+                            Integer id = redisConnectTreeItem.id();
+
+                        });
+                        addConnectDialog.setLocationRelativeTo(null);
+                        addConnectDialog.setVisible(true);
+                        addConnectDialog.pack();
+                    }
+                });
+            }
+        };
+        treeNodeGroupPopupMenu.add(addConnectMenuItem);
         treeNodeGroupPopupMenu.addSeparator();
 
         JMenuItem updateConnectMenuItem = new JMenuItem("编辑分组") {
             {
-                addActionListener(e -> {
+                addActionListener(_ -> {
                     TreePath selectionPath = getSelectionPath();
                     if (selectionPath == null) {
                         return;
@@ -203,7 +225,7 @@ public class MainLeftConnectTree extends JXTree {
         treeNodeGroupPopupMenu.add(updateConnectMenuItem);
         JMenuItem deleteConnectMenuItem = new JMenuItem("删除分组") {
             {
-                addActionListener(e -> {
+                addActionListener(_ -> {
                     TreePath selectionPath = getSelectionPath();
                     if (selectionPath == null) {
                         return;
@@ -241,11 +263,8 @@ public class MainLeftConnectTree extends JXTree {
                 "[dark]background:darken(#FFFFFF,30%);");
         JMenuItem addConnectGroupMenuItem = new JMenuItem("新建分组") {
             {
-                addActionListener(e -> {
-                    context.taskExecute(() -> {
-                        Entity connectGroup = Entity.create("connect_group");
-                        return DbUtil.use(datasource).count(connectGroup);
-                    }, (count, exp) -> {
+                addActionListener(_ -> {
+                    context.taskExecute(() -> ConnectGroupDao.newInstance(datasource).count(), (count, exp) -> {
                         if (exp != null) {
                             log.error(exp.getMessage());
                             Notifications.getInstance().show(Notifications.Type.ERROR, exp.getMessage());
@@ -282,7 +301,7 @@ public class MainLeftConnectTree extends JXTree {
         JMenuItem addConnectMenuItem = new JMenuItem("添加连接") {
             {
                 addActionListener(_ -> {
-                    AddConnectDialog addConnectDialog =  new AddConnectDialog(owner);
+                    AddConnectDialog addConnectDialog = new AddConnectDialog(owner);
                     addConnectDialog.setLocationRelativeTo(null);
                     addConnectDialog.setVisible(true);
                     addConnectDialog.pack();
@@ -310,7 +329,7 @@ public class MainLeftConnectTree extends JXTree {
             @Override
             public KeyStroke getKeyStroke() {
                 return SystemInfo.isMacOS ?
-                        KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()):
+                        KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()) :
                         KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK);
             }
         });

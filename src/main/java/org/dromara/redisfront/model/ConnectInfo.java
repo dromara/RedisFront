@@ -1,5 +1,7 @@
 package org.dromara.redisfront.model;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.dromara.redisfront.commons.constant.Enums;
 import org.dromara.redisfront.commons.func.Fn;
 
@@ -11,6 +13,8 @@ import java.util.Map;
  *
  * @author Jin
  */
+@Getter
+@Setter
 public class ConnectInfo implements Serializable, Cloneable {
 
     private int id;
@@ -29,24 +33,12 @@ public class ConnectInfo implements Serializable, Cloneable {
     private SSLConfig sslConfig;
     private SSHConfig sshConfig;
 
-    public String getLocalHost() {
-        return localHost;
-    }
-
     public void setLocalHost(String localHost) {
         this.localHost = localHost;
     }
 
-    public Map<Integer, Integer> getClusterLocalPort() {
-        return clusterLocalPort;
-    }
-
     public void setClusterLocalPort(Map<Integer, Integer> clusterLocalPort) {
         this.clusterLocalPort = clusterLocalPort;
-    }
-
-    public Integer getLocalPort() {
-        return localPort;
     }
 
     public void setLocalPort(Integer localPort) {
@@ -74,6 +66,8 @@ public class ConnectInfo implements Serializable, Cloneable {
         }
     }
 
+    @Getter
+    @Setter
     public static class SSHConfig implements Serializable {
         private String privateKeyPath;
         private String user;
@@ -89,40 +83,20 @@ public class ConnectInfo implements Serializable, Cloneable {
             this.password = password;
         }
 
-        public String getPrivateKeyPath() {
-            return privateKeyPath;
-        }
-
         public void setPrivateKeyPath(String privateKeyPath) {
             this.privateKeyPath = privateKeyPath;
-        }
-
-        public String getUser() {
-            return user;
         }
 
         public void setUser(String user) {
             this.user = user;
         }
 
-        public String getHost() {
-            return host;
-        }
-
         public void setHost(String host) {
             this.host = host;
         }
 
-        public Integer getPort() {
-            return port;
-        }
-
         public void setPort(Integer port) {
             this.port = port;
-        }
-
-        public String getPassword() {
-            return password;
         }
 
         public void setPassword(String password) {
@@ -152,6 +126,8 @@ public class ConnectInfo implements Serializable, Cloneable {
         this.sshConfig = sshConfig;
     }
 
+    @Getter
+    @Setter
     public static class SSLConfig implements Serializable {
         private String privateKeyFilePath;
         private String publicKeyFilePath;
@@ -313,54 +289,6 @@ public class ConnectInfo implements Serializable, Cloneable {
     public ConnectInfo setRedisModeEnum(Enums.RedisMode redisMode) {
         this.redisMode = redisMode;
         return this;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public Integer getPort() {
-        return port;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public Integer getDatabase() {
-        return database;
-    }
-
-    public Boolean getSsl() {
-        return ssl;
-    }
-
-    public Enums.Connect getConnectMode() {
-        return connectMode;
-    }
-
-    public Enums.RedisMode getRedisMode() {
-        return redisMode;
-    }
-
-    public SSLConfig getSslConfig() {
-        return sslConfig;
-    }
-
-    public SSHConfig getSshConfig() {
-        return sshConfig;
     }
 
     @Override

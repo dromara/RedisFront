@@ -5,7 +5,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.redisfront.commons.constant.Enums;
-import org.dromara.redisfront.commons.constant.Res;
+import org.dromara.redisfront.commons.constant.Icons;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.commons.util.AlertUtils;
 import org.dromara.redisfront.commons.util.FutureUtils;
@@ -201,11 +201,11 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
         enableSubscribe = new JToggleButton();
         enableSubscribe.setFocusable(false);
         enableSubscribe.setText("开启监听 ");
-        enableSubscribe.setIcon(Res.SUBSCRIBE_ICON);
-        enableSubscribe.setSelectedIcon(Res.UNSUBSCRIBE_ICON);
+        enableSubscribe.setIcon(Icons.SUBSCRIBE_ICON);
+        enableSubscribe.setSelectedIcon(Icons.UNSUBSCRIBE_ICON);
 
         publishBtn = new JButton();
-        publishBtn.setIcon(Res.PUBLISH_ICON);
+        publishBtn.setIcon(Icons.PUBLISH_ICON);
         publishBtn.setFocusable(false);
 
         numLabel = new JLabel();

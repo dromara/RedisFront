@@ -7,12 +7,12 @@ import com.formdev.flatlaf.extras.FlatDesktop;
 import com.formdev.flatlaf.extras.components.FlatButton;
 import com.formdev.flatlaf.util.SystemInfo;
 import org.dromara.redisfront.RedisFrontMain;
-import org.dromara.redisfront.commons.constant.Const;
-import org.dromara.redisfront.commons.constant.Res;
+import org.dromara.redisfront.commons.constant.Constants;
+import org.dromara.redisfront.commons.constant.Icons;
 import org.dromara.redisfront.commons.util.AlertUtils;
 import org.dromara.redisfront.commons.util.FutureUtils;
 import org.dromara.redisfront.commons.util.LocaleUtils;
-import org.dromara.redisfront.service.ConnectService;
+import org.dromara.redisfront.dao.ConnectDetailDao;
 import org.dromara.redisfront.ui.dialog.ImportConfigDialog;
 import org.dromara.redisfront.ui.dialog.SettingDialog;
 
@@ -232,7 +232,7 @@ public class MainMenuBar extends JMenuBar {
         add(Box.createGlue());
 
         var gitBtn = new FlatButton();
-        gitBtn.setIcon(Res.GITHUB_ICON);
+        gitBtn.setIcon(Icons.GITHUB_ICON);
         gitBtn.setButtonType(FlatButton.ButtonType.toolBarButton);
         gitBtn.setFocusable(false);
         gitBtn.setToolTipText("https://github.com/westboy/redisfront");
@@ -268,7 +268,7 @@ public class MainMenuBar extends JMenuBar {
                         new JPanel() {
                             {
                                 setLayout(new BorderLayout());
-                                add(new JLabel(Res.REDIS_ICON), BorderLayout.WEST);
+                                add(new JLabel(Icons.REDIS_ICON), BorderLayout.WEST);
                                 add(new JPanel() {
                                     {
                                         setLayout(new BorderLayout());
@@ -278,7 +278,7 @@ public class MainMenuBar extends JMenuBar {
                                         add(new JPanel() {
                                             {
                                                 setLayout(new BorderLayout());
-                                                add(new JLabel("Version " + Const.APP_VERSION), BorderLayout.NORTH);
+                                                add(new JLabel("Version " + Constants.APP_VERSION), BorderLayout.NORTH);
                                                 add(linkLabel, BorderLayout.CENTER);
                                             }
                                         }, BorderLayout.SOUTH);
@@ -295,12 +295,12 @@ public class MainMenuBar extends JMenuBar {
      * 选择文件保存路径
      */
     private void showFileSaveDialog() {
-        if (!FileUtil.exist(Const.CONFIG_DATA_PATH)) {
-            FileUtil.mkdir(Const.CONFIG_DATA_PATH);
+        if (!FileUtil.exist(Constants.CONFIG_DATA_PATH)) {
+            FileUtil.mkdir(Constants.CONFIG_DATA_PATH);
         }
         // 创建一个默认的文件选取器
-        var fileChooser = new JFileChooser(Const.CONFIG_DATA_PATH);
-        var getAllConnectListFuture = FutureUtils.supplyAsync(ConnectService.service::getAllConnectList);
+        var fileChooser = new JFileChooser(Constants.CONFIG_DATA_PATH);
+        var getAllConnectListFuture = FutureUtils.supplyAsync(ConnectDetailDao.DAO::getAllConnectList);
         // 设置打开文件选择框后默认输入的文件名
         fileChooser.setSelectedFile(new File("configure.json"));
         // 打开文件选择框（线程将被阻塞, 直到选择框被关闭）

@@ -4,7 +4,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.redisfront.RedisFrontMain;
-import org.dromara.redisfront.commons.constant.Res;
+import org.dromara.redisfront.commons.constant.Icons;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.commons.handler.ProcessHandler;
 import org.dromara.redisfront.commons.ui.AbstractDialog;
@@ -14,7 +14,7 @@ import org.dromara.redisfront.commons.util.LoadingUtils;
 import org.dromara.redisfront.commons.util.LocaleUtils;
 import org.dromara.redisfront.model.ConnectInfo;
 import org.dromara.redisfront.model.ConnectTableModel;
-import org.dromara.redisfront.service.ConnectService;
+import org.dromara.redisfront.dao.ConnectDetailDao;
 import org.dromara.redisfront.service.RedisBasicService;
 
 import javax.swing.*;
@@ -98,7 +98,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                         return;
                     }
                     var id = connectTable.getValueAt(row, 0);
-                    var connectInfo = ConnectService.service.getConnect(id);
+                    var connectInfo = ConnectDetailDao.DAO.getConnect(id);
                     onCancel();
                     FutureUtils.runAsync(() -> editProcessHandler.processHandler(connectInfo));
                 });
@@ -112,7 +112,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                         return;
                     }
                     var id = connectTable.getValueAt(row, 0);
-                    var connectInfo = ConnectService.service.getConnect(id);
+                    var connectInfo = ConnectDetailDao.DAO.getConnect(id);
                     if (Fn.isNotNull(connectInfo)) {
                         FutureUtils.runAsync(() -> {
                             delProcessHandler.processHandler(connectInfo);
@@ -143,7 +143,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         });
 
         //查询数据连接列表
-        var connectInfoList = ConnectService.service.getAllConnectList();
+        var connectInfoList = ConnectDetailDao.DAO.getAllConnectList();
         connectTable.setModel(new ConnectTableModel(connectInfoList));
     }
 
@@ -154,7 +154,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
             return;
         }
         var id = connectTable.getValueAt(row, 0);
-        var connectInfo = ConnectService.service.getConnect(id);
+        var connectInfo = ConnectDetailDao.DAO.getConnect(id);
         FutureUtils.runAsync(() -> {
             LoadingUtils.showDialog(String.format(LocaleUtils.getMessageFromBundle("OpenConnectDialog.openConnection.message"), connectInfo.host(), connectInfo.port()));
             var redisMode = RedisBasicService.service.getRedisModeEnum(connectInfo);
@@ -173,7 +173,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         addConnectBtn.addActionListener(e -> {
             dispose();
         });
-        addConnectBtn.setIcon(Res.CONNECTION_ICON);
+        addConnectBtn.setIcon(Icons.CONNECTION_ICON);
     }
 
     /**

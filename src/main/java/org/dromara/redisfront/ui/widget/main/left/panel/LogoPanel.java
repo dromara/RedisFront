@@ -1,25 +1,25 @@
-package org.dromara.redisfront.ui.widget.main.left;
+package org.dromara.redisfront.ui.widget.main.left.panel;
 
-import org.dromara.redisfront.commons.constant.Res;
+import org.dromara.redisfront.commons.constant.Icons;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 
-public class MainLeftLogo extends JPanel {
-    private static final MainLeftLogo INSTANCE = new MainLeftLogo();
+public class LogoPanel extends JPanel {
+    private static final LogoPanel INSTANCE = new LogoPanel();
 
-    public static MainLeftLogo getInstance() {
+    public static LogoPanel getInstance() {
         return INSTANCE;
     }
 
-    public MainLeftLogo() {
+    public LogoPanel() {
         this.setOpaque(false);
         this.setLayout(new BorderLayout());
         this.setMinimumSize(new Dimension(196, 58));
         this.setMaximumSize(new Dimension(196, 58));
-        this.add(BorderLayout.WEST, new JLabel(Res.REDIS_ICON_45x45));
-        this.add(BorderLayout.CENTER, new JLabel(Res.LOGO_TEXT_ICON));
+        this.add(BorderLayout.WEST, new JLabel(Icons.REDIS_ICON_45x45));
+        this.add(BorderLayout.CENTER, new JLabel(Icons.LOGO_TEXT_ICON));
         JLabel subTitleLabel = new JLabel("Cross-Platform Redis GUI Client");
         subTitleLabel.setVerticalAlignment(JLabel.CENTER);
         subTitleLabel.setHorizontalAlignment(JLabel.CENTER);

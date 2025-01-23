@@ -4,7 +4,7 @@ import com.formdev.flatlaf.util.SystemInfo;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import org.dromara.redisfront.commons.constant.Res;
+import org.dromara.redisfront.commons.constant.Icons;
 import org.dromara.redisfront.commons.util.LocaleUtils;
 
 import javax.swing.*;
@@ -14,7 +14,7 @@ import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.util.Locale;
 
-import static org.dromara.redisfront.commons.constant.Res.COMMAND_ICON_16x16;
+import static org.dromara.redisfront.commons.constant.Icons.COMMAND_ICON_16x16;
 
 /**
  * MainNoneForm
@@ -52,7 +52,7 @@ public class MainNoneForm {
     }
 
     private void createUIComponents() {
-        logoLabel = new JLabel(Res.REDIS_ICON);
+        logoLabel = new JLabel(Icons.REDIS_ICON);
         newLabel = new JLabel() {
             @Override
             public void updateUI() {
