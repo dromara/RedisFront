@@ -6,15 +6,15 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatDesktop;
 import com.formdev.flatlaf.extras.components.FlatButton;
 import com.formdev.flatlaf.util.SystemInfo;
-import org.dromara.redisfront.Application;
+import org.dromara.redisfront.RedisFrontMain;
 import org.dromara.redisfront.commons.constant.Const;
 import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.commons.util.AlertUtils;
 import org.dromara.redisfront.commons.util.FutureUtils;
 import org.dromara.redisfront.commons.util.LocaleUtils;
 import org.dromara.redisfront.service.ConnectService;
-import org.dromara.redisfront.dialog.ImportConfigDialog;
-import org.dromara.redisfront.dialog.SettingDialog;
+import org.dromara.redisfront.ui.dialog.ImportConfigDialog;
+import org.dromara.redisfront.ui.dialog.SettingDialog;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -124,7 +124,7 @@ public class MainMenuBar extends JMenuBar {
             }
         };
         exitMenu.addActionListener(e -> {
-            Application.frame.dispose();
+            RedisFrontMain.frame.dispose();
             System.exit(0);
         });
         fileMenu.add(exitMenu);
@@ -264,7 +264,7 @@ public class MainMenuBar extends JMenuBar {
             }
         });
 
-        JOptionPane.showMessageDialog(Application.frame, new Object[]{
+        JOptionPane.showMessageDialog(RedisFrontMain.frame, new Object[]{
                         new JPanel() {
                             {
                                 setLayout(new BorderLayout());
@@ -304,7 +304,7 @@ public class MainMenuBar extends JMenuBar {
         // 设置打开文件选择框后默认输入的文件名
         fileChooser.setSelectedFile(new File("configure.json"));
         // 打开文件选择框（线程将被阻塞, 直到选择框被关闭）
-        var result = fileChooser.showSaveDialog(Application.frame);
+        var result = fileChooser.showSaveDialog(RedisFrontMain.frame);
         if (result == JFileChooser.APPROVE_OPTION) {
             getAllConnectListFuture.thenAccept(connectList -> {
                 // 如果点击了"保存", 则获取选择的保存路径

@@ -6,7 +6,7 @@ import org.dromara.redisfront.commons.util.LettuceUtils;
 import org.dromara.redisfront.model.ClusterNode;
 import org.dromara.redisfront.model.ConnectInfo;
 import org.dromara.redisfront.model.ScanContext;
-import org.dromara.redisfront.dialog.LogsDialog;
+import org.dromara.redisfront.ui.dialog.LogsDialog;
 import io.lettuce.core.KeyScanCursor;
 import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;

@@ -23,7 +23,7 @@ import org.dromara.redisfront.service.*;
 import org.dromara.redisfront.ui.component.LoadingPanel;
 import org.dromara.redisfront.ui.component.TextEditor;
 import io.lettuce.core.*;
-import org.dromara.redisfront.dialog.AddOrUpdateItemDialog;
+import org.dromara.redisfront.ui.dialog.AddOrUpdateItemDialog;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
 import javax.swing.*;

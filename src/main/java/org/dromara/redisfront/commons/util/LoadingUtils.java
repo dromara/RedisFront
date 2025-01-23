@@ -1,6 +1,6 @@
 package org.dromara.redisfront.commons.util;
 
-import org.dromara.redisfront.Application;
+import org.dromara.redisfront.RedisFrontMain;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.ui.component.LoadingDialog;
 
@@ -20,7 +20,7 @@ public class LoadingUtils {
             loadingDialog = new LoadingDialog(message);
         }
         loadingDialog.setMinimumSize(new Dimension(500, -1));
-        loadingDialog.setLocationRelativeTo(Application.frame);
+        loadingDialog.setLocationRelativeTo(RedisFrontMain.frame);
         loadingDialog.pack();
         loadingDialog.setVisible(true);
 
@@ -31,7 +31,7 @@ public class LoadingUtils {
             loadingDialog = new LoadingDialog(null);
         }
         loadingDialog.setMinimumSize(new Dimension(500, -1));
-        loadingDialog.setLocationRelativeTo(Application.frame);
+        loadingDialog.setLocationRelativeTo(RedisFrontMain.frame);
         loadingDialog.pack();
         loadingDialog.setVisible(true);
 

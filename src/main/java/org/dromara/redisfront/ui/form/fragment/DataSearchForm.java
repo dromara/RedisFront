@@ -6,14 +6,14 @@ import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import org.dromara.redisfront.Application;
+import org.dromara.redisfront.RedisFrontMain;
 import org.dromara.redisfront.commons.constant.Enums;
 import org.dromara.redisfront.model.ConnectInfo;
 import org.dromara.redisfront.model.DbInfo;
 import org.dromara.redisfront.model.ScanContext;
 import org.dromara.redisfront.model.TreeNodeInfo;
 import org.dromara.redisfront.service.*;
-import org.dromara.redisfront.dialog.AddKeyDialog;
+import org.dromara.redisfront.ui.dialog.AddKeyDialog;
 import io.lettuce.core.*;
 import org.dromara.redisfront.commons.constant.Const;
 import org.dromara.redisfront.commons.constant.Res;
@@ -333,7 +333,7 @@ public class DataSearchForm {
         addBtn.setIcon(Res.PLUS_ICON);
         addBtn.setFocusable(false);
         addBtn.addActionListener(e -> AddKeyDialog.showAddDialog(connectInfo, null, (key) -> {
-            var res = JOptionPane.showConfirmDialog(Application.frame,
+            var res = JOptionPane.showConfirmDialog(RedisFrontMain.frame,
                     LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.message"),
                     LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.title"), JOptionPane.YES_NO_OPTION);
             if (res == JOptionPane.YES_OPTION) {
@@ -490,7 +490,7 @@ public class DataSearchForm {
                     var selectNode = keyTree.getLastSelectedPathComponent();
                     if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
                         AddKeyDialog.showAddDialog(connectInfo, treeNodeInfo.key(), (key) -> {
-                            var res = JOptionPane.showConfirmDialog(Application.frame,
+                            var res = JOptionPane.showConfirmDialog(RedisFrontMain.frame,
                                     LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.message"),
                                     LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.title"), JOptionPane.YES_NO_OPTION);
                             if (res == JOptionPane.YES_OPTION) {

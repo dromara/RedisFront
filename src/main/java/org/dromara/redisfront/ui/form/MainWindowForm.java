@@ -3,7 +3,7 @@ package org.dromara.redisfront.ui.form;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.icons.FlatTabbedPaneCloseIcon;
 import com.formdev.flatlaf.ui.FlatLineBorder;
-import org.dromara.redisfront.Application;
+import org.dromara.redisfront.RedisFrontMain;
 import org.dromara.redisfront.commons.constant.Enums;
 import org.dromara.redisfront.commons.constant.Res;
 import org.dromara.redisfront.commons.func.Fn;
@@ -12,7 +12,7 @@ import org.dromara.redisfront.model.ConnectInfo;
 import org.dromara.redisfront.service.ConnectService;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.ui.component.MainTabbedPanel;
-import org.dromara.redisfront.dialog.LogsDialog;
+import org.dromara.redisfront.ui.dialog.LogsDialog;
 import io.lettuce.core.RedisException;
 import io.lettuce.core.api.sync.BaseRedisCommands;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
@@ -92,7 +92,7 @@ public class MainWindowForm {
                     var ip = master.get("ip");
                     var port = master.get("port");
                     LoadingUtils.closeDialog();
-                    var ret = JOptionPane.showConfirmDialog(Application.frame, String.format(LocaleUtils.getMessageFromBundle("MainWindowForm.JOptionPane.showConfirmDialog.message"), ip, port), "连接提示", JOptionPane.YES_NO_OPTION);
+                    var ret = JOptionPane.showConfirmDialog(RedisFrontMain.frame, String.format(LocaleUtils.getMessageFromBundle("MainWindowForm.JOptionPane.showConfirmDialog.message"), ip, port), "连接提示", JOptionPane.YES_NO_OPTION);
                     if (ret == JOptionPane.YES_OPTION) {
                         connectInfo.setHost(ip);
                         connectInfo.setPort(Integer.valueOf(port));
@@ -103,7 +103,7 @@ public class MainWindowForm {
                         if (e instanceof RedisException redisException) {
                             var ex = redisException.getCause();
                             if (Fn.equal(ex.getMessage(), "WRONGPASS invalid username-password pair or user is disabled.")) {
-                                var password = JOptionPane.showInputDialog(Application.frame, String.format(LocaleUtils.getMessageFromBundle("MainWindowForm.JOptionPane.showInputDialog.message"), ip, port));
+                                var password = JOptionPane.showInputDialog(RedisFrontMain.frame, String.format(LocaleUtils.getMessageFromBundle("MainWindowForm.JOptionPane.showInputDialog.message"), ip, port));
                                 if (ret == JOptionPane.YES_OPTION) {
                                     connectInfo.setPassword(password);
                                     LettuceUtils.run(connectInfo, BaseRedisCommands::ping);
