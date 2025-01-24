@@ -3,7 +3,7 @@ package org.dromara.redisfront.service;
 import org.dromara.redisfront.commons.constant.Enums;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.model.ClusterNode;
-import org.dromara.redisfront.model.ConnectInfo;
+import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.model.LogInfo;
 import io.lettuce.core.KeyScanCursor;
 import io.lettuce.core.ScanArgs;
@@ -21,149 +21,149 @@ public interface RedisBasicService {
 
     RedisBasicService service = new RedisBasicServiceImpl();
 
-    String flushdb(ConnectInfo connectInfo);
+    String flushdb(ConnectContext connectContext);
 
-    String flushall(ConnectInfo connectInfo);
+    String flushall(ConnectContext connectContext);
 
-    KeyScanCursor<String> scan(ConnectInfo connectInfo, ScanArgs scanArgs);
+    KeyScanCursor<String> scan(ConnectContext connectContext, ScanArgs scanArgs);
 
-    KeyScanCursor<String> scan(ConnectInfo connectInfo, ScanCursor scanCursor, ScanArgs scanArgs);
+    KeyScanCursor<String> scan(ConnectContext connectContext, ScanCursor scanCursor, ScanArgs scanArgs);
 
-    KeyScanCursor<String> scan(ConnectInfo connectInfo, ScanCursor scanCursor);
+    KeyScanCursor<String> scan(ConnectContext connectContext, ScanCursor scanCursor);
 
-    StreamScanCursor scan(ConnectInfo connectInfo, KeyStreamingChannel<String> channel);
+    StreamScanCursor scan(ConnectContext connectContext, KeyStreamingChannel<String> channel);
 
-    StreamScanCursor scan(ConnectInfo connectInfo, KeyStreamingChannel<String> channel, ScanArgs scanArgs);
+    StreamScanCursor scan(ConnectContext connectContext, KeyStreamingChannel<String> channel, ScanArgs scanArgs);
 
-    StreamScanCursor scan(ConnectInfo connectInfo, KeyStreamingChannel<String> channel, ScanCursor scanCursor, ScanArgs scanArgs);
+    StreamScanCursor scan(ConnectContext connectContext, KeyStreamingChannel<String> channel, ScanCursor scanCursor, ScanArgs scanArgs);
 
-    Map<String, String> configGet(ConnectInfo connectInfo, String... keys);
+    Map<String, String> configGet(ConnectContext connectContext, String... keys);
 
-    StreamScanCursor scan(ConnectInfo connectInfo, KeyStreamingChannel<String> channel, ScanCursor scanCursor);
+    StreamScanCursor scan(ConnectContext connectContext, KeyStreamingChannel<String> channel, ScanCursor scanCursor);
 
     /**
      * del
      *
-     * @param connectInfo connectInfo
+     * @param connectContext connectInfo
      * @param key         key
      * @return String
      */
-    Long del(ConnectInfo connectInfo, String key);
+    Long del(ConnectContext connectContext, String key);
 
-    String rename(ConnectInfo connectInfo, String key, String newKey);
+    String rename(ConnectContext connectContext, String key, String newKey);
 
 
-    Boolean expire(ConnectInfo connectInfo, String key, Long ttl);
+    Boolean expire(ConnectContext connectContext, String key, Long ttl);
 
 
     /**
      * type
      *
-     * @param connectInfo connectInfo
+     * @param connectContext connectInfo
      * @param key         key
      * @return String
      */
-    String type(ConnectInfo connectInfo, String key);
+    String type(ConnectContext connectContext, String key);
 
     /**
      * ttl
      *
-     * @param connectInfo connectInfo
+     * @param connectContext connectInfo
      * @param key         key
      * @return String
      */
-    Long ttl(ConnectInfo connectInfo, String key);
+    Long ttl(ConnectContext connectContext, String key);
 
     /**
      * redis ping
      *
-     * @param connectInfo 连接信息
+     * @param connectContext 连接信息
      * @return Boolean
      */
-    Boolean ping(ConnectInfo connectInfo);
+    Boolean ping(ConnectContext connectContext);
 
     /**
      * 获取 redisMode
      *
-     * @param connectInfo 连接信息
+     * @param connectContext 连接信息
      * @return Enum.RedisMode
      */
-    Enums.RedisMode getRedisModeEnum(ConnectInfo connectInfo);
+    Enums.RedisMode getRedisModeEnum(ConnectContext connectContext);
 
     /**
      * 获取集群节点
      *
-     * @param connectInfo 连接信息
+     * @param connectContext 连接信息
      * @return Map
      */
-    List<ClusterNode> getClusterNodes(ConnectInfo connectInfo);
+    List<ClusterNode> getClusterNodes(ConnectContext connectContext);
 
 
     /**
      * 获取集群信息
      *
-     * @param connectInfo 连接信息
+     * @param connectContext 连接信息
      * @return Map
      */
-    Map<String, Object> getClusterInfo(ConnectInfo connectInfo);
+    Map<String, Object> getClusterInfo(ConnectContext connectContext);
 
     /**
      * 获取info
      *
-     * @param connectInfo 连接信息
+     * @param connectContext 连接信息
      * @return Map
      */
-    Map<String, Object> getInfo(ConnectInfo connectInfo);
+    Map<String, Object> getInfo(ConnectContext connectContext);
 
     /**
      * 获取cpu info
      *
-     * @param connectInfo 连接信息
+     * @param connectContext 连接信息
      * @return Map
      */
-    Map<String, Object> getCpuInfo(ConnectInfo connectInfo);
+    Map<String, Object> getCpuInfo(ConnectContext connectContext);
 
     /**
      * 获取memory info
      *
-     * @param connectInfo 连接信息
+     * @param connectContext 连接信息
      * @return Map
      */
-    Map<String, Object> getMemoryInfo(ConnectInfo connectInfo);
+    Map<String, Object> getMemoryInfo(ConnectContext connectContext);
 
     /**
      * 获取 server info
      *
-     * @param connectInfo 连接信息
+     * @param connectContext 连接信息
      * @return Map
      */
-    Map<String, Object> getServerInfo(ConnectInfo connectInfo);
+    Map<String, Object> getServerInfo(ConnectContext connectContext);
 
     /**
      * 获取单机 KeySpace
      *
-     * @param connectInfo 连接信息
+     * @param connectContext 连接信息
      * @return Map
      */
-    Map<String, Object> getKeySpace(ConnectInfo connectInfo);
+    Map<String, Object> getKeySpace(ConnectContext connectContext);
 
     /**
      * 获取 client info
      *
-     * @param connectInfo 连接信息
+     * @param connectContext 连接信息
      * @return Map
      */
-    Map<String, Object> getClientInfo(ConnectInfo connectInfo);
+    Map<String, Object> getClientInfo(ConnectContext connectContext);
 
     /**
-     * @param connectInfo 连接信息
+     * @param connectContext 连接信息
      * @return Map
      */
-    Map<String, Object> getStatInfo(ConnectInfo connectInfo);
+    Map<String, Object> getStatInfo(ConnectContext connectContext);
 
-    Boolean isClusterMode(ConnectInfo connectInfo);
+    Boolean isClusterMode(ConnectContext connectContext);
 
-    Long dbSize(ConnectInfo connectInfo);
+    Long dbSize(ConnectContext connectContext);
 
     default Map<String, Object> strToMap(String str) {
         Map<String, Object> result = new HashMap<>();
@@ -180,8 +180,8 @@ public interface RedisBasicService {
         return result;
     }
 
-    static LogInfo buildLogInfo(ConnectInfo connectInfo) {
-        return new LogInfo().setDate(LocalDateTime.now()).setIp(connectInfo.getHost());
+    static LogInfo buildLogInfo(ConnectContext connectContext) {
+        return new LogInfo().setDate(LocalDateTime.now()).setIp(connectContext.getHost());
     }
 
 

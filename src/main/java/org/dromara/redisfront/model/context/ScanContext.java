@@ -1,5 +1,7 @@
-package org.dromara.redisfront.model;
+package org.dromara.redisfront.model.context;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.dromara.redisfront.commons.func.Fn;
 import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
@@ -7,8 +9,12 @@ import io.lettuce.core.ScanCursor;
 import java.util.List;
 
 public class ScanContext<T> {
+    @Setter
     private ScanCursor scanCursor;
+    @Setter
+    @Getter
     private Long limit;
+    @Setter
     private String searchKey;
     private List<T> keys;
 
@@ -19,24 +25,8 @@ public class ScanContext<T> {
         return scanCursor;
     }
 
-    public void setScanCursor(ScanCursor scanCursor) {
-        this.scanCursor = scanCursor;
-    }
-
-    public Long getLimit() {
-        return limit;
-    }
-
-    public void setLimit(Long limit) {
-        this.limit = limit;
-    }
-
     public String getSearchKey() {
         return Fn.isNotEmpty(searchKey) ? searchKey : "*";
-    }
-
-    public void setSearchKey(String searchKey) {
-        this.searchKey = searchKey;
     }
 
     public ScanArgs getScanArgs() {

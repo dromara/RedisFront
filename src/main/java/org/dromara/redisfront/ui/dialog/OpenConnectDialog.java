@@ -5,16 +5,13 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.redisfront.RedisFrontMain;
 import org.dromara.redisfront.commons.constant.Icons;
-import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.commons.handler.ProcessHandler;
 import org.dromara.redisfront.commons.ui.AbstractDialog;
 import org.dromara.redisfront.commons.util.AlertUtils;
 import org.dromara.redisfront.commons.util.FutureUtils;
-import org.dromara.redisfront.commons.util.LoadingUtils;
 import org.dromara.redisfront.commons.util.LocaleUtils;
-import org.dromara.redisfront.model.ConnectInfo;
+import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.model.ConnectTableModel;
-import org.dromara.redisfront.dao.ConnectDetailDao;
 import org.dromara.redisfront.service.RedisBasicService;
 
 import javax.swing.*;
@@ -24,7 +21,7 @@ import java.awt.event.*;
 import java.lang.reflect.Method;
 import java.util.ResourceBundle;
 
-public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
+public class OpenConnectDialog extends AbstractDialog<ConnectContext> {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -32,13 +29,13 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
     private JButton addConnectBtn;
     private JScrollPane scrollPanel;
 
-    protected ProcessHandler<ConnectInfo> openProcessHandler;
+    protected ProcessHandler<ConnectContext> openProcessHandler;
 
-    protected ProcessHandler<ConnectInfo> editProcessHandler;
+    protected ProcessHandler<ConnectContext> editProcessHandler;
 
-    protected ProcessHandler<ConnectInfo> delProcessHandler;
+    protected ProcessHandler<ConnectContext> delProcessHandler;
 
-    public static void showOpenConnectDialog(ProcessHandler<ConnectInfo> openProcessHandler, ProcessHandler<ConnectInfo> editProcessHandler, ProcessHandler<ConnectInfo> delProcessHandler) {
+    public static void showOpenConnectDialog(ProcessHandler<ConnectContext> openProcessHandler, ProcessHandler<ConnectContext> editProcessHandler, ProcessHandler<ConnectContext> delProcessHandler) {
         var openConnectDialog = new OpenConnectDialog(openProcessHandler, editProcessHandler, delProcessHandler);
         openConnectDialog.setSize(new Dimension(500, 280));
         openConnectDialog.setLocationRelativeTo(RedisFrontMain.frame);
@@ -46,7 +43,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         openConnectDialog.setVisible(true);
     }
 
-    public OpenConnectDialog(ProcessHandler<ConnectInfo> openProcessHandler, ProcessHandler<ConnectInfo> editProcessHandler, ProcessHandler<ConnectInfo> delProcessHandler) {
+    public OpenConnectDialog(ProcessHandler<ConnectContext> openProcessHandler, ProcessHandler<ConnectContext> editProcessHandler, ProcessHandler<ConnectContext> delProcessHandler) {
         super(RedisFrontMain.frame);
         $$$setupUI$$$();
         setTitle(LocaleUtils.getMessageFromBundle("OpenConnectDialog.title"));
@@ -98,9 +95,9 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                         return;
                     }
                     var id = connectTable.getValueAt(row, 0);
-                    var connectInfo = ConnectDetailDao.DAO.getById(id);
+//                    var connectInfo = ConnectDetailDao.DAO.getById(id);
                     onCancel();
-                    FutureUtils.runAsync(() -> editProcessHandler.processHandler(connectInfo));
+                    FutureUtils.runAsync(() -> editProcessHandler.processHandler(null));
                 });
                 add(editConnectMenu);
                 //表格删除操作
@@ -112,14 +109,15 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
                         return;
                     }
                     var id = connectTable.getValueAt(row, 0);
-                    var connectInfo = ConnectDetailDao.DAO.getById(id);
-                    if (Fn.isNotNull(connectInfo)) {
+//                    var connectInfo = ConnectDetailDao.DAO.getById(id);
+//                    if (Fn.isNotNull(connectInfo)) {
                         FutureUtils.runAsync(() -> {
-                            delProcessHandler.processHandler(connectInfo);
+                            delProcessHandler.processHandler(null);
                             ((ConnectTableModel) connectTable.getModel()).removeRow(row);
                             connectTable.revalidate();
                         });
-                    }
+//                    }
+
                 });
                 add(deleteConnectMenu);
             }
@@ -143,8 +141,8 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         });
 
         //查询数据连接列表
-        var connectInfoList = ConnectDetailDao.DAO.loadAll();
-        connectTable.setModel(new ConnectTableModel(connectInfoList));
+//        var connectInfoList = ConnectDetailDao.DAO.loadAll();
+        connectTable.setModel(new ConnectTableModel(null));
     }
 
     private void onOK() {
@@ -154,10 +152,10 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
             return;
         }
         var id = connectTable.getValueAt(row, 0);
-        var connectInfo = ConnectDetailDao.DAO.getById(id);
+//        var connectInfo = ConnectDetailDao.DAO.getById(id);
         FutureUtils.runAsync(() -> {
-            LoadingUtils.showDialog(String.format(LocaleUtils.getMessageFromBundle("OpenConnectDialog.openConnection.message"), connectInfo.getHost(), connectInfo.getPort()));
-            var redisMode = RedisBasicService.service.getRedisModeEnum(connectInfo);
+//            LoadingUtils.showDialog(String.format(LocaleUtils.getMessageFromBundle("OpenConnectDialog.openConnection.message"), connectInfo.getHost(), connectInfo.getPort()));
+            var redisMode = RedisBasicService.service.getRedisModeEnum(null);
 //            openProcessHandler.processHandler(connectInfo.setRedisMode(redisMode));
         });
         dispose();

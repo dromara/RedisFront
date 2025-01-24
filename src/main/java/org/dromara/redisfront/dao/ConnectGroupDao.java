@@ -4,7 +4,6 @@ import cn.hutool.db.DbUtil;
 import cn.hutool.db.Entity;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.redisfront.model.entity.ConnectGroupEntity;
-import org.dromara.redisfront.model.ConnectInfo;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;

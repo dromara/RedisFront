@@ -1,6 +1,6 @@
 package org.dromara.redisfront.service;
 
-import org.dromara.redisfront.model.ConnectInfo;
+import org.dromara.redisfront.model.context.ConnectContext;
 import io.lettuce.core.MapScanCursor;
 import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
@@ -13,26 +13,26 @@ public interface RedisHashService {
 
     RedisHashService service = new RedisHashServiceImpl();
 
-    String hget(ConnectInfo connectInfo, String key, String field);
+    String hget(ConnectContext connectContext, String key, String field);
 
-    Map<String, String> hgetall(ConnectInfo connectInfo, String key);
+    Map<String, String> hgetall(ConnectContext connectContext, String key);
 
-    List<String> hkeys(ConnectInfo connectInfo, String key);
+    List<String> hkeys(ConnectContext connectContext, String key);
 
-    Long hlen(ConnectInfo connectInfo, String key);
+    Long hlen(ConnectContext connectContext, String key);
 
-    String hmset(ConnectInfo connectInfo, String key, Map<String, String> map);
+    String hmset(ConnectContext connectContext, String key, Map<String, String> map);
 
-    MapScanCursor<String, String> hscan(ConnectInfo connectInfo, String key, ScanCursor scanCursor, ScanArgs scanArgs);
-    MapScanCursor<String, String> hscan(ConnectInfo connectInfo, String key, ScanCursor scanCursor);
+    MapScanCursor<String, String> hscan(ConnectContext connectContext, String key, ScanCursor scanCursor, ScanArgs scanArgs);
+    MapScanCursor<String, String> hscan(ConnectContext connectContext, String key, ScanCursor scanCursor);
 
-    Boolean hset(ConnectInfo connectInfo, String key, String field, String value);
+    Boolean hset(ConnectContext connectContext, String key, String field, String value);
 
-    Long hset(ConnectInfo connectInfo, String key, Map<String, String> map);
+    Long hset(ConnectContext connectContext, String key, Map<String, String> map);
 
-    Long hstrlen(ConnectInfo connectInfo, String key, String field);
+    Long hstrlen(ConnectContext connectContext, String key, String field);
 
-    List<String> hvals(ConnectInfo connectInfo, String key);
+    List<String> hvals(ConnectContext connectContext, String key);
 
-    Long hdel(ConnectInfo connectInfo, String key, String... fields);
+    Long hdel(ConnectContext connectContext, String key, String... fields);
 }

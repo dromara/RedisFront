@@ -1,15 +1,14 @@
-package org.dromara.redisfront.ui.component;
+package org.dromara.redisfront.ui.support;
 
 import cn.hutool.core.date.DateUtil;
 import org.dromara.redisfront.commons.constant.Enums;
-import org.dromara.redisfront.model.ConnectInfo;
+import org.dromara.redisfront.model.context.ConnectContext;
 import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.output.ArrayOutput;
 import io.lettuce.core.protocol.CommandArgs;
 import io.lettuce.core.protocol.CommandType;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.func.Fn;
-import org.dromara.redisfront.commons.ui.AbstractTerminal;
 import org.dromara.redisfront.commons.util.LettuceUtils;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.slf4j.Logger;
@@ -22,25 +21,25 @@ import java.util.List;
 
 public class RedisTerminal extends AbstractTerminal {
     private static final Logger log = LoggerFactory.getLogger(RedisTerminal.class);
-    private final ConnectInfo connectInfo;
+    private final ConnectContext connectContext;
 
 
-    public static RedisTerminal newInstance(ConnectInfo connectInfo) {
-        return new RedisTerminal(connectInfo);
+    public static RedisTerminal newInstance(ConnectContext connectContext) {
+        return new RedisTerminal(connectContext);
     }
 
-    public RedisTerminal(final ConnectInfo connectInfo) {
+    public RedisTerminal(final ConnectContext connectContext) {
         super();
-        this.connectInfo = connectInfo.clone();
+        this.connectContext = connectContext.clone();
         terminal.setEnabled(true);
         printConnectedSuccessMessage();
     }
 
     public void ping() {
         try {
-            if (RedisBasicService.service.ping(connectInfo)) {
+            if (RedisBasicService.service.ping(connectContext)) {
                 if (!terminal.isEnabled()) {
-                    connectInfo.setDatabase(0);
+                    connectContext.setDatabase(0);
                     terminal.setEnabled(true);
                     super.printConnectedSuccessMessage();
                 }
@@ -58,10 +57,10 @@ public class RedisTerminal extends AbstractTerminal {
         try {
             var commandList = new ArrayList<>(List.of(inputText.split(" ")));
             var commandType = Arrays.stream(CommandType.values())
-                    .filter(e -> Fn.equal(e.name(), commandList.get(0).toUpperCase()))
+                    .filter(e -> Fn.equal(e.name(), commandList.getFirst().toUpperCase()))
                     .findAny()
                     .orElseThrow(() -> new RedisFrontException("ERR unknown command '" + inputText + "'", false));
-            commandList.remove(0);
+            commandList.removeFirst();
 
             if (Fn.equal(connectInfo().getRedisMode(), Enums.RedisMode.CLUSTER)) {
                 LettuceUtils.clusterRun(connectInfo(), redisCommands -> {
@@ -76,13 +75,13 @@ public class RedisTerminal extends AbstractTerminal {
             } else {
                 LettuceUtils.run(connectInfo(), redisCommands -> {
                     if (CommandType.SELECT.equals(commandType)) {
-                        connectInfo.setDatabase(Integer.valueOf(commandList.get(0)));
+                        connectContext.setDatabase(Integer.valueOf(commandList.getFirst()));
                     }
                     if (CommandType.PUBLISH.equals(commandType)) {
                         //监听后期完善
                         var newCommandList = new ArrayList<String>();
-                        newCommandList.add(commandList.get(0));
-                        commandList.remove(0);
+                        newCommandList.add(commandList.getFirst());
+                        commandList.removeFirst();
                         var message = commandList.toArray(new String[]{});
                         newCommandList.add(String.join(" ", message));
                         var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(newCommandList));
@@ -103,7 +102,7 @@ public class RedisTerminal extends AbstractTerminal {
         var sb = new StringBuilder();
         if (s instanceof List<?> list) {
             if (list.size() == 1) {
-                return String.valueOf(list.get(0));
+                return String.valueOf(list.getFirst());
             }
             for (int i = 0; i < list.size(); i++) {
                 var item = list.get(i);
@@ -121,13 +120,13 @@ public class RedisTerminal extends AbstractTerminal {
 
 
     @Override
-    protected ConnectInfo connectInfo() {
-        return connectInfo;
+    protected ConnectContext connectInfo() {
+        return connectContext;
     }
 
     @Override
     protected String databaseName() {
-        return String.valueOf(connectInfo.getDatabase());
+        return String.valueOf(connectContext.getDatabase());
     }
 
 }

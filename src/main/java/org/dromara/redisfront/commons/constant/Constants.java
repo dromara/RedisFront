@@ -33,6 +33,7 @@ public class Constants {
                 username     TEXT,
                 password     TEXT,
                 connect_mode TEXT,
+                redis_mode TEXT,
                 enable_ssl integer,
                 ssl_config   TEXT,
                 ssh_config   TEXT

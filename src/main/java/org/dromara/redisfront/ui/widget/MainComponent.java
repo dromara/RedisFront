@@ -6,9 +6,9 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.util.SystemInfo;
 import org.dromara.quickswing.ui.app.QSAction;
 import org.dromara.quickswing.ui.swing.Background;
-import org.dromara.redisfront.ui.common.DefaultNonePanel;
-import org.dromara.redisfront.ui.common.DrawerAnimationAction;
-import org.dromara.redisfront.ui.common.DrawerMenuItemEvent;
+import org.dromara.redisfront.ui.support.NonePanel;
+import org.dromara.redisfront.ui.support.extend.DrawerAnimationAction;
+import org.dromara.redisfront.ui.support.extend.DrawerMenuItemEvent;
 import org.dromara.redisfront.ui.dialog.AddConnectDialog;
 import org.dromara.redisfront.ui.widget.left.MainLeftComponent;
 import org.dromara.redisfront.ui.widget.right.MainRightComponent;
@@ -58,7 +58,7 @@ public class MainComponent extends Background {
                     drawerAnimationAction.handleAction(null);
                 }
                 mainContentPane.removeAll();
-                mainContentPane.add(DefaultNonePanel.getInstance(), BorderLayout.CENTER);
+                mainContentPane.add(NonePanel.getInstance(), BorderLayout.CENTER);
                 FlatLaf.updateUI();
             }
         });
@@ -104,7 +104,7 @@ public class MainComponent extends Background {
         JPanel parentPanel = new JPanel(new BorderLayout());
         this.mainContentPane = new JPanel();
         this.mainContentPane.setLayout(new BorderLayout());
-        this.mainContentPane.add(DefaultNonePanel.getInstance(), BorderLayout.CENTER);
+        this.mainContentPane.add(NonePanel.getInstance(), BorderLayout.CENTER);
         parentPanel.add(mainContentPane, BorderLayout.CENTER);
 
         this.mainDrawerPanel = new MainLeftComponent(owner, menuEvent, drawerAnimationAction, drawerMenuItemEvent).buildDrawerPanel();

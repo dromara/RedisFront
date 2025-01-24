@@ -1,6 +1,6 @@
 package org.dromara.redisfront.service;
 
-import org.dromara.redisfront.model.ConnectInfo;
+import org.dromara.redisfront.model.context.ConnectContext;
 import io.lettuce.core.*;
 import org.dromara.redisfront.service.impl.RedisZSetServiceImpl;
 
@@ -9,39 +9,39 @@ import java.util.List;
 public interface RedisZSetService {
     RedisZSetService service = new RedisZSetServiceImpl();
 
-    Long zadd(ConnectInfo connectInfo,String key, double score, String member);
+    Long zadd(ConnectContext connectContext, String key, double score, String member);
 
-    Long zadd(ConnectInfo connectInfo,String key, ScoredValue<String>... scoredValues);
+    Long zadd(ConnectContext connectContext, String key, ScoredValue<String>... scoredValues);
 
-    Double zaddincr(ConnectInfo connectInfo,String key, double score, String member);
+    Double zaddincr(ConnectContext connectContext, String key, double score, String member);
 
-    Long zcard(ConnectInfo connectInfo,String key);
+    Long zcard(ConnectContext connectContext, String key);
 
-    Long zrem(ConnectInfo connectInfo,String key, String... members);
-    List<ScoredValue<String>> zrange(ConnectInfo connectInfo,String key, long start, long stop);
+    Long zrem(ConnectContext connectContext, String key, String... members);
+    List<ScoredValue<String>> zrange(ConnectContext connectContext, String key, long start, long stop);
 
-    Long zcount(ConnectInfo connectInfo, String key, Range<? extends Number> range);
+    Long zcount(ConnectContext connectContext, String key, Range<? extends Number> range);
 
-    List<String> zrangebyscore(ConnectInfo connectInfo,String key, Range<? extends Number> range, Limit limit);
+    List<String> zrangebyscore(ConnectContext connectContext, String key, Range<? extends Number> range, Limit limit);
 
-    List<ScoredValue<String>> zrangebyscoreWithScores(ConnectInfo connectInfo,String key, Range<? extends Number> range);
+    List<ScoredValue<String>> zrangebyscoreWithScores(ConnectContext connectContext, String key, Range<? extends Number> range);
 
-    List<String> zrevrangebyscore(ConnectInfo connectInfo,String key, Range<? extends Number> range, Limit limit);
+    List<String> zrevrangebyscore(ConnectContext connectContext, String key, Range<? extends Number> range, Limit limit);
 
-    Long zrevrank(ConnectInfo connectInfo,String key, String member);
+    Long zrevrank(ConnectContext connectContext, String key, String member);
 
-    ScoredValueScanCursor<String> zscan(ConnectInfo connectInfo,String key);
+    ScoredValueScanCursor<String> zscan(ConnectContext connectContext, String key);
 
-    ScoredValueScanCursor<String> zscan(ConnectInfo connectInfo,String key, ScanArgs scanArgs);
+    ScoredValueScanCursor<String> zscan(ConnectContext connectContext, String key, ScanArgs scanArgs);
 
-    ScoredValueScanCursor<String> zscan(ConnectInfo connectInfo,String key, ScanCursor scanCursor, ScanArgs scanArgs);
+    ScoredValueScanCursor<String> zscan(ConnectContext connectContext, String key, ScanCursor scanCursor, ScanArgs scanArgs);
 
-    ScoredValueScanCursor<String> zscan(ConnectInfo connectInfo,String key, ScanCursor scanCursor);
-    Double zscore(ConnectInfo connectInfo,String key, String member);
+    ScoredValueScanCursor<String> zscan(ConnectContext connectContext, String key, ScanCursor scanCursor);
+    Double zscore(ConnectContext connectContext, String key, String member);
 
-    ScoredValue<String> zpopmin(ConnectInfo connectInfo,String key);
+    ScoredValue<String> zpopmin(ConnectContext connectContext, String key);
 
-    List<ScoredValue<String>> zpopmin(ConnectInfo connectInfo,String key, long count);
+    List<ScoredValue<String>> zpopmin(ConnectContext connectContext, String key, long count);
 
 
 }

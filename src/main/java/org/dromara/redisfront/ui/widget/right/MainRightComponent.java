@@ -11,10 +11,10 @@ import org.dromara.quickswing.constant.QSOs;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.constant.Icons;
-import org.dromara.redisfront.model.ConnectInfo;
-import org.dromara.redisfront.ui.component.RedisTerminal;
-import org.dromara.redisfront.ui.common.DrawerAnimationAction;
-import org.dromara.redisfront.ui.common.BoldTitleTabbedPaneUI;
+import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.ui.support.RedisTerminal;
+import org.dromara.redisfront.ui.support.extend.DrawerAnimationAction;
+import org.dromara.redisfront.ui.support.extend.BoldTitleTabbedPaneUI;
 import org.dromara.redisfront.ui.widget.MainWidget;
 
 import javax.swing.*;
@@ -209,12 +209,12 @@ public class MainRightComponent extends JPanel {
     private void initMainTabbedItem() {
         //主窗口
         contentTabbedPane.addTab("主页", Icons.CONTENT_TAB_DATA_ICON, new JPanel());
-        ConnectInfo connectInfo = new ConnectInfo();
-        connectInfo.setHost("127.0.0.1");
-        connectInfo.setPort(3306);
-        connectInfo.setDatabase(2);
+        ConnectContext connectContext = new ConnectContext();
+        connectContext.setHost("127.0.0.1");
+        connectContext.setPort(3306);
+        connectContext.setDatabase(2);
         //命令窗口
-        contentTabbedPane.addTab("命令", Icons.CONTENT_TAB_COMMAND_ICON, new RedisTerminal(connectInfo));
+        contentTabbedPane.addTab("命令", Icons.CONTENT_TAB_COMMAND_ICON, new RedisTerminal(connectContext));
         contentTabbedPane.addTab("订阅", Icons.MQ_ICON, new JPanel());
         //数据窗口
         contentTabbedPane.addTab("数据", Icons.CONTENT_TAB_INFO_ICON, new JPanel());

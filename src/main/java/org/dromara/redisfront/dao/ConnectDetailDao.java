@@ -1,11 +1,12 @@
 package org.dromara.redisfront.dao;
 
-import org.dromara.redisfront.commons.constant.Enums;
-import org.dromara.redisfront.commons.func.Fn;
-import org.dromara.redisfront.model.ConnectInfo;
+import cn.hutool.db.DbUtil;
+import cn.hutool.db.Entity;
+import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 
+import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 
 /**
  * ConnectService
@@ -16,33 +17,42 @@ public class ConnectDetailDao {
 
     public static final String TABLE_NAME = "connect_detail";
 
+    private final DataSource datasource;
 
-    public static ConnectDetailDao DAO = new ConnectDetailDao();
-
-
-
-    public List<ConnectInfo> loadAll() {
-        return null;
+    public static ConnectDetailDao newInstance(DataSource datasource) {
+        return new ConnectDetailDao(datasource);
     }
 
-    public List<ConnectInfo> loadByGroupId(Object id) {
-        return null;
+    private ConnectDetailDao(DataSource datasource) {
+        this.datasource = datasource;
     }
 
-    public ConnectInfo getById(Object id) {
-        return null;
+    public List<ConnectDetailEntity> loadAll() throws SQLException {
+        return DbUtil.use(datasource).findAll(Entity.create(TABLE_NAME).set("group_id", -1), ConnectDetailEntity.class);
     }
 
-    public void save(ConnectInfo connectInfo) {
-
+    public List<ConnectDetailEntity> loadAll(Object id) throws SQLException {
+        return DbUtil.use(datasource).findAll(Entity.create(TABLE_NAME).set("group_id", id), ConnectDetailEntity.class);
     }
 
-    public void update(ConnectInfo connectInfo) {
-
+    public ConnectDetailEntity getById(Object id) throws SQLException {
+        Entity entity = DbUtil.use(datasource).get(TABLE_NAME, "group_id", id);
+        return entity.toBean(ConnectDetailEntity.class);
     }
 
-    public void delete(Object id) {
+    public void save(ConnectDetailEntity connectDetailEntity) throws SQLException {
+        Entity entity = Entity.create(TABLE_NAME).parseBean(connectDetailEntity, true, true);
+        DbUtil.use(datasource).insert(entity);
+    }
 
+    public void update(Object id, ConnectDetailEntity connectDetailEntity) throws SQLException {
+        Entity entity = Entity.create(TABLE_NAME)
+                .parseBean(connectDetailEntity, true, true);
+        DbUtil.use(datasource).update(entity, Entity.create().set("id", id));
+    }
+
+    public void delete(Object id) throws SQLException {
+        DbUtil.use(datasource).del(TABLE_NAME, "id", id);
     }
 
 }

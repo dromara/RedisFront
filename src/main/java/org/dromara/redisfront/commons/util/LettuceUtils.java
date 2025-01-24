@@ -2,7 +2,7 @@ package org.dromara.redisfront.commons.util;
 
 import cn.hutool.core.util.RandomUtil;
 import org.dromara.redisfront.commons.constant.Enums;
-import org.dromara.redisfront.model.ConnectInfo;
+import org.dromara.redisfront.model.context.ConnectContext;
 import io.lettuce.core.*;
 import io.lettuce.core.api.sync.RedisCommands;
 import io.lettuce.core.cluster.ClusterClientOptions;
@@ -12,7 +12,6 @@ import io.lettuce.core.cluster.api.sync.RedisAdvancedClusterCommands;
 import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
 import io.netty.util.internal.StringUtil;
-import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.func.Fn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +39,7 @@ public class LettuceUtils {
     private LettuceUtils() {
     }
 
-    public synchronized static RedisClusterClient getRedisClusterClient(RedisURI redisURI, ConnectInfo connectInfo) {
+    public synchronized static RedisClusterClient getRedisClusterClient(RedisURI redisURI, ConnectContext connectContext) {
         var clusterClient = RedisClusterClient.create(redisURI);
         var clusterTopologyRefreshOptions = ClusterTopologyRefreshOptions.builder()
                 .enableAdaptiveRefreshTrigger(ClusterTopologyRefreshOptions.RefreshTrigger.MOVED_REDIRECT, ClusterTopologyRefreshOptions.RefreshTrigger.PERSISTENT_RECONNECTS)
@@ -50,36 +49,36 @@ public class LettuceUtils {
                 .topologyRefreshOptions(clusterTopologyRefreshOptions)
                 .build();
 
-        if (connectInfo.getEnableSsl()) {
-            if (Fn.isNotEmpty(connectInfo.getSslInfo().getPassword()) || Fn.isNotEmpty(connectInfo.getSslInfo().getPublicKeyFilePath())) {
+        if (connectContext.getEnableSsl()) {
+            if (Fn.isNotEmpty(connectContext.getSslInfo().getPassword()) || Fn.isNotEmpty(connectContext.getSslInfo().getPublicKeyFilePath())) {
                 clientOptions = clientOptions
                         .mutate()
                         .sslOptions(SslOptions.builder()
                                 .jdkSslProvider()
-                                .truststore(new File(connectInfo.getSslInfo().getPublicKeyFilePath()), connectInfo.getSslInfo().getPassword())
+                                .truststore(new File(connectContext.getSslInfo().getPublicKeyFilePath()), connectContext.getSslInfo().getPassword())
                                 .build())
                         .build();
             }
         }
 
         clusterClient.setOptions(clientOptions);
-        if (Fn.equal(connectInfo.getConnectTypeMode(), Enums.ConnectType.SSH)) {
+        if (Fn.equal(connectContext.getConnectTypeMode(), Enums.ConnectType.SSH)) {
             Map<Integer, Integer> clusterTempPort = new HashMap<>();
             for (RedisClusterNode partition : clusterClient.getPartitions()) {
                 var remotePort = partition.getUri().getPort();
                 int port = getTempLocalPort();
                 clusterTempPort.put(remotePort, port);
             }
-            connectInfo.setClusterLocalPort(clusterTempPort);
+            connectContext.setClusterLocalPort(clusterTempPort);
         }
         return clusterClient;
     }
 
-    public synchronized static void clusterRun(ConnectInfo connectInfo, Consumer<RedisAdvancedClusterCommands<String, String>> consumer) {
-        var redisURI = getRedisURI(connectInfo);
-        var clusterClient = getRedisClusterClient(redisURI, connectInfo);
+    public synchronized static void clusterRun(ConnectContext connectContext, Consumer<RedisAdvancedClusterCommands<String, String>> consumer) {
+        var redisURI = getRedisURI(connectContext);
+        var clusterClient = getRedisClusterClient(redisURI, connectContext);
         try {
-            JschUtils.openSession(connectInfo, clusterClient);
+            JschUtils.openSession(connectContext, clusterClient);
             try (var connection = clusterClient.connect()) {
                 consumer.accept(connection.sync());
             } finally {
@@ -94,11 +93,11 @@ public class LettuceUtils {
         }
     }
 
-    public synchronized static <T> T clusterExec(ConnectInfo connectInfo, Function<RedisAdvancedClusterCommands<String, String>, T> function) {
-        var redisURI = getRedisURI(connectInfo);
-        var clusterClient = getRedisClusterClient(redisURI, connectInfo);
+    public synchronized static <T> T clusterExec(ConnectContext connectContext, Function<RedisAdvancedClusterCommands<String, String>, T> function) {
+        var redisURI = getRedisURI(connectContext);
+        var clusterClient = getRedisClusterClient(redisURI, connectContext);
         try {
-            JschUtils.openSession(connectInfo, clusterClient);
+            JschUtils.openSession(connectContext, clusterClient);
             try (var connection = clusterClient.connect()) {
                 return function.apply(connection.sync());
             } finally {
@@ -114,11 +113,11 @@ public class LettuceUtils {
     }
 
 
-    public synchronized static void sentinelRun(ConnectInfo connectInfo, Consumer<RedisSentinelCommands<String, String>> consumer) {
-        var redisURI = getRedisURI(connectInfo);
+    public synchronized static void sentinelRun(ConnectContext connectContext, Consumer<RedisSentinelCommands<String, String>> consumer) {
+        var redisURI = getRedisURI(connectContext);
         var redisClient = io.lettuce.core.RedisClient.create(redisURI);
         try {
-            JschUtils.openSession(connectInfo);
+            JschUtils.openSession(connectContext);
             try (var connection = redisClient.connectSentinel()) {
                 consumer.accept(connection.sync());
             } finally {
@@ -133,11 +132,11 @@ public class LettuceUtils {
         }
     }
 
-    public synchronized static <T> T sentinelExec(ConnectInfo connectInfo, Function<RedisSentinelCommands<String, String>, T> function) {
-        var redisURI = getRedisURI(connectInfo);
+    public synchronized static <T> T sentinelExec(ConnectContext connectContext, Function<RedisSentinelCommands<String, String>, T> function) {
+        var redisURI = getRedisURI(connectContext);
         var redisClient = io.lettuce.core.RedisClient.create(redisURI);
         try {
-            JschUtils.openSession(connectInfo);
+            JschUtils.openSession(connectContext);
             try (var connection = redisClient.connectSentinel()) {
                 return function.apply(connection.sync());
             } finally {
@@ -152,10 +151,10 @@ public class LettuceUtils {
         }
     }
 
-    public synchronized static void run(ConnectInfo connectInfo, Consumer<RedisCommands<String, String>> consumer) {
-        var redisClient = getRedisClient(connectInfo);
+    public synchronized static void run(ConnectContext connectContext, Consumer<RedisCommands<String, String>> consumer) {
+        var redisClient = getRedisClient(connectContext);
         try {
-            JschUtils.openSession(connectInfo);
+            JschUtils.openSession(connectContext);
             try (var connection = redisClient.connect()) {
                 consumer.accept(connection.sync());
             } finally {
@@ -170,14 +169,14 @@ public class LettuceUtils {
         }
     }
 
-    public synchronized static RedisClient getRedisClient(ConnectInfo connectInfo) {
-        var redisURI = getRedisURI(connectInfo);
+    public synchronized static RedisClient getRedisClient(ConnectContext connectContext) {
+        var redisURI = getRedisURI(connectContext);
         var redisClient = RedisClient.create(redisURI);
-        if (connectInfo.getEnableSsl()) {
-            if (Fn.isNotEmpty(connectInfo.getSslInfo().getPassword()) || Fn.isNotEmpty(connectInfo.getSslInfo().getPublicKeyFilePath())) {
+        if (connectContext.getEnableSsl()) {
+            if (Fn.isNotEmpty(connectContext.getSslInfo().getPassword()) || Fn.isNotEmpty(connectContext.getSslInfo().getPublicKeyFilePath())) {
                 var sslOptions = SslOptions.builder()
                         .jdkSslProvider()
-                        .truststore(new File(connectInfo.getSslInfo().getPublicKeyFilePath()), connectInfo.getSslInfo().getPassword())
+                        .truststore(new File(connectContext.getSslInfo().getPublicKeyFilePath()), connectContext.getSslInfo().getPassword())
                         .build();
                 redisClient.setOptions(ClientOptions.builder().sslOptions(sslOptions).build());
             }
@@ -185,10 +184,10 @@ public class LettuceUtils {
         return redisClient;
     }
 
-    public synchronized static <T> T exec(ConnectInfo connectInfo, Function<RedisCommands<String, String>, T> function) {
-        var redisClient = getRedisClient(connectInfo);
+    public synchronized static <T> T exec(ConnectContext connectContext, Function<RedisCommands<String, String>, T> function) {
+        var redisClient = getRedisClient(connectContext);
         try {
-            JschUtils.openSession(connectInfo);
+            JschUtils.openSession(connectContext);
             try (var connection = redisClient.connect()) {
                 return function.apply(connection.sync());
             } finally {
@@ -202,31 +201,31 @@ public class LettuceUtils {
         }
     }
 
-    public synchronized static RedisURI getRedisURI(ConnectInfo connectInfo) {
-        if (Fn.equal(connectInfo.getConnectTypeMode(), Enums.ConnectType.SSH)) {
-            connectInfo.setLocalHost("127.0.0.1");
+    public synchronized static RedisURI getRedisURI(ConnectContext connectContext) {
+        if (Fn.equal(connectContext.getConnectTypeMode(), Enums.ConnectType.SSH)) {
+            connectContext.setLocalHost("127.0.0.1");
             int port = getTempLocalPort();
-            connectInfo.setLocalPort(port);
+            connectContext.setLocalPort(port);
         }
         String host = "";
         String password = "";
-        if (!StringUtil.isNullOrEmpty(connectInfo.getHost())) {
-            host = connectInfo.getHost().replace("\uFEFF", "");
+        if (!StringUtil.isNullOrEmpty(connectContext.getHost())) {
+            host = connectContext.getHost().replace("\uFEFF", "");
         }
-        if (!StringUtil.isNullOrEmpty(connectInfo.getPassword())) {
-            password = connectInfo.getPassword().replace("\uFEFF", "");
+        if (!StringUtil.isNullOrEmpty(connectContext.getPassword())) {
+            password = connectContext.getPassword().replace("\uFEFF", "");
         }
 
         var redisURI = RedisURI.builder()
-                .withHost(Fn.equal(connectInfo.getConnectTypeMode(), Enums.ConnectType.SSH) ? connectInfo.getLocalHost() : host)
-                .withPort(Fn.equal(connectInfo.getConnectTypeMode(), Enums.ConnectType.SSH) ? connectInfo.getLocalPort() : connectInfo.getPort())
-                .withSsl(connectInfo.getEnableSsl())
-                .withDatabase(connectInfo.getDatabase())
-                .withTimeout(Duration.ofMillis(PrefUtils.getState().getInt(Constants.KEY_REDIS_TIMEOUT, 1000)))
+                .withHost(Fn.equal(connectContext.getConnectTypeMode(), Enums.ConnectType.SSH) ? connectContext.getLocalHost() : host)
+                .withPort(Fn.equal(connectContext.getConnectTypeMode(), Enums.ConnectType.SSH) ? connectContext.getLocalPort() : connectContext.getPort())
+                .withSsl(connectContext.getEnableSsl())
+                .withDatabase(connectContext.getDatabase())
+                .withTimeout(Duration.ofMillis(1000))
                 .build();
 
-        if (Fn.isNotEmpty(connectInfo.getUsername()) && Fn.isNotEmpty(password)) {
-            var staticCredentialsProvider = new StaticCredentialsProvider(connectInfo.getUsername(), password.toCharArray());
+        if (Fn.isNotEmpty(connectContext.getUsername()) && Fn.isNotEmpty(password)) {
+            var staticCredentialsProvider = new StaticCredentialsProvider(connectContext.getUsername(), password.toCharArray());
             redisURI.setCredentialsProvider(staticCredentialsProvider);
         } else if (Fn.isNotEmpty(password)) {
             var staticCredentialsProvider = new StaticCredentialsProvider(null, password.toCharArray());

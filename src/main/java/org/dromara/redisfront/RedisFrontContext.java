@@ -12,6 +12,7 @@ import org.dromara.quickswing.ui.app.QSWidget;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.ui.widget.MainWidget;
 import raven.popup.GlassPanePopup;
+
 import javax.sql.DataSource;
 import javax.swing.*;
 import java.io.File;
@@ -67,26 +68,25 @@ public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, Redi
     }
 
     @Override
-    protected void populatePreferencesFromApplication(QSWidget<RedisFrontPrefs> app, RedisFrontPrefs preferences) {
-
+    protected void performBeforeInitialization(RedisFrontPrefs preferences) {
+//        if (preferences.getDBInitialized()) {
+        DataSource datasource = getDatabaseManager().getDatasource();
+        try {
+            DbUtil.use(datasource).execute(Constants.SQL_CREATE_CONNECT_GROUP);
+            log.info("创建 connect_group 表完成！");
+            DbUtil.use(datasource).execute(Constants.SQL_CREATE_CONNECT_DETAIL);
+            log.info("创建 connect_detail 表完成！");
+            preferences.setDBInitialized(true);
+        } catch (SQLException e) {
+            log.error("数据库初始化失败.", e);
+            JOptionPane.showMessageDialog(null, e.getMessage(), "数据库初始化失败", JOptionPane.ERROR_MESSAGE);
+        }
+//        }
     }
 
     @Override
     protected void performPostInitialization(QSWidget<RedisFrontPrefs> application, RedisFrontPrefs preferences) {
         GlassPanePopup.install(application);
-        if (!preferences.getDBInitialized()) {
-            DataSource datasource = getDatabaseManager().getDatasource();
-            try {
-                DbUtil.use(datasource).execute(Constants.SQL_CREATE_CONNECT_GROUP);
-                log.info("创建 connect_group 表完成！");
-                DbUtil.use(datasource).execute(Constants.SQL_CREATE_CONNECT_DETAIL);
-                log.info("创建 connect_detail 表完成！");
-                preferences.setDBInitialized(true);
-            } catch (SQLException e) {
-                log.error("数据库初始化失败.", e);
-                JOptionPane.showMessageDialog(application, e.getMessage(), "数据库初始化失败", JOptionPane.ERROR_MESSAGE);
-            }
-        }
     }
 
     public String version() {

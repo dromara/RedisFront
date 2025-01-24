@@ -1,6 +1,5 @@
-package org.dromara.redisfront.model;
+package org.dromara.redisfront.ui.widget.left.tree;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -19,12 +18,21 @@ import java.util.Comparator;
 @Getter
 @Setter
 @Accessors(chain = true)
-@AllArgsConstructor
-public class RedisConnectTreeItem extends DefaultMutableTreeNode implements Comparator<TreeNode> {
+public class RedisConnectTreeNode extends DefaultMutableTreeNode implements Comparator<TreeNode> {
 
     private Boolean isGroup;
     private ConnectGroupEntity group;
     private ConnectDetailEntity detail;
+
+    public RedisConnectTreeNode(ConnectGroupEntity group) {
+        this.isGroup = true;
+        this.group = group;
+    }
+
+    public RedisConnectTreeNode(ConnectDetailEntity detail) {
+        this.isGroup = false;
+        this.detail = detail;
+    }
 
     public Integer id() {
         if (isGroup) {
@@ -43,7 +51,7 @@ public class RedisConnectTreeItem extends DefaultMutableTreeNode implements Comp
 
     @Override
     public int compare(TreeNode o1, TreeNode o2) {
-        if (o1 instanceof RedisConnectTreeItem o1Node && o2 instanceof RedisConnectTreeItem o2Node) {
+        if (o1 instanceof RedisConnectTreeNode o1Node && o2 instanceof RedisConnectTreeNode o2Node) {
             return o1Node.id().compareTo(o2Node.id());
         }
         return 0;

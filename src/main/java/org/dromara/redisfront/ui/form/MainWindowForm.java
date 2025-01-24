@@ -8,10 +8,9 @@ import org.dromara.redisfront.commons.constant.Enums;
 import org.dromara.redisfront.commons.constant.Icons;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.commons.util.*;
-import org.dromara.redisfront.model.ConnectInfo;
-import org.dromara.redisfront.dao.ConnectDetailDao;
+import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;
-import org.dromara.redisfront.ui.component.MainTabbedPanel;
+import org.dromara.redisfront.ui.support.MainTabbedPanel;
 import org.dromara.redisfront.ui.dialog.LogsDialog;
 import io.lettuce.core.RedisException;
 import io.lettuce.core.api.sync.BaseRedisCommands;
@@ -49,8 +48,8 @@ public class MainWindowForm {
         contentPanel.add(MainNoneForm.getInstance(), BorderLayout.CENTER);
     }
 
-    public void addTabActionPerformed(final ConnectInfo connectInfo) {
-        var addTabWorker = new SwingWorker<ConnectInfo, Integer>() {
+    public void addTabActionPerformed(final ConnectContext connectContext) {
+        var addTabWorker = new SwingWorker<ConnectContext, Integer>() {
             @Override
             protected void done() {
                 try {
@@ -74,39 +73,39 @@ public class MainWindowForm {
             }
 
             @Override
-            protected ConnectInfo doInBackground() {
-                connectInfo.setRedisMode(RedisBasicService.service.getRedisModeEnum(connectInfo));
-                var prototype = connectInfo.clone();
+            protected ConnectContext doInBackground() {
+                connectContext.setRedisMode(RedisBasicService.service.getRedisModeEnum(connectContext));
+                var prototype = connectContext.clone();
 
                 FutureUtils.runAsync(() -> {
                     if (Fn.equal(prototype.getId(), 0)) {
-                        ConnectDetailDao.DAO.save(prototype);
+//                        ConnectDetailDao.DAO.save(prototype);
                     } else {
-                        ConnectDetailDao.DAO.update(prototype);
+//                        ConnectDetailDao.DAO.update(prototype);
                     }
                 });
 
-                if (Enums.RedisMode.SENTINEL == connectInfo.getRedisMode()) {
-                    var masterList = LettuceUtils.sentinelExec(connectInfo, RedisSentinelCommands::masters);
+                if (Enums.RedisMode.SENTINEL == connectContext.getRedisMode()) {
+                    var masterList = LettuceUtils.sentinelExec(connectContext, RedisSentinelCommands::masters);
                     var master = masterList.stream().findAny().orElseThrow();
                     var ip = master.get("ip");
                     var port = master.get("port");
                     LoadingUtils.closeDialog();
                     var ret = JOptionPane.showConfirmDialog(RedisFrontMain.frame, String.format(LocaleUtils.getMessageFromBundle("MainWindowForm.JOptionPane.showConfirmDialog.message"), ip, port), "连接提示", JOptionPane.YES_NO_OPTION);
                     if (ret == JOptionPane.YES_OPTION) {
-                        connectInfo.setHost(ip);
-                        connectInfo.setPort(Integer.valueOf(port));
+                        connectContext.setHost(ip);
+                        connectContext.setPort(Integer.valueOf(port));
                     }
                     try {
-                        LettuceUtils.run(connectInfo, BaseRedisCommands::ping);
+                        LettuceUtils.run(connectContext, BaseRedisCommands::ping);
                     } catch (Exception e) {
                         if (e instanceof RedisException redisException) {
                             var ex = redisException.getCause();
                             if (Fn.equal(ex.getMessage(), "WRONGPASS invalid username-password pair or user is disabled.")) {
                                 var password = JOptionPane.showInputDialog(RedisFrontMain.frame, String.format(LocaleUtils.getMessageFromBundle("MainWindowForm.JOptionPane.showInputDialog.message"), ip, port));
                                 if (ret == JOptionPane.YES_OPTION) {
-                                    connectInfo.setPassword(password);
-                                    LettuceUtils.run(connectInfo, BaseRedisCommands::ping);
+                                    connectContext.setPassword(password);
+                                    LettuceUtils.run(connectContext, BaseRedisCommands::ping);
                                 }
                             }
                         } else if (Fn.isNotNull(e.getCause())) {
@@ -116,9 +115,9 @@ public class MainWindowForm {
                             throw e;
                         }
                     }
-                    LoadingUtils.showDialog(String.format(LocaleUtils.getMessageFromBundle("MainWindowForm.connection.message"), connectInfo.getHost(), connectInfo.getPort()));
+                    LoadingUtils.showDialog(String.format(LocaleUtils.getMessageFromBundle("MainWindowForm.connection.message"), connectContext.getHost(), connectContext.getPort()));
                 }
-                return connectInfo;
+                return connectContext;
             }
         };
         addTabWorker.execute();

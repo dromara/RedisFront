@@ -19,9 +19,11 @@ import org.dromara.redisfront.commons.util.AlertUtils;
 import org.dromara.redisfront.commons.util.FutureUtils;
 import org.dromara.redisfront.commons.util.LocaleUtils;
 import org.dromara.redisfront.model.*;
+import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.ScanContext;
 import org.dromara.redisfront.service.*;
-import org.dromara.redisfront.ui.component.LoadingPanel;
-import org.dromara.redisfront.ui.component.TextEditor;
+import org.dromara.redisfront.ui.support.LoadingPanel;
+import org.dromara.redisfront.ui.support.TextEditor;
 import io.lettuce.core.*;
 import org.dromara.redisfront.ui.dialog.AddOrUpdateItemDialog;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -81,7 +83,7 @@ public class DataViewForm {
     private TextEditor textEditor;
     private JTextField fieldOrScoreField;
     private JComboBox<String> jComboBox;
-    private final ConnectInfo connectInfo;
+    private final ConnectContext connectContext;
 
     private final Map<String, ScanContext<String>> scanSetContextMap;
     private final Map<String, ScanContext<String>> scanListContextMap;
@@ -106,8 +108,8 @@ public class DataViewForm {
         this.refreshAfterHandler = refreshAfterHandler;
     }
 
-    public static DataViewForm newInstance(ConnectInfo connectInfo) {
-        return new DataViewForm(connectInfo);
+    public static DataViewForm newInstance(ConnectContext connectContext) {
+        return new DataViewForm(connectContext);
     }
 
     public void setDeleteActionHandler(ActionHandler handler) {
@@ -130,8 +132,8 @@ public class DataViewForm {
         refBtn.setEnabled(true);
     }
 
-    public DataViewForm(ConnectInfo connectInfo) {
-        this.connectInfo = connectInfo;
+    public DataViewForm(ConnectContext connectContext) {
+        this.connectContext = connectContext;
         scanZSetContextMap = new LinkedHashMap<>();
         scanSetContextMap = new LinkedHashMap<>();
         scanListContextMap = new LinkedHashMap<>();
@@ -364,10 +366,10 @@ public class DataViewForm {
         refreshBeforeHandler.handle();
         beforeActionHandler.handle();
 
-        var type = RedisBasicService.service.type(connectInfo, key);
+        var type = RedisBasicService.service.type(connectContext, key);
         if (Fn.notEqual(type, "none")) {
             var keyTypeEnum = Enums.KeyTypeEnum.valueOf(type.toUpperCase());
-            var ttl = RedisBasicService.service.ttl(connectInfo, key);
+            var ttl = RedisBasicService.service.ttl(connectContext, key);
 
             SwingUtilities.invokeLater(() -> {
                 fieldOrScoreField.setVisible(keyTypeEnum == Enums.KeyTypeEnum.ZSET || keyTypeEnum == Enums.KeyTypeEnum.HASH);
@@ -401,8 +403,8 @@ public class DataViewForm {
     }
 
     private void loadStringActionPerformed(String key) {
-        var strLen = RedisStringService.service.strlen(connectInfo, key);
-        var value = RedisStringService.service.get(connectInfo, key);
+        var strLen = RedisStringService.service.strlen(connectContext, key);
+        var value = RedisStringService.service.get(connectContext, key);
         SwingUtilities.invokeLater(() -> {
             tableViewPanel.setVisible(false);
             valueUpdateSaveBtn.setEnabled(true);
@@ -413,14 +415,14 @@ public class DataViewForm {
     }
 
     private void loadHashDataActionPerformed(String key) {
-        var len = RedisHashService.service.hlen(connectInfo, key);
+        var len = RedisHashService.service.hlen(connectContext, key);
         var scanContext = scanHashContextMap.getOrDefault(key, new ScanContext<>());
         var lastSearchKey = scanContext.getSearchKey();
 
         scanContext.setSearchKey(tableSearchField.getText());
         scanContext.setLimit(500L);
 
-        var mapScanCursor = RedisHashService.service.hscan(connectInfo, key, scanContext.getScanCursor(), scanContext.getScanArgs());
+        var mapScanCursor = RedisHashService.service.hscan(connectContext, key, scanContext.getScanCursor(), scanContext.getScanArgs());
         scanContext.setScanCursor(mapScanCursor);
 
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
@@ -452,14 +454,14 @@ public class DataViewForm {
     }
 
     private void loadSetDataActionPerformed(String key) {
-        var len = RedisSetService.service.scard(connectInfo, key);
+        var len = RedisSetService.service.scard(connectContext, key);
         var scanContext = scanSetContextMap.getOrDefault(key, new ScanContext<>());
 
         var lastSearchKey = scanContext.getSearchKey();
         scanContext.setSearchKey(tableSearchField.getText());
         scanContext.setLimit(500L);
 
-        var valueScanCursor = RedisSetService.service.sscan(connectInfo, key, scanContext.getScanCursor(), scanContext.getScanArgs());
+        var valueScanCursor = RedisSetService.service.sscan(connectContext, key, scanContext.getScanCursor(), scanContext.getScanArgs());
         scanContext.setScanCursor(valueScanCursor);
 
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
@@ -487,7 +489,7 @@ public class DataViewForm {
     }
 
     private void loadListDataActionPerformed(String key) {
-        var len = RedisListService.service.llen(connectInfo, key);
+        var len = RedisListService.service.llen(connectContext, key);
 
         var scanContext = scanListContextMap.getOrDefault(key, new ScanContext<>());
 
@@ -496,7 +498,7 @@ public class DataViewForm {
         scanContext.setLimit(500L);
         var start = Long.parseLong(scanContext.getScanCursor().getCursor());
         var stop = start + (scanContext.getLimit() - 1);
-        var value = RedisListService.service.lrange(connectInfo, key, start, stop);
+        var value = RedisListService.service.lrange(connectContext, key, start, stop);
 
         var nextCursor = start + scanContext.getLimit();
         if (nextCursor >= len) {
@@ -535,7 +537,7 @@ public class DataViewForm {
     }
 
     private void loadStreamDataActionPerformed(String key) {
-        var len = RedisStreamService.service.xlen(connectInfo, key);
+        var len = RedisStreamService.service.xlen(connectContext, key);
 
         var xRangeContext = xRangeContextMap.getOrDefault(key, new ScanContext<>());
 
@@ -544,7 +546,7 @@ public class DataViewForm {
         xRangeContext.setLimit(500L);
         var start = Long.parseLong(xRangeContext.getScanCursor().getCursor());
         var stop = start + (xRangeContext.getLimit() - 1);
-        var value = RedisStreamService.service.xrange(connectInfo, key, Range.unbounded(), Limit.create(start, stop));
+        var value = RedisStreamService.service.xrange(connectContext, key, Range.unbounded(), Limit.create(start, stop));
 
         var nextCursor = start + xRangeContext.getLimit();
         if (nextCursor >= len) {
@@ -576,7 +578,7 @@ public class DataViewForm {
     }
 
     private void loadZSetDataActionPerformed(String key) {
-        var len = RedisZSetService.service.zcard(connectInfo, key);
+        var len = RedisZSetService.service.zcard(connectContext, key);
 
         var scanContext = scanZSetContextMap.getOrDefault(key, new ScanContext<>());
 
@@ -584,7 +586,7 @@ public class DataViewForm {
         scanContext.setSearchKey(tableSearchField.getText());
         scanContext.setLimit(500L);
 
-        var valueScanCursor = RedisZSetService.service.zscan(connectInfo, key, scanContext.getScanCursor(), scanContext.getScanArgs());
+        var valueScanCursor = RedisZSetService.service.zscan(connectContext, key, scanContext.getScanCursor(), scanContext.getScanArgs());
         scanContext.setScanCursor(valueScanCursor);
 
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
@@ -641,18 +643,18 @@ public class DataViewForm {
             case ZSET -> {
                 var score = (Double) dataTable.getValueAt(row, 1);
                 var value = (String) dataTable.getValueAt(row, 2);
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), score.toString(), value, connectInfo, keyTypeEnum, () -> {
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), score.toString(), value, connectContext, keyTypeEnum, () -> {
                 });
             }
             case HASH -> {
                 var key = (String) dataTable.getValueAt(row, 0);
                 var value = (String) dataTable.getValueAt(row, 1);
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), key, value, connectInfo, keyTypeEnum, () -> {
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), key, value, connectContext, keyTypeEnum, () -> {
                 });
             }
             case LIST, SET -> {
                 var value = (String) dataTable.getValueAt(row, 1);
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), null, value, connectInfo, keyTypeEnum, () -> {
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), null, value, connectContext, keyTypeEnum, () -> {
                 });
             }
         }
@@ -741,8 +743,8 @@ public class DataViewForm {
                 var newValue = textEditor.textArea().getText();
 
                 if (typeEnum.equals(Enums.KeyTypeEnum.STRING)) {
-                    RedisBasicService.service.del(connectInfo, key);
-                    RedisStringService.service.set(connectInfo, key, newValue);
+                    RedisBasicService.service.del(connectContext, key);
+                    RedisStringService.service.set(connectContext, key, newValue);
                 } else {
 
                     var row = dataTable.getSelectedRow();
@@ -755,24 +757,24 @@ public class DataViewForm {
                         case HASH -> {
                             var fieldOrScore = fieldOrScoreField.getText();
                             var filed = (String) dataTable.getValueAt(row, 0);
-                            RedisHashService.service.hdel(connectInfo, key, filed);
-                            RedisHashService.service.hset(connectInfo, key, fieldOrScore, newValue);
+                            RedisHashService.service.hdel(connectContext, key, filed);
+                            RedisHashService.service.hset(connectContext, key, fieldOrScore, newValue);
                         }
                         case ZSET -> {
                             var fieldOrScore = fieldOrScoreField.getText();
                             var value = (String) dataTable.getValueAt(row, 2);
-                            RedisZSetService.service.zrem(connectInfo, key, value);
-                            RedisZSetService.service.zadd(connectInfo, key, Double.parseDouble(fieldOrScore), newValue);
+                            RedisZSetService.service.zrem(connectContext, key, value);
+                            RedisZSetService.service.zadd(connectContext, key, Double.parseDouble(fieldOrScore), newValue);
                         }
                         case LIST -> {
                             var value = (String) dataTable.getValueAt(row, 1);
-                            RedisListService.service.lrem(connectInfo, key, 1, value);
-                            RedisListService.service.lpush(connectInfo, key, newValue);
+                            RedisListService.service.lrem(connectContext, key, 1, value);
+                            RedisListService.service.lpush(connectContext, key, newValue);
                         }
                         case SET -> {
                             var value = (String) dataTable.getValueAt(row, 1);
-                            RedisSetService.service.srem(connectInfo, key, value);
-                            RedisSetService.service.sadd(connectInfo, key, newValue);
+                            RedisSetService.service.srem(connectContext, key, value);
+                            RedisSetService.service.sadd(connectContext, key, newValue);
                         }
                     }
                 }
@@ -887,10 +889,10 @@ public class DataViewForm {
             String ttl = ttlField.getText();
             String key = keyField.getText();
             if (Fn.notEqual(key, lastKeyName)) {
-                RedisBasicService.service.rename(connectInfo, lastKeyName, key);
+                RedisBasicService.service.rename(connectContext, lastKeyName, key);
             }
             if (Fn.notEqual(ttl, lastKeyTTL.toString())) {
-                RedisBasicService.service.expire(connectInfo, key, Long.valueOf(ttl));
+                RedisBasicService.service.expire(connectContext, key, Long.valueOf(ttl));
             }
             reloadAllActionPerformed();
             SwingUtilities.invokeLater(() -> {
@@ -928,15 +930,15 @@ public class DataViewForm {
 
             switch (keyTypeEnum) {
                 case ZSET ->
-                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("ZSET", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> tableRefreshBtn.doClick());
+                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("ZSET", keyField.getText(), null, null, connectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
                 case HASH ->
-                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("HASH", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> tableRefreshBtn.doClick());
+                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("HASH", keyField.getText(), null, null, connectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
                 case LIST ->
-                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("LIST", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> tableRefreshBtn.doClick());
+                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("LIST", keyField.getText(), null, null, connectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
                 case SET ->
-                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("SET", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> tableRefreshBtn.doClick());
+                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("SET", keyField.getText(), null, null, connectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
                 case STREAM ->
-                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("STREAM", keyField.getText(), null, null, connectInfo, keyTypeEnum, () -> tableRefreshBtn.doClick());
+                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("STREAM", keyField.getText(), null, null, connectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
             }
         });
 
@@ -961,7 +963,7 @@ public class DataViewForm {
             switch (keyTypeEnum) {
                 case ZSET -> {
                     var value = (String) dataTable.getValueAt(row, 2);
-                    RedisZSetService.service.zrem(connectInfo, key, value);
+                    RedisZSetService.service.zrem(connectContext, key, value);
                     {
                         fieldOrScoreField.setText("");
                         textEditor.textArea().setText("");
@@ -970,7 +972,7 @@ public class DataViewForm {
                 }
                 case HASH -> {
                     var field = (String) dataTable.getValueAt(row, 0);
-                    RedisHashService.service.hdel(connectInfo, key, field);
+                    RedisHashService.service.hdel(connectContext, key, field);
                     {
                         fieldOrScoreField.setText("");
                         textEditor.textArea().setText("");
@@ -979,7 +981,7 @@ public class DataViewForm {
                 }
                 case LIST -> {
                     var value = (String) dataTable.getValueAt(row, 1);
-                    RedisListService.service.lrem(connectInfo, key, 1, value);
+                    RedisListService.service.lrem(connectContext, key, 1, value);
                     {
                         textEditor.textArea().setText("");
                         valueUpdateSaveBtn.setEnabled(false);
@@ -987,7 +989,7 @@ public class DataViewForm {
                 }
                 case SET -> {
                     var value = (String) dataTable.getValueAt(row, 1);
-                    RedisSetService.service.srem(connectInfo, key, value);
+                    RedisSetService.service.srem(connectContext, key, value);
                     {
                         textEditor.textArea().setText("");
                         valueUpdateSaveBtn.setEnabled(false);
@@ -995,7 +997,7 @@ public class DataViewForm {
                 }
                 case STREAM -> {
                     var id = (String) dataTable.getValueAt(row, 1);
-                    RedisStreamService.service.xdel(connectInfo, key, id);
+                    RedisStreamService.service.xdel(connectContext, key, id);
                     {
                         fieldOrScoreField.setText("");
                         textEditor.textArea().setText("");

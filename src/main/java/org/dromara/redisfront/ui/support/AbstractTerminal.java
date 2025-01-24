@@ -1,7 +1,7 @@
-package org.dromara.redisfront.commons.ui;
+package org.dromara.redisfront.ui.support;
 
 import org.dromara.redisfront.commons.func.Fn;
-import org.dromara.redisfront.model.ConnectInfo;
+import org.dromara.redisfront.model.context.ConnectContext;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -37,7 +37,7 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
 
     protected abstract void inputProcessHandler(String input);
 
-    protected abstract ConnectInfo connectInfo();
+    protected abstract ConnectContext connectInfo();
 
     protected abstract String databaseName();
 

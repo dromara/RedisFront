@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.common;
+package org.dromara.redisfront.ui.support;
 
 import com.formdev.flatlaf.util.SystemInfo;
 import com.intellij.uiDesigner.core.GridConstraints;
@@ -15,11 +15,11 @@ import java.awt.*;
  * @author jin
  */
 @SuppressWarnings("all")
-public class DefaultNonePanel extends JPanel {
+public class NonePanel extends JPanel {
     @Getter
-    private static final DefaultNonePanel instance = new DefaultNonePanel();
+    private static final NonePanel instance = new NonePanel();
 
-    public DefaultNonePanel() {
+    public NonePanel() {
         this.setLayout(new GridLayoutManager(4, 4, new Insets(0, 0, 0, 0), -1, -1));
         this.add(new Spacer(), new GridConstraints(1, 0, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         this.add(new Spacer(), new GridConstraints(2, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));

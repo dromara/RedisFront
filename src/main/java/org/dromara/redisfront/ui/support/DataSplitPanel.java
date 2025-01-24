@@ -1,7 +1,7 @@
-package org.dromara.redisfront.ui.component;
+package org.dromara.redisfront.ui.support;
 
 import com.formdev.flatlaf.ui.FlatLineBorder;
-import org.dromara.redisfront.model.ConnectInfo;
+import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.ui.form.MainNoneForm;
 import org.dromara.redisfront.ui.form.fragment.DataSearchForm;
@@ -20,10 +20,10 @@ import java.awt.*;
  */
 public class DataSplitPanel extends JSplitPane {
     private static final Logger log = LoggerFactory.getLogger(DataSplitPanel.class);
-    private final ConnectInfo connectInfo;
+    private final ConnectContext connectContext;
 
-    public static DataSplitPanel newInstance(ConnectInfo connectInfo) {
-        return new DataSplitPanel(connectInfo);
+    public static DataSplitPanel newInstance(ConnectContext connectContext) {
+        return new DataSplitPanel(connectContext);
     }
 
     @Override
@@ -31,18 +31,18 @@ public class DataSplitPanel extends JSplitPane {
         super.updateUI();
     }
 
-    public DataSplitPanel(ConnectInfo connectInfo) {
+    public DataSplitPanel(ConnectContext connectContext) {
 
-        this.connectInfo = connectInfo;
+        this.connectContext = connectContext;
 
-        var dataSearchForm = DataSearchForm.newInstance(connectInfo);
+        var dataSearchForm = DataSearchForm.newInstance(connectContext);
 
         this.setLeftComponent(dataSearchForm.getContentPanel());
         this.setRightComponent(commonNonePanel);
 
         //节点点击事件
         dataSearchForm.setNodeClickProcessHandler((treeNodeInfo) -> {
-            var dataViewForm = DataViewForm.newInstance(connectInfo);
+            var dataViewForm = DataViewForm.newInstance(connectContext);
 
             dataViewForm.setRefreshBeforeHandler(dataSearchForm::scanBeforeProcess);
 
@@ -100,7 +100,7 @@ public class DataSplitPanel extends JSplitPane {
 
 
     public void ping() {
-        RedisBasicService.service.ping(connectInfo);
+        RedisBasicService.service.ping(connectContext);
     }
 
 }

@@ -17,8 +17,7 @@ import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.commons.ui.AbstractDialog;
 import org.dromara.redisfront.commons.util.AlertUtils;
 import org.dromara.redisfront.commons.util.LocaleUtils;
-import org.dromara.redisfront.model.ConnectInfo;
-import org.dromara.redisfront.dao.ConnectDetailDao;
+import org.dromara.redisfront.model.context.ConnectContext;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -90,12 +89,12 @@ public class ImportConfigDialog extends AbstractDialog<Void> {
                 if ("导入RedisFront配置".equals(selectedItem)) {
                     try {
                         if (JSONUtil.isTypeJSONObject(fileReader.readString())) {
-                            var connectInfo = JSONUtil.toBean(fileReader.readString(), ConnectInfo.class);
-                            ConnectDetailDao.DAO.save(connectInfo);
+                            var connectInfo = JSONUtil.toBean(fileReader.readString(), ConnectContext.class);
+//                            ConnectDetailDao.DAO.save(connectInfo);
                         } else {
-                            var connectInfos = JSONUtil.toList(fileReader.readString(), ConnectInfo.class);
-                            for (ConnectInfo connectInfo : connectInfos) {
-                                ConnectDetailDao.DAO.save(connectInfo);
+                            var connectInfos = JSONUtil.toList(fileReader.readString(), ConnectContext.class);
+                            for (ConnectContext connectContext : connectInfos) {
+//                                ConnectDetailDao.DAO.save(connectInfo);
                             }
                         }
                         AlertUtils.showInformationDialog("导入完成");
@@ -116,11 +115,11 @@ public class ImportConfigDialog extends AbstractDialog<Void> {
                                     for (Object connection : connections) {
                                         var groupConnection = (JSONObject) connection;
                                         var connectInfo = genConnectInfo(groupConnection.getRaw());
-                                        ConnectDetailDao.DAO.save(connectInfo);
+//                                        ConnectDetailDao.DAO.save(connectInfo);
                                     }
                                 } else {
                                     var connectInfo = genConnectInfo(data.getRaw());
-                                    ConnectDetailDao.DAO.save(connectInfo);
+//                                    ConnectDetailDao.DAO.save(connectInfo);
                                 }
                             }
                         }
@@ -136,8 +135,8 @@ public class ImportConfigDialog extends AbstractDialog<Void> {
         dispose();
     }
 
-    private ConnectInfo genConnectInfo(Map<String, Object> raw) {
-        var connectInfo = new ConnectInfo();
+    private ConnectContext genConnectInfo(Map<String, Object> raw) {
+        var connectInfo = new ConnectContext();
         if (Fn.isNotNull(raw.get("host"))) {
             connectInfo.setHost((String) raw.get("host"));
         }
@@ -154,7 +153,7 @@ public class ImportConfigDialog extends AbstractDialog<Void> {
             connectInfo.setUsername((String) raw.get("username"));
         }
         connectInfo.setConnectTypeMode(Enums.ConnectType.NORMAL);
-        connectInfo.setSshInfo(new ConnectInfo.SshInfo("", "", "", null, ""));
+        connectInfo.setSshInfo(new ConnectContext.SshInfo("", "", "", null, ""));
         if (!StrUtil.isBlankIfStr(raw.get("ssh_host"))) {
             connectInfo.getSshInfo().setHost((String) raw.get("ssh_host"));
             connectInfo.setConnectTypeMode(Enums.ConnectType.SSH);

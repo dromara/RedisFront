@@ -5,10 +5,10 @@ import com.formdev.flatlaf.util.SystemInfo;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
-import org.dromara.redisfront.ui.common.DrawerMenuItemEvent;
-import org.dromara.redisfront.ui.common.DrawerAnimationAction;
+import org.dromara.redisfront.ui.support.extend.DrawerMenuItemEvent;
+import org.dromara.redisfront.ui.support.extend.DrawerAnimationAction;
 import org.dromara.redisfront.ui.widget.MainComponent;
-import org.dromara.redisfront.ui.widget.left.tree.ConnectTree;
+import org.dromara.redisfront.ui.widget.left.tree.RedisConnectTree;
 import org.dromara.redisfront.ui.widget.MainWidget;
 import org.dromara.redisfront.ui.widget.left.panel.LogoPanel;
 import org.dromara.redisfront.ui.widget.left.panel.ThemesChangePanel;
@@ -96,7 +96,7 @@ public class MainLeftComponent extends SimpleDrawerBuilder {
 
     @Override
     public Component getMenu() {
-        JTree tree = new ConnectTree(owner, menuEvent);
+        JTree tree = new RedisConnectTree(owner, menuEvent);
         JScrollPane scrollPane = createScroll(tree);
         scrollPane.setBorder(new EmptyBorder(0, 10, 0, 10));
         return scrollPane;

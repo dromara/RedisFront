@@ -1,8 +1,8 @@
 package org.dromara.redisfront.service.impl;
 
 import org.dromara.redisfront.commons.constant.Enums;
-import org.dromara.redisfront.model.ConnectInfo;
-import org.dromara.redisfront.model.ScanContext;
+import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.ScanContext;
 import io.lettuce.core.MapScanCursor;
 import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
@@ -24,128 +24,128 @@ import java.util.Map;
 public class RedisHashServiceImpl implements RedisHashService {
 
     @Override
-    public String hget(ConnectInfo connectInfo, String key, String field) {
+    public String hget(ConnectContext connectContext, String key, String field) {
 
-        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectInfo, commands -> commands.hget(key, field));
+        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectContext, commands -> commands.hget(key, field));
         } else {
-            return LettuceUtils.exec(connectInfo, commands -> commands.hget(key, field));
+            return LettuceUtils.exec(connectContext, commands -> commands.hget(key, field));
         }
     }
 
     @Override
-    public Map<String, String> hgetall(ConnectInfo connectInfo, String key) {
-        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectInfo, commands -> commands.hgetall(key));
+    public Map<String, String> hgetall(ConnectContext connectContext, String key) {
+        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectContext, commands -> commands.hgetall(key));
         } else {
-            return LettuceUtils.exec(connectInfo, commands -> commands.hgetall(key));
+            return LettuceUtils.exec(connectContext, commands -> commands.hgetall(key));
         }
     }
 
     @Override
-    public List<String> hkeys(ConnectInfo connectInfo, String key) {
-        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectInfo, commands -> commands.hkeys(key));
+    public List<String> hkeys(ConnectContext connectContext, String key) {
+        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectContext, commands -> commands.hkeys(key));
         } else {
-            return LettuceUtils.exec(connectInfo, commands -> commands.hkeys(key));
+            return LettuceUtils.exec(connectContext, commands -> commands.hkeys(key));
         }
     }
 
     @Override
-    public Long hlen(ConnectInfo connectInfo, String key) {
-        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectInfo, commands -> commands.hlen(key));
+    public Long hlen(ConnectContext connectContext, String key) {
+        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectContext, commands -> commands.hlen(key));
         } else {
-            return LettuceUtils.exec(connectInfo, commands -> commands.hlen(key));
+            return LettuceUtils.exec(connectContext, commands -> commands.hlen(key));
         }
     }
 
     @Override
-    public String hmset(ConnectInfo connectInfo, String key, Map<String, String> map) {
-        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectInfo, commands -> commands.hmset(key, map));
+    public String hmset(ConnectContext connectContext, String key, Map<String, String> map) {
+        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectContext, commands -> commands.hmset(key, map));
         } else {
-            return LettuceUtils.exec(connectInfo, commands -> commands.hmset(key, map));
+            return LettuceUtils.exec(connectContext, commands -> commands.hmset(key, map));
         }
     }
 
     @Override
-    public MapScanCursor<String, String> hscan(ConnectInfo connectInfo, String key, ScanCursor scanCursor, ScanArgs scanArgs) {
+    public MapScanCursor<String, String> hscan(ConnectContext connectContext, String key, ScanCursor scanCursor, ScanArgs scanArgs) {
 
         ScanContext.MyScanArgs myScanArgs = (ScanContext.MyScanArgs) scanArgs;
-        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("HSCAN ".concat(key).concat(" ").concat(scanCursor.getCursor()).concat(myScanArgs.getCommandStr()));
+        var logInfo = RedisBasicService.buildLogInfo(connectContext).setInfo("HSCAN ".concat(key).concat(" ").concat(scanCursor.getCursor()).concat(myScanArgs.getCommandStr()));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectInfo, commands -> commands.hscan(key, scanCursor, scanArgs));
+        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectContext, commands -> commands.hscan(key, scanCursor, scanArgs));
         } else {
-            return LettuceUtils.exec(connectInfo, commands -> commands.hscan(key, scanCursor, scanArgs));
+            return LettuceUtils.exec(connectContext, commands -> commands.hscan(key, scanCursor, scanArgs));
         }
     }
 
     @Override
-    public MapScanCursor<String, String> hscan(ConnectInfo connectInfo, String key, ScanCursor scanCursor) {
+    public MapScanCursor<String, String> hscan(ConnectContext connectContext, String key, ScanCursor scanCursor) {
 
-        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("HSCAN ".concat(key).concat(" ").concat(scanCursor.getCursor()));
+        var logInfo = RedisBasicService.buildLogInfo(connectContext).setInfo("HSCAN ".concat(key).concat(" ").concat(scanCursor.getCursor()));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectInfo, commands -> commands.hscan(key, scanCursor));
+        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectContext, commands -> commands.hscan(key, scanCursor));
         } else {
-            return LettuceUtils.exec(connectInfo, commands -> commands.hscan(key, scanCursor));
+            return LettuceUtils.exec(connectContext, commands -> commands.hscan(key, scanCursor));
         }
     }
 
     @Override
-    public Boolean hset(ConnectInfo connectInfo, String key, String field, String value) {
+    public Boolean hset(ConnectContext connectContext, String key, String field, String value) {
 
-        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("HSET ".concat(key).concat(" ").concat(field).concat(" ").concat(value));
+        var logInfo = RedisBasicService.buildLogInfo(connectContext).setInfo("HSET ".concat(key).concat(" ").concat(field).concat(" ").concat(value));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectInfo, commands -> commands.hset(key, field, value));
+        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectContext, commands -> commands.hset(key, field, value));
         } else {
-            return LettuceUtils.exec(connectInfo, commands -> commands.hset(key, field, value));
+            return LettuceUtils.exec(connectContext, commands -> commands.hset(key, field, value));
         }
     }
 
     @Override
-    public Long hset(ConnectInfo connectInfo, String key, Map<String, String> map) {
-        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectInfo, commands -> commands.hset(key, map));
+    public Long hset(ConnectContext connectContext, String key, Map<String, String> map) {
+        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectContext, commands -> commands.hset(key, map));
         } else {
-            return LettuceUtils.exec(connectInfo, commands -> commands.hset(key, map));
+            return LettuceUtils.exec(connectContext, commands -> commands.hset(key, map));
         }
     }
 
     @Override
-    public Long hstrlen(ConnectInfo connectInfo, String key, String field) {
-        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectInfo, commands -> commands.hstrlen(key, field));
+    public Long hstrlen(ConnectContext connectContext, String key, String field) {
+        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectContext, commands -> commands.hstrlen(key, field));
         } else {
-            return LettuceUtils.exec(connectInfo, commands -> commands.hstrlen(key, field));
+            return LettuceUtils.exec(connectContext, commands -> commands.hstrlen(key, field));
         }
     }
 
     @Override
-    public List<String> hvals(ConnectInfo connectInfo, String key) {
-        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectInfo, commands -> commands.hvals(key));
+    public List<String> hvals(ConnectContext connectContext, String key) {
+        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectContext, commands -> commands.hvals(key));
         } else {
-            return LettuceUtils.exec(connectInfo, commands -> commands.hvals(key));
+            return LettuceUtils.exec(connectContext, commands -> commands.hvals(key));
         }
     }
 
     @Override
-    public Long hdel(ConnectInfo connectInfo, String key, String... fields) {
+    public Long hdel(ConnectContext connectContext, String key, String... fields) {
 
-        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("HSET ".concat(key).concat(" ").concat(Arrays.toString(fields).replace("[", "").replace("]", "").replace(","," ")));
+        var logInfo = RedisBasicService.buildLogInfo(connectContext).setInfo("HSET ".concat(key).concat(" ").concat(Arrays.toString(fields).replace("[", "").replace("]", "").replace(","," ")));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectInfo, commands -> commands.hdel(key, fields));
+        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectContext, commands -> commands.hdel(key, fields));
         } else {
-            return LettuceUtils.exec(connectInfo, commands -> commands.hdel(key, fields));
+            return LettuceUtils.exec(connectContext, commands -> commands.hdel(key, fields));
         }
     }
 

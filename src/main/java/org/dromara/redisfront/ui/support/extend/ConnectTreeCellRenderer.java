@@ -1,8 +1,8 @@
-package org.dromara.redisfront.ui.common;
+package org.dromara.redisfront.ui.support.extend;
 
 import com.formdev.flatlaf.util.SystemInfo;
 import org.dromara.redisfront.commons.constant.Icons;
-import org.dromara.redisfront.model.RedisConnectTreeItem;
+import org.dromara.redisfront.ui.widget.left.tree.RedisConnectTreeNode;
 import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer;
 
 import javax.swing.*;
@@ -19,8 +19,8 @@ public class ConnectTreeCellRenderer extends DefaultXTreeCellRenderer {
         if (SystemInfo.isWindows) {
             this.setFont(new Font("Microsoft YaHei", Font.PLAIN, 16));
         }
-        if (value instanceof RedisConnectTreeItem redisConnectTreeItem) {
-            if (redisConnectTreeItem.getIsGroup()) {
+        if (value instanceof RedisConnectTreeNode redisConnectTreeNode) {
+            if (redisConnectTreeNode.getIsGroup()) {
                 this.setIcon(Icons.FOLDER_ICON_14x14);
             } else {
                 this.setIcon(Icons.LINK_ICON_14x14);

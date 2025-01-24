@@ -16,7 +16,7 @@ import org.dromara.redisfront.commons.ui.AbstractDialog;
 import org.dromara.redisfront.commons.util.AlertUtils;
 import org.dromara.redisfront.commons.util.LocaleUtils;
 import org.dromara.redisfront.commons.util.PrefUtils;
-import org.dromara.redisfront.model.ConnectInfo;
+import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.service.*;
 
 import javax.swing.*;
@@ -50,17 +50,17 @@ public class AddKeyDialog extends AbstractDialog<String> {
 
     private final String parentKey;
 
-    private final ConnectInfo connectInfo;
+    private final ConnectContext connectContext;
 
-    public static void showAddDialog(ConnectInfo connectInfo, String parent, ProcessHandler<String> addSuccessProcessHandler) {
-        var addKeyDialog = new AddKeyDialog(connectInfo, parent, addSuccessProcessHandler);
+    public static void showAddDialog(ConnectContext connectContext, String parent, ProcessHandler<String> addSuccessProcessHandler) {
+        var addKeyDialog = new AddKeyDialog(connectContext, parent, addSuccessProcessHandler);
         addKeyDialog.setResizable(false);
         addKeyDialog.setLocationRelativeTo(RedisFrontMain.frame);
         addKeyDialog.pack();
         addKeyDialog.setVisible(true);
     }
 
-    public AddKeyDialog(ConnectInfo connectInfo, String parent, ProcessHandler<String> addSuccessProcessHandler) {
+    public AddKeyDialog(ConnectContext connectContext, String parent, ProcessHandler<String> addSuccessProcessHandler) {
         super(RedisFrontMain.frame);
         this.setModal(true);
         this.setResizable(true);
@@ -68,7 +68,7 @@ public class AddKeyDialog extends AbstractDialog<String> {
         this.setContentPane(contentPane);
         getRootPane().setDefaultButton(buttonOK);
         setTitle(LocaleUtils.getMessageFromBundle("AddKeyDialog.title"));
-        this.connectInfo = connectInfo;
+        this.connectContext = connectContext;
         this.processHandler = addSuccessProcessHandler;
         buttonOK.addActionListener(e -> onOK());
 
@@ -224,9 +224,9 @@ public class AddKeyDialog extends AbstractDialog<String> {
         var selectItem = (String) keyTypeComboBox.getSelectedItem();
 
         if (Fn.equal(Enums.KeyTypeEnum.HASH.typeName(), selectItem)) {
-            RedisHashService.service.hset(connectInfo, key, hashKeyField.getText(), keyValueField.getText());
+            RedisHashService.service.hset(connectContext, key, hashKeyField.getText(), keyValueField.getText());
         } else if (Fn.equal(Enums.KeyTypeEnum.STREAM.typeName(), selectItem)) {
-            var serverInfo = RedisBasicService.service.getServerInfo(connectInfo);
+            var serverInfo = RedisBasicService.service.getServerInfo(connectContext);
             var redisVersion = serverInfo.get("redis_version");
             var x = redisVersion.toString().split("\\.")[0];
             if (Integer.parseInt(x) < 5) {
@@ -236,9 +236,9 @@ public class AddKeyDialog extends AbstractDialog<String> {
                 HashMap<String, String> bodyMap = new HashMap<>();
                 JSONUtil.parseObj(value).forEach((key1, value1) -> bodyMap.put(key1, value1.toString()));
                 if (Fn.equal(streamField.getText(), "*")) {
-                    RedisStreamService.service.xadd(connectInfo, key, bodyMap);
+                    RedisStreamService.service.xadd(connectContext, key, bodyMap);
                 } else {
-                    RedisStreamService.service.xadd(connectInfo, streamField.getText(), key, bodyMap);
+                    RedisStreamService.service.xadd(connectContext, streamField.getText(), key, bodyMap);
                 }
             } else {
                 AlertUtils.showInformationDialog("stream 请输入JSON格式数据！");
@@ -247,17 +247,17 @@ public class AddKeyDialog extends AbstractDialog<String> {
             }
 
         } else if (Fn.equal(Enums.KeyTypeEnum.SET.typeName(), selectItem)) {
-            RedisSetService.service.sadd(connectInfo, key, value);
+            RedisSetService.service.sadd(connectContext, key, value);
         } else if (Fn.equal(Enums.KeyTypeEnum.LIST.typeName(), selectItem)) {
-            RedisListService.service.lpush(connectInfo, key, value);
+            RedisListService.service.lpush(connectContext, key, value);
         } else if (Fn.equal(Enums.KeyTypeEnum.ZSET.typeName(), selectItem)) {
-            RedisZSetService.service.zadd(connectInfo, key, Double.parseDouble(zSetScoreField.getText()), value);
+            RedisZSetService.service.zadd(connectContext, key, Double.parseDouble(zSetScoreField.getText()), value);
         } else {
-            RedisStringService.service.set(connectInfo, key, value);
+            RedisStringService.service.set(connectContext, key, value);
         }
 
         if (ttl > 0) {
-            RedisBasicService.service.expire(connectInfo, key, ttl.longValue());
+            RedisBasicService.service.expire(connectContext, key, ttl.longValue());
         }
 
         dispose();

@@ -1,5 +1,6 @@
 package org.dromara.redisfront.ui.widget.left.tree;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.util.SystemInfo;
@@ -8,13 +9,14 @@ import org.dromara.quickswing.events.QSEvent;
 import org.dromara.quickswing.events.QSEventListener;
 import org.dromara.quickswing.ui.app.QSAction;
 import org.dromara.redisfront.RedisFrontContext;
+import org.dromara.redisfront.dao.ConnectDetailDao;
 import org.dromara.redisfront.dao.ConnectGroupDao;
-import org.dromara.redisfront.model.RedisConnectTreeItem;
+import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 import org.dromara.redisfront.model.entity.ConnectGroupEntity;
-import org.dromara.redisfront.ui.common.ConnectTreeCellRenderer;
 import org.dromara.redisfront.ui.dialog.AddConnectDialog;
 import org.dromara.redisfront.ui.event.DeleteConnectTreeEvent;
 import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
+import org.dromara.redisfront.ui.support.extend.ConnectTreeCellRenderer;
 import org.dromara.redisfront.ui.widget.MainWidget;
 import org.jdesktop.swingx.JXTree;
 import raven.drawer.component.menu.MenuEvent;
@@ -34,14 +36,14 @@ import java.sql.SQLException;
 import java.util.List;
 
 @Slf4j
-public class ConnectTree extends JXTree {
+public class RedisConnectTree extends JXTree {
     private final MainWidget owner;
     private final MenuEvent menuEvent;
     private JPopupMenu treePopupMenu;
     private JPopupMenu treeNodePopupMenu;
     private JPopupMenu treeNodeGroupPopupMenu;
 
-    public ConnectTree(MainWidget owner, MenuEvent menuEvent) {
+    public RedisConnectTree(MainWidget owner, MenuEvent menuEvent) {
         this.owner = owner;
         this.menuEvent = menuEvent;
         this.setRootVisible(false);
@@ -100,9 +102,9 @@ public class ConnectTree extends JXTree {
                 }
                 if (event instanceof DeleteConnectTreeEvent deleteConnectTreeEvent) {
                     Object message = deleteConnectTreeEvent.getMessage();
-                    if (message instanceof RedisConnectTreeItem RedisConnectTreeItem) {
+                    if (message instanceof RedisConnectTreeNode RedisConnectTreeNode) {
                         context.taskExecute(() -> {
-                            ConnectGroupDao.newInstance(datasource).delete(RedisConnectTreeItem.id());
+                            ConnectGroupDao.newInstance(datasource).delete(RedisConnectTreeNode.id());
                             return buildConnectTreeItem(datasource);
                         }, (r, e) -> {
                             if (e != null) {
@@ -122,13 +124,21 @@ public class ConnectTree extends JXTree {
     public DefaultMutableTreeNode buildConnectTreeItem(DataSource dataSource) throws SQLException {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("root", true);
         List<ConnectGroupEntity> connectGroupEntityList = ConnectGroupDao.newInstance(dataSource).loadAll();
-        for (ConnectGroupEntity entity : connectGroupEntityList) {
-            RedisConnectTreeItem treeNodeInfo = new RedisConnectTreeItem(
-                    true,
-                    entity,
-                    null
-            );
-            root.add(treeNodeInfo);
+        for (ConnectGroupEntity connectGroupEntity : connectGroupEntityList) {
+            RedisConnectTreeNode treeGroupNodeInfo = new RedisConnectTreeNode(connectGroupEntity);
+            List<ConnectDetailEntity> connectDetailEntities = ConnectDetailDao.newInstance(dataSource).loadAll(connectGroupEntity.getGroupId());
+            if (CollUtil.isNotEmpty(connectDetailEntities)) {
+                for (ConnectDetailEntity connectDetailEntity : connectDetailEntities) {
+                    RedisConnectTreeNode treeDetailNodeInfo = new RedisConnectTreeNode(connectDetailEntity);
+                    treeGroupNodeInfo.add(treeDetailNodeInfo);
+                }
+            }
+            root.add(treeGroupNodeInfo);
+        }
+        List<ConnectDetailEntity> connectDetailEntityList = ConnectDetailDao.newInstance(dataSource).loadAll();
+        for (ConnectDetailEntity connectDetailEntity : connectDetailEntityList) {
+            RedisConnectTreeNode treeDetailNodeInfo = new RedisConnectTreeNode(connectDetailEntity);
+            root.add(treeDetailNodeInfo);
         }
         return root;
     }
@@ -150,8 +160,8 @@ public class ConnectTree extends JXTree {
                     setSelectionPath(getPathForLocation(e.getX(), e.getY()));
                     if (getSelectionPath() != null) {
                         Object component = getSelectionPath().getLastPathComponent();
-                        if (component instanceof RedisConnectTreeItem redisConnectTreeItem) {
-                            if (redisConnectTreeItem.getIsGroup()) {
+                        if (component instanceof RedisConnectTreeNode redisConnectTreeNode) {
+                            if (redisConnectTreeNode.getIsGroup()) {
                                 treeNodeGroupPopupMenu.show(e.getComponent(), e.getX(), e.getY());
                             } else {
                                 treeNodePopupMenu.show(e.getComponent(), e.getX(), e.getY());
@@ -177,7 +187,7 @@ public class ConnectTree extends JXTree {
                         return;
                     }
                     Object pathComponent = selectionPath.getLastPathComponent();
-                    if (pathComponent instanceof RedisConnectTreeItem redisConnectTreeItem) {
+                    if (pathComponent instanceof RedisConnectTreeNode redisConnectTreeItem) {
                         AddConnectDialog.getInstance(owner).showNewConnectDialog(redisConnectTreeItem.id());
 
                     }
@@ -195,7 +205,7 @@ public class ConnectTree extends JXTree {
                         return;
                     }
                     Object lastPathComponent = selectionPath.getLastPathComponent();
-                    if (lastPathComponent instanceof RedisConnectTreeItem redisConnectTreeItem) {
+                    if (lastPathComponent instanceof RedisConnectTreeNode redisConnectTreeItem) {
                         String groupName = redisConnectTreeItem.toString();
                         String value = (String) JOptionPane.showInputDialog(owner, "分组名称", "修改分组", JOptionPane.PLAIN_MESSAGE, null, null, groupName);
                         if (StrUtil.isEmpty(value) || StrUtil.equals(value, groupName)) {
@@ -226,7 +236,7 @@ public class ConnectTree extends JXTree {
                         return;
                     }
                     Object lastPathComponent = selectionPath.getLastPathComponent();
-                    if (lastPathComponent instanceof RedisConnectTreeItem redisConnectTreeItem) {
+                    if (lastPathComponent instanceof RedisConnectTreeNode redisConnectTreeItem) {
                         context.getEventBus().publish(new DeleteConnectTreeEvent(redisConnectTreeItem));
                     }
                 });

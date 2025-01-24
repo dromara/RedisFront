@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.component;
+package org.dromara.redisfront.ui.support;
 
 
 import com.formdev.flatlaf.ui.FlatLineBorder;

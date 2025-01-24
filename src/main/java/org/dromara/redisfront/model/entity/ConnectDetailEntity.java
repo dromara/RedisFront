@@ -4,13 +4,13 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.Data;
 import org.dromara.redisfront.commons.constant.Enums;
-import org.dromara.redisfront.model.ConnectInfo;
+import org.dromara.redisfront.model.context.ConnectContext;
 
 @Data
 public class ConnectDetailEntity {
     private Integer id;
     private String name;
-    private Integer groupId;
+    private Integer groupId = -1;
     private String host;
     private Integer port;
     private String username;
@@ -20,21 +20,21 @@ public class ConnectDetailEntity {
     private String sslConfig;
     private String sshConfig;
 
-    public ConnectInfo toConnectInfo() {
-        ConnectInfo connectInfo = new ConnectInfo();
-        connectInfo.setId(id);
-        connectInfo.setTitle(name);
-        connectInfo.setHost(host);
-        connectInfo.setPort(port);
-        connectInfo.setUsername(username);
-        connectInfo.setPassword(password);
-        connectInfo.setConnectTypeMode(Enums.ConnectType.of(connectMode));
+    public ConnectContext toConnectInfo() {
+        ConnectContext connectContext = new ConnectContext();
+        connectContext.setId(id);
+        connectContext.setTitle(name);
+        connectContext.setHost(host);
+        connectContext.setPort(port);
+        connectContext.setUsername(username);
+        connectContext.setPassword(password);
+        connectContext.setConnectTypeMode(Enums.ConnectType.of(connectMode));
         if (StrUtil.isNotEmpty(sslConfig)) {
-            JSONUtil.toBean(sslConfig, ConnectInfo.SslInfo.class);
+            JSONUtil.toBean(sslConfig, ConnectContext.SslInfo.class);
         }
         if (StrUtil.isNotEmpty(sshConfig)) {
-            JSONUtil.toBean(sshConfig, ConnectInfo.SshInfo.class);
+            JSONUtil.toBean(sshConfig, ConnectContext.SshInfo.class);
         }
-        return connectInfo;
+        return connectContext;
     }
 }

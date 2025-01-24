@@ -1,5 +1,6 @@
-package org.dromara.redisfront.model;
+package org.dromara.redisfront.model.context;
 
+import cn.hutool.json.JSONUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,7 +21,7 @@ import java.util.Map;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ConnectInfo implements Serializable, Cloneable {
+public class ConnectContext implements Serializable, Cloneable {
     private int id;
     private String title;
     private String host = "127.0.0.1";
@@ -30,7 +31,7 @@ public class ConnectInfo implements Serializable, Cloneable {
     private Map<Integer, Integer> clusterLocalPort;
     private String username;
     private String password;
-    private Integer database;
+    private Integer database = 0;
     private Boolean enableSsl = false;
     private Enums.ConnectType connectTypeMode;
     private Enums.RedisMode redisMode;
@@ -39,21 +40,22 @@ public class ConnectInfo implements Serializable, Cloneable {
 
     public ConnectDetailEntity toEntity() {
         ConnectDetailEntity entity = new ConnectDetailEntity();
-        entity.setId(id);
         entity.setName(title);
         entity.setHost(host);
         entity.setPort(port);
         entity.setUsername(username);
         entity.setPassword(password);
-        entity.setEnableSsl(enableSsl ? 0 : 1);
-
+        entity.setEnableSsl(enableSsl ? 1 : 0);
+        entity.setConnectMode(connectTypeMode.name());
+        entity.setSshConfig(JSONUtil.toJsonStr(sshInfo));
+        entity.setSslConfig(JSONUtil.toJsonStr(sslInfo));
         return entity;
     }
 
     @Override
-    public ConnectInfo clone() {
+    public ConnectContext clone() {
         try {
-            return (ConnectInfo) super.clone();
+            return (ConnectContext) super.clone();
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }

@@ -1,7 +1,7 @@
 package org.dromara.redisfront.service.impl;
 
 import org.dromara.redisfront.commons.constant.Enums;
-import org.dromara.redisfront.model.ConnectInfo;
+import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.ui.dialog.LogsDialog;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.commons.util.LettuceUtils;
@@ -16,51 +16,51 @@ public class RedisStringServiceImpl implements RedisStringService {
 
 
     @Override
-    public String set(ConnectInfo connectInfo, String key, String value) {
+    public String set(ConnectContext connectContext, String key, String value) {
 
 
-        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("SET ".concat(key).concat(" ").concat(value));
+        var logInfo = RedisBasicService.buildLogInfo(connectContext).setInfo("SET ".concat(key).concat(" ").concat(value));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectInfo, commands -> commands.set(key, value));
+        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectContext, commands -> commands.set(key, value));
         } else {
-            return LettuceUtils.exec(connectInfo, commands -> commands.set(key, value));
+            return LettuceUtils.exec(connectContext, commands -> commands.set(key, value));
         }
     }
 
     @Override
-    public String get(ConnectInfo connectInfo, String key) {
+    public String get(ConnectContext connectContext, String key) {
 
-        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("GET ".concat(key));
+        var logInfo = RedisBasicService.buildLogInfo(connectContext).setInfo("GET ".concat(key));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectInfo, commands -> commands.get(key));
+        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectContext, commands -> commands.get(key));
         } else {
-            return LettuceUtils.exec(connectInfo, commands -> commands.get(key));
+            return LettuceUtils.exec(connectContext, commands -> commands.get(key));
         }
     }
 
     @Override
-    public Long strlen(ConnectInfo connectInfo, String key) {
+    public Long strlen(ConnectContext connectContext, String key) {
 
-        var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("STRLEN ".concat(key));
+        var logInfo = RedisBasicService.buildLogInfo(connectContext).setInfo("STRLEN ".concat(key));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectInfo, commands -> commands.strlen(key));
+        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectContext, commands -> commands.strlen(key));
         } else {
-            return LettuceUtils.exec(connectInfo, commands -> commands.strlen(key));
+            return LettuceUtils.exec(connectContext, commands -> commands.strlen(key));
         }
     }
 
     @Override
-    public String setex(ConnectInfo connectInfo, String key, long seconds, String value) {
-        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectInfo, commands -> commands.setex(key, seconds, value));
+    public String setex(ConnectContext connectContext, String key, long seconds, String value) {
+        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectContext, commands -> commands.setex(key, seconds, value));
         } else {
-            return LettuceUtils.exec(connectInfo, commands -> commands.setex(key, seconds, value));
+            return LettuceUtils.exec(connectContext, commands -> commands.setex(key, seconds, value));
         }
     }
 

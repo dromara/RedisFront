@@ -3,7 +3,7 @@ package org.dromara.redisfront.service.impl;
 import org.dromara.redisfront.commons.constant.Enums;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.commons.util.LettuceUtils;
-import org.dromara.redisfront.model.ConnectInfo;
+import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.service.RedisPubSubService;
 
 /**
@@ -14,11 +14,11 @@ import org.dromara.redisfront.service.RedisPubSubService;
 public class RedisPubSubServiceImpl implements RedisPubSubService {
 
     @Override
-    public Long publish(ConnectInfo connectInfo, String channel, String message) {
-        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectInfo, clusterCommands -> clusterCommands.publish(channel, message));
+    public Long publish(ConnectContext connectContext, String channel, String message) {
+        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(connectContext, clusterCommands -> clusterCommands.publish(channel, message));
         } else {
-            return LettuceUtils.exec(connectInfo, commands -> commands.publish(channel, message));
+            return LettuceUtils.exec(connectContext, commands -> commands.publish(channel, message));
         }
     }
 

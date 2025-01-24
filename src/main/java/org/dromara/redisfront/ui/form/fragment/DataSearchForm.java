@@ -8,9 +8,9 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import org.dromara.redisfront.RedisFrontMain;
 import org.dromara.redisfront.commons.constant.Enums;
-import org.dromara.redisfront.model.ConnectInfo;
+import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.model.DbInfo;
-import org.dromara.redisfront.model.ScanContext;
+import org.dromara.redisfront.model.context.ScanContext;
 import org.dromara.redisfront.model.TreeNodeInfo;
 import org.dromara.redisfront.service.*;
 import org.dromara.redisfront.ui.dialog.AddKeyDialog;
@@ -70,7 +70,7 @@ public class DataSearchForm {
     private JButton deleteAllBtn;
     private volatile Map<Integer, ScanContext<String>> scanKeysContextMap;
     private ProcessHandler<TreeNodeInfo> nodeClickProcessHandler;
-    private final ConnectInfo connectInfo;
+    private final ConnectContext connectContext;
     private JButton searchBtn;
 
     private final ArrayList<DbInfo> dbList = new ArrayList<>() {
@@ -100,12 +100,12 @@ public class DataSearchForm {
         return contentPanel;
     }
 
-    public static DataSearchForm newInstance(ConnectInfo connectInfo) {
-        return new DataSearchForm(connectInfo);
+    public static DataSearchForm newInstance(ConnectContext connectContext) {
+        return new DataSearchForm(connectContext);
     }
 
-    public DataSearchForm(ConnectInfo connectInfo) {
-        this.connectInfo = connectInfo;
+    public DataSearchForm(ConnectContext connectContext) {
+        this.connectContext = connectContext;
         $$$setupUI$$$();
         databaseComboBox.setSelectedIndex(0);
     }
@@ -119,7 +119,7 @@ public class DataSearchForm {
         try {
             LoadingUtils.showDialog(LocaleUtils.getMessageFromBundle("DataSearchForm.showDialog.message"));
             scanBeforeProcess();
-            var scanKeysContext = scanKeysContextMap.get(connectInfo.getDatabase());
+            var scanKeysContext = scanKeysContextMap.get(connectContext.getDatabase());
 
             if (Fn.isNull(scanKeysContext.getLimit())) {
                 Long limit = PrefUtils.getState().getLong(Constants.KEY_KEY_MAX_LOAD_NUM, 10000L);
@@ -144,7 +144,7 @@ public class DataSearchForm {
 
             }
 
-            var keyScanCursor = RedisBasicService.service.scan(connectInfo, scanKeysContext.getScanCursor(), scanKeysContext.getScanArgs());
+            var keyScanCursor = RedisBasicService.service.scan(connectContext, scanKeysContext.getScanCursor(), scanKeysContext.getScanArgs());
             scanKeysContext.setScanCursor(keyScanCursor);
             log.debug("本次扫描到：{}", keyScanCursor.getKeys().size());
 
@@ -155,7 +155,7 @@ public class DataSearchForm {
             //模糊匹配(模糊匹配在key数量小于 limit 的情况加全部查询出来)
             if (!loadMorePanel.isVisible() && Fn.equal("*", key)) {
                 while (Fn.equal("*", key) && !keyScanCursor.isFinished()) {
-                    keyScanCursor = RedisBasicService.service.scan(connectInfo, scanKeysContext.getScanCursor(), scanKeysContext.getScanArgs());
+                    keyScanCursor = RedisBasicService.service.scan(connectContext, scanKeysContext.getScanCursor(), scanKeysContext.getScanArgs());
                     scanKeysContext.setScanCursor(keyScanCursor);
                     scanKeysList.addAll(keyScanCursor.getKeys());
                 }
@@ -279,7 +279,7 @@ public class DataSearchForm {
                 loadMoreBtn.requestFocus();
                 loadMoreBtn.setEnabled(true);
             }
-            databaseComboBox.setEnabled(Fn.notEqual(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER));
+            databaseComboBox.setEnabled(Fn.notEqual(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER));
         });
     }
 
@@ -288,7 +288,7 @@ public class DataSearchForm {
         var selectNode = keyTree.getLastSelectedPathComponent();
         if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
             if (treeNodeInfo.getParent() != null) {
-                RedisBasicService.service.del(connectInfo, treeNodeInfo.key());
+                RedisBasicService.service.del(connectContext, treeNodeInfo.key());
                 treeModel.removeNodeFromParent(treeNodeInfo);
             }
         }
@@ -301,7 +301,7 @@ public class DataSearchForm {
                 deleteActionPerformed(subNode);
             }
         } else {
-            RedisBasicService.service.del(connectInfo, treeNodeInfo.key());
+            RedisBasicService.service.del(connectContext, treeNodeInfo.key());
         }
     }
 
@@ -332,12 +332,12 @@ public class DataSearchForm {
         };
         addBtn.setIcon(Icons.PLUS_ICON);
         addBtn.setFocusable(false);
-        addBtn.addActionListener(e -> AddKeyDialog.showAddDialog(connectInfo, null, (key) -> {
+        addBtn.addActionListener(e -> AddKeyDialog.showAddDialog(connectContext, null, (key) -> {
             var res = JOptionPane.showConfirmDialog(RedisFrontMain.frame,
                     LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.message"),
                     LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.title"), JOptionPane.YES_NO_OPTION);
             if (res == JOptionPane.YES_OPTION) {
-                scanKeysContextMap.put(connectInfo.getDatabase(), new ScanContext<>());
+                scanKeysContextMap.put(connectContext.getDatabase(), new ScanContext<>());
                 scanKeysAndInitScanInfo();
             }
         }));
@@ -376,9 +376,9 @@ public class DataSearchForm {
                 () -> {
                     String operation = JOptionPane.showInputDialog(LocaleUtils.getMessageFromBundle("DataSearchForm.showInputDialog.title") + "\n “flushdb” or “flushall” ");
                     if (Fn.equal(operation, "flushdb")) {
-                        RedisBasicService.service.flushdb(connectInfo);
+                        RedisBasicService.service.flushdb(connectContext);
                     } else if (Fn.equal(operation, "flushall")) {
-                        RedisBasicService.service.flushall(connectInfo);
+                        RedisBasicService.service.flushall(connectContext);
                     }
                 },
                 this::scanBeforeProcess,
@@ -413,8 +413,8 @@ public class DataSearchForm {
             if (Fn.isNull(db)) {
                 return;
             }
-            connectInfo.setDatabase(db.dbIndex());
-            scanKeysContextMap.put(connectInfo.getDatabase(), new ScanContext<>());
+            connectContext.setDatabase(db.dbIndex());
+            scanKeysContextMap.put(connectContext.getDatabase(), new ScanContext<>());
             var limit = PrefUtils.getState().getLong(Constants.KEY_KEY_MAX_LOAD_NUM, 10000L);
             var flag = !Fn.isNull(db.dbSize()) && (db.dbSize() > limit);
             allField.setText(String.valueOf(db.dbSize()));
@@ -435,7 +435,7 @@ public class DataSearchForm {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (Fn.equal(e.getKeyCode(), KeyEvent.VK_ENTER)) {
-                    scanKeysContextMap.put(connectInfo.getDatabase(), new ScanContext<>());
+                    scanKeysContextMap.put(connectContext.getDatabase(), new ScanContext<>());
                     scanKeysAndInitScanInfo();
                 }
             }
@@ -444,14 +444,14 @@ public class DataSearchForm {
         searchBtn = new JButton(new FlatSearchIcon());
         searchBtn.setFocusable(false);
         searchBtn.addActionListener(actionEvent -> {
-            scanKeysContextMap.put(connectInfo.getDatabase(), new ScanContext<>());
+            scanKeysContextMap.put(connectContext.getDatabase(), new ScanContext<>());
             scanKeysAndInitScanInfo();
         });
 
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchBtn);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> {
-            scanKeysContextMap.put(connectInfo.getDatabase(), new ScanContext<>());
+            scanKeysContextMap.put(connectContext.getDatabase(), new ScanContext<>());
             searchTextField.setText("");
             scanKeysAndInitScanInfo();
         });
@@ -489,12 +489,12 @@ public class DataSearchForm {
                 addMenuItem.addActionListener((e) -> {
                     var selectNode = keyTree.getLastSelectedPathComponent();
                     if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
-                        AddKeyDialog.showAddDialog(connectInfo, treeNodeInfo.key(), (key) -> {
+                        AddKeyDialog.showAddDialog(connectContext, treeNodeInfo.key(), (key) -> {
                             var res = JOptionPane.showConfirmDialog(RedisFrontMain.frame,
                                     LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.message"),
                                     LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.title"), JOptionPane.YES_NO_OPTION);
                             if (res == JOptionPane.YES_OPTION) {
-                                scanKeysContextMap.put(connectInfo.getDatabase(), new ScanContext<>());
+                                scanKeysContextMap.put(connectContext.getDatabase(), new ScanContext<>());
                                 scanKeysAndInitScanInfo();
                             }
                         });
@@ -595,12 +595,12 @@ public class DataSearchForm {
                     }
                 } else {
                     FutureUtils.supplyAsync(
-                            () -> RedisBasicService.service.type(connectInfo, treeNodeInfo.key()),
+                            () -> RedisBasicService.service.type(connectContext, treeNodeInfo.key()),
                             type -> {
                                 var typeEnum = Enums.KeyTypeEnum.valueOf(type.toUpperCase());
 
                                 if (typeEnum.equals(Enums.KeyTypeEnum.STRING)) {
-                                    var value = RedisStringService.service.get(connectInfo, treeNodeInfo.key());
+                                    var value = RedisStringService.service.get(connectContext, treeNodeInfo.key());
                                     SwingUtilities.invokeLater(() -> {
                                         treeNodeInfo.setMemorySize(value.length());
                                         keyTree.updateUI();
@@ -608,10 +608,10 @@ public class DataSearchForm {
                                 }
 
                                 if (typeEnum.equals(Enums.KeyTypeEnum.ZSET)) {
-                                    var valueScanCursor = RedisZSetService.service.zscan(connectInfo, treeNodeInfo.key(), ScoredValueScanCursor.INITIAL);
+                                    var valueScanCursor = RedisZSetService.service.zscan(connectContext, treeNodeInfo.key(), ScoredValueScanCursor.INITIAL);
                                     var dataList = new ArrayList<>(valueScanCursor.getValues());
                                     while (!valueScanCursor.isFinished()) {
-                                        valueScanCursor = RedisZSetService.service.zscan(connectInfo, treeNodeInfo.key(), valueScanCursor);
+                                        valueScanCursor = RedisZSetService.service.zscan(connectContext, treeNodeInfo.key(), valueScanCursor);
                                         dataList.addAll(valueScanCursor.getValues());
                                     }
                                     if (Fn.isNotEmpty(dataList)) {
@@ -624,10 +624,10 @@ public class DataSearchForm {
 
                                 if (typeEnum.equals(Enums.KeyTypeEnum.HASH)) {
 
-                                    var mapScanCursor = RedisHashService.service.hscan(connectInfo, treeNodeInfo.key(), MapScanCursor.INITIAL);
+                                    var mapScanCursor = RedisHashService.service.hscan(connectContext, treeNodeInfo.key(), MapScanCursor.INITIAL);
                                     var dataList = new ArrayList<>(mapScanCursor.getMap().entrySet());
                                     while (!mapScanCursor.isFinished()) {
-                                        mapScanCursor = RedisHashService.service.hscan(connectInfo, treeNodeInfo.key(), mapScanCursor);
+                                        mapScanCursor = RedisHashService.service.hscan(connectContext, treeNodeInfo.key(), mapScanCursor);
                                         dataList.addAll(new ArrayList<>(mapScanCursor.getMap().entrySet()));
                                     }
 
@@ -640,12 +640,12 @@ public class DataSearchForm {
                                 }
 
                                 if (typeEnum.equals(Enums.KeyTypeEnum.LIST)) {
-                                    var len = RedisListService.service.llen(connectInfo, treeNodeInfo.key());
+                                    var len = RedisListService.service.llen(connectContext, treeNodeInfo.key());
                                     var start = 0;
                                     var dataList = new ArrayList<>();
                                     while (start >= len) {
                                         var stop = start + (1000 - 1);
-                                        var values = RedisListService.service.lrange(connectInfo, treeNodeInfo.key(), start, stop);
+                                        var values = RedisListService.service.lrange(connectContext, treeNodeInfo.key(), start, stop);
                                         dataList.addAll(values);
                                         start += 1000;
                                     }
@@ -659,10 +659,10 @@ public class DataSearchForm {
                                 }
 
                                 if (typeEnum.equals(Enums.KeyTypeEnum.SET)) {
-                                    var valueScanCursor = RedisSetService.service.sscan(connectInfo, treeNodeInfo.key(), ValueScanCursor.INITIAL);
+                                    var valueScanCursor = RedisSetService.service.sscan(connectContext, treeNodeInfo.key(), ValueScanCursor.INITIAL);
                                     var dataList = new ArrayList<>(valueScanCursor.getValues());
                                     while (!valueScanCursor.isFinished()) {
-                                        valueScanCursor = RedisSetService.service.sscan(connectInfo, treeNodeInfo.key(), valueScanCursor);
+                                        valueScanCursor = RedisSetService.service.sscan(connectContext, treeNodeInfo.key(), valueScanCursor);
                                         dataList.addAll(valueScanCursor.getValues());
                                     }
                                     if (Fn.isNotEmpty(dataList)) {
@@ -721,15 +721,15 @@ public class DataSearchForm {
     }
 
     private void databaseComboBoxInit(int selectedIndex) {
-        if (Fn.notEqual(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
-            Map<String, String> databases = RedisBasicService.service.configGet(connectInfo, "databases");
+        if (Fn.notEqual(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+            Map<String, String> databases = RedisBasicService.service.configGet(connectContext, "databases");
             var dbNum = Integer.parseInt(databases.get("databases"));
             if (dbNum > 16) {
                 for (int i = 16; i < dbNum; i++) {
                     dbList.add(new DbInfo("DB" + i, i));
                 }
             }
-            var keySpace = RedisBasicService.service.getKeySpace(connectInfo);
+            var keySpace = RedisBasicService.service.getKeySpace(connectContext);
             for (int i = 0; i < dbList.size(); i++) {
                 var dbInfo = dbList.get(i);
                 var value = (String) keySpace.get(dbInfo.dbName().toLowerCase());
@@ -746,7 +746,7 @@ public class DataSearchForm {
         } else {
             var dbInfo = dbList.get(0);
             scanKeysContextMap.put(dbInfo.dbIndex(), new ScanContext<>());
-            var dbSize = RedisBasicService.service.dbSize(connectInfo);
+            var dbSize = RedisBasicService.service.dbSize(connectContext);
             dbInfo.setDbSize(dbSize);
             databaseComboBox.insertItemAt(dbInfo, 0);
             databaseComboBox.setEnabled(false);

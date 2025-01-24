@@ -11,7 +11,7 @@ import org.dromara.redisfront.commons.util.AlertUtils;
 import org.dromara.redisfront.commons.util.FutureUtils;
 import org.dromara.redisfront.commons.util.JschUtils;
 import org.dromara.redisfront.commons.util.LettuceUtils;
-import org.dromara.redisfront.model.ConnectInfo;
+import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.service.RedisPubSubService;
 import io.lettuce.core.AbstractRedisClient;
 import io.lettuce.core.RedisClient;
@@ -50,17 +50,17 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
     private JLabel numLabel;
     private JLabel infoLabel;
     private String lastSubscribeChanel;
-    private final ConnectInfo connectInfo;
+    private final ConnectContext connectContext;
 
-    public static PubSubForm newInstance(ConnectInfo connectInfo) {
-        return new PubSubForm(connectInfo);
+    public static PubSubForm newInstance(ConnectContext connectContext) {
+        return new PubSubForm(connectContext);
     }
 
-    public PubSubForm(ConnectInfo connectInfo) {
+    public PubSubForm(ConnectContext connectContext) {
         $$$setupUI$$$();
         setLayout(new BorderLayout());
         add(rootPanel, BorderLayout.CENTER);
-        this.connectInfo = connectInfo;
+        this.connectContext = connectContext;
         channelField.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
@@ -103,7 +103,7 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
             }
         });
         publishBtn.addActionListener(e -> FutureUtils.runAsync(() -> {
-            var count = RedisPubSubService.service.publish(connectInfo, channelField.getText(), messageField.getText());
+            var count = RedisPubSubService.service.publish(connectContext, channelField.getText(), messageField.getText());
             SwingUtilities.invokeLater(() -> {
                 messageField.setText("");
                 AlertUtils.showInformationDialog("成功发布 " + count + " 条消息！");
@@ -112,18 +112,18 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
     }
 
     public void openConnection() {
-        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             FutureUtils.runAsync(() -> {
-                var redisUrl = LettuceUtils.getRedisURI(connectInfo);
-                redisClient = LettuceUtils.getRedisClusterClient(redisUrl, connectInfo);
+                var redisUrl = LettuceUtils.getRedisURI(connectContext);
+                redisClient = LettuceUtils.getRedisClusterClient(redisUrl, connectContext);
                 var connection = ((RedisClusterClient) redisClient).connectPubSub();
-                JschUtils.openSession(connectInfo, (RedisClusterClient) redisClient);
+                JschUtils.openSession(connectContext, (RedisClusterClient) redisClient);
                 pubsub = connection.async();
             }).thenRun(() -> pubsub.getStatefulConnection().addListener(this));
         } else {
             FutureUtils.runAsync(() -> {
-                redisClient = LettuceUtils.getRedisClient(connectInfo);
-                JschUtils.openSession(connectInfo);
+                redisClient = LettuceUtils.getRedisClient(connectContext);
+                JschUtils.openSession(connectContext);
                 var connection = (((RedisClient) redisClient).connectPubSub());
                 pubsub = connection.async();
             }).thenRun(() -> pubsub.getStatefulConnection().addListener(this));
@@ -134,7 +134,7 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
         enableSubscribe.setSelected(false);
         if (Fn.isNotNull(pubsub)) {
             pubsub.getStatefulConnection().closeAsync().thenRun(() -> redisClient.shutdownAsync().thenRun(() -> {
-                if (connectInfo.getSshInfo() != null) {
+                if (connectContext.getSshInfo() != null) {
                     JschUtils.closeSession();
                 }
             }));

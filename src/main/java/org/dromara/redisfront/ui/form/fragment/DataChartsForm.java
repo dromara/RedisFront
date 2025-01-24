@@ -9,9 +9,9 @@ import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.commons.util.FutureUtils;
 import org.dromara.redisfront.commons.util.LettuceUtils;
-import org.dromara.redisfront.model.ConnectInfo;
+import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;
-import org.dromara.redisfront.ui.component.ChartsPanel;
+import org.dromara.redisfront.ui.support.ChartsPanel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -54,17 +54,17 @@ public class DataChartsForm extends ChartsPanel {
     private JLabel slowLogLabel;
     private JTextArea slowLogTextArea;
     private JRadioButton autoRefreshBtn;
-    private final ConnectInfo connectInfo;
+    private final ConnectContext connectContext;
     private Boolean scheduleStarted = false;
 
     private ScheduledExecutorService scheduledExecutor;
 
-    public static DataChartsForm getInstance(final ConnectInfo connectInfo) {
-        return new DataChartsForm(connectInfo);
+    public static DataChartsForm getInstance(final ConnectContext connectContext) {
+        return new DataChartsForm(connectContext);
     }
 
-    public DataChartsForm(final ConnectInfo connectInfo) {
-        this.connectInfo = connectInfo;
+    public DataChartsForm(final ConnectContext connectContext) {
+        this.connectContext = connectContext;
         scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
         $$$setupUI$$$();
     }
@@ -99,7 +99,7 @@ public class DataChartsForm extends ChartsPanel {
 
         scheduledExecutor.scheduleAtFixedRate(() -> {
                     if (scheduleStarted) {
-                        FutureUtils.supplyAsync(() -> RedisBasicService.service.getStatInfo(connectInfo), statInfo -> {
+                        FutureUtils.supplyAsync(() -> RedisBasicService.service.getStatInfo(connectContext), statInfo -> {
                                     var instantaneousInputKbps = (String) statInfo.get("instantaneous_input_kbps");
                                     var instantaneousOutputKbps = (String) statInfo.get("instantaneous_output_kbps");
                                     var instantaneousOpsPerSec = (String) statInfo.get("instantaneous_ops_per_sec");
@@ -115,7 +115,7 @@ public class DataChartsForm extends ChartsPanel {
                                 }
                         );
 
-                        FutureUtils.supplyAsync(() -> RedisBasicService.service.getClientInfo(connectInfo), clientInfo -> {
+                        FutureUtils.supplyAsync(() -> RedisBasicService.service.getClientInfo(connectContext), clientInfo -> {
                                     var connectedClients = (String) clientInfo.get("connected_clients");
                                     if (Fn.isNotEmpty(connectedClients)) {
                                         SwingUtilities.invokeLater(() -> clientsValue.setText(connectedClients));
@@ -127,7 +127,7 @@ public class DataChartsForm extends ChartsPanel {
                             slowLogActionPerformed();
                         }
 
-                        FutureUtils.supplyAsync(() -> RedisBasicService.service.getCpuInfo(connectInfo), cpuInfo -> {
+                        FutureUtils.supplyAsync(() -> RedisBasicService.service.getCpuInfo(connectContext), cpuInfo -> {
                                     var currentTimeSecond = DateUtil.currentSeconds();
                                     var usedCpuSys = (String) cpuInfo.get("used_cpu_sys");
                                     if (Fn.isNotEmpty(usedCpuSys)) {
@@ -145,7 +145,7 @@ public class DataChartsForm extends ChartsPanel {
                                 }
                         );
 
-                        FutureUtils.supplyAsync(() -> RedisBasicService.service.getMemoryInfo(connectInfo), memoryInfo -> {
+                        FutureUtils.supplyAsync(() -> RedisBasicService.service.getMemoryInfo(connectContext), memoryInfo -> {
                             var usedMemory = (String) memoryInfo.get("used_memory");
 
                             if (Fn.isNotEmpty(usedMemory)) {
@@ -162,7 +162,7 @@ public class DataChartsForm extends ChartsPanel {
 
     private void slowLogActionPerformed() {
         FutureUtils.runAsync(() -> {
-            List<Object> objectList = LettuceUtils.exec(connectInfo, commands -> commands.slowlogGet(128));
+            List<Object> objectList = LettuceUtils.exec(connectContext, commands -> commands.slowlogGet(128));
             if (Fn.isNotEmpty(objectList)) {
                 var slowLogShowTextStrBuilder = new StringBuilder();
                 for (Object slowLogObj : objectList) {

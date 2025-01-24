@@ -1,6 +1,6 @@
 package org.dromara.redisfront.service;
 
-import org.dromara.redisfront.model.ConnectInfo;
+import org.dromara.redisfront.model.context.ConnectContext;
 import io.lettuce.core.*;
 import org.dromara.redisfront.service.impl.RedisStreamServiceImpl;
 
@@ -16,22 +16,22 @@ public interface RedisStreamService {
 
     RedisStreamService service = new RedisStreamServiceImpl();
 
-    Long xdel(ConnectInfo connectInfo, String key, String... messageIds);
+    Long xdel(ConnectContext connectContext, String key, String... messageIds);
 
-    Long xack(ConnectInfo connectInfo, String key, String group, String... messageIds);
+    Long xack(ConnectContext connectContext, String key, String group, String... messageIds);
 
-    String xadd(ConnectInfo connectInfo, String key, Map<String, String> body);
+    String xadd(ConnectContext connectContext, String key, Map<String, String> body);
 
-    String xadd(ConnectInfo connectInfo, String id, String key, Map<String, String> body);
+    String xadd(ConnectContext connectContext, String id, String key, Map<String, String> body);
 
-    List<StreamMessage<String, String>> xrange(ConnectInfo connectInfo, String key, Range<String> range, Limit limit);
+    List<StreamMessage<String, String>> xrange(ConnectContext connectContext, String key, Range<String> range, Limit limit);
 
-    String xadd(ConnectInfo connectInfo, String key, XAddArgs args, Object... keysAndValues);
+    String xadd(ConnectContext connectContext, String key, XAddArgs args, Object... keysAndValues);
 
-    String xgroupCreate(ConnectInfo connectInfo, XReadArgs.StreamOffset<String> streamOffset, String group);
+    String xgroupCreate(ConnectContext connectContext, XReadArgs.StreamOffset<String> streamOffset, String group);
 
-    String xgroupCreate(ConnectInfo connectInfo, XReadArgs.StreamOffset<String> streamOffset, String group, XGroupCreateArgs args);
+    String xgroupCreate(ConnectContext connectContext, XReadArgs.StreamOffset<String> streamOffset, String group, XGroupCreateArgs args);
 
-    Long xlen(ConnectInfo connectInfo, String key);
+    Long xlen(ConnectContext connectContext, String key);
 
 }
