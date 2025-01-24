@@ -285,12 +285,38 @@ public class RedisConnectTree extends JXTree {
         treeNodePopupMenu.putClientProperty(FlatClientProperties.STYLE,
                 "[dark]background:darken(#FFFFFF,30%);");
 
-        JMenuItem openConnectMenuItem = new JMenuItem("打开连接");
+        JMenuItem openConnectMenuItem = new JMenuItem("打开连接"){
+            {
+                addActionListener(_ -> {
+                    TreePath selectionPath = getSelectionPath();
+                    if (selectionPath == null) {
+                        return;
+                    }
+                    Object pathComponent = selectionPath.getLastPathComponent();
+                    if (pathComponent instanceof RedisConnectTreeNode redisConnectTreeItem) {
+                        menuEvent.selected(null,null);
+                    }
+                });
+            }
+        };
         treeNodePopupMenu.add(openConnectMenuItem);
 
         treeNodePopupMenu.addSeparator();
 
-        JMenuItem editConnectMenuItem = new JMenuItem("编辑连接");
+        JMenuItem editConnectMenuItem = new JMenuItem("编辑连接"){
+            {
+                addActionListener(_ -> {
+                    TreePath selectionPath = getSelectionPath();
+                    if (selectionPath == null) {
+                        return;
+                    }
+                    Object pathComponent = selectionPath.getLastPathComponent();
+                    if (pathComponent instanceof RedisConnectTreeNode redisConnectTreeItem) {
+                        AddConnectDialog.getInstance(owner).showEditConnectDialog(redisConnectTreeItem);
+                    }
+                });
+            }
+        };
         treeNodePopupMenu.add(editConnectMenuItem);
 
         JMenuItem deleteConnectMenuItem = new JMenuItem("删除连接") {

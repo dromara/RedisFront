@@ -34,6 +34,7 @@ import java.util.ResourceBundle;
 public class AddConnectDialog extends QSDialog<MainWidget> {
     private static final Logger log = LoggerFactory.getLogger(AddConnectDialog.class);
     private final RedisFrontContext context;
+    private Integer detailId;
     private Integer groupId;
     private JPanel contentPane;
     private JButton submitBtn;
@@ -87,9 +88,14 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
         this.pack();
     }
 
-    public void showEditConnectDialog(Integer groupId, ConnectDetailEntity connectDetailEntity) {
-        this.groupId = groupId;
-        this.populateConnectInfo(connectDetailEntity.toConnectInfo());
+    public void showEditConnectDialog(RedisConnectTreeNode redisConnectTreeNode) {
+        ConnectDetailEntity detail = redisConnectTreeNode.getDetail();
+        if (null != detail.getGroupId()) {
+            this.groupId = detail.getGroupId();
+        }
+        this.detailId = detail.getId();
+        this.setTitle("编辑连接 【" + detail.getName() + "】");
+        this.populateConnectInfo(detail.toConnectInfo());
         this.setLocationRelativeTo(null);
         this.setVisible(true);
         this.pack();
@@ -255,7 +261,11 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
             try {
                 ConnectDetailEntity connectDetailEntity = connectInfo.toEntity();
                 connectDetailEntity.setGroupId(groupId);
-                ConnectDetailDao.newInstance(context.getDatabaseManager().getDatasource()).save(connectDetailEntity);
+                if (null == detailId) {
+                    ConnectDetailDao.newInstance(context.getDatabaseManager().getDatasource()).save(connectDetailEntity);
+                } else {
+                    ConnectDetailDao.newInstance(context.getDatabaseManager().getDatasource()).update(detailId, connectDetailEntity);
+                }
                 context.getEventBus().publish(new RedisConnectValidEvent(connectInfo));
                 context.getEventBus().publish(new RefreshConnectTreeEvent(connectInfo));
                 dispose();
