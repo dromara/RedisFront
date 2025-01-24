@@ -79,7 +79,7 @@ public class MainTabbedPanel extends JPanel {
                         var configFile = (String) serverInfo.get("config_file");
                         appendRow(buf, LocaleUtils.getMessageFromBundle("MainTabbedPanel.configFile.title"), configFile);
 
-                        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+                        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
                             List<ClusterNode> clusterNodes = RedisBasicService.service.getClusterNodes(connectInfo);
                             clusterNodes.forEach(s -> appendRow(buf, s.flags().toUpperCase(), s.ipAndPort()));
                         }
@@ -87,7 +87,7 @@ public class MainTabbedPanel extends JPanel {
                         buf.append("</td></tr>");
                         buf.append("</table></html>");
                         setToolTipText(buf.toString());
-                        setText(connectInfo.host() + ":" + connectInfo.port() + " - " + LocaleUtils.getMessageFromBundle(connectInfo.redisModeEnum().modeName));
+                        setText(connectInfo.getHost() + ":" + connectInfo.getPort() + " - " + LocaleUtils.getMessageFromBundle(connectInfo.getRedisMode().modeName));
                     }
                 };
 
@@ -218,7 +218,7 @@ public class MainTabbedPanel extends JPanel {
         scheduledExecutor.scheduleAtFixedRate(() -> {
                     CompletableFuture<Void> keyInfoFuture = FutureUtils.supplyAsync(() -> {
                         var keyInfo = new String[2];
-                        if (Fn.notEqual(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+                        if (Fn.notEqual(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
                             var keySpace = RedisBasicService.service.getKeySpace(connectInfo);
                             var count = keySpace.values().stream()
                                     .map(value -> ((String) value).split(",")[0].split("=")[1])

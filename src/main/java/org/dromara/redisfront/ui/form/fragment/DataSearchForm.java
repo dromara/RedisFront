@@ -119,7 +119,7 @@ public class DataSearchForm {
         try {
             LoadingUtils.showDialog(LocaleUtils.getMessageFromBundle("DataSearchForm.showDialog.message"));
             scanBeforeProcess();
-            var scanKeysContext = scanKeysContextMap.get(connectInfo.database());
+            var scanKeysContext = scanKeysContextMap.get(connectInfo.getDatabase());
 
             if (Fn.isNull(scanKeysContext.getLimit())) {
                 Long limit = PrefUtils.getState().getLong(Constants.KEY_KEY_MAX_LOAD_NUM, 10000L);
@@ -279,7 +279,7 @@ public class DataSearchForm {
                 loadMoreBtn.requestFocus();
                 loadMoreBtn.setEnabled(true);
             }
-            databaseComboBox.setEnabled(Fn.notEqual(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER));
+            databaseComboBox.setEnabled(Fn.notEqual(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER));
         });
     }
 
@@ -337,7 +337,7 @@ public class DataSearchForm {
                     LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.message"),
                     LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.title"), JOptionPane.YES_NO_OPTION);
             if (res == JOptionPane.YES_OPTION) {
-                scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
+                scanKeysContextMap.put(connectInfo.getDatabase(), new ScanContext<>());
                 scanKeysAndInitScanInfo();
             }
         }));
@@ -414,7 +414,7 @@ public class DataSearchForm {
                 return;
             }
             connectInfo.setDatabase(db.dbIndex());
-            scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
+            scanKeysContextMap.put(connectInfo.getDatabase(), new ScanContext<>());
             var limit = PrefUtils.getState().getLong(Constants.KEY_KEY_MAX_LOAD_NUM, 10000L);
             var flag = !Fn.isNull(db.dbSize()) && (db.dbSize() > limit);
             allField.setText(String.valueOf(db.dbSize()));
@@ -435,7 +435,7 @@ public class DataSearchForm {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (Fn.equal(e.getKeyCode(), KeyEvent.VK_ENTER)) {
-                    scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
+                    scanKeysContextMap.put(connectInfo.getDatabase(), new ScanContext<>());
                     scanKeysAndInitScanInfo();
                 }
             }
@@ -444,14 +444,14 @@ public class DataSearchForm {
         searchBtn = new JButton(new FlatSearchIcon());
         searchBtn.setFocusable(false);
         searchBtn.addActionListener(actionEvent -> {
-            scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
+            scanKeysContextMap.put(connectInfo.getDatabase(), new ScanContext<>());
             scanKeysAndInitScanInfo();
         });
 
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchBtn);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> {
-            scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
+            scanKeysContextMap.put(connectInfo.getDatabase(), new ScanContext<>());
             searchTextField.setText("");
             scanKeysAndInitScanInfo();
         });
@@ -494,7 +494,7 @@ public class DataSearchForm {
                                     LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.message"),
                                     LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.title"), JOptionPane.YES_NO_OPTION);
                             if (res == JOptionPane.YES_OPTION) {
-                                scanKeysContextMap.put(connectInfo.database(), new ScanContext<>());
+                                scanKeysContextMap.put(connectInfo.getDatabase(), new ScanContext<>());
                                 scanKeysAndInitScanInfo();
                             }
                         });
@@ -721,7 +721,7 @@ public class DataSearchForm {
     }
 
     private void databaseComboBoxInit(int selectedIndex) {
-        if (Fn.notEqual(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.notEqual(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             Map<String, String> databases = RedisBasicService.service.configGet(connectInfo, "databases");
             var dbNum = Integer.parseInt(databases.get("databases"));
             if (dbNum > 16) {

@@ -45,24 +45,4 @@ public class ConnectDetailDao {
 
     }
 
-    private ConnectInfo mapToConnectInfo(Map<String, Object> map) {
-        var sslConfigStr = (String) map.get("ssl_config");
-        var sshConfigStr = (String) map.get("ssh_config");
-        var sslConfig = Fn.isEmpty(sslConfigStr) ? null : Fn.fromJson(sslConfigStr, ConnectInfo.SSLConfig.class);
-        var sshConfig = Fn.isEmpty(sshConfigStr) ? null : Fn.fromJson(sshConfigStr, ConnectInfo.SSHConfig.class);
-        return new ConnectInfo()
-                .setId((Integer) map.get("id"))
-                .setTitle((String) map.get("title"))
-                .setHost((String) map.get("host"))
-                .setPort((Integer) map.get("port"))
-                .setUsername((String) map.get("username"))
-                .setPassword((String) map.get("password"))
-                .setDatabase((Integer) map.get("database"))
-                .setSsl(Boolean.valueOf((String) map.get("ssl")))
-                .setConnectMode(Enums.Connect.valueOf((String) map.get("connect_mode")))
-                .setSshConfig(sshConfig)
-                .setSslConfig(sslConfig)
-                ;
-    }
-
 }

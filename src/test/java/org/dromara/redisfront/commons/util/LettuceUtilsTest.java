@@ -25,7 +25,7 @@ public class LettuceUtilsTest {
 
     //    @Test
     public void test1() {
-        LettuceUtils.run(new ConnectInfo().setHost("127.0.0.1").setPort(6379).setSsl(false), redisCommands -> {
+        LettuceUtils.run(new ConnectInfo(), redisCommands -> {
             if (redisCommands.getStatefulConnection() instanceof StatefulRedisConnectionImpl<String, String> statefulRedisConnection) {
                 List<Object> s = redisCommands.dispatch(CommandType.GET, new ArrayOutput<>(statefulRedisConnection.getCodec()), new CommandArgs<>(statefulRedisConnection.getCodec()).addKeys("a"));
                 System.out.println(s);
@@ -39,20 +39,20 @@ public class LettuceUtilsTest {
         for (int i = 0; i < 26; i++) {
             int finalI = i;
             String key = list[finalI] + ":" + finalI;
-            LettuceUtils.run(new ConnectInfo().setHost("127.0.0.1").setPort(6379).setSsl(false), redisCommands -> {
+            LettuceUtils.run(new ConnectInfo(), redisCommands -> {
                 redisCommands.set(key, String.valueOf(finalI));
             });
             for (int j = 0; j < 200; j++) {
                 String key2 = key + ":" + j;
                 int finalJ = j;
-                LettuceUtils.run(new ConnectInfo().setHost("127.0.0.1").setPort(6379).setSsl(false), redisCommands -> {
+                LettuceUtils.run(new ConnectInfo(), redisCommands -> {
                     redisCommands.set(key2, String.valueOf(finalJ));
                 });
 
                 for (int k = 0; k < 50; k++) {
                     String key3 = key2 + ":" + k;
                     int finalK = k;
-                    LettuceUtils.run(new ConnectInfo().setHost("127.0.0.1").setPort(6379).setSsl(false), redisCommands -> {
+                    LettuceUtils.run(new ConnectInfo(), redisCommands -> {
                         redisCommands.set(key3, String.valueOf(finalK));
                     });
                 }
@@ -63,7 +63,7 @@ public class LettuceUtilsTest {
 
     //    @Test
     public void test2() {
-        LettuceUtils.run(new ConnectInfo().setHost("127.0.0.1").setPort(6379).setSsl(false), redisCommands -> {
+        LettuceUtils.run(new ConnectInfo(), redisCommands -> {
             ScanArgs scanArgs = new ScanArgs();
             scanArgs.limit(5);
 

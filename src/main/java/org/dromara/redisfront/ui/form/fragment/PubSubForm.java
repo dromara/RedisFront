@@ -112,7 +112,7 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
     }
 
     public void openConnection() {
-        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             FutureUtils.runAsync(() -> {
                 var redisUrl = LettuceUtils.getRedisURI(connectInfo);
                 redisClient = LettuceUtils.getRedisClusterClient(redisUrl, connectInfo);
@@ -134,7 +134,7 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
         enableSubscribe.setSelected(false);
         if (Fn.isNotNull(pubsub)) {
             pubsub.getStatefulConnection().closeAsync().thenRun(() -> redisClient.shutdownAsync().thenRun(() -> {
-                if (connectInfo.getSshConfig() != null) {
+                if (connectInfo.getSshInfo() != null) {
                     JschUtils.closeSession();
                 }
             }));

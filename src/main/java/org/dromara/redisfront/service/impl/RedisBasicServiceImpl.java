@@ -35,7 +35,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
                 .setInfo("flushdb".toUpperCase());
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, RedisAdvancedClusterCommands::flushdb);
         } else {
             return LettuceUtils.exec(connectInfo, RedisServerCommands::flushdb);
@@ -44,7 +44,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public Map<String, String> configGet(ConnectInfo connectInfo, String... keys) {
-        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.configGet(keys));
         } else {
             return LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.configGet(keys));
@@ -58,7 +58,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
                 .setInfo("flushall".toUpperCase());
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, RedisAdvancedClusterCommands::flushall);
         } else {
             return LettuceUtils.exec(connectInfo, RedisServerCommands::flushall);
@@ -72,7 +72,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
         var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("SCAN ".concat(myScanArgs.getCommandStr()));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.scan(scanArgs));
         } else {
             return LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.scan(scanArgs));
@@ -86,7 +86,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
         var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("SCAN ".concat(scanCursor.getCursor()).concat(myScanArgs.getCommandStr()));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.scan(scanCursor, scanArgs));
         } else {
             return LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.scan(scanCursor, scanArgs));
@@ -99,7 +99,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
         var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("SCAN ".concat(scanCursor.getCursor()));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.scan(scanCursor));
         } else {
             return LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.scan(scanCursor));
@@ -108,7 +108,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public StreamScanCursor scan(ConnectInfo connectInfo, KeyStreamingChannel<String> channel) {
-        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.scan(channel));
         } else {
             return LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.scan(channel));
@@ -117,7 +117,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public StreamScanCursor scan(ConnectInfo connectInfo, KeyStreamingChannel<String> channel, ScanArgs scanArgs) {
-        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.scan(channel, scanArgs));
         } else {
             return LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.scan(channel, scanArgs));
@@ -126,7 +126,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public StreamScanCursor scan(ConnectInfo connectInfo, KeyStreamingChannel<String> channel, ScanCursor scanCursor, ScanArgs scanArgs) {
-        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.scan(channel, scanCursor, scanArgs));
         } else {
             return LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.scan(channel, scanCursor, scanArgs));
@@ -135,7 +135,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public StreamScanCursor scan(ConnectInfo connectInfo, KeyStreamingChannel<String> channel, ScanCursor scanCursor) {
-        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.scan(channel, scanCursor));
         } else {
             return LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.scan(channel, scanCursor));
@@ -149,7 +149,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
                 .setInfo("del ".concat(key).toUpperCase());
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.del(key));
         } else {
             return LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.del(key));
@@ -163,7 +163,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
                 .setInfo("rename ".concat(key).concat(" ").concat(newKey).toUpperCase());
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.rename(key, newKey));
         } else {
             return LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.rename(key, newKey));
@@ -177,7 +177,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
                 .setInfo("expire ".concat(key).toUpperCase());
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.expire(key, ttl));
         } else {
             return LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.expire(key, ttl));
@@ -191,7 +191,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
                 .setInfo("type ".concat(key).toUpperCase());
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.type(key));
         } else {
             return LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.type(key));
@@ -205,7 +205,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
                 .setInfo("ttl ".concat(key).toUpperCase());
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, redisCommands -> redisCommands.ttl(key));
         } else {
             return LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.ttl(key));
@@ -222,7 +222,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
     public Enums.RedisMode getRedisModeEnum(ConnectInfo connectInfo) {
         Map<String, Object> server = getServerInfo(connectInfo);
         String redisMode = (String) server.get("redis_mode");
-        log.info("获取到Redis [ {}:{} ] 服务类型 - {}", connectInfo.host(), connectInfo.port(), redisMode);
+        log.info("获取到Redis [ {}:{} ] 服务类型 - {}", connectInfo.getHost(), connectInfo.getPort(), redisMode);
         return Enums.RedisMode.valueOf(redisMode.toUpperCase());
     }
 
@@ -236,56 +236,56 @@ public class RedisBasicServiceImpl implements RedisBasicService {
     @Override
     public Map<String, Object> getClusterInfo(ConnectInfo connectInfo) {
         var clusterInfo = LettuceUtils.exec(connectInfo, RedisClusterCommands::clusterInfo);
-        log.info("获取到Redis [ {}:{} ] ClusterInfo - {}", connectInfo.host(), connectInfo.port(), clusterInfo);
+        log.info("获取到Redis [ {}:{} ] ClusterInfo - {}", connectInfo.getHost(), connectInfo.getPort(), clusterInfo);
         return strToMap(clusterInfo);
     }
 
     @Override
     public Map<String, Object> getInfo(ConnectInfo connectInfo) {
         var info = LettuceUtils.exec(connectInfo, RedisServerCommands::info);
-        log.info("获取到Redis [ {}:{} ] Info - {}", connectInfo.host(), connectInfo.port(), info);
+        log.info("获取到Redis [ {}:{} ] Info - {}", connectInfo.getHost(), connectInfo.getPort(), info);
         return strToMap(info);
     }
 
     @Override
     public Map<String, Object> getCpuInfo(ConnectInfo connectInfo) {
         var cpuInfo = LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.info("cpu"));
-        log.info("获取到Redis [ {}:{} ] cpuInfo - {}", connectInfo.host(), connectInfo.port(), cpuInfo);
+        log.info("获取到Redis [ {}:{} ] cpuInfo - {}", connectInfo.getHost(), connectInfo.getPort(), cpuInfo);
         return strToMap(cpuInfo);
     }
 
     @Override
     public Map<String, Object> getMemoryInfo(ConnectInfo connectInfo) {
         var memoryInfo = LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.info("memory"));
-        log.info("获取到Redis [ {}:{} ] memoryInfo - {}", connectInfo.host(), connectInfo.port(), memoryInfo);
+        log.info("获取到Redis [ {}:{} ] memoryInfo - {}", connectInfo.getHost(), connectInfo.getPort(), memoryInfo);
         return strToMap(memoryInfo);
     }
 
     @Override
     public Map<String, Object> getServerInfo(ConnectInfo connectInfo) {
         var server = LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.info("server"));
-        log.info("获取到Redis [ {}:{} ] serverInfo - {}", connectInfo.host(), connectInfo.port(), server);
+        log.info("获取到Redis [ {}:{} ] serverInfo - {}", connectInfo.getHost(), connectInfo.getPort(), server);
         return strToMap(server);
     }
 
     @Override
     public Map<String, Object> getKeySpace(ConnectInfo connectInfo) {
         var keyspace = LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.info("keyspace"));
-        log.info("获取到Redis [ {}:{} ] keyspace - {}", connectInfo.host(), connectInfo.port(), keyspace);
+        log.info("获取到Redis [ {}:{} ] keyspace - {}", connectInfo.getHost(), connectInfo.getPort(), keyspace);
         return strToMap(keyspace);
     }
 
     @Override
     public Map<String, Object> getClientInfo(ConnectInfo connectInfo) {
         var clientInfo = LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.info("clients"));
-        log.info("获取到Redis [ {}:{} ] clientInfo - {}", connectInfo.host(), connectInfo.port(), clientInfo);
+        log.info("获取到Redis [ {}:{} ] clientInfo - {}", connectInfo.getHost(), connectInfo.getPort(), clientInfo);
         return strToMap(clientInfo);
     }
 
     @Override
     public Map<String, Object> getStatInfo(ConnectInfo connectInfo) {
         var statInfo = LettuceUtils.exec(connectInfo, redisCommands -> redisCommands.info("stats"));
-        log.info("获取到Redis [ {}:{} ] statInfo - {}", connectInfo.host(), connectInfo.port(), statInfo);
+        log.info("获取到Redis [ {}:{} ] statInfo - {}", connectInfo.getHost(), connectInfo.getPort(), statInfo);
         return strToMap(statInfo);
     }
 
@@ -298,7 +298,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public Long dbSize(ConnectInfo connectInfo) {
-        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, RedisAdvancedClusterCommands::dbsize);
         } else {
             return LettuceUtils.exec(connectInfo, RedisServerCommands::dbsize);

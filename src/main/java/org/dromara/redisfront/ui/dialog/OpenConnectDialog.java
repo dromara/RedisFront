@@ -156,9 +156,9 @@ public class OpenConnectDialog extends AbstractDialog<ConnectInfo> {
         var id = connectTable.getValueAt(row, 0);
         var connectInfo = ConnectDetailDao.DAO.getById(id);
         FutureUtils.runAsync(() -> {
-            LoadingUtils.showDialog(String.format(LocaleUtils.getMessageFromBundle("OpenConnectDialog.openConnection.message"), connectInfo.host(), connectInfo.port()));
+            LoadingUtils.showDialog(String.format(LocaleUtils.getMessageFromBundle("OpenConnectDialog.openConnection.message"), connectInfo.getHost(), connectInfo.getPort()));
             var redisMode = RedisBasicService.service.getRedisModeEnum(connectInfo);
-            openProcessHandler.processHandler(connectInfo.setRedisModeEnum(redisMode));
+//            openProcessHandler.processHandler(connectInfo.setRedisMode(redisMode));
         });
         dispose();
     }

@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.main.right;
+package org.dromara.redisfront.ui.widget.right;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
@@ -13,9 +13,9 @@ import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.constant.Icons;
 import org.dromara.redisfront.model.ConnectInfo;
 import org.dromara.redisfront.ui.component.RedisTerminal;
-import org.dromara.redisfront.ui.widget.common.DrawerAnimationAction;
-import org.dromara.redisfront.ui.widget.common.BoldTitleTabbedPaneUI;
-import org.dromara.redisfront.ui.widget.main.MainWidget;
+import org.dromara.redisfront.ui.common.DrawerAnimationAction;
+import org.dromara.redisfront.ui.common.BoldTitleTabbedPaneUI;
+import org.dromara.redisfront.ui.widget.MainWidget;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -72,7 +72,7 @@ public class MainRightComponent extends JPanel {
         var closeDrawerBtn = new JButton(Icons.DRAWER_SHOW_OR_CLOSE_ICON);
         closeDrawerBtn.addActionListener(action);
         toolBar.add(closeDrawerBtn);
-        action.setBeforeProcess(state -> closeDrawerBtn.setVisible(false));
+        action.setBeforeProcess(_ -> closeDrawerBtn.setVisible(false));
         action.setAfterProcess(state -> {
             if (SystemInfo.isMacOS) {
                 if (owner.isFullScreen()) {

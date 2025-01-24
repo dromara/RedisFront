@@ -1,8 +1,6 @@
-package org.dromara.redisfront.ui.widget.main.left;
+package org.dromara.redisfront.ui.widget.left.tree;
 
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.DbUtil;
-import cn.hutool.db.Entity;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.util.SystemInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -13,11 +11,11 @@ import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.dao.ConnectGroupDao;
 import org.dromara.redisfront.model.RedisConnectTreeItem;
 import org.dromara.redisfront.model.entity.ConnectGroupEntity;
+import org.dromara.redisfront.ui.common.ConnectTreeCellRenderer;
 import org.dromara.redisfront.ui.dialog.AddConnectDialog;
-import org.dromara.redisfront.ui.widget.main.left.event.DeleteConnectTreeEvent;
-import org.dromara.redisfront.ui.widget.main.left.event.RefreshConnectTreeEvent;
-import org.dromara.redisfront.ui.widget.common.ConnectTreeCellRenderer;
-import org.dromara.redisfront.ui.widget.main.MainWidget;
+import org.dromara.redisfront.ui.event.DeleteConnectTreeEvent;
+import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
+import org.dromara.redisfront.ui.widget.MainWidget;
 import org.jdesktop.swingx.JXTree;
 import raven.drawer.component.menu.MenuEvent;
 import raven.toast.Notifications;
@@ -36,14 +34,14 @@ import java.sql.SQLException;
 import java.util.List;
 
 @Slf4j
-public class MainLeftConnectTree extends JXTree {
+public class ConnectTree extends JXTree {
     private final MainWidget owner;
     private final MenuEvent menuEvent;
     private JPopupMenu treePopupMenu;
     private JPopupMenu treeNodePopupMenu;
     private JPopupMenu treeNodeGroupPopupMenu;
 
-    public MainLeftConnectTree(MainWidget owner, MenuEvent menuEvent) {
+    public ConnectTree(MainWidget owner, MenuEvent menuEvent) {
         this.owner = owner;
         this.menuEvent = menuEvent;
         this.setRootVisible(false);
@@ -67,6 +65,7 @@ public class MainLeftConnectTree extends JXTree {
         this.loadTreeNodeData(context);
         this.registerEventListener(context);
     }
+
 
     @Override
     public void updateUI() {
@@ -179,14 +178,8 @@ public class MainLeftConnectTree extends JXTree {
                     }
                     Object pathComponent = selectionPath.getLastPathComponent();
                     if (pathComponent instanceof RedisConnectTreeItem redisConnectTreeItem) {
-                        AddConnectDialog addConnectDialog = new AddConnectDialog(owner);
-                        addConnectDialog.setSubmitHandler(connectInfo -> {
-                            Integer id = redisConnectTreeItem.id();
-                            //todo
-                        });
-                        addConnectDialog.setLocationRelativeTo(null);
-                        addConnectDialog.setVisible(true);
-                        addConnectDialog.pack();
+                        AddConnectDialog.getInstance(owner).showNewConnectDialog(redisConnectTreeItem.id());
+
                     }
                 });
             }
@@ -301,10 +294,7 @@ public class MainLeftConnectTree extends JXTree {
         JMenuItem addConnectMenuItem = new JMenuItem("添加连接") {
             {
                 addActionListener(_ -> {
-                    AddConnectDialog addConnectDialog = new AddConnectDialog(owner);
-                    addConnectDialog.setLocationRelativeTo(null);
-                    addConnectDialog.setVisible(true);
-                    addConnectDialog.pack();
+                    AddConnectDialog.getInstance(owner).showNewConnectDialog(null);
                 });
             }
         };

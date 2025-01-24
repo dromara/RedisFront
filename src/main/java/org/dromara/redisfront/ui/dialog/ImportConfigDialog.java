@@ -153,27 +153,27 @@ public class ImportConfigDialog extends AbstractDialog<Void> {
         if (Fn.isNotNull(raw.get("username"))) {
             connectInfo.setUsername((String) raw.get("username"));
         }
-        connectInfo.setConnectMode(Enums.Connect.NORMAL);
-        connectInfo.setSshConfig(new ConnectInfo.SSHConfig("", "", "", null, ""));
+        connectInfo.setConnectTypeMode(Enums.ConnectType.NORMAL);
+        connectInfo.setSshInfo(new ConnectInfo.SshInfo("", "", "", null, ""));
         if (!StrUtil.isBlankIfStr(raw.get("ssh_host"))) {
-            connectInfo.getSshConfig().setHost((String) raw.get("ssh_host"));
-            connectInfo.setConnectMode(Enums.Connect.SSH);
+            connectInfo.getSshInfo().setHost((String) raw.get("ssh_host"));
+            connectInfo.setConnectTypeMode(Enums.ConnectType.SSH);
         }
         if (Fn.isNotNull(raw.get("ssh_port"))) {
-            connectInfo.getSshConfig().setPort((Integer) raw.get("ssh_port"));
+            connectInfo.getSshInfo().setPort((Integer) raw.get("ssh_port"));
             ///connectInfo.setConnectMode(Enum.Connect.SSH);
         }
         if (!StrUtil.isBlankIfStr(raw.get("ssh_user"))) {
-            connectInfo.getSshConfig().setUser((String) raw.get("ssh_user"));
-            connectInfo.setConnectMode(Enums.Connect.SSH);
+            connectInfo.getSshInfo().setUser((String) raw.get("ssh_user"));
+            connectInfo.setConnectTypeMode(Enums.ConnectType.SSH);
         }
         if (!StrUtil.isBlankIfStr(raw.get("ssh_password"))) {
-            connectInfo.getSshConfig().setPassword((String) raw.get("ssh_password"));
-            connectInfo.setConnectMode(Enums.Connect.SSH);
+            connectInfo.getSshInfo().setPassword((String) raw.get("ssh_password"));
+            connectInfo.setConnectTypeMode(Enums.ConnectType.SSH);
         }
         if (!StrUtil.isBlankIfStr(raw.get("ssh_private_key_path"))) {
-            connectInfo.getSshConfig().setPrivateKeyPath((String) raw.get("ssh_private_key_path"));
-            connectInfo.setConnectMode(Enums.Connect.SSH);
+            connectInfo.getSshInfo().setPrivateKeyPath((String) raw.get("ssh_private_key_path"));
+            connectInfo.setConnectTypeMode(Enums.ConnectType.SSH);
         }
         return connectInfo;
     }

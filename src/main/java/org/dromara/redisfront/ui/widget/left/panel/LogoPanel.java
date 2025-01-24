@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.main.left.panel;
+package org.dromara.redisfront.ui.widget.left.panel;
 
 import org.dromara.redisfront.commons.constant.Icons;
 

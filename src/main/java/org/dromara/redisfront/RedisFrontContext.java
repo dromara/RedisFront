@@ -10,7 +10,7 @@ import org.dromara.quickswing.excutor.QSTaskExecutor;
 import org.dromara.quickswing.ui.app.QSContext;
 import org.dromara.quickswing.ui.app.QSWidget;
 import org.dromara.redisfront.commons.constant.Constants;
-import org.dromara.redisfront.ui.widget.main.MainWidget;
+import org.dromara.redisfront.ui.widget.MainWidget;
 import raven.popup.GlassPanePopup;
 import javax.sql.DataSource;
 import javax.swing.*;

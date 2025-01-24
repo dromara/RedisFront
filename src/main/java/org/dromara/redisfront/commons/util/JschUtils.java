@@ -23,19 +23,20 @@ public class JschUtils {
     static ThreadLocal<Session> sessionThreadLocal = new ThreadLocal<>();
 
     public static Session createSession(ConnectInfo connectInfo) {
-        if (Fn.isNotEmpty(connectInfo.sshConfig().getPrivateKeyPath()) && Fn.isNotEmpty(connectInfo.sshConfig().getPassword())) {
-            return JschUtil.createSession(connectInfo.sshConfig().getHost(), connectInfo.sshConfig().getPort(), connectInfo.sshConfig().getUser(), connectInfo.sshConfig().getPrivateKeyPath(), connectInfo.sshConfig().getPassword().getBytes());
-        } else if (Fn.isNotEmpty(connectInfo.sshConfig().getPrivateKeyPath())) {
-            return JschUtil.createSession(connectInfo.sshConfig().getHost(), connectInfo.sshConfig().getPort(), connectInfo.sshConfig().getUser(), connectInfo.sshConfig().getPrivateKeyPath(), null);
+        ConnectInfo.SshInfo sshInfo = connectInfo.getSshInfo();
+        if (Fn.isNotEmpty(sshInfo.getPrivateKeyPath()) && Fn.isNotEmpty(sshInfo.getPassword())) {
+            return JschUtil.createSession(sshInfo.getHost(), sshInfo.getPort(), sshInfo.getUser(), sshInfo.getPrivateKeyPath(), sshInfo.getPassword().getBytes());
+        } else if (Fn.isNotEmpty(sshInfo.getPrivateKeyPath())) {
+            return JschUtil.createSession(sshInfo.getHost(), sshInfo.getPort(), sshInfo.getUser(), sshInfo.getPrivateKeyPath(), null);
         } else {
-            return JschUtil.createSession(connectInfo.sshConfig().getHost(), connectInfo.sshConfig().getPort(), connectInfo.sshConfig().getUser(), connectInfo.sshConfig().getPassword());
+            return JschUtil.createSession(sshInfo.getHost(), sshInfo.getPort(), sshInfo.getUser(), sshInfo.getPassword());
         }
     }
 
     private static String getRemoteAddress(ConnectInfo connectInfo) {
-        var remoteAddress = connectInfo.host();
+        var remoteAddress = connectInfo.getHost();
         if (Fn.equal(remoteAddress, "127.0.0.1") || Fn.equal(remoteAddress.toLowerCase(), "localhost")) {
-            remoteAddress = connectInfo.sshConfig().getHost();
+            remoteAddress = connectInfo.getSshInfo().getHost();
         }
         return remoteAddress;
     }
@@ -50,7 +51,7 @@ public class JschUtils {
     }
 
     public synchronized static void openSession(ConnectInfo connectInfo, RedisClusterClient clusterClient) {
-        if (Fn.isNotNull(connectInfo.sshConfig())) {
+        if (Fn.isNotNull(connectInfo.getSshInfo())) {
             try {
                 Session session = sessionThreadLocal.get();
                 if (Fn.isNotNull(session)) {
@@ -72,12 +73,12 @@ public class JschUtils {
                 }
             }
         } else {
-            clusterClient.getPartitions().forEach(redisClusterNode -> redisClusterNode.getUri().setHost(connectInfo.host()));
+            clusterClient.getPartitions().forEach(redisClusterNode -> redisClusterNode.getUri().setHost(connectInfo.getHost()));
         }
     }
 
     public synchronized static void openSession(ConnectInfo connectInfo) {
-        if (Fn.isNotNull(connectInfo.sshConfig())) {
+        if (Fn.isNotNull(connectInfo.getSshInfo())) {
             try {
                 Session session = sessionThreadLocal.get();
                 if (Fn.isNotNull(session)) {
@@ -87,7 +88,7 @@ public class JschUtils {
                 var remoteHost = getRemoteAddress(connectInfo);
                 session.setTimeout(1000);
                 session.connect();
-                JschUtil.bindPort(session, remoteHost, connectInfo.port(), connectInfo.getLocalPort());
+                JschUtil.bindPort(session, remoteHost, connectInfo.getPort(), connectInfo.getLocalPort());
                 sessionThreadLocal.set(session);
             } catch (Exception e) {
                 if (e instanceof JSchException jSchException) {

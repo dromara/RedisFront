@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.main.left.panel;
+package org.dromara.redisfront.ui.widget.left.panel;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
@@ -16,7 +16,7 @@ import java.awt.*;
 public class ThemesChangePanel extends JPanel {
     public final static OsThemeDetector DETECTOR = OsThemeDetector.getDetector();
     public ThemesChangePanel() {
-        init();
+        initializeUI();
         ThemesChangePanel.changeMode(ThemesChangePanel.isDark());
         ThemesChangePanel.DETECTOR.registerListener(isDark -> SwingUtilities.invokeLater(() -> changeMode(isDark)));
     }
@@ -31,7 +31,7 @@ public class ThemesChangePanel extends JPanel {
         return icon;
     }
 
-    private void init() {
+    private void initializeUI() {
         putClientProperty(FlatClientProperties.STYLE,  "background:null");
         setLayout(new MigLayout("al center", "[fill,200]", "fill"));
         JPanel panel = new JPanel(new MigLayout("fill", "[fill]10[fill]", "fill"));
@@ -39,8 +39,8 @@ public class ThemesChangePanel extends JPanel {
                 + "background:darken($RedisFront.main.background,5%)");
         JButton buttonLight = new JButton(createIcon("svg/light.svg"));
         JButton buttonDark = new JButton(createIcon("svg/dark.svg"));
-        buttonLight.addActionListener(e -> changeMode(false));
-        buttonDark.addActionListener(e -> changeMode(true));
+        buttonLight.addActionListener(_ -> changeMode(false));
+        buttonDark.addActionListener(_ -> changeMode(true));
         buttonLight.putClientProperty(FlatClientProperties.STYLE, "arc:999;"
                 + "[dark]background:null;"
                 + "[light]background:$RedisFront.main.background;"

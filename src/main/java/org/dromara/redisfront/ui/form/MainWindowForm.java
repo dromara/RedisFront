@@ -57,7 +57,7 @@ public class MainWindowForm {
                     var connectInfo = get();
                     FutureUtils.runAsync(LoadingUtils::closeDialog);
                     var mainTabbedPanel = MainTabbedPanel.newInstance(connectInfo);
-                    tabPanel.addTab(get().title(), Icons.MAIN_TAB_DATABASE_ICON, mainTabbedPanel);
+                    tabPanel.addTab(get().getTitle(), Icons.MAIN_TAB_DATABASE_ICON, mainTabbedPanel);
                     tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
                     contentPanel.add(tabPanel, BorderLayout.CENTER, 0);
                     toolBar.setVisible(true);
@@ -75,18 +75,18 @@ public class MainWindowForm {
 
             @Override
             protected ConnectInfo doInBackground() {
-                connectInfo.setRedisModeEnum(RedisBasicService.service.getRedisModeEnum(connectInfo));
+                connectInfo.setRedisMode(RedisBasicService.service.getRedisModeEnum(connectInfo));
                 var prototype = connectInfo.clone();
 
                 FutureUtils.runAsync(() -> {
-                    if (Fn.equal(prototype.id(), 0)) {
+                    if (Fn.equal(prototype.getId(), 0)) {
                         ConnectDetailDao.DAO.save(prototype);
                     } else {
                         ConnectDetailDao.DAO.update(prototype);
                     }
                 });
 
-                if (Enums.RedisMode.SENTINEL == connectInfo.redisModeEnum()) {
+                if (Enums.RedisMode.SENTINEL == connectInfo.getRedisMode()) {
                     var masterList = LettuceUtils.sentinelExec(connectInfo, RedisSentinelCommands::masters);
                     var master = masterList.stream().findAny().orElseThrow();
                     var ip = master.get("ip");
@@ -116,7 +116,7 @@ public class MainWindowForm {
                             throw e;
                         }
                     }
-                    LoadingUtils.showDialog(String.format(LocaleUtils.getMessageFromBundle("MainWindowForm.connection.message"), connectInfo.host(), connectInfo.port()));
+                    LoadingUtils.showDialog(String.format(LocaleUtils.getMessageFromBundle("MainWindowForm.connection.message"), connectInfo.getHost(), connectInfo.getPort()));
                 }
                 return connectInfo;
             }

@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.main;
+package org.dromara.redisfront.ui.widget;
 
 
 import com.formdev.flatlaf.FlatClientProperties;

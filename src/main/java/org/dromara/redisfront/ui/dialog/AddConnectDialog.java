@@ -6,16 +6,17 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import io.lettuce.core.RedisConnectionException;
-import lombok.Getter;
-import lombok.Setter;
 import org.dromara.quickswing.ui.app.QSDialog;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.commons.constant.Enums;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.model.ConnectInfo;
+import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 import org.dromara.redisfront.service.RedisBasicService;
-import org.dromara.redisfront.ui.widget.main.MainWidget;
+import org.dromara.redisfront.ui.event.ConnectCheckSuccessEvent;
+import org.dromara.redisfront.ui.widget.MainWidget;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -23,10 +24,10 @@ import java.awt.*;
 import java.awt.event.*;
 import java.lang.reflect.Method;
 import java.util.ResourceBundle;
-import java.util.function.Consumer;
 
 public class AddConnectDialog extends QSDialog<MainWidget> {
     private final RedisFrontContext context;
+    private Integer groupId;
     private JPanel contentPane;
     private JButton submitBtn;
     private JButton buttonCancel;
@@ -63,12 +64,28 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
     private JLabel sshUserLabel;
     private JLabel sshPortLabel;
     private JLabel sshPasswordLabel;
-    @Getter
-    @Setter
-    private Consumer<ConnectInfo> submitHandler;
 
 
-    public AddConnectDialog(MainWidget app) {
+    public static AddConnectDialog getInstance(MainWidget app) {
+        return new AddConnectDialog(app);
+    }
+
+    public void showNewConnectDialog(Integer groupId) {
+        this.groupId = groupId;
+        this.setLocationRelativeTo(null);
+        this.setVisible(true);
+        this.pack();
+    }
+
+    public void showEditConnectDialog(Integer groupId, ConnectDetailEntity connectDetailEntity) {
+        this.groupId = groupId;
+        this.populateConnectInfo(connectDetailEntity.toConnectInfo());
+        this.setLocationRelativeTo(null);
+        this.setVisible(true);
+        this.pack();
+    }
+
+    private AddConnectDialog(MainWidget app) {
         super(app, app.$tr("AddConnectDialog.Title"));
         this.context = (RedisFrontContext) app.getContext();
         $$$setupUI$$$();
@@ -225,7 +242,8 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
         var connectInfo = validGetConnectInfo();
         var connectSuccess = testConnect();
         if (connectSuccess) {
-            submitHandler.accept(connectInfo);
+            ConnectCheckSuccessEvent event = new ConnectCheckSuccessEvent(connectInfo);
+            context.getEventBus().publish(event);
             dispose();
         }
     }
@@ -243,106 +261,99 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
         var title = titleField.getText();
 
         if (enableSSHBtn.isSelected()) {
-
             if (Fn.isEmpty(sshHostField.getText())) {
                 sshHostField.requestFocus();
                 throw new RedisFrontException($tr("AddConnectDialog.require.sshHost.message"), false);
             }
-
             if (Fn.isEmpty(sshUserField.getText())) {
                 sshUserField.requestFocus();
                 throw new RedisFrontException($tr("AddConnectDialog.require.sshUser.message"), false);
             }
-
             if (enableSshPrivateKey.isSelected()) {
                 if (Fn.isEmpty(sshPrivateKeyFile.getText())) {
                     sshPrivateKeyFile.requestFocus();
                     throw new RedisFrontException($tr("AddConnectDialog.require.sshPrivateKey.message"), false);
                 }
             }
-
-            var sshConfig = new ConnectInfo.SSHConfig(
-                    sshPrivateKeyFile.getText(),
-                    sshUserField.getText(),
-                    sshHostField.getText(),
-                    (Integer) sshPortField.getValue(),
-                    new String(sshPasswordField.getPassword()));
-
-            return new ConnectInfo(
-                    title,
-                    hostField.getText(),
-                    (Integer) portField.getValue(),
-                    userField.getText(),
-                    String.valueOf(passwordField.getPassword()),
-                    0,
-                    enableSSLBtn.isSelected(),
-                    Enums.Connect.SSH,
-                    sshConfig)
-                    ;
-
-
+            return getSshConnectInfo(title);
         } else if (enableSSLBtn.isSelected()) {
-            var sslConfig = new ConnectInfo.SSLConfig(
-                    null,
-                    publicKeyField.getText(),
-                    null,
-                    String.valueOf(sslPasswordField.getPassword())
-            );
-            return new ConnectInfo(title,
-                    hostField.getText(),
-                    (Integer) portField.getValue(),
-                    userField.getText(),
-                    String.valueOf(passwordField.getPassword()),
-                    0,
-                    enableSSLBtn.isSelected(),
-                    Enums.Connect.NORMAL,
-                    sslConfig)
-                    ;
-
+            return getSslConnectInfo(title);
         } else {
-            return new ConnectInfo(title,
-                    hostField.getText(),
-                    (Integer) portField.getValue(),
-                    userField.getText(),
-                    String.valueOf(passwordField.getPassword()),
-                    0,
-                    enableSSLBtn.isSelected(),
-                    Enums.Connect.NORMAL)
-                    ;
-
+            ConnectInfo connectInfo = new ConnectInfo();
+            connectInfo.setTitle(title);
+            connectInfo.setHost(hostField.getText());
+            connectInfo.setPort((Integer) portField.getValue());
+            connectInfo.setUsername(userField.getText());
+            connectInfo.setPassword(String.valueOf(passwordField.getPassword()));
+            connectInfo.setConnectTypeMode(Enums.ConnectType.NORMAL);
+            return connectInfo;
         }
     }
 
-    /**
-     * 数据初始化
-     */
-    public void componentsDataInit(ConnectInfo connectInfo) {
-        this.titleField.setText(connectInfo.title());
-        this.hostField.setText(connectInfo.host());
-        this.portField.setValue(connectInfo.port());
-        this.userField.setText(connectInfo.user());
-        this.passwordField.setText(connectInfo.password());
-        this.enableSSLBtn.setSelected(connectInfo.ssl());
-        this.enableSSHBtn.setSelected(Enums.Connect.SSH.equals(connectInfo.connectMode()));
+    private @NotNull ConnectInfo getSslConnectInfo(String title) {
+        var sslInfo = new ConnectInfo.SslInfo(
+                null,
+                publicKeyField.getText(),
+                null,
+                String.valueOf(sslPasswordField.getPassword())
+        );
+        ConnectInfo connectInfo = new ConnectInfo();
+        connectInfo.setTitle(title);
+        connectInfo.setHost(hostField.getText());
+        connectInfo.setPort((Integer) portField.getValue());
+        connectInfo.setUsername(userField.getText());
+        connectInfo.setPassword(String.valueOf(passwordField.getPassword()));
+        connectInfo.setSslInfo(sslInfo);
+        connectInfo.setEnableSsl(enableSSLBtn.isSelected());
+        connectInfo.setConnectTypeMode(Enums.ConnectType.NORMAL);
+        return connectInfo;
+    }
+
+    private @NotNull ConnectInfo getSshConnectInfo(String title) {
+        var sshInfo = new ConnectInfo.SshInfo(
+                sshPrivateKeyFile.getText(),
+                sshUserField.getText(),
+                sshHostField.getText(),
+                (Integer) sshPortField.getValue(),
+                new String(sshPasswordField.getPassword()));
+
+        ConnectInfo connectInfo = new ConnectInfo();
+        connectInfo.setTitle(title);
+        connectInfo.setHost(hostField.getText());
+        connectInfo.setPort((Integer) portField.getValue());
+        connectInfo.setUsername(userField.getText());
+        connectInfo.setPassword(String.valueOf(passwordField.getPassword()));
+        connectInfo.setSshInfo(sshInfo);
+        connectInfo.setEnableSsl(enableSSLBtn.isSelected());
+        connectInfo.setConnectTypeMode(Enums.ConnectType.SSH);
+        return connectInfo;
+    }
+
+    private void populateConnectInfo(ConnectInfo connectInfo) {
+        this.titleField.setText(connectInfo.getTitle());
+        this.hostField.setText(connectInfo.getHost());
+        this.portField.setValue(connectInfo.getPort());
+        this.userField.setText(connectInfo.getUsername());
+        this.passwordField.setText(connectInfo.getPassword());
+        this.enableSSLBtn.setSelected(connectInfo.getEnableSsl());
+        this.enableSSHBtn.setSelected(Enums.ConnectType.SSH.equals(connectInfo.getConnectTypeMode()));
         if (enableSSLBtn.isSelected()) {
             setSize(new Dimension(getWidth(), getHeight() - 130));
             sslPanel.setVisible(true);
-            sslPasswordField.setText(connectInfo.sslConfig().getPassword());
-            publicKeyField.setText(connectInfo.sslConfig().getPublicKeyFilePath());
+            sslPasswordField.setText(connectInfo.getSslInfo().getPassword());
+            publicKeyField.setText(connectInfo.getSslInfo().getPublicKeyFilePath());
         }
         if (enableSSHBtn.isSelected()) {
             setSize(new Dimension(getWidth(), getHeight() + 140));
             sshPanel.setVisible(true);
-            sshUserField.setText(connectInfo.sshConfig().getUser());
-            sshHostField.setText(connectInfo.sshConfig().getHost());
-            sshPasswordField.setText(connectInfo.sshConfig().getPassword());
-            sshPortField.setValue(connectInfo.sshConfig().getPort());
-
-            enableSshPrivateKey.setSelected(Fn.isNotEmpty(connectInfo.sshConfig().getPrivateKeyPath()));
+            sshUserField.setText(connectInfo.getSshInfo().getUser());
+            sshHostField.setText(connectInfo.getSshInfo().getHost());
+            sshPasswordField.setText(connectInfo.getSshInfo().getPassword());
+            sshPortField.setValue(connectInfo.getSshInfo().getPort());
+            enableSshPrivateKey.setSelected(Fn.isNotEmpty(connectInfo.getSshInfo().getPrivateKeyPath()));
             sshPrivateKeyFile.setVisible(enableSshPrivateKey.isSelected());
             sshPrivateKeyBtn.setVisible(enableSshPrivateKey.isSelected());
-
-            sshPrivateKeyFile.setText(connectInfo.sshConfig().getPrivateKeyPath());
+            sshPrivateKeyFile.setText(connectInfo.getSshInfo().getPrivateKeyPath());
         }
     }
 

@@ -63,12 +63,12 @@ public class RedisTerminal extends AbstractTerminal {
                     .orElseThrow(() -> new RedisFrontException("ERR unknown command '" + inputText + "'", false));
             commandList.remove(0);
 
-            if (Fn.equal(connectInfo().redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+            if (Fn.equal(connectInfo().getRedisMode(), Enums.RedisMode.CLUSTER)) {
                 LettuceUtils.clusterRun(connectInfo(), redisCommands -> {
                     var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
                     println(format(res, ""));
                 });
-            } else if (Fn.equal(connectInfo().redisModeEnum(), Enums.RedisMode.SENTINEL)) {
+            } else if (Fn.equal(connectInfo().getRedisMode(), Enums.RedisMode.SENTINEL)) {
                 LettuceUtils.sentinelRun(connectInfo(), redisCommands -> {
                     var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
                     println(format(res, ""));
@@ -127,7 +127,7 @@ public class RedisTerminal extends AbstractTerminal {
 
     @Override
     protected String databaseName() {
-        return String.valueOf(connectInfo.database());
+        return String.valueOf(connectInfo.getDatabase());
     }
 
 }

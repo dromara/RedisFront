@@ -22,7 +22,7 @@ public class RedisStringServiceImpl implements RedisStringService {
         var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("SET ".concat(key).concat(" ").concat(value));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.set(key, value));
         } else {
             return LettuceUtils.exec(connectInfo, commands -> commands.set(key, value));
@@ -35,7 +35,7 @@ public class RedisStringServiceImpl implements RedisStringService {
         var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("GET ".concat(key));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.get(key));
         } else {
             return LettuceUtils.exec(connectInfo, commands -> commands.get(key));
@@ -48,7 +48,7 @@ public class RedisStringServiceImpl implements RedisStringService {
         var logInfo = RedisBasicService.buildLogInfo(connectInfo).setInfo("STRLEN ".concat(key));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.strlen(key));
         } else {
             return LettuceUtils.exec(connectInfo, commands -> commands.strlen(key));
@@ -57,7 +57,7 @@ public class RedisStringServiceImpl implements RedisStringService {
 
     @Override
     public String setex(ConnectInfo connectInfo, String key, long seconds, String value) {
-        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, commands -> commands.setex(key, seconds, value));
         } else {
             return LettuceUtils.exec(connectInfo, commands -> commands.setex(key, seconds, value));

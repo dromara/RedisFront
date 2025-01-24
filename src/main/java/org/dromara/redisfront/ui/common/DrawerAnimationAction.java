@@ -1,10 +1,10 @@
-package org.dromara.redisfront.ui.widget.common;
+package org.dromara.redisfront.ui.common;
 
 
 import lombok.Getter;
 import lombok.Setter;
 import org.dromara.quickswing.ui.app.QSAction;
-import org.dromara.redisfront.ui.widget.main.MainWidget;
+import org.dromara.redisfront.ui.widget.MainWidget;
 import org.jdesktop.core.animation.timing.Animator;
 import org.jdesktop.core.animation.timing.TimingTarget;
 import org.jdesktop.core.animation.timing.TimingTargetAdapter;

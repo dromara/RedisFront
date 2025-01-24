@@ -4,9 +4,18 @@ import java.awt.*;
 
 public class Enums {
 
-    public enum Connect {
+    public enum ConnectType {
         NORMAL,
-        SSH
+        SSH;
+
+        public static ConnectType of(String type) {
+            for (ConnectType connectType : values()) {
+                if (connectType.name().equals(type)) {
+                    return connectType;
+                }
+            }
+            return NORMAL;
+        }
     }
 
     public enum KeyTypeEnum {
@@ -47,7 +56,14 @@ public class Enums {
             this.modeName = modeName;
         }
 
-
+        public static RedisMode of(String modeName) {
+            for (RedisMode redisMode : values()) {
+                if (redisMode.modeName.equals(modeName)) {
+                    return redisMode;
+                }
+            }
+            return STANDALONE;
+        }
     }
 
 }

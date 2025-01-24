@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.common;
+package org.dromara.redisfront.ui.common;
 
 import com.formdev.flatlaf.util.SystemInfo;
 import org.dromara.redisfront.commons.constant.Icons;

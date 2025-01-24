@@ -4,8 +4,6 @@ import cn.hutool.core.io.resource.ResourceUtil;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.Ellipse2D;
-import java.net.URL;
 
 /**
  * LoadingPanel

@@ -181,7 +181,7 @@ public interface RedisBasicService {
     }
 
     static LogInfo buildLogInfo(ConnectInfo connectInfo) {
-        return new LogInfo().setDate(LocalDateTime.now()).setIp(connectInfo.host());
+        return new LogInfo().setDate(LocalDateTime.now()).setIp(connectInfo.getHost());
     }
 
 

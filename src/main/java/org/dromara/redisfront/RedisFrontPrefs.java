@@ -6,7 +6,7 @@ import org.dromara.quickswing.ui.app.QSPrefs;
 public class RedisFrontPrefs extends QSPrefs {
     @Override
     protected String getKeyPrefix() {
-        return "rdf";
+        return "redis-front";
     }
 
     public RedisFrontPrefs(String rootPath) {

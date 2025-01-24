@@ -54,9 +54,9 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
 
     protected void printConnectedSuccessMessage() {
         this.println("");
-        this.println("connection ".concat(connectInfo().host()).concat(":") + connectInfo().port() + " redis server success...");
+        this.println("connection ".concat(connectInfo().getHost()).concat(":") + connectInfo().getPort() + " redis server success...");
         this.println("");
-        this.print(connectInfo().host().concat(":").concat(String.valueOf(connectInfo().port())).concat(Fn.equal("0", databaseName()) ? "" : " [" + databaseName() + "] ").concat(">"));
+        this.print(connectInfo().getHost().concat(":").concat(String.valueOf(connectInfo().getPassword())).concat(Fn.equal("0", databaseName()) ? "" : " [" + databaseName() + "] ").concat(">"));
     }
 
     @Override
@@ -90,8 +90,8 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
                 }
             }
             this.print("\n");
-            this.print(connectInfo().host().concat(":").concat(connectInfo().port().toString()).concat(Fn.equal("0", databaseName()) ? "" : "[" + databaseName() + "]").concat(">"));
-        } else if (currentKeyCode == KeyEvent.VK_ENTER && e.getKeyChar() != '\n') {
+            this.print(connectInfo().getHost().concat(":").concat(connectInfo().getPort().toString()).concat(Fn.equal("0", databaseName()) ? "" : "[" + databaseName() + "]").concat(">"));
+        } else if (currentKeyCode == KeyEvent.VK_ENTER) {
             e.consume();
             terminal.setText(terminal.getText().concat(String.valueOf(e.getKeyChar())));
         }

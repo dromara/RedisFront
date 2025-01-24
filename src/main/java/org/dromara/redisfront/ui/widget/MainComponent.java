@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.main;
+package org.dromara.redisfront.ui.widget;
 
 import cn.hutool.core.util.ArrayUtil;
 import com.formdev.flatlaf.FlatClientProperties;
@@ -6,12 +6,12 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.util.SystemInfo;
 import org.dromara.quickswing.ui.app.QSAction;
 import org.dromara.quickswing.ui.swing.Background;
+import org.dromara.redisfront.ui.common.DefaultNonePanel;
+import org.dromara.redisfront.ui.common.DrawerAnimationAction;
+import org.dromara.redisfront.ui.common.DrawerMenuItemEvent;
 import org.dromara.redisfront.ui.dialog.AddConnectDialog;
-import org.dromara.redisfront.ui.widget.common.DrawerAnimationAction;
-import org.dromara.redisfront.ui.widget.common.DefaultNonePanel;
-import org.dromara.redisfront.ui.widget.common.DrawerMenuItemEvent;
-import org.dromara.redisfront.ui.widget.main.left.MainLeftComponent;
-import org.dromara.redisfront.ui.widget.main.right.MainRightComponent;
+import org.dromara.redisfront.ui.widget.left.MainLeftComponent;
+import org.dromara.redisfront.ui.widget.right.MainRightComponent;
 import raven.drawer.component.menu.MenuEvent;
 
 import javax.swing.*;
@@ -82,24 +82,21 @@ public class MainComponent extends Background {
         this.owner.registerAction(this, new QSAction<>(owner) {
             @Override
             public void handleAction(ActionEvent actionEvent) {
-                AddConnectDialog addConnectDialog =  new AddConnectDialog(getApp());
-                addConnectDialog.setLocationRelativeTo(null);
-                addConnectDialog.setVisible(true);
-                addConnectDialog.pack();
+                AddConnectDialog.getInstance(owner).showNewConnectDialog(null);
             }
 
             @Override
             public KeyStroke getKeyStroke() {
                 return SystemInfo.isMacOS ?
-                        KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()):
+                        KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()) :
                         KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK);
             }
         });
     }
 
-    DrawerMenuItemEvent drawerMenuItemEvent = (key,index)->{
-        System.out.println("drawerMenuItemEvent"+" key:"+key);
-        System.out.println("drawerMenuItemEvent"+" index:"+ Arrays.toString(index));
+    DrawerMenuItemEvent drawerMenuItemEvent = (key, index) -> {
+        System.out.println("drawerMenuItemEvent" + " key:" + key);
+        System.out.println("drawerMenuItemEvent" + " index:" + Arrays.toString(index));
     };
 
     private void initComponents() {
@@ -110,7 +107,7 @@ public class MainComponent extends Background {
         this.mainContentPane.add(DefaultNonePanel.getInstance(), BorderLayout.CENTER);
         parentPanel.add(mainContentPane, BorderLayout.CENTER);
 
-        this.mainDrawerPanel = new MainLeftComponent(owner, menuEvent, drawerAnimationAction,drawerMenuItemEvent).buildDrawerPanel();
+        this.mainDrawerPanel = new MainLeftComponent(owner, menuEvent, drawerAnimationAction, drawerMenuItemEvent).buildDrawerPanel();
         this.mainDrawerPanel.setMinimumSize(new Dimension(250, -1));
         this.mainDrawerPanel.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
         parentPanel.add(mainDrawerPanel, BorderLayout.WEST);

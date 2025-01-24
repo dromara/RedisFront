@@ -15,7 +15,7 @@ public class RedisPubSubServiceImpl implements RedisPubSubService {
 
     @Override
     public Long publish(ConnectInfo connectInfo, String channel, String message) {
-        if (Fn.equal(connectInfo.redisModeEnum(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectInfo.getRedisMode(), Enums.RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectInfo, clusterCommands -> clusterCommands.publish(channel, message));
         } else {
             return LettuceUtils.exec(connectInfo, commands -> commands.publish(channel, message));

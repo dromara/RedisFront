@@ -1,16 +1,17 @@
-package org.dromara.redisfront.ui.widget.main.left;
+package org.dromara.redisfront.ui.widget.left;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.util.SystemInfo;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
-import org.dromara.redisfront.ui.widget.common.DrawerMenuItemEvent;
-import org.dromara.redisfront.ui.widget.common.DrawerAnimationAction;
-import org.dromara.redisfront.ui.widget.main.MainComponent;
-import org.dromara.redisfront.ui.widget.main.MainWidget;
-import org.dromara.redisfront.ui.widget.main.left.panel.LogoPanel;
-import org.dromara.redisfront.ui.widget.main.left.panel.ThemesChangePanel;
+import org.dromara.redisfront.ui.common.DrawerMenuItemEvent;
+import org.dromara.redisfront.ui.common.DrawerAnimationAction;
+import org.dromara.redisfront.ui.widget.MainComponent;
+import org.dromara.redisfront.ui.widget.left.tree.ConnectTree;
+import org.dromara.redisfront.ui.widget.MainWidget;
+import org.dromara.redisfront.ui.widget.left.panel.LogoPanel;
+import org.dromara.redisfront.ui.widget.left.panel.ThemesChangePanel;
 import raven.drawer.component.DrawerPanel;
 import raven.drawer.component.SimpleDrawerBuilder;
 import raven.drawer.component.footer.SimpleFooterData;
@@ -38,7 +39,6 @@ public class MainLeftComponent extends SimpleDrawerBuilder {
             @Override
             public void updateUI() {
                 super.updateUI();
-
             }
         };
     }
@@ -96,7 +96,7 @@ public class MainLeftComponent extends SimpleDrawerBuilder {
 
     @Override
     public Component getMenu() {
-        JTree tree = new MainLeftConnectTree(owner, menuEvent);
+        JTree tree = new ConnectTree(owner, menuEvent);
         JScrollPane scrollPane = createScroll(tree);
         scrollPane.setBorder(new EmptyBorder(0, 10, 0, 10));
         return scrollPane;

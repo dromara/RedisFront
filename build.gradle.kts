@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter
 
 plugins {
     `java-library`
-    kotlin("jvm") version "2.0.0-RC3"
+    kotlin("jvm") version "2.0.0"
 }
 
 buildscript {
@@ -65,7 +65,7 @@ val applicationName: String = "RedisFront"
 val organization: String = "dromara.org"
 val supportUrl: String = "https://redisfront.dromara.org"
 
-val hutoolVersion = "5.8.21"
+val hutoolVersion = "5.8.25"
 val fifesoftVersion = "3.2.0"
 val derbyVersion = "10.17.1.0"
 val lettuceVersion = "6.2.0.RELEASE"
@@ -82,8 +82,8 @@ val requireModules = listOf(
     "java.naming"
 )
 
-if (JavaVersion.current() < JavaVersion.VERSION_17)
-    throw RuntimeException("compile required Java ${JavaVersion.VERSION_17}, current Java ${JavaVersion.current()}")
+if (JavaVersion.current() < JavaVersion.VERSION_22)
+    throw RuntimeException("compile required Java ${JavaVersion.VERSION_22}, current Java ${JavaVersion.current()}")
 
 val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
@@ -104,7 +104,6 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
     implementation("io.lettuce:lettuce-core:${lettuceVersion}")
-    implementation("io.netty:netty-common:4.1.82.Final")
     implementation("org.jfree:jfreechart:1.5.3")
     implementation("cn.hutool:hutool-extra:${hutoolVersion}")
     implementation("cn.hutool:hutool-json:${hutoolVersion}")
@@ -153,7 +152,7 @@ tasks.jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     manifest {
-        attributes("Main-Class" to "org.dromara.redisfront.application.Application")
+        attributes("Main-Class" to "org.dromara.redisfront.RedisFrontMain")
         attributes("Implementation-Vendor" to "redisfront.dromara.org")
         attributes("Implementation-Copyright" to "redisfront")
         attributes("Implementation-Version" to project.version)
@@ -185,7 +184,7 @@ tasks.jar {
 }
 
 configure<PackagePluginExtension> {
-    mainClass("org.dromara.redisfront.application.Application")
+    mainClass("org.dromara.redisfront.RedisFrontMain")
     packagingJdk(File(System.getProperty("java.home")))
     bundleJre(true)
     customizedJre(true)
@@ -197,9 +196,9 @@ configure<PackagePluginExtension> {
 
 tasks.register<PackageTask>("packageForWindows") {
 
-    val setupLanguage = LinkedHashMap<String, String>()
-    setupLanguage["Chinese"] = "compiler:Languages\\ChineseSimplified.isl"
-    setupLanguage["English"] = "compiler:Default.isl"
+    val languages = LinkedHashMap<String, String>()
+    languages["Chinese"] = "compiler:Languages\\ChineseSimplified.isl"
+    languages["English"] = "compiler:Default.isl"
 
     description = "package For Windows"
 
@@ -209,7 +208,6 @@ tasks.register<PackageTask>("packageForWindows") {
     platform = Platform.windows
     isCreateZipball = false
     winConfig(closureOf<WindowsConfig> {
-        icoFile = getIcon("RedisFront.ico")
         headerType = HeaderType.gui
         originalFilename = applicationName
         copyright = applicationName
@@ -217,7 +215,7 @@ tasks.register<PackageTask>("packageForWindows") {
         productVersion = version
         fileVersion = version
         isGenerateSetup = true
-        setupLanguages = setupLanguage
+        setupLanguages = languages
         isCreateZipball = true
         isGenerateMsi = false
         isGenerateMsm = false
@@ -238,7 +236,6 @@ tasks.register<PackageTask>("packageForLinux") {
 
     linuxConfig(
         closureOf<LinuxConfig> {
-            pngFile = getIcon("RedisFront.png")
             isGenerateDeb = true
             isGenerateRpm = true
             isCreateTarball = true
@@ -258,7 +255,6 @@ tasks.register<PackageTask>("packageForMac_arm") {
 
     macConfig(
         closureOf<MacConfig> {
-            icnsFile = getIcon("RedisFront.icns")
             isGenerateDmg = true
             macStartup = MacStartup.ARM64
         } as Closure<MacConfig>
@@ -275,14 +271,9 @@ tasks.register<PackageTask>("packageForMac_x86") {
 
     macConfig(
         closureOf<MacConfig> {
-            icnsFile = getIcon("RedisFront.icns")
             isGenerateDmg = true
             macStartup = MacStartup.X86_64
         } as Closure<MacConfig>
     )
     dependsOn(tasks.build)
-}
-
-fun getIcon(fileName: String): File {
-    return File(projectDir.absolutePath + File.separator + "assets" + File.separator + fileName)
 }

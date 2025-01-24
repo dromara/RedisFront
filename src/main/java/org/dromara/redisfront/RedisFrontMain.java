@@ -25,6 +25,8 @@ public class RedisFrontMain {
             application.setVisible(true);
         });
 
+        log.info("RedisFront started");
+
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             if (throwable instanceof RedisFrontException redisFrontException) {
                 Notifications.getInstance().show(Notifications.Type.ERROR, redisFrontException.getMessage());

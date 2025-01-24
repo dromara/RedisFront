@@ -20,12 +20,12 @@ public class ConnectTableModel extends DefaultTableModel {
     public ConnectTableModel(List<ConnectInfo> dataList) {
         var dataVector = new Object[dataList.size()][6];
         for (var i = 0; i < dataList.size(); i++) {
-            dataVector[i][0] = dataList.get(i).id();
-            dataVector[i][1] = dataList.get(i).title();
-            dataVector[i][2] = dataList.get(i).host();
-            dataVector[i][3] = dataList.get(i).port();
-            dataVector[i][4] = dataList.get(i).ssl().toString();
-            dataVector[i][5] = dataList.get(i).connectMode();
+            dataVector[i][0] = dataList.get(i).getId();
+            dataVector[i][1] = dataList.get(i).getTitle();
+            dataVector[i][2] = dataList.get(i).getHost();
+            dataVector[i][3] = dataList.get(i).getPort();
+            dataVector[i][4] = dataList.get(i).getSshInfo();
+            dataVector[i][5] = dataList.get(i).getConnectTypeMode();
         }
         this.setDataVector(dataVector, new String[]{
                 LocaleUtils.getMessageFromBundle("OpenConnectDialog.ConnectTableModel.id"),
