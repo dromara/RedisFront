@@ -54,5 +54,8 @@ public class ConnectDetailDao {
     public void delete(Object id) throws SQLException {
         DbUtil.use(datasource).del(TABLE_NAME, "id", id);
     }
+    public void deleteByGroupId(Object id) throws SQLException {
+        DbUtil.use(datasource).del(TABLE_NAME, "group_id", id);
+    }
 
 }

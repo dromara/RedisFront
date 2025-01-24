@@ -14,7 +14,6 @@ import org.dromara.redisfront.dao.ConnectGroupDao;
 import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 import org.dromara.redisfront.model.entity.ConnectGroupEntity;
 import org.dromara.redisfront.ui.dialog.AddConnectDialog;
-import org.dromara.redisfront.ui.event.DeleteConnectTreeEvent;
 import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
 import org.dromara.redisfront.ui.support.extend.ConnectTreeCellRenderer;
 import org.dromara.redisfront.ui.widget.MainWidget;
@@ -39,6 +38,7 @@ import java.util.List;
 public class RedisConnectTree extends JXTree {
     private final MainWidget owner;
     private final MenuEvent menuEvent;
+    private final RedisFrontContext context;
     private JPopupMenu treePopupMenu;
     private JPopupMenu treeNodePopupMenu;
     private JPopupMenu treeNodeGroupPopupMenu;
@@ -46,6 +46,13 @@ public class RedisConnectTree extends JXTree {
     public RedisConnectTree(MainWidget owner, MenuEvent menuEvent) {
         this.owner = owner;
         this.menuEvent = menuEvent;
+        this.context = (RedisFrontContext) owner.getContext();
+        this.initializeUI();
+        this.initializeActions();
+        this.initializeComponents();
+    }
+
+    private void initializeUI() {
         this.setRootVisible(false);
         this.setShowsRootHandles(true);
         this.setDragEnabled(true);
@@ -62,10 +69,40 @@ public class RedisConnectTree extends JXTree {
 
         );
         this.setCellRenderer(new ConnectTreeCellRenderer());
-        RedisFrontContext context = (RedisFrontContext) owner.getContext();
-        this.initPopupMenus(context);
-        this.loadTreeNodeData(context);
-        this.registerEventListener(context);
+    }
+
+    private void initializeComponents() {
+        this.initPopupMenus();
+        this.loadTreeNodeData();
+        this.registerEventListener();
+    }
+
+    private void initializeActions() {
+        this.owner.registerAction(this, new QSAction<>(owner) {
+            @Override
+            public void handleAction(ActionEvent actionEvent) {
+                TreePath selectionPath = getSelectionPath();
+                if (selectionPath == null) {
+                    AddConnectDialog.getInstance(owner).showNewConnectDialog(null);
+                } else {
+                    Object pathComponent = selectionPath.getLastPathComponent();
+                    if (pathComponent instanceof RedisConnectTreeNode redisConnectTreeItem) {
+                        if (redisConnectTreeItem.getIsGroup()) {
+                            AddConnectDialog.getInstance(owner).showNewConnectDialog(redisConnectTreeItem.id());
+                        } else {
+                            AddConnectDialog.getInstance(owner).showNewConnectDialog(null);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public KeyStroke getKeyStroke() {
+                return SystemInfo.isMacOS ?
+                        KeyStroke.getKeyStroke(KeyEvent.VK_A, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()) :
+                        KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK);
+            }
+        });
     }
 
 
@@ -79,7 +116,7 @@ public class RedisConnectTree extends JXTree {
         }
     }
 
-    private void loadTreeNodeData(RedisFrontContext context) {
+    private void loadTreeNodeData() {
         DataSource datasource = context.getDatabaseManager().getDatasource();
         context.taskExecute(() -> this.buildConnectTreeItem(datasource), (r, e) -> {
             if (e != null) {
@@ -92,30 +129,12 @@ public class RedisConnectTree extends JXTree {
         });
     }
 
-    private void registerEventListener(RedisFrontContext context) {
-        DataSource datasource = context.getDatabaseManager().getDatasource();
+    private void registerEventListener() {
         context.getEventBus().subscribe(new QSEventListener<>(owner) {
             @Override
             protected void onEvent(QSEvent event) {
                 if (event instanceof RefreshConnectTreeEvent) {
-                    loadTreeNodeData(context);
-                }
-                if (event instanceof DeleteConnectTreeEvent deleteConnectTreeEvent) {
-                    Object message = deleteConnectTreeEvent.getMessage();
-                    if (message instanceof RedisConnectTreeNode RedisConnectTreeNode) {
-                        context.taskExecute(() -> {
-                            ConnectGroupDao.newInstance(datasource).delete(RedisConnectTreeNode.id());
-                            return buildConnectTreeItem(datasource);
-                        }, (r, e) -> {
-                            if (e != null) {
-                                log.error(e.getMessage());
-                                Notifications.getInstance().show(Notifications.Type.ERROR, e.getMessage());
-                            } else {
-                                setModel(new DefaultTreeModel(r));
-                                updateUI();
-                            }
-                        });
-                    }
+                    loadTreeNodeData();
                 }
             }
         });
@@ -143,7 +162,7 @@ public class RedisConnectTree extends JXTree {
         return root;
     }
 
-    private void initPopupMenus(RedisFrontContext context) {
+    private void initPopupMenus() {
         DataSource datasource = context.getDatabaseManager().getDatasource();
         this.initTreePopupMenu(context, datasource);
         this.initTreeNodePopupMenu(context, datasource);
@@ -189,7 +208,6 @@ public class RedisConnectTree extends JXTree {
                     Object pathComponent = selectionPath.getLastPathComponent();
                     if (pathComponent instanceof RedisConnectTreeNode redisConnectTreeItem) {
                         AddConnectDialog.getInstance(owner).showNewConnectDialog(redisConnectTreeItem.id());
-
                     }
                 });
             }
@@ -237,7 +255,18 @@ public class RedisConnectTree extends JXTree {
                     }
                     Object lastPathComponent = selectionPath.getLastPathComponent();
                     if (lastPathComponent instanceof RedisConnectTreeNode redisConnectTreeItem) {
-                        context.getEventBus().publish(new DeleteConnectTreeEvent(redisConnectTreeItem));
+                        context.taskExecute(() -> {
+                            ConnectDetailDao.newInstance(datasource).deleteByGroupId(redisConnectTreeItem.id());
+                            context.getEventBus().publish(new RefreshConnectTreeEvent(redisConnectTreeItem));
+                            return null;
+                        }, (_, exception) -> {
+                            if (exception != null) {
+                                log.error(exception.getMessage());
+                                Notifications.getInstance().show(Notifications.Type.ERROR, exception.getMessage());
+                            } else {
+                                Notifications.getInstance().show(Notifications.Type.SUCCESS, "删除成功！");
+                            }
+                        });
                     }
                 });
             }
@@ -258,7 +287,31 @@ public class RedisConnectTree extends JXTree {
         JMenuItem editConnectMenuItem = new JMenuItem("编辑连接");
         treeNodePopupMenu.add(editConnectMenuItem);
 
-        JMenuItem deleteConnectMenuItem = new JMenuItem("删除连接");
+        JMenuItem deleteConnectMenuItem = new JMenuItem("删除连接") {
+            {
+                addActionListener(_ -> {
+                    TreePath selectionPath = getSelectionPath();
+                    if (selectionPath == null) {
+                        return;
+                    }
+                    Object lastPathComponent = selectionPath.getLastPathComponent();
+                    if (lastPathComponent instanceof RedisConnectTreeNode redisConnectTreeItem) {
+                        context.taskExecute(() -> {
+                            ConnectDetailDao.newInstance(datasource).delete(redisConnectTreeItem.id());
+                            context.getEventBus().publish(new RefreshConnectTreeEvent(redisConnectTreeItem));
+                            return null;
+                        }, (_, exception) -> {
+                            if (exception != null) {
+                                log.error(exception.getMessage());
+                                Notifications.getInstance().show(Notifications.Type.ERROR, exception.getMessage());
+                            } else {
+                                Notifications.getInstance().show(Notifications.Type.SUCCESS, "删除成功！");
+                            }
+                        });
+                    }
+                });
+            }
+        };
         treeNodePopupMenu.add(deleteConnectMenuItem);
     }
 

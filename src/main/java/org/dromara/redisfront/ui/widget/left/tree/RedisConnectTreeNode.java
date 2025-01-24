@@ -38,7 +38,7 @@ public class RedisConnectTreeNode extends DefaultMutableTreeNode implements Comp
         if (isGroup) {
             return group.getGroupId();
         }
-        return detail.getGroupId();
+        return detail.getId();
     }
 
     @Override

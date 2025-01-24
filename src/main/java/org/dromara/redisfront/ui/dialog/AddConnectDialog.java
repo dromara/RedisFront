@@ -15,7 +15,7 @@ import org.dromara.redisfront.dao.ConnectDetailDao;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 import org.dromara.redisfront.service.RedisBasicService;
-import org.dromara.redisfront.ui.event.ConnectCheckSuccessEvent;
+import org.dromara.redisfront.ui.event.RedisConnectValidEvent;
 import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
 import org.dromara.redisfront.ui.widget.MainWidget;
 import org.jetbrains.annotations.NotNull;
@@ -252,7 +252,7 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
                 ConnectDetailEntity connectDetailEntity = connectInfo.toEntity();
                 connectDetailEntity.setGroupId(groupId);
                 ConnectDetailDao.newInstance(context.getDatabaseManager().getDatasource()).save(connectDetailEntity);
-                context.getEventBus().publish(new ConnectCheckSuccessEvent(connectInfo));
+                context.getEventBus().publish(new RedisConnectValidEvent(connectInfo));
                 context.getEventBus().publish(new RefreshConnectTreeEvent(connectInfo));
                 dispose();
             } catch (SQLException e) {
