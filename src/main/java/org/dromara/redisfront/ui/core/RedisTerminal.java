@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.support;
+package org.dromara.redisfront.ui.core;
 
 import cn.hutool.core.date.DateUtil;
 import org.dromara.redisfront.commons.constant.Enums;

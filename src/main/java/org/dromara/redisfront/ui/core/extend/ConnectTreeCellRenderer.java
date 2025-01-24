@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.support.extend;
+package org.dromara.redisfront.ui.core.extend;
 
 import com.formdev.flatlaf.util.SystemInfo;
 import org.dromara.redisfront.commons.constant.Icons;

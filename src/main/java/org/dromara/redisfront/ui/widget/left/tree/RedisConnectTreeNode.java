@@ -3,6 +3,7 @@ package org.dromara.redisfront.ui.widget.left.tree;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.dromara.quickswing.tree.QSTreeNode;
 import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 import org.dromara.redisfront.model.entity.ConnectGroupEntity;
 
@@ -18,7 +19,7 @@ import java.util.Comparator;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class RedisConnectTreeNode extends DefaultMutableTreeNode implements Comparator<TreeNode> {
+public class RedisConnectTreeNode extends DefaultMutableTreeNode implements QSTreeNode<Integer>, Comparator<TreeNode> {
 
     private Boolean isGroup;
     private ConnectGroupEntity group;

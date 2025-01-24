@@ -11,7 +11,7 @@ import org.dromara.redisfront.commons.util.FutureUtils;
 import org.dromara.redisfront.commons.util.LettuceUtils;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;
-import org.dromara.redisfront.ui.support.ChartsPanel;
+import org.dromara.redisfront.ui.core.ChartsPanel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;

@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.support.extend;
+package org.dromara.redisfront.ui.core.extend;
 
 
 import lombok.Getter;

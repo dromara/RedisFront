@@ -12,9 +12,9 @@ import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.constant.Icons;
 import org.dromara.redisfront.model.context.ConnectContext;
-import org.dromara.redisfront.ui.support.RedisTerminal;
-import org.dromara.redisfront.ui.support.extend.DrawerAnimationAction;
-import org.dromara.redisfront.ui.support.extend.BoldTitleTabbedPaneUI;
+import org.dromara.redisfront.ui.core.RedisTerminal;
+import org.dromara.redisfront.ui.core.extend.DrawerAnimationAction;
+import org.dromara.redisfront.ui.core.extend.BoldTitleTabbedPaneUI;
 import org.dromara.redisfront.ui.widget.MainWidget;
 
 import javax.swing.*;

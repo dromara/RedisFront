@@ -18,6 +18,7 @@ import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.ui.event.RedisConnectValidEvent;
 import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
 import org.dromara.redisfront.ui.widget.MainWidget;
+import org.dromara.redisfront.ui.widget.left.tree.RedisConnectTreeNode;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,8 +77,11 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
         return new AddConnectDialog(app);
     }
 
-    public void showNewConnectDialog(Integer groupId) {
-        this.groupId = groupId;
+    public void showNewConnectDialog(RedisConnectTreeNode node) {
+        if (null != node) {
+            this.groupId = node.id();
+            this.setTitle(this.getTitle() + "到【" + node + "】");
+        }
         this.setLocationRelativeTo(null);
         this.setVisible(true);
         this.pack();

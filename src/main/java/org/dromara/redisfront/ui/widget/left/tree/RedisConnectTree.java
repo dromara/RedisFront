@@ -9,13 +9,15 @@ import org.dromara.quickswing.events.QSEvent;
 import org.dromara.quickswing.events.QSEventListener;
 import org.dromara.quickswing.ui.app.QSAction;
 import org.dromara.redisfront.RedisFrontContext;
+import org.dromara.redisfront.commons.util.SwingTreeUtils;
 import org.dromara.redisfront.dao.ConnectDetailDao;
 import org.dromara.redisfront.dao.ConnectGroupDao;
+import org.dromara.redisfront.model.TreeNodeInfo;
 import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 import org.dromara.redisfront.model.entity.ConnectGroupEntity;
+import org.dromara.redisfront.ui.core.extend.ConnectTreeCellRenderer;
 import org.dromara.redisfront.ui.dialog.AddConnectDialog;
 import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
-import org.dromara.redisfront.ui.support.extend.ConnectTreeCellRenderer;
 import org.dromara.redisfront.ui.widget.MainWidget;
 import org.jdesktop.swingx.JXTree;
 import raven.drawer.component.menu.MenuEvent;
@@ -68,6 +70,7 @@ public class RedisConnectTree extends JXTree {
                         "showCellFocusIndicator:false;"
 
         );
+        this.setModel(new DefaultTreeModel(new TreeNodeInfo()));
         this.setCellRenderer(new ConnectTreeCellRenderer());
     }
 
@@ -88,7 +91,7 @@ public class RedisConnectTree extends JXTree {
                     Object pathComponent = selectionPath.getLastPathComponent();
                     if (pathComponent instanceof RedisConnectTreeNode redisConnectTreeItem) {
                         if (redisConnectTreeItem.getIsGroup()) {
-                            AddConnectDialog.getInstance(owner).showNewConnectDialog(redisConnectTreeItem.id());
+                            AddConnectDialog.getInstance(owner).showNewConnectDialog(redisConnectTreeItem);
                         } else {
                             AddConnectDialog.getInstance(owner).showNewConnectDialog(null);
                         }
@@ -117,13 +120,15 @@ public class RedisConnectTree extends JXTree {
     }
 
     private void loadTreeNodeData() {
-        DataSource datasource = context.getDatabaseManager().getDatasource();
-        context.taskExecute(() -> this.buildConnectTreeItem(datasource), (r, e) -> {
-            if (e != null) {
-                log.error(e.getMessage());
-                Notifications.getInstance().show(Notifications.Type.ERROR, e.getMessage());
+        context.taskExecute(() -> this.buildConnectTreeItem(context.getDatabaseManager().getDatasource()), (result, exception) -> {
+            if (exception != null) {
+                log.error(exception.getMessage(), exception);
+                Notifications.getInstance().show(Notifications.Type.ERROR, exception.getMessage());
             } else {
-                this.setModel(new DefaultTreeModel(r));
+                List<Object> expandedPaths = SwingTreeUtils.saveExpandedPaths(this);
+                DefaultTreeModel model = new DefaultTreeModel(result);
+                this.setModel(model);
+                SwingTreeUtils.restoreExpandedPaths(this, model, expandedPaths);
                 this.updateUI();
             }
         });
@@ -207,7 +212,7 @@ public class RedisConnectTree extends JXTree {
                     }
                     Object pathComponent = selectionPath.getLastPathComponent();
                     if (pathComponent instanceof RedisConnectTreeNode redisConnectTreeItem) {
-                        AddConnectDialog.getInstance(owner).showNewConnectDialog(redisConnectTreeItem.id());
+                        AddConnectDialog.getInstance(owner).showNewConnectDialog(redisConnectTreeItem);
                     }
                 });
             }
@@ -257,7 +262,8 @@ public class RedisConnectTree extends JXTree {
                     if (lastPathComponent instanceof RedisConnectTreeNode redisConnectTreeItem) {
                         context.taskExecute(() -> {
                             ConnectDetailDao.newInstance(datasource).deleteByGroupId(redisConnectTreeItem.id());
-                            context.getEventBus().publish(new RefreshConnectTreeEvent(redisConnectTreeItem));
+                            ConnectGroupDao.newInstance(datasource).delete(redisConnectTreeItem.id());
+                            context.getEventBus().publish(new RefreshConnectTreeEvent(redisConnectTreeItem.id()));
                             return null;
                         }, (_, exception) -> {
                             if (exception != null) {
