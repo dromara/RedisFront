@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.left.tree;
+package org.dromara.redisfront.ui.widget.sidebar.tree;
 
 import lombok.Getter;
 import lombok.Setter;

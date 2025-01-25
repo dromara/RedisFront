@@ -18,7 +18,7 @@ import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.ui.event.OpenRedisConnectEvent;
 import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
 import org.dromara.redisfront.ui.widget.MainWidget;
-import org.dromara.redisfront.ui.widget.left.tree.RedisConnectTreeNode;
+import org.dromara.redisfront.ui.widget.sidebar.tree.RedisConnectTreeNode;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

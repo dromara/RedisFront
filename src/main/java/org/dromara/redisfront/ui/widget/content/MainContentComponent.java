@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.right;
+package org.dromara.redisfront.ui.widget.content;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
@@ -26,7 +26,7 @@ import java.awt.event.ComponentEvent;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-public class MainRightComponent extends JPanel {
+public class MainContentComponent extends JPanel {
     private final MainWidget owner;
     private final DrawerAnimationAction action;
     private JTabbedPane topTabbedPane;
@@ -36,7 +36,7 @@ public class MainRightComponent extends JPanel {
     private Consumer<Integer> tabCloseProcess;
 
 
-    public MainRightComponent(DrawerAnimationAction action, MainWidget owner) {
+    public MainContentComponent(DrawerAnimationAction action, MainWidget owner) {
         this.owner = owner;
         this.action = action;
         this.setLayout(new BorderLayout());

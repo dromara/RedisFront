@@ -2,7 +2,7 @@ package org.dromara.redisfront.ui.components.extend;
 
 import com.formdev.flatlaf.util.SystemInfo;
 import org.dromara.redisfront.commons.constant.Icons;
-import org.dromara.redisfront.ui.widget.left.tree.RedisConnectTreeNode;
+import org.dromara.redisfront.ui.widget.sidebar.tree.RedisConnectTreeNode;
 import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer;
 
 import javax.swing.*;

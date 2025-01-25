@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.left;
+package org.dromara.redisfront.ui.widget.sidebar;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.util.SystemInfo;
@@ -9,10 +9,10 @@ import org.dromara.redisfront.ui.handler.OpenConnectHandler;
 import org.dromara.redisfront.ui.components.extend.DrawerMenuItemEvent;
 import org.dromara.redisfront.ui.components.extend.DrawerAnimationAction;
 import org.dromara.redisfront.ui.widget.MainComponent;
-import org.dromara.redisfront.ui.widget.left.tree.RedisConnectTree;
+import org.dromara.redisfront.ui.widget.sidebar.tree.RedisConnectTree;
 import org.dromara.redisfront.ui.widget.MainWidget;
-import org.dromara.redisfront.ui.widget.left.panel.LogoPanel;
-import org.dromara.redisfront.ui.widget.left.panel.ThemesChangePanel;
+import org.dromara.redisfront.ui.widget.sidebar.panel.LogoPanel;
+import org.dromara.redisfront.ui.widget.sidebar.panel.ThemesChangePanel;
 import raven.drawer.component.DrawerPanel;
 import raven.drawer.component.SimpleDrawerBuilder;
 import raven.drawer.component.footer.SimpleFooterData;
@@ -25,7 +25,7 @@ import java.awt.*;
 
 @Getter
 @Slf4j
-public class MainLeftComponent extends SimpleDrawerBuilder {
+public class MainSidebarComponent extends SimpleDrawerBuilder {
 
     private final MainWidget owner;
     private final OpenConnectHandler openConnectHandler;
@@ -43,7 +43,7 @@ public class MainLeftComponent extends SimpleDrawerBuilder {
         };
     }
 
-    public MainLeftComponent(MainWidget owner, OpenConnectHandler openConnectHandler, DrawerAnimationAction drawerAnimationAction, DrawerMenuItemEvent drawerMenuItemEvent) {
+    public MainSidebarComponent(MainWidget owner, OpenConnectHandler openConnectHandler, DrawerAnimationAction drawerAnimationAction, DrawerMenuItemEvent drawerMenuItemEvent) {
         this.owner = owner;
         this.openConnectHandler = openConnectHandler;
         this.drawerAnimationAction = drawerAnimationAction;

@@ -12,8 +12,8 @@ import org.dromara.redisfront.ui.components.NonePanel;
 import org.dromara.redisfront.ui.components.extend.DrawerAnimationAction;
 import org.dromara.redisfront.ui.event.OpenRedisConnectEvent;
 import org.dromara.redisfront.ui.handler.OpenConnectHandler;
-import org.dromara.redisfront.ui.widget.left.MainLeftComponent;
-import org.dromara.redisfront.ui.widget.right.MainRightComponent;
+import org.dromara.redisfront.ui.widget.sidebar.MainSidebarComponent;
+import org.dromara.redisfront.ui.widget.content.MainContentComponent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,8 +30,8 @@ public class MainComponent extends Background {
     private JPanel mainLeftPanel;
     private JPanel mainRightPane;
 
-    private MainRightComponent createMainTabbedPanel(DrawerAnimationAction drawerAnimationAction) {
-        MainRightComponent mainRightTabbedPanel = new MainRightComponent(drawerAnimationAction, owner);
+    private MainContentComponent createMainTabbedPanel(DrawerAnimationAction drawerAnimationAction) {
+        MainContentComponent mainRightTabbedPanel = new MainContentComponent(drawerAnimationAction, owner);
         mainRightTabbedPanel.setTabCloseProcess(count -> {
             if (count == 0) {
                 if (!drawerAnimationAction.isDrawerOpen()) {
@@ -72,12 +72,12 @@ public class MainComponent extends Background {
                 if (ArrayUtil.isNotEmpty(components)) {
                     Optional<Component> first = Arrays.stream(components).findFirst();
                     if (first.isPresent()) {
-                        if (first.get() instanceof MainRightComponent mainRightTabbedPanel) {
+                        if (first.get() instanceof MainContentComponent mainRightTabbedPanel) {
                             //todo add tab
                             System.out.println("JTabbedPane " + first.get());
                         } else {
                             mainRightPane.removeAll();
-                            MainRightComponent mainRightTabbedPanel = createMainTabbedPanel(drawerAnimationAction);
+                            MainContentComponent mainRightTabbedPanel = createMainTabbedPanel(drawerAnimationAction);
                             mainRightPane.add(mainRightTabbedPanel, BorderLayout.CENTER);
                             FlatLaf.updateUI();
                         }
@@ -96,7 +96,7 @@ public class MainComponent extends Background {
             }
         });
 
-        this.mainLeftPanel = new MainLeftComponent(owner, openConnectProcessor, drawerAnimationAction, (key, index) -> {
+        this.mainLeftPanel = new MainSidebarComponent(owner, openConnectProcessor, drawerAnimationAction, (key, index) -> {
             System.out.println("drawerMenuItemEvent" + " key:" + key);
             System.out.println("drawerMenuItemEvent" + " index:" + Arrays.toString(index));
         }).buildPanel();

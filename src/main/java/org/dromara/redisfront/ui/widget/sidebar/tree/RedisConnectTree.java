@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.left.tree;
+package org.dromara.redisfront.ui.widget.sidebar.tree;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
@@ -423,13 +423,10 @@ public class RedisConnectTree extends JXTree {
         Object pathComponent = selectionPath.getLastPathComponent();
         if (pathComponent instanceof RedisConnectTreeNode redisConnectTreeItem) {
             if (redisConnectTreeItem.getIsGroup()) {
+                Notifications.getInstance().show(Notifications.Type.INFO, "请选择要打开的连接！");
                 return;
             }
-            ConnectDetailEntity detail = redisConnectTreeItem.getDetail();
-            if (null == detail) {
-                return;
-            }
-            openConnectHandler.handle(detail.getConnectContext());
+            openConnectHandler.accept( redisConnectTreeItem.getDetail().getConnectContext());
         }
     }
 
