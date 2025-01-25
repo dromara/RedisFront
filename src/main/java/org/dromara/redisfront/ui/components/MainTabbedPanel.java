@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.core;
+package org.dromara.redisfront.ui.components;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.components.FlatLabel;

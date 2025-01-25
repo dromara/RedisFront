@@ -15,7 +15,7 @@ import org.dromara.redisfront.dao.ConnectDetailDao;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 import org.dromara.redisfront.service.RedisBasicService;
-import org.dromara.redisfront.ui.event.RedisConnectValidEvent;
+import org.dromara.redisfront.ui.event.OpenRedisConnectEvent;
 import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
 import org.dromara.redisfront.ui.widget.MainWidget;
 import org.dromara.redisfront.ui.widget.left.tree.RedisConnectTreeNode;
@@ -37,8 +37,8 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
     private Integer detailId;
     private Integer groupId;
     private JPanel contentPane;
-    private JButton submitBtn;
-    private JButton buttonCancel;
+    private JButton openBtn;
+    private JButton storageBtn;
     private JTextField titleField;
     private JTextField hostField;
     private JTextField userField;
@@ -82,6 +82,8 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
         if (null != node) {
             this.groupId = node.id();
             this.setTitle(this.getTitle() + "到【" + node + "】");
+        } else {
+            this.groupId = -1;
         }
         this.setLocationRelativeTo(null);
         this.setVisible(true);
@@ -92,10 +94,12 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
         ConnectDetailEntity detail = redisConnectTreeNode.getDetail();
         if (null != detail.getGroupId()) {
             this.groupId = detail.getGroupId();
+        } else {
+            this.groupId = -1;
         }
         this.detailId = detail.getId();
         this.setTitle("编辑连接 【" + detail.getName() + "】");
-        this.populateConnectInfo(detail.toConnectInfo());
+        this.populateConnectInfo(detail.getConnectContext());
         this.setLocationRelativeTo(null);
         this.setVisible(true);
         this.pack();
@@ -109,7 +113,7 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
         this.setResizable(true);
         this.setMinimumSize(new Dimension(400, 280));
         this.setContentPane(contentPane);
-        this.getRootPane().setDefaultButton(submitBtn);
+        this.getRootPane().setDefaultButton(openBtn);
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
@@ -124,8 +128,8 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
         this.sshPrivateKeyFile.setVisible(enableSshPrivateKey.isSelected());
         this.sshPrivateKeyBtn.setVisible(enableSshPrivateKey.isSelected());
 
-        submitBtn.addActionListener(this::submitActionPerformed);
-        buttonCancel.addActionListener(this::cancelActionPerformed);
+        openBtn.addActionListener(this::openActionPerformed);
+        storageBtn.addActionListener(this::storageActionPerformed);
 
         showPasswordCheckBox.addActionListener(_ -> {
             if (showPasswordCheckBox.isSelected()) {
@@ -250,29 +254,43 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
         return connectSuccess;
     }
 
-    private void cancelActionPerformed(ActionEvent actionEvent) {
-        dispose();
-    }
-
-
-    private void submitActionPerformed(ActionEvent actionEvent) {
-        var connectInfo = validGetConnectInfo();
+    private void storageActionPerformed(ActionEvent actionEvent) {
+        var connectcontext = validGetConnectInfo();
         if (testConnect()) {
             try {
-                ConnectDetailEntity connectDetailEntity = connectInfo.toEntity();
+                ConnectDetailEntity connectDetailEntity = connectcontext.toEntity();
                 connectDetailEntity.setGroupId(groupId);
                 if (null == detailId) {
-                    ConnectDetailDao.newInstance(context.getDatabaseManager().getDatasource()).save(connectDetailEntity);
+                    ConnectDetailDao.newInstance(this.context.getDatabaseManager().getDatasource()).save(connectDetailEntity);
                 } else {
-                    ConnectDetailDao.newInstance(context.getDatabaseManager().getDatasource()).update(detailId, connectDetailEntity);
+                    ConnectDetailDao.newInstance(this.context.getDatabaseManager().getDatasource()).update(detailId, connectDetailEntity);
                 }
-                context.getEventBus().publish(new RedisConnectValidEvent(connectInfo));
-                context.getEventBus().publish(new RefreshConnectTreeEvent(connectInfo));
+                this.context.getEventBus().publish(new RefreshConnectTreeEvent(connectcontext));
                 dispose();
             } catch (SQLException e) {
                 getOwner().displayException($tr("AddConnectDialog.save.fail.message"), e);
             }
+        }
+    }
 
+
+    private void openActionPerformed(ActionEvent actionEvent) {
+        var connectcontext = validGetConnectInfo();
+        if (testConnect()) {
+            try {
+                ConnectDetailEntity connectDetailEntity = connectcontext.toEntity();
+                connectDetailEntity.setGroupId(groupId);
+                if (null == detailId) {
+                    ConnectDetailDao.newInstance(this.context.getDatabaseManager().getDatasource()).save(connectDetailEntity);
+                } else {
+                    ConnectDetailDao.newInstance(this.context.getDatabaseManager().getDatasource()).update(detailId, connectDetailEntity);
+                }
+                this.context.getEventBus().publish(new OpenRedisConnectEvent(connectcontext));
+                this.context.getEventBus().publish(new RefreshConnectTreeEvent(connectcontext));
+                dispose();
+            } catch (SQLException e) {
+                getOwner().displayException($tr("AddConnectDialog.save.fail.message"), e);
+            }
         }
     }
 
@@ -429,12 +447,12 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1, true, false));
         panel1.add(panel2, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        submitBtn = new JButton();
-        this.$$$loadButtonText$$$(submitBtn, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "AddConnectDialog.buttonOK.Title"));
-        panel2.add(submitBtn, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        buttonCancel = new JButton();
-        this.$$$loadButtonText$$$(buttonCancel, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "AddConnectDialog.buttonCancel.Title"));
-        panel2.add(buttonCancel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        openBtn = new JButton();
+        this.$$$loadButtonText$$$(openBtn, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "AddConnectDialog.buttonOK.Title"));
+        panel2.add(openBtn, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        storageBtn = new JButton();
+        this.$$$loadButtonText$$$(storageBtn, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "AddConnectDialog.storageBtn.Title"));
+        panel2.add(storageBtn, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         this.$$$loadButtonText$$$(testBtn, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "AddConnectDialog.testBtn.Title"));
         panel1.add(testBtn, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();

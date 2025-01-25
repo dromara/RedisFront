@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.core;
+package org.dromara.redisfront.ui.components;
 
 import javax.swing.*;
 import java.util.concurrent.ScheduledExecutorService;

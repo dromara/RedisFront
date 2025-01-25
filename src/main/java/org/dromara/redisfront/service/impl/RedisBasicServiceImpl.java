@@ -309,7 +309,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
     private List<ClusterNode> strToClusterNodes(String str) {
         List<ClusterNode> clusterNodes = new ArrayList<>();
         for (var s : str.split("\n")) {
-            if (!Fn.startWith(s, "#") && Fn.isNotEmpty(s)) {
+            if (Fn.startWith(s, "#") && Fn.isNotEmpty(s)) {
                 var v = s.split(" ");
                 var clusterNode = new ClusterNode()
                         .setId(v[0])

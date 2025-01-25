@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.core;
+package org.dromara.redisfront.ui.components;
 
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.model.context.ConnectContext;

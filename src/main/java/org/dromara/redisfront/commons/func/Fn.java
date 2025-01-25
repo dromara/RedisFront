@@ -1,7 +1,6 @@
 package org.dromara.redisfront.commons.func;
 
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.unit.DataSizeUtil;
 import cn.hutool.core.map.MapUtil;
@@ -15,10 +14,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
-import java.util.List;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 
 /**
@@ -95,53 +91,12 @@ public class Fn {
         return ObjectUtil.notEqual(obj1, obj2);
     }
 
-    public static boolean startWithIgnoreCase(String str, String prefix) {
-        return StrUtil.startWithIgnoreCase(str, prefix);
-    }
-
     public static boolean startWith(String str, String prefix) {
         return StrUtil.startWith(str, prefix);
     }
 
     public static boolean endsWith(String str, String suffix) {
         return StrUtil.endWith(str, suffix);
-    }
-
-    public static boolean endsWithIgnoreCase(String str, String suffix) {
-        return StrUtil.endWithIgnoreCase(str, suffix);
-    }
-
-    public static void copyProperties(Object source, Object target) {
-        BeanUtil.copyProperties(source, target);
-    }
-
-    public static List<String> str2List(String str, String errorMsg) {
-        if (isEmpty(str)) {
-            throw new IllegalArgumentException(errorMsg);
-        }
-        if (!str.contains(",")) {
-            return Collections.singletonList(str);
-        }
-        return Arrays.asList(str.split(","));
-    }
-
-    public static List<String> str2List(String str) {
-        return str2List(str, "字符串转列表 - 参数错误");
-    }
-
-    public static String list2Str(Collection<String> collection) {
-        if (isEmpty(collection)) {
-            throw new IllegalArgumentException("列表转字符串 - 参数错误");
-        }
-        return collection.stream().map(Object::toString).collect(Collectors.joining(","));
-    }
-
-
-    public static String list2Str(List<Object> list) {
-        if (isEmpty(list)) {
-            throw new IllegalArgumentException("列表转字符串 - 参数错误");
-        }
-        return list.stream().map(Object::toString).collect(Collectors.joining(","));
     }
 
     public static String toJson(Object obj) {
@@ -160,44 +115,6 @@ public class Fn {
         }
         return byteSize;
     }
-
-    public static <T> T fromJson(String json, Class<T> type) {
-        return JSONUtil.toBean(json, type);
-    }
-
-    /**
-     * 遍历集合，根据提供的function生成或者获取对象，汇总去重，返回列表
-     *
-     * @param dataList 数据集合
-     * @param function 获取的列
-     * @param <R>      返回的类型
-     * @param <T>      数据集合的类型
-     * @return
-     */
-    public static <R, T> List<R> collectList(List<T> dataList, Function<? super T, ? extends R> function) {
-        if (Fn.isEmpty(dataList)) {
-            return Collections.emptyList();
-        }
-        return dataList.stream().map(function).filter(Fn::isNotNull).distinct().collect(Collectors.toList());
-    }
-
-    /**
-     * 遍历集合，以提供的function获取到每一个数据的key，以提供的获取数据的function获取到每一个value，默认出现相同的数据保持不变
-     * 将 List&lt;A&gt; 转换为 Map&lt;A.prop,A&gt;
-     *
-     * @param dataList
-     * @param keyMapper 获取key的映射器
-     * @param <R>
-     * @param <T>
-     * @return
-     */
-    public static <R, T> Map<R, T> collectMap(List<T> dataList, Function<? super T, ? extends R> keyMapper) {
-        if (Fn.isEmpty(dataList)) {
-            return new HashMap<>();
-        }
-        return dataList.stream().collect(Collectors.toMap(keyMapper, Function.identity(), (a, b) -> a));
-    }
-
 
     public static String getDataSize(String str) {
         if (isNotEmpty(str)) {

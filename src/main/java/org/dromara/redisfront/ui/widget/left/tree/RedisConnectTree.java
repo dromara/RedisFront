@@ -15,12 +15,12 @@ import org.dromara.redisfront.dao.ConnectGroupDao;
 import org.dromara.redisfront.model.TreeNodeInfo;
 import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 import org.dromara.redisfront.model.entity.ConnectGroupEntity;
-import org.dromara.redisfront.ui.core.extend.ConnectTreeCellRenderer;
+import org.dromara.redisfront.ui.handler.OpenConnectHandler;
+import org.dromara.redisfront.ui.components.extend.ConnectTreeCellRenderer;
 import org.dromara.redisfront.ui.dialog.AddConnectDialog;
 import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
 import org.dromara.redisfront.ui.widget.MainWidget;
 import org.jdesktop.swingx.JXTree;
-import raven.drawer.component.menu.MenuEvent;
 import raven.toast.Notifications;
 
 import javax.sql.DataSource;
@@ -39,15 +39,15 @@ import java.util.List;
 @Slf4j
 public class RedisConnectTree extends JXTree {
     private final MainWidget owner;
-    private final MenuEvent menuEvent;
+    private final OpenConnectHandler openConnectHandler;
     private final RedisFrontContext context;
     private JPopupMenu treePopupMenu;
     private JPopupMenu treeNodePopupMenu;
     private JPopupMenu treeNodeGroupPopupMenu;
 
-    public RedisConnectTree(MainWidget owner, MenuEvent menuEvent) {
+    public RedisConnectTree(MainWidget owner, OpenConnectHandler openConnectHandler) {
         this.owner = owner;
-        this.menuEvent = menuEvent;
+        this.openConnectHandler = openConnectHandler;
         this.context = (RedisFrontContext) owner.getContext();
         this.initializeUI();
         this.initializeActions();
@@ -61,13 +61,13 @@ public class RedisConnectTree extends JXTree {
         this.setFocusable(false);
         this.putClientProperty(FlatClientProperties.STYLE,
                 "selectionArc:10;" +
-                        "rowHeight:25;" +
-                        "background:$RedisFront.main.background;" +
-                        "foreground:#ffffff;" +
-                        "[light]selectionBackground:darken(#FFFFFF,20%);" +
-                        "[light]selectionForeground:darken($Label.foreground,50%);" +
-                        "[dark]selectionBackground:darken($Label.foreground,50%);" +
-                        "showCellFocusIndicator:false;"
+                "rowHeight:25;" +
+                "background:$RedisFront.main.background;" +
+                "foreground:#ffffff;" +
+                "[light]selectionBackground:darken(#FFFFFF,20%);" +
+                "[light]selectionForeground:darken($Label.foreground,50%);" +
+                "[dark]selectionBackground:darken($Label.foreground,50%);" +
+                "showCellFocusIndicator:false;"
 
         );
         this.setModel(new DefaultTreeModel(new TreeNodeInfo()));
@@ -285,17 +285,14 @@ public class RedisConnectTree extends JXTree {
         treeNodePopupMenu.putClientProperty(FlatClientProperties.STYLE,
                 "[dark]background:darken(#FFFFFF,30%);");
 
-        JMenuItem openConnectMenuItem = new JMenuItem("打开连接"){
+        JMenuItem openConnectMenuItem = new JMenuItem("打开连接") {
             {
                 addActionListener(_ -> {
                     TreePath selectionPath = getSelectionPath();
                     if (selectionPath == null) {
                         return;
                     }
-                    Object pathComponent = selectionPath.getLastPathComponent();
-                    if (pathComponent instanceof RedisConnectTreeNode redisConnectTreeItem) {
-                        menuEvent.selected(null,null);
-                    }
+                    openConnectHandler(selectionPath);
                 });
             }
         };
@@ -303,7 +300,7 @@ public class RedisConnectTree extends JXTree {
 
         treeNodePopupMenu.addSeparator();
 
-        JMenuItem editConnectMenuItem = new JMenuItem("编辑连接"){
+        JMenuItem editConnectMenuItem = new JMenuItem("编辑连接") {
             {
                 addActionListener(_ -> {
                     TreePath selectionPath = getSelectionPath();
@@ -408,7 +405,9 @@ public class RedisConnectTree extends JXTree {
                 TreePath selectionPath = getSelectionPath();
                 if (selectionPath == null) {
                     Notifications.getInstance().show(Notifications.Type.INFO, "请选择要打开的连接！");
+                    return;
                 }
+                openConnectHandler(selectionPath);
             }
 
             @Override
@@ -418,6 +417,20 @@ public class RedisConnectTree extends JXTree {
                         KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK);
             }
         });
+    }
+
+    private void openConnectHandler(TreePath selectionPath) {
+        Object pathComponent = selectionPath.getLastPathComponent();
+        if (pathComponent instanceof RedisConnectTreeNode redisConnectTreeItem) {
+            if (redisConnectTreeItem.getIsGroup()) {
+                return;
+            }
+            ConnectDetailEntity detail = redisConnectTreeItem.getDetail();
+            if (null == detail) {
+                return;
+            }
+            openConnectHandler.handle(detail.getConnectContext());
+        }
     }
 
 

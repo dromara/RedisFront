@@ -20,7 +20,7 @@ public class ConnectDetailEntity {
     private String sslConfig;
     private String sshConfig;
 
-    public ConnectContext toConnectInfo() {
+    public ConnectContext getConnectContext() {
         ConnectContext connectContext = new ConnectContext();
         connectContext.setId(id);
         connectContext.setTitle(name);

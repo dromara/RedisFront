@@ -69,19 +69,19 @@ public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, Redi
 
     @Override
     protected void performBeforeInitialization(RedisFrontPrefs preferences) {
-//        if (preferences.getDBInitialized()) {
-        DataSource datasource = getDatabaseManager().getDatasource();
-        try {
-            DbUtil.use(datasource).execute(Constants.SQL_CREATE_CONNECT_GROUP);
-            log.info("创建 connect_group 表完成！");
-            DbUtil.use(datasource).execute(Constants.SQL_CREATE_CONNECT_DETAIL);
-            log.info("创建 connect_detail 表完成！");
-            preferences.setDBInitialized(true);
-        } catch (SQLException e) {
-            log.error("数据库初始化失败.", e);
-            JOptionPane.showMessageDialog(null, e.getMessage(), "数据库初始化失败", JOptionPane.ERROR_MESSAGE);
+        if (!preferences.getDBInitialized()) {
+            DataSource datasource = getDatabaseManager().getDatasource();
+            try {
+                DbUtil.use(datasource).execute(Constants.SQL_CREATE_CONNECT_GROUP);
+                log.info("创建 connect_group 表完成！");
+                DbUtil.use(datasource).execute(Constants.SQL_CREATE_CONNECT_DETAIL);
+                log.info("创建 connect_detail 表完成！");
+                preferences.setDBInitialized(true);
+            } catch (SQLException e) {
+                log.error("数据库初始化失败.", e);
+                JOptionPane.showMessageDialog(null, e.getMessage(), "数据库初始化失败", JOptionPane.ERROR_MESSAGE);
+            }
         }
-//        }
     }
 
     @Override

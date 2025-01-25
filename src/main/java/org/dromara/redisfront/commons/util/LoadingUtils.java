@@ -2,7 +2,7 @@ package org.dromara.redisfront.commons.util;
 
 import org.dromara.redisfront.RedisFrontMain;
 import org.dromara.redisfront.commons.func.Fn;
-import org.dromara.redisfront.ui.core.LoadingDialog;
+import org.dromara.redisfront.ui.components.LoadingDialog;
 
 import java.awt.*;
 

@@ -168,7 +168,7 @@ public interface RedisBasicService {
     default Map<String, Object> strToMap(String str) {
         Map<String, Object> result = new HashMap<>();
         for (String s : str.split("\r\n")) {
-            if (!Fn.startWith(s, "#") && Fn.isNotEmpty(s)) {
+            if (Fn.startWith(s, "#") && Fn.isNotEmpty(s)) {
                 String[] v = s.split(":");
                 if (v.length > 1) {
                     result.put(v[0], v[1]);

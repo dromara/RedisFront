@@ -7,10 +7,6 @@ import java.util.List;
 @SuppressWarnings("all")
 public class DataSyncWorker extends SwingWorker<Void, String> {
 
-
-
-
-
     @Override
     protected Void doInBackground() throws Exception {
 
