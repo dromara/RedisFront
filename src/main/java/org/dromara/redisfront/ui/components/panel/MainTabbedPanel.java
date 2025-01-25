@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.components;
+package org.dromara.redisfront.ui.components.panel;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.components.FlatLabel;
@@ -7,6 +7,7 @@ import com.formdev.flatlaf.ui.FlatLineBorder;
 import org.dromara.redisfront.commons.constant.Enums;
 import org.dromara.redisfront.model.ClusterNode;
 import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.ui.components.RedisTerminal;
 import org.dromara.redisfront.ui.form.fragment.PubSubForm;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.constant.Icons;

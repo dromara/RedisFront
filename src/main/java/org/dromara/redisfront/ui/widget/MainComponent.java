@@ -8,7 +8,7 @@ import org.dromara.quickswing.events.QSEventListener;
 import org.dromara.quickswing.ui.swing.Background;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.model.context.ConnectContext;
-import org.dromara.redisfront.ui.components.NonePanel;
+import org.dromara.redisfront.ui.components.panel.NonePanel;
 import org.dromara.redisfront.ui.components.extend.DrawerAnimationAction;
 import org.dromara.redisfront.ui.event.OpenRedisConnectEvent;
 import org.dromara.redisfront.ui.handler.OpenConnectHandler;

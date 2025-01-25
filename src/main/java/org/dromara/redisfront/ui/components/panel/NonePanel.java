@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.components;
+package org.dromara.redisfront.ui.components.panel;
 
 import com.formdev.flatlaf.util.SystemInfo;
 import com.intellij.uiDesigner.core.GridConstraints;

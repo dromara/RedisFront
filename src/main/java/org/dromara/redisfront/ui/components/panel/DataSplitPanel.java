@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.components;
+package org.dromara.redisfront.ui.components.panel;
 
 import com.formdev.flatlaf.ui.FlatLineBorder;
 import org.dromara.redisfront.model.context.ConnectContext;

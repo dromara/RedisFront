@@ -22,7 +22,7 @@ import org.dromara.redisfront.model.*;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.model.context.ScanContext;
 import org.dromara.redisfront.service.*;
-import org.dromara.redisfront.ui.components.LoadingPanel;
+import org.dromara.redisfront.ui.components.panel.LoadingPanel;
 import org.dromara.redisfront.ui.components.TextEditor;
 import io.lettuce.core.*;
 import org.dromara.redisfront.ui.dialog.AddOrUpdateItemDialog;

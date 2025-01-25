@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.components;
+package org.dromara.redisfront.ui.components.panel;
 
 import cn.hutool.core.io.resource.ResourceUtil;
 
