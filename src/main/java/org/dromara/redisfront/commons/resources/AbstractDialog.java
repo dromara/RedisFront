@@ -1,4 +1,4 @@
-package org.dromara.redisfront.commons.ui;
+package org.dromara.redisfront.commons.resources;
 
 
 import org.dromara.redisfront.commons.handler.ProcessHandler;
@@ -11,6 +11,7 @@ import java.awt.*;
  *
  * @author Jin
  */
+@Deprecated
 public abstract class AbstractDialog<T> extends JDialog {
     protected ProcessHandler<T> processHandler;
 

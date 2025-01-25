@@ -14,9 +14,9 @@ import org.dromara.redisfront.RedisFrontMain;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.constant.Enums;
 import org.dromara.redisfront.commons.func.Fn;
-import org.dromara.redisfront.commons.ui.AbstractDialog;
-import org.dromara.redisfront.commons.util.AlertUtils;
-import org.dromara.redisfront.commons.util.LocaleUtils;
+import org.dromara.redisfront.commons.resources.AbstractDialog;
+import org.dromara.redisfront.commons.utils.AlertUtils;
+import org.dromara.redisfront.commons.utils.LocaleUtils;
 import org.dromara.redisfront.model.context.ConnectContext;
 
 import javax.swing.*;

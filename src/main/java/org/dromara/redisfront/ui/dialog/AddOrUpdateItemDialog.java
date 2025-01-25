@@ -8,7 +8,7 @@ import org.dromara.redisfront.RedisFrontMain;
 import org.dromara.redisfront.commons.constant.Enums;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.commons.handler.ActionHandler;
-import org.dromara.redisfront.commons.util.AlertUtils;
+import org.dromara.redisfront.commons.utils.AlertUtils;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.service.*;
 

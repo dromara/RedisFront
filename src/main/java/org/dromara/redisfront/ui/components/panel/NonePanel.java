@@ -5,7 +5,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import lombok.Getter;
-import org.dromara.redisfront.commons.constant.Icons;
+import org.dromara.redisfront.commons.resources.Icons;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

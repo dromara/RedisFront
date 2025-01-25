@@ -4,8 +4,8 @@ import com.formdev.flatlaf.util.SystemInfo;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import org.dromara.redisfront.commons.constant.Icons;
-import org.dromara.redisfront.commons.util.LocaleUtils;
+import org.dromara.redisfront.commons.resources.Icons;
+import org.dromara.redisfront.commons.utils.LocaleUtils;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -14,7 +14,7 @@ import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.util.Locale;
 
-import static org.dromara.redisfront.commons.constant.Icons.COMMAND_ICON_16x16;
+import static org.dromara.redisfront.commons.resources.Icons.COMMAND_ICON_16x16;
 
 /**
  * MainNoneForm

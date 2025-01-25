@@ -1,6 +1,6 @@
 package org.dromara.redisfront.model;
 
-import org.dromara.redisfront.commons.util.LocaleUtils;
+import org.dromara.redisfront.commons.utils.LocaleUtils;
 import org.dromara.redisfront.model.context.ConnectContext;
 
 import javax.swing.table.DefaultTableModel;

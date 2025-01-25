@@ -9,13 +9,13 @@ import org.dromara.quickswing.events.QSEvent;
 import org.dromara.quickswing.events.QSEventListener;
 import org.dromara.quickswing.ui.app.QSAction;
 import org.dromara.redisfront.RedisFrontContext;
-import org.dromara.redisfront.commons.util.SwingTreeUtils;
+import org.dromara.redisfront.commons.utils.SwingTreeUtils;
 import org.dromara.redisfront.dao.ConnectDetailDao;
 import org.dromara.redisfront.dao.ConnectGroupDao;
 import org.dromara.redisfront.model.TreeNodeInfo;
 import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 import org.dromara.redisfront.model.entity.ConnectGroupEntity;
-import org.dromara.redisfront.ui.handler.OpenConnectHandler;
+import org.dromara.redisfront.ui.handler.ConnectHandler;
 import org.dromara.redisfront.ui.components.extend.ConnectTreeCellRenderer;
 import org.dromara.redisfront.ui.dialog.AddConnectDialog;
 import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
@@ -39,15 +39,15 @@ import java.util.List;
 @Slf4j
 public class RedisConnectTree extends JXTree {
     private final MainWidget owner;
-    private final OpenConnectHandler openConnectHandler;
+    private final ConnectHandler connectHandler;
     private final RedisFrontContext context;
     private JPopupMenu treePopupMenu;
     private JPopupMenu treeNodePopupMenu;
     private JPopupMenu treeNodeGroupPopupMenu;
 
-    public RedisConnectTree(MainWidget owner, OpenConnectHandler openConnectHandler) {
+    public RedisConnectTree(MainWidget owner, ConnectHandler connectHandler) {
         this.owner = owner;
-        this.openConnectHandler = openConnectHandler;
+        this.connectHandler = connectHandler;
         this.context = (RedisFrontContext) owner.getContext();
         this.initializeUI();
         this.initializeActions();
@@ -426,7 +426,7 @@ public class RedisConnectTree extends JXTree {
                 Notifications.getInstance().show(Notifications.Type.INFO, "请选择要打开的连接！");
                 return;
             }
-            openConnectHandler.accept( redisConnectTreeItem.getDetail().getConnectContext());
+            connectHandler.accept( redisConnectTreeItem.getDetail().getConnectContext());
         }
     }
 

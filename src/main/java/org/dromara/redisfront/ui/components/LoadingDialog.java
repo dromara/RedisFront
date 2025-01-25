@@ -4,8 +4,8 @@ import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import org.dromara.redisfront.commons.func.Fn;
-import org.dromara.redisfront.commons.util.AlertUtils;
-import org.dromara.redisfront.commons.util.LocaleUtils;
+import org.dromara.redisfront.commons.utils.AlertUtils;
+import org.dromara.redisfront.commons.utils.LocaleUtils;
 
 import javax.swing.*;
 import java.awt.*;

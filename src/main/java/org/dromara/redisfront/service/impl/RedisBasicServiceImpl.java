@@ -2,7 +2,7 @@ package org.dromara.redisfront.service.impl;
 
 import org.dromara.redisfront.commons.constant.Enums;
 import org.dromara.redisfront.commons.func.Fn;
-import org.dromara.redisfront.commons.util.LettuceUtils;
+import org.dromara.redisfront.commons.utils.LettuceUtils;
 import org.dromara.redisfront.model.ClusterNode;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.model.context.ScanContext;

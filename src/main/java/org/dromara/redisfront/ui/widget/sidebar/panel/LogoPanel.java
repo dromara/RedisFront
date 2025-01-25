@@ -1,6 +1,6 @@
 package org.dromara.redisfront.ui.widget.sidebar.panel;
 
-import org.dromara.redisfront.commons.constant.Icons;
+import org.dromara.redisfront.commons.resources.Icons;
 
 import javax.swing.*;
 import java.awt.*;

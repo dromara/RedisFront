@@ -1,11 +1,10 @@
-package org.dromara.redisfront.commons.util;
+package org.dromara.redisfront.commons.utils;
 
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 import org.jdesktop.swingx.treetable.TreeTableModel;
-import org.junit.jupiter.api.Test;
 
 import javax.swing.*;
 import java.util.Arrays;

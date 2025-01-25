@@ -1,4 +1,4 @@
-package org.dromara.redisfront.commons.util;
+package org.dromara.redisfront.commons.utils;
 
 import java.util.prefs.Preferences;
 

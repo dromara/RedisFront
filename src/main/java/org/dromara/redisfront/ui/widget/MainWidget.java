@@ -10,7 +10,7 @@ import org.dromara.quickswing.constant.QSOs;
 import org.dromara.quickswing.ui.app.QSContext;
 import org.dromara.quickswing.ui.app.QSWidget;
 import org.dromara.redisfront.RedisFrontPrefs;
-import org.dromara.redisfront.commons.constant.Icons;
+import org.dromara.redisfront.commons.resources.Icons;
 
 import javax.swing.*;
 import java.awt.*;

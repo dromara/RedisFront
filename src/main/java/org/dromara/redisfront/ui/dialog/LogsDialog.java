@@ -5,7 +5,7 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 
 import org.dromara.redisfront.RedisFrontMain;
-import org.dromara.redisfront.commons.util.LocaleUtils;
+import org.dromara.redisfront.commons.utils.LocaleUtils;
 import org.dromara.redisfront.model.LogInfo;
 
 import javax.swing.*;

@@ -10,7 +10,7 @@ import net.miginfocom.swing.MigLayout;
 import org.dromara.quickswing.constant.QSOs;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.commons.constant.Constants;
-import org.dromara.redisfront.commons.constant.Icons;
+import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.ui.components.RedisTerminal;
 import org.dromara.redisfront.ui.components.extend.DrawerAnimationAction;

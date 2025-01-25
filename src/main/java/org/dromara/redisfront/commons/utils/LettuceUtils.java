@@ -1,4 +1,4 @@
-package org.dromara.redisfront.commons.util;
+package org.dromara.redisfront.commons.utils;
 
 import cn.hutool.core.util.RandomUtil;
 import org.dromara.redisfront.commons.constant.Enums;

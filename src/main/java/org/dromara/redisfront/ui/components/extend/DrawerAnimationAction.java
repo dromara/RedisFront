@@ -23,12 +23,12 @@ public class DrawerAnimationAction extends QSAction<MainWidget> {
     @Setter
     private Consumer<Boolean> beforeProcess;
     @Setter
-    private BiConsumer<Double,Boolean> process;
+    private BiConsumer<Double,Boolean> handler;
     @Setter
     private Consumer<Boolean> afterProcess;
-    public DrawerAnimationAction(MainWidget app, BiConsumer<Double,Boolean> process) {
+    public DrawerAnimationAction(MainWidget app, BiConsumer<Double,Boolean> handler) {
         super(app);
-        this.process = process;
+        this.handler = handler;
     }
 
     @Override
@@ -57,7 +57,7 @@ public class DrawerAnimationAction extends QSAction<MainWidget> {
 
         @Override
         public void timingEvent(Animator source, double fraction) {
-            process.accept(fraction,drawerOpen);
+            handler.accept(fraction,drawerOpen);
             app.revalidate();
             app.repaint();
         }

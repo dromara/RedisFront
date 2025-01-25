@@ -1,4 +1,4 @@
-package org.dromara.redisfront.commons.util;
+package org.dromara.redisfront.commons.utils;
 
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatPropertiesLaf;

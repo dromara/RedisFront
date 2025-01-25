@@ -1,4 +1,4 @@
-package org.dromara.redisfront.commons.util;
+package org.dromara.redisfront.commons.utils;
 
 import cn.hutool.extra.ssh.JschUtil;
 import com.jcraft.jsch.JSchException;

@@ -5,7 +5,7 @@ import com.formdev.flatlaf.util.SystemInfo;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
-import org.dromara.redisfront.ui.handler.OpenConnectHandler;
+import org.dromara.redisfront.ui.handler.ConnectHandler;
 import org.dromara.redisfront.ui.components.extend.DrawerMenuItemEvent;
 import org.dromara.redisfront.ui.components.extend.DrawerAnimationAction;
 import org.dromara.redisfront.ui.widget.MainComponent;
@@ -28,7 +28,7 @@ import java.awt.*;
 public class MainSidebarComponent extends SimpleDrawerBuilder {
 
     private final MainWidget owner;
-    private final OpenConnectHandler openConnectHandler;
+    private final ConnectHandler connectHandler;
     private final DrawerAnimationAction drawerAnimationAction;
     private final DrawerMenuItemEvent drawerMenuItemEvent;
 
@@ -43,9 +43,9 @@ public class MainSidebarComponent extends SimpleDrawerBuilder {
         };
     }
 
-    public MainSidebarComponent(MainWidget owner, OpenConnectHandler openConnectHandler, DrawerAnimationAction drawerAnimationAction, DrawerMenuItemEvent drawerMenuItemEvent) {
+    public MainSidebarComponent(MainWidget owner, ConnectHandler connectHandler, DrawerAnimationAction drawerAnimationAction, DrawerMenuItemEvent drawerMenuItemEvent) {
         this.owner = owner;
-        this.openConnectHandler = openConnectHandler;
+        this.connectHandler = connectHandler;
         this.drawerAnimationAction = drawerAnimationAction;
         this.drawerMenuItemEvent = drawerMenuItemEvent;
         initializeUI();
@@ -96,7 +96,7 @@ public class MainSidebarComponent extends SimpleDrawerBuilder {
 
     @Override
     public Component getMenu() {
-        JTree tree = new RedisConnectTree(owner, openConnectHandler);
+        JTree tree = new RedisConnectTree(owner, connectHandler);
         JScrollPane scrollPane = createScroll(tree);
         scrollPane.setBorder(new EmptyBorder(0, 10, 0, 10));
         return scrollPane;

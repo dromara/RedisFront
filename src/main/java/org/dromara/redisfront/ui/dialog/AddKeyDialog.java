@@ -12,10 +12,10 @@ import org.dromara.redisfront.commons.constant.Enums;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.func.Fn;
 import org.dromara.redisfront.commons.handler.ProcessHandler;
-import org.dromara.redisfront.commons.ui.AbstractDialog;
-import org.dromara.redisfront.commons.util.AlertUtils;
-import org.dromara.redisfront.commons.util.LocaleUtils;
-import org.dromara.redisfront.commons.util.PrefUtils;
+import org.dromara.redisfront.commons.resources.AbstractDialog;
+import org.dromara.redisfront.commons.utils.AlertUtils;
+import org.dromara.redisfront.commons.utils.LocaleUtils;
+import org.dromara.redisfront.commons.utils.PrefUtils;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.service.*;
 

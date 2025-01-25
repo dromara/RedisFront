@@ -7,7 +7,7 @@ import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
 import io.lettuce.core.ValueScanCursor;
 import org.dromara.redisfront.commons.func.Fn;
-import org.dromara.redisfront.commons.util.LettuceUtils;
+import org.dromara.redisfront.commons.utils.LettuceUtils;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.service.RedisSetService;
 

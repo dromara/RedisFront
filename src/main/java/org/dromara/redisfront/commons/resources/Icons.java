@@ -1,4 +1,4 @@
-package org.dromara.redisfront.commons.constant;
+package org.dromara.redisfront.commons.resources;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.FlatSVGUtils;

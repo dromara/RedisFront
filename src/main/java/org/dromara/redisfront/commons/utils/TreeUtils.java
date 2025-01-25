@@ -1,4 +1,4 @@
-package org.dromara.redisfront.commons.util;
+package org.dromara.redisfront.commons.utils;
 
 import cn.hutool.core.util.StrUtil;
 import org.dromara.redisfront.model.TreeNodeInfo;

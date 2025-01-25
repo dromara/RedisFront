@@ -12,10 +12,10 @@ import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.redisfront.RedisFrontMain;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.func.Fn;
-import org.dromara.redisfront.commons.ui.AbstractDialog;
-import org.dromara.redisfront.commons.util.LocaleUtils;
-import org.dromara.redisfront.commons.util.PrefUtils;
-import org.dromara.redisfront.commons.util.ThemeUtils;
+import org.dromara.redisfront.commons.resources.AbstractDialog;
+import org.dromara.redisfront.commons.utils.LocaleUtils;
+import org.dromara.redisfront.commons.utils.PrefUtils;
+import org.dromara.redisfront.commons.utils.ThemeUtils;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
