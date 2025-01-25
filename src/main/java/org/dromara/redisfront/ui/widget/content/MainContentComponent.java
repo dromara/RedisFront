@@ -141,7 +141,7 @@ public class MainContentComponent extends JPanel {
         rightToolBar.setLayout(new BorderLayout());
         rightToolBar.setMargin(new Insets(0, 3, 0, 3));
 
-        var mode = new JLabel(Icons.MODE_ICON_45x45);
+        var mode = new JLabel(Icons.MODE_ICON);
         mode.setText("单机模式");
         rightToolBar.add(mode, BorderLayout.WEST);
 
@@ -149,17 +149,17 @@ public class MainContentComponent extends JPanel {
         horizontalBox.setLayout(new FlowLayout());
         rightToolBar.add(horizontalBox, BorderLayout.CENTER);
 
-        var cpu = new JLabel(Icons.CPU_ICON_45x45);
+        var cpu = new JLabel(Icons.CPU_ICON);
         cpu.setToolTipText("CPU使用率0.07%");
         cpu.setText("0.07%");
         horizontalBox.add(cpu);
 
-        var memory = new JLabel(Icons.MEMORY_ICON_45x45);
+        var memory = new JLabel(Icons.MEMORY_ICON);
         memory.setToolTipText("CPU使用率0.07%");
         memory.setText("11MB");
         horizontalBox.add(memory);
 
-        var network = new JLabel(Icons.WIFI_ICON_45x45);
+        var network = new JLabel(Icons.WIFI_ICON);
         network.setToolTipText("CPU使用率0.07%");
         network.setText("25KB/s");
         horizontalBox.add(network);
