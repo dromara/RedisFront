@@ -24,7 +24,7 @@ import java.util.Map;
 public class ConnectContext implements Serializable, Cloneable {
     private int id;
     private String title;
-    private String host = "127.0.0.1";
+    private String host = "191.0.0.1";
     private Integer port = 6379;
     private String localHost;
     private Integer localPort;

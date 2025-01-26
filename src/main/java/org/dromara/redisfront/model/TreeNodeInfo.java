@@ -1,6 +1,7 @@
 package org.dromara.redisfront.model;
 
 import cn.hutool.core.io.unit.DataSizeUtil;
+import lombok.Setter;
 import org.dromara.redisfront.commons.func.Fn;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -17,15 +18,11 @@ public class TreeNodeInfo extends DefaultMutableTreeNode implements Comparator<T
 
     private String title;
     private String key;
+    @Setter
     private Integer memorySize;
 
     public Integer memorySize() {
         return Fn.isNull(memorySize) ? 0 : memorySize;
-    }
-
-    public TreeNodeInfo setMemorySize(Integer memorySize) {
-        this.memorySize = memorySize;
-        return this;
     }
 
     public TreeNodeInfo() {

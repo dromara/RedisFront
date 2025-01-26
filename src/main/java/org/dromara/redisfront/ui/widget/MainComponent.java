@@ -9,6 +9,7 @@ import org.dromara.quickswing.ui.swing.Background;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.ui.components.extend.DrawerAnimationAction;
+import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
 import org.dromara.redisfront.ui.components.panel.NonePanel;
 import org.dromara.redisfront.ui.event.OpenRedisConnectEvent;
 import org.dromara.redisfront.ui.handler.ConnectHandler;
@@ -61,12 +62,30 @@ public class MainComponent extends Background {
                     if (first.get() instanceof MainContentComponent mainRightTabbedPanel) {
                         //todo add tab
                         System.out.println("JTabbedPane " + first.get());
-                        mainRightPane.add(createMainTabbedPanel(drawerAnimationAction), BorderLayout.CENTER);
+                        SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> {
+                            try {
+                                Thread.sleep(5000);
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                            return null;
+                        }, (o, e) -> {
+                            mainRightPane.add(createMainTabbedPanel(drawerAnimationAction), BorderLayout.CENTER);
+                        });
                     } else {
                         mainRightPane.removeAll();
-                        MainContentComponent mainRightTabbedPanel = createMainTabbedPanel(drawerAnimationAction);
-                        mainRightPane.add(mainRightTabbedPanel, BorderLayout.CENTER);
-                        FlatLaf.updateUI();
+                        SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> {
+                            try {
+                                Thread.sleep(5000);
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                            return createMainTabbedPanel(drawerAnimationAction);
+                        }, (o, e) -> {
+                            mainRightPane.add(createMainTabbedPanel(drawerAnimationAction), BorderLayout.CENTER);
+                            FlatLaf.updateUI();
+                        });
+
                     }
                 }
             }

@@ -1,5 +1,6 @@
 package org.dromara.redisfront.model;
 
+import lombok.Setter;
 import org.dromara.redisfront.commons.func.Fn;
 
 /**
@@ -10,6 +11,7 @@ import org.dromara.redisfront.commons.func.Fn;
 public class DbInfo {
     private String dbName;
     private Integer dbIndex;
+    @Setter
     private Long dbSize;
 
     public DbInfo(String dbName, Integer dbIndex) {
@@ -37,11 +39,6 @@ public class DbInfo {
 
     public Long dbSize() {
         return dbSize;
-    }
-
-    public DbInfo setDbSize(Long dbSize) {
-        this.dbSize = dbSize;
-        return this;
     }
 
     @Override

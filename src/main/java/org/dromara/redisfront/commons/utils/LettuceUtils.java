@@ -221,7 +221,7 @@ public class LettuceUtils {
                 .withPort(Fn.equal(connectContext.getConnectTypeMode(), Enums.ConnectType.SSH) ? connectContext.getLocalPort() : connectContext.getPort())
                 .withSsl(connectContext.getEnableSsl())
                 .withDatabase(connectContext.getDatabase())
-                .withTimeout(Duration.ofMillis(1000))
+                .withTimeout(Duration.ofMillis(3000))
                 .build();
 
         if (Fn.isNotEmpty(connectContext.getUsername()) && Fn.isNotEmpty(password)) {

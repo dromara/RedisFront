@@ -1,6 +1,9 @@
 package org.dromara.redisfront.model;
 
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
 
 /**
@@ -8,33 +11,12 @@ import java.io.Serializable;
  *
  * @author Jin
  */
+@Setter
+@Getter
 public class MessageInfo implements Serializable {
 
     private String date;
     private String channel;
     private String message;
 
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public String getChannel() {
-        return channel;
-    }
-
-    public void setChannel(String channel) {
-        this.channel = channel;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
 }

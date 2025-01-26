@@ -1,6 +1,7 @@
 package org.dromara.redisfront.commons.utils;
 
 
+import cn.hutool.core.date.StopWatch;
 import io.lettuce.core.*;
 import io.lettuce.core.output.*;
 import io.lettuce.core.protocol.CommandArgs;
@@ -9,6 +10,7 @@ import org.dromara.redisfront.model.context.ConnectContext;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -23,14 +25,23 @@ public class LettuceUtilsTest {
 
     }
 
-    //    @Test
+        @Test
     public void test1() {
-        LettuceUtils.run(new ConnectContext(), redisCommands -> {
-            if (redisCommands.getStatefulConnection() instanceof StatefulRedisConnectionImpl<String, String> statefulRedisConnection) {
-                List<Object> s = redisCommands.dispatch(CommandType.GET, new ArrayOutput<>(statefulRedisConnection.getCodec()), new CommandArgs<>(statefulRedisConnection.getCodec()).addKeys("a"));
-                System.out.println(s);
+        StopWatch watch = StopWatch.create("T1");
+            watch.start();
+            try {
+                LettuceUtils.run(new ConnectContext(), redisCommands -> {
+                    if (redisCommands.getStatefulConnection() instanceof StatefulRedisConnectionImpl<String, String> statefulRedisConnection) {
+                        List<Object> s = redisCommands.dispatch(CommandType.GET, new ArrayOutput<>(statefulRedisConnection.getCodec()), new CommandArgs<>(statefulRedisConnection.getCodec()).addKeys("a"));
+                        System.out.println(s);
+                    }
+                });
+            }catch (Exception e){
+                System.out.println(e.getMessage());
             }
-        });
+
+            watch.stop();
+            System.out.println(watch.prettyPrint(TimeUnit.SECONDS));
     }
 
     //    @Test
