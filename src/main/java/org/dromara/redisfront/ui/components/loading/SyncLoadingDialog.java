@@ -10,6 +10,8 @@ import org.dromara.redisfront.ui.widget.MainWidget;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -53,9 +55,16 @@ public class SyncLoadingDialog extends QSDialog<MainWidget> {
             biConsumer.accept(object, exception);
         });
         syncLoadingWaiter.execute();
-
-        this.setVisible(true);
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                syncLoadingWaiter.cancel(false);
+                super.windowClosing(e);
+            }
+        });
         this.setLocationRelativeTo(getOwner());
+        this.setVisible(true);
+        this.pack();
     }
 
 }
