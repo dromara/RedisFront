@@ -11,11 +11,10 @@ import org.dromara.quickswing.constant.QSOs;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.resources.Icons;
-import org.dromara.redisfront.model.context.ConnectContext;
-import org.dromara.redisfront.ui.components.RedisTerminal;
-import org.dromara.redisfront.ui.components.extend.DrawerAnimationAction;
 import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
+import org.dromara.redisfront.ui.components.extend.DrawerAnimationAction;
 import org.dromara.redisfront.ui.widget.MainWidget;
+import org.dromara.redisfront.ui.widget.content.panel.ContentTabPanel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -23,6 +22,9 @@ import javax.swing.plaf.TabbedPaneUI;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -30,7 +32,6 @@ public class MainContentComponent extends JPanel {
     private final MainWidget owner;
     private final DrawerAnimationAction action;
     private JTabbedPane topTabbedPane;
-    private JTabbedPane contentTabbedPane;
     private FlatToolBar toolBar;
     @Setter
     private Consumer<Integer> tabCloseProcess;
@@ -55,10 +56,7 @@ public class MainContentComponent extends JPanel {
 
     private void initComponents() {
         this.initTopBar();
-        this.initMainTabbedUI();
         this.initBottomToolBar();
-        this.initMainTabbedItem();
-
     }
 
 
@@ -84,23 +82,24 @@ public class MainContentComponent extends JPanel {
                 } else {
                     if (state) {
                         toolBar.setMargin(new Insets(2, 73, 0, 0));
-                        contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_INSETS, new Insets(10, 22, 10, 22));
+                        //todo 发布事件修改
+//                        contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_INSETS, new Insets(10, 22, 10, 22));
                     } else {
                         toolBar.setMargin(new Insets(2, 6, 0, 0));
-                        contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_INSETS, new Insets(10, 10, 10, 10));
+//                        contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_INSETS, new Insets(10, 10, 10, 10));
                     }
                 }
 
             } else {
                 toolBar.setMargin(new Insets(2, 3, 0, 0));
-                contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_INSETS, new Insets(10, 10, 10, 10));
+//                contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_INSETS, new Insets(10, 10, 10, 10));
             }
             closeDrawerBtn.setVisible(true);
             FlatLaf.updateUI();
         });
 
         //tabbedPane init
-        topTabbedPane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT){
+        topTabbedPane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT) {
             @Override
             public void setUI(TabbedPaneUI ui) {
                 super.setUI(new BoldTitleTabbedPaneUI());
@@ -175,51 +174,25 @@ public class MainContentComponent extends JPanel {
         this.add(verticalBox, BorderLayout.SOUTH);
     }
 
-    private void initMainTabbedUI() {
-        //tabbedPane init
-        contentTabbedPane = new JTabbedPane(){
-            @Override
-            public void setUI(TabbedPaneUI ui) {
-                super.setUI(new BoldTitleTabbedPaneUI());
-            }
-        };
-        contentTabbedPane.setTabPlacement(JTabbedPane.LEFT);
-        contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
-        contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_HEIGHT, 70);
-        contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ICON_PLACEMENT, SwingConstants.TOP);
-        contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_LEADING);
-        contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_WIDTH_MODE, FlatClientProperties.TABBED_PANE_TAB_WIDTH_MODE_COMPACT);
-        contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, true);
-
-        FlatToolBar settingToolBar = new FlatToolBar();
-        settingToolBar.setLayout(new MigLayout(new LC().align("center", "bottom")));
-        settingToolBar.add(new JButton(Icons.SETTING_ICON_40x40));
-        contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, settingToolBar);
-
-        //tab 切换事件
-        contentTabbedPane.addChangeListener(e -> {
-            var tabbedPane = (JTabbedPane) e.getSource();
-            System.out.println(tabbedPane.getSelectedIndex());
-        });
-
-        topTabbedPane.addTab("127.0.0.1", Icons.REDIS_ICON_14x14, contentTabbedPane);
+    public void addTab(String title, ContentTabPanel contentTabPanel) {
+        Optional<ContentTabPanel> matchedPanel = Arrays
+                .stream(topTabbedPane.getComponents())
+                .map(e -> {
+                    if (e instanceof ContentTabPanel) {
+                        return (ContentTabPanel) e;
+                    } else {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .filter(e -> e.getContext().getId() == contentTabPanel.getContext().getId())
+                .findFirst();
+        if (matchedPanel.isPresent()) {
+            topTabbedPane.setSelectedComponent(matchedPanel.get());
+            return;
+        }
+        topTabbedPane.addTab(title, Icons.REDIS_ICON_14x14, contentTabPanel);
+        topTabbedPane.setSelectedComponent(contentTabPanel);
 
     }
-
-    private void initMainTabbedItem() {
-        //主窗口
-        contentTabbedPane.addTab("主页", Icons.CONTENT_TAB_DATA_ICON, new JPanel());
-        ConnectContext connectContext = new ConnectContext();
-        connectContext.setHost("127.0.0.1");
-        connectContext.setPort(3306);
-        connectContext.setDatabase(2);
-        //命令窗口
-        contentTabbedPane.addTab("命令", Icons.CONTENT_TAB_COMMAND_ICON, new RedisTerminal(connectContext));
-        contentTabbedPane.addTab("订阅", Icons.MQ_ICON, new JPanel());
-        //数据窗口
-        contentTabbedPane.addTab("数据", Icons.CONTENT_TAB_INFO_ICON, new JPanel());
-
-    }
-
-
 }

@@ -59,6 +59,7 @@ public class SyncLoadingDialog extends QSDialog<MainWidget> {
             @Override
             public void windowClosing(WindowEvent e) {
                 syncLoadingWaiter.cancel(false);
+                messageLabel.setText($tr("LoadingDialog.loadInfoLabel.cancel.message"));
                 super.windowClosing(e);
             }
         });

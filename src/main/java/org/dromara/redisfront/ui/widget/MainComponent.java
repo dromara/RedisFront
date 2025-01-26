@@ -1,7 +1,6 @@
 package org.dromara.redisfront.ui.widget;
 
 import cn.hutool.core.util.ArrayUtil;
-import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
 import org.dromara.quickswing.events.QSEvent;
 import org.dromara.quickswing.events.QSEventListener;
@@ -15,6 +14,7 @@ import org.dromara.redisfront.ui.event.OpenRedisConnectEvent;
 import org.dromara.redisfront.ui.handler.ConnectHandler;
 import org.dromara.redisfront.ui.handler.DrawerHandler;
 import org.dromara.redisfront.ui.widget.content.MainContentComponent;
+import org.dromara.redisfront.ui.widget.content.panel.ContentTabPanel;
 import org.dromara.redisfront.ui.widget.sidebar.MainSidebarComponent;
 
 import javax.swing.*;
@@ -54,7 +54,7 @@ public class MainComponent extends Background {
 
         var drawerAnimationAction = new DrawerAnimationAction(owner, drawerHandler);
 
-        ConnectHandler connectHandler = _ -> {
+        ConnectHandler connectHandler = context -> {
             Component[] components = mainRightPane.getComponents();
             if (ArrayUtil.isNotEmpty(components)) {
                 Optional<Component> first = Arrays.stream(components).findFirst();
@@ -64,28 +64,26 @@ public class MainComponent extends Background {
                         System.out.println("JTabbedPane " + first.get());
                         SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> {
                             try {
-                                Thread.sleep(5000);
+                                Thread.sleep(2000);
                             } catch (InterruptedException e) {
                                 throw new RuntimeException(e);
                             }
                             return null;
                         }, (o, e) -> {
-                            mainRightPane.add(createMainTabbedPanel(drawerAnimationAction), BorderLayout.CENTER);
+                            mainRightTabbedPanel.addTab(context.getTitle(), new ContentTabPanel(owner, context));
                         });
                     } else {
-                        mainRightPane.removeAll();
                         SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> {
-                            try {
-                                Thread.sleep(5000);
-                            } catch (InterruptedException e) {
-                                throw new RuntimeException(e);
-                            }
-                            return createMainTabbedPanel(drawerAnimationAction);
+                            return null;
                         }, (o, e) -> {
-                            mainRightPane.add(createMainTabbedPanel(drawerAnimationAction), BorderLayout.CENTER);
-                            FlatLaf.updateUI();
+                            if (e == null) {
+                                mainRightPane.removeAll();
+                                MainContentComponent mainTabbedPanel = createMainTabbedPanel(drawerAnimationAction);
+                                mainTabbedPanel.addTab(context.getTitle(), new ContentTabPanel(owner, context));
+                                mainRightPane.add(mainTabbedPanel, BorderLayout.CENTER);
+                                FlatLaf.updateUI();
+                            }
                         });
-
                     }
                 }
             }
@@ -105,10 +103,7 @@ public class MainComponent extends Background {
             System.out.println("drawerMenuItemEvent" + " key:" + key);
             System.out.println("drawerMenuItemEvent" + " index:" + Arrays.toString(index));
         }).buildPanel();
-        this.mainLeftPanel.setMinimumSize(new Dimension(250, -1));
-        this.mainLeftPanel.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
         parentPanel.add(mainLeftPanel, BorderLayout.WEST);
-
         this.add(parentPanel, BorderLayout.CENTER);
     }
 

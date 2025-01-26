@@ -35,12 +35,15 @@ public class MainSidebarComponent extends SimpleDrawerBuilder {
 
 
     public DrawerPanel buildPanel() {
-        return new DrawerPanel(this) {
+        DrawerPanel drawerPanel = new DrawerPanel(this) {
             @Override
             public void updateUI() {
                 super.updateUI();
             }
         };
+        drawerPanel.setMinimumSize(new Dimension(250, -1));
+        drawerPanel.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
+        return drawerPanel;
     }
 
     public MainSidebarComponent(MainWidget owner, ConnectHandler connectHandler, DrawerAnimationAction drawerAnimationAction, DrawerMenuItemEvent drawerMenuItemEvent) {
