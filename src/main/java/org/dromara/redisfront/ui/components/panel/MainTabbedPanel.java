@@ -4,14 +4,14 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.components.FlatLabel;
 import com.formdev.flatlaf.extras.components.FlatToolBar;
 import com.formdev.flatlaf.ui.FlatLineBorder;
-import org.dromara.redisfront.commons.constant.Enums;
+import org.dromara.redisfront.commons.enums.Enums;
 import org.dromara.redisfront.model.ClusterNode;
 import org.dromara.redisfront.model.context.ConnectContext;
-import org.dromara.redisfront.ui.components.RedisTerminal;
+import org.dromara.redisfront.ui.components.terminal.RedisFrontTerminal;
 import org.dromara.redisfront.ui.form.fragment.PubSubForm;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.resources.Icons;
-import org.dromara.redisfront.commons.func.Fn;
+import org.dromara.redisfront.Fn;
 import org.dromara.redisfront.commons.utils.FutureUtils;
 import org.dromara.redisfront.commons.utils.LocaleUtils;
 import org.dromara.redisfront.service.RedisBasicService;
@@ -172,7 +172,7 @@ public class MainTabbedPanel extends JPanel {
                 //主窗口
                 contentPanel.addTab(null, Icons.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(connectContext));
                 //命令窗口
-                contentPanel.addTab(null, Icons.CONTENT_TAB_COMMAND_ICON, RedisTerminal.newInstance(connectContext));
+                contentPanel.addTab(null, Icons.CONTENT_TAB_COMMAND_ICON, RedisFrontTerminal.newInstance(connectContext));
                 contentPanel.addTab(null, Icons.MQ_ICON, PubSubForm.newInstance(connectContext));
                 //数据窗口
                 contentPanel.addTab(null, Icons.CONTENT_TAB_INFO_ICON, DataChartsForm.getInstance(connectContext));
@@ -183,7 +183,7 @@ public class MainTabbedPanel extends JPanel {
                     var tabbedPane = (JTabbedPane) e.getSource();
                     PubSubForm pubSubForm = (PubSubForm) tabbedPane.getComponentAt(2);
                     var component = tabbedPane.getSelectedComponent();
-                    if (component instanceof RedisTerminal terminal) {
+                    if (component instanceof RedisFrontTerminal terminal) {
                         terminal.ping();
                         chartsFormInit();
                         pubSubForm.disConnection();

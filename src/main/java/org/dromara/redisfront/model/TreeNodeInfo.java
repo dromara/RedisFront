@@ -2,7 +2,7 @@ package org.dromara.redisfront.model;
 
 import cn.hutool.core.io.unit.DataSizeUtil;
 import lombok.Setter;
-import org.dromara.redisfront.commons.func.Fn;
+import org.dromara.redisfront.Fn;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;

@@ -6,7 +6,7 @@ import com.jcraft.jsch.Session;
 import org.dromara.redisfront.model.context.ConnectContext;
 import io.lettuce.core.cluster.RedisClusterClient;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
-import org.dromara.redisfront.commons.func.Fn;
+import org.dromara.redisfront.Fn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

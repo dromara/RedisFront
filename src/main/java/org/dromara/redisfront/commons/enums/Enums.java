@@ -1,4 +1,4 @@
-package org.dromara.redisfront.commons.constant;
+package org.dromara.redisfront.commons.enums;
 
 import java.awt.*;
 

@@ -1,6 +1,6 @@
 package org.dromara.redisfront.ui.components.loading;
 
-import org.dromara.redisfront.commons.func.Fn;
+import org.dromara.redisfront.Fn;
 
 import javax.swing.*;
 import java.util.function.Supplier;

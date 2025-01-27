@@ -1,7 +1,7 @@
 package org.dromara.redisfront.service.impl;
 
-import org.dromara.redisfront.commons.constant.Enums;
-import org.dromara.redisfront.commons.func.Fn;
+import org.dromara.redisfront.commons.enums.Enums;
+import org.dromara.redisfront.Fn;
 import org.dromara.redisfront.commons.utils.LettuceUtils;
 import org.dromara.redisfront.model.ClusterNode;
 import org.dromara.redisfront.model.context.ConnectContext;
@@ -250,7 +250,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
     @Override
     public Map<String, Object> getCpuInfo(ConnectContext connectContext) {
         var cpuInfo = LettuceUtils.exec(connectContext, redisCommands -> redisCommands.info("cpu"));
-        log.info("获取到Redis [ {}:{} ] cpuInfo - {}", connectContext.getHost(), connectContext.getPort(), cpuInfo);
+        log.debug("获取到Redis [ {}:{} ] cpuInfo - {}", connectContext.getHost(), connectContext.getPort(), cpuInfo);
         return strToMap(cpuInfo);
     }
 

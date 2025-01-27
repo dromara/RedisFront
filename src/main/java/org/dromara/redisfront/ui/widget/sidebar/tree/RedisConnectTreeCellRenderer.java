@@ -1,15 +1,14 @@
-package org.dromara.redisfront.ui.components.extend;
+package org.dromara.redisfront.ui.widget.sidebar.tree;
 
 import com.formdev.flatlaf.util.SystemInfo;
 import org.dromara.redisfront.commons.resources.Icons;
-import org.dromara.redisfront.ui.widget.sidebar.tree.RedisConnectTreeNode;
 import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class ConnectTreeCellRenderer extends DefaultXTreeCellRenderer {
-    public ConnectTreeCellRenderer() {
+public class RedisConnectTreeCellRenderer extends DefaultXTreeCellRenderer {
+    public RedisConnectTreeCellRenderer() {
         this.setTextNonSelectionColor(Color.WHITE);
     }
 

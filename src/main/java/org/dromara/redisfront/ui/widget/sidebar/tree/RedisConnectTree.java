@@ -9,14 +9,13 @@ import org.dromara.quickswing.events.QSEvent;
 import org.dromara.quickswing.events.QSEventListener;
 import org.dromara.quickswing.ui.app.QSAction;
 import org.dromara.redisfront.RedisFrontContext;
-import org.dromara.redisfront.commons.utils.SwingTreeUtils;
+import org.dromara.redisfront.commons.utils.SwingUtils;
 import org.dromara.redisfront.dao.ConnectDetailDao;
 import org.dromara.redisfront.dao.ConnectGroupDao;
 import org.dromara.redisfront.model.TreeNodeInfo;
 import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 import org.dromara.redisfront.model.entity.ConnectGroupEntity;
 import org.dromara.redisfront.ui.handler.ConnectHandler;
-import org.dromara.redisfront.ui.components.extend.ConnectTreeCellRenderer;
 import org.dromara.redisfront.ui.dialog.AddConnectDialog;
 import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
 import org.dromara.redisfront.ui.widget.MainWidget;
@@ -71,7 +70,7 @@ public class RedisConnectTree extends JXTree {
 
         );
         this.setModel(new DefaultTreeModel(new TreeNodeInfo()));
-        this.setCellRenderer(new ConnectTreeCellRenderer());
+        this.setCellRenderer(new RedisConnectTreeCellRenderer());
     }
 
     private void initializeComponents() {
@@ -125,10 +124,10 @@ public class RedisConnectTree extends JXTree {
                 log.error(exception.getMessage(), exception);
                 Notifications.getInstance().show(Notifications.Type.ERROR, exception.getMessage());
             } else {
-                List<Object> expandedPaths = SwingTreeUtils.saveExpandedPaths(this);
+                List<Object> expandedPaths = SwingUtils.saveExpandedPaths(this);
                 DefaultTreeModel model = new DefaultTreeModel(result);
                 this.setModel(model);
-                SwingTreeUtils.restoreExpandedPaths(this, model, expandedPaths);
+                SwingUtils.restoreExpandedPaths(this, model, expandedPaths);
                 this.updateUI();
             }
         });

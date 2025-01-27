@@ -10,20 +10,21 @@ import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import org.dromara.redisfront.commons.constant.Enums;
+import org.dromara.redisfront.commons.enums.Enums;
 import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
-import org.dromara.redisfront.commons.func.Fn;
+import org.dromara.redisfront.Fn;
 import org.dromara.redisfront.commons.handler.ActionHandler;
 import org.dromara.redisfront.commons.utils.AlertUtils;
 import org.dromara.redisfront.commons.utils.FutureUtils;
 import org.dromara.redisfront.commons.utils.LocaleUtils;
+import org.dromara.redisfront.commons.utils.SwingUtils;
 import org.dromara.redisfront.model.*;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.model.context.ScanContext;
 import org.dromara.redisfront.service.*;
 import org.dromara.redisfront.ui.components.panel.LoadingPanel;
-import org.dromara.redisfront.ui.components.TextEditor;
+import org.dromara.redisfront.ui.components.editor.TextEditor;
 import io.lettuce.core.*;
 import org.dromara.redisfront.ui.dialog.AddOrUpdateItemDialog;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -264,7 +265,7 @@ public class DataViewForm {
                                 SwingUtilities.invokeLater(() -> {
                                     refreshDisableBtn();
                                     refreshBeforeHandler.handle();
-                                    Fn.removeAllComponent(dataPanel);
+                                    SwingUtils.removeAllComponent(dataPanel);
                                     dataPanel.add(LoadingPanel.newInstance(), BorderLayout.CENTER);
                                     dataPanel.updateUI();
                                 });
@@ -292,7 +293,7 @@ public class DataViewForm {
                             }, () -> SwingUtilities.invokeLater(() -> {
                                 refreshEnableBtn();
                                 refreshAfterHandler.handle();
-                                Fn.removeAllComponent(dataPanel);
+                                SwingUtils.removeAllComponent(dataPanel);
                                 dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
                                 dataPanel.updateUI();
                             })), throwable -> refreshAfterHandler.handle());
@@ -448,7 +449,7 @@ public class DataViewForm {
             keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
             tableViewPanel.setVisible(true);
             dataTable.setModel(hashTableModel);
-            Fn.removeAllComponent(dataPanel);
+            SwingUtils.removeAllComponent(dataPanel);
             dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
         });
     }
@@ -483,7 +484,7 @@ public class DataViewForm {
             LoadAfterUpdate(len, DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)), String.valueOf(scanContext.getKeyList().size()), valueScanCursor.isFinished());
             tableViewPanel.setVisible(true);
             dataTable.setModel(setTableModel);
-            Fn.removeAllComponent(dataPanel);
+            SwingUtils.removeAllComponent(dataPanel);
             dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
         });
     }
@@ -531,7 +532,7 @@ public class DataViewForm {
             LoadAfterUpdate(len, DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)), String.valueOf(scanContext.getKeyList().size()), scanContext.getScanCursor().isFinished());
             tableViewPanel.setVisible(true);
             dataTable.setModel(finalListTableModel);
-            Fn.removeAllComponent(dataPanel);
+            SwingUtils.removeAllComponent(dataPanel);
             dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
         });
     }
@@ -572,7 +573,7 @@ public class DataViewForm {
             LoadAfterUpdate(len, DataSizeUtil.format(xRangeContext.getKeyList().stream().map(e -> Fn.getByteSize(e.getBody())).reduce(Integer::sum).orElse(0)), String.valueOf(xRangeContext.getKeyList().size()), xRangeContext.getScanCursor().isFinished());
             tableViewPanel.setVisible(true);
             dataTable.setModel(finalListTableModel);
-            Fn.removeAllComponent(dataPanel);
+            SwingUtils.removeAllComponent(dataPanel);
             dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
         });
     }
@@ -609,7 +610,7 @@ public class DataViewForm {
             LoadAfterUpdate(len, DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getValue().getBytes().length).reduce(Integer::sum).orElse(0)), String.valueOf(scanContext.getKeyList().size()), valueScanCursor.isFinished());
             tableViewPanel.setVisible(true);
             dataTable.setModel(sortedSetTableModel);
-            Fn.removeAllComponent(dataPanel);
+            SwingUtils.removeAllComponent(dataPanel);
             dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
         });
     }

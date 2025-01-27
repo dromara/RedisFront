@@ -1,12 +1,12 @@
 package org.dromara.redisfront.service.impl;
 
-import org.dromara.redisfront.commons.constant.Enums;
+import org.dromara.redisfront.commons.enums.Enums;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.model.context.ScanContext;
 import io.lettuce.core.MapScanCursor;
 import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
-import org.dromara.redisfront.commons.func.Fn;
+import org.dromara.redisfront.Fn;
 import org.dromara.redisfront.commons.utils.LettuceUtils;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.service.RedisHashService;

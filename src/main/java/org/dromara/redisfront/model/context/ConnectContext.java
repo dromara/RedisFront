@@ -5,8 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.dromara.redisfront.commons.constant.Enums;
-import org.dromara.redisfront.commons.func.Fn;
+import org.dromara.redisfront.commons.enums.Enums;
+import org.dromara.redisfront.Fn;
 import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 
 import java.io.Serializable;

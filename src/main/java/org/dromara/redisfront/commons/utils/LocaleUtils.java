@@ -1,7 +1,7 @@
 package org.dromara.redisfront.commons.utils;
 
 
-import org.dromara.redisfront.commons.func.Fn;
+import org.dromara.redisfront.Fn;
 
 import java.lang.reflect.Method;
 import java.util.ResourceBundle;

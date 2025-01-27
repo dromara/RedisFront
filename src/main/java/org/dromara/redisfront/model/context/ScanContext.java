@@ -2,7 +2,7 @@ package org.dromara.redisfront.model.context;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.dromara.redisfront.commons.func.Fn;
+import org.dromara.redisfront.Fn;
 import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
 

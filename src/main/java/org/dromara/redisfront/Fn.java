@@ -1,4 +1,4 @@
-package org.dromara.redisfront.commons.func;
+package org.dromara.redisfront;
 
 
 import cn.hutool.core.collection.CollectionUtil;
@@ -26,18 +26,6 @@ public class Fn {
 
     private Fn() {
     }
-
-    public static void revalidateAndRepaintAllFramesAndDialogs() {
-        FlatLaf.revalidateAndRepaintAllFramesAndDialogs();
-    }
-
-    public static void removeAllComponent(JComponent component) {
-        for (Component c : component.getComponents()) {
-            component.remove(c);
-        }
-        Fn.revalidateAndRepaintAllFramesAndDialogs();
-    }
-
 
     public static boolean isNotEmpty(Collection<?> collection) {
         return CollectionUtil.isNotEmpty(collection);
@@ -111,7 +99,7 @@ public class Fn {
             os.writeObject(data);
             byteSize = byteArrayOutputStream.size();
         } catch (Exception e) {
-            e.printStackTrace();
+            return byteSize;
         }
         return byteSize;
     }

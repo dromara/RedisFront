@@ -1,7 +1,7 @@
 package org.dromara.redisfront.service;
 
-import org.dromara.redisfront.commons.constant.Enums;
-import org.dromara.redisfront.commons.func.Fn;
+import org.dromara.redisfront.commons.enums.Enums;
+import org.dromara.redisfront.Fn;
 import org.dromara.redisfront.model.ClusterNode;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.model.LogInfo;
@@ -167,13 +167,14 @@ public interface RedisBasicService {
 
     default Map<String, Object> strToMap(String str) {
         Map<String, Object> result = new HashMap<>();
-        for (String s : str.split("\r\n")) {
-            if (Fn.startWith(s, "#") && Fn.isNotEmpty(s)) {
-                String[] v = s.split(":");
-                if (v.length > 1) {
-                    result.put(v[0], v[1]);
+        String[] tokens = str.split("\r\n");
+        for (String token : tokens) {
+            if (!Fn.startWith(token, "#") && Fn.isNotEmpty(token)) {
+                String[] values = token.split(":");
+                if (values.length > 1) {
+                    result.put(values[0], values[1]);
                 } else {
-                    result.put(v[0], "");
+                    result.put(values[0], "");
                 }
             }
         }

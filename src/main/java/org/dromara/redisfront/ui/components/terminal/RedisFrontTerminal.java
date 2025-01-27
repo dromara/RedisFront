@@ -1,14 +1,14 @@
-package org.dromara.redisfront.ui.components;
+package org.dromara.redisfront.ui.components.terminal;
 
 import cn.hutool.core.date.DateUtil;
-import org.dromara.redisfront.commons.constant.Enums;
+import org.dromara.redisfront.commons.enums.Enums;
 import org.dromara.redisfront.model.context.ConnectContext;
 import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.output.ArrayOutput;
 import io.lettuce.core.protocol.CommandArgs;
 import io.lettuce.core.protocol.CommandType;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
-import org.dromara.redisfront.commons.func.Fn;
+import org.dromara.redisfront.Fn;
 import org.dromara.redisfront.commons.utils.LettuceUtils;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.slf4j.Logger;
@@ -19,16 +19,16 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-public class RedisTerminal extends AbstractTerminal {
-    private static final Logger log = LoggerFactory.getLogger(RedisTerminal.class);
+public class RedisFrontTerminal extends AbstractTerminal {
+    private static final Logger log = LoggerFactory.getLogger(RedisFrontTerminal.class);
     private final ConnectContext connectContext;
 
 
-    public static RedisTerminal newInstance(ConnectContext connectContext) {
-        return new RedisTerminal(connectContext);
+    public static RedisFrontTerminal newInstance(ConnectContext connectContext) {
+        return new RedisFrontTerminal(connectContext);
     }
 
-    public RedisTerminal(final ConnectContext connectContext) {
+    public RedisFrontTerminal(final ConnectContext connectContext) {
         super();
         this.connectContext = connectContext.clone();
         terminal.setEnabled(true);

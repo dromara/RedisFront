@@ -3,7 +3,7 @@ package com.redisfront.commons.util
 import cn.hutool.http.HttpUtil
 import cn.hutool.json.JSONUtil
 import org.dromara.redisfront.commons.constant.Constants
-import org.dromara.redisfront.commons.func.Fn
+import org.dromara.redisfront.Fn
 
 /**
  *  Upgrade

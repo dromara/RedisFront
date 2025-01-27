@@ -1,6 +1,6 @@
-package org.dromara.redisfront.ui.components;
+package org.dromara.redisfront.ui.components.terminal;
 
-import org.dromara.redisfront.commons.func.Fn;
+import org.dromara.redisfront.Fn;
 import org.dromara.redisfront.model.context.ConnectContext;
 
 import javax.swing.*;
@@ -125,16 +125,11 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
         if (currentKeyCode == KeyEvent.VK_DOWN && !commandHistory.isEmpty()) {
             e.consume();
             consumeFlag = true;
-            if (!commandHistory.isEmpty()) {
-                if (commandHistoryIndex < commandHistory.size() - 1) {
-                    String input = terminal.getText().substring(0, lastSelectionStart);
-                    commandHistoryIndex = commandHistoryIndex + 1;
-                    System.out.println("commandCacheIndex:" + commandHistoryIndex);
-                    System.out.println("commandCache.size():" + commandHistory.size());
-                    terminal.setText(input.concat(commandHistory.get(commandHistoryIndex)));
-                }
-            } else if (commandHistoryIndex == 0) {
+            if (commandHistoryIndex < commandHistory.size() - 1) {
                 String input = terminal.getText().substring(0, lastSelectionStart);
+                commandHistoryIndex = commandHistoryIndex + 1;
+                System.out.println("commandCacheIndex:" + commandHistoryIndex);
+                System.out.println("commandCache.size():" + commandHistory.size());
                 terminal.setText(input.concat(commandHistory.get(commandHistoryIndex)));
             }
         }

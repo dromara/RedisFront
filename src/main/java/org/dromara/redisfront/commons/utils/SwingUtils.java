@@ -1,20 +1,35 @@
 package org.dromara.redisfront.commons.utils;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.formdev.flatlaf.FlatLaf;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.quickswing.tree.QSTreeNode;
+import org.dromara.redisfront.Fn;
 import org.jdesktop.swingx.JXTree;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
 @Slf4j
-public class SwingTreeUtils {
+public class SwingUtils {
+
+    public static void revalidateAndRepaintAllFramesAndDialogs() {
+        FlatLaf.revalidateAndRepaintAllFramesAndDialogs();
+    }
+
+    public static void removeAllComponent(JComponent component) {
+        for (Component c : component.getComponents()) {
+            component.remove(c);
+        }
+        revalidateAndRepaintAllFramesAndDialogs();
+    }
+
     public static List<Object> saveExpandedPaths(JXTree tree) {
         List<Object> savedPaths = new ArrayList<>();
         TreePath rootPath = new TreePath(tree.getModel().getRoot());

@@ -1,7 +1,7 @@
 package org.dromara.redisfront.commons.utils;
 
 import cn.hutool.core.util.RandomUtil;
-import org.dromara.redisfront.commons.constant.Enums;
+import org.dromara.redisfront.commons.enums.Enums;
 import org.dromara.redisfront.model.context.ConnectContext;
 import io.lettuce.core.*;
 import io.lettuce.core.api.sync.RedisCommands;
@@ -12,7 +12,7 @@ import io.lettuce.core.cluster.api.sync.RedisAdvancedClusterCommands;
 import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
 import io.netty.util.internal.StringUtil;
-import org.dromara.redisfront.commons.func.Fn;
+import org.dromara.redisfront.Fn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

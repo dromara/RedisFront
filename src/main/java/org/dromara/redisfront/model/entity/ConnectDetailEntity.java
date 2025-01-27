@@ -3,7 +3,7 @@ package org.dromara.redisfront.model.entity;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.Data;
-import org.dromara.redisfront.commons.constant.Enums;
+import org.dromara.redisfront.commons.enums.Enums;
 import org.dromara.redisfront.model.context.ConnectContext;
 
 @Data
