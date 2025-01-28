@@ -1,7 +1,7 @@
 package org.dromara.redisfront.commons.utils;
 
 
-import org.dromara.redisfront.Fn;
+import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.commons.handler.ProcessHandler;
 
 import java.util.concurrent.CompletableFuture;

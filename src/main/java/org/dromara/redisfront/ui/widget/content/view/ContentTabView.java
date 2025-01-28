@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.content.panel;
+package org.dromara.redisfront.ui.widget.content.view;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.components.FlatToolBar;
@@ -8,23 +8,27 @@ import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
 import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.model.context.ConnectContext;
-import org.dromara.redisfront.ui.components.terminal.RedisFrontTerminal;
+import org.dromara.redisfront.ui.widget.content.view.scaffold.PageScaffold;
+import org.dromara.redisfront.ui.widget.content.view.scaffold.index.IndexPageView;
+import org.dromara.redisfront.ui.widget.content.view.scaffold.pubsub.PubSubPageView;
+import org.dromara.redisfront.ui.widget.content.view.scaffold.terminal.RedisFrontTerminal;
 import org.dromara.redisfront.ui.widget.content.extend.BoldTitleTabbedPaneUI;
 import org.dromara.redisfront.ui.widget.MainWidget;
+import org.dromara.redisfront.ui.widget.content.view.scaffold.terminal.TerminalPageView;
 
 import javax.swing.*;
 import javax.swing.plaf.TabbedPaneUI;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ContentTabPanel extends JTabbedPane {
+public class ContentTabView extends JTabbedPane {
 
     private final MainWidget owner;
-    private final ConnectContext context;
+    private final ConnectContext connectContext;
 
-    public ContentTabPanel(MainWidget owner, ConnectContext context) {
+    public ContentTabView(MainWidget owner, ConnectContext connectContext) {
         this.owner = owner;
-        this.context = context;
+        this.connectContext = connectContext;
         this.setTabPlacement(JTabbedPane.LEFT);
         this.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
         this.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_HEIGHT, 70);
@@ -39,17 +43,18 @@ public class ContentTabPanel extends JTabbedPane {
         //tab 切换事件
         this.addChangeListener(e -> {
             var tabbedPane = (JTabbedPane) e.getSource();
-            System.out.println(tabbedPane.getSelectedIndex());
+            if(tabbedPane.getSelectedComponent() instanceof PageScaffold pageScaffold){
+                pageScaffold.onChange();
+            }
         });
+        PageScaffold pageScaffold = new PageScaffold(new IndexPageView(connectContext,owner));
         //主窗口
-        this.addTab("主页", Icons.CONTENT_TAB_DATA_ICON, new JPanel());
-        ConnectContext connectContext = new ConnectContext();
-        connectContext.setHost("127.0.0.1");
-        connectContext.setPort(3306);
-        connectContext.setDatabase(2);
+        this.addTab("主页", Icons.CONTENT_TAB_DATA_ICON, pageScaffold);
         //命令窗口
-        this.addTab("命令", Icons.CONTENT_TAB_COMMAND_ICON, new RedisFrontTerminal(connectContext));
-        this.addTab("订阅", Icons.MQ_ICON, new JPanel());
+        pageScaffold = new PageScaffold(new TerminalPageView(connectContext,owner));
+        this.addTab("命令", Icons.CONTENT_TAB_COMMAND_ICON, pageScaffold);
+        pageScaffold = new PageScaffold(new PubSubPageView(connectContext,owner));
+        this.addTab("订阅", Icons.MQ_ICON, pageScaffold);
         //数据窗口
         this.addTab("数据", Icons.CONTENT_TAB_INFO_ICON, new JPanel());
 

@@ -11,7 +11,7 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.redisfront.RedisFrontMain;
 import org.dromara.redisfront.commons.constant.Constants;
-import org.dromara.redisfront.Fn;
+import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.commons.resources.AbstractDialog;
 import org.dromara.redisfront.commons.utils.LocaleUtils;
 import org.dromara.redisfront.commons.utils.PrefUtils;

@@ -8,9 +8,9 @@ import com.intellij.uiDesigner.core.Spacer;
 import io.lettuce.core.RedisConnectionException;
 import org.dromara.quickswing.ui.app.QSDialog;
 import org.dromara.redisfront.RedisFrontContext;
-import org.dromara.redisfront.commons.enums.Enums;
+import org.dromara.redisfront.commons.enums.ConnectType;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
-import org.dromara.redisfront.Fn;
+import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.dao.ConnectDetailDao;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.model.entity.ConnectDetailEntity;
@@ -331,7 +331,7 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
             connectContext.setPort((Integer) portField.getValue());
             connectContext.setUsername(userField.getText());
             connectContext.setPassword(String.valueOf(passwordField.getPassword()));
-            connectContext.setConnectTypeMode(Enums.ConnectType.NORMAL);
+            connectContext.setConnectTypeMode(ConnectType.NORMAL);
             return connectContext;
         }
     }
@@ -351,7 +351,7 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
         connectContext.setPassword(String.valueOf(passwordField.getPassword()));
         connectContext.setSslInfo(sslInfo);
         connectContext.setEnableSsl(enableSSLBtn.isSelected());
-        connectContext.setConnectTypeMode(Enums.ConnectType.NORMAL);
+        connectContext.setConnectTypeMode(ConnectType.NORMAL);
         return connectContext;
     }
 
@@ -371,7 +371,7 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
         connectContext.setPassword(String.valueOf(passwordField.getPassword()));
         connectContext.setSshInfo(sshInfo);
         connectContext.setEnableSsl(enableSSLBtn.isSelected());
-        connectContext.setConnectTypeMode(Enums.ConnectType.SSH);
+        connectContext.setConnectTypeMode(ConnectType.SSH);
         return connectContext;
     }
 
@@ -382,7 +382,7 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
         this.userField.setText(connectContext.getUsername());
         this.passwordField.setText(connectContext.getPassword());
         this.enableSSLBtn.setSelected(connectContext.getEnableSsl());
-        this.enableSSHBtn.setSelected(Enums.ConnectType.SSH.equals(connectContext.getConnectTypeMode()));
+        this.enableSSHBtn.setSelected(ConnectType.SSH.equals(connectContext.getConnectTypeMode()));
         if (enableSSLBtn.isSelected()) {
             setSize(new Dimension(getWidth(), getHeight() - 130));
             sslPanel.setVisible(true);

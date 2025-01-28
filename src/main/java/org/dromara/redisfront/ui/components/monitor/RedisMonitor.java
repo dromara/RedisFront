@@ -1,6 +1,6 @@
 package org.dromara.redisfront.ui.components.monitor;
 
-import org.dromara.redisfront.Fn;
+import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.model.RedisUsageInfo;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;

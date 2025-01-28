@@ -14,7 +14,7 @@ import org.dromara.redisfront.ui.event.OpenRedisConnectEvent;
 import org.dromara.redisfront.ui.handler.ConnectHandler;
 import org.dromara.redisfront.ui.handler.DrawerHandler;
 import org.dromara.redisfront.ui.widget.content.MainContentComponent;
-import org.dromara.redisfront.ui.widget.content.panel.ContentTabPanel;
+import org.dromara.redisfront.ui.widget.content.view.ContentTabView;
 import org.dromara.redisfront.ui.widget.sidebar.MainSidebarComponent;
 
 import javax.swing.*;
@@ -70,7 +70,7 @@ public class MainComponent extends Background {
                             }
                             return null;
                         }, (o, e) -> {
-                            mainRightTabbedPanel.addTab(context.getTitle(), new ContentTabPanel(owner, context));
+                            mainRightTabbedPanel.addTab(context.getTitle(), new ContentTabView(owner, context));
                         });
                     } else {
                         SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> {
@@ -79,7 +79,7 @@ public class MainComponent extends Background {
                             if (e == null) {
                                 mainRightPane.removeAll();
                                 MainContentComponent mainTabbedPanel = createMainTabbedPanel(drawerAnimationAction);
-                                mainTabbedPanel.addTab(context.getTitle(), new ContentTabPanel(owner, context));
+                                mainTabbedPanel.addTab(context.getTitle(), new ContentTabView(owner, context));
                                 mainRightPane.add(mainTabbedPanel, BorderLayout.CENTER);
                                 FlatLaf.updateUI();
                             }

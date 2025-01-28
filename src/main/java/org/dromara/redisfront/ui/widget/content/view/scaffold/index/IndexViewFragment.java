@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.form.fragment;
+package org.dromara.redisfront.ui.widget.content.view.scaffold.index;
 
 import cn.hutool.core.io.unit.DataSizeUtil;
 import cn.hutool.json.JSONException;
@@ -10,10 +10,10 @@ import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import org.dromara.redisfront.commons.enums.Enums;
+import org.dromara.redisfront.commons.enums.KeyTypeEnum;
 import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
-import org.dromara.redisfront.Fn;
+import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.commons.handler.ActionHandler;
 import org.dromara.redisfront.commons.utils.AlertUtils;
 import org.dromara.redisfront.commons.utils.FutureUtils;
@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
  *
  * @author Jin
  */
-public class DataViewForm {
+public class IndexViewFragment {
 
     private JPanel contentPanel;
     private JTextField keyField;
@@ -109,8 +109,8 @@ public class DataViewForm {
         this.refreshAfterHandler = refreshAfterHandler;
     }
 
-    public static DataViewForm newInstance(ConnectContext connectContext) {
-        return new DataViewForm(connectContext);
+    public static IndexViewFragment newInstance(ConnectContext connectContext) {
+        return new IndexViewFragment(connectContext);
     }
 
     public void setDeleteActionHandler(ActionHandler handler) {
@@ -133,7 +133,7 @@ public class DataViewForm {
         refBtn.setEnabled(true);
     }
 
-    public DataViewForm(ConnectContext connectContext) {
+    public IndexViewFragment(ConnectContext connectContext) {
         this.connectContext = connectContext;
         scanZSetContextMap = new LinkedHashMap<>();
         scanSetContextMap = new LinkedHashMap<>();
@@ -259,7 +259,7 @@ public class DataViewForm {
             this.lastKeyName = key;
             FutureUtils.supplyAsync(() -> keyTypeLabel.getText(), keyType -> {
                 if (Fn.notEqual(keyType, "none")) {
-                    Enums.KeyTypeEnum keyTypeEnum = Enums.KeyTypeEnum.valueOf(keyType.toUpperCase());
+                    KeyTypeEnum keyTypeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
                     FutureUtils.runAsync(() ->
                             dataChangeActionPerformed(key, () -> {
                                 SwingUtilities.invokeLater(() -> {
@@ -271,22 +271,22 @@ public class DataViewForm {
                                 });
                                 //加载数据
                                 {
-                                    if (keyTypeEnum == Enums.KeyTypeEnum.STRING || keyTypeEnum == Enums.KeyTypeEnum.JSON) {
+                                    if (keyTypeEnum == KeyTypeEnum.STRING || keyTypeEnum == KeyTypeEnum.JSON) {
                                         loadStringActionPerformed(key);
                                     }
-                                    if (keyTypeEnum.equals(Enums.KeyTypeEnum.ZSET)) {
+                                    if (keyTypeEnum.equals(KeyTypeEnum.ZSET)) {
                                         this.scanZSetContextMap.put(key, new ScanContext<>());
                                     }
-                                    if (keyTypeEnum.equals(Enums.KeyTypeEnum.HASH)) {
+                                    if (keyTypeEnum.equals(KeyTypeEnum.HASH)) {
                                         this.scanHashContextMap.put(key, new ScanContext<>());
                                     }
-                                    if (keyTypeEnum.equals(Enums.KeyTypeEnum.LIST)) {
+                                    if (keyTypeEnum.equals(KeyTypeEnum.LIST)) {
                                         this.scanListContextMap.put(key, new ScanContext<>());
                                     }
-                                    if (keyTypeEnum.equals(Enums.KeyTypeEnum.SET)) {
+                                    if (keyTypeEnum.equals(KeyTypeEnum.SET)) {
                                         this.scanSetContextMap.put(key, new ScanContext<>());
                                     }
-                                    if (keyTypeEnum.equals(Enums.KeyTypeEnum.STREAM)) {
+                                    if (keyTypeEnum.equals(KeyTypeEnum.STREAM)) {
                                         this.xRangeContextMap.put(key, new ScanContext<>());
                                     }
                                 }
@@ -312,7 +312,7 @@ public class DataViewForm {
             var key = keyField.getText();
             this.lastKeyName = key;
             var keyType = keyTypeLabel.getText();
-            var keyTypeEnum = Enums.KeyTypeEnum.valueOf(keyType.toUpperCase());
+            var keyTypeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
 
             SwingUtilities.invokeLater(() -> {
                 refreshBeforeHandler.handle();
@@ -369,11 +369,11 @@ public class DataViewForm {
 
         var type = RedisBasicService.service.type(connectContext, key);
         if (Fn.notEqual(type, "none")) {
-            var keyTypeEnum = Enums.KeyTypeEnum.valueOf(type.toUpperCase());
+            var keyTypeEnum = KeyTypeEnum.valueOf(type.toUpperCase());
             var ttl = RedisBasicService.service.ttl(connectContext, key);
 
             SwingUtilities.invokeLater(() -> {
-                fieldOrScoreField.setVisible(keyTypeEnum == Enums.KeyTypeEnum.ZSET || keyTypeEnum == Enums.KeyTypeEnum.HASH);
+                fieldOrScoreField.setVisible(keyTypeEnum == KeyTypeEnum.ZSET || keyTypeEnum == KeyTypeEnum.HASH);
                 keyTypeLabel.setText(keyTypeEnum.typeName());
                 keyTypeLabel.setBackground(keyTypeEnum.color());
                 ttlField.setText(ttl.toString());
@@ -638,7 +638,7 @@ public class DataViewForm {
             return;
         }
         var keyType = keyTypeLabel.getText();
-        Enums.KeyTypeEnum keyTypeEnum = Enums.KeyTypeEnum.valueOf(keyType.toUpperCase());
+        KeyTypeEnum keyTypeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
 
         switch (keyTypeEnum) {
             case ZSET -> {
@@ -739,11 +739,11 @@ public class DataViewForm {
             SwingUtilities.invokeLater(this::refreshDisableBtn);
             FutureUtils.runAsync(() -> {
                 var keyType = keyTypeLabel.getText();
-                Enums.KeyTypeEnum typeEnum = Enums.KeyTypeEnum.valueOf(keyType.toUpperCase());
+                KeyTypeEnum typeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
                 var key = keyField.getText();
                 var newValue = textEditor.textArea().getText();
 
-                if (typeEnum.equals(Enums.KeyTypeEnum.STRING)) {
+                if (typeEnum.equals(KeyTypeEnum.STRING)) {
                     RedisBasicService.service.del(connectContext, key);
                     RedisStringService.service.set(connectContext, key, newValue);
                 } else {
@@ -927,7 +927,7 @@ public class DataViewForm {
 
         tableAddBtn.addActionListener((event) -> {
             var keyType = keyTypeLabel.getText();
-            Enums.KeyTypeEnum keyTypeEnum = Enums.KeyTypeEnum.valueOf(keyType.toUpperCase());
+            KeyTypeEnum keyTypeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
 
             switch (keyTypeEnum) {
                 case ZSET ->
@@ -958,7 +958,7 @@ public class DataViewForm {
             }
             tableDelBtn.setEnabled(false);
             var keyType = keyTypeLabel.getText();
-            Enums.KeyTypeEnum keyTypeEnum = Enums.KeyTypeEnum.valueOf(keyType.toUpperCase());
+            KeyTypeEnum keyTypeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
             String key = keyField.getText();
 
             switch (keyTypeEnum) {

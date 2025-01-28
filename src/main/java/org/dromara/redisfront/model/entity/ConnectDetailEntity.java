@@ -3,7 +3,7 @@ package org.dromara.redisfront.model.entity;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.Data;
-import org.dromara.redisfront.commons.enums.Enums;
+import org.dromara.redisfront.commons.enums.ConnectType;
 import org.dromara.redisfront.model.context.ConnectContext;
 
 @Data
@@ -28,7 +28,7 @@ public class ConnectDetailEntity {
         connectContext.setPort(port);
         connectContext.setUsername(username);
         connectContext.setPassword(password);
-        connectContext.setConnectTypeMode(Enums.ConnectType.of(connectMode));
+        connectContext.setConnectTypeMode(ConnectType.of(connectMode));
         if (StrUtil.isNotEmpty(sslConfig)) {
             JSONUtil.toBean(sslConfig, ConnectContext.SslInfo.class);
         }

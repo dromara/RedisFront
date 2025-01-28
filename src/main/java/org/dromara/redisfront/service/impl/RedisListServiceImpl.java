@@ -1,9 +1,9 @@
 package org.dromara.redisfront.service.impl;
 
-import org.dromara.redisfront.commons.enums.Enums;
+import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.ui.dialog.LogsDialog;
-import org.dromara.redisfront.Fn;
+import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.commons.utils.LettuceUtils;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.service.RedisListService;
@@ -23,7 +23,7 @@ public class RedisListServiceImpl implements RedisListService {
         var logInfo = RedisBasicService.buildLogInfo(connectContext).setInfo("LRANGE ".concat(key).concat(" ").concat(String.valueOf(start)).concat(" ").concat(String.valueOf(stop)));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, commands -> commands.lrange(key, start, stop));
         } else {
             return LettuceUtils.exec(connectContext, commands -> commands.lrange(key, start, stop));
@@ -36,7 +36,7 @@ public class RedisListServiceImpl implements RedisListService {
         var logInfo = RedisBasicService.buildLogInfo(connectContext).setInfo("LREM ".concat(key).concat(" ").concat(String.valueOf(count)).concat(" ").concat(String.valueOf(value)));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, commands -> commands.lrem(key, count, value));
         } else {
             return LettuceUtils.exec(connectContext, commands -> commands.lrem(key, count, value));
@@ -49,7 +49,7 @@ public class RedisListServiceImpl implements RedisListService {
         var logInfo = RedisBasicService.buildLogInfo(connectContext).setInfo("LLEN ".concat(key).concat(" "));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, commands -> commands.llen(key));
         } else {
             return LettuceUtils.exec(connectContext, commands -> commands.llen(key));
@@ -58,7 +58,7 @@ public class RedisListServiceImpl implements RedisListService {
 
     @Override
     public String lpop(ConnectContext connectContext, String key) {
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, commands -> commands.lpop(key));
         } else {
             return LettuceUtils.exec(connectContext, commands -> commands.lpop(key));
@@ -67,7 +67,7 @@ public class RedisListServiceImpl implements RedisListService {
 
     @Override
     public List<String> lpop(ConnectContext connectContext, String key, long count) {
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, commands -> commands.lpop(key, count));
         } else {
             return LettuceUtils.exec(connectContext, commands -> commands.lpop(key, count));
@@ -80,7 +80,7 @@ public class RedisListServiceImpl implements RedisListService {
         var logInfo = RedisBasicService.buildLogInfo(connectContext).setInfo("LPUSH ".concat(key).concat(" ").concat(Arrays.toString(values).replace("[", "").replace("]", "").replace(","," ")));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, commands -> commands.lpush(key, values));
         } else {
             return LettuceUtils.exec(connectContext, commands -> commands.lpush(key, values));
@@ -89,7 +89,7 @@ public class RedisListServiceImpl implements RedisListService {
 
     @Override
     public String lset(ConnectContext connectContext, String key, long index, String value) {
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, commands -> commands.lset(key, index, value));
         } else {
             return LettuceUtils.exec(connectContext, commands -> commands.lset(key, index, value));
@@ -98,7 +98,7 @@ public class RedisListServiceImpl implements RedisListService {
 
     @Override
     public String rpop(ConnectContext connectContext, String key) {
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, commands -> commands.rpop(key));
         } else {
             return LettuceUtils.exec(connectContext, commands -> commands.rpop(key));
@@ -107,7 +107,7 @@ public class RedisListServiceImpl implements RedisListService {
 
     @Override
     public List<String> rpop(ConnectContext connectContext, String key, long count) {
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, commands -> commands.rpop(key, count));
         } else {
             return LettuceUtils.exec(connectContext, commands -> commands.rpop(key, count));
@@ -116,7 +116,7 @@ public class RedisListServiceImpl implements RedisListService {
 
     @Override
     public Long rpush(ConnectContext connectContext, String key, String... values) {
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, commands -> commands.rpush(key, values));
         } else {
             return LettuceUtils.exec(connectContext, commands -> commands.rpush(key, values));

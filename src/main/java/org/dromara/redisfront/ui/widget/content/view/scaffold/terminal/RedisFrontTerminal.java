@@ -1,16 +1,17 @@
-package org.dromara.redisfront.ui.components.terminal;
+package org.dromara.redisfront.ui.widget.content.view.scaffold.terminal;
 
 import cn.hutool.core.date.DateUtil;
-import org.dromara.redisfront.commons.enums.Enums;
+import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.model.context.ConnectContext;
 import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.output.ArrayOutput;
 import io.lettuce.core.protocol.CommandArgs;
 import io.lettuce.core.protocol.CommandType;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
-import org.dromara.redisfront.Fn;
+import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.commons.utils.LettuceUtils;
 import org.dromara.redisfront.service.RedisBasicService;
+import org.dromara.redisfront.ui.components.terminal.AbstractTerminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,11 +23,6 @@ import java.util.List;
 public class RedisFrontTerminal extends AbstractTerminal {
     private static final Logger log = LoggerFactory.getLogger(RedisFrontTerminal.class);
     private final ConnectContext connectContext;
-
-
-    public static RedisFrontTerminal newInstance(ConnectContext connectContext) {
-        return new RedisFrontTerminal(connectContext);
-    }
 
     public RedisFrontTerminal(final ConnectContext connectContext) {
         super();
@@ -62,12 +58,12 @@ public class RedisFrontTerminal extends AbstractTerminal {
                     .orElseThrow(() -> new RedisFrontException("ERR unknown command '" + inputText + "'", false));
             commandList.removeFirst();
 
-            if (Fn.equal(connectInfo().getRedisMode(), Enums.RedisMode.CLUSTER)) {
+            if (Fn.equal(connectInfo().getRedisMode(), RedisMode.CLUSTER)) {
                 LettuceUtils.clusterRun(connectInfo(), redisCommands -> {
                     var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
                     println(format(res, ""));
                 });
-            } else if (Fn.equal(connectInfo().getRedisMode(), Enums.RedisMode.SENTINEL)) {
+            } else if (Fn.equal(connectInfo().getRedisMode(), RedisMode.SENTINEL)) {
                 LettuceUtils.sentinelRun(connectInfo(), redisCommands -> {
                     var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
                     println(format(res, ""));

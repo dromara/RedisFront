@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.form.fragment;
+package org.dromara.redisfront.ui.widget.content.view.scaffold.report;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.unit.DataSizeUtil;
@@ -6,12 +6,13 @@ import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import org.dromara.redisfront.Fn;
+import org.dromara.quickswing.ui.app.page.QSPageItem;
+import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.commons.utils.FutureUtils;
 import org.dromara.redisfront.commons.utils.LettuceUtils;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;
-import org.dromara.redisfront.ui.components.panel.ChartsPanel;
+import org.dromara.redisfront.ui.widget.MainWidget;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -39,7 +40,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Jin
  */
-public class DataChartsForm extends ChartsPanel {
+public class ReportPageView extends QSPageItem<MainWidget> {
 
     private JPanel contentPanel;
     private JPanel chartsPanel;
@@ -57,13 +58,13 @@ public class DataChartsForm extends ChartsPanel {
     private final ConnectContext connectContext;
     private Boolean scheduleStarted = false;
 
-    private ScheduledExecutorService scheduledExecutor;
+    private final ScheduledExecutorService scheduledExecutor;
 
-    public static DataChartsForm getInstance(final ConnectContext connectContext) {
-        return new DataChartsForm(connectContext);
+    public static ReportPageView getInstance(final ConnectContext connectContext) {
+        return new ReportPageView(connectContext);
     }
 
-    public DataChartsForm(final ConnectContext connectContext) {
+    public ReportPageView(final ConnectContext connectContext) {
         this.connectContext = connectContext;
         scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
         $$$setupUI$$$();
@@ -355,8 +356,14 @@ public class DataChartsForm extends ChartsPanel {
         return contentPanel;
     }
 
+
     @Override
-    protected ScheduledExecutorService getScheduledExecutor() {
-        return scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+    public MainWidget getApp() {
+        return null;
+    }
+
+    @Override
+    protected JPanel getContentPanel() {
+        return null;
     }
 }

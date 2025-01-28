@@ -4,18 +4,18 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.components.FlatLabel;
 import com.formdev.flatlaf.extras.components.FlatToolBar;
 import com.formdev.flatlaf.ui.FlatLineBorder;
-import org.dromara.redisfront.commons.enums.Enums;
+import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.model.ClusterNode;
 import org.dromara.redisfront.model.context.ConnectContext;
-import org.dromara.redisfront.ui.components.terminal.RedisFrontTerminal;
-import org.dromara.redisfront.ui.form.fragment.PubSubForm;
+import org.dromara.redisfront.ui.widget.content.view.scaffold.terminal.RedisFrontTerminal;
+import org.dromara.redisfront.ui.widget.content.view.scaffold.pubsub.PubSubPageView;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.resources.Icons;
-import org.dromara.redisfront.Fn;
+import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.commons.utils.FutureUtils;
 import org.dromara.redisfront.commons.utils.LocaleUtils;
 import org.dromara.redisfront.service.RedisBasicService;
-import org.dromara.redisfront.ui.form.fragment.DataChartsForm;
+import org.dromara.redisfront.ui.widget.content.view.scaffold.report.ReportPageView;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -80,7 +80,7 @@ public class MainTabbedPanel extends JPanel {
                         var configFile = (String) serverInfo.get("config_file");
                         appendRow(buf, LocaleUtils.getMessageFromBundle("MainTabbedPanel.configFile.title"), configFile);
 
-                        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+                        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
                             List<ClusterNode> clusterNodes = RedisBasicService.service.getClusterNodes(connectContext);
                             clusterNodes.forEach(s -> appendRow(buf, s.flags().toUpperCase(), s.ipAndPort()));
                         }
@@ -172,33 +172,31 @@ public class MainTabbedPanel extends JPanel {
                 //主窗口
                 contentPanel.addTab(null, Icons.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(connectContext));
                 //命令窗口
-                contentPanel.addTab(null, Icons.CONTENT_TAB_COMMAND_ICON, RedisFrontTerminal.newInstance(connectContext));
-                contentPanel.addTab(null, Icons.MQ_ICON, PubSubForm.newInstance(connectContext));
                 //数据窗口
-                contentPanel.addTab(null, Icons.CONTENT_TAB_INFO_ICON, DataChartsForm.getInstance(connectContext));
+                contentPanel.addTab(null, Icons.CONTENT_TAB_INFO_ICON, ReportPageView.getInstance(connectContext));
 
 
                 //tab 切换事件
                 contentPanel.addChangeListener(e -> {
                     var tabbedPane = (JTabbedPane) e.getSource();
-                    PubSubForm pubSubForm = (PubSubForm) tabbedPane.getComponentAt(2);
+                    PubSubPageView pubSubPageView = (PubSubPageView) tabbedPane.getComponentAt(2);
                     var component = tabbedPane.getSelectedComponent();
                     if (component instanceof RedisFrontTerminal terminal) {
                         terminal.ping();
                         chartsFormInit();
-                        pubSubForm.disConnection();
+                        pubSubPageView.disConnection();
                     }
                     if (component instanceof DataSplitPanel dataSplitPanel) {
                         dataSplitPanel.ping();
                         chartsFormInit();
-                        pubSubForm.disConnection();
+                        pubSubPageView.disConnection();
                     }
-                    if (component instanceof PubSubForm pubSubForm1) {
-                        pubSubForm1.openConnection();
+                    if (component instanceof PubSubPageView pubSubPageView1) {
+                        pubSubPageView1.openConnection();
                     }
-                    if (component instanceof DataChartsForm chartsForm) {
+                    if (component instanceof ReportPageView chartsForm) {
                         chartsForm.scheduleInit();
-                        pubSubForm.disConnection();
+                        pubSubPageView.disConnection();
                     }
                 });
             }
@@ -210,8 +208,8 @@ public class MainTabbedPanel extends JPanel {
 
     private void chartsFormInit() {
 
-        if (contentPanel.getTabCount() > 2 && contentPanel.getComponentAt(2) instanceof DataChartsForm dataChartsForm) {
-            dataChartsForm.scheduleInit();
+        if (contentPanel.getTabCount() > 2 && contentPanel.getComponentAt(2) instanceof ReportPageView reportPageView) {
+            reportPageView.scheduleInit();
         }
     }
 
@@ -219,7 +217,7 @@ public class MainTabbedPanel extends JPanel {
         scheduledExecutor.scheduleAtFixedRate(() -> {
                     CompletableFuture<Void> keyInfoFuture = FutureUtils.supplyAsync(() -> {
                         var keyInfo = new String[2];
-                        if (Fn.notEqual(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+                        if (Fn.notEqual(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
                             var keySpace = RedisBasicService.service.getKeySpace(connectContext);
                             var count = keySpace.values().stream()
                                     .map(value -> ((String) value).split(",")[0].split("=")[1])

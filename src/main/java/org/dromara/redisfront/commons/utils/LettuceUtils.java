@@ -1,7 +1,8 @@
 package org.dromara.redisfront.commons.utils;
 
 import cn.hutool.core.util.RandomUtil;
-import org.dromara.redisfront.commons.enums.Enums;
+import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.enums.ConnectType;
 import org.dromara.redisfront.model.context.ConnectContext;
 import io.lettuce.core.*;
 import io.lettuce.core.api.sync.RedisCommands;
@@ -12,7 +13,6 @@ import io.lettuce.core.cluster.api.sync.RedisAdvancedClusterCommands;
 import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
 import io.netty.util.internal.StringUtil;
-import org.dromara.redisfront.Fn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +62,7 @@ public class LettuceUtils {
         }
 
         clusterClient.setOptions(clientOptions);
-        if (Fn.equal(connectContext.getConnectTypeMode(), Enums.ConnectType.SSH)) {
+        if (Fn.equal(connectContext.getConnectTypeMode(), ConnectType.SSH)) {
             Map<Integer, Integer> clusterTempPort = new HashMap<>();
             for (RedisClusterNode partition : clusterClient.getPartitions()) {
                 var remotePort = partition.getUri().getPort();
@@ -202,7 +202,7 @@ public class LettuceUtils {
     }
 
     public synchronized static RedisURI getRedisURI(ConnectContext connectContext) {
-        if (Fn.equal(connectContext.getConnectTypeMode(), Enums.ConnectType.SSH)) {
+        if (Fn.equal(connectContext.getConnectTypeMode(), ConnectType.SSH)) {
             connectContext.setLocalHost("127.0.0.1");
             int port = getTempLocalPort();
             connectContext.setLocalPort(port);
@@ -217,8 +217,8 @@ public class LettuceUtils {
         }
 
         var redisURI = RedisURI.builder()
-                .withHost(Fn.equal(connectContext.getConnectTypeMode(), Enums.ConnectType.SSH) ? connectContext.getLocalHost() : host)
-                .withPort(Fn.equal(connectContext.getConnectTypeMode(), Enums.ConnectType.SSH) ? connectContext.getLocalPort() : connectContext.getPort())
+                .withHost(Fn.equal(connectContext.getConnectTypeMode(), ConnectType.SSH) ? connectContext.getLocalHost() : host)
+                .withPort(Fn.equal(connectContext.getConnectTypeMode(), ConnectType.SSH) ? connectContext.getLocalPort() : connectContext.getPort())
                 .withSsl(connectContext.getEnableSsl())
                 .withDatabase(connectContext.getDatabase())
                 .withTimeout(Duration.ofMillis(3000))

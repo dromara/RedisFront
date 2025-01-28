@@ -3,10 +3,10 @@ package org.dromara.redisfront.commons.utils;
 import cn.hutool.extra.ssh.JschUtil;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.model.context.ConnectContext;
 import io.lettuce.core.cluster.RedisClusterClient;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
-import org.dromara.redisfront.Fn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

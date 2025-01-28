@@ -5,8 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.dromara.redisfront.commons.enums.Enums;
-import org.dromara.redisfront.Fn;
+import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.enums.ConnectType;
+import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 
 import java.io.Serializable;
@@ -33,8 +34,8 @@ public class ConnectContext implements Serializable, Cloneable {
     private String password;
     private Integer database = 0;
     private Boolean enableSsl = false;
-    private Enums.ConnectType connectTypeMode;
-    private Enums.RedisMode redisMode;
+    private ConnectType connectTypeMode;
+    private RedisMode redisMode;
     private SslInfo sslInfo;
     private SshInfo sshInfo;
 

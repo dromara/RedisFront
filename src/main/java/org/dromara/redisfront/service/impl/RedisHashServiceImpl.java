@@ -1,12 +1,12 @@
 package org.dromara.redisfront.service.impl;
 
-import org.dromara.redisfront.commons.enums.Enums;
+import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.model.context.ScanContext;
 import io.lettuce.core.MapScanCursor;
 import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
-import org.dromara.redisfront.Fn;
+import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.commons.utils.LettuceUtils;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.service.RedisHashService;
@@ -26,7 +26,7 @@ public class RedisHashServiceImpl implements RedisHashService {
     @Override
     public String hget(ConnectContext connectContext, String key, String field) {
 
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, commands -> commands.hget(key, field));
         } else {
             return LettuceUtils.exec(connectContext, commands -> commands.hget(key, field));
@@ -35,7 +35,7 @@ public class RedisHashServiceImpl implements RedisHashService {
 
     @Override
     public Map<String, String> hgetall(ConnectContext connectContext, String key) {
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, commands -> commands.hgetall(key));
         } else {
             return LettuceUtils.exec(connectContext, commands -> commands.hgetall(key));
@@ -44,7 +44,7 @@ public class RedisHashServiceImpl implements RedisHashService {
 
     @Override
     public List<String> hkeys(ConnectContext connectContext, String key) {
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, commands -> commands.hkeys(key));
         } else {
             return LettuceUtils.exec(connectContext, commands -> commands.hkeys(key));
@@ -53,7 +53,7 @@ public class RedisHashServiceImpl implements RedisHashService {
 
     @Override
     public Long hlen(ConnectContext connectContext, String key) {
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, commands -> commands.hlen(key));
         } else {
             return LettuceUtils.exec(connectContext, commands -> commands.hlen(key));
@@ -62,7 +62,7 @@ public class RedisHashServiceImpl implements RedisHashService {
 
     @Override
     public String hmset(ConnectContext connectContext, String key, Map<String, String> map) {
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, commands -> commands.hmset(key, map));
         } else {
             return LettuceUtils.exec(connectContext, commands -> commands.hmset(key, map));
@@ -76,7 +76,7 @@ public class RedisHashServiceImpl implements RedisHashService {
         var logInfo = RedisBasicService.buildLogInfo(connectContext).setInfo("HSCAN ".concat(key).concat(" ").concat(scanCursor.getCursor()).concat(myScanArgs.getCommandStr()));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, commands -> commands.hscan(key, scanCursor, scanArgs));
         } else {
             return LettuceUtils.exec(connectContext, commands -> commands.hscan(key, scanCursor, scanArgs));
@@ -89,7 +89,7 @@ public class RedisHashServiceImpl implements RedisHashService {
         var logInfo = RedisBasicService.buildLogInfo(connectContext).setInfo("HSCAN ".concat(key).concat(" ").concat(scanCursor.getCursor()));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, commands -> commands.hscan(key, scanCursor));
         } else {
             return LettuceUtils.exec(connectContext, commands -> commands.hscan(key, scanCursor));
@@ -102,7 +102,7 @@ public class RedisHashServiceImpl implements RedisHashService {
         var logInfo = RedisBasicService.buildLogInfo(connectContext).setInfo("HSET ".concat(key).concat(" ").concat(field).concat(" ").concat(value));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, commands -> commands.hset(key, field, value));
         } else {
             return LettuceUtils.exec(connectContext, commands -> commands.hset(key, field, value));
@@ -111,7 +111,7 @@ public class RedisHashServiceImpl implements RedisHashService {
 
     @Override
     public Long hset(ConnectContext connectContext, String key, Map<String, String> map) {
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, commands -> commands.hset(key, map));
         } else {
             return LettuceUtils.exec(connectContext, commands -> commands.hset(key, map));
@@ -120,7 +120,7 @@ public class RedisHashServiceImpl implements RedisHashService {
 
     @Override
     public Long hstrlen(ConnectContext connectContext, String key, String field) {
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, commands -> commands.hstrlen(key, field));
         } else {
             return LettuceUtils.exec(connectContext, commands -> commands.hstrlen(key, field));
@@ -129,7 +129,7 @@ public class RedisHashServiceImpl implements RedisHashService {
 
     @Override
     public List<String> hvals(ConnectContext connectContext, String key) {
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, commands -> commands.hvals(key));
         } else {
             return LettuceUtils.exec(connectContext, commands -> commands.hvals(key));
@@ -142,7 +142,7 @@ public class RedisHashServiceImpl implements RedisHashService {
         var logInfo = RedisBasicService.buildLogInfo(connectContext).setInfo("HSET ".concat(key).concat(" ").concat(Arrays.toString(fields).replace("[", "").replace("]", "").replace(","," ")));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, commands -> commands.hdel(key, fields));
         } else {
             return LettuceUtils.exec(connectContext, commands -> commands.hdel(key, fields));

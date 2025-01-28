@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.form.fragment;
+package org.dromara.redisfront.ui.widget.content.view.scaffold.index;
 
 import cn.hutool.core.util.NumberUtil;
 import com.formdev.flatlaf.FlatClientProperties;
@@ -6,8 +6,10 @@ import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import lombok.Getter;
 import org.dromara.redisfront.RedisFrontMain;
-import org.dromara.redisfront.commons.enums.Enums;
+import org.dromara.redisfront.commons.enums.KeyTypeEnum;
+import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.model.DbInfo;
 import org.dromara.redisfront.model.context.ScanContext;
@@ -18,9 +20,10 @@ import io.lettuce.core.*;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
-import org.dromara.redisfront.Fn;
+import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.commons.handler.ProcessHandler;
 import org.dromara.redisfront.commons.utils.*;
+import org.dromara.redisfront.ui.widget.MainWidget;
 import org.jdesktop.swingx.JXTree;
 import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer;
 import org.slf4j.Logger;
@@ -52,9 +55,11 @@ import java.util.function.Consumer;
  *
  * @author Jin
  */
-public class DataSearchForm {
-    private static final Logger log = LoggerFactory.getLogger(DataSearchForm.class);
+public class IndexSearchFragment {
+    private static final Logger log = LoggerFactory.getLogger(IndexSearchFragment.class);
     private static final String SEPARATOR_FLAG = "/";
+    private final MainWidget owner;
+    @Getter
     private JPanel contentPanel;
     private JXTree keyTree;
     private JTextField searchTextField;
@@ -96,15 +101,8 @@ public class DataSearchForm {
 
     static final ExecutorService executorService = Executors.newFixedThreadPool(5);
 
-    public JPanel getContentPanel() {
-        return contentPanel;
-    }
-
-    public static DataSearchForm newInstance(ConnectContext connectContext) {
-        return new DataSearchForm(connectContext);
-    }
-
-    public DataSearchForm(ConnectContext connectContext) {
+    public IndexSearchFragment(MainWidget owner, ConnectContext connectContext) {
+        this.owner = owner;
         this.connectContext = connectContext;
         $$$setupUI$$$();
         databaseComboBox.setSelectedIndex(0);
@@ -117,12 +115,13 @@ public class DataSearchForm {
 
     public synchronized void loadTreeModelData(String key) {
         try {
-            LoadingUtils.showDialog(LocaleUtils.getMessageFromBundle("DataSearchForm.showDialog.message"));
+//            LoadingUtils.showDialog(LocaleUtils.getMessageFromBundle("DataSearchForm.showDialog.message"));
+            
             scanBeforeProcess();
             var scanKeysContext = scanKeysContextMap.get(connectContext.getDatabase());
 
             if (Fn.isNull(scanKeysContext.getLimit())) {
-                Long limit = PrefUtils.getState().getLong(Constants.KEY_KEY_MAX_LOAD_NUM, 10000L);
+                Long limit = owner.getPrefs().getState().getLong(Constants.KEY_KEY_MAX_LOAD_NUM, 10000L);
                 scanKeysContext.setLimit(limit);
             }
 
@@ -172,7 +171,7 @@ public class DataSearchForm {
                 scanKeysContext.setKeyList(scanKeysList);
             }
 
-            var delim = PrefUtils.getState().get(Constants.KEY_KEY_SEPARATOR, ":");
+            var delim = owner.getPrefs().getState().get(Constants.KEY_KEY_SEPARATOR, ":");
 
             var treeModel = TreeUtils.toTreeModel(new HashSet<>(scanKeysContext.getKeyList()), delim);
 
@@ -279,7 +278,7 @@ public class DataSearchForm {
                 loadMoreBtn.requestFocus();
                 loadMoreBtn.setEnabled(true);
             }
-            databaseComboBox.setEnabled(Fn.notEqual(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER));
+            databaseComboBox.setEnabled(Fn.notEqual(connectContext.getRedisMode(), RedisMode.CLUSTER));
         });
     }
 
@@ -415,7 +414,7 @@ public class DataSearchForm {
             }
             connectContext.setDatabase(db.dbIndex());
             scanKeysContextMap.put(connectContext.getDatabase(), new ScanContext<>());
-            var limit = PrefUtils.getState().getLong(Constants.KEY_KEY_MAX_LOAD_NUM, 10000L);
+            var limit = owner.getPrefs().getState().getLong(Constants.KEY_KEY_MAX_LOAD_NUM, 10000L);
             var flag = !Fn.isNull(db.dbSize()) && (db.dbSize() > limit);
             allField.setText(String.valueOf(db.dbSize()));
             loadMorePanel.setVisible(flag);
@@ -597,9 +596,9 @@ public class DataSearchForm {
                     FutureUtils.supplyAsync(
                             () -> RedisBasicService.service.type(connectContext, treeNodeInfo.key()),
                             type -> {
-                                var typeEnum = Enums.KeyTypeEnum.valueOf(type.toUpperCase());
+                                var typeEnum = KeyTypeEnum.valueOf(type.toUpperCase());
 
-                                if (typeEnum.equals(Enums.KeyTypeEnum.STRING)) {
+                                if (typeEnum.equals(KeyTypeEnum.STRING)) {
                                     var value = RedisStringService.service.get(connectContext, treeNodeInfo.key());
                                     SwingUtilities.invokeLater(() -> {
                                         treeNodeInfo.setMemorySize(value.length());
@@ -607,7 +606,7 @@ public class DataSearchForm {
                                     });
                                 }
 
-                                if (typeEnum.equals(Enums.KeyTypeEnum.ZSET)) {
+                                if (typeEnum.equals(KeyTypeEnum.ZSET)) {
                                     var valueScanCursor = RedisZSetService.service.zscan(connectContext, treeNodeInfo.key(), ScoredValueScanCursor.INITIAL);
                                     var dataList = new ArrayList<>(valueScanCursor.getValues());
                                     while (!valueScanCursor.isFinished()) {
@@ -622,7 +621,7 @@ public class DataSearchForm {
                                     }
                                 }
 
-                                if (typeEnum.equals(Enums.KeyTypeEnum.HASH)) {
+                                if (typeEnum.equals(KeyTypeEnum.HASH)) {
 
                                     var mapScanCursor = RedisHashService.service.hscan(connectContext, treeNodeInfo.key(), MapScanCursor.INITIAL);
                                     var dataList = new ArrayList<>(mapScanCursor.getMap().entrySet());
@@ -639,7 +638,7 @@ public class DataSearchForm {
                                     }
                                 }
 
-                                if (typeEnum.equals(Enums.KeyTypeEnum.LIST)) {
+                                if (typeEnum.equals(KeyTypeEnum.LIST)) {
                                     var len = RedisListService.service.llen(connectContext, treeNodeInfo.key());
                                     var start = 0;
                                     var dataList = new ArrayList<>();
@@ -658,7 +657,7 @@ public class DataSearchForm {
 
                                 }
 
-                                if (typeEnum.equals(Enums.KeyTypeEnum.SET)) {
+                                if (typeEnum.equals(KeyTypeEnum.SET)) {
                                     var valueScanCursor = RedisSetService.service.sscan(connectContext, treeNodeInfo.key(), ValueScanCursor.INITIAL);
                                     var dataList = new ArrayList<>(valueScanCursor.getValues());
                                     while (!valueScanCursor.isFinished()) {
@@ -721,7 +720,7 @@ public class DataSearchForm {
     }
 
     private void databaseComboBoxInit(int selectedIndex) {
-        if (Fn.notEqual(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.notEqual(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             Map<String, String> databases = RedisBasicService.service.configGet(connectContext, "databases");
             var dbNum = Integer.parseInt(databases.get("databases"));
             if (dbNum > 16) {

@@ -1,7 +1,7 @@
 package org.dromara.redisfront.model;
 
 import lombok.Setter;
-import org.dromara.redisfront.Fn;
+import org.dromara.redisfront.commons.Fn;
 
 /**
  * DbInfo

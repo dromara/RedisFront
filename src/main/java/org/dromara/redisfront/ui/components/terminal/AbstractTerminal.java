@@ -1,6 +1,6 @@
 package org.dromara.redisfront.ui.components.terminal;
 
-import org.dromara.redisfront.Fn;
+import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.model.context.ConnectContext;
 
 import javax.swing.*;

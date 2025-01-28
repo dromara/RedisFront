@@ -4,9 +4,9 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.icons.FlatTabbedPaneCloseIcon;
 import com.formdev.flatlaf.ui.FlatLineBorder;
 import org.dromara.redisfront.RedisFrontMain;
-import org.dromara.redisfront.commons.enums.Enums;
+import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.commons.resources.Icons;
-import org.dromara.redisfront.Fn;
+import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.commons.utils.*;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;
@@ -85,7 +85,7 @@ public class MainWindowForm {
                     }
                 });
 
-                if (Enums.RedisMode.SENTINEL == connectContext.getRedisMode()) {
+                if (RedisMode.SENTINEL == connectContext.getRedisMode()) {
                     var masterList = LettuceUtils.sentinelExec(connectContext, RedisSentinelCommands::masters);
                     var master = masterList.stream().findAny().orElseThrow();
                     var ip = master.get("ip");

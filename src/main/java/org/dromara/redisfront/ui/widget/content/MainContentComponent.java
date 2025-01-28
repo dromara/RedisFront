@@ -1,6 +1,5 @@
 package org.dromara.redisfront.ui.widget.content;
 
-import cn.hutool.core.io.unit.DataSizeUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.components.FlatToolBar;
@@ -10,25 +9,19 @@ import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
 import org.dromara.quickswing.constant.QSOs;
-import org.dromara.redisfront.Fn;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.model.RedisUsageInfo;
 import org.dromara.redisfront.model.context.ConnectContext;
-import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.ui.components.monitor.RedisMonitor;
-import org.dromara.redisfront.ui.components.panel.MainTabbedPanel;
-import org.dromara.redisfront.ui.form.MainNoneForm;
 import org.dromara.redisfront.ui.widget.content.extend.BoldTitleTabbedPaneUI;
 import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
 import org.dromara.redisfront.ui.widget.MainWidget;
-import org.dromara.redisfront.ui.widget.content.panel.ContentTabPanel;
+import org.dromara.redisfront.ui.widget.content.view.ContentTabView;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.plaf.TabbedPaneUI;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
@@ -135,11 +128,11 @@ public class MainContentComponent extends JPanel {
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSABLE, true);
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
             Component component = tabbedPane.getComponentAt(tabIndex);
-            if (component instanceof ContentTabPanel contentTabPanel) {
-                ScheduledExecutorService executorService = executorServiceMap.get(contentTabPanel.getContext().getId());
+            if (component instanceof ContentTabView contentTabView) {
+                ScheduledExecutorService executorService = executorServiceMap.get(contentTabView.getConnectContext().getId());
                 if (executorService != null) {
                     executorService.shutdownNow();
-                    executorServiceMap.remove(contentTabPanel.getContext().getId());
+                    executorServiceMap.remove(contentTabView.getConnectContext().getId());
                 }
             }
             tabbedPane.removeTabAt(tabIndex);
@@ -164,8 +157,8 @@ public class MainContentComponent extends JPanel {
             if (topTabbedPane.getSelectedIndex() == -1) {
                 return;
             }
-            if (topTabbedPane.getSelectedComponent() instanceof ContentTabPanel contentTabPanel) {
-                ConnectContext connectContext = contentTabPanel.getContext();
+            if (topTabbedPane.getSelectedComponent() instanceof ContentTabView contentTabView) {
+                ConnectContext connectContext = contentTabView.getConnectContext();
                 if (!executorServiceMap.containsKey(connectContext.getId())) {
                     RedisMonitor monitor = new RedisMonitor(connectContext);
                     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -232,25 +225,25 @@ public class MainContentComponent extends JPanel {
         this.add(verticalBox, BorderLayout.SOUTH);
     }
 
-    public void addTab(String title, ContentTabPanel contentTabPanel) {
-        Optional<ContentTabPanel> matchedPanel = Arrays
+    public void addTab(String title, ContentTabView contentTabView) {
+        Optional<ContentTabView> matchedPanel = Arrays
                 .stream(topTabbedPane.getComponents())
                 .map(e -> {
-                    if (e instanceof ContentTabPanel) {
-                        return (ContentTabPanel) e;
+                    if (e instanceof ContentTabView) {
+                        return (ContentTabView) e;
                     } else {
                         return null;
                     }
                 })
                 .filter(Objects::nonNull)
-                .filter(e -> e.getContext().getId() == contentTabPanel.getContext().getId())
+                .filter(e -> e.getConnectContext().getId() == contentTabView.getConnectContext().getId())
                 .findFirst();
         if (matchedPanel.isPresent()) {
             topTabbedPane.setSelectedComponent(matchedPanel.get());
             return;
         }
-        topTabbedPane.addTab(title, Icons.REDIS_ICON_14x14, contentTabPanel);
-        topTabbedPane.setSelectedComponent(contentTabPanel);
+        topTabbedPane.addTab(title, Icons.REDIS_ICON_14x14, contentTabView);
+        topTabbedPane.setSelectedComponent(contentTabView);
 
     }
 }

@@ -5,8 +5,8 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.redisfront.RedisFrontMain;
-import org.dromara.redisfront.commons.enums.Enums;
-import org.dromara.redisfront.Fn;
+import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.enums.KeyTypeEnum;
 import org.dromara.redisfront.commons.handler.ActionHandler;
 import org.dromara.redisfront.commons.utils.AlertUtils;
 import org.dromara.redisfront.model.context.ConnectContext;
@@ -28,13 +28,13 @@ public class AddOrUpdateItemDialog extends JDialog {
     private JLabel nameLabel;
     private JLabel valueLabel;
     private final ActionHandler addSuccessHandler;
-    private final Enums.KeyTypeEnum typeEnum;
+    private final KeyTypeEnum typeEnum;
     private final String fieldOrScore;
     private final String value;
     private final String key;
     private final ConnectContext connectContext;
 
-    public static void showAddOrUpdateItemDialog(String title, String key, String fieldOrScore, String value, ConnectContext connectContext, Enums.KeyTypeEnum typeEnum, ActionHandler addSuccessHandler) {
+    public static void showAddOrUpdateItemDialog(String title, String key, String fieldOrScore, String value, ConnectContext connectContext, KeyTypeEnum typeEnum, ActionHandler addSuccessHandler) {
         var addOrUpdateItemDialog = new AddOrUpdateItemDialog(title, key, fieldOrScore, value, connectContext, typeEnum, addSuccessHandler);
         addOrUpdateItemDialog.setResizable(false);
         addOrUpdateItemDialog.setLocationRelativeTo(RedisFrontMain.frame);
@@ -43,7 +43,7 @@ public class AddOrUpdateItemDialog extends JDialog {
     }
 
 
-    public AddOrUpdateItemDialog(String title, String key, String fieldOrScore, String value, ConnectContext connectContext, Enums.KeyTypeEnum typeEnum, ActionHandler addSuccessHandler) {
+    public AddOrUpdateItemDialog(String title, String key, String fieldOrScore, String value, ConnectContext connectContext, KeyTypeEnum typeEnum, ActionHandler addSuccessHandler) {
         super(RedisFrontMain.frame);
         setContentPane(contentPane);
         setTitle(title);
@@ -60,12 +60,12 @@ public class AddOrUpdateItemDialog extends JDialog {
             valueTextArea.setText(value);
         }
 
-        if (typeEnum.equals(Enums.KeyTypeEnum.ZSET) || typeEnum.equals(Enums.KeyTypeEnum.HASH)) {
+        if (typeEnum.equals(KeyTypeEnum.ZSET) || typeEnum.equals(KeyTypeEnum.HASH)) {
             this.nameField.setText(fieldOrScore);
             nameLabel.setVisible(true);
-            nameLabel.setText(typeEnum.equals(Enums.KeyTypeEnum.ZSET) ? "分数" : "键");
+            nameLabel.setText(typeEnum.equals(KeyTypeEnum.ZSET) ? "分数" : "键");
             nameField.setVisible(true);
-        } else if (typeEnum.equals(Enums.KeyTypeEnum.STREAM)) {
+        } else if (typeEnum.equals(KeyTypeEnum.STREAM)) {
             this.nameField.setText(fieldOrScore);
             nameLabel.setVisible(true);
             nameLabel.setText("ID");
@@ -96,7 +96,7 @@ public class AddOrUpdateItemDialog extends JDialog {
     }
 
     private void onOK() {
-        if (typeEnum.equals(Enums.KeyTypeEnum.ZSET) || typeEnum.equals(Enums.KeyTypeEnum.HASH)) {
+        if (typeEnum.equals(KeyTypeEnum.ZSET) || typeEnum.equals(KeyTypeEnum.HASH)) {
             if (Fn.isEmpty(nameField.getText())) {
                 nameField.requestFocus();
             }
@@ -106,35 +106,35 @@ public class AddOrUpdateItemDialog extends JDialog {
             valueTextArea.requestFocus();
         }
 
-        if (typeEnum.equals(Enums.KeyTypeEnum.ZSET)) {
+        if (typeEnum.equals(KeyTypeEnum.ZSET)) {
             if (Fn.isNotEmpty(value)) {
                 RedisZSetService.service.zrem(connectContext, key, value);
             }
             RedisZSetService.service.zadd(connectContext, key, Double.parseDouble(nameField.getText()), valueTextArea.getText());
         }
 
-        if (typeEnum.equals(Enums.KeyTypeEnum.HASH)) {
+        if (typeEnum.equals(KeyTypeEnum.HASH)) {
             if (Fn.isNotEmpty(fieldOrScore)) {
                 RedisHashService.service.hdel(connectContext, key, fieldOrScore);
             }
             RedisHashService.service.hset(connectContext, key, nameField.getText(), valueTextArea.getText());
         }
 
-        if (typeEnum.equals(Enums.KeyTypeEnum.LIST)) {
+        if (typeEnum.equals(KeyTypeEnum.LIST)) {
             if (Fn.isNotEmpty(value)) {
                 RedisListService.service.lrem(connectContext, key, 1, value);
             }
             RedisListService.service.lpush(connectContext, key, valueTextArea.getText());
         }
 
-        if (typeEnum.equals(Enums.KeyTypeEnum.SET)) {
+        if (typeEnum.equals(KeyTypeEnum.SET)) {
             if (Fn.isNotEmpty(value)) {
                 RedisSetService.service.srem(connectContext, key, value);
             }
             RedisSetService.service.sadd(connectContext, key, valueTextArea.getText());
         }
 
-        if (typeEnum.equals(Enums.KeyTypeEnum.STREAM)) {
+        if (typeEnum.equals(KeyTypeEnum.STREAM)) {
             if (JSONUtil.isTypeJSON(valueTextArea.getText())) {
                 HashMap<String, String> bodyMap = new HashMap<>();
                 JSONUtil.parseObj(valueTextArea.getText()).forEach((k, v) -> bodyMap.put(k, v.toString()));

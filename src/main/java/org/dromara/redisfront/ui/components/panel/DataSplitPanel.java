@@ -4,8 +4,6 @@ import com.formdev.flatlaf.ui.FlatLineBorder;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.ui.form.MainNoneForm;
-import org.dromara.redisfront.ui.form.fragment.DataSearchForm;
-import org.dromara.redisfront.ui.form.fragment.DataViewForm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +16,7 @@ import java.awt.*;
  *
  * @author Jin
  */
+@Deprecated
 public class DataSplitPanel extends JSplitPane {
     private static final Logger log = LoggerFactory.getLogger(DataSplitPanel.class);
     private final ConnectContext connectContext;
@@ -35,33 +34,7 @@ public class DataSplitPanel extends JSplitPane {
 
         this.connectContext = connectContext;
 
-        var dataSearchForm = DataSearchForm.newInstance(connectContext);
 
-        this.setLeftComponent(dataSearchForm.getContentPanel());
-        this.setRightComponent(commonNonePanel);
-
-        //节点点击事件
-        dataSearchForm.setNodeClickProcessHandler((treeNodeInfo) -> {
-            var dataViewForm = DataViewForm.newInstance(connectContext);
-
-            dataViewForm.setRefreshBeforeHandler(dataSearchForm::scanBeforeProcess);
-
-            dataViewForm.setRefreshAfterHandler(dataSearchForm::scanAfterProcess);
-
-            dataViewForm.setDeleteActionHandler(() -> {
-                dataSearchForm.deleteActionPerformed();
-                setRightComponent(commonNonePanel);
-            });
-
-            dataViewForm.setCloseActionHandler(() -> setRightComponent(commonNonePanel));
-            var startTime = System.currentTimeMillis();
-            //加载数据并展示
-            dataViewForm.dataChangeActionPerformed(treeNodeInfo.key(),
-                    () -> SwingUtilities.invokeLater(() -> setRightComponent(commonLoadingPanel)),
-                    () -> SwingUtilities.invokeLater(() -> setRightComponent(dataViewForm.contentPanel())));
-
-            log.info("加载key用时：{}/ms", (System.currentTimeMillis() - startTime) / 1000);
-        });
     }
 
     private static final JPanel commonLoadingPanel = new JPanel() {

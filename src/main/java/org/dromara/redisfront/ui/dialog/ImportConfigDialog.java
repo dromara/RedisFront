@@ -12,8 +12,8 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.redisfront.RedisFrontMain;
 import org.dromara.redisfront.commons.constant.Constants;
-import org.dromara.redisfront.commons.enums.Enums;
-import org.dromara.redisfront.Fn;
+import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.enums.ConnectType;
 import org.dromara.redisfront.commons.resources.AbstractDialog;
 import org.dromara.redisfront.commons.utils.AlertUtils;
 import org.dromara.redisfront.commons.utils.LocaleUtils;
@@ -152,11 +152,11 @@ public class ImportConfigDialog extends AbstractDialog<Void> {
         if (Fn.isNotNull(raw.get("username"))) {
             connectInfo.setUsername((String) raw.get("username"));
         }
-        connectInfo.setConnectTypeMode(Enums.ConnectType.NORMAL);
+        connectInfo.setConnectTypeMode(ConnectType.NORMAL);
         connectInfo.setSshInfo(new ConnectContext.SshInfo("", "", "", null, ""));
         if (!StrUtil.isBlankIfStr(raw.get("ssh_host"))) {
             connectInfo.getSshInfo().setHost((String) raw.get("ssh_host"));
-            connectInfo.setConnectTypeMode(Enums.ConnectType.SSH);
+            connectInfo.setConnectTypeMode(ConnectType.SSH);
         }
         if (Fn.isNotNull(raw.get("ssh_port"))) {
             connectInfo.getSshInfo().setPort((Integer) raw.get("ssh_port"));
@@ -164,15 +164,15 @@ public class ImportConfigDialog extends AbstractDialog<Void> {
         }
         if (!StrUtil.isBlankIfStr(raw.get("ssh_user"))) {
             connectInfo.getSshInfo().setUser((String) raw.get("ssh_user"));
-            connectInfo.setConnectTypeMode(Enums.ConnectType.SSH);
+            connectInfo.setConnectTypeMode(ConnectType.SSH);
         }
         if (!StrUtil.isBlankIfStr(raw.get("ssh_password"))) {
             connectInfo.getSshInfo().setPassword((String) raw.get("ssh_password"));
-            connectInfo.setConnectTypeMode(Enums.ConnectType.SSH);
+            connectInfo.setConnectTypeMode(ConnectType.SSH);
         }
         if (!StrUtil.isBlankIfStr(raw.get("ssh_private_key_path"))) {
             connectInfo.getSshInfo().setPrivateKeyPath((String) raw.get("ssh_private_key_path"));
-            connectInfo.setConnectTypeMode(Enums.ConnectType.SSH);
+            connectInfo.setConnectTypeMode(ConnectType.SSH);
         }
         return connectInfo;
     }

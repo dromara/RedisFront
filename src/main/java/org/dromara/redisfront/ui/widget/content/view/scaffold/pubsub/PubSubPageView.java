@@ -1,12 +1,15 @@
-package org.dromara.redisfront.ui.form.fragment;
+package org.dromara.redisfront.ui.widget.content.view.scaffold.pubsub;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import org.dromara.redisfront.commons.enums.Enums;
+import com.sun.tools.javac.Main;
+import org.dromara.quickswing.ui.app.page.QSPageItem;
+import org.dromara.redisfront.commons.enums.KeyTypeEnum;
+import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.commons.resources.Icons;
-import org.dromara.redisfront.Fn;
+import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.commons.utils.AlertUtils;
 import org.dromara.redisfront.commons.utils.FutureUtils;
 import org.dromara.redisfront.commons.utils.JschUtils;
@@ -20,6 +23,7 @@ import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
 import io.lettuce.core.cluster.pubsub.RedisClusterPubSubListener;
 import io.lettuce.core.pubsub.RedisPubSubListener;
 import io.lettuce.core.pubsub.api.async.RedisPubSubAsyncCommands;
+import org.dromara.redisfront.ui.widget.MainWidget;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -35,7 +39,7 @@ import java.util.function.Consumer;
  *
  * @author Jin
  */
-public class PubSubForm extends JPanel implements RedisPubSubListener<String, String>, RedisClusterPubSubListener<String, String> {
+public class PubSubPageView extends QSPageItem<MainWidget> implements RedisPubSubListener<String, String>, RedisClusterPubSubListener<String, String> {
 
     private RedisPubSubAsyncCommands<String, String> pubsub;
     private AbstractRedisClient redisClient;
@@ -52,11 +56,7 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
     private String lastSubscribeChanel;
     private final ConnectContext connectContext;
 
-    public static PubSubForm newInstance(ConnectContext connectContext) {
-        return new PubSubForm(connectContext);
-    }
-
-    public PubSubForm(ConnectContext connectContext) {
+    public PubSubPageView(ConnectContext connectContext, MainWidget owner) {
         $$$setupUI$$$();
         setLayout(new BorderLayout());
         add(rootPanel, BorderLayout.CENTER);
@@ -112,7 +112,7 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
     }
 
     public void openConnection() {
-        if (Fn.equal(connectContext.getRedisMode(), Enums.RedisMode.CLUSTER)) {
+        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             FutureUtils.runAsync(() -> {
                 var redisUrl = LettuceUtils.getRedisURI(connectContext);
                 redisClient = LettuceUtils.getRedisClusterClient(redisUrl, connectContext);
@@ -211,7 +211,7 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
         numLabel = new JLabel();
         numLabel.setOpaque(true);
         numLabel.setForeground(Color.WHITE);
-        numLabel.setBackground(Enums.KeyTypeEnum.ZSET.color());
+        numLabel.setBackground(KeyTypeEnum.ZSET.color());
         numLabel.setBorder(new EmptyBorder(2, 3, 2, 3));
 
         subscribeChannel = new JTextField();
@@ -289,4 +289,15 @@ public class PubSubForm extends JPanel implements RedisPubSubListener<String, St
     public void punsubscribed(RedisClusterNode node, String pattern, long count) {
 
     }
+
+    @Override
+    public MainWidget getApp() {
+        return null;
+    }
+
+    @Override
+    protected JComponent getContentPanel() {
+        return rootPanel;
+    }
+
 }

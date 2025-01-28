@@ -1,7 +1,7 @@
 package org.dromara.redisfront.service;
 
-import org.dromara.redisfront.commons.enums.Enums;
-import org.dromara.redisfront.Fn;
+import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.model.ClusterNode;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.model.LogInfo;
@@ -88,7 +88,7 @@ public interface RedisBasicService {
      * @param connectContext 连接信息
      * @return Enum.RedisMode
      */
-    Enums.RedisMode getRedisModeEnum(ConnectContext connectContext);
+    RedisMode getRedisModeEnum(ConnectContext connectContext);
 
     /**
      * 获取集群节点
