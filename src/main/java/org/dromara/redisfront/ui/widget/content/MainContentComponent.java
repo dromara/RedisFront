@@ -18,6 +18,8 @@ import org.dromara.redisfront.model.RedisUsageInfo;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.ui.components.monitor.RedisMonitor;
+import org.dromara.redisfront.ui.components.panel.MainTabbedPanel;
+import org.dromara.redisfront.ui.form.MainNoneForm;
 import org.dromara.redisfront.ui.widget.content.extend.BoldTitleTabbedPaneUI;
 import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
 import org.dromara.redisfront.ui.widget.MainWidget;
@@ -25,6 +27,8 @@ import org.dromara.redisfront.ui.widget.content.panel.ContentTabPanel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.plaf.TabbedPaneUI;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
@@ -39,6 +43,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+
 @Slf4j
 public class MainContentComponent extends JPanel {
     private final MainWidget owner;
@@ -129,6 +134,14 @@ public class MainContentComponent extends JPanel {
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, true);
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSABLE, true);
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
+            Component component = tabbedPane.getComponentAt(tabIndex);
+            if (component instanceof ContentTabPanel contentTabPanel) {
+                ScheduledExecutorService executorService = executorServiceMap.get(contentTabPanel.getContext().getId());
+                if (executorService != null) {
+                    executorService.shutdownNow();
+                    executorServiceMap.remove(contentTabPanel.getContext().getId());
+                }
+            }
             tabbedPane.removeTabAt(tabIndex);
             tabCloseProcess.accept(tabbedPane.getTabCount());
         });
@@ -158,16 +171,16 @@ public class MainContentComponent extends JPanel {
                     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                     scheduler.scheduleAtFixedRate(() -> {
                         RedisUsageInfo usage = monitor.getUsageInfo();
-                        log.info("[Redis {} - {} ] 使用：{}\n",connectContext.getTitle(),connectContext.getHost(), usage);
-                        if(displayId == connectContext.getId()){
+                        log.info("[Redis {} - {} ] 使用：{}\n", connectContext.getTitle(), connectContext.getHost(), usage);
+                        if (displayId == connectContext.getId()) {
                             SwingUtilities.invokeLater(() -> {
                                 memory.setText(usage.getMemory());
-                                memory.setToolTipText("[ Redis "+connectContext.getTitle()+"@"+connectContext.getHost()+" ]\n内存已使用："+ usage.getMemory());
+                                memory.setToolTipText("[ Redis " + connectContext.getTitle() + "@" + connectContext.getHost() + " ]\n内存已使用：" + usage.getMemory());
                                 cpu.setText(usage.getCpu());
-                                cpu.setToolTipText("[ Redis "+connectContext.getTitle()+"@"+connectContext.getHost()+" ]\nCPU使用率："+ usage.getCpu());
-                                String networkRate = String.format("%.2fKB/s｜%.2fKB/s", usage.getNetwork().inputRate()/ 1024, usage.getNetwork().outputRate()/ 1024);
+                                cpu.setToolTipText("[ Redis " + connectContext.getTitle() + "@" + connectContext.getHost() + " ]\nCPU使用率：" + usage.getCpu());
+                                String networkRate = String.format("%.2fKB/s｜%.2fKB/s", usage.getNetwork().inputRate() / 1024, usage.getNetwork().outputRate() / 1024);
                                 network.setText(networkRate);
-                                network.setToolTipText("[ Redis "+connectContext.getTitle()+"@"+connectContext.getHost()+" ]\n网络传输："+ usage.getNetwork());
+                                network.setToolTipText("[ Redis " + connectContext.getTitle() + "@" + connectContext.getHost() + " ]\n网络传输：" + usage.getNetwork());
                             });
                         }
 
