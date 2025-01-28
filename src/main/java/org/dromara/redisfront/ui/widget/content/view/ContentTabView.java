@@ -1,13 +1,19 @@
 package org.dromara.redisfront.ui.widget.content.view;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.components.FlatToolBar;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
+import org.dromara.quickswing.QSApplication;
+import org.dromara.quickswing.events.QSEvent;
+import org.dromara.quickswing.events.QSEventListener;
+import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.ui.event.DrawerChangeEvent;
 import org.dromara.redisfront.ui.widget.content.view.scaffold.PageScaffold;
 import org.dromara.redisfront.ui.widget.content.view.scaffold.index.IndexPageView;
 import org.dromara.redisfront.ui.widget.content.view.scaffold.pubsub.PubSubPageView;
@@ -18,16 +24,19 @@ import org.dromara.redisfront.ui.widget.content.view.scaffold.terminal.TerminalP
 
 import javax.swing.*;
 import javax.swing.plaf.TabbedPaneUI;
+import java.awt.*;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ContentTabView extends JTabbedPane {
 
     private final MainWidget owner;
+    private final RedisFrontContext context;
     private final ConnectContext connectContext;
 
     public ContentTabView(MainWidget owner, ConnectContext connectContext) {
         this.owner = owner;
+        this.context = (RedisFrontContext) owner.getContext();
         this.connectContext = connectContext;
         this.setTabPlacement(JTabbedPane.LEFT);
         this.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
@@ -57,6 +66,20 @@ public class ContentTabView extends JTabbedPane {
         this.addTab("订阅", Icons.MQ_ICON, pageScaffold);
         //数据窗口
         this.addTab("数据", Icons.CONTENT_TAB_INFO_ICON, new JPanel());
+        context.getEventBus().subscribe(new QSEventListener<QSApplication>() {
+            @Override
+            protected void onEvent(QSEvent qsEvent) {
+                if(qsEvent instanceof DrawerChangeEvent drawerChangeEvent){
+                    Object message = drawerChangeEvent.getMessage();
+                    if(message instanceof Insets insets){
+                        SwingUtilities.invokeLater(()->{
+                            putClientProperty(FlatClientProperties.TABBED_PANE_TAB_INSETS, insets);
+                            FlatLaf.updateUI();
+                        });
+                    }
+                }
+            }
+        });
 
     }
 

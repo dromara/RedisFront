@@ -60,14 +60,7 @@ public class MainComponent extends Background {
                 Optional<Component> first = Arrays.stream(components).findFirst();
                 if (first.isPresent()) {
                     if (first.get() instanceof MainContentComponent mainRightTabbedPanel) {
-                        //todo add tab
-                        System.out.println("JTabbedPane " + first.get());
                         SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> {
-                            try {
-                                Thread.sleep(2000);
-                            } catch (InterruptedException e) {
-                                throw new RuntimeException(e);
-                            }
                             return null;
                         }, (o, e) -> {
                             mainRightTabbedPanel.addTab(context.getTitle(), new ContentTabView(owner, context));

@@ -55,8 +55,8 @@ import java.util.function.Consumer;
  *
  * @author Jin
  */
-public class IndexSearchFragment {
-    private static final Logger log = LoggerFactory.getLogger(IndexSearchFragment.class);
+public class LeftSearchFragment {
+    private static final Logger log = LoggerFactory.getLogger(LeftSearchFragment.class);
     private static final String SEPARATOR_FLAG = "/";
     private final MainWidget owner;
     @Getter
@@ -101,7 +101,7 @@ public class IndexSearchFragment {
 
     static final ExecutorService executorService = Executors.newFixedThreadPool(5);
 
-    public IndexSearchFragment(MainWidget owner, ConnectContext connectContext) {
+    public LeftSearchFragment(MainWidget owner, ConnectContext connectContext) {
         this.owner = owner;
         this.connectContext = connectContext;
         $$$setupUI$$$();
@@ -116,7 +116,7 @@ public class IndexSearchFragment {
     public synchronized void loadTreeModelData(String key) {
         try {
 //            LoadingUtils.showDialog(LocaleUtils.getMessageFromBundle("DataSearchForm.showDialog.message"));
-            
+
             scanBeforeProcess();
             var scanKeysContext = scanKeysContextMap.get(connectContext.getDatabase());
 
@@ -307,14 +307,8 @@ public class IndexSearchFragment {
     private void createUIComponents() {
         contentPanel = new JPanel();
         contentPanel.setLayout(new BorderLayout());
-        contentPanel.setBorder(new EmptyBorder(0, 5, 0, 5));
+        contentPanel.setBorder(new EmptyBorder(0, 5, 0, 0));
         borderPanel = new JPanel() {
-            @Override
-            public void updateUI() {
-                super.updateUI();
-                var flatLineBorder = new FlatLineBorder(new Insets(0, 0, 0, 2), UIManager.getColor("Component.borderColor"));
-                setBorder(flatLineBorder);
-            }
         };
         borderPanel.setLayout(new BorderLayout());
 
@@ -782,7 +776,7 @@ public class IndexSearchFragment {
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new BorderLayout(0, 0));
         borderPanel.add(panel1, BorderLayout.NORTH);
-        panel1.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 5, 5, 10), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
+        panel1.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 0, 5, 5), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new BorderLayout(0, 0));
         panel1.add(panel2, BorderLayout.NORTH);
@@ -804,7 +798,7 @@ public class IndexSearchFragment {
         panel4.add(searchTextField, BorderLayout.CENTER);
         treePanel.setLayout(new BorderLayout(0, 0));
         borderPanel.add(treePanel, BorderLayout.CENTER);
-        treePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(0, 5, 5, 10), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
+        treePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(0, 0, 5, 5), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         final JScrollPane scrollPane1 = new JScrollPane();
         scrollPane1.setMinimumSize(new Dimension(200, 18));
         treePanel.add(scrollPane1, BorderLayout.CENTER);

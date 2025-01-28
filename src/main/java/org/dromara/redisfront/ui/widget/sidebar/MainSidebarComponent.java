@@ -51,11 +51,6 @@ public class MainSidebarComponent extends SimpleDrawerBuilder {
         this.connectHandler = connectHandler;
         this.drawerAnimationAction = drawerAnimationAction;
         this.drawerMenuItemEvent = drawerMenuItemEvent;
-        initializeUI();
-    }
-
-    private void initializeUI() {
-        var simpleMenuOption = this.getSimpleMenuOption();
     }
 
     @Override

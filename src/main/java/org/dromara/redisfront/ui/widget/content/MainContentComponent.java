@@ -15,6 +15,7 @@ import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.model.RedisUsageInfo;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.ui.components.monitor.RedisMonitor;
+import org.dromara.redisfront.ui.event.DrawerChangeEvent;
 import org.dromara.redisfront.ui.widget.content.extend.BoldTitleTabbedPaneUI;
 import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
 import org.dromara.redisfront.ui.widget.MainWidget;
@@ -40,6 +41,7 @@ import java.util.function.Consumer;
 @Slf4j
 public class MainContentComponent extends JPanel {
     private final MainWidget owner;
+    private final RedisFrontContext context;
     private final DrawerAnimationAction action;
     private final Map<Integer, ScheduledExecutorService> executorServiceMap;
     private final JLabel cpu = new JLabel(Icons.CPU_ICON);
@@ -55,6 +57,7 @@ public class MainContentComponent extends JPanel {
     public MainContentComponent(DrawerAnimationAction action, MainWidget owner) {
         this.owner = owner;
         this.action = action;
+        this.context = (RedisFrontContext) owner.getContext();
         this.executorServiceMap = new ConcurrentHashMap<>();
         this.setLayout(new BorderLayout());
         this.initComponentListener();
@@ -98,17 +101,19 @@ public class MainContentComponent extends JPanel {
                 } else {
                     if (state) {
                         toolBar.setMargin(new Insets(2, 73, 0, 0));
-                        //todo 发布事件修改
-//                        contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_INSETS, new Insets(10, 22, 10, 22));
+                        DrawerChangeEvent drawerChangeEvent = new DrawerChangeEvent(new Insets(10, 22, 10, 22));
+                        context.getEventBus().publish(drawerChangeEvent);
                     } else {
                         toolBar.setMargin(new Insets(2, 6, 0, 0));
-//                        contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_INSETS, new Insets(10, 10, 10, 10));
+                        DrawerChangeEvent drawerChangeEvent = new DrawerChangeEvent(new Insets(10, 10, 10, 10));
+                        context.getEventBus().publish(drawerChangeEvent);
                     }
                 }
 
             } else {
                 toolBar.setMargin(new Insets(2, 3, 0, 0));
-//                contentTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_INSETS, new Insets(10, 10, 10, 10));
+                DrawerChangeEvent drawerChangeEvent = new DrawerChangeEvent(new Insets(10, 10, 10, 10));
+                context.getEventBus().publish(drawerChangeEvent);
             }
             closeDrawerBtn.setVisible(true);
             FlatLaf.updateUI();

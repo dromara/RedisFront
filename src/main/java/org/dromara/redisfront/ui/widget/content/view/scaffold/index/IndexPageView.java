@@ -1,5 +1,6 @@
 package org.dromara.redisfront.ui.widget.content.view.scaffold.index;
 
+import cn.hutool.core.date.StopWatch;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.quickswing.ui.app.page.QSPageItem;
@@ -8,7 +9,6 @@ import org.dromara.redisfront.ui.components.panel.NonePanel;
 import org.dromara.redisfront.ui.widget.MainWidget;
 
 import javax.swing.*;
-import java.awt.*;
 
 @Slf4j
 public class IndexPageView extends QSPageItem<MainWidget> {
@@ -23,35 +23,35 @@ public class IndexPageView extends QSPageItem<MainWidget> {
         this.connectContext = connectContext;
         this.owner = owner;
         this.splitPane = new JSplitPane();
-        this.setLayout(new BorderLayout());
-        IndexSearchFragment indexSearchFragment = new IndexSearchFragment(owner, connectContext);
-        this.splitPane.setLeftComponent(indexSearchFragment.getContentPanel());
-        this.splitPane.setRightComponent(NonePanel.getInstance());
-
+        LeftSearchFragment leftSearchFragment = new LeftSearchFragment(owner, connectContext);
         //节点点击事件
-        indexSearchFragment.setNodeClickProcessHandler((treeNodeInfo) -> {
-            var dataViewForm = IndexViewFragment.newInstance(connectContext);
+        leftSearchFragment.setNodeClickProcessHandler((treeNodeInfo) -> {
+            var dataViewForm = RightViewFragment.newInstance(connectContext);
 
-            dataViewForm.setRefreshBeforeHandler(indexSearchFragment::scanBeforeProcess);
+            dataViewForm.setRefreshBeforeHandler(leftSearchFragment::scanBeforeProcess);
 
-            dataViewForm.setRefreshAfterHandler(indexSearchFragment::scanAfterProcess);
+            dataViewForm.setRefreshAfterHandler(leftSearchFragment::scanAfterProcess);
 
             dataViewForm.setDeleteActionHandler(() -> {
-                indexSearchFragment.deleteActionPerformed();
+                leftSearchFragment.deleteActionPerformed();
                 splitPane.setRightComponent(NonePanel.getInstance());
             });
 
             dataViewForm.setCloseActionHandler(() -> splitPane.setRightComponent(NonePanel.getInstance()));
-            var startTime = System.currentTimeMillis();
+            StopWatch stopWatch = StopWatch.create("loadData");
+            stopWatch.start();
             //加载数据并展示
             dataViewForm.dataChangeActionPerformed(treeNodeInfo.key(),
                     () -> SwingUtilities.invokeLater(() -> splitPane.setRightComponent(NonePanel.getInstance())),
                     () -> SwingUtilities.invokeLater(() -> splitPane.setRightComponent(dataViewForm.contentPanel())));
-
-            log.info("加载key用时：{}/ms", (System.currentTimeMillis() - startTime) / 1000);
+            stopWatch.stop();
+            log.info("加载key用时：{}/ms", stopWatch.getTotalTimeSeconds());
         });
+        this.splitPane.setLeftComponent(leftSearchFragment.getContentPanel());
+        this.splitPane.setRightComponent(NonePanel.getInstance());
         this.setupUI();
     }
+
 
     @Override
     public MainWidget getApp() {

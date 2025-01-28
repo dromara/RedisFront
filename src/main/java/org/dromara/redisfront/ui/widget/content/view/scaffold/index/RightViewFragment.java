@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
  *
  * @author Jin
  */
-public class IndexViewFragment {
+public class RightViewFragment {
 
     private JPanel contentPanel;
     private JTextField keyField;
@@ -109,8 +109,8 @@ public class IndexViewFragment {
         this.refreshAfterHandler = refreshAfterHandler;
     }
 
-    public static IndexViewFragment newInstance(ConnectContext connectContext) {
-        return new IndexViewFragment(connectContext);
+    public static RightViewFragment newInstance(ConnectContext connectContext) {
+        return new RightViewFragment(connectContext);
     }
 
     public void setDeleteActionHandler(ActionHandler handler) {
@@ -133,7 +133,7 @@ public class IndexViewFragment {
         refBtn.setEnabled(true);
     }
 
-    public IndexViewFragment(ConnectContext connectContext) {
+    public RightViewFragment(ConnectContext connectContext) {
         this.connectContext = connectContext;
         scanZSetContextMap = new LinkedHashMap<>();
         scanSetContextMap = new LinkedHashMap<>();

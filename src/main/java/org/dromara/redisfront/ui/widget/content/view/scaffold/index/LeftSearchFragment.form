@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="org.dromara.redisfront.ui.widget.content.view.scaffold.index.IndexSearchFragment">
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="org.dromara.redisfront.ui.widget.content.view.scaffold.index.LeftSearchFragment">
   <grid id="27dc6" binding="contentPanel" custom-create="true" layout-manager="BorderLayout" hgap="0" vgap="0">
     <constraints>
       <xy x="20" y="20" width="500" height="400"/>
@@ -21,7 +21,7 @@
             <constraints border-constraint="North"/>
             <properties/>
             <border type="empty">
-              <size top="5" left="5" bottom="5" right="10"/>
+              <size top="5" left="0" bottom="5" right="5"/>
             </border>
             <children>
               <grid id="947c1" layout-manager="BorderLayout" hgap="0" vgap="0">
@@ -79,7 +79,7 @@
             <constraints border-constraint="Center"/>
             <properties/>
             <border type="empty">
-              <size top="0" left="5" bottom="5" right="10"/>
+              <size top="0" left="0" bottom="5" right="5"/>
             </border>
             <children>
               <scrollpane id="96925">
