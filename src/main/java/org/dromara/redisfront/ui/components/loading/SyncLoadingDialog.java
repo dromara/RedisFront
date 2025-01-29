@@ -50,11 +50,6 @@ public class SyncLoadingDialog extends QSDialog<MainWidget> {
 
     public void showSyncLoadingDialog(Supplier<Object> supplier, BiConsumer<Object, Exception> biConsumer) {
         SyncLoadingWaiter syncLoadingWaiter = new SyncLoadingWaiter(this, supplier);
-        context.taskExecute(syncLoadingWaiter::get, (object, exception) -> {
-            getOwner().getContentPane().setEnabled(true);
-            biConsumer.accept(object, exception);
-        });
-        syncLoadingWaiter.execute();
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -63,9 +58,11 @@ public class SyncLoadingDialog extends QSDialog<MainWidget> {
                 super.windowClosing(e);
             }
         });
-        this.setLocationRelativeTo(getOwner());
-        this.setVisible(true);
-        this.pack();
+        syncLoadingWaiter.execute();
+        context.taskExecute(syncLoadingWaiter::get, (object, exception) -> {
+            getOwner().getContentPane().setEnabled(true);
+            biConsumer.accept(object, exception);
+        });
     }
 
 }

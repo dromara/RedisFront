@@ -1,5 +1,6 @@
 package org.dromara.redisfront.ui.widget;
 
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
 import com.formdev.flatlaf.FlatLaf;
 import org.dromara.quickswing.events.QSEvent;
@@ -60,20 +61,19 @@ public class MainComponent extends Background {
                 Optional<Component> first = Arrays.stream(components).findFirst();
                 if (first.isPresent()) {
                     if (first.get() instanceof MainContentComponent mainRightTabbedPanel) {
-                        SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> {
-                            return null;
-                        }, (o, e) -> {
-                            mainRightTabbedPanel.addTab(context.getTitle(), new ContentTabView(owner, context));
+                        SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> new ContentTabView(owner, context), (o, e) -> {
+                            mainRightTabbedPanel.addTab(context.getTitle(), (ContentTabView)o);
                         });
                     } else {
                         SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> {
-                            return null;
+                            MainContentComponent mainTabbedPanel = createMainTabbedPanel(drawerAnimationAction);
+                            mainTabbedPanel.addTab(context.getTitle(), new ContentTabView(owner, context));
+                            ThreadUtil.safeSleep(15000);
+                            return mainTabbedPanel;
                         }, (o, e) -> {
                             if (e == null) {
                                 mainRightPane.removeAll();
-                                MainContentComponent mainTabbedPanel = createMainTabbedPanel(drawerAnimationAction);
-                                mainTabbedPanel.addTab(context.getTitle(), new ContentTabView(owner, context));
-                                mainRightPane.add(mainTabbedPanel, BorderLayout.CENTER);
+                                mainRightPane.add((MainContentComponent)o, BorderLayout.CENTER);
                                 FlatLaf.updateUI();
                             }
                         });

@@ -25,10 +25,13 @@ public class SyncLoadingWaiter extends SwingWorker<Object, Object> {
         this.addPropertyChangeListener(event -> {
             if (Fn.equal(event.getPropertyName(), "state")) {
                 if (StateValue.STARTED == event.getNewValue()) {
-                    timer.start();
+                    this.timer.start();
+                    syncLoadingDialog.setLocationRelativeTo(syncLoadingDialog.getOwner());
+                    syncLoadingDialog.setVisible(true);
+                    syncLoadingDialog.pack();
                 } else if (StateValue.DONE == event.getNewValue()) {
-                    timer.stop();
-                    cancel(true);
+                    this.timer.stop();
+                    this.cancel(true);
                     syncLoadingDialog.setVisible(false);
                     syncLoadingDialog.dispose();
                 }
@@ -43,8 +46,8 @@ public class SyncLoadingWaiter extends SwingWorker<Object, Object> {
         for (Object chunk : chunks) {
             if (Fn.equal(chunk, "timeout")) {
                 this.timer.stop();
-//                    messageLabel.setText($tr("LoadingDialog.loadInfoLabel.timeout.message"));
-                syncLoadingDialog.getMessageLabel().setText("请求超时");
+                this.cancel(true);
+                syncLoadingDialog.getMessageLabel().setText(syncLoadingDialog.$tr("LoadingDialog.loadInfoLabel.timeout.message"));
             }
         }
     }

@@ -425,7 +425,7 @@ public class RedisConnectTree extends JXTree {
                 Notifications.getInstance().show(Notifications.Type.INFO, "请选择要打开的连接！");
                 return;
             }
-            connectHandler.accept( redisConnectTreeItem.getDetail().getConnectContext());
+            connectHandler.accept(redisConnectTreeItem.getDetail().getConnectContext());
         }
     }
 
