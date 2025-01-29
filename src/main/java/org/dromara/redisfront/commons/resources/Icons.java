@@ -33,7 +33,7 @@ public class Icons {
     public static final Icon MQ_ICON = new FlatSVGIcon("icons/mq.svg",24,24);
     public static final Icon CLOSE_ICON = new FlatSVGIcon("icons/close.svg");
     public static final Icon LOGS_ICON = new FlatSVGIcon("icons/RecentlyUsed.svg");
-    public static final Icon PLUS_ICON = new FlatSVGIcon("icons/add.svg");
+    public static final Icon PLUS_ICON = new FlatSVGIcon("icons/add.svg",12,12);
     public static final Icon LOAD_MORE_ICON = new FlatSVGIcon("svg/testBtn.svg");
 
     public static final Icon GITHUB_ICON = new FlatSVGIcon("icons/github.svg");

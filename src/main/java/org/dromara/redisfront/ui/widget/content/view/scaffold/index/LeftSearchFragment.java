@@ -324,6 +324,7 @@ public class LeftSearchFragment {
             }
         };
         addBtn.setIcon(Icons.PLUS_ICON);
+        addBtn.putClientProperty(FlatClientProperties.BUTTON_TYPE, FlatClientProperties.BUTTON_TYPE_TAB);
         addBtn.setFocusable(false);
         addBtn.addActionListener(e -> AddKeyDialog.showAddDialog(connectContext, null, (key) -> {
             var res = JOptionPane.showConfirmDialog(RedisFrontMain.frame,
