@@ -66,14 +66,13 @@ public class MainComponent extends Background {
                         });
                     } else {
                         SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> {
-                            ThreadUtil.safeSleep(15000);
                             MainContentComponent mainTabbedPanel = createMainTabbedPanel(drawerAnimationAction);
                             mainTabbedPanel.addTab(context.getTitle(), new ContentTabView(owner, context));
                             return mainTabbedPanel;
-                        }, (o, e) -> {
+                        }, (ret, e) -> {
                             if (e == null) {
                                 mainRightPane.removeAll();
-                                mainRightPane.add((MainContentComponent)o, BorderLayout.CENTER);
+                                mainRightPane.add((MainContentComponent)ret, BorderLayout.CENTER);
                                 FlatLaf.updateUI();
                             }
                         });
