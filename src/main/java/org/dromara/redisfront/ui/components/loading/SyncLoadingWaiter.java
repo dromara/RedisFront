@@ -1,5 +1,7 @@
 package org.dromara.redisfront.ui.components.loading;
 
+import cn.hutool.core.lang.Assert;
+import lombok.Setter;
 import org.dromara.redisfront.commons.Fn;
 
 import javax.swing.*;
@@ -9,12 +11,12 @@ public class SyncLoadingWaiter extends SwingWorker<Object, Object> {
 
     private final Timer timer;
     private final SyncLoadingDialog syncLoadingDialog;
-    private final Supplier<Object> supplier;
+    @Setter
+    private Supplier<Object> supplier;
     private Integer count = 0;
 
-    public SyncLoadingWaiter(SyncLoadingDialog syncLoadingDialog, Supplier<Object> supplier) {
+    public SyncLoadingWaiter(SyncLoadingDialog syncLoadingDialog) {
         this.syncLoadingDialog = syncLoadingDialog;
-        this.supplier = supplier;
         this.timer = new Timer(100, _ -> {
             if (count < 100) {
                 setProgress(count += 1);
@@ -54,6 +56,7 @@ public class SyncLoadingWaiter extends SwingWorker<Object, Object> {
 
     @Override
     protected Object doInBackground() {
+        Assert.notNull(supplier, "supplier must not be null");
         return supplier.get();
     }
 }

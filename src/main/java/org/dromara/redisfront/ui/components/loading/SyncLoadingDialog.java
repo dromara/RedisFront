@@ -20,6 +20,7 @@ public class SyncLoadingDialog extends QSDialog<MainWidget> {
     private JProgressBar progressBar;
     private JLabel messageLabel;
     private final RedisFrontContext context;
+    private final SyncLoadingWaiter syncLoadingWaiter;
 
     private SyncLoadingDialog(MainWidget owner) {
         super(owner, true);
@@ -28,6 +29,7 @@ public class SyncLoadingDialog extends QSDialog<MainWidget> {
         this.setMinimumSize(new Dimension(500, 100));
         this.setupUI();
         this.context = (RedisFrontContext) owner.getContext();
+        syncLoadingWaiter = new SyncLoadingWaiter(this);
     }
 
     protected void setupUI() {
@@ -49,7 +51,6 @@ public class SyncLoadingDialog extends QSDialog<MainWidget> {
     }
 
     public void showSyncLoadingDialog(Supplier<Object> supplier, BiConsumer<Object, Exception> biConsumer) {
-        SyncLoadingWaiter syncLoadingWaiter = new SyncLoadingWaiter(this, supplier);
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -58,8 +59,9 @@ public class SyncLoadingDialog extends QSDialog<MainWidget> {
                 super.windowClosing(e);
             }
         });
-        syncLoadingWaiter.execute();
-        context.taskExecute(syncLoadingWaiter::get, (object, exception) -> {
+        this.syncLoadingWaiter.setSupplier(supplier);
+        this.syncLoadingWaiter.execute();
+        this.context.taskExecute(syncLoadingWaiter::get, (object, exception) -> {
             getOwner().getContentPane().setEnabled(true);
             biConsumer.accept(object, exception);
         });

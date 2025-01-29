@@ -66,9 +66,9 @@ public class MainComponent extends Background {
                         });
                     } else {
                         SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> {
+                            ThreadUtil.safeSleep(15000);
                             MainContentComponent mainTabbedPanel = createMainTabbedPanel(drawerAnimationAction);
                             mainTabbedPanel.addTab(context.getTitle(), new ContentTabView(owner, context));
-                            ThreadUtil.safeSleep(15000);
                             return mainTabbedPanel;
                         }, (o, e) -> {
                             if (e == null) {
