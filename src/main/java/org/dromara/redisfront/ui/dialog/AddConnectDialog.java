@@ -282,8 +282,10 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
                 connectDetailEntity.setGroupId(groupId);
                 if (null == detailId) {
                     ConnectDetailDao.newInstance(this.context.getDatabaseManager().getDatasource()).save(connectDetailEntity);
+                    connectcontext.setId(connectcontext.getId());
                 } else {
                     ConnectDetailDao.newInstance(this.context.getDatabaseManager().getDatasource()).update(detailId, connectDetailEntity);
+                    connectcontext.setId(detailId);
                 }
                 this.context.getEventBus().publish(new OpenRedisConnectEvent(connectcontext));
                 this.context.getEventBus().publish(new RefreshConnectTreeEvent(connectcontext));

@@ -7,6 +7,7 @@ import org.dromara.quickswing.ui.app.page.QSPageItem;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.ui.components.panel.NonePanel;
 import org.dromara.redisfront.ui.widget.MainWidget;
+import org.dromara.redisfront.ui.widget.content.extend.BorderWrapperPanel;
 
 import javax.swing.*;
 
@@ -48,9 +49,10 @@ public class IndexPageView extends QSPageItem<MainWidget> {
             log.info("加载key用时：{}/ms", stopWatch.getTotalTimeSeconds());
         });
         this.splitPane.setLeftComponent(leftSearchFragment.getContentPanel());
-        this.splitPane.setRightComponent(NonePanel.getInstance());
+        this.splitPane.setRightComponent(new BorderWrapperPanel(NonePanel.getInstance()));
         this.setupUI();
     }
+
 
 
     @Override

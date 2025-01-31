@@ -242,7 +242,9 @@ public class MainContentComponent extends JPanel {
                     }
                 })
                 .filter(Objects::nonNull)
-                .filter(e -> e.getConnectContext().getId() == contentTabView.getConnectContext().getId())
+                .filter(e ->
+                        e.getConnectContext().getId() == contentTabView.getConnectContext().getId()
+                )
                 .findFirst();
         if (matchedPanel.isPresent()) {
             topTabbedPane.setSelectedComponent(matchedPanel.get());
