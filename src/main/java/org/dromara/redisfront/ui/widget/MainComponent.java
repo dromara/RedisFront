@@ -1,6 +1,5 @@
 package org.dromara.redisfront.ui.widget;
 
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
 import com.formdev.flatlaf.FlatLaf;
 import org.dromara.quickswing.events.QSEvent;
@@ -8,7 +7,6 @@ import org.dromara.quickswing.events.QSEventListener;
 import org.dromara.quickswing.ui.swing.Background;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.model.context.ConnectContext;
-import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
 import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
 import org.dromara.redisfront.ui.components.panel.NonePanel;
 import org.dromara.redisfront.ui.event.OpenRedisConnectEvent;
@@ -17,6 +15,7 @@ import org.dromara.redisfront.ui.handler.DrawerHandler;
 import org.dromara.redisfront.ui.widget.content.MainContentComponent;
 import org.dromara.redisfront.ui.widget.content.view.ContentTabView;
 import org.dromara.redisfront.ui.widget.sidebar.MainSidebarComponent;
+import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
 
 import javax.swing.*;
 import java.awt.*;
@@ -62,7 +61,11 @@ public class MainComponent extends Background {
                 if (first.isPresent()) {
                     if (first.get() instanceof MainContentComponent mainRightTabbedPanel) {
                         SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> new ContentTabView(owner, context), (o, e) -> {
-                            mainRightTabbedPanel.addTab(context.getTitle(), (ContentTabView)o);
+                            if (e == null) {
+                                mainRightTabbedPanel.addTab(context.getTitle(), (ContentTabView) o);
+                            } else {
+                                owner.displayException(e);
+                            }
                         });
                     } else {
                         SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> {
@@ -72,8 +75,10 @@ public class MainComponent extends Background {
                         }, (ret, e) -> {
                             if (e == null) {
                                 mainRightPane.removeAll();
-                                mainRightPane.add((MainContentComponent)ret, BorderLayout.CENTER);
+                                mainRightPane.add((MainContentComponent) ret, BorderLayout.CENTER);
                                 FlatLaf.updateUI();
+                            } else {
+                                owner.displayException(e);
                             }
                         });
                     }

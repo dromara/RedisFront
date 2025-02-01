@@ -2,55 +2,84 @@ package org.dromara.redisfront.ui.components.loading;
 
 import cn.hutool.core.lang.Assert;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.redisfront.commons.Fn;
 
 import javax.swing.*;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
+@Slf4j
 public class SyncLoadingWaiter extends SwingWorker<Object, Object> {
 
     private final Timer timer;
+    private final AtomicInteger count;
     private final SyncLoadingDialog syncLoadingDialog;
+    private static final String TIMEOUT_MESSAGE_KEY = "LoadingDialog.loadInfoLabel.timeout.message";
     @Setter
     private Supplier<Object> supplier;
-    private Integer count = 0;
+    @Setter
+    private BiConsumer<Object, Exception> biConsumer;
 
     public SyncLoadingWaiter(SyncLoadingDialog syncLoadingDialog) {
         this.syncLoadingDialog = syncLoadingDialog;
+        this.count = new AtomicInteger(0);
         this.timer = new Timer(100, _ -> {
-            if (count < 100) {
-                setProgress(count += 1);
+            if (count.get() < 100) {
+                setProgress(count.incrementAndGet());
             } else {
-                publish("timeout");
+                this.publish("timeout");
             }
         });
         this.addPropertyChangeListener(event -> {
             if (Fn.equal(event.getPropertyName(), "state")) {
                 if (StateValue.STARTED == event.getNewValue()) {
                     this.timer.start();
-                    syncLoadingDialog.setLocationRelativeTo(syncLoadingDialog.getOwner());
-                    syncLoadingDialog.setVisible(true);
-                    syncLoadingDialog.pack();
                 } else if (StateValue.DONE == event.getNewValue()) {
-                    this.timer.stop();
-                    this.cancel(true);
-                    syncLoadingDialog.setVisible(false);
-                    syncLoadingDialog.dispose();
+                    terminated();
                 }
             } else if (Fn.equal(event.getPropertyName(), "progress")) {
-                syncLoadingDialog.getProgressBar().setValue((Integer) event.getNewValue());
+                this.syncLoadingDialog.setProgressValue((Integer) event.getNewValue());
             }
         });
     }
 
-    @Override
-    protected void process(java.util.List<Object> chunks) {
-        for (Object chunk : chunks) {
-            if (Fn.equal(chunk, "timeout")) {
-                this.timer.stop();
-                this.cancel(true);
-                syncLoadingDialog.getMessageLabel().setText(syncLoadingDialog.$tr("LoadingDialog.loadInfoLabel.timeout.message"));
+    public void terminated() {
+        if (this.isDone()) {
+            boolean cancelResult = this.cancel(true);
+            if (!cancelResult) {
+                log.warn("Failed to cancel the task.");
             }
+        }
+        if(this.timer.isRunning()) {
+            this.timer.stop();
+        }
+        this.syncLoadingDialog.setVisible(false);
+        this.syncLoadingDialog.dispose();
+
+    }
+
+    @Override
+    protected void done() {
+        try {
+            this.biConsumer.accept(this.get(), null);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            this.biConsumer.accept(null, e);
+        }
+    }
+
+    @Override
+    protected void process(List<Object> chunks) {
+        if (chunks.isEmpty()) {
+            return;
+        }
+        if (Fn.equal(chunks.getFirst(), "timeout")) {
+            this.timer.stop();
+            this.cancel(true);
+            this.syncLoadingDialog.setMessageValue(syncLoadingDialog.$tr(TIMEOUT_MESSAGE_KEY));
         }
     }
 

@@ -3,9 +3,8 @@ package org.dromara.redisfront.ui.components.loading;
 import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.quickswing.ui.app.QSDialog;
-import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.ui.widget.MainWidget;
 
 import javax.swing.*;
@@ -15,21 +14,26 @@ import java.awt.event.WindowEvent;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
-@Getter
+@Slf4j
 public class SyncLoadingDialog extends QSDialog<MainWidget> {
     private JProgressBar progressBar;
     private JLabel messageLabel;
-    private final RedisFrontContext context;
     private final SyncLoadingWaiter syncLoadingWaiter;
 
     private SyncLoadingDialog(MainWidget owner) {
         super(owner, true);
-        this.setResizable(false);
-        this.setAlwaysOnTop(true);
+        this.setResizable(true);
         this.setMinimumSize(new Dimension(500, 100));
         this.setupUI();
-        this.context = (RedisFrontContext) owner.getContext();
         syncLoadingWaiter = new SyncLoadingWaiter(this);
+    }
+
+    public void setProgressValue(int value) {
+        progressBar.setValue(value);
+    }
+
+    public void setMessageValue(String message) {
+        messageLabel.setText(message);
     }
 
     protected void setupUI() {
@@ -54,17 +58,18 @@ public class SyncLoadingDialog extends QSDialog<MainWidget> {
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                syncLoadingWaiter.cancel(false);
+                syncLoadingWaiter.terminated();
                 messageLabel.setText($tr("LoadingDialog.loadInfoLabel.cancel.message"));
                 super.windowClosing(e);
             }
         });
         this.syncLoadingWaiter.setSupplier(supplier);
+        this.syncLoadingWaiter.setBiConsumer(biConsumer);
         this.syncLoadingWaiter.execute();
-        this.context.taskExecute(syncLoadingWaiter::get, (object, exception) -> {
-            getOwner().getContentPane().setEnabled(true);
-            biConsumer.accept(object, exception);
-        });
+        this.setLocationRelativeTo(getOwner());
+        this.setVisible(true);
+        this.pack();
+        log.info("showSyncLoadingDialog -> {}", Thread.currentThread().getName());
     }
 
 }
