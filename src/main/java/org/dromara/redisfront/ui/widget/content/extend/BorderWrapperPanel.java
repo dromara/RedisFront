@@ -15,6 +15,7 @@ public class BorderWrapperPanel extends JPanel {
                 super.updateUI();
                 var flatLineBorder = new FlatLineBorder(new Insets(10, 10, 10, 10), UIManager.getColor("Component.borderColor"), 1, 5);
                 setBorder(flatLineBorder);
+                add(component, BorderLayout.CENTER);
             }
         };
         var flatLineBorder = new FlatLineBorder(new Insets(10, 10, 10, 10), UIManager.getColor("Component.borderColor"),1,5);
