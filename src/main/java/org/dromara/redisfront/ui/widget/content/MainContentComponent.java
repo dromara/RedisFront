@@ -21,7 +21,7 @@ import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.monitor.RedisMonitor;
 import org.dromara.redisfront.ui.event.DrawerChangeEvent;
 import org.dromara.redisfront.ui.widget.MainWidget;
-import org.dromara.redisfront.ui.widget.content.ext.BoldTitleTabbedPaneUI;
+import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
 import org.dromara.redisfront.ui.widget.content.view.ContentTabView;
 import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
 

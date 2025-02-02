@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.content.ext;
+package org.dromara.redisfront.ui.components.extend;
 
 import com.formdev.flatlaf.ui.FlatTabbedPaneUI;
 

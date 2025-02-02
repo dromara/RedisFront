@@ -17,7 +17,7 @@ import org.dromara.redisfront.ui.event.DrawerChangeEvent;
 import org.dromara.redisfront.ui.widget.content.view.scaffold.PageScaffold;
 import org.dromara.redisfront.ui.widget.content.view.scaffold.index.IndexPageView;
 import org.dromara.redisfront.ui.widget.content.view.scaffold.pubsub.PubSubPageView;
-import org.dromara.redisfront.ui.widget.content.ext.BoldTitleTabbedPaneUI;
+import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
 import org.dromara.redisfront.ui.widget.MainWidget;
 import org.dromara.redisfront.ui.widget.content.view.scaffold.terminal.TerminalPageView;
 

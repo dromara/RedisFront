@@ -14,10 +14,9 @@ import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
 import org.dromara.redisfront.ui.components.panel.NonePanel;
 import org.dromara.redisfront.ui.event.ClickKeyTreeNodeEvent;
 import org.dromara.redisfront.ui.widget.MainWidget;
-import org.dromara.redisfront.ui.widget.content.ext.BorderWrapperPanel;
+import org.dromara.redisfront.ui.components.panel.BorderWrapperPanel;
 
 import javax.swing.*;
-import java.awt.*;
 
 @Getter
 @Slf4j

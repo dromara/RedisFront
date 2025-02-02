@@ -1,6 +1,4 @@
-package org.dromara.redisfront.ui.widget.content.ext;
-
-import com.formdev.flatlaf.ui.FlatLineBorder;
+package org.dromara.redisfront.ui.components.panel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
