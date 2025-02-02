@@ -135,7 +135,7 @@ public class PubSubPageView extends QSPageItem<MainWidget> implements RedisPubSu
         if (Fn.isNotNull(pubsub)) {
             pubsub.getStatefulConnection().closeAsync().thenRun(() -> redisClient.shutdownAsync().thenRun(() -> {
                 if (connectContext.getSshInfo() != null) {
-                    JschUtils.closeSession();
+                    JschUtils.closeSession(connectContext);
                 }
             }));
         }

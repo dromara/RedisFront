@@ -1,4 +1,4 @@
-package com.redisfront.commons.util
+package org.dromara.redisfront.commons.utils
 
 import cn.hutool.http.HttpUtil
 import cn.hutool.json.JSONUtil

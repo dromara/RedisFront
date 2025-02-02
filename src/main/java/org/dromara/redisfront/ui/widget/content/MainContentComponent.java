@@ -1,6 +1,5 @@
 package org.dromara.redisfront.ui.widget.content;
 
-import cn.hutool.core.thread.ThreadUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.components.FlatToolBar;
@@ -11,16 +10,20 @@ import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
 import org.dromara.quickswing.constant.QSOs;
 import org.dromara.redisfront.RedisFrontContext;
+import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.commons.constant.Constants;
+import org.dromara.redisfront.commons.enums.ConnectType;
 import org.dromara.redisfront.commons.resources.Icons;
+import org.dromara.redisfront.commons.utils.JschUtils;
+import org.dromara.redisfront.commons.utils.LettuceUtils;
 import org.dromara.redisfront.model.RedisUsageInfo;
 import org.dromara.redisfront.model.context.ConnectContext;
 import org.dromara.redisfront.ui.components.monitor.RedisMonitor;
 import org.dromara.redisfront.ui.event.DrawerChangeEvent;
-import org.dromara.redisfront.ui.widget.content.extend.BoldTitleTabbedPaneUI;
-import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
 import org.dromara.redisfront.ui.widget.MainWidget;
+import org.dromara.redisfront.ui.widget.content.extend.BoldTitleTabbedPaneUI;
 import org.dromara.redisfront.ui.widget.content.view.ContentTabView;
+import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -52,7 +55,7 @@ public class MainContentComponent extends JPanel {
     private FlatToolBar toolBar;
     private Integer displayId;
     @Setter
-    private Consumer<Integer> tabCloseProcess;
+    private Consumer<Integer> tabCloseEvent;
 
 
     public MainContentComponent(DrawerAnimationAction action, MainWidget owner) {
@@ -135,14 +138,19 @@ public class MainContentComponent extends JPanel {
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
             Component component = tabbedPane.getComponentAt(tabIndex);
             if (component instanceof ContentTabView contentTabView) {
-                ScheduledExecutorService executorService = executorServiceMap.get(contentTabView.getConnectContext().getId());
+                ConnectContext connectContext = contentTabView.getConnectContext();
+                ScheduledExecutorService executorService = executorServiceMap.remove(connectContext.getId());
                 if (executorService != null) {
                     executorService.shutdownNow();
-                    executorServiceMap.remove(contentTabView.getConnectContext().getId());
+                }
+                //关闭ssh会话
+                if (Fn.equal(connectContext.getConnectTypeMode(), ConnectType.SSH)) {
+                    JschUtils.closeSession(connectContext);
+                    LettuceUtils.removeTmpLocalPort(connectContext);
                 }
             }
             tabbedPane.removeTabAt(tabIndex);
-            tabCloseProcess.accept(tabbedPane.getTabCount());
+            tabCloseEvent.accept(tabbedPane.getTabCount());
         });
 
         FlatToolBar settingToolBar = new FlatToolBar();

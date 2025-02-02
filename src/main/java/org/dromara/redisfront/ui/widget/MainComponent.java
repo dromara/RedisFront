@@ -106,7 +106,7 @@ public class MainComponent extends Background {
 
     private MainContentComponent createMainTabbedPanel(DrawerAnimationAction drawerAnimationAction) {
         MainContentComponent mainRightTabbedPanel = new MainContentComponent(drawerAnimationAction, owner);
-        mainRightTabbedPanel.setTabCloseProcess(count -> {
+        mainRightTabbedPanel.setTabCloseEvent(count -> {
             if (count == 0) {
                 if (!drawerAnimationAction.isDrawerOpen()) {
                     drawerAnimationAction.handleAction(null);

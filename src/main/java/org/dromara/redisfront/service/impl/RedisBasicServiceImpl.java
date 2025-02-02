@@ -34,7 +34,6 @@ public class RedisBasicServiceImpl implements RedisBasicService {
         var logInfo = RedisBasicService.buildLogInfo(connectContext)
                 .setInfo("flushdb".toUpperCase());
         LogsDialog.appendLog(logInfo);
-
         if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(connectContext, RedisAdvancedClusterCommands::flushdb);
         } else {
@@ -222,13 +221,12 @@ public class RedisBasicServiceImpl implements RedisBasicService {
     public RedisMode getRedisModeEnum(ConnectContext connectContext) {
         Map<String, Object> server = getServerInfo(connectContext);
         String redisMode = (String) server.get("redis_mode");
-        log.info("获取到Redis [ {}:{} ] 服务类型 - {}", connectContext.getHost(), connectContext.getPort(), redisMode);
+        log.debug("获取到Redis [ {}:{} ] 服务类型 - {}", connectContext.getHost(), connectContext.getPort(), redisMode);
         return RedisMode.valueOf(redisMode.toUpperCase());
     }
 
     @Override
     public List<ClusterNode> getClusterNodes(ConnectContext connectContext) {
-
         String clusterNodes = LettuceUtils.exec(connectContext, RedisClusterCommands::clusterNodes);
         return strToClusterNodes(clusterNodes);
     }
@@ -236,14 +234,14 @@ public class RedisBasicServiceImpl implements RedisBasicService {
     @Override
     public Map<String, Object> getClusterInfo(ConnectContext connectContext) {
         var clusterInfo = LettuceUtils.exec(connectContext, RedisClusterCommands::clusterInfo);
-        log.info("获取到Redis [ {}:{} ] ClusterInfo - {}", connectContext.getHost(), connectContext.getPort(), clusterInfo);
+        log.debug("获取到Redis [ {}:{} ] ClusterInfo - {}", connectContext.getHost(), connectContext.getPort(), clusterInfo);
         return strToMap(clusterInfo);
     }
 
     @Override
     public Map<String, Object> getInfo(ConnectContext connectContext) {
         var info = LettuceUtils.exec(connectContext, RedisServerCommands::info);
-        log.info("获取到Redis [ {}:{} ] Info - {}", connectContext.getHost(), connectContext.getPort(), info);
+        log.debug("获取到Redis [ {}:{} ] Info - {}", connectContext.getHost(), connectContext.getPort(), info);
         return strToMap(info);
     }
 
@@ -257,35 +255,35 @@ public class RedisBasicServiceImpl implements RedisBasicService {
     @Override
     public Map<String, Object> getMemoryInfo(ConnectContext connectContext) {
         var memoryInfo = LettuceUtils.exec(connectContext, redisCommands -> redisCommands.info("memory"));
-        log.info("获取到Redis [ {}:{} ] memoryInfo - {}", connectContext.getHost(), connectContext.getPort(), memoryInfo);
+        log.debug("获取到Redis [ {}:{} ] memoryInfo - {}", connectContext.getHost(), connectContext.getPort(), memoryInfo);
         return strToMap(memoryInfo);
     }
 
     @Override
     public Map<String, Object> getServerInfo(ConnectContext connectContext) {
         var server = LettuceUtils.exec(connectContext, redisCommands -> redisCommands.info("server"));
-        log.info("获取到Redis [ {}:{} ] serverInfo - {}", connectContext.getHost(), connectContext.getPort(), server);
+        log.debug("获取到Redis [ {}:{} ] serverInfo - {}", connectContext.getHost(), connectContext.getPort(), server);
         return strToMap(server);
     }
 
     @Override
     public Map<String, Object> getKeySpace(ConnectContext connectContext) {
         var keyspace = LettuceUtils.exec(connectContext, redisCommands -> redisCommands.info("keyspace"));
-        log.info("获取到Redis [ {}:{} ] keyspace - {}", connectContext.getHost(), connectContext.getPort(), keyspace);
+        log.debug("获取到Redis [ {}:{} ] keyspace - {}", connectContext.getHost(), connectContext.getPort(), keyspace);
         return strToMap(keyspace);
     }
 
     @Override
     public Map<String, Object> getClientInfo(ConnectContext connectContext) {
         var clientInfo = LettuceUtils.exec(connectContext, redisCommands -> redisCommands.info("clients"));
-        log.info("获取到Redis [ {}:{} ] clientInfo - {}", connectContext.getHost(), connectContext.getPort(), clientInfo);
+        log.debug("获取到Redis [ {}:{} ] clientInfo - {}", connectContext.getHost(), connectContext.getPort(), clientInfo);
         return strToMap(clientInfo);
     }
 
     @Override
     public Map<String, Object> getStatInfo(ConnectContext connectContext) {
         var statInfo = LettuceUtils.exec(connectContext, redisCommands -> redisCommands.info("stats"));
-        log.info("获取到Redis [ {}:{} ] statInfo - {}", connectContext.getHost(), connectContext.getPort(), statInfo);
+        log.debug("获取到Redis [ {}:{} ] statInfo - {}", connectContext.getHost(), connectContext.getPort(), statInfo);
         return strToMap(statInfo);
     }
 

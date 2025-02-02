@@ -1,9 +1,6 @@
 package org.dromara.redisfront.commons.utils;
 
 import cn.hutool.core.util.RandomUtil;
-import org.dromara.redisfront.commons.Fn;
-import org.dromara.redisfront.commons.enums.ConnectType;
-import org.dromara.redisfront.model.context.ConnectContext;
 import io.lettuce.core.*;
 import io.lettuce.core.api.sync.RedisCommands;
 import io.lettuce.core.cluster.ClusterClientOptions;
@@ -13,14 +10,18 @@ import io.lettuce.core.cluster.api.sync.RedisAdvancedClusterCommands;
 import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
 import io.netty.util.internal.StringUtil;
+import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.enums.ConnectType;
+import org.dromara.redisfront.commons.enums.RedisMode;
+import org.dromara.redisfront.model.context.ConnectContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.time.Duration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -33,35 +34,19 @@ import java.util.function.Function;
 public class LettuceUtils {
 
     private static final Logger log = LoggerFactory.getLogger(LettuceUtils.class);
-
-    private static final HashSet<Integer> portHashSet = new HashSet<>();
+    private static final ConcurrentSkipListSet<Integer> PORT_SET = new ConcurrentSkipListSet<>();
+    private static final int MIN_PORT = 32768;
+    private static final int MAX_PORT = 65535;
+    private static final Duration TIMEOUT = Duration.ofMillis(3000);
 
     private LettuceUtils() {
     }
 
     public synchronized static RedisClusterClient getRedisClusterClient(RedisURI redisURI, ConnectContext connectContext) {
         var clusterClient = RedisClusterClient.create(redisURI);
-        var clusterTopologyRefreshOptions = ClusterTopologyRefreshOptions.builder()
-                .enableAdaptiveRefreshTrigger(ClusterTopologyRefreshOptions.RefreshTrigger.MOVED_REDIRECT, ClusterTopologyRefreshOptions.RefreshTrigger.PERSISTENT_RECONNECTS)
-                .enablePeriodicRefresh(Duration.ofMinutes(30))
-                .build();
-        var clientOptions = ClusterClientOptions.builder()
-                .topologyRefreshOptions(clusterTopologyRefreshOptions)
-                .build();
-
         if (connectContext.getEnableSsl()) {
-            if (Fn.isNotEmpty(connectContext.getSslInfo().getPassword()) || Fn.isNotEmpty(connectContext.getSslInfo().getPublicKeyFilePath())) {
-                clientOptions = clientOptions
-                        .mutate()
-                        .sslOptions(SslOptions.builder()
-                                .jdkSslProvider()
-                                .truststore(new File(connectContext.getSslInfo().getPublicKeyFilePath()), connectContext.getSslInfo().getPassword())
-                                .build())
-                        .build();
-            }
+            configureSsl(clusterClient, connectContext);
         }
-
-        clusterClient.setOptions(clientOptions);
         if (Fn.equal(connectContext.getConnectTypeMode(), ConnectType.SSH)) {
             Map<Integer, Integer> clusterTempPort = new HashMap<>();
             for (RedisClusterNode partition : clusterClient.getPartitions()) {
@@ -83,13 +68,21 @@ public class LettuceUtils {
                 consumer.accept(connection.sync());
             } finally {
                 clusterClient.shutdown();
-                JschUtils.closeSession();
             }
         } catch (Exception exception) {
             log.error("redis连接失败！", exception);
             clusterClient.shutdown();
-            JschUtils.closeSession();
+            JschUtils.closeSession(connectContext);
+            removeTmpLocalPort(connectContext);
             throw exception;
+        }
+    }
+
+    public static void removeTmpLocalPort(ConnectContext connectContext) {
+        if (connectContext.getRedisMode().equals(RedisMode.CLUSTER)) {
+            connectContext.getClusterLocalPort().forEach((_, v) -> PORT_SET.remove(v));
+        } else {
+            PORT_SET.remove(connectContext.getLocalPort());
         }
     }
 
@@ -102,12 +95,12 @@ public class LettuceUtils {
                 return function.apply(connection.sync());
             } finally {
                 clusterClient.shutdown();
-                JschUtils.closeSession();
             }
         } catch (Exception exception) {
             log.error("redis连接失败！", exception);
             clusterClient.shutdown();
-            JschUtils.closeSession();
+            JschUtils.closeSession(connectContext);
+            removeTmpLocalPort(connectContext);
             throw exception;
         }
     }
@@ -122,12 +115,12 @@ public class LettuceUtils {
                 consumer.accept(connection.sync());
             } finally {
                 redisClient.shutdown();
-                JschUtils.closeSession();
             }
         } catch (Exception exception) {
             log.error("redis连接失败！", exception);
             redisClient.shutdown();
-            JschUtils.closeSession();
+            JschUtils.closeSession(connectContext);
+            removeTmpLocalPort(connectContext);
             throw exception;
         }
     }
@@ -141,12 +134,12 @@ public class LettuceUtils {
                 return function.apply(connection.sync());
             } finally {
                 redisClient.shutdown();
-                JschUtils.closeSession();
             }
         } catch (Exception exception) {
             log.error("redis连接失败！", exception);
             redisClient.shutdown();
-            JschUtils.closeSession();
+            JschUtils.closeSession(connectContext);
+            removeTmpLocalPort(connectContext);
             throw exception;
         }
     }
@@ -159,12 +152,12 @@ public class LettuceUtils {
                 consumer.accept(connection.sync());
             } finally {
                 redisClient.shutdown();
-                JschUtils.closeSession();
             }
         } catch (Exception exception) {
             log.error("redis连接失败！", exception);
             redisClient.shutdown();
-            JschUtils.closeSession();
+            JschUtils.closeSession(connectContext);
+            removeTmpLocalPort(connectContext);
             throw exception;
         }
     }
@@ -173,13 +166,7 @@ public class LettuceUtils {
         var redisURI = getRedisURI(connectContext);
         var redisClient = RedisClient.create(redisURI);
         if (connectContext.getEnableSsl()) {
-            if (Fn.isNotEmpty(connectContext.getSslInfo().getPassword()) || Fn.isNotEmpty(connectContext.getSslInfo().getPublicKeyFilePath())) {
-                var sslOptions = SslOptions.builder()
-                        .jdkSslProvider()
-                        .truststore(new File(connectContext.getSslInfo().getPublicKeyFilePath()), connectContext.getSslInfo().getPassword())
-                        .build();
-                redisClient.setOptions(ClientOptions.builder().sslOptions(sslOptions).build());
-            }
+            configureSsl(redisClient, connectContext);
         }
         return redisClient;
     }
@@ -192,11 +179,11 @@ public class LettuceUtils {
                 return function.apply(connection.sync());
             } finally {
                 redisClient.shutdown();
-                JschUtils.closeSession();
             }
         } catch (Exception exception) {
             redisClient.shutdown();
-            JschUtils.closeSession();
+            JschUtils.closeSession(connectContext);
+            removeTmpLocalPort(connectContext);
             throw exception;
         }
     }
@@ -221,7 +208,7 @@ public class LettuceUtils {
                 .withPort(Fn.equal(connectContext.getConnectTypeMode(), ConnectType.SSH) ? connectContext.getLocalPort() : connectContext.getPort())
                 .withSsl(connectContext.getEnableSsl())
                 .withDatabase(connectContext.getDatabase())
-                .withTimeout(Duration.ofMillis(3000))
+                .withTimeout(TIMEOUT)
                 .build();
 
         if (Fn.isNotEmpty(connectContext.getUsername()) && Fn.isNotEmpty(password)) {
@@ -235,13 +222,40 @@ public class LettuceUtils {
     }
 
     private static int getTempLocalPort() {
-        int port = RandomUtil.randomInt(32768, 65535);
-        if (!portHashSet.contains(port)) {
-            portHashSet.add(port);
-        } else {
-            port = getTempLocalPort();
-        }
+        int port;
+        do {
+            port = RandomUtil.randomInt(MIN_PORT, MAX_PORT);
+        } while (!PORT_SET.add(port));
         return port;
     }
 
+    private static void configureSsl(RedisClusterClient redisClient, ConnectContext connectContext) {
+        var clusterTopologyRefreshOptions = ClusterTopologyRefreshOptions.builder()
+                .enableAdaptiveRefreshTrigger(ClusterTopologyRefreshOptions.RefreshTrigger.MOVED_REDIRECT, ClusterTopologyRefreshOptions.RefreshTrigger.PERSISTENT_RECONNECTS)
+                .enablePeriodicRefresh(Duration.ofMinutes(30))
+                .build();
+        var clientOptions = ClusterClientOptions.builder()
+                .topologyRefreshOptions(clusterTopologyRefreshOptions)
+                .build();
+        if (Fn.isNotEmpty(connectContext.getSslInfo().getPassword()) || Fn.isNotEmpty(connectContext.getSslInfo().getPublicKeyFilePath())) {
+            clientOptions = clientOptions
+                    .mutate()
+                    .sslOptions(SslOptions.builder()
+                            .jdkSslProvider()
+                            .truststore(new File(connectContext.getSslInfo().getPublicKeyFilePath()), connectContext.getSslInfo().getPassword())
+                            .build())
+                    .build();
+        }
+        redisClient.setOptions(clientOptions);
+    }
+
+    private static void configureSsl(RedisClient redisClient, ConnectContext connectContext) {
+        if (Fn.isNotEmpty(connectContext.getSslInfo().getPassword()) || Fn.isNotEmpty(connectContext.getSslInfo().getPublicKeyFilePath())) {
+            var sslOptions = SslOptions.builder()
+                    .jdkSslProvider()
+                    .truststore(new File(connectContext.getSslInfo().getPublicKeyFilePath()), connectContext.getSslInfo().getPassword())
+                    .build();
+            redisClient.setOptions(ClientOptions.builder().sslOptions(sslOptions).build());
+        }
+    }
 }
