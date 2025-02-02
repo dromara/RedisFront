@@ -116,8 +116,6 @@ public class MainContentComponent extends JPanel {
 
             } else {
                 toolBar.setMargin(new Insets(2, 3, 0, 0));
-                DrawerChangeEvent drawerChangeEvent = new DrawerChangeEvent(new Insets(10, 10, 10, 10));
-                context.getEventBus().publish(drawerChangeEvent);
             }
             closeDrawerBtn.setVisible(true);
             FlatLaf.updateUI();

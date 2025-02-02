@@ -18,7 +18,7 @@
         <properties/>
         <border type="none"/>
         <children>
-          <grid id="8d544" binding="basicPanel" custom-create="true" layout-manager="GridLayoutManager" row-count="2" column-count="6" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="8d544" binding="basicPanel" custom-create="true" layout-manager="GridLayoutManager" row-count="2" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints border-constraint="North"/>
             <properties/>
@@ -42,33 +42,6 @@
                   </grid>
                 </constraints>
                 <properties/>
-              </component>
-              <component id="7208c" class="javax.swing.JButton" binding="saveBtn" custom-create="true">
-                <constraints>
-                  <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.saveBtn.title"/>
-                  <toolTipText resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.saveBtn.toolTip.Text"/>
-                </properties>
-              </component>
-              <component id="447d7" class="javax.swing.JButton" binding="delBtn" custom-create="true">
-                <constraints>
-                  <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.delBtn.title"/>
-                  <toolTipText resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.delBtn.toolTip.Text"/>
-                </properties>
-              </component>
-              <component id="7670d" class="javax.swing.JButton" binding="refBtn" custom-create="true">
-                <constraints>
-                  <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.refBtn.title"/>
-                  <toolTipText resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.refBtn.toolTip.Text"/>
-                </properties>
               </component>
               <component id="85ead" class="javax.swing.JTextField" binding="ttlField" custom-create="true">
                 <constraints>
@@ -106,6 +79,56 @@
                   </component>
                 </children>
               </grid>
+              <toolbar id="be911">
+                <constraints>
+                  <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false">
+                    <preferred-size width="-1" height="20"/>
+                  </grid>
+                </constraints>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="447d7" class="javax.swing.JButton" binding="delBtn" custom-create="true">
+                    <constraints/>
+                    <properties>
+                      <text resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.delBtn.title"/>
+                      <toolTipText resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.delBtn.toolTip.Text"/>
+                    </properties>
+                  </component>
+                  <component id="9a714" class="javax.swing.JToolBar$Separator">
+                    <constraints/>
+                    <properties/>
+                  </component>
+                  <component id="7670d" class="javax.swing.JButton" binding="refBtn" custom-create="true">
+                    <constraints/>
+                    <properties>
+                      <text resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.refBtn.title"/>
+                      <toolTipText resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.refBtn.toolTip.Text"/>
+                    </properties>
+                  </component>
+                  <component id="e0bf" class="javax.swing.JToolBar$Separator">
+                    <constraints/>
+                    <properties/>
+                  </component>
+                  <component id="7208c" class="javax.swing.JButton" binding="saveBtn" custom-create="true">
+                    <constraints/>
+                    <properties>
+                      <text resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.saveBtn.title"/>
+                      <toolTipText resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.saveBtn.toolTip.Text"/>
+                    </properties>
+                  </component>
+                  <component id="56ab4" class="javax.swing.JToolBar$Separator">
+                    <constraints/>
+                    <properties/>
+                  </component>
+                  <component id="1e790" class="javax.swing.JButton" binding="关闭Button" default-binding="true">
+                    <constraints/>
+                    <properties>
+                      <text value="关闭"/>
+                    </properties>
+                  </component>
+                </children>
+              </toolbar>
             </children>
           </grid>
           <grid id="361ca" binding="dataPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
