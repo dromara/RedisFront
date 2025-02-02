@@ -22,7 +22,6 @@ import org.dromara.redisfront.model.*;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.context.ScanContext;
 import org.dromara.redisfront.service.*;
-import org.dromara.redisfront.ui.components.panel.LoadingPanel;
 import org.dromara.redisfront.ui.components.editor.TextEditor;
 import io.lettuce.core.*;
 import org.dromara.redisfront.ui.dialog.AddOrUpdateItemDialog;
@@ -239,7 +238,7 @@ public class RightViewFragment {
                                             refreshDisableBtn();
 //                                    refreshBeforeHandler.handle();
                                             SwingUtils.removeAllComponent(dataPanel);
-                                            dataPanel.add(LoadingPanel.newInstance(), BorderLayout.CENTER);
+//                                            dataPanel.add(LoadingPanel.newInstance(), BorderLayout.CENTER);
                                             dataPanel.updateUI();
                                         });
                                         //加载数据
