@@ -1,6 +1,6 @@
 package org.dromara.redisfront.service;
 
-import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
 import io.lettuce.core.ValueScanCursor;
@@ -13,47 +13,47 @@ public interface RedisSetService {
 
     RedisSetService service = new RedisSetServiceImpl();
 
-    Long sadd(ConnectContext connectContext, String key, String... members);
+    Long sadd(RedisConnectContext redisConnectContext, String key, String... members);
 
-    Long scard(ConnectContext connectContext, String key);
+    Long scard(RedisConnectContext redisConnectContext, String key);
 
-    Set<String> sdiff(ConnectContext connectContext, String... keys);
-
-
-    Long sdiffstore(ConnectContext connectContext, String destination, String... keys);
+    Set<String> sdiff(RedisConnectContext redisConnectContext, String... keys);
 
 
-    Set<String> sinter(ConnectContext connectContext, String... keys);
-
-    Long sinterstore(ConnectContext connectContext, String destination, String... keys);
-
-    Boolean sismember(ConnectContext connectContext, String key, String member);
-
-    Set<String> smembers(ConnectContext connectContext, String key);
-
-    List<Boolean> smismember(ConnectContext connectContext, String key, String... members);
-
-    Boolean smove(ConnectContext connectContext, String source, String destination, String member);
-
-    String spop(ConnectContext connectContext, String key);
-
-    Set<String> spop(ConnectContext connectContext, String key, long count);
-
-    String srandmember(ConnectContext connectContext, String key);
-
-    List<String> srandmember(ConnectContext connectContext, String key, long count);
+    Long sdiffstore(RedisConnectContext redisConnectContext, String destination, String... keys);
 
 
-    Long srem(ConnectContext connectContext, String key, String... members);
+    Set<String> sinter(RedisConnectContext redisConnectContext, String... keys);
 
-    Set<String> sunion(ConnectContext connectContext, String... keys);
+    Long sinterstore(RedisConnectContext redisConnectContext, String destination, String... keys);
+
+    Boolean sismember(RedisConnectContext redisConnectContext, String key, String member);
+
+    Set<String> smembers(RedisConnectContext redisConnectContext, String key);
+
+    List<Boolean> smismember(RedisConnectContext redisConnectContext, String key, String... members);
+
+    Boolean smove(RedisConnectContext redisConnectContext, String source, String destination, String member);
+
+    String spop(RedisConnectContext redisConnectContext, String key);
+
+    Set<String> spop(RedisConnectContext redisConnectContext, String key, long count);
+
+    String srandmember(RedisConnectContext redisConnectContext, String key);
+
+    List<String> srandmember(RedisConnectContext redisConnectContext, String key, long count);
 
 
-    ValueScanCursor<String> sscan(ConnectContext connectContext, String key);
+    Long srem(RedisConnectContext redisConnectContext, String key, String... members);
 
-    ValueScanCursor<String> sscan(ConnectContext connectContext, String key, ScanCursor scanCursor, ScanArgs scanArgs);
+    Set<String> sunion(RedisConnectContext redisConnectContext, String... keys);
 
-    ValueScanCursor<String> sscan(ConnectContext connectContext, String key, ScanCursor scanCursor);
+
+    ValueScanCursor<String> sscan(RedisConnectContext redisConnectContext, String key);
+
+    ValueScanCursor<String> sscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor, ScanArgs scanArgs);
+
+    ValueScanCursor<String> sscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor);
 
 
 }

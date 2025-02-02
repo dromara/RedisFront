@@ -31,7 +31,6 @@ public class Icons {
     public static final Icon PUBLISH_ICON = new FlatSVGIcon("svg/publish.svg");
     public static final Icon TREE_KEY_ICON = new FlatSVGIcon("icons/tree_key.svg");
     public static final Icon MQ_ICON = new FlatSVGIcon("icons/mq.svg",24,24);
-    public static final Icon CLOSE_ICON = new FlatSVGIcon("icons/close.svg");
     public static final Icon LOGS_ICON = new FlatSVGIcon("icons/RecentlyUsed.svg");
     public static final Icon PLUS_ICON = new FlatSVGIcon("icons/add.svg",12,12);
     public static final Icon LOAD_MORE_ICON = new FlatSVGIcon("svg/testBtn.svg");
@@ -40,9 +39,10 @@ public class Icons {
     public static final Icon MAIN_TAB_DATABASE_ICON = new FlatSVGIcon("icons/icon_db5.svg");
     public static final Icon INFO_ICON = new FlatSVGIcon("icons/info.svg");
     public static final Icon CONNECTION_ICON = new FlatSVGIcon("icons/connection.svg");
-    public static final Icon REFRESH_ICON = new FlatSVGIcon("icons/refresh.svg");
+    public static final Icon REFRESH_ICON = new FlatSVGIcon("icons/refresh.svg",16,16);
     public static final Icon DELETE_ICON = new FlatSVGIcon("icons/delete.svg",16,16);
-    public static final Icon SAVE_ICON = new FlatSVGIcon("icons/save.svg");
+    public static final Icon DELETE_1_ICON = new FlatSVGIcon("icons/delete2.svg",16,16);
+    public static final Icon SAVE_ICON = new FlatSVGIcon("icons/save.svg",16,16);
     public static final Icon CONTENT_TAB_DATA_ICON = new FlatSVGIcon("icons/table.svg",24,24);
     public static final Icon CONTENT_TAB_COMMAND_ICON = new FlatSVGIcon("icons/db_cli2.svg",24,24);
     public static final Icon CONTENT_TAB_INFO_ICON = new FlatSVGIcon("icons/db_report2.svg",24,24);

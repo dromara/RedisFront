@@ -6,7 +6,6 @@ import cn.hutool.json.JSONUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.formdev.flatlaf.ui.FlatEmptyBorder;
-import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -20,7 +19,7 @@ import org.dromara.redisfront.commons.utils.FutureUtils;
 import org.dromara.redisfront.commons.utils.LocaleUtils;
 import org.dromara.redisfront.commons.utils.SwingUtils;
 import org.dromara.redisfront.model.*;
-import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.context.ScanContext;
 import org.dromara.redisfront.service.*;
 import org.dromara.redisfront.ui.components.panel.LoadingPanel;
@@ -80,11 +79,10 @@ public class RightViewFragment {
     private JTextField currentCountField;
     private JTextField allCountField;
     private JButton loadMoreBtn;
-    private JButton closeBtn;
     private TextEditor textEditor;
     private JTextField fieldOrScoreField;
     private JComboBox<String> jComboBox;
-    private final ConnectContext connectContext;
+    private final RedisConnectContext redisConnectContext;
 
     private final Map<String, ScanContext<String>> scanSetContextMap;
     private final Map<String, ScanContext<String>> scanListContextMap;
@@ -93,33 +91,8 @@ public class RightViewFragment {
     private final Map<String, ScanContext<ScoredValue<String>>> scanZSetContextMap;
     private final Map<String, ScanContext<Map.Entry<String, String>>> scanHashContextMap;
 
-    private ActionHandler deleteActionHandler;
-    private ActionHandler closeActionHandler;
-    private ActionHandler refreshBeforeHandler;
-    private ActionHandler refreshAfterHandler;
-
     private String lastKeyName;
     private Long lastKeyTTL;
-
-    public void setRefreshBeforeHandler(ActionHandler refreshBeforeHandler) {
-        this.refreshBeforeHandler = refreshBeforeHandler;
-    }
-
-    public void setRefreshAfterHandler(ActionHandler refreshAfterHandler) {
-        this.refreshAfterHandler = refreshAfterHandler;
-    }
-
-    public static RightViewFragment newInstance(ConnectContext connectContext) {
-        return new RightViewFragment(connectContext);
-    }
-
-    public void setDeleteActionHandler(ActionHandler handler) {
-        this.deleteActionHandler = handler;
-    }
-
-    public void setCloseActionHandler(ActionHandler closeActionHandler) {
-        this.closeActionHandler = closeActionHandler;
-    }
 
     private void refreshDisableBtn() {
         refBtn.setEnabled(false);
@@ -133,8 +106,8 @@ public class RightViewFragment {
         refBtn.setEnabled(true);
     }
 
-    public RightViewFragment(ConnectContext connectContext) {
-        this.connectContext = connectContext;
+    public RightViewFragment(RedisConnectContext redisConnectContext) {
+        this.redisConnectContext = redisConnectContext;
         scanZSetContextMap = new LinkedHashMap<>();
         scanSetContextMap = new LinkedHashMap<>();
         scanListContextMap = new LinkedHashMap<>();
@@ -261,42 +234,46 @@ public class RightViewFragment {
                 if (Fn.notEqual(keyType, "none")) {
                     KeyTypeEnum keyTypeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
                     FutureUtils.runAsync(() ->
-                            dataChangeActionPerformed(key, () -> {
-                                SwingUtilities.invokeLater(() -> {
-                                    refreshDisableBtn();
-                                    refreshBeforeHandler.handle();
-                                    SwingUtils.removeAllComponent(dataPanel);
-                                    dataPanel.add(LoadingPanel.newInstance(), BorderLayout.CENTER);
-                                    dataPanel.updateUI();
-                                });
-                                //加载数据
-                                {
-                                    if (keyTypeEnum == KeyTypeEnum.STRING || keyTypeEnum == KeyTypeEnum.JSON) {
-                                        loadStringActionPerformed(key);
-                                    }
-                                    if (keyTypeEnum.equals(KeyTypeEnum.ZSET)) {
-                                        this.scanZSetContextMap.put(key, new ScanContext<>());
-                                    }
-                                    if (keyTypeEnum.equals(KeyTypeEnum.HASH)) {
-                                        this.scanHashContextMap.put(key, new ScanContext<>());
-                                    }
-                                    if (keyTypeEnum.equals(KeyTypeEnum.LIST)) {
-                                        this.scanListContextMap.put(key, new ScanContext<>());
-                                    }
-                                    if (keyTypeEnum.equals(KeyTypeEnum.SET)) {
-                                        this.scanSetContextMap.put(key, new ScanContext<>());
-                                    }
-                                    if (keyTypeEnum.equals(KeyTypeEnum.STREAM)) {
-                                        this.xRangeContextMap.put(key, new ScanContext<>());
-                                    }
-                                }
-                            }, () -> SwingUtilities.invokeLater(() -> {
-                                refreshEnableBtn();
-                                refreshAfterHandler.handle();
-                                SwingUtils.removeAllComponent(dataPanel);
-                                dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
-                                dataPanel.updateUI();
-                            })), throwable -> refreshAfterHandler.handle());
+                                    dataChangeActionPerformed(key, () -> {
+                                        SwingUtilities.invokeLater(() -> {
+                                            refreshDisableBtn();
+//                                    refreshBeforeHandler.handle();
+                                            SwingUtils.removeAllComponent(dataPanel);
+                                            dataPanel.add(LoadingPanel.newInstance(), BorderLayout.CENTER);
+                                            dataPanel.updateUI();
+                                        });
+                                        //加载数据
+                                        {
+                                            if (keyTypeEnum == KeyTypeEnum.STRING || keyTypeEnum == KeyTypeEnum.JSON) {
+                                                loadStringActionPerformed(key);
+                                            }
+                                            if (keyTypeEnum.equals(KeyTypeEnum.ZSET)) {
+                                                this.scanZSetContextMap.put(key, new ScanContext<>());
+                                            }
+                                            if (keyTypeEnum.equals(KeyTypeEnum.HASH)) {
+                                                this.scanHashContextMap.put(key, new ScanContext<>());
+                                            }
+                                            if (keyTypeEnum.equals(KeyTypeEnum.LIST)) {
+                                                this.scanListContextMap.put(key, new ScanContext<>());
+                                            }
+                                            if (keyTypeEnum.equals(KeyTypeEnum.SET)) {
+                                                this.scanSetContextMap.put(key, new ScanContext<>());
+                                            }
+                                            if (keyTypeEnum.equals(KeyTypeEnum.STREAM)) {
+                                                this.xRangeContextMap.put(key, new ScanContext<>());
+                                            }
+                                        }
+                                    }, () -> SwingUtilities.invokeLater(() -> {
+                                        refreshEnableBtn();
+//                                refreshAfterHandler.handle();
+                                        SwingUtils.removeAllComponent(dataPanel);
+                                        dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
+                                        dataPanel.updateUI();
+                                    })), throwable -> {
+//                        refreshAfterHandler.handle()
+                            }
+
+                    );
                 } else {
                     ttlField.setText("-2");
                     AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showInformationDialog.message"));
@@ -315,7 +292,7 @@ public class RightViewFragment {
             var keyTypeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
 
             SwingUtilities.invokeLater(() -> {
-                refreshBeforeHandler.handle();
+//                refreshBeforeHandler.handle();
                 refreshDisableBtn();
                 tableAddBtn.setEnabled(false);
                 tableDelBtn.setEnabled(false);
@@ -352,25 +329,25 @@ public class RightViewFragment {
             }
 
             SwingUtilities.invokeLater(() -> {
-                refreshBeforeHandler.handle();
+//                refreshBeforeHandler.handle();
                 refreshEnableBtn();
                 loadMoreBtn.requestFocus();
                 tableAddBtn.setEnabled(true);
                 tableRefreshBtn.setEnabled(true);
-                refreshAfterHandler.handle();
+//                refreshAfterHandler.handle();
             });
         });
     }
 
     public synchronized void dataChangeActionPerformed(String key, ActionHandler beforeActionHandler, ActionHandler afterActionHandler) {
         var startTime = System.currentTimeMillis();
-        refreshBeforeHandler.handle();
+//        refreshBeforeHandler.handle();
         beforeActionHandler.handle();
 
-        var type = RedisBasicService.service.type(connectContext, key);
+        var type = RedisBasicService.service.type(redisConnectContext, key);
         if (Fn.notEqual(type, "none")) {
             var keyTypeEnum = KeyTypeEnum.valueOf(type.toUpperCase());
-            var ttl = RedisBasicService.service.ttl(connectContext, key);
+            var ttl = RedisBasicService.service.ttl(redisConnectContext, key);
 
             SwingUtilities.invokeLater(() -> {
                 fieldOrScoreField.setVisible(keyTypeEnum == KeyTypeEnum.ZSET || keyTypeEnum == KeyTypeEnum.HASH);
@@ -398,14 +375,14 @@ public class RightViewFragment {
             refreshDisableBtn();
         }
 
-        refreshAfterHandler.handle();
+//        refreshAfterHandler.handle();
         afterActionHandler.handle();
         System.out.println("初始化key 3 用时：" + (System.currentTimeMillis() - startTime) / 1000);
     }
 
     private void loadStringActionPerformed(String key) {
-        var strLen = RedisStringService.service.strlen(connectContext, key);
-        var value = RedisStringService.service.get(connectContext, key);
+        var strLen = RedisStringService.service.strlen(redisConnectContext, key);
+        var value = RedisStringService.service.get(redisConnectContext, key);
         SwingUtilities.invokeLater(() -> {
             tableViewPanel.setVisible(false);
             valueUpdateSaveBtn.setEnabled(true);
@@ -416,14 +393,14 @@ public class RightViewFragment {
     }
 
     private void loadHashDataActionPerformed(String key) {
-        var len = RedisHashService.service.hlen(connectContext, key);
+        var len = RedisHashService.service.hlen(redisConnectContext, key);
         var scanContext = scanHashContextMap.getOrDefault(key, new ScanContext<>());
         var lastSearchKey = scanContext.getSearchKey();
 
         scanContext.setSearchKey(tableSearchField.getText());
         scanContext.setLimit(500L);
 
-        var mapScanCursor = RedisHashService.service.hscan(connectContext, key, scanContext.getScanCursor(), scanContext.getScanArgs());
+        var mapScanCursor = RedisHashService.service.hscan(redisConnectContext, key, scanContext.getScanCursor(), scanContext.getScanArgs());
         scanContext.setScanCursor(mapScanCursor);
 
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
@@ -455,14 +432,14 @@ public class RightViewFragment {
     }
 
     private void loadSetDataActionPerformed(String key) {
-        var len = RedisSetService.service.scard(connectContext, key);
+        var len = RedisSetService.service.scard(redisConnectContext, key);
         var scanContext = scanSetContextMap.getOrDefault(key, new ScanContext<>());
 
         var lastSearchKey = scanContext.getSearchKey();
         scanContext.setSearchKey(tableSearchField.getText());
         scanContext.setLimit(500L);
 
-        var valueScanCursor = RedisSetService.service.sscan(connectContext, key, scanContext.getScanCursor(), scanContext.getScanArgs());
+        var valueScanCursor = RedisSetService.service.sscan(redisConnectContext, key, scanContext.getScanCursor(), scanContext.getScanArgs());
         scanContext.setScanCursor(valueScanCursor);
 
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
@@ -490,7 +467,7 @@ public class RightViewFragment {
     }
 
     private void loadListDataActionPerformed(String key) {
-        var len = RedisListService.service.llen(connectContext, key);
+        var len = RedisListService.service.llen(redisConnectContext, key);
 
         var scanContext = scanListContextMap.getOrDefault(key, new ScanContext<>());
 
@@ -499,7 +476,7 @@ public class RightViewFragment {
         scanContext.setLimit(500L);
         var start = Long.parseLong(scanContext.getScanCursor().getCursor());
         var stop = start + (scanContext.getLimit() - 1);
-        var value = RedisListService.service.lrange(connectContext, key, start, stop);
+        var value = RedisListService.service.lrange(redisConnectContext, key, start, stop);
 
         var nextCursor = start + scanContext.getLimit();
         if (nextCursor >= len) {
@@ -538,7 +515,7 @@ public class RightViewFragment {
     }
 
     private void loadStreamDataActionPerformed(String key) {
-        var len = RedisStreamService.service.xlen(connectContext, key);
+        var len = RedisStreamService.service.xlen(redisConnectContext, key);
 
         var xRangeContext = xRangeContextMap.getOrDefault(key, new ScanContext<>());
 
@@ -547,7 +524,7 @@ public class RightViewFragment {
         xRangeContext.setLimit(500L);
         var start = Long.parseLong(xRangeContext.getScanCursor().getCursor());
         var stop = start + (xRangeContext.getLimit() - 1);
-        var value = RedisStreamService.service.xrange(connectContext, key, Range.unbounded(), Limit.create(start, stop));
+        var value = RedisStreamService.service.xrange(redisConnectContext, key, Range.unbounded(), Limit.create(start, stop));
 
         var nextCursor = start + xRangeContext.getLimit();
         if (nextCursor >= len) {
@@ -579,7 +556,7 @@ public class RightViewFragment {
     }
 
     private void loadZSetDataActionPerformed(String key) {
-        var len = RedisZSetService.service.zcard(connectContext, key);
+        var len = RedisZSetService.service.zcard(redisConnectContext, key);
 
         var scanContext = scanZSetContextMap.getOrDefault(key, new ScanContext<>());
 
@@ -587,7 +564,7 @@ public class RightViewFragment {
         scanContext.setSearchKey(tableSearchField.getText());
         scanContext.setLimit(500L);
 
-        var valueScanCursor = RedisZSetService.service.zscan(connectContext, key, scanContext.getScanCursor(), scanContext.getScanArgs());
+        var valueScanCursor = RedisZSetService.service.zscan(redisConnectContext, key, scanContext.getScanCursor(), scanContext.getScanArgs());
         scanContext.setScanCursor(valueScanCursor);
 
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
@@ -644,18 +621,18 @@ public class RightViewFragment {
             case ZSET -> {
                 var score = (Double) dataTable.getValueAt(row, 1);
                 var value = (String) dataTable.getValueAt(row, 2);
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), score.toString(), value, connectContext, keyTypeEnum, () -> {
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), score.toString(), value, redisConnectContext, keyTypeEnum, () -> {
                 });
             }
             case HASH -> {
                 var key = (String) dataTable.getValueAt(row, 0);
                 var value = (String) dataTable.getValueAt(row, 1);
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), key, value, connectContext, keyTypeEnum, () -> {
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), key, value, redisConnectContext, keyTypeEnum, () -> {
                 });
             }
             case LIST, SET -> {
                 var value = (String) dataTable.getValueAt(row, 1);
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), null, value, connectContext, keyTypeEnum, () -> {
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), null, value, redisConnectContext, keyTypeEnum, () -> {
                 });
             }
         }
@@ -667,8 +644,6 @@ public class RightViewFragment {
             @Override
             public void updateUI() {
                 super.updateUI();
-                var flatLineBorder = new FlatLineBorder(new Insets(0, 2, 0, 0), UIManager.getColor("Component.borderColor"));
-                setBorder(flatLineBorder);
                 if (Fn.isNotNull(dataTable)) {
                     dataTableInit();
                 }
@@ -687,7 +662,7 @@ public class RightViewFragment {
         };
 
         var jToolBar = new JToolBar();
-        jToolBar.setBorder(new EmptyBorder(5, 8, 0, 10));
+        jToolBar.setBorder(new EmptyBorder(5, 0, 0, 10));
 
         fieldOrScoreField = new JTextField();
         keyLabel = new JLabel() {
@@ -697,10 +672,8 @@ public class RightViewFragment {
                 setText(LocaleUtils.getMessageFromBundle("DataViewForm.keyLabel.title"));
             }
         };
-        keyLabel.setBackground(UIManager.getColor("background"));
         keyLabel.setBorder(new EmptyBorder(0, 2, 0, 2));
         fieldOrScoreField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, keyLabel);
-        fieldOrScoreField.setBackground(UIManager.getColor("FlatEditorPane.background"));
         jToolBar.add(fieldOrScoreField);
 
         jComboBox = new JComboBox<>();
@@ -735,7 +708,7 @@ public class RightViewFragment {
         };
         valueUpdateSaveBtn.setEnabled(false);
         valueUpdateSaveBtn.setIcon(Icons.SAVE_ICON);
-        valueUpdateSaveBtn.addActionListener((e) -> {
+        valueUpdateSaveBtn.addActionListener((_) -> {
             SwingUtilities.invokeLater(this::refreshDisableBtn);
             FutureUtils.runAsync(() -> {
                 var keyType = keyTypeLabel.getText();
@@ -744,8 +717,8 @@ public class RightViewFragment {
                 var newValue = textEditor.textArea().getText();
 
                 if (typeEnum.equals(KeyTypeEnum.STRING)) {
-                    RedisBasicService.service.del(connectContext, key);
-                    RedisStringService.service.set(connectContext, key, newValue);
+                    RedisBasicService.service.del(redisConnectContext, key);
+                    RedisStringService.service.set(redisConnectContext, key, newValue);
                 } else {
 
                     var row = dataTable.getSelectedRow();
@@ -758,24 +731,24 @@ public class RightViewFragment {
                         case HASH -> {
                             var fieldOrScore = fieldOrScoreField.getText();
                             var filed = (String) dataTable.getValueAt(row, 0);
-                            RedisHashService.service.hdel(connectContext, key, filed);
-                            RedisHashService.service.hset(connectContext, key, fieldOrScore, newValue);
+                            RedisHashService.service.hdel(redisConnectContext, key, filed);
+                            RedisHashService.service.hset(redisConnectContext, key, fieldOrScore, newValue);
                         }
                         case ZSET -> {
                             var fieldOrScore = fieldOrScoreField.getText();
                             var value = (String) dataTable.getValueAt(row, 2);
-                            RedisZSetService.service.zrem(connectContext, key, value);
-                            RedisZSetService.service.zadd(connectContext, key, Double.parseDouble(fieldOrScore), newValue);
+                            RedisZSetService.service.zrem(redisConnectContext, key, value);
+                            RedisZSetService.service.zadd(redisConnectContext, key, Double.parseDouble(fieldOrScore), newValue);
                         }
                         case LIST -> {
                             var value = (String) dataTable.getValueAt(row, 1);
-                            RedisListService.service.lrem(connectContext, key, 1, value);
-                            RedisListService.service.lpush(connectContext, key, newValue);
+                            RedisListService.service.lrem(redisConnectContext, key, 1, value);
+                            RedisListService.service.lpush(redisConnectContext, key, newValue);
                         }
                         case SET -> {
                             var value = (String) dataTable.getValueAt(row, 1);
-                            RedisSetService.service.srem(connectContext, key, value);
-                            RedisSetService.service.sadd(connectContext, key, newValue);
+                            RedisSetService.service.srem(redisConnectContext, key, value);
+                            RedisSetService.service.sadd(redisConnectContext, key, newValue);
                         }
                     }
                 }
@@ -792,7 +765,6 @@ public class RightViewFragment {
                 super.updateUI();
                 setLayout(new BorderLayout());
                 setBorder(new FlatEmptyBorder(0, 0, 5, 0));
-                add(new JSeparator(), BorderLayout.NORTH);
                 add(jToolBar, BorderLayout.SOUTH);
             }
         }, BorderLayout.NORTH);
@@ -801,7 +773,6 @@ public class RightViewFragment {
         valueViewPanel.add(new JPanel() {
             {
                 setLayout(new BorderLayout());
-                setBorder(new FlatEmptyBorder(0, 10, 5, 10));
                 add(textEditor, BorderLayout.CENTER);
             }
         }, BorderLayout.CENTER);
@@ -854,7 +825,7 @@ public class RightViewFragment {
         ttlField = new JTextField();
         ttlField.setSize(5, -1);
         ttlField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, ttlLabel);
-        delBtn = new JButton(Icons.DELETE_ICON) {
+        delBtn = new JButton() {
             @Override
             public void updateUI() {
                 super.updateUI();
@@ -862,9 +833,11 @@ public class RightViewFragment {
                 setToolTipText(LocaleUtils.getMessageFromBundle("DataViewForm.delBtn.toolTip.Text"));
             }
         };
-        delBtn.addActionListener(e -> deleteActionHandler.handle());
+        delBtn.addActionListener(e -> {
+//            deleteActionHandler.handle()
+        });
 
-        refBtn = new JButton(Icons.REFRESH_ICON) {
+        refBtn = new JButton() {
             @Override
             public void updateUI() {
                 super.updateUI();
@@ -874,7 +847,7 @@ public class RightViewFragment {
         };
         refBtn.addActionListener(e -> reloadAllActionPerformed());
 
-        saveBtn = new JButton(Icons.SAVE_ICON) {
+        saveBtn = new JButton() {
             @Override
             public void updateUI() {
                 super.updateUI();
@@ -884,21 +857,21 @@ public class RightViewFragment {
         };
         saveBtn.addActionListener((e) -> {
             SwingUtilities.invokeLater(() -> {
-                refreshBeforeHandler.handle();
+//                refreshBeforeHandler.handle();
                 refreshDisableBtn();
             });
             String ttl = ttlField.getText();
             String key = keyField.getText();
             if (Fn.notEqual(key, lastKeyName)) {
-                RedisBasicService.service.rename(connectContext, lastKeyName, key);
+                RedisBasicService.service.rename(redisConnectContext, lastKeyName, key);
             }
             if (Fn.notEqual(ttl, lastKeyTTL.toString())) {
-                RedisBasicService.service.expire(connectContext, key, Long.valueOf(ttl));
+                RedisBasicService.service.expire(redisConnectContext, key, Long.valueOf(ttl));
             }
             reloadAllActionPerformed();
             SwingUtilities.invokeLater(() -> {
                 refreshEnableBtn();
-                refreshAfterHandler.handle();
+//                refreshAfterHandler.handle();
             });
         });
         tableSearchField = new JTextField() {
@@ -931,15 +904,15 @@ public class RightViewFragment {
 
             switch (keyTypeEnum) {
                 case ZSET ->
-                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("ZSET", keyField.getText(), null, null, connectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
+                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("ZSET", keyField.getText(), null, null, redisConnectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
                 case HASH ->
-                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("HASH", keyField.getText(), null, null, connectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
+                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("HASH", keyField.getText(), null, null, redisConnectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
                 case LIST ->
-                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("LIST", keyField.getText(), null, null, connectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
+                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("LIST", keyField.getText(), null, null, redisConnectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
                 case SET ->
-                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("SET", keyField.getText(), null, null, connectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
+                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("SET", keyField.getText(), null, null, redisConnectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
                 case STREAM ->
-                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("STREAM", keyField.getText(), null, null, connectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
+                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("STREAM", keyField.getText(), null, null, redisConnectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
             }
         });
 
@@ -964,7 +937,7 @@ public class RightViewFragment {
             switch (keyTypeEnum) {
                 case ZSET -> {
                     var value = (String) dataTable.getValueAt(row, 2);
-                    RedisZSetService.service.zrem(connectContext, key, value);
+                    RedisZSetService.service.zrem(redisConnectContext, key, value);
                     {
                         fieldOrScoreField.setText("");
                         textEditor.textArea().setText("");
@@ -973,7 +946,7 @@ public class RightViewFragment {
                 }
                 case HASH -> {
                     var field = (String) dataTable.getValueAt(row, 0);
-                    RedisHashService.service.hdel(connectContext, key, field);
+                    RedisHashService.service.hdel(redisConnectContext, key, field);
                     {
                         fieldOrScoreField.setText("");
                         textEditor.textArea().setText("");
@@ -982,7 +955,7 @@ public class RightViewFragment {
                 }
                 case LIST -> {
                     var value = (String) dataTable.getValueAt(row, 1);
-                    RedisListService.service.lrem(connectContext, key, 1, value);
+                    RedisListService.service.lrem(redisConnectContext, key, 1, value);
                     {
                         textEditor.textArea().setText("");
                         valueUpdateSaveBtn.setEnabled(false);
@@ -990,7 +963,7 @@ public class RightViewFragment {
                 }
                 case SET -> {
                     var value = (String) dataTable.getValueAt(row, 1);
-                    RedisSetService.service.srem(connectContext, key, value);
+                    RedisSetService.service.srem(redisConnectContext, key, value);
                     {
                         textEditor.textArea().setText("");
                         valueUpdateSaveBtn.setEnabled(false);
@@ -998,7 +971,7 @@ public class RightViewFragment {
                 }
                 case STREAM -> {
                     var id = (String) dataTable.getValueAt(row, 1);
-                    RedisStreamService.service.xdel(connectContext, key, id);
+                    RedisStreamService.service.xdel(redisConnectContext, key, id);
                     {
                         fieldOrScoreField.setText("");
                         textEditor.textArea().setText("");
@@ -1050,17 +1023,6 @@ public class RightViewFragment {
         allCountField.setEnabled(false);
         allCountField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, pageSizeLabel);
 
-        closeBtn = new JButton(Icons.CLOSE_ICON) {
-            @Override
-            public void updateUI() {
-                super.updateUI();
-                setText(LocaleUtils.getMessageFromBundle("DataViewForm.closeBtn.title"));
-                setToolTipText(LocaleUtils.getMessageFromBundle("DataViewForm.closeBtn.toolTip.Text"));
-            }
-        };
-
-        closeBtn.addActionListener(e -> closeActionHandler.handle());
-
     }
 
 
@@ -1075,12 +1037,12 @@ public class RightViewFragment {
         createUIComponents();
         contentPanel = new JPanel();
         contentPanel.setLayout(new BorderLayout(0, 0));
-        contentPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
+        contentPanel.setMinimumSize(new Dimension(-1, -1));
+        contentPanel.setPreferredSize(new Dimension(618, -1));
         bodyPanel.setLayout(new BorderLayout(0, 0));
         contentPanel.add(bodyPanel, BorderLayout.CENTER);
         basicPanel.setLayout(new GridLayoutManager(2, 6, new Insets(0, 0, 0, 0), -1, -1));
         bodyPanel.add(basicPanel, BorderLayout.NORTH);
-        basicPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         Font keyTypeLabelFont = this.$$$getFont$$$(null, Font.BOLD, 14, keyTypeLabel.getFont());
         if (keyTypeLabelFont != null) keyTypeLabel.setFont(keyTypeLabelFont);
         keyTypeLabel.setText("");
@@ -1098,20 +1060,15 @@ public class RightViewFragment {
         basicPanel.add(refBtn, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         basicPanel.add(ttlField, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
         final JPanel panel1 = new JPanel();
-        panel1.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
+        panel1.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         basicPanel.add(panel1, new GridConstraints(1, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         panel1.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 5, 0, 0), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         lengthLabel = new JLabel();
         lengthLabel.setText("");
         panel1.add(lengthLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer1 = new Spacer();
-        panel1.add(spacer1, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         keySizeLabel = new JLabel();
         keySizeLabel.setText("");
         panel1.add(keySizeLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        this.$$$loadButtonText$$$(closeBtn, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "DataViewForm.closeBtn.title"));
-        closeBtn.setToolTipText(this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "DataViewForm.closeBtn.toolTip.Text"));
-        basicPanel.add(closeBtn, new GridConstraints(1, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         dataPanel = new JPanel();
         dataPanel.setLayout(new BorderLayout(0, 0));
         bodyPanel.add(dataPanel, BorderLayout.CENTER);
@@ -1129,8 +1086,8 @@ public class RightViewFragment {
         panel3.setLayout(new GridLayoutManager(6, 5, new Insets(0, 0, 0, 0), -1, -1));
         panel2.add(panel3, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         panel3.add(tableSearchField, new GridConstraints(0, 0, 1, 5, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
-        final Spacer spacer2 = new Spacer();
-        panel3.add(spacer2, new GridConstraints(5, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final Spacer spacer1 = new Spacer();
+        panel3.add(spacer1, new GridConstraints(5, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         tableDelBtn.setEnabled(true);
         this.$$$loadButtonText$$$(tableDelBtn, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "DataViewForm.tableDelBtn.title"));
         panel3.add(tableDelBtn, new GridConstraints(3, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
@@ -1156,7 +1113,6 @@ public class RightViewFragment {
         tableScorePanel.setViewportView(dataTable);
         valueViewPanel.setMinimumSize(new Dimension(-1, -1));
         dataSplitPanel.setRightComponent(valueViewPanel);
-        valueViewPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
     }
 
     /**

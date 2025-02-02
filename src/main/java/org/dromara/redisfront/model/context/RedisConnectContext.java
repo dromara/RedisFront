@@ -22,7 +22,7 @@ import java.util.Map;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ConnectContext implements Serializable, Cloneable {
+public class RedisConnectContext implements Serializable, Cloneable {
     private int id;
     private String title;
     private String host = "191.0.0.1";
@@ -54,9 +54,9 @@ public class ConnectContext implements Serializable, Cloneable {
     }
 
     @Override
-    public ConnectContext clone() {
+    public RedisConnectContext clone() {
         try {
-            return (ConnectContext) super.clone();
+            return (RedisConnectContext) super.clone();
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }

@@ -1,7 +1,7 @@
 package org.dromara.redisfront.ui.components.panel;
 
 import com.formdev.flatlaf.ui.FlatLineBorder;
-import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.ui.form.MainNoneForm;
 import org.slf4j.Logger;
@@ -19,10 +19,10 @@ import java.awt.*;
 @Deprecated
 public class DataSplitPanel extends JSplitPane {
     private static final Logger log = LoggerFactory.getLogger(DataSplitPanel.class);
-    private final ConnectContext connectContext;
+    private final RedisConnectContext redisConnectContext;
 
-    public static DataSplitPanel newInstance(ConnectContext connectContext) {
-        return new DataSplitPanel(connectContext);
+    public static DataSplitPanel newInstance(RedisConnectContext redisConnectContext) {
+        return new DataSplitPanel(redisConnectContext);
     }
 
     @Override
@@ -30,9 +30,9 @@ public class DataSplitPanel extends JSplitPane {
         super.updateUI();
     }
 
-    public DataSplitPanel(ConnectContext connectContext) {
+    public DataSplitPanel(RedisConnectContext redisConnectContext) {
 
-        this.connectContext = connectContext;
+        this.redisConnectContext = redisConnectContext;
 
 
     }
@@ -73,7 +73,7 @@ public class DataSplitPanel extends JSplitPane {
 
 
     public void ping() {
-        RedisBasicService.service.ping(connectContext);
+        RedisBasicService.service.ping(redisConnectContext);
     }
 
 }

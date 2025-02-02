@@ -2,13 +2,13 @@ package org.dromara.redisfront.ui.components.monitor;
 
 import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.model.RedisUsageInfo;
-import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class RedisMonitor {
-    private final ConnectContext context;
+    private final RedisConnectContext context;
     private double lastUserCpu;
     private double lastSysCpu;
     private long lastCpuCheckTime;
@@ -17,7 +17,7 @@ public class RedisMonitor {
     private double lastOutputBytes;
     private long lastIoCheckTime;
 
-    public RedisMonitor(ConnectContext context) {
+    public RedisMonitor(RedisConnectContext context) {
         this.context = context;
         this.initializeCpu();
         this.initializeIO();

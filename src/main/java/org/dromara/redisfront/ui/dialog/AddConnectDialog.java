@@ -12,7 +12,7 @@ import org.dromara.redisfront.commons.enums.ConnectType;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.dao.ConnectDetailDao;
-import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.ui.event.OpenRedisConnectEvent;
@@ -296,7 +296,7 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
         }
     }
 
-    private ConnectContext validGetConnectInfo() {
+    private RedisConnectContext validGetConnectInfo() {
         if (StringUtils.isEmpty(titleField.getText())) {
             titleField.requestFocus();
             throw new RedisFrontException($tr("AddConnectDialog.require.title.message"), false);
@@ -327,81 +327,81 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
         } else if (enableSSLBtn.isSelected()) {
             return getSslConnectInfo(title);
         } else {
-            ConnectContext connectContext = new ConnectContext();
-            connectContext.setTitle(title);
-            connectContext.setHost(hostField.getText());
-            connectContext.setPort((Integer) portField.getValue());
-            connectContext.setUsername(userField.getText());
-            connectContext.setPassword(String.valueOf(passwordField.getPassword()));
-            connectContext.setConnectTypeMode(ConnectType.NORMAL);
-            return connectContext;
+            RedisConnectContext redisConnectContext = new RedisConnectContext();
+            redisConnectContext.setTitle(title);
+            redisConnectContext.setHost(hostField.getText());
+            redisConnectContext.setPort((Integer) portField.getValue());
+            redisConnectContext.setUsername(userField.getText());
+            redisConnectContext.setPassword(String.valueOf(passwordField.getPassword()));
+            redisConnectContext.setConnectTypeMode(ConnectType.NORMAL);
+            return redisConnectContext;
         }
     }
 
-    private @NotNull ConnectContext getSslConnectInfo(String title) {
-        var sslInfo = new ConnectContext.SslInfo(
+    private @NotNull RedisConnectContext getSslConnectInfo(String title) {
+        var sslInfo = new RedisConnectContext.SslInfo(
                 null,
                 publicKeyField.getText(),
                 null,
                 String.valueOf(sslPasswordField.getPassword())
         );
-        ConnectContext connectContext = new ConnectContext();
-        connectContext.setTitle(title);
-        connectContext.setHost(hostField.getText());
-        connectContext.setPort((Integer) portField.getValue());
-        connectContext.setUsername(userField.getText());
-        connectContext.setPassword(String.valueOf(passwordField.getPassword()));
-        connectContext.setSslInfo(sslInfo);
-        connectContext.setEnableSsl(enableSSLBtn.isSelected());
-        connectContext.setConnectTypeMode(ConnectType.NORMAL);
-        return connectContext;
+        RedisConnectContext redisConnectContext = new RedisConnectContext();
+        redisConnectContext.setTitle(title);
+        redisConnectContext.setHost(hostField.getText());
+        redisConnectContext.setPort((Integer) portField.getValue());
+        redisConnectContext.setUsername(userField.getText());
+        redisConnectContext.setPassword(String.valueOf(passwordField.getPassword()));
+        redisConnectContext.setSslInfo(sslInfo);
+        redisConnectContext.setEnableSsl(enableSSLBtn.isSelected());
+        redisConnectContext.setConnectTypeMode(ConnectType.NORMAL);
+        return redisConnectContext;
     }
 
-    private @NotNull ConnectContext getSshConnectInfo(String title) {
-        var sshInfo = new ConnectContext.SshInfo(
+    private @NotNull RedisConnectContext getSshConnectInfo(String title) {
+        var sshInfo = new RedisConnectContext.SshInfo(
                 sshPrivateKeyFile.getText(),
                 sshUserField.getText(),
                 sshHostField.getText(),
                 (Integer) sshPortField.getValue(),
                 new String(sshPasswordField.getPassword()));
 
-        ConnectContext connectContext = new ConnectContext();
-        connectContext.setTitle(title);
-        connectContext.setHost(hostField.getText());
-        connectContext.setPort((Integer) portField.getValue());
-        connectContext.setUsername(userField.getText());
-        connectContext.setPassword(String.valueOf(passwordField.getPassword()));
-        connectContext.setSshInfo(sshInfo);
-        connectContext.setEnableSsl(enableSSLBtn.isSelected());
-        connectContext.setConnectTypeMode(ConnectType.SSH);
-        return connectContext;
+        RedisConnectContext redisConnectContext = new RedisConnectContext();
+        redisConnectContext.setTitle(title);
+        redisConnectContext.setHost(hostField.getText());
+        redisConnectContext.setPort((Integer) portField.getValue());
+        redisConnectContext.setUsername(userField.getText());
+        redisConnectContext.setPassword(String.valueOf(passwordField.getPassword()));
+        redisConnectContext.setSshInfo(sshInfo);
+        redisConnectContext.setEnableSsl(enableSSLBtn.isSelected());
+        redisConnectContext.setConnectTypeMode(ConnectType.SSH);
+        return redisConnectContext;
     }
 
-    private void populateConnectInfo(ConnectContext connectContext) {
-        this.titleField.setText(connectContext.getTitle());
-        this.hostField.setText(connectContext.getHost());
-        this.portField.setValue(connectContext.getPort());
-        this.userField.setText(connectContext.getUsername());
-        this.passwordField.setText(connectContext.getPassword());
-        this.enableSSLBtn.setSelected(connectContext.getEnableSsl());
-        this.enableSSHBtn.setSelected(ConnectType.SSH.equals(connectContext.getConnectTypeMode()));
+    private void populateConnectInfo(RedisConnectContext redisConnectContext) {
+        this.titleField.setText(redisConnectContext.getTitle());
+        this.hostField.setText(redisConnectContext.getHost());
+        this.portField.setValue(redisConnectContext.getPort());
+        this.userField.setText(redisConnectContext.getUsername());
+        this.passwordField.setText(redisConnectContext.getPassword());
+        this.enableSSLBtn.setSelected(redisConnectContext.getEnableSsl());
+        this.enableSSHBtn.setSelected(ConnectType.SSH.equals(redisConnectContext.getConnectTypeMode()));
         if (enableSSLBtn.isSelected()) {
             setSize(new Dimension(getWidth(), getHeight() - 130));
             sslPanel.setVisible(true);
-            sslPasswordField.setText(connectContext.getSslInfo().getPassword());
-            publicKeyField.setText(connectContext.getSslInfo().getPublicKeyFilePath());
+            sslPasswordField.setText(redisConnectContext.getSslInfo().getPassword());
+            publicKeyField.setText(redisConnectContext.getSslInfo().getPublicKeyFilePath());
         }
         if (enableSSHBtn.isSelected()) {
             setSize(new Dimension(getWidth(), getHeight() + 140));
             sshPanel.setVisible(true);
-            sshUserField.setText(connectContext.getSshInfo().getUser());
-            sshHostField.setText(connectContext.getSshInfo().getHost());
-            sshPasswordField.setText(connectContext.getSshInfo().getPassword());
-            sshPortField.setValue(connectContext.getSshInfo().getPort());
-            enableSshPrivateKey.setSelected(Fn.isNotEmpty(connectContext.getSshInfo().getPrivateKeyPath()));
+            sshUserField.setText(redisConnectContext.getSshInfo().getUser());
+            sshHostField.setText(redisConnectContext.getSshInfo().getHost());
+            sshPasswordField.setText(redisConnectContext.getSshInfo().getPassword());
+            sshPortField.setValue(redisConnectContext.getSshInfo().getPort());
+            enableSshPrivateKey.setSelected(Fn.isNotEmpty(redisConnectContext.getSshInfo().getPrivateKeyPath()));
             sshPrivateKeyFile.setVisible(enableSshPrivateKey.isSelected());
             sshPrivateKeyBtn.setVisible(enableSshPrivateKey.isSelected());
-            sshPrivateKeyFile.setText(connectContext.getSshInfo().getPrivateKeyPath());
+            sshPrivateKeyFile.setText(redisConnectContext.getSshInfo().getPrivateKeyPath());
         }
     }
 

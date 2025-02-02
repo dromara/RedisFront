@@ -17,7 +17,7 @@ import org.dromara.redisfront.commons.enums.ConnectType;
 import org.dromara.redisfront.commons.resources.AbstractDialog;
 import org.dromara.redisfront.commons.utils.AlertUtils;
 import org.dromara.redisfront.commons.utils.LocaleUtils;
-import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -89,11 +89,11 @@ public class ImportConfigDialog extends AbstractDialog<Void> {
                 if ("导入RedisFront配置".equals(selectedItem)) {
                     try {
                         if (JSONUtil.isTypeJSONObject(fileReader.readString())) {
-                            var connectInfo = JSONUtil.toBean(fileReader.readString(), ConnectContext.class);
+                            var connectInfo = JSONUtil.toBean(fileReader.readString(), RedisConnectContext.class);
 //                            ConnectDetailDao.DAO.save(connectInfo);
                         } else {
-                            var connectInfos = JSONUtil.toList(fileReader.readString(), ConnectContext.class);
-                            for (ConnectContext connectContext : connectInfos) {
+                            var connectInfos = JSONUtil.toList(fileReader.readString(), RedisConnectContext.class);
+                            for (RedisConnectContext redisConnectContext : connectInfos) {
 //                                ConnectDetailDao.DAO.save(connectInfo);
                             }
                         }
@@ -135,8 +135,8 @@ public class ImportConfigDialog extends AbstractDialog<Void> {
         dispose();
     }
 
-    private ConnectContext genConnectInfo(Map<String, Object> raw) {
-        var connectInfo = new ConnectContext();
+    private RedisConnectContext genConnectInfo(Map<String, Object> raw) {
+        var connectInfo = new RedisConnectContext();
         if (Fn.isNotNull(raw.get("host"))) {
             connectInfo.setHost((String) raw.get("host"));
         }
@@ -153,7 +153,7 @@ public class ImportConfigDialog extends AbstractDialog<Void> {
             connectInfo.setUsername((String) raw.get("username"));
         }
         connectInfo.setConnectTypeMode(ConnectType.NORMAL);
-        connectInfo.setSshInfo(new ConnectContext.SshInfo("", "", "", null, ""));
+        connectInfo.setSshInfo(new RedisConnectContext.SshInfo("", "", "", null, ""));
         if (!StrUtil.isBlankIfStr(raw.get("ssh_host"))) {
             connectInfo.getSshInfo().setHost((String) raw.get("ssh_host"));
             connectInfo.setConnectTypeMode(ConnectType.SSH);

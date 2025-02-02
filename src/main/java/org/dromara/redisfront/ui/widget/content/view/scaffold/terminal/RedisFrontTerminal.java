@@ -2,7 +2,7 @@ package org.dromara.redisfront.ui.widget.content.view.scaffold.terminal;
 
 import cn.hutool.core.date.DateUtil;
 import org.dromara.redisfront.commons.enums.RedisMode;
-import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.output.ArrayOutput;
 import io.lettuce.core.protocol.CommandArgs;
@@ -22,20 +22,20 @@ import java.util.List;
 
 public class RedisFrontTerminal extends AbstractTerminal {
     private static final Logger log = LoggerFactory.getLogger(RedisFrontTerminal.class);
-    private final ConnectContext connectContext;
+    private final RedisConnectContext redisConnectContext;
 
-    public RedisFrontTerminal(final ConnectContext connectContext) {
+    public RedisFrontTerminal(final RedisConnectContext redisConnectContext) {
         super();
-        this.connectContext = connectContext.clone();
+        this.redisConnectContext = redisConnectContext.clone();
         terminal.setEnabled(true);
         printConnectedSuccessMessage();
     }
 
     public void ping() {
         try {
-            if (RedisBasicService.service.ping(connectContext)) {
+            if (RedisBasicService.service.ping(redisConnectContext)) {
                 if (!terminal.isEnabled()) {
-                    connectContext.setDatabase(0);
+                    redisConnectContext.setDatabase(0);
                     terminal.setEnabled(true);
                     super.printConnectedSuccessMessage();
                 }
@@ -71,7 +71,7 @@ public class RedisFrontTerminal extends AbstractTerminal {
             } else {
                 LettuceUtils.run(connectInfo(), redisCommands -> {
                     if (CommandType.SELECT.equals(commandType)) {
-                        connectContext.setDatabase(Integer.valueOf(commandList.getFirst()));
+                        redisConnectContext.setDatabase(Integer.valueOf(commandList.getFirst()));
                     }
                     if (CommandType.PUBLISH.equals(commandType)) {
                         //监听后期完善
@@ -116,13 +116,13 @@ public class RedisFrontTerminal extends AbstractTerminal {
 
 
     @Override
-    protected ConnectContext connectInfo() {
-        return connectContext;
+    protected RedisConnectContext connectInfo() {
+        return redisConnectContext;
     }
 
     @Override
     protected String databaseName() {
-        return String.valueOf(connectContext.getDatabase());
+        return String.valueOf(redisConnectContext.getDatabase());
     }
 
 }

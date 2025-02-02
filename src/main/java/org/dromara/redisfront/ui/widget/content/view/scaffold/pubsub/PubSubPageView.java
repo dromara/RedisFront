@@ -4,7 +4,6 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import com.sun.tools.javac.Main;
 import org.dromara.quickswing.ui.app.page.QSPageItem;
 import org.dromara.redisfront.commons.enums.KeyTypeEnum;
 import org.dromara.redisfront.commons.enums.RedisMode;
@@ -14,7 +13,7 @@ import org.dromara.redisfront.commons.utils.AlertUtils;
 import org.dromara.redisfront.commons.utils.FutureUtils;
 import org.dromara.redisfront.commons.utils.JschUtils;
 import org.dromara.redisfront.commons.utils.LettuceUtils;
-import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.RedisPubSubService;
 import io.lettuce.core.AbstractRedisClient;
 import io.lettuce.core.RedisClient;
@@ -54,13 +53,13 @@ public class PubSubPageView extends QSPageItem<MainWidget> implements RedisPubSu
     private JLabel numLabel;
     private JLabel infoLabel;
     private String lastSubscribeChanel;
-    private final ConnectContext connectContext;
+    private final RedisConnectContext redisConnectContext;
 
-    public PubSubPageView(ConnectContext connectContext, MainWidget owner) {
+    public PubSubPageView(RedisConnectContext redisConnectContext, MainWidget owner) {
         $$$setupUI$$$();
         setLayout(new BorderLayout());
         add(rootPanel, BorderLayout.CENTER);
-        this.connectContext = connectContext;
+        this.redisConnectContext = redisConnectContext;
         channelField.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
@@ -103,7 +102,7 @@ public class PubSubPageView extends QSPageItem<MainWidget> implements RedisPubSu
             }
         });
         publishBtn.addActionListener(e -> FutureUtils.runAsync(() -> {
-            var count = RedisPubSubService.service.publish(connectContext, channelField.getText(), messageField.getText());
+            var count = RedisPubSubService.service.publish(redisConnectContext, channelField.getText(), messageField.getText());
             SwingUtilities.invokeLater(() -> {
                 messageField.setText("");
                 AlertUtils.showInformationDialog("成功发布 " + count + " 条消息！");
@@ -112,18 +111,18 @@ public class PubSubPageView extends QSPageItem<MainWidget> implements RedisPubSu
     }
 
     public void openConnection() {
-        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
+        if (Fn.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             FutureUtils.runAsync(() -> {
-                var redisUrl = LettuceUtils.getRedisURI(connectContext);
-                redisClient = LettuceUtils.getRedisClusterClient(redisUrl, connectContext);
+                var redisUrl = LettuceUtils.getRedisURI(redisConnectContext);
+                redisClient = LettuceUtils.getRedisClusterClient(redisUrl, redisConnectContext);
                 var connection = ((RedisClusterClient) redisClient).connectPubSub();
-                JschUtils.openSession(connectContext, (RedisClusterClient) redisClient);
+                JschUtils.openSession(redisConnectContext, (RedisClusterClient) redisClient);
                 pubsub = connection.async();
             }).thenRun(() -> pubsub.getStatefulConnection().addListener(this));
         } else {
             FutureUtils.runAsync(() -> {
-                redisClient = LettuceUtils.getRedisClient(connectContext);
-                JschUtils.openSession(connectContext);
+                redisClient = LettuceUtils.getRedisClient(redisConnectContext);
+                JschUtils.openSession(redisConnectContext);
                 var connection = (((RedisClient) redisClient).connectPubSub());
                 pubsub = connection.async();
             }).thenRun(() -> pubsub.getStatefulConnection().addListener(this));
@@ -134,8 +133,8 @@ public class PubSubPageView extends QSPageItem<MainWidget> implements RedisPubSu
         enableSubscribe.setSelected(false);
         if (Fn.isNotNull(pubsub)) {
             pubsub.getStatefulConnection().closeAsync().thenRun(() -> redisClient.shutdownAsync().thenRun(() -> {
-                if (connectContext.getSshInfo() != null) {
-                    JschUtils.closeSession(connectContext);
+                if (redisConnectContext.getSshInfo() != null) {
+                    JschUtils.closeSession(redisConnectContext);
                 }
             }));
         }

@@ -1,7 +1,7 @@
 package org.dromara.redisfront.service;
 
 
-import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.impl.RedisListServiceImpl;
 
 
@@ -11,24 +11,24 @@ public interface RedisListService {
 
     RedisListService service = new RedisListServiceImpl();
 
-    List<String> lrange(ConnectContext connectContext, String key, long start, long stop);
+    List<String> lrange(RedisConnectContext redisConnectContext, String key, long start, long stop);
 
-    Long lrem(ConnectContext connectContext, String key, long count, String value);
+    Long lrem(RedisConnectContext redisConnectContext, String key, long count, String value);
 
-    Long llen(ConnectContext connectContext, String key);
+    Long llen(RedisConnectContext redisConnectContext, String key);
 
-    String lpop(ConnectContext connectContext, String key);
+    String lpop(RedisConnectContext redisConnectContext, String key);
 
-    List<String> lpop(ConnectContext connectContext, String key, long count);
+    List<String> lpop(RedisConnectContext redisConnectContext, String key, long count);
 
-    Long lpush(ConnectContext connectContext, String key, String... values);
+    Long lpush(RedisConnectContext redisConnectContext, String key, String... values);
 
-    String lset(ConnectContext connectContext, String key, long index, String value);
+    String lset(RedisConnectContext redisConnectContext, String key, long index, String value);
 
-    String rpop(ConnectContext connectContext, String key);
+    String rpop(RedisConnectContext redisConnectContext, String key);
 
-    List<String> rpop(ConnectContext connectContext, String key, long count);
+    List<String> rpop(RedisConnectContext redisConnectContext, String key, long count);
 
-    Long rpush(ConnectContext connectContext, String key, String... values);
+    Long rpush(RedisConnectContext redisConnectContext, String key, String... values);
 
 }

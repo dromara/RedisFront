@@ -1,6 +1,6 @@
 package org.dromara.redisfront.service;
 
-import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import io.lettuce.core.*;
 import org.dromara.redisfront.service.impl.RedisStreamServiceImpl;
 
@@ -16,22 +16,22 @@ public interface RedisStreamService {
 
     RedisStreamService service = new RedisStreamServiceImpl();
 
-    Long xdel(ConnectContext connectContext, String key, String... messageIds);
+    Long xdel(RedisConnectContext redisConnectContext, String key, String... messageIds);
 
-    Long xack(ConnectContext connectContext, String key, String group, String... messageIds);
+    Long xack(RedisConnectContext redisConnectContext, String key, String group, String... messageIds);
 
-    String xadd(ConnectContext connectContext, String key, Map<String, String> body);
+    String xadd(RedisConnectContext redisConnectContext, String key, Map<String, String> body);
 
-    String xadd(ConnectContext connectContext, String id, String key, Map<String, String> body);
+    String xadd(RedisConnectContext redisConnectContext, String id, String key, Map<String, String> body);
 
-    List<StreamMessage<String, String>> xrange(ConnectContext connectContext, String key, Range<String> range, Limit limit);
+    List<StreamMessage<String, String>> xrange(RedisConnectContext redisConnectContext, String key, Range<String> range, Limit limit);
 
-    String xadd(ConnectContext connectContext, String key, XAddArgs args, Object... keysAndValues);
+    String xadd(RedisConnectContext redisConnectContext, String key, XAddArgs args, Object... keysAndValues);
 
-    String xgroupCreate(ConnectContext connectContext, XReadArgs.StreamOffset<String> streamOffset, String group);
+    String xgroupCreate(RedisConnectContext redisConnectContext, XReadArgs.StreamOffset<String> streamOffset, String group);
 
-    String xgroupCreate(ConnectContext connectContext, XReadArgs.StreamOffset<String> streamOffset, String group, XGroupCreateArgs args);
+    String xgroupCreate(RedisConnectContext redisConnectContext, XReadArgs.StreamOffset<String> streamOffset, String group, XGroupCreateArgs args);
 
-    Long xlen(ConnectContext connectContext, String key);
+    Long xlen(RedisConnectContext redisConnectContext, String key);
 
 }

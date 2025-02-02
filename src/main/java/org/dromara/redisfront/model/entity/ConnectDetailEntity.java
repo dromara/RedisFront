@@ -4,7 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.Data;
 import org.dromara.redisfront.commons.enums.ConnectType;
-import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 
 @Data
 public class ConnectDetailEntity {
@@ -20,21 +20,21 @@ public class ConnectDetailEntity {
     private String sslConfig;
     private String sshConfig;
 
-    public ConnectContext getConnectContext() {
-        ConnectContext connectContext = new ConnectContext();
-        connectContext.setId(id);
-        connectContext.setTitle(name);
-        connectContext.setHost(host);
-        connectContext.setPort(port);
-        connectContext.setUsername(username);
-        connectContext.setPassword(password);
-        connectContext.setConnectTypeMode(ConnectType.of(connectMode));
+    public RedisConnectContext getConnectContext() {
+        RedisConnectContext redisConnectContext = new RedisConnectContext();
+        redisConnectContext.setId(id);
+        redisConnectContext.setTitle(name);
+        redisConnectContext.setHost(host);
+        redisConnectContext.setPort(port);
+        redisConnectContext.setUsername(username);
+        redisConnectContext.setPassword(password);
+        redisConnectContext.setConnectTypeMode(ConnectType.of(connectMode));
         if (StrUtil.isNotEmpty(sslConfig)) {
-            JSONUtil.toBean(sslConfig, ConnectContext.SslInfo.class);
+            JSONUtil.toBean(sslConfig, RedisConnectContext.SslInfo.class);
         }
         if (StrUtil.isNotEmpty(sshConfig)) {
-            JSONUtil.toBean(sshConfig, ConnectContext.SshInfo.class);
+            JSONUtil.toBean(sshConfig, RedisConnectContext.SshInfo.class);
         }
-        return connectContext;
+        return redisConnectContext;
     }
 }

@@ -1,7 +1,7 @@
 package org.dromara.redisfront.model;
 
 import org.dromara.redisfront.commons.utils.LocaleUtils;
-import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 
 import javax.swing.table.DefaultTableModel;
 import java.util.List;
@@ -18,7 +18,7 @@ public class ConnectTableModel extends DefaultTableModel {
             false, false, false, false, false, false
     };
 
-    public ConnectTableModel(List<ConnectContext> dataList) {
+    public ConnectTableModel(List<RedisConnectContext> dataList) {
         var dataVector = new Object[dataList.size()][6];
         for (var i = 0; i < dataList.size(); i++) {
             dataVector[i][0] = dataList.get(i).getId();

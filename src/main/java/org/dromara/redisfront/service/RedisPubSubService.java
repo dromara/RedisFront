@@ -1,6 +1,6 @@
 package org.dromara.redisfront.service;
 
-import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.impl.RedisPubSubServiceImpl;
 
 /**
@@ -11,7 +11,7 @@ import org.dromara.redisfront.service.impl.RedisPubSubServiceImpl;
 public interface RedisPubSubService {
     RedisPubSubService service = new RedisPubSubServiceImpl();
 
-    Long publish(ConnectContext connectContext, String channel, String message);
+    Long publish(RedisConnectContext redisConnectContext, String channel, String message);
 
 
 }

@@ -3,26 +3,29 @@ package org.dromara.redisfront.ui.widget.content.view.scaffold.index;
 import cn.hutool.core.util.NumberUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
-import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import io.lettuce.core.MapScanCursor;
+import io.lettuce.core.RedisCommandExecutionException;
+import io.lettuce.core.ScoredValueScanCursor;
+import io.lettuce.core.ValueScanCursor;
 import lombok.Getter;
+import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.RedisFrontMain;
+import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.enums.KeyTypeEnum;
 import org.dromara.redisfront.commons.enums.RedisMode;
-import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.commons.exception.RedisFrontException;
+import org.dromara.redisfront.commons.resources.Icons;
+import org.dromara.redisfront.commons.utils.*;
 import org.dromara.redisfront.model.DbInfo;
-import org.dromara.redisfront.model.context.ScanContext;
 import org.dromara.redisfront.model.TreeNodeInfo;
+import org.dromara.redisfront.model.context.RedisConnectContext;
+import org.dromara.redisfront.model.context.ScanContext;
 import org.dromara.redisfront.service.*;
 import org.dromara.redisfront.ui.dialog.AddKeyDialog;
-import io.lettuce.core.*;
-import org.dromara.redisfront.commons.constant.Constants;
-import org.dromara.redisfront.commons.resources.Icons;
-import org.dromara.redisfront.commons.exception.RedisFrontException;
-import org.dromara.redisfront.commons.Fn;
-import org.dromara.redisfront.commons.handler.ProcessHandler;
-import org.dromara.redisfront.commons.utils.*;
+import org.dromara.redisfront.ui.event.ClickKeyTreeNodeEvent;
 import org.dromara.redisfront.ui.widget.MainWidget;
 import org.jdesktop.swingx.JXTree;
 import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer;
@@ -59,6 +62,7 @@ public class LeftSearchFragment {
     private static final Logger log = LoggerFactory.getLogger(LeftSearchFragment.class);
     private static final String SEPARATOR_FLAG = "/";
     private final MainWidget owner;
+    private final RedisFrontContext context;
     @Getter
     private JPanel contentPanel;
     private JXTree keyTree;
@@ -74,8 +78,7 @@ public class LeftSearchFragment {
     private JPanel loadMorePanel;
     private JButton deleteAllBtn;
     private volatile Map<Integer, ScanContext<String>> scanKeysContextMap;
-    private ProcessHandler<TreeNodeInfo> nodeClickProcessHandler;
-    private final ConnectContext connectContext;
+    private final RedisConnectContext redisConnectContext;
     private JButton searchBtn;
 
     private final ArrayList<DbInfo> dbList = new ArrayList<>() {
@@ -101,15 +104,12 @@ public class LeftSearchFragment {
 
     static final ExecutorService executorService = Executors.newFixedThreadPool(5);
 
-    public LeftSearchFragment(MainWidget owner, ConnectContext connectContext) {
+    public LeftSearchFragment(MainWidget owner, RedisConnectContext redisConnectContext) {
         this.owner = owner;
-        this.connectContext = connectContext;
+        this.context = (RedisFrontContext) owner.getContext();
+        this.redisConnectContext = redisConnectContext;
         $$$setupUI$$$();
-        databaseComboBox.setSelectedIndex(0);
-    }
-
-    public void setNodeClickProcessHandler(ProcessHandler<TreeNodeInfo> nodeClickProcessHandler) {
-        this.nodeClickProcessHandler = nodeClickProcessHandler;
+        this.databaseComboBox.setSelectedIndex(0);
     }
 
 
@@ -118,7 +118,7 @@ public class LeftSearchFragment {
 //            LoadingUtils.showDialog(LocaleUtils.getMessageFromBundle("DataSearchForm.showDialog.message"));
 
             scanBeforeProcess();
-            var scanKeysContext = scanKeysContextMap.get(connectContext.getDatabase());
+            var scanKeysContext = scanKeysContextMap.get(redisConnectContext.getDatabase());
 
             if (Fn.isNull(scanKeysContext.getLimit())) {
                 Long limit = owner.getPrefs().getState().getLong(Constants.KEY_KEY_MAX_LOAD_NUM, 10000L);
@@ -143,7 +143,7 @@ public class LeftSearchFragment {
 
             }
 
-            var keyScanCursor = RedisBasicService.service.scan(connectContext, scanKeysContext.getScanCursor(), scanKeysContext.getScanArgs());
+            var keyScanCursor = RedisBasicService.service.scan(redisConnectContext, scanKeysContext.getScanCursor(), scanKeysContext.getScanArgs());
             scanKeysContext.setScanCursor(keyScanCursor);
             log.debug("本次扫描到：{}", keyScanCursor.getKeys().size());
 
@@ -154,7 +154,7 @@ public class LeftSearchFragment {
             //模糊匹配(模糊匹配在key数量小于 limit 的情况加全部查询出来)
             if (!loadMorePanel.isVisible() && Fn.equal("*", key)) {
                 while (Fn.equal("*", key) && !keyScanCursor.isFinished()) {
-                    keyScanCursor = RedisBasicService.service.scan(connectContext, scanKeysContext.getScanCursor(), scanKeysContext.getScanArgs());
+                    keyScanCursor = RedisBasicService.service.scan(redisConnectContext, scanKeysContext.getScanCursor(), scanKeysContext.getScanArgs());
                     scanKeysContext.setScanCursor(keyScanCursor);
                     scanKeysList.addAll(keyScanCursor.getKeys());
                 }
@@ -278,7 +278,7 @@ public class LeftSearchFragment {
                 loadMoreBtn.requestFocus();
                 loadMoreBtn.setEnabled(true);
             }
-            databaseComboBox.setEnabled(Fn.notEqual(connectContext.getRedisMode(), RedisMode.CLUSTER));
+            databaseComboBox.setEnabled(Fn.notEqual(redisConnectContext.getRedisMode(), RedisMode.CLUSTER));
         });
     }
 
@@ -287,7 +287,7 @@ public class LeftSearchFragment {
         var selectNode = keyTree.getLastSelectedPathComponent();
         if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
             if (treeNodeInfo.getParent() != null) {
-                RedisBasicService.service.del(connectContext, treeNodeInfo.key());
+                RedisBasicService.service.del(redisConnectContext, treeNodeInfo.key());
                 treeModel.removeNodeFromParent(treeNodeInfo);
             }
         }
@@ -300,7 +300,7 @@ public class LeftSearchFragment {
                 deleteActionPerformed(subNode);
             }
         } else {
-            RedisBasicService.service.del(connectContext, treeNodeInfo.key());
+            RedisBasicService.service.del(redisConnectContext, treeNodeInfo.key());
         }
     }
 
@@ -326,12 +326,12 @@ public class LeftSearchFragment {
         addBtn.setIcon(Icons.PLUS_ICON);
         addBtn.putClientProperty(FlatClientProperties.BUTTON_TYPE, FlatClientProperties.BUTTON_TYPE_TAB);
         addBtn.setFocusable(false);
-        addBtn.addActionListener(e -> AddKeyDialog.showAddDialog(connectContext, null, (key) -> {
+        addBtn.addActionListener(e -> AddKeyDialog.showAddDialog(redisConnectContext, null, (key) -> {
             var res = JOptionPane.showConfirmDialog(RedisFrontMain.frame,
                     LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.message"),
                     LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.title"), JOptionPane.YES_NO_OPTION);
             if (res == JOptionPane.YES_OPTION) {
-                scanKeysContextMap.put(connectContext.getDatabase(), new ScanContext<>());
+                scanKeysContextMap.put(redisConnectContext.getDatabase(), new ScanContext<>());
                 scanKeysAndInitScanInfo();
             }
         }));
@@ -370,15 +370,15 @@ public class LeftSearchFragment {
                 () -> {
                     String operation = JOptionPane.showInputDialog(LocaleUtils.getMessageFromBundle("DataSearchForm.showInputDialog.title") + "\n “flushdb” or “flushall” ");
                     if (Fn.equal(operation, "flushdb")) {
-                        RedisBasicService.service.flushdb(connectContext);
+                        RedisBasicService.service.flushdb(redisConnectContext);
                     } else if (Fn.equal(operation, "flushall")) {
-                        RedisBasicService.service.flushall(connectContext);
+                        RedisBasicService.service.flushall(redisConnectContext);
                     }
                 },
                 this::scanBeforeProcess,
                 this::scanAfterProcess
         ));
-        deleteAllBtn.setIcon(Icons.DELETE_ICON);
+        deleteAllBtn.setIcon(Icons.DELETE_1_ICON);
 
 
         databaseComboBox = new JComboBox<>();
@@ -407,8 +407,8 @@ public class LeftSearchFragment {
             if (Fn.isNull(db)) {
                 return;
             }
-            connectContext.setDatabase(db.dbIndex());
-            scanKeysContextMap.put(connectContext.getDatabase(), new ScanContext<>());
+            redisConnectContext.setDatabase(db.dbIndex());
+            scanKeysContextMap.put(redisConnectContext.getDatabase(), new ScanContext<>());
             var limit = owner.getPrefs().getState().getLong(Constants.KEY_KEY_MAX_LOAD_NUM, 10000L);
             var flag = !Fn.isNull(db.dbSize()) && (db.dbSize() > limit);
             allField.setText(String.valueOf(db.dbSize()));
@@ -429,7 +429,7 @@ public class LeftSearchFragment {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (Fn.equal(e.getKeyCode(), KeyEvent.VK_ENTER)) {
-                    scanKeysContextMap.put(connectContext.getDatabase(), new ScanContext<>());
+                    scanKeysContextMap.put(redisConnectContext.getDatabase(), new ScanContext<>());
                     scanKeysAndInitScanInfo();
                 }
             }
@@ -438,14 +438,14 @@ public class LeftSearchFragment {
         searchBtn = new JButton(new FlatSearchIcon());
         searchBtn.setFocusable(false);
         searchBtn.addActionListener(actionEvent -> {
-            scanKeysContextMap.put(connectContext.getDatabase(), new ScanContext<>());
+            scanKeysContextMap.put(redisConnectContext.getDatabase(), new ScanContext<>());
             scanKeysAndInitScanInfo();
         });
 
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchBtn);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> {
-            scanKeysContextMap.put(connectContext.getDatabase(), new ScanContext<>());
+            scanKeysContextMap.put(redisConnectContext.getDatabase(), new ScanContext<>());
             searchTextField.setText("");
             scanKeysAndInitScanInfo();
         });
@@ -461,11 +461,11 @@ public class LeftSearchFragment {
                 setLeafIcon(Icons.TREE_KEY_ICON);
             }
         });
-        keyTree.addTreeSelectionListener(e -> {
+        keyTree.addTreeSelectionListener(_ -> {
             var selectNode = keyTree.getLastSelectedPathComponent();
             if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
                 if (treeNodeInfo.getChildCount() == 0) {
-                    FutureUtils.runAsync(() -> nodeClickProcessHandler.processHandler(treeNodeInfo));
+                    context.getEventBus().publish(new ClickKeyTreeNodeEvent(treeNodeInfo));
                 }
             }
         });
@@ -483,12 +483,12 @@ public class LeftSearchFragment {
                 addMenuItem.addActionListener((e) -> {
                     var selectNode = keyTree.getLastSelectedPathComponent();
                     if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
-                        AddKeyDialog.showAddDialog(connectContext, treeNodeInfo.key(), (key) -> {
+                        AddKeyDialog.showAddDialog(redisConnectContext, treeNodeInfo.key(), (key) -> {
                             var res = JOptionPane.showConfirmDialog(RedisFrontMain.frame,
                                     LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.message"),
                                     LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.title"), JOptionPane.YES_NO_OPTION);
                             if (res == JOptionPane.YES_OPTION) {
-                                scanKeysContextMap.put(connectContext.getDatabase(), new ScanContext<>());
+                                scanKeysContextMap.put(redisConnectContext.getDatabase(), new ScanContext<>());
                                 scanKeysAndInitScanInfo();
                             }
                         });
@@ -589,12 +589,12 @@ public class LeftSearchFragment {
                     }
                 } else {
                     FutureUtils.supplyAsync(
-                            () -> RedisBasicService.service.type(connectContext, treeNodeInfo.key()),
+                            () -> RedisBasicService.service.type(redisConnectContext, treeNodeInfo.key()),
                             type -> {
                                 var typeEnum = KeyTypeEnum.valueOf(type.toUpperCase());
 
                                 if (typeEnum.equals(KeyTypeEnum.STRING)) {
-                                    var value = RedisStringService.service.get(connectContext, treeNodeInfo.key());
+                                    var value = RedisStringService.service.get(redisConnectContext, treeNodeInfo.key());
                                     SwingUtilities.invokeLater(() -> {
                                         treeNodeInfo.setMemorySize(value.length());
                                         keyTree.updateUI();
@@ -602,10 +602,10 @@ public class LeftSearchFragment {
                                 }
 
                                 if (typeEnum.equals(KeyTypeEnum.ZSET)) {
-                                    var valueScanCursor = RedisZSetService.service.zscan(connectContext, treeNodeInfo.key(), ScoredValueScanCursor.INITIAL);
+                                    var valueScanCursor = RedisZSetService.service.zscan(redisConnectContext, treeNodeInfo.key(), ScoredValueScanCursor.INITIAL);
                                     var dataList = new ArrayList<>(valueScanCursor.getValues());
                                     while (!valueScanCursor.isFinished()) {
-                                        valueScanCursor = RedisZSetService.service.zscan(connectContext, treeNodeInfo.key(), valueScanCursor);
+                                        valueScanCursor = RedisZSetService.service.zscan(redisConnectContext, treeNodeInfo.key(), valueScanCursor);
                                         dataList.addAll(valueScanCursor.getValues());
                                     }
                                     if (Fn.isNotEmpty(dataList)) {
@@ -618,10 +618,10 @@ public class LeftSearchFragment {
 
                                 if (typeEnum.equals(KeyTypeEnum.HASH)) {
 
-                                    var mapScanCursor = RedisHashService.service.hscan(connectContext, treeNodeInfo.key(), MapScanCursor.INITIAL);
+                                    var mapScanCursor = RedisHashService.service.hscan(redisConnectContext, treeNodeInfo.key(), MapScanCursor.INITIAL);
                                     var dataList = new ArrayList<>(mapScanCursor.getMap().entrySet());
                                     while (!mapScanCursor.isFinished()) {
-                                        mapScanCursor = RedisHashService.service.hscan(connectContext, treeNodeInfo.key(), mapScanCursor);
+                                        mapScanCursor = RedisHashService.service.hscan(redisConnectContext, treeNodeInfo.key(), mapScanCursor);
                                         dataList.addAll(new ArrayList<>(mapScanCursor.getMap().entrySet()));
                                     }
 
@@ -634,12 +634,12 @@ public class LeftSearchFragment {
                                 }
 
                                 if (typeEnum.equals(KeyTypeEnum.LIST)) {
-                                    var len = RedisListService.service.llen(connectContext, treeNodeInfo.key());
+                                    var len = RedisListService.service.llen(redisConnectContext, treeNodeInfo.key());
                                     var start = 0;
                                     var dataList = new ArrayList<>();
                                     while (start >= len) {
                                         var stop = start + (1000 - 1);
-                                        var values = RedisListService.service.lrange(connectContext, treeNodeInfo.key(), start, stop);
+                                        var values = RedisListService.service.lrange(redisConnectContext, treeNodeInfo.key(), start, stop);
                                         dataList.addAll(values);
                                         start += 1000;
                                     }
@@ -653,10 +653,10 @@ public class LeftSearchFragment {
                                 }
 
                                 if (typeEnum.equals(KeyTypeEnum.SET)) {
-                                    var valueScanCursor = RedisSetService.service.sscan(connectContext, treeNodeInfo.key(), ValueScanCursor.INITIAL);
+                                    var valueScanCursor = RedisSetService.service.sscan(redisConnectContext, treeNodeInfo.key(), ValueScanCursor.INITIAL);
                                     var dataList = new ArrayList<>(valueScanCursor.getValues());
                                     while (!valueScanCursor.isFinished()) {
-                                        valueScanCursor = RedisSetService.service.sscan(connectContext, treeNodeInfo.key(), valueScanCursor);
+                                        valueScanCursor = RedisSetService.service.sscan(redisConnectContext, treeNodeInfo.key(), valueScanCursor);
                                         dataList.addAll(valueScanCursor.getValues());
                                     }
                                     if (Fn.isNotEmpty(dataList)) {
@@ -715,15 +715,15 @@ public class LeftSearchFragment {
     }
 
     private void databaseComboBoxInit(int selectedIndex) {
-        if (Fn.notEqual(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            Map<String, String> databases = RedisBasicService.service.configGet(connectContext, "databases");
+        if (Fn.notEqual(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
+            Map<String, String> databases = RedisBasicService.service.configGet(redisConnectContext, "databases");
             var dbNum = Integer.parseInt(databases.get("databases"));
             if (dbNum > 16) {
                 for (int i = 16; i < dbNum; i++) {
                     dbList.add(new DbInfo("DB" + i, i));
                 }
             }
-            var keySpace = RedisBasicService.service.getKeySpace(connectContext);
+            var keySpace = RedisBasicService.service.getKeySpace(redisConnectContext);
             for (int i = 0; i < dbList.size(); i++) {
                 var dbInfo = dbList.get(i);
                 var value = (String) keySpace.get(dbInfo.dbName().toLowerCase());
@@ -740,7 +740,7 @@ public class LeftSearchFragment {
         } else {
             var dbInfo = dbList.get(0);
             scanKeysContextMap.put(dbInfo.dbIndex(), new ScanContext<>());
-            var dbSize = RedisBasicService.service.dbSize(connectContext);
+            var dbSize = RedisBasicService.service.dbSize(redisConnectContext);
             dbInfo.setDbSize(dbSize);
             databaseComboBox.insertItemAt(dbInfo, 0);
             databaseComboBox.setEnabled(false);
@@ -769,7 +769,7 @@ public class LeftSearchFragment {
     private void $$$setupUI$$$() {
         createUIComponents();
         contentPanel.setLayout(new BorderLayout(0, 0));
-        contentPanel.setMinimumSize(new Dimension(300, -1));
+        contentPanel.setMinimumSize(new Dimension(-1, -1));
         contentPanel.setPreferredSize(new Dimension(300, 681));
         borderPanel.setLayout(new BorderLayout(0, 0));
         borderPanel.setMinimumSize(new Dimension(350, 199));

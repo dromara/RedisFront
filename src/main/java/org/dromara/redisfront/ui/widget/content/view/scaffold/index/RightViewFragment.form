@@ -4,8 +4,11 @@
     <constraints>
       <xy x="20" y="20" width="1415" height="521"/>
     </constraints>
-    <properties/>
-    <border type="empty">
+    <properties>
+      <minimumSize width="-1" height="-1"/>
+      <preferredSize width="618" height="-1"/>
+    </properties>
+    <border type="none">
       <size top="0" left="5" bottom="0" right="0"/>
       <color color="-15653957"/>
     </border>
@@ -19,7 +22,7 @@
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints border-constraint="North"/>
             <properties/>
-            <border type="empty">
+            <border type="none">
               <size top="5" left="10" bottom="5" right="10"/>
             </border>
             <children>
@@ -75,7 +78,7 @@
                 </constraints>
                 <properties/>
               </component>
-              <grid id="876a1" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="876a1" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
                   <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -93,11 +96,6 @@
                       <text value=""/>
                     </properties>
                   </component>
-                  <hspacer id="91509">
-                    <constraints>
-                      <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                  </hspacer>
                   <component id="ac387" class="javax.swing.JLabel" binding="keySizeLabel">
                     <constraints>
                       <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
@@ -108,15 +106,6 @@
                   </component>
                 </children>
               </grid>
-              <component id="5dbbc" class="javax.swing.JButton" binding="closeBtn" custom-create="true">
-                <constraints>
-                  <grid row="1" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.closeBtn.title"/>
-                  <toolTipText resource-bundle="org/dromara/redisfront/RedisFront" key="DataViewForm.closeBtn.toolTip.Text"/>
-                </properties>
-              </component>
             </children>
           </grid>
           <grid id="361ca" binding="dataPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
@@ -277,7 +266,7 @@
                     <properties>
                       <minimumSize width="-1" height="-1"/>
                     </properties>
-                    <border type="empty">
+                    <border type="none">
                       <size top="5" left="0" bottom="5" right="0"/>
                     </border>
                     <children/>

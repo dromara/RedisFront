@@ -6,7 +6,7 @@ import io.lettuce.core.*;
 import io.lettuce.core.output.*;
 import io.lettuce.core.protocol.CommandArgs;
 import io.lettuce.core.protocol.CommandType;
-import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public class LettuceUtilsTest {
         StopWatch watch = StopWatch.create("T1");
             watch.start();
             try {
-                LettuceUtils.run(new ConnectContext(), redisCommands -> {
+                LettuceUtils.run(new RedisConnectContext(), redisCommands -> {
                     if (redisCommands.getStatefulConnection() instanceof StatefulRedisConnectionImpl<String, String> statefulRedisConnection) {
                         List<Object> s = redisCommands.dispatch(CommandType.GET, new ArrayOutput<>(statefulRedisConnection.getCodec()), new CommandArgs<>(statefulRedisConnection.getCodec()).addKeys("a"));
                         System.out.println(s);
@@ -50,20 +50,20 @@ public class LettuceUtilsTest {
         for (int i = 0; i < 26; i++) {
             int finalI = i;
             String key = list[finalI] + ":" + finalI;
-            LettuceUtils.run(new ConnectContext(), redisCommands -> {
+            LettuceUtils.run(new RedisConnectContext(), redisCommands -> {
                 redisCommands.set(key, String.valueOf(finalI));
             });
             for (int j = 0; j < 200; j++) {
                 String key2 = key + ":" + j;
                 int finalJ = j;
-                LettuceUtils.run(new ConnectContext(), redisCommands -> {
+                LettuceUtils.run(new RedisConnectContext(), redisCommands -> {
                     redisCommands.set(key2, String.valueOf(finalJ));
                 });
 
                 for (int k = 0; k < 50; k++) {
                     String key3 = key2 + ":" + k;
                     int finalK = k;
-                    LettuceUtils.run(new ConnectContext(), redisCommands -> {
+                    LettuceUtils.run(new RedisConnectContext(), redisCommands -> {
                         redisCommands.set(key3, String.valueOf(finalK));
                     });
                 }
@@ -74,7 +74,7 @@ public class LettuceUtilsTest {
 
     //    @Test
     public void test2() {
-        LettuceUtils.run(new ConnectContext(), redisCommands -> {
+        LettuceUtils.run(new RedisConnectContext(), redisCommands -> {
             ScanArgs scanArgs = new ScanArgs();
             scanArgs.limit(5);
 

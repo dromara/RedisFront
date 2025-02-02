@@ -6,7 +6,7 @@ import com.jcraft.jsch.Session;
 import io.lettuce.core.cluster.RedisClusterClient;
 import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
-import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,8 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class JschUtils {
     private static final Map<Integer, Session> sessionMap = new ConcurrentHashMap<>();
 
-    public static Session createSession(ConnectContext connectContext) {
-        ConnectContext.SshInfo sshInfo = connectContext.getSshInfo();
+    public static Session createSession(RedisConnectContext redisConnectContext) {
+        RedisConnectContext.SshInfo sshInfo = redisConnectContext.getSshInfo();
         if (Fn.isNotEmpty(sshInfo.getPrivateKeyPath()) && Fn.isNotEmpty(sshInfo.getPassword())) {
             return JschUtil.createSession(sshInfo.getHost(), sshInfo.getPort(), sshInfo.getUser(), sshInfo.getPrivateKeyPath(), sshInfo.getPassword().getBytes());
         } else if (Fn.isNotEmpty(sshInfo.getPrivateKeyPath())) {
@@ -31,42 +31,42 @@ public class JschUtils {
         }
     }
 
-    private static String getRemoteAddress(ConnectContext connectContext) {
-        var remoteAddress = connectContext.getHost();
+    private static String getRemoteAddress(RedisConnectContext redisConnectContext) {
+        var remoteAddress = redisConnectContext.getHost();
         if (Fn.equal(remoteAddress, "127.0.0.1") || Fn.equal(remoteAddress.toLowerCase(), "localhost")) {
-            remoteAddress = connectContext.getSshInfo().getHost();
+            remoteAddress = redisConnectContext.getSshInfo().getHost();
         }
         return remoteAddress;
     }
 
-    public static void closeSession(ConnectContext connectContext) {
-        Session session = sessionMap.remove(connectContext.getId());
+    public static void closeSession(RedisConnectContext redisConnectContext) {
+        Session session = sessionMap.remove(redisConnectContext.getId());
         if (session != null && session.isConnected()) {
             session.disconnect();
         }
     }
 
-    public static void openSession(ConnectContext connectContext, RedisClusterClient clusterClient) {
-        if (Fn.isNotNull(connectContext.getSshInfo())) {
-            openSession(connectContext);
+    public static void openSession(RedisConnectContext redisConnectContext, RedisClusterClient clusterClient) {
+        if (Fn.isNotNull(redisConnectContext.getSshInfo())) {
+            openSession(redisConnectContext);
         } else {
-            clusterClient.getPartitions().forEach(redisClusterNode -> redisClusterNode.getUri().setHost(connectContext.getHost()));
+            clusterClient.getPartitions().forEach(redisClusterNode -> redisClusterNode.getUri().setHost(redisConnectContext.getHost()));
         }
     }
 
-    public static void openSession(ConnectContext connectContext) {
-        if (Fn.isNotNull(connectContext.getSshInfo())) {
+    public static void openSession(RedisConnectContext redisConnectContext) {
+        if (Fn.isNotNull(redisConnectContext.getSshInfo())) {
             try {
-                sessionMap.compute(connectContext.getId(), (_, session) -> {
+                sessionMap.compute(redisConnectContext.getId(), (_, session) -> {
                     if (session != null && session.isConnected()) {
                         return session;
                     }
-                    Session newSession = createSession(connectContext);
+                    Session newSession = createSession(redisConnectContext);
                     try {
                         newSession.setTimeout(1000);
                         newSession.connect();
-                        String remoteHost = getRemoteAddress(connectContext);
-                        JschUtil.bindPort(newSession, remoteHost, connectContext.getPort(), connectContext.getLocalPort());
+                        String remoteHost = getRemoteAddress(redisConnectContext);
+                        JschUtil.bindPort(newSession, remoteHost, redisConnectContext.getPort(), redisConnectContext.getLocalPort());
                         return newSession;
                     } catch (JSchException e) {
                         throw new RedisFrontException("SSH 连接失败 - " + e.getMessage());

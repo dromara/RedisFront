@@ -28,11 +28,11 @@ public class SyncLoadingDialog extends QSDialog<MainWidget> {
         syncLoadingWaiter = new SyncLoadingWaiter(this);
     }
 
-    public void setProgressValue(int value) {
+    protected void setProgressValue(int value) {
         progressBar.setValue(value);
     }
 
-    public void setMessageValue(String message) {
+    protected void setMessageValue(String message) {
         messageLabel.setText(message);
     }
 

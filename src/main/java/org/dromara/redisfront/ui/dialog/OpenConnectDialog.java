@@ -10,7 +10,7 @@ import org.dromara.redisfront.commons.resources.AbstractDialog;
 import org.dromara.redisfront.commons.utils.AlertUtils;
 import org.dromara.redisfront.commons.utils.FutureUtils;
 import org.dromara.redisfront.commons.utils.LocaleUtils;
-import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.ConnectTableModel;
 import org.dromara.redisfront.service.RedisBasicService;
 
@@ -21,7 +21,7 @@ import java.awt.event.*;
 import java.lang.reflect.Method;
 import java.util.ResourceBundle;
 
-public class OpenConnectDialog extends AbstractDialog<ConnectContext> {
+public class OpenConnectDialog extends AbstractDialog<RedisConnectContext> {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -29,13 +29,13 @@ public class OpenConnectDialog extends AbstractDialog<ConnectContext> {
     private JButton addConnectBtn;
     private JScrollPane scrollPanel;
 
-    protected ProcessHandler<ConnectContext> openProcessHandler;
+    protected ProcessHandler<RedisConnectContext> openProcessHandler;
 
-    protected ProcessHandler<ConnectContext> editProcessHandler;
+    protected ProcessHandler<RedisConnectContext> editProcessHandler;
 
-    protected ProcessHandler<ConnectContext> delProcessHandler;
+    protected ProcessHandler<RedisConnectContext> delProcessHandler;
 
-    public static void showOpenConnectDialog(ProcessHandler<ConnectContext> openProcessHandler, ProcessHandler<ConnectContext> editProcessHandler, ProcessHandler<ConnectContext> delProcessHandler) {
+    public static void showOpenConnectDialog(ProcessHandler<RedisConnectContext> openProcessHandler, ProcessHandler<RedisConnectContext> editProcessHandler, ProcessHandler<RedisConnectContext> delProcessHandler) {
         var openConnectDialog = new OpenConnectDialog(openProcessHandler, editProcessHandler, delProcessHandler);
         openConnectDialog.setSize(new Dimension(500, 280));
         openConnectDialog.setLocationRelativeTo(RedisFrontMain.frame);
@@ -43,7 +43,7 @@ public class OpenConnectDialog extends AbstractDialog<ConnectContext> {
         openConnectDialog.setVisible(true);
     }
 
-    public OpenConnectDialog(ProcessHandler<ConnectContext> openProcessHandler, ProcessHandler<ConnectContext> editProcessHandler, ProcessHandler<ConnectContext> delProcessHandler) {
+    public OpenConnectDialog(ProcessHandler<RedisConnectContext> openProcessHandler, ProcessHandler<RedisConnectContext> editProcessHandler, ProcessHandler<RedisConnectContext> delProcessHandler) {
         super(RedisFrontMain.frame);
         $$$setupUI$$$();
         setTitle(LocaleUtils.getMessageFromBundle("OpenConnectDialog.title"));

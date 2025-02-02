@@ -6,7 +6,7 @@ import com.formdev.flatlaf.extras.components.FlatToolBar;
 import com.formdev.flatlaf.ui.FlatLineBorder;
 import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.model.ClusterNode;
-import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.widget.content.view.scaffold.terminal.RedisFrontTerminal;
 import org.dromara.redisfront.ui.widget.content.view.scaffold.pubsub.PubSubPageView;
 import org.dromara.redisfront.commons.constant.Constants;
@@ -31,8 +31,8 @@ public class MainTabbedPanel extends JPanel {
     private final JTabbedPane contentPanel;
     private final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
-    public static MainTabbedPanel newInstance(ConnectContext connectContext) {
-        return new MainTabbedPanel(connectContext);
+    public static MainTabbedPanel newInstance(RedisConnectContext redisConnectContext) {
+        return new MainTabbedPanel(redisConnectContext);
     }
 
     public void shutdownScheduled() {
@@ -44,7 +44,7 @@ public class MainTabbedPanel extends JPanel {
 
     }
 
-    public MainTabbedPanel(ConnectContext connectContext) {
+    public MainTabbedPanel(RedisConnectContext redisConnectContext) {
         setLayout(new BorderLayout());
         {
             Box horizontalBox = Box.createHorizontalBox();
@@ -64,7 +64,7 @@ public class MainTabbedPanel extends JPanel {
                         buf.append("<html><style>");
                         buf.append("td { padding: 0 10 0 0; }");
                         buf.append("</style><table>");
-                        var serverInfo = RedisBasicService.service.getServerInfo(connectContext);
+                        var serverInfo = RedisBasicService.service.getServerInfo(redisConnectContext);
                         var version = (String) serverInfo.get("redis_version");
                         appendRow(buf, LocaleUtils.getMessageFromBundle("MainTabbedPanel.redisVersion.title"), version);
 
@@ -80,15 +80,15 @@ public class MainTabbedPanel extends JPanel {
                         var configFile = (String) serverInfo.get("config_file");
                         appendRow(buf, LocaleUtils.getMessageFromBundle("MainTabbedPanel.configFile.title"), configFile);
 
-                        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
-                            List<ClusterNode> clusterNodes = RedisBasicService.service.getClusterNodes(connectContext);
+                        if (Fn.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
+                            List<ClusterNode> clusterNodes = RedisBasicService.service.getClusterNodes(redisConnectContext);
                             clusterNodes.forEach(s -> appendRow(buf, s.flags().toUpperCase(), s.ipAndPort()));
                         }
 
                         buf.append("</td></tr>");
                         buf.append("</table></html>");
                         setToolTipText(buf.toString());
-                        setText(connectContext.getHost() + ":" + connectContext.getPort() + " - " + LocaleUtils.getMessageFromBundle(connectContext.getRedisMode().modeName));
+                        setText(redisConnectContext.getHost() + ":" + redisConnectContext.getPort() + " - " + LocaleUtils.getMessageFromBundle(redisConnectContext.getRedisMode().modeName));
                     }
                 };
 
@@ -123,7 +123,7 @@ public class MainTabbedPanel extends JPanel {
                 keysInfo.setIcon(Icons.CONTENT_TAB_KEYS_ICON);
                 middleToolBar.add(keysInfo);
 
-                threadInit(connectContext, keysInfo, cupInfo, memoryInfo);
+                threadInit(redisConnectContext, keysInfo, cupInfo, memoryInfo);
 
                 horizontalBox.add(middleToolBar);
             }
@@ -170,10 +170,10 @@ public class MainTabbedPanel extends JPanel {
             }
             {
                 //主窗口
-                contentPanel.addTab(null, Icons.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(connectContext));
+                contentPanel.addTab(null, Icons.CONTENT_TAB_DATA_ICON, DataSplitPanel.newInstance(redisConnectContext));
                 //命令窗口
                 //数据窗口
-                contentPanel.addTab(null, Icons.CONTENT_TAB_INFO_ICON, ReportPageView.getInstance(connectContext));
+                contentPanel.addTab(null, Icons.CONTENT_TAB_INFO_ICON, ReportPageView.getInstance(redisConnectContext));
 
 
                 //tab 切换事件
@@ -213,12 +213,12 @@ public class MainTabbedPanel extends JPanel {
         }
     }
 
-    private void threadInit(ConnectContext connectContext, FlatLabel keysInfo, FlatLabel cupInfo, FlatLabel memoryInfo) {
+    private void threadInit(RedisConnectContext redisConnectContext, FlatLabel keysInfo, FlatLabel cupInfo, FlatLabel memoryInfo) {
         scheduledExecutor.scheduleAtFixedRate(() -> {
                     CompletableFuture<Void> keyInfoFuture = FutureUtils.supplyAsync(() -> {
                         var keyInfo = new String[2];
-                        if (Fn.notEqual(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
-                            var keySpace = RedisBasicService.service.getKeySpace(connectContext);
+                        if (Fn.notEqual(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
+                            var keySpace = RedisBasicService.service.getKeySpace(redisConnectContext);
                             var count = keySpace.values().stream()
                                     .map(value -> ((String) value).split(",")[0].split("=")[1])
                                     .map(Integer::parseInt).reduce(Integer::sum).orElse(0);
@@ -243,7 +243,7 @@ public class MainTabbedPanel extends JPanel {
                             buf.append("</html>");
                             keyInfo[1] = buf.toString();
                         } else {
-                            keyInfo[0] = String.valueOf(RedisBasicService.service.dbSize(connectContext));
+                            keyInfo[0] = String.valueOf(RedisBasicService.service.dbSize(redisConnectContext));
                             keyInfo[1] = LocaleUtils.getMessageFromBundle("MainTabbedPanel.keyInfoFuture.keySize.title") + keyInfo[0];
                         }
                         return keyInfo;
@@ -253,13 +253,13 @@ public class MainTabbedPanel extends JPanel {
                                 keysInfo.setToolTipText(s[1]);
                             }));
 
-                    CompletableFuture<Void> opsInfoFuture = FutureUtils.supplyAsync(() -> RedisBasicService.service.getStatInfo(connectContext), stats ->
+                    CompletableFuture<Void> opsInfoFuture = FutureUtils.supplyAsync(() -> RedisBasicService.service.getStatInfo(redisConnectContext), stats ->
                             SwingUtilities.invokeLater(() -> {
                                 cupInfo.setText(LocaleUtils.getMessageFromBundle("MainTabbedPanel.opsInfoFuture.opsPerSec.title") + stats.get("instantaneous_ops_per_sec") + " ");
                                 cupInfo.setToolTipText(LocaleUtils.getMessageFromBundle("MainTabbedPanel.opsInfoFuture.opsPerSec.title") + stats.get("instantaneous_ops_per_sec"));
                             }));
 
-                    CompletableFuture<Void> memoryFuture = FutureUtils.supplyAsync(() -> RedisBasicService.service.getMemoryInfo(connectContext), memory ->
+                    CompletableFuture<Void> memoryFuture = FutureUtils.supplyAsync(() -> RedisBasicService.service.getMemoryInfo(redisConnectContext), memory ->
                             SwingUtilities.invokeLater(() -> {
                                 memoryInfo.setText(LocaleUtils.getMessageFromBundle("MainTabbedPanel.memoryFuture.usedMemoryHuman.title") + (Fn.isNotNull(memory.get("used_memory_human")) ? memory.get("used_memory_human") : 0) + " ");
                                 memoryInfo.setToolTipText(LocaleUtils.getMessageFromBundle("MainTabbedPanel.memoryFuture.usedMemoryHuman.title") + (Fn.isNotNull(memory.get("used_memory_human")) ? memory.get("used_memory_human") : 0));

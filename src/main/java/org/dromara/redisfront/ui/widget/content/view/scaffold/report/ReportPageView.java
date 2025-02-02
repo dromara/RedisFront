@@ -10,7 +10,7 @@ import org.dromara.quickswing.ui.app.page.QSPageItem;
 import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.commons.utils.FutureUtils;
 import org.dromara.redisfront.commons.utils.LettuceUtils;
-import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.ui.widget.MainWidget;
 import org.jfree.chart.ChartFactory;
@@ -55,17 +55,17 @@ public class ReportPageView extends QSPageItem<MainWidget> {
     private JLabel slowLogLabel;
     private JTextArea slowLogTextArea;
     private JRadioButton autoRefreshBtn;
-    private final ConnectContext connectContext;
+    private final RedisConnectContext redisConnectContext;
     private Boolean scheduleStarted = false;
 
     private final ScheduledExecutorService scheduledExecutor;
 
-    public static ReportPageView getInstance(final ConnectContext connectContext) {
-        return new ReportPageView(connectContext);
+    public static ReportPageView getInstance(final RedisConnectContext redisConnectContext) {
+        return new ReportPageView(redisConnectContext);
     }
 
-    public ReportPageView(final ConnectContext connectContext) {
-        this.connectContext = connectContext;
+    public ReportPageView(final RedisConnectContext redisConnectContext) {
+        this.redisConnectContext = redisConnectContext;
         scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
         $$$setupUI$$$();
     }
@@ -100,7 +100,7 @@ public class ReportPageView extends QSPageItem<MainWidget> {
 
         scheduledExecutor.scheduleAtFixedRate(() -> {
                     if (scheduleStarted) {
-                        FutureUtils.supplyAsync(() -> RedisBasicService.service.getStatInfo(connectContext), statInfo -> {
+                        FutureUtils.supplyAsync(() -> RedisBasicService.service.getStatInfo(redisConnectContext), statInfo -> {
                                     var instantaneousInputKbps = (String) statInfo.get("instantaneous_input_kbps");
                                     var instantaneousOutputKbps = (String) statInfo.get("instantaneous_output_kbps");
                                     var instantaneousOpsPerSec = (String) statInfo.get("instantaneous_ops_per_sec");
@@ -116,7 +116,7 @@ public class ReportPageView extends QSPageItem<MainWidget> {
                                 }
                         );
 
-                        FutureUtils.supplyAsync(() -> RedisBasicService.service.getClientInfo(connectContext), clientInfo -> {
+                        FutureUtils.supplyAsync(() -> RedisBasicService.service.getClientInfo(redisConnectContext), clientInfo -> {
                                     var connectedClients = (String) clientInfo.get("connected_clients");
                                     if (Fn.isNotEmpty(connectedClients)) {
                                         SwingUtilities.invokeLater(() -> clientsValue.setText(connectedClients));
@@ -128,7 +128,7 @@ public class ReportPageView extends QSPageItem<MainWidget> {
                             slowLogActionPerformed();
                         }
 
-                        FutureUtils.supplyAsync(() -> RedisBasicService.service.getCpuInfo(connectContext), cpuInfo -> {
+                        FutureUtils.supplyAsync(() -> RedisBasicService.service.getCpuInfo(redisConnectContext), cpuInfo -> {
                                     var currentTimeSecond = DateUtil.currentSeconds();
                                     var usedCpuSys = (String) cpuInfo.get("used_cpu_sys");
                                     if (Fn.isNotEmpty(usedCpuSys)) {
@@ -146,7 +146,7 @@ public class ReportPageView extends QSPageItem<MainWidget> {
                                 }
                         );
 
-                        FutureUtils.supplyAsync(() -> RedisBasicService.service.getMemoryInfo(connectContext), memoryInfo -> {
+                        FutureUtils.supplyAsync(() -> RedisBasicService.service.getMemoryInfo(redisConnectContext), memoryInfo -> {
                             var usedMemory = (String) memoryInfo.get("used_memory");
 
                             if (Fn.isNotEmpty(usedMemory)) {
@@ -163,7 +163,7 @@ public class ReportPageView extends QSPageItem<MainWidget> {
 
     private void slowLogActionPerformed() {
         FutureUtils.runAsync(() -> {
-            List<Object> objectList = LettuceUtils.exec(connectContext, commands -> commands.slowlogGet(128));
+            List<Object> objectList = LettuceUtils.exec(redisConnectContext, commands -> commands.slowlogGet(128));
             if (Fn.isNotEmpty(objectList)) {
                 var slowLogShowTextStrBuilder = new StringBuilder();
                 for (Object slowLogObj : objectList) {

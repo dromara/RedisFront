@@ -4,7 +4,7 @@ import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.commons.utils.LettuceUtils;
 import org.dromara.redisfront.model.ClusterNode;
-import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.context.ScanContext;
 import org.dromara.redisfront.ui.dialog.LogsDialog;
 import io.lettuce.core.KeyScanCursor;
@@ -29,277 +29,277 @@ public class RedisBasicServiceImpl implements RedisBasicService {
     private static final Logger log = LoggerFactory.getLogger(RedisBasicServiceImpl.class);
 
     @Override
-    public String flushdb(ConnectContext connectContext) {
+    public String flushdb(RedisConnectContext redisConnectContext) {
 
-        var logInfo = RedisBasicService.buildLogInfo(connectContext)
+        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext)
                 .setInfo("flushdb".toUpperCase());
         LogsDialog.appendLog(logInfo);
-        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectContext, RedisAdvancedClusterCommands::flushdb);
+        if (Fn.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(redisConnectContext, RedisAdvancedClusterCommands::flushdb);
         } else {
-            return LettuceUtils.exec(connectContext, RedisServerCommands::flushdb);
+            return LettuceUtils.exec(redisConnectContext, RedisServerCommands::flushdb);
         }
     }
 
     @Override
-    public Map<String, String> configGet(ConnectContext connectContext, String... keys) {
-        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectContext, redisCommands -> redisCommands.configGet(keys));
+    public Map<String, String> configGet(RedisConnectContext redisConnectContext, String... keys) {
+        if (Fn.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.configGet(keys));
         } else {
-            return LettuceUtils.exec(connectContext, redisCommands -> redisCommands.configGet(keys));
+            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.configGet(keys));
         }
     }
 
     @Override
-    public String flushall(ConnectContext connectContext) {
+    public String flushall(RedisConnectContext redisConnectContext) {
 
-        var logInfo = RedisBasicService.buildLogInfo(connectContext)
+        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext)
                 .setInfo("flushall".toUpperCase());
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectContext, RedisAdvancedClusterCommands::flushall);
+        if (Fn.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(redisConnectContext, RedisAdvancedClusterCommands::flushall);
         } else {
-            return LettuceUtils.exec(connectContext, RedisServerCommands::flushall);
+            return LettuceUtils.exec(redisConnectContext, RedisServerCommands::flushall);
         }
     }
 
     @Override
-    public KeyScanCursor<String> scan(ConnectContext connectContext, ScanArgs scanArgs) {
+    public KeyScanCursor<String> scan(RedisConnectContext redisConnectContext, ScanArgs scanArgs) {
 
         ScanContext.MyScanArgs myScanArgs = (ScanContext.MyScanArgs) scanArgs;
-        var logInfo = RedisBasicService.buildLogInfo(connectContext).setInfo("SCAN ".concat(myScanArgs.getCommandStr()));
+        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("SCAN ".concat(myScanArgs.getCommandStr()));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectContext, redisCommands -> redisCommands.scan(scanArgs));
+        if (Fn.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.scan(scanArgs));
         } else {
-            return LettuceUtils.exec(connectContext, redisCommands -> redisCommands.scan(scanArgs));
+            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.scan(scanArgs));
         }
     }
 
     @Override
-    public KeyScanCursor<String> scan(ConnectContext connectContext, ScanCursor scanCursor, ScanArgs scanArgs) {
+    public KeyScanCursor<String> scan(RedisConnectContext redisConnectContext, ScanCursor scanCursor, ScanArgs scanArgs) {
 
         ScanContext.MyScanArgs myScanArgs = (ScanContext.MyScanArgs) scanArgs;
-        var logInfo = RedisBasicService.buildLogInfo(connectContext).setInfo("SCAN ".concat(scanCursor.getCursor()).concat(myScanArgs.getCommandStr()));
+        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("SCAN ".concat(scanCursor.getCursor()).concat(myScanArgs.getCommandStr()));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectContext, redisCommands -> redisCommands.scan(scanCursor, scanArgs));
+        if (Fn.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.scan(scanCursor, scanArgs));
         } else {
-            return LettuceUtils.exec(connectContext, redisCommands -> redisCommands.scan(scanCursor, scanArgs));
+            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.scan(scanCursor, scanArgs));
         }
     }
 
     @Override
-    public KeyScanCursor<String> scan(ConnectContext connectContext, ScanCursor scanCursor) {
+    public KeyScanCursor<String> scan(RedisConnectContext redisConnectContext, ScanCursor scanCursor) {
 
-        var logInfo = RedisBasicService.buildLogInfo(connectContext).setInfo("SCAN ".concat(scanCursor.getCursor()));
+        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("SCAN ".concat(scanCursor.getCursor()));
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectContext, redisCommands -> redisCommands.scan(scanCursor));
+        if (Fn.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.scan(scanCursor));
         } else {
-            return LettuceUtils.exec(connectContext, redisCommands -> redisCommands.scan(scanCursor));
+            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.scan(scanCursor));
         }
     }
 
     @Override
-    public StreamScanCursor scan(ConnectContext connectContext, KeyStreamingChannel<String> channel) {
-        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectContext, redisCommands -> redisCommands.scan(channel));
+    public StreamScanCursor scan(RedisConnectContext redisConnectContext, KeyStreamingChannel<String> channel) {
+        if (Fn.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.scan(channel));
         } else {
-            return LettuceUtils.exec(connectContext, redisCommands -> redisCommands.scan(channel));
+            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.scan(channel));
         }
     }
 
     @Override
-    public StreamScanCursor scan(ConnectContext connectContext, KeyStreamingChannel<String> channel, ScanArgs scanArgs) {
-        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectContext, redisCommands -> redisCommands.scan(channel, scanArgs));
+    public StreamScanCursor scan(RedisConnectContext redisConnectContext, KeyStreamingChannel<String> channel, ScanArgs scanArgs) {
+        if (Fn.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.scan(channel, scanArgs));
         } else {
-            return LettuceUtils.exec(connectContext, redisCommands -> redisCommands.scan(channel, scanArgs));
+            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.scan(channel, scanArgs));
         }
     }
 
     @Override
-    public StreamScanCursor scan(ConnectContext connectContext, KeyStreamingChannel<String> channel, ScanCursor scanCursor, ScanArgs scanArgs) {
-        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectContext, redisCommands -> redisCommands.scan(channel, scanCursor, scanArgs));
+    public StreamScanCursor scan(RedisConnectContext redisConnectContext, KeyStreamingChannel<String> channel, ScanCursor scanCursor, ScanArgs scanArgs) {
+        if (Fn.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.scan(channel, scanCursor, scanArgs));
         } else {
-            return LettuceUtils.exec(connectContext, redisCommands -> redisCommands.scan(channel, scanCursor, scanArgs));
+            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.scan(channel, scanCursor, scanArgs));
         }
     }
 
     @Override
-    public StreamScanCursor scan(ConnectContext connectContext, KeyStreamingChannel<String> channel, ScanCursor scanCursor) {
-        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectContext, redisCommands -> redisCommands.scan(channel, scanCursor));
+    public StreamScanCursor scan(RedisConnectContext redisConnectContext, KeyStreamingChannel<String> channel, ScanCursor scanCursor) {
+        if (Fn.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.scan(channel, scanCursor));
         } else {
-            return LettuceUtils.exec(connectContext, redisCommands -> redisCommands.scan(channel, scanCursor));
+            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.scan(channel, scanCursor));
         }
     }
 
     @Override
-    public Long del(ConnectContext connectContext, String key) {
+    public Long del(RedisConnectContext redisConnectContext, String key) {
 
-        var logInfo = RedisBasicService.buildLogInfo(connectContext)
+        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext)
                 .setInfo("del ".concat(key).toUpperCase());
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectContext, redisCommands -> redisCommands.del(key));
+        if (Fn.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.del(key));
         } else {
-            return LettuceUtils.exec(connectContext, redisCommands -> redisCommands.del(key));
+            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.del(key));
         }
     }
 
     @Override
-    public String rename(ConnectContext connectContext, String key, String newKey) {
+    public String rename(RedisConnectContext redisConnectContext, String key, String newKey) {
 
-        var logInfo = RedisBasicService.buildLogInfo(connectContext)
+        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext)
                 .setInfo("rename ".concat(key).concat(" ").concat(newKey).toUpperCase());
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectContext, redisCommands -> redisCommands.rename(key, newKey));
+        if (Fn.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.rename(key, newKey));
         } else {
-            return LettuceUtils.exec(connectContext, redisCommands -> redisCommands.rename(key, newKey));
+            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.rename(key, newKey));
         }
     }
 
     @Override
-    public Boolean expire(ConnectContext connectContext, String key, Long ttl) {
+    public Boolean expire(RedisConnectContext redisConnectContext, String key, Long ttl) {
 
-        var logInfo = RedisBasicService.buildLogInfo(connectContext)
+        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext)
                 .setInfo("expire ".concat(key).toUpperCase());
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectContext, redisCommands -> redisCommands.expire(key, ttl));
+        if (Fn.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.expire(key, ttl));
         } else {
-            return LettuceUtils.exec(connectContext, redisCommands -> redisCommands.expire(key, ttl));
+            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.expire(key, ttl));
         }
     }
 
     @Override
-    public String type(ConnectContext connectContext, String key) {
+    public String type(RedisConnectContext redisConnectContext, String key) {
 
-        var logInfo = RedisBasicService.buildLogInfo(connectContext)
+        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext)
                 .setInfo("type ".concat(key).toUpperCase());
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectContext, redisCommands -> redisCommands.type(key));
+        if (Fn.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.type(key));
         } else {
-            return LettuceUtils.exec(connectContext, redisCommands -> redisCommands.type(key));
+            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.type(key));
         }
     }
 
     @Override
-    public Long ttl(ConnectContext connectContext, String key) {
+    public Long ttl(RedisConnectContext redisConnectContext, String key) {
 
-        var logInfo = RedisBasicService.buildLogInfo(connectContext)
+        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext)
                 .setInfo("ttl ".concat(key).toUpperCase());
         LogsDialog.appendLog(logInfo);
 
-        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectContext, redisCommands -> redisCommands.ttl(key));
+        if (Fn.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.ttl(key));
         } else {
-            return LettuceUtils.exec(connectContext, redisCommands -> redisCommands.ttl(key));
+            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.ttl(key));
         }
     }
 
     @Override
-    public Boolean ping(ConnectContext connectContext) {
-        String ping = LettuceUtils.exec(connectContext, BaseRedisCommands::ping);
+    public Boolean ping(RedisConnectContext redisConnectContext) {
+        String ping = LettuceUtils.exec(redisConnectContext, BaseRedisCommands::ping);
         return Fn.equal(ping, "PONG");
     }
 
     @Override
-    public RedisMode getRedisModeEnum(ConnectContext connectContext) {
-        Map<String, Object> server = getServerInfo(connectContext);
+    public RedisMode getRedisModeEnum(RedisConnectContext redisConnectContext) {
+        Map<String, Object> server = getServerInfo(redisConnectContext);
         String redisMode = (String) server.get("redis_mode");
-        log.debug("获取到Redis [ {}:{} ] 服务类型 - {}", connectContext.getHost(), connectContext.getPort(), redisMode);
+        log.debug("获取到Redis [ {}:{} ] 服务类型 - {}", redisConnectContext.getHost(), redisConnectContext.getPort(), redisMode);
         return RedisMode.valueOf(redisMode.toUpperCase());
     }
 
     @Override
-    public List<ClusterNode> getClusterNodes(ConnectContext connectContext) {
-        String clusterNodes = LettuceUtils.exec(connectContext, RedisClusterCommands::clusterNodes);
+    public List<ClusterNode> getClusterNodes(RedisConnectContext redisConnectContext) {
+        String clusterNodes = LettuceUtils.exec(redisConnectContext, RedisClusterCommands::clusterNodes);
         return strToClusterNodes(clusterNodes);
     }
 
     @Override
-    public Map<String, Object> getClusterInfo(ConnectContext connectContext) {
-        var clusterInfo = LettuceUtils.exec(connectContext, RedisClusterCommands::clusterInfo);
-        log.debug("获取到Redis [ {}:{} ] ClusterInfo - {}", connectContext.getHost(), connectContext.getPort(), clusterInfo);
+    public Map<String, Object> getClusterInfo(RedisConnectContext redisConnectContext) {
+        var clusterInfo = LettuceUtils.exec(redisConnectContext, RedisClusterCommands::clusterInfo);
+        log.debug("获取到Redis [ {}:{} ] ClusterInfo - {}", redisConnectContext.getHost(), redisConnectContext.getPort(), clusterInfo);
         return strToMap(clusterInfo);
     }
 
     @Override
-    public Map<String, Object> getInfo(ConnectContext connectContext) {
-        var info = LettuceUtils.exec(connectContext, RedisServerCommands::info);
-        log.debug("获取到Redis [ {}:{} ] Info - {}", connectContext.getHost(), connectContext.getPort(), info);
+    public Map<String, Object> getInfo(RedisConnectContext redisConnectContext) {
+        var info = LettuceUtils.exec(redisConnectContext, RedisServerCommands::info);
+        log.debug("获取到Redis [ {}:{} ] Info - {}", redisConnectContext.getHost(), redisConnectContext.getPort(), info);
         return strToMap(info);
     }
 
     @Override
-    public Map<String, Object> getCpuInfo(ConnectContext connectContext) {
-        var cpuInfo = LettuceUtils.exec(connectContext, redisCommands -> redisCommands.info("cpu"));
-        log.debug("获取到Redis [ {}:{} ] cpuInfo - {}", connectContext.getHost(), connectContext.getPort(), cpuInfo);
+    public Map<String, Object> getCpuInfo(RedisConnectContext redisConnectContext) {
+        var cpuInfo = LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.info("cpu"));
+        log.debug("获取到Redis [ {}:{} ] cpuInfo - {}", redisConnectContext.getHost(), redisConnectContext.getPort(), cpuInfo);
         return strToMap(cpuInfo);
     }
 
     @Override
-    public Map<String, Object> getMemoryInfo(ConnectContext connectContext) {
-        var memoryInfo = LettuceUtils.exec(connectContext, redisCommands -> redisCommands.info("memory"));
-        log.debug("获取到Redis [ {}:{} ] memoryInfo - {}", connectContext.getHost(), connectContext.getPort(), memoryInfo);
+    public Map<String, Object> getMemoryInfo(RedisConnectContext redisConnectContext) {
+        var memoryInfo = LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.info("memory"));
+        log.debug("获取到Redis [ {}:{} ] memoryInfo - {}", redisConnectContext.getHost(), redisConnectContext.getPort(), memoryInfo);
         return strToMap(memoryInfo);
     }
 
     @Override
-    public Map<String, Object> getServerInfo(ConnectContext connectContext) {
-        var server = LettuceUtils.exec(connectContext, redisCommands -> redisCommands.info("server"));
-        log.debug("获取到Redis [ {}:{} ] serverInfo - {}", connectContext.getHost(), connectContext.getPort(), server);
+    public Map<String, Object> getServerInfo(RedisConnectContext redisConnectContext) {
+        var server = LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.info("server"));
+        log.debug("获取到Redis [ {}:{} ] serverInfo - {}", redisConnectContext.getHost(), redisConnectContext.getPort(), server);
         return strToMap(server);
     }
 
     @Override
-    public Map<String, Object> getKeySpace(ConnectContext connectContext) {
-        var keyspace = LettuceUtils.exec(connectContext, redisCommands -> redisCommands.info("keyspace"));
-        log.debug("获取到Redis [ {}:{} ] keyspace - {}", connectContext.getHost(), connectContext.getPort(), keyspace);
+    public Map<String, Object> getKeySpace(RedisConnectContext redisConnectContext) {
+        var keyspace = LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.info("keyspace"));
+        log.debug("获取到Redis [ {}:{} ] keyspace - {}", redisConnectContext.getHost(), redisConnectContext.getPort(), keyspace);
         return strToMap(keyspace);
     }
 
     @Override
-    public Map<String, Object> getClientInfo(ConnectContext connectContext) {
-        var clientInfo = LettuceUtils.exec(connectContext, redisCommands -> redisCommands.info("clients"));
-        log.debug("获取到Redis [ {}:{} ] clientInfo - {}", connectContext.getHost(), connectContext.getPort(), clientInfo);
+    public Map<String, Object> getClientInfo(RedisConnectContext redisConnectContext) {
+        var clientInfo = LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.info("clients"));
+        log.debug("获取到Redis [ {}:{} ] clientInfo - {}", redisConnectContext.getHost(), redisConnectContext.getPort(), clientInfo);
         return strToMap(clientInfo);
     }
 
     @Override
-    public Map<String, Object> getStatInfo(ConnectContext connectContext) {
-        var statInfo = LettuceUtils.exec(connectContext, redisCommands -> redisCommands.info("stats"));
-        log.debug("获取到Redis [ {}:{} ] statInfo - {}", connectContext.getHost(), connectContext.getPort(), statInfo);
+    public Map<String, Object> getStatInfo(RedisConnectContext redisConnectContext) {
+        var statInfo = LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.info("stats"));
+        log.debug("获取到Redis [ {}:{} ] statInfo - {}", redisConnectContext.getHost(), redisConnectContext.getPort(), statInfo);
         return strToMap(statInfo);
     }
 
     @Override
-    public Boolean isClusterMode(ConnectContext connectContext) {
-        var cluster = LettuceUtils.exec(connectContext, redisCommands -> redisCommands.info("Cluster"));
+    public Boolean isClusterMode(RedisConnectContext redisConnectContext) {
+        var cluster = LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.info("Cluster"));
         return (Fn.equal(strToMap(cluster).get("cluster_enabled"), "1"));
     }
 
 
     @Override
-    public Long dbSize(ConnectContext connectContext) {
-        if (Fn.equal(connectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(connectContext, RedisAdvancedClusterCommands::dbsize);
+    public Long dbSize(RedisConnectContext redisConnectContext) {
+        if (Fn.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
+            return LettuceUtils.clusterExec(redisConnectContext, RedisAdvancedClusterCommands::dbsize);
         } else {
-            return LettuceUtils.exec(connectContext, RedisServerCommands::dbsize);
+            return LettuceUtils.exec(redisConnectContext, RedisServerCommands::dbsize);
         }
     }
 

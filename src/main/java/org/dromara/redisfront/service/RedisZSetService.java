@@ -1,6 +1,6 @@
 package org.dromara.redisfront.service;
 
-import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import io.lettuce.core.*;
 import org.dromara.redisfront.service.impl.RedisZSetServiceImpl;
 
@@ -9,39 +9,39 @@ import java.util.List;
 public interface RedisZSetService {
     RedisZSetService service = new RedisZSetServiceImpl();
 
-    Long zadd(ConnectContext connectContext, String key, double score, String member);
+    Long zadd(RedisConnectContext redisConnectContext, String key, double score, String member);
 
-    Long zadd(ConnectContext connectContext, String key, ScoredValue<String>... scoredValues);
+    Long zadd(RedisConnectContext redisConnectContext, String key, ScoredValue<String>... scoredValues);
 
-    Double zaddincr(ConnectContext connectContext, String key, double score, String member);
+    Double zaddincr(RedisConnectContext redisConnectContext, String key, double score, String member);
 
-    Long zcard(ConnectContext connectContext, String key);
+    Long zcard(RedisConnectContext redisConnectContext, String key);
 
-    Long zrem(ConnectContext connectContext, String key, String... members);
-    List<ScoredValue<String>> zrange(ConnectContext connectContext, String key, long start, long stop);
+    Long zrem(RedisConnectContext redisConnectContext, String key, String... members);
+    List<ScoredValue<String>> zrange(RedisConnectContext redisConnectContext, String key, long start, long stop);
 
-    Long zcount(ConnectContext connectContext, String key, Range<? extends Number> range);
+    Long zcount(RedisConnectContext redisConnectContext, String key, Range<? extends Number> range);
 
-    List<String> zrangebyscore(ConnectContext connectContext, String key, Range<? extends Number> range, Limit limit);
+    List<String> zrangebyscore(RedisConnectContext redisConnectContext, String key, Range<? extends Number> range, Limit limit);
 
-    List<ScoredValue<String>> zrangebyscoreWithScores(ConnectContext connectContext, String key, Range<? extends Number> range);
+    List<ScoredValue<String>> zrangebyscoreWithScores(RedisConnectContext redisConnectContext, String key, Range<? extends Number> range);
 
-    List<String> zrevrangebyscore(ConnectContext connectContext, String key, Range<? extends Number> range, Limit limit);
+    List<String> zrevrangebyscore(RedisConnectContext redisConnectContext, String key, Range<? extends Number> range, Limit limit);
 
-    Long zrevrank(ConnectContext connectContext, String key, String member);
+    Long zrevrank(RedisConnectContext redisConnectContext, String key, String member);
 
-    ScoredValueScanCursor<String> zscan(ConnectContext connectContext, String key);
+    ScoredValueScanCursor<String> zscan(RedisConnectContext redisConnectContext, String key);
 
-    ScoredValueScanCursor<String> zscan(ConnectContext connectContext, String key, ScanArgs scanArgs);
+    ScoredValueScanCursor<String> zscan(RedisConnectContext redisConnectContext, String key, ScanArgs scanArgs);
 
-    ScoredValueScanCursor<String> zscan(ConnectContext connectContext, String key, ScanCursor scanCursor, ScanArgs scanArgs);
+    ScoredValueScanCursor<String> zscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor, ScanArgs scanArgs);
 
-    ScoredValueScanCursor<String> zscan(ConnectContext connectContext, String key, ScanCursor scanCursor);
-    Double zscore(ConnectContext connectContext, String key, String member);
+    ScoredValueScanCursor<String> zscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor);
+    Double zscore(RedisConnectContext redisConnectContext, String key, String member);
 
-    ScoredValue<String> zpopmin(ConnectContext connectContext, String key);
+    ScoredValue<String> zpopmin(RedisConnectContext redisConnectContext, String key);
 
-    List<ScoredValue<String>> zpopmin(ConnectContext connectContext, String key, long count);
+    List<ScoredValue<String>> zpopmin(RedisConnectContext redisConnectContext, String key, long count);
 
 
 }

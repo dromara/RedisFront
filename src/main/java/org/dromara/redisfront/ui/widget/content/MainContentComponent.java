@@ -17,11 +17,11 @@ import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.commons.utils.JschUtils;
 import org.dromara.redisfront.commons.utils.LettuceUtils;
 import org.dromara.redisfront.model.RedisUsageInfo;
-import org.dromara.redisfront.model.context.ConnectContext;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.monitor.RedisMonitor;
 import org.dromara.redisfront.ui.event.DrawerChangeEvent;
 import org.dromara.redisfront.ui.widget.MainWidget;
-import org.dromara.redisfront.ui.widget.content.extend.BoldTitleTabbedPaneUI;
+import org.dromara.redisfront.ui.widget.content.ext.BoldTitleTabbedPaneUI;
 import org.dromara.redisfront.ui.widget.content.view.ContentTabView;
 import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
 
@@ -138,15 +138,15 @@ public class MainContentComponent extends JPanel {
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
             Component component = tabbedPane.getComponentAt(tabIndex);
             if (component instanceof ContentTabView contentTabView) {
-                ConnectContext connectContext = contentTabView.getConnectContext();
-                ScheduledExecutorService executorService = executorServiceMap.remove(connectContext.getId());
+                RedisConnectContext redisConnectContext = contentTabView.getRedisConnectContext();
+                ScheduledExecutorService executorService = executorServiceMap.remove(redisConnectContext.getId());
                 if (executorService != null) {
                     executorService.shutdownNow();
                 }
                 //关闭ssh会话
-                if (Fn.equal(connectContext.getConnectTypeMode(), ConnectType.SSH)) {
-                    JschUtils.closeSession(connectContext);
-                    LettuceUtils.removeTmpLocalPort(connectContext);
+                if (Fn.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
+                    JschUtils.closeSession(redisConnectContext);
+                    LettuceUtils.removeTmpLocalPort(redisConnectContext);
                 }
             }
             tabbedPane.removeTabAt(tabIndex);
@@ -172,29 +172,29 @@ public class MainContentComponent extends JPanel {
                 return;
             }
             if (topTabbedPane.getSelectedComponent() instanceof ContentTabView contentTabView) {
-                ConnectContext connectContext = contentTabView.getConnectContext();
-                if (!executorServiceMap.containsKey(connectContext.getId())) {
-                    RedisMonitor monitor = new RedisMonitor(connectContext);
+                RedisConnectContext redisConnectContext = contentTabView.getRedisConnectContext();
+                if (!executorServiceMap.containsKey(redisConnectContext.getId())) {
+                    RedisMonitor monitor = new RedisMonitor(redisConnectContext);
                     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                     scheduler.scheduleAtFixedRate(() -> {
                         RedisUsageInfo usage = monitor.getUsageInfo();
-                        log.info("[Redis {} - {} ] 使用：{}\n", connectContext.getTitle(), connectContext.getHost(), usage);
-                        if (displayId == connectContext.getId()) {
+                        log.info("[Redis {} - {} ] 使用：{}\n", redisConnectContext.getTitle(), redisConnectContext.getHost(), usage);
+                        if (displayId == redisConnectContext.getId()) {
                             SwingUtilities.invokeLater(() -> {
                                 memory.setText(usage.getMemory());
-                                memory.setToolTipText("[ Redis " + connectContext.getTitle() + "@" + connectContext.getHost() + " ]\n内存已使用：" + usage.getMemory());
+                                memory.setToolTipText("[ Redis " + redisConnectContext.getTitle() + "@" + redisConnectContext.getHost() + " ]\n内存已使用：" + usage.getMemory());
                                 cpu.setText(usage.getCpu());
-                                cpu.setToolTipText("[ Redis " + connectContext.getTitle() + "@" + connectContext.getHost() + " ]\nCPU使用率：" + usage.getCpu());
+                                cpu.setToolTipText("[ Redis " + redisConnectContext.getTitle() + "@" + redisConnectContext.getHost() + " ]\nCPU使用率：" + usage.getCpu());
                                 String networkRate = String.format("%.2fKB/s｜%.2fKB/s", usage.getNetwork().inputRate() / 1024, usage.getNetwork().outputRate() / 1024);
                                 network.setText(networkRate);
-                                network.setToolTipText("[ Redis " + connectContext.getTitle() + "@" + connectContext.getHost() + " ]\n网络传输：" + usage.getNetwork());
+                                network.setToolTipText("[ Redis " + redisConnectContext.getTitle() + "@" + redisConnectContext.getHost() + " ]\n网络传输：" + usage.getNetwork());
                             });
                         }
 
                     }, 1, 5, TimeUnit.SECONDS);
-                    executorServiceMap.put(connectContext.getId(), scheduler);
+                    executorServiceMap.put(redisConnectContext.getId(), scheduler);
                 }
-                displayId = connectContext.getId();
+                displayId = redisConnectContext.getId();
             }
 
         });
@@ -251,7 +251,7 @@ public class MainContentComponent extends JPanel {
                 })
                 .filter(Objects::nonNull)
                 .filter(e ->
-                        e.getConnectContext().getId() == contentTabView.getConnectContext().getId()
+                        e.getRedisConnectContext().getId() == contentTabView.getRedisConnectContext().getId()
                 )
                 .findFirst();
         if (matchedPanel.isPresent()) {
