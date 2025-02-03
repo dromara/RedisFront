@@ -2,6 +2,7 @@ package org.dromara.redisfront.ui.widget.content.view.scaffold.index;
 
 import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.thread.ThreadUtil;
+import com.formdev.flatlaf.ui.FlatSplitPaneUI;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.quickswing.events.QSEvent;
@@ -11,10 +12,10 @@ import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.model.TreeNodeInfo;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
-import org.dromara.redisfront.ui.components.panel.NonePanel;
+import org.dromara.redisfront.ui.components.panel.BorderNonePanel;
+import org.dromara.redisfront.ui.components.panel.WrapperPanel;
 import org.dromara.redisfront.ui.event.ClickKeyTreeNodeEvent;
 import org.dromara.redisfront.ui.widget.MainWidget;
-import org.dromara.redisfront.ui.components.panel.BorderWrapperPanel;
 
 import javax.swing.*;
 
@@ -40,24 +41,27 @@ public class IndexPageView extends QSPageItem<MainWidget> {
     @Override
     public void onLoad() {
         var leftSearchFragment = new LeftSearchFragment(owner, redisConnectContext);
+        this.splitPane.setDividerSize(0);
         this.splitPane.setLeftComponent(leftSearchFragment.getContentPanel());
-        this.splitPane.setRightComponent(new BorderWrapperPanel(NonePanel.getInstance()));
+        this.splitPane.setRightComponent(new BorderNonePanel());
         this.context.getEventBus().subscribe(new QSEventListener<>(owner) {
             @Override
             protected void onEvent(QSEvent qsEvent) {
                 if (qsEvent instanceof ClickKeyTreeNodeEvent clickKeyTreeNodeEvent) {
+                    if (redisConnectContext.getId() != clickKeyTreeNodeEvent.getId()) {
+                        return;
+                    }
                     Object message = clickKeyTreeNodeEvent.getMessage();
                     if (message instanceof TreeNodeInfo treeNodeInfo) {
                         selectTreeNode = treeNodeInfo;
-                        leftSearchFragment.scanBeforeProcess();
                         SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> {
                             RightViewFragment rightViewFragment = new RightViewFragment(redisConnectContext);
                             ThreadUtil.safeSleep(2000);
                             return rightViewFragment.contentPanel();
                         }, (o, e) -> {
-                            leftSearchFragment.scanAfterProcess();
                             if (e == null) {
-                                splitPane.setRightComponent(new BorderWrapperPanel((JComponent) o));
+                                splitPane.setDividerSize(5);
+                                splitPane.setRightComponent(new WrapperPanel((JComponent) o));
                             } else {
                                 owner.displayException(e);
                             }

@@ -176,7 +176,7 @@ public class MainContentComponent extends JPanel {
                     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                     scheduler.scheduleAtFixedRate(() -> {
                         RedisUsageInfo usage = monitor.getUsageInfo();
-                        log.info("[Redis {} - {} ] 使用：{}\n", redisConnectContext.getTitle(), redisConnectContext.getHost(), usage);
+                        log.debug("[Redis {} - {} ] 使用：{}\n", redisConnectContext.getTitle(), redisConnectContext.getHost(), usage);
                         if (displayId == redisConnectContext.getId()) {
                             SwingUtilities.invokeLater(() -> {
                                 memory.setText(usage.getMemory());

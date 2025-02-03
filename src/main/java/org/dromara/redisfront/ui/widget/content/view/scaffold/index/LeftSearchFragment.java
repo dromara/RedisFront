@@ -465,7 +465,7 @@ public class LeftSearchFragment {
             var selectNode = keyTree.getLastSelectedPathComponent();
             if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
                 if (treeNodeInfo.getChildCount() == 0) {
-                    context.getEventBus().publish(new ClickKeyTreeNodeEvent(treeNodeInfo));
+                    context.getEventBus().publish(new ClickKeyTreeNodeEvent(treeNodeInfo, redisConnectContext.getId()));
                 }
             }
         });

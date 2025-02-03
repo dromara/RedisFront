@@ -19,7 +19,6 @@ public class Icons {
     public static final Icon ADD_CONN_ICON_45x45 = new FlatSVGIcon("icons/add_conn.svg",80,16);
     public static final Icon COLORS_ICON_45x45 = new FlatSVGIcon("svg/actions/colors.svg",14,14);
     public static final Icon COMMAND_ICON_16x16 = new FlatSVGIcon("icons/command.svg",14,14);
-    public static final Icon CMD_PLUS_ICON_16x16 = new FlatSVGIcon("icons/cmd_add.svg",14,14);
     public static final Icon FOLDER_ICON_14x14 = new FlatSVGIcon("icons/folder.svg",16,16);
     public static final Icon LINK_ICON_14x14 = new FlatSVGIcon("icons/link.svg",18,18);
     public static final Icon MODE_ICON = new FlatSVGIcon("icons/mode.svg",14,14);
@@ -34,11 +33,9 @@ public class Icons {
     public static final Icon LOGS_ICON = new FlatSVGIcon("icons/RecentlyUsed.svg");
     public static final Icon PLUS_ICON = new FlatSVGIcon("icons/add.svg",12,12);
     public static final Icon LOAD_MORE_ICON = new FlatSVGIcon("svg/testBtn.svg");
+    public static final Icon REDIS_A_ICON = new FlatSVGIcon("svg/redis-a.svg",64,64);
 
     public static final Icon GITHUB_ICON = new FlatSVGIcon("icons/github.svg");
-    public static final Icon MAIN_TAB_DATABASE_ICON = new FlatSVGIcon("icons/icon_db5.svg");
-    public static final Icon INFO_ICON = new FlatSVGIcon("icons/info.svg");
-    public static final Icon CONNECTION_ICON = new FlatSVGIcon("icons/connection.svg");
     public static final Icon REFRESH_ICON = new FlatSVGIcon("icons/refresh.svg",16,16);
     public static final Icon DELETE_ICON = new FlatSVGIcon("icons/delete.svg",16,16);
     public static final Icon DELETE_1_ICON = new FlatSVGIcon("icons/delete2.svg",16,16);
@@ -46,10 +43,6 @@ public class Icons {
     public static final Icon CONTENT_TAB_DATA_ICON = new FlatSVGIcon("icons/table.svg",24,24);
     public static final Icon CONTENT_TAB_COMMAND_ICON = new FlatSVGIcon("icons/db_cli2.svg",24,24);
     public static final Icon CONTENT_TAB_INFO_ICON = new FlatSVGIcon("icons/db_report2.svg",24,24);
-    public static final Icon CONTENT_TAB_MEMORY_ICON = new FlatSVGIcon("icons/memory.svg");
-    public static final Icon CONTENT_TAB_CPU_ICON = new FlatSVGIcon("icons/process.svg");
-    public static final Icon CONTENT_TAB_KEYS_ICON = new FlatSVGIcon("icons/key.svg");
-    public static final Icon CONTENT_TAB_HOST_ICON = new FlatSVGIcon("icons/host.svg");
     public static final Icon DRAWER_SHOW_OR_CLOSE_ICON = new FlatSVGIcon("icons/listFiles.svg",24,24);
 
 }
