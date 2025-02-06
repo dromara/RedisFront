@@ -17,7 +17,6 @@ plugins {
 
 buildscript {
     repositories {
-        mavenLocal()
         maven {
             url = uri("https://packages.aliyun.com/maven/repository/2048752-snapshot-C7TcE7")
             credentials {
@@ -35,13 +34,13 @@ buildscript {
         dependencies {
             classpath("io.github.fvarrui:javapackager:1.7.5")
         }
+        mavenLocal()
     }
 }
 plugins.apply("io.github.fvarrui.javapackager.plugin")
 
 allprojects {
     repositories {
-        mavenLocal()
         maven {
             url = uri("https://packages.aliyun.com/maven/repository/2048752-snapshot-C7TcE7")
             credentials {
@@ -56,6 +55,7 @@ allprojects {
                 password = "pub-user"
             }
         }
+        mavenLocal()
     }
 }
 
@@ -118,12 +118,8 @@ dependencies {
     implementation("org.bouncycastle:bcprov-jdk15on:1.70")
     implementation("com.intellij:forms_rt:7.0.3")
     implementation("com.jcraft:jsch:0.1.55")
-    implementation("com.jcraft:jsch:0.1.55")
     implementation("org.dromara:quick-swing:1.1-SNAPSHOT")
     implementation(kotlin("stdlib-jdk8"))
-}
-repositories {
-    mavenCentral()
 }
 
 tasks.test {
