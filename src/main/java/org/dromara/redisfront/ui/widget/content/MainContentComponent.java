@@ -18,10 +18,10 @@ import org.dromara.redisfront.commons.utils.JschUtils;
 import org.dromara.redisfront.commons.utils.LettuceUtils;
 import org.dromara.redisfront.model.RedisUsageInfo;
 import org.dromara.redisfront.model.context.RedisConnectContext;
+import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
 import org.dromara.redisfront.ui.components.monitor.RedisMonitor;
 import org.dromara.redisfront.ui.event.DrawerChangeEvent;
 import org.dromara.redisfront.ui.widget.MainWidget;
-import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
 import org.dromara.redisfront.ui.widget.content.view.ContentTabView;
 import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
 
@@ -45,7 +45,7 @@ import java.util.function.Consumer;
 @Slf4j
 public class MainContentComponent extends JPanel {
     private final MainWidget owner;
-    private final RedisFrontContext context;
+    private final RedisFrontContext redisFrontContext;
     private final DrawerAnimationAction action;
     private final Map<Integer, ScheduledExecutorService> executorServiceMap;
     private final JLabel cpu = new JLabel(Icons.CPU_ICON);
@@ -61,7 +61,7 @@ public class MainContentComponent extends JPanel {
     public MainContentComponent(DrawerAnimationAction action, MainWidget owner) {
         this.owner = owner;
         this.action = action;
-        this.context = (RedisFrontContext) owner.getContext();
+        this.redisFrontContext = (RedisFrontContext) owner.getContext();
         this.executorServiceMap = new ConcurrentHashMap<>();
         this.setLayout(new BorderLayout());
         this.initComponentListener();
@@ -106,11 +106,11 @@ public class MainContentComponent extends JPanel {
                     if (state) {
                         toolBar.setMargin(new Insets(2, 73, 0, 0));
                         DrawerChangeEvent drawerChangeEvent = new DrawerChangeEvent(new Insets(10, 22, 10, 22));
-                        context.getEventBus().publish(drawerChangeEvent);
+                        redisFrontContext.getEventBus().publish(drawerChangeEvent);
                     } else {
                         toolBar.setMargin(new Insets(2, 6, 0, 0));
                         DrawerChangeEvent drawerChangeEvent = new DrawerChangeEvent(new Insets(10, 10, 10, 10));
-                        context.getEventBus().publish(drawerChangeEvent);
+                        redisFrontContext.getEventBus().publish(drawerChangeEvent);
                     }
                 }
 
@@ -133,9 +133,12 @@ public class MainContentComponent extends JPanel {
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_LEADING);
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, true);
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSABLE, true);
+        //Redis Tab 关闭事件
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
             Component component = tabbedPane.getComponentAt(tabIndex);
             if (component instanceof ContentTabView contentTabView) {
+
+                //关闭线程池
                 RedisConnectContext redisConnectContext = contentTabView.getRedisConnectContext();
                 ScheduledExecutorService executorService = executorServiceMap.remove(redisConnectContext.getId());
                 if (executorService != null) {
@@ -146,6 +149,8 @@ public class MainContentComponent extends JPanel {
                     JschUtils.closeSession(redisConnectContext);
                     LettuceUtils.removeTmpLocalPort(redisConnectContext);
                 }
+                //关闭移除消息监听器
+                owner.getEventListener().unbind(redisConnectContext.getId());
             }
             tabbedPane.removeTabAt(tabIndex);
             tabCloseEvent.accept(tabbedPane.getTabCount());
@@ -165,7 +170,7 @@ public class MainContentComponent extends JPanel {
             topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_INSETS, new Insets(0, 0, 0, 130));
         }
 
-        topTabbedPane.addChangeListener(e -> {
+        topTabbedPane.addChangeListener(_ -> {
             if (topTabbedPane.getSelectedIndex() == -1) {
                 return;
             }

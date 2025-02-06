@@ -4,8 +4,6 @@ import cn.hutool.core.util.ArrayUtil;
 import com.formdev.flatlaf.FlatLaf;
 import io.lettuce.core.api.sync.BaseRedisCommands;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
-import org.dromara.quickswing.events.QSEvent;
-import org.dromara.quickswing.events.QSEventListener;
 import org.dromara.quickswing.ui.swing.Background;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.commons.enums.RedisMode;
@@ -25,7 +23,6 @@ import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
-import java.util.Optional;
 
 
 public class MainComponent extends Background {
@@ -62,17 +59,17 @@ public class MainComponent extends Background {
         ConnectHandler connectHandler = redisConnectContext -> {
             Component[] components = mainRightPane.getComponents();
             if (ArrayUtil.isNotEmpty(components)) {
-                Optional<Component> first = Arrays.stream(components).findFirst();
-                if (first.isPresent()) {
-                    ContentTabView contentTabView = new ContentTabView(owner, redisConnectContext);
-                    if (first.get() instanceof MainContentComponent mainRightTabbedPanel) {
-                        SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> {
-                            fetchRedisMode(redisConnectContext);
-                            return contentTabView;
-                        }, (o, e) -> {
-                            if (e == null) {
-                                mainRightTabbedPanel.addTab(redisConnectContext.getTitle(), (ContentTabView) o);
-                            } else {
+                Arrays.stream(components)
+                        .findFirst()
+                        .ifPresent(component -> {
+                            if (component instanceof MainContentComponent mainRightTabbedPanel) {
+                                SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> {
+                                    fetchRedisMode(redisConnectContext);
+                                    return new ContentTabView(owner, redisConnectContext);
+                                }, (o, e) -> {
+                                    if (e == null) {
+                                        mainRightTabbedPanel.addTab(redisConnectContext.getTitle(), (ContentTabView) o);
+                                    } else {
                                 /*
                                   连接失败时，弹出密码输入框，输入密码后重试
                                 if (e instanceof RedisException redisException) {
@@ -86,36 +83,33 @@ public class MainComponent extends Background {
                                     owner.displayException(e);
                                 }
                                  */
-                                owner.displayException(e);
-                            }
-                        });
-                    } else {
-                        SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> {
-                            fetchRedisMode(redisConnectContext);
-                            MainContentComponent mainTabbedPanel = createMainTabbedPanel(drawerAnimationAction);
-                            mainTabbedPanel.addTab(redisConnectContext.getTitle(), contentTabView);
-                            return mainTabbedPanel;
-                        }, (ret, e) -> {
-                            if (e == null) {
-                                mainRightPane.removeAll();
-                                mainRightPane.add((MainContentComponent) ret, BorderLayout.CENTER);
-                                FlatLaf.updateUI();
+                                        owner.displayException(e);
+                                    }
+                                });
                             } else {
-                                owner.displayException(e);
+                                SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> {
+                                    fetchRedisMode(redisConnectContext);
+                                    MainContentComponent mainTabbedPanel = createMainTabbedPanel(drawerAnimationAction);
+                                    ContentTabView contentTabView = new ContentTabView(owner, redisConnectContext);
+                                    mainTabbedPanel.addTab(redisConnectContext.getTitle(), contentTabView);
+                                    return mainTabbedPanel;
+                                }, (ret, e) -> {
+                                    if (e == null) {
+                                        mainRightPane.remove(component);
+                                        mainRightPane.add((MainContentComponent) ret, BorderLayout.CENTER);
+                                        FlatLaf.updateUI();
+                                    } else {
+                                        owner.displayException(e);
+                                    }
+                                });
                             }
                         });
-                    }
-                }
             }
         };
-
-        context.getEventBus().subscribe(new QSEventListener<>() {
-            @Override
-            protected void onEvent(QSEvent qsEvent) {
-                if (qsEvent instanceof OpenRedisConnectEvent openRedisConnectEvent) {
-                    Object message = openRedisConnectEvent.getMessage();
-                    connectHandler.accept((RedisConnectContext) message);
-                }
+        owner.getEventListener().bind(-1, OpenRedisConnectEvent.class, qsEvent -> {
+            if (qsEvent instanceof OpenRedisConnectEvent openRedisConnectEvent) {
+                Object message = openRedisConnectEvent.getMessage();
+                connectHandler.accept((RedisConnectContext) message);
             }
         });
 

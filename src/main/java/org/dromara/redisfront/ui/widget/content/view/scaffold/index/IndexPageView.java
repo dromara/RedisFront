@@ -1,12 +1,8 @@
 package org.dromara.redisfront.ui.widget.content.view.scaffold.index;
 
 import cn.hutool.core.date.StopWatch;
-import cn.hutool.core.thread.ThreadUtil;
-import com.formdev.flatlaf.ui.FlatSplitPaneUI;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.quickswing.events.QSEvent;
-import org.dromara.quickswing.events.QSEventListener;
 import org.dromara.quickswing.ui.app.page.QSPageItem;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.model.TreeNodeInfo;
@@ -37,35 +33,33 @@ public class IndexPageView extends QSPageItem<MainWidget> {
 
     }
 
-
     @Override
     public void onLoad() {
         var leftSearchFragment = new LeftSearchFragment(owner, redisConnectContext);
         this.splitPane.setDividerSize(0);
         this.splitPane.setLeftComponent(leftSearchFragment.getContentPanel());
         this.splitPane.setRightComponent(new BorderNonePanel());
-        this.context.getEventBus().subscribe(new QSEventListener<>(owner) {
-            @Override
-            protected void onEvent(QSEvent qsEvent) {
-                if (qsEvent instanceof ClickKeyTreeNodeEvent clickKeyTreeNodeEvent) {
-                    if (redisConnectContext.getId() != clickKeyTreeNodeEvent.getId()) {
-                        return;
-                    }
-                    Object message = clickKeyTreeNodeEvent.getMessage();
-                    if (message instanceof TreeNodeInfo treeNodeInfo) {
-                        selectTreeNode = treeNodeInfo;
-                        SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> {
-                            RightViewFragment rightViewFragment = new RightViewFragment(redisConnectContext);
-                            ThreadUtil.safeSleep(2000);
-                            return rightViewFragment.contentPanel();
-                        }, (o, e) -> {
-                            if (e == null) {
-                                splitPane.setDividerSize(5);
-                                splitPane.setRightComponent(new WrapperPanel((JComponent) o));
-                            } else {
-                                owner.displayException(e);
-                            }
-                        });
+        this.owner.getEventListener().bind(redisConnectContext.getId(), ClickKeyTreeNodeEvent.class, qsEvent -> {
+            if (qsEvent instanceof ClickKeyTreeNodeEvent clickKeyTreeNodeEvent) {
+                if (redisConnectContext.getId() != clickKeyTreeNodeEvent.getId()) {
+                    return;
+                }
+                Object message = clickKeyTreeNodeEvent.getMessage();
+                if (message instanceof TreeNodeInfo treeNodeInfo) {
+                    selectTreeNode = treeNodeInfo;
+                    SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> {
+                        String key = treeNodeInfo.key();
+                        RightViewFragment rightViewFragment = new RightViewFragment(redisConnectContext);
+                        rightViewFragment.doLoadData(key);
+                        return rightViewFragment;
+                    }, (o, e) -> {
+                        if (e == null && o instanceof RightViewFragment rightViewFragment) {
+                            splitPane.setDividerSize(5);
+                            splitPane.setRightComponent(new WrapperPanel(rightViewFragment.contentPanel()));
+                        } else {
+                            owner.displayException(e);
+                        }
+                    });
 
 
 //                        dataViewForm.setRefreshBeforeHandler();
@@ -78,15 +72,14 @@ public class IndexPageView extends QSPageItem<MainWidget> {
 //                        });
 
 //                        dataViewForm.setCloseActionHandler(() -> splitPane.setRightComponent(NonePanel.getInstance()));
-                        StopWatch stopWatch = StopWatch.create("loadData");
-                        stopWatch.start();
-                        //加载数据并展示
+                    StopWatch stopWatch = StopWatch.create("loadData");
+                    stopWatch.start();
+                    //加载数据并展示
 //                        dataViewForm.dataChangeActionPerformed(treeNodeInfo.key(),
 //                                () -> SwingUtilities.invokeLater(() -> splitPane.setRightComponent(NonePanel.getInstance())),
 //                                () -> SwingUtilities.invokeLater(() -> splitPane.setRightComponent(dataViewForm.contentPanel())));
-                        stopWatch.stop();
-                        log.info("加载key用时：{}/ms", stopWatch.getTotalTimeSeconds());
-                    }
+                    stopWatch.stop();
+                    log.info("加载key用时：{}/ms", stopWatch.getTotalTimeSeconds());
                 }
             }
         });

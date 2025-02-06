@@ -11,7 +11,7 @@ public class WrapperPanel extends JPanel {
         contentPanel.setLayout(new BorderLayout());
         contentPanel.add(component, BorderLayout.CENTER);
         contentPanel.setBackground(UIManager.getColor("Component.background"));
-        setBorder(new EmptyBorder(8, 8, 8, 8));
+        setBorder(new EmptyBorder(8, 8, 7, 8));
         setLayout(new BorderLayout());
         add(contentPanel, BorderLayout.CENTER);
     }

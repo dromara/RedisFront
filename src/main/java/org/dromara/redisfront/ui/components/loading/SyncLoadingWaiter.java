@@ -26,7 +26,7 @@ public class SyncLoadingWaiter extends SwingWorker<Object, Object> {
     public SyncLoadingWaiter(SyncLoadingDialog syncLoadingDialog) {
         this.syncLoadingDialog = syncLoadingDialog;
         this.count = new AtomicInteger(0);
-        this.timer = new Timer(100, _ -> {
+        this.timer = new Timer(1000, _ -> {
             if (count.get() < 100) {
                 setProgress(count.incrementAndGet());
             } else {
@@ -38,6 +38,7 @@ public class SyncLoadingWaiter extends SwingWorker<Object, Object> {
                 if (StateValue.STARTED == event.getNewValue()) {
                     this.timer.start();
                 } else if (StateValue.DONE == event.getNewValue()) {
+                    this.syncLoadingDialog.setProgressValue(100);
                     terminated();
                 }
             } else if (Fn.equal(event.getPropertyName(), "progress")) {
@@ -48,12 +49,9 @@ public class SyncLoadingWaiter extends SwingWorker<Object, Object> {
 
     public void terminated() {
         if (this.isDone()) {
-            boolean cancelResult = this.cancel(true);
-            if (!cancelResult) {
-                log.warn("Failed to cancel the task.");
-            }
+            this.cancel(true);
         }
-        if(this.timer.isRunning()) {
+        if (this.timer.isRunning()) {
             this.timer.stop();
         }
         this.syncLoadingDialog.setVisible(false);

@@ -11,6 +11,7 @@ import org.dromara.quickswing.ui.app.QSContext;
 import org.dromara.quickswing.ui.app.QSWidget;
 import org.dromara.redisfront.RedisFrontPrefs;
 import org.dromara.redisfront.commons.resources.Icons;
+import org.dromara.redisfront.RedisFrontEventListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,6 +20,7 @@ import java.awt.*;
 public class MainWidget extends QSWidget<RedisFrontPrefs> {
 
     private final MainComponent mainComponent;
+    private final RedisFrontEventListener eventListener;
 
     public MainWidget(QSContext<? extends QSWidget<RedisFrontPrefs>, RedisFrontPrefs> context, String title, RedisFrontPrefs prefs) throws HeadlessException {
         super(context, title, prefs);
@@ -37,6 +39,7 @@ public class MainWidget extends QSWidget<RedisFrontPrefs> {
         this.setSize(1300, 800);
         this.setIconImages(Icons.MAIN_FRAME_ICON_IMAGES);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.eventListener = new RedisFrontEventListener(this);
         this.mainComponent = new MainComponent(this);
         this.setContentPane(mainComponent);
     }

@@ -9,11 +9,11 @@ import com.formdev.flatlaf.ui.FlatEmptyBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import org.dromara.redisfront.commons.enums.KeyTypeEnum;
-import org.dromara.redisfront.commons.resources.Icons;
-import org.dromara.redisfront.commons.exception.RedisFrontException;
+import io.lettuce.core.*;
 import org.dromara.redisfront.commons.Fn;
-import org.dromara.redisfront.commons.handler.ActionHandler;
+import org.dromara.redisfront.commons.enums.KeyTypeEnum;
+import org.dromara.redisfront.commons.exception.RedisFrontException;
+import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.commons.utils.AlertUtils;
 import org.dromara.redisfront.commons.utils.FutureUtils;
 import org.dromara.redisfront.commons.utils.LocaleUtils;
@@ -23,7 +23,6 @@ import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.context.ScanContext;
 import org.dromara.redisfront.service.*;
 import org.dromara.redisfront.ui.components.editor.TextEditor;
-import io.lettuce.core.*;
 import org.dromara.redisfront.ui.dialog.AddOrUpdateItemDialog;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
@@ -118,7 +117,6 @@ public class RightViewFragment {
     }
 
     private void dataTableInit() {
-
         dataTable.setShowHorizontalLines(true);
         dataTable.setShowVerticalLines(true);
         dataTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
@@ -230,56 +228,56 @@ public class RightViewFragment {
         if (refBtn.isEnabled()) {
             var key = keyField.getText();
             this.lastKeyName = key;
-            FutureUtils.supplyAsync(() -> keyTypeLabel.getText(), keyType -> {
-                if (Fn.notEqual(keyType, "none")) {
-                    KeyTypeEnum keyTypeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
-                    FutureUtils.runAsync(() ->
-                                    dataChangeActionPerformed(key, () -> {
-                                        SwingUtilities.invokeLater(() -> {
-                                            refreshDisableBtn();
-//                                    refreshBeforeHandler.handle();
-                                            SwingUtils.removeAllComponent(dataPanel);
-//                                            dataPanel.add(LoadingPanel.newInstance(), BorderLayout.CENTER);
-                                            dataPanel.updateUI();
-                                        });
-                                        //加载数据
-                                        {
-                                            if (keyTypeEnum == KeyTypeEnum.STRING || keyTypeEnum == KeyTypeEnum.JSON) {
-                                                loadStringActionPerformed(key);
-                                            }
-                                            if (keyTypeEnum.equals(KeyTypeEnum.ZSET)) {
-                                                this.scanZSetContextMap.put(key, new ScanContext<>());
-                                            }
-                                            if (keyTypeEnum.equals(KeyTypeEnum.HASH)) {
-                                                this.scanHashContextMap.put(key, new ScanContext<>());
-                                            }
-                                            if (keyTypeEnum.equals(KeyTypeEnum.LIST)) {
-                                                this.scanListContextMap.put(key, new ScanContext<>());
-                                            }
-                                            if (keyTypeEnum.equals(KeyTypeEnum.SET)) {
-                                                this.scanSetContextMap.put(key, new ScanContext<>());
-                                            }
-                                            if (keyTypeEnum.equals(KeyTypeEnum.STREAM)) {
-                                                this.xRangeContextMap.put(key, new ScanContext<>());
-                                            }
-                                        }
-                                    }, () -> SwingUtilities.invokeLater(() -> {
-                                        refreshEnableBtn();
-//                                refreshAfterHandler.handle();
-                                        SwingUtils.removeAllComponent(dataPanel);
-                                        dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
-                                        dataPanel.updateUI();
-                                    })), throwable -> {
-//                        refreshAfterHandler.handle()
-                            }
-
-                    );
-                } else {
-                    ttlField.setText("-2");
-                    AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showInformationDialog.message"));
-                }
-
-            });
+//            FutureUtils.supplyAsync(() -> keyTypeLabel.getText(), keyType -> {
+//                if (Fn.notEqual(keyType, "none")) {
+//                    KeyTypeEnum keyTypeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
+//                    FutureUtils.runAsync(() ->
+//                                    loadDataActionPerformed(key, () -> {
+//                                        SwingUtilities.invokeLater(() -> {
+//                                            refreshDisableBtn();
+////
+//                                            SwingUtils.removeAllComponent(dataPanel);
+////                                            dataPanel.add(LoadingPanel.newInstance(), BorderLayout.CENTER);
+//                                            dataPanel.updateUI();
+//                                        });
+//                                        //加载数据
+//                                        {
+//                                            if (keyTypeEnum == KeyTypeEnum.STRING || keyTypeEnum == KeyTypeEnum.JSON) {
+//                                                loadStringActionPerformed(key);
+//                                            }
+//                                            if (keyTypeEnum.equals(KeyTypeEnum.ZSET)) {
+//                                                this.scanZSetContextMap.put(key, new ScanContext<>());
+//                                            }
+//                                            if (keyTypeEnum.equals(KeyTypeEnum.HASH)) {
+//                                                this.scanHashContextMap.put(key, new ScanContext<>());
+//                                            }
+//                                            if (keyTypeEnum.equals(KeyTypeEnum.LIST)) {
+//                                                this.scanListContextMap.put(key, new ScanContext<>());
+//                                            }
+//                                            if (keyTypeEnum.equals(KeyTypeEnum.SET)) {
+//                                                this.scanSetContextMap.put(key, new ScanContext<>());
+//                                            }
+//                                            if (keyTypeEnum.equals(KeyTypeEnum.STREAM)) {
+//                                                this.xRangeContextMap.put(key, new ScanContext<>());
+//                                            }
+//                                        }
+//                                    }, () -> SwingUtilities.invokeLater(() -> {
+//                                        refreshEnableBtn();
+////                                refreshAfterHandler.handle();
+//                                        SwingUtils.removeAllComponent(dataPanel);
+//                                        dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
+//                                        dataPanel.updateUI();
+//                                    })), throwable -> {
+////                        refreshAfterHandler.handle()
+//                            }
+//
+//                    );
+//                } else {
+//                    ttlField.setText("-2");
+//                    AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showInformationDialog.message"));
+//                }
+//
+//            });
 
         }
     }
@@ -339,27 +337,18 @@ public class RightViewFragment {
         });
     }
 
-    public synchronized void dataChangeActionPerformed(String key, ActionHandler beforeActionHandler, ActionHandler afterActionHandler) {
-        var startTime = System.currentTimeMillis();
-//        refreshBeforeHandler.handle();
-        beforeActionHandler.handle();
-
+    public void doLoadData(String key) {
         var type = RedisBasicService.service.type(redisConnectContext, key);
         if (Fn.notEqual(type, "none")) {
             var keyTypeEnum = KeyTypeEnum.valueOf(type.toUpperCase());
             var ttl = RedisBasicService.service.ttl(redisConnectContext, key);
-
-            SwingUtilities.invokeLater(() -> {
-                fieldOrScoreField.setVisible(keyTypeEnum == KeyTypeEnum.ZSET || keyTypeEnum == KeyTypeEnum.HASH);
-                keyTypeLabel.setText(keyTypeEnum.typeName());
-                keyTypeLabel.setBackground(keyTypeEnum.color());
-                ttlField.setText(ttl.toString());
-                keyField.setText(key);
-                this.lastKeyName = key;
-                this.lastKeyTTL = ttl;
-            });
-            System.out.println("初始化key 1 用时：" + (System.currentTimeMillis() - startTime) / 1000);
-
+            this.fieldOrScoreField.setVisible(keyTypeEnum == KeyTypeEnum.ZSET || keyTypeEnum == KeyTypeEnum.HASH);
+            this.keyTypeLabel.setText(keyTypeEnum.typeName());
+            this.keyTypeLabel.setBackground(keyTypeEnum.color());
+            this.ttlField.setText(ttl.toString());
+            this.keyField.setText(key);
+            this.lastKeyName = key;
+            this.lastKeyTTL = ttl;
             switch (keyTypeEnum) {
                 case ZSET -> loadZSetDataActionPerformed(key);
                 case HASH -> loadHashDataActionPerformed(key);
@@ -369,27 +358,20 @@ public class RightViewFragment {
                 default -> loadStringActionPerformed(key);
             }
 
-            System.out.println("初始化key 2 用时：" + (System.currentTimeMillis() - startTime) / 1000);
         } else {
             AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showInformationDialog.message"));
             refreshDisableBtn();
         }
-
-//        refreshAfterHandler.handle();
-        afterActionHandler.handle();
-        System.out.println("初始化key 3 用时：" + (System.currentTimeMillis() - startTime) / 1000);
     }
 
     private void loadStringActionPerformed(String key) {
         var strLen = RedisStringService.service.strlen(redisConnectContext, key);
         var value = RedisStringService.service.get(redisConnectContext, key);
-        SwingUtilities.invokeLater(() -> {
-            tableViewPanel.setVisible(false);
-            valueUpdateSaveBtn.setEnabled(true);
-            lengthLabel.setText("Length: " + strLen);
-            keySizeLabel.setText("Size: " + Fn.getDataSize(value));
-            jsonValueFormat(value);
-        });
+        tableViewPanel.setVisible(false);
+        valueUpdateSaveBtn.setEnabled(true);
+        lengthLabel.setText("Length: " + strLen);
+        keySizeLabel.setText("Size: " + Fn.getDataSize(value));
+        jsonValueFormat(value);
     }
 
     private void loadHashDataActionPerformed(String key) {

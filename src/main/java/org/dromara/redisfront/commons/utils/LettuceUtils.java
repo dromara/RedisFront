@@ -1,5 +1,6 @@
 package org.dromara.redisfront.commons.utils;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.RandomUtil;
 import io.lettuce.core.*;
 import io.lettuce.core.api.sync.RedisCommands;
@@ -79,10 +80,12 @@ public class LettuceUtils {
     }
 
     public static void removeTmpLocalPort(RedisConnectContext redisConnectContext) {
-        if (redisConnectContext.getRedisMode().equals(RedisMode.CLUSTER)) {
+        if (Fn.equal(RedisMode.CLUSTER, redisConnectContext.getRedisMode())) {
             redisConnectContext.getClusterLocalPort().forEach((_, v) -> PORT_SET.remove(v));
         } else {
-            PORT_SET.remove(redisConnectContext.getLocalPort());
+            if (CollUtil.isNotEmpty(PORT_SET)) {
+                PORT_SET.remove(redisConnectContext.getLocalPort());
+            }
         }
     }
 

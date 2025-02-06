@@ -275,20 +275,20 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
 
 
     private void openActionPerformed(ActionEvent actionEvent) {
-        var connectcontext = validGetConnectInfo();
+        var redisConnectContext = validGetConnectInfo();
         if (testConnect()) {
             try {
-                ConnectDetailEntity connectDetailEntity = connectcontext.toEntity();
+                ConnectDetailEntity connectDetailEntity = redisConnectContext.toEntity();
                 connectDetailEntity.setGroupId(groupId);
                 if (null == detailId) {
                     ConnectDetailDao.newInstance(this.context.getDatabaseManager().getDatasource()).save(connectDetailEntity);
-                    connectcontext.setId(connectcontext.getId());
+                    redisConnectContext.setId(redisConnectContext.getId());
                 } else {
                     ConnectDetailDao.newInstance(this.context.getDatabaseManager().getDatasource()).update(detailId, connectDetailEntity);
-                    connectcontext.setId(detailId);
+                    redisConnectContext.setId(detailId);
                 }
-                this.context.getEventBus().publish(new OpenRedisConnectEvent(connectcontext));
-                this.context.getEventBus().publish(new RefreshConnectTreeEvent(connectcontext));
+                this.context.getEventBus().publish(new OpenRedisConnectEvent(redisConnectContext));
+                this.context.getEventBus().publish(new RefreshConnectTreeEvent(redisConnectContext));
                 dispose();
             } catch (SQLException e) {
                 getOwner().displayException($tr("AddConnectDialog.save.fail.message"), e);

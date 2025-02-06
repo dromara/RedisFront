@@ -5,8 +5,6 @@ import cn.hutool.core.util.StrUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.util.SystemInfo;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.quickswing.events.QSEvent;
-import org.dromara.quickswing.events.QSEventListener;
 import org.dromara.quickswing.ui.app.QSAction;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.commons.utils.SwingUtils;
@@ -15,9 +13,9 @@ import org.dromara.redisfront.dao.ConnectGroupDao;
 import org.dromara.redisfront.model.TreeNodeInfo;
 import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 import org.dromara.redisfront.model.entity.ConnectGroupEntity;
-import org.dromara.redisfront.ui.handler.ConnectHandler;
 import org.dromara.redisfront.ui.dialog.AddConnectDialog;
 import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
+import org.dromara.redisfront.ui.handler.ConnectHandler;
 import org.dromara.redisfront.ui.widget.MainWidget;
 import org.jdesktop.swingx.JXTree;
 import raven.toast.Notifications;
@@ -60,13 +58,13 @@ public class RedisConnectTree extends JXTree {
         this.setFocusable(false);
         this.putClientProperty(FlatClientProperties.STYLE,
                 "selectionArc:10;" +
-                "rowHeight:25;" +
-                "background:$RedisFront.main.background;" +
-                "foreground:#ffffff;" +
-                "[light]selectionBackground:darken(#FFFFFF,20%);" +
-                "[light]selectionForeground:darken($Label.foreground,50%);" +
-                "[dark]selectionBackground:darken($Label.foreground,50%);" +
-                "showCellFocusIndicator:false;"
+                        "rowHeight:25;" +
+                        "background:$RedisFront.main.background;" +
+                        "foreground:#ffffff;" +
+                        "[light]selectionBackground:darken(#FFFFFF,20%);" +
+                        "[light]selectionForeground:darken($Label.foreground,50%);" +
+                        "[dark]selectionBackground:darken($Label.foreground,50%);" +
+                        "showCellFocusIndicator:false;"
 
         );
         this.setModel(new DefaultTreeModel(new TreeNodeInfo()));
@@ -134,12 +132,9 @@ public class RedisConnectTree extends JXTree {
     }
 
     private void registerEventListener() {
-        context.getEventBus().subscribe(new QSEventListener<>(owner) {
-            @Override
-            protected void onEvent(QSEvent event) {
-                if (event instanceof RefreshConnectTreeEvent) {
-                    loadTreeNodeData();
-                }
+        owner.getEventListener().bind(-1, RefreshConnectTreeEvent.class, event -> {
+            if (event instanceof RefreshConnectTreeEvent) {
+                loadTreeNodeData();
             }
         });
     }
