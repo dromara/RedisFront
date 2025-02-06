@@ -17,42 +17,30 @@ plugins {
 
 buildscript {
     repositories {
-        maven {
-            url = uri("https://packages.aliyun.com/maven/repository/2048752-snapshot-C7TcE7")
-            credentials {
-                username = "662c9a1d2df38b0129acf288"
-                password = "pub-user"
-            }
-        }
-        maven {
-            url = uri("https://packages.aliyun.com/maven/repository/2048752-release-f1IHDo")
-            credentials {
-                username = "662c9a1d2df38b0129acf288"
-                password = "pub-user"
-            }
-        }
+        mavenLocal()
         dependencies {
             classpath("io.github.fvarrui:javapackager:1.7.5")
         }
-        mavenLocal()
     }
 }
 plugins.apply("io.github.fvarrui.javapackager.plugin")
 
 allprojects {
+    val repoUsername = "662c9a1d2df38b0129acf288"
+    val repoPassword = "pub-user"
     repositories {
         maven {
             url = uri("https://packages.aliyun.com/maven/repository/2048752-snapshot-C7TcE7")
             credentials {
-                username = "662c9a1d2df38b0129acf288"
-                password = "pub-user"
+                username = repoUsername
+                password = repoPassword
             }
         }
         maven {
             url = uri("https://packages.aliyun.com/maven/repository/2048752-release-f1IHDo")
             credentials {
-                username = "662c9a1d2df38b0129acf288"
-                password = "pub-user"
+                username = repoUsername
+                password = repoPassword
             }
         }
         mavenLocal()
@@ -61,9 +49,9 @@ allprojects {
 
 version = "2024.1"
 
-val applicationName: String = "RedisFront"
-val organization: String = "dromara.org"
-val supportUrl: String = "https://redisfront.dromara.org"
+val applicationName = "RedisFront"
+val organization = "dromara.org"
+val supportUrl = "https://redisfront.dromara.org"
 
 val hutoolVersion = "5.8.25"
 val fifesoftVersion = "3.2.0"
