@@ -19,16 +19,16 @@ public class TextEditor extends JPanel {
     private final RSyntaxTextArea textArea;
     private final RTextScrollPane scrollPane;
 
-    public static TextEditor newInstance() {
-        return new TextEditor();
+    public static TextEditor newInstance(String text) {
+        return new TextEditor(text);
     }
 
     public RSyntaxTextArea textArea() {
         return textArea;
     }
 
-    public TextEditor() {
-        this.textArea = new RSyntaxTextArea() {
+    public TextEditor(String text) {
+        this.textArea = new RSyntaxTextArea(text) {
             {
                 setRTextAreaUI(new RSyntaxTextAreaUI(this) {
                     @Override

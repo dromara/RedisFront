@@ -7,6 +7,7 @@ import org.dromara.redisfront.commons.Fn;
 
 import javax.swing.*;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
@@ -38,7 +39,6 @@ public class SyncLoadingWaiter extends SwingWorker<Object, Object> {
                 if (StateValue.STARTED == event.getNewValue()) {
                     this.timer.start();
                 } else if (StateValue.DONE == event.getNewValue()) {
-                    this.syncLoadingDialog.setProgressValue(100);
                     terminated();
                 }
             } else if (Fn.equal(event.getPropertyName(), "progress")) {
@@ -48,12 +48,8 @@ public class SyncLoadingWaiter extends SwingWorker<Object, Object> {
     }
 
     public void terminated() {
-        if (this.isDone()) {
-            this.cancel(true);
-        }
-        if (this.timer.isRunning()) {
-            this.timer.stop();
-        }
+        this.cancel(true);
+        this.timer.stop();
         this.syncLoadingDialog.setVisible(false);
         this.syncLoadingDialog.dispose();
 
@@ -62,9 +58,13 @@ public class SyncLoadingWaiter extends SwingWorker<Object, Object> {
     @Override
     protected void done() {
         try {
-            this.biConsumer.accept(this.get(), null);
+            Object object = this.get();
+            this.biConsumer.accept(object, null);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+            if (e instanceof CancellationException) {
+                return;
+            }
             this.biConsumer.accept(null, e);
         }
     }

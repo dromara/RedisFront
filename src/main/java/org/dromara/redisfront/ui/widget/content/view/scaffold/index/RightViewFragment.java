@@ -1,5 +1,6 @@
 package org.dromara.redisfront.ui.widget.content.view.scaffold.index;
 
+import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.io.unit.DataSizeUtil;
 import cn.hutool.json.JSONException;
 import cn.hutool.json.JSONUtil;
@@ -25,6 +26,8 @@ import org.dromara.redisfront.service.*;
 import org.dromara.redisfront.ui.components.editor.TextEditor;
 import org.dromara.redisfront.ui.dialog.AddOrUpdateItemDialog;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -50,6 +53,7 @@ import java.util.stream.Collectors;
  */
 public class RightViewFragment {
 
+    private static final Logger log = LoggerFactory.getLogger(RightViewFragment.class);
     private JPanel contentPanel;
     private JTextField keyField;
     private JPanel bodyPanel;
@@ -366,12 +370,16 @@ public class RightViewFragment {
 
     private void loadStringActionPerformed(String key) {
         var strLen = RedisStringService.service.strlen(redisConnectContext, key);
+        StopWatch stopWatch = StopWatch.create("load " + key);
+        stopWatch.start();
         var value = RedisStringService.service.get(redisConnectContext, key);
         tableViewPanel.setVisible(false);
         valueUpdateSaveBtn.setEnabled(true);
         lengthLabel.setText("Length: " + strLen);
         keySizeLabel.setText("Size: " + Fn.getDataSize(value));
         jsonValueFormat(value);
+        stopWatch.stop();
+        log.info(stopWatch.shortSummary());
     }
 
     private void loadHashDataActionPerformed(String key) {
@@ -751,7 +759,7 @@ public class RightViewFragment {
             }
         }, BorderLayout.NORTH);
 
-        textEditor = TextEditor.newInstance();
+        textEditor = TextEditor.newInstance("");
         valueViewPanel.add(new JPanel() {
             {
                 setLayout(new BorderLayout());
