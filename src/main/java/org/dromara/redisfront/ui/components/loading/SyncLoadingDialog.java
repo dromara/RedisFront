@@ -69,7 +69,6 @@ public class SyncLoadingDialog extends QSDialog<MainWidget> {
         this.setLocationRelativeTo(getOwner());
         this.setVisible(true);
         this.pack();
-        log.info("showSyncLoadingDialog -> {}", Thread.currentThread().getName());
     }
 
 }

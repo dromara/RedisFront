@@ -19,16 +19,20 @@ public class TextEditor extends JPanel {
     private final RSyntaxTextArea textArea;
     private final RTextScrollPane scrollPane;
 
-    public static TextEditor newInstance(String text) {
-        return new TextEditor(text);
+    public static TextEditor newInstance() {
+        return new TextEditor();
     }
 
     public RSyntaxTextArea textArea() {
         return textArea;
     }
 
-    public TextEditor(String text) {
-        this.textArea = new RSyntaxTextArea(text) {
+    public void setText(String text) {
+        this.textArea.append(text);
+    }
+
+    public TextEditor() {
+        this.textArea = new RSyntaxTextArea() {
             {
                 setRTextAreaUI(new RSyntaxTextAreaUI(this) {
                     @Override
@@ -44,13 +48,12 @@ public class TextEditor extends JPanel {
         this.textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON);
         //增加文本框，自动换行
         this.textArea.setLineWrap(true);
-        scrollPane = new RTextScrollPane(this.textArea);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.setLineNumbersEnabled(true);
+        this.scrollPane = new RTextScrollPane(this.textArea);
+        this.scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        this.scrollPane.setLineNumbersEnabled(true);
         this.setLayout(new BorderLayout());
         this.add(scrollPane, BorderLayout.CENTER);
-        updateTheme();
-
+        this.updateTheme();
     }
 
     @Override

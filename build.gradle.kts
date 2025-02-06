@@ -54,8 +54,7 @@ val organization = "dromara.org"
 val supportUrl = "https://redisfront.dromara.org"
 
 val hutoolVersion = "5.8.25"
-val fifesoftVersion = "3.2.0"
-val derbyVersion = "10.17.1.0"
+val fifesoftVersion = "3.5.3"
 val lettuceVersion = "6.2.0.RELEASE"
 val logbackVersion = "1.4.12"
 
@@ -96,9 +95,7 @@ dependencies {
     implementation("cn.hutool:hutool-extra:${hutoolVersion}")
     implementation("cn.hutool:hutool-json:${hutoolVersion}")
     implementation("cn.hutool:hutool-http:${hutoolVersion}")
-    implementation("org.apache.derby:derby:${derbyVersion}")
     implementation("com.fifesoft:rsyntaxtextarea:${fifesoftVersion}")
-    implementation("com.fifesoft:rstaui:${fifesoftVersion}")
     implementation("ch.qos.logback:logback-classic:${logbackVersion}")
     implementation("at.swimmesberger:swingx-core:1.6.8")
     implementation("commons-net:commons-net:3.9.0")

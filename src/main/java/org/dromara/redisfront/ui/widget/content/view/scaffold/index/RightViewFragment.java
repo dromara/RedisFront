@@ -1,6 +1,5 @@
 package org.dromara.redisfront.ui.widget.content.view.scaffold.index;
 
-import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.io.unit.DataSizeUtil;
 import cn.hutool.json.JSONException;
 import cn.hutool.json.JSONUtil;
@@ -81,7 +80,7 @@ public class RightViewFragment {
     private JTextField currentCountField;
     private JTextField allCountField;
     private JButton loadMoreBtn;
-    private JButton 关闭Button;
+    private JButton closeBtn;
     private TextEditor textEditor;
     private JTextField fieldOrScoreField;
     private JComboBox<String> jComboBox;
@@ -117,10 +116,10 @@ public class RightViewFragment {
         xRangeContextMap = new LinkedHashMap<>();
         scanHashContextMap = new LinkedHashMap<>();
         $$$setupUI$$$();
-        dataTableInit();
+        initialize();
     }
 
-    private void dataTableInit() {
+    private void initialize() {
         dataTable.setShowHorizontalLines(true);
         dataTable.setShowVerticalLines(true);
         dataTable.setDefaultRenderer(String.class, new DefaultTableCellRenderer() {
@@ -220,7 +219,7 @@ public class RightViewFragment {
                 textEditor.textArea().setText(value);
             }
         } else {
-            textEditor.textArea().setText(value);
+            textEditor.textArea().append(value);
         }
     }
 
@@ -305,29 +304,29 @@ public class RightViewFragment {
                 case ZSET -> {
                     if (init)
                         scanZSetContextMap.put(key, new ScanContext<>());
-                    loadZSetDataActionPerformed(key);
+                    loadZSetData(key);
                 }
                 case HASH -> {
                     if (init)
                         scanHashContextMap.put(key, new ScanContext<>());
-                    loadHashDataActionPerformed(key);
+                    loadHashData(key);
                 }
                 case LIST -> {
                     if (init)
                         scanListContextMap.put(key, new ScanContext<>());
-                    loadListDataActionPerformed(key);
+                    loadListData(key);
                 }
                 case SET -> {
                     if (init)
                         scanSetContextMap.put(key, new ScanContext<>());
-                    loadSetDataActionPerformed(key);
+                    loadSetData(key);
                 }
                 case STREAM -> {
                     if (init)
                         xRangeContextMap.put(key, new ScanContext<>());
-                    loadStreamDataActionPerformed(key);
+                    loadStreamData(key);
                 }
-                default -> loadStringActionPerformed(key);
+                default -> loadStringData(key);
             }
 
             SwingUtilities.invokeLater(() -> {
@@ -341,7 +340,7 @@ public class RightViewFragment {
         });
     }
 
-    public void doLoadData(String key) {
+    public void loadData(String key) {
         var type = RedisBasicService.service.type(redisConnectContext, key);
         if (Fn.notEqual(type, "none")) {
             var keyTypeEnum = KeyTypeEnum.valueOf(type.toUpperCase());
@@ -354,12 +353,12 @@ public class RightViewFragment {
             this.lastKeyName = key;
             this.lastKeyTTL = ttl;
             switch (keyTypeEnum) {
-                case ZSET -> loadZSetDataActionPerformed(key);
-                case HASH -> loadHashDataActionPerformed(key);
-                case SET -> loadSetDataActionPerformed(key);
-                case LIST -> loadListDataActionPerformed(key);
-                case STREAM -> loadStreamDataActionPerformed(key);
-                default -> loadStringActionPerformed(key);
+                case ZSET -> loadZSetData(key);
+                case HASH -> loadHashData(key);
+                case SET -> loadSetData(key);
+                case LIST -> loadListData(key);
+                case STREAM -> loadStreamData(key);
+                default -> loadStringData(key);
             }
 
         } else {
@@ -368,21 +367,17 @@ public class RightViewFragment {
         }
     }
 
-    private void loadStringActionPerformed(String key) {
+    private void loadStringData(String key) {
         var strLen = RedisStringService.service.strlen(redisConnectContext, key);
-        StopWatch stopWatch = StopWatch.create("load " + key);
-        stopWatch.start();
         var value = RedisStringService.service.get(redisConnectContext, key);
         tableViewPanel.setVisible(false);
         valueUpdateSaveBtn.setEnabled(true);
         lengthLabel.setText("Length: " + strLen);
         keySizeLabel.setText("Size: " + Fn.getDataSize(value));
         jsonValueFormat(value);
-        stopWatch.stop();
-        log.info(stopWatch.shortSummary());
     }
 
-    private void loadHashDataActionPerformed(String key) {
+    private void loadHashData(String key) {
         var len = RedisHashService.service.hlen(redisConnectContext, key);
         var scanContext = scanHashContextMap.getOrDefault(key, new ScanContext<>());
         var lastSearchKey = scanContext.getSearchKey();
@@ -421,7 +416,7 @@ public class RightViewFragment {
         });
     }
 
-    private void loadSetDataActionPerformed(String key) {
+    private void loadSetData(String key) {
         var len = RedisSetService.service.scard(redisConnectContext, key);
         var scanContext = scanSetContextMap.getOrDefault(key, new ScanContext<>());
 
@@ -456,7 +451,7 @@ public class RightViewFragment {
         });
     }
 
-    private void loadListDataActionPerformed(String key) {
+    private void loadListData(String key) {
         var len = RedisListService.service.llen(redisConnectContext, key);
 
         var scanContext = scanListContextMap.getOrDefault(key, new ScanContext<>());
@@ -504,7 +499,7 @@ public class RightViewFragment {
         });
     }
 
-    private void loadStreamDataActionPerformed(String key) {
+    private void loadStreamData(String key) {
         var len = RedisStreamService.service.xlen(redisConnectContext, key);
 
         var xRangeContext = xRangeContextMap.getOrDefault(key, new ScanContext<>());
@@ -545,7 +540,7 @@ public class RightViewFragment {
         });
     }
 
-    private void loadZSetDataActionPerformed(String key) {
+    private void loadZSetData(String key) {
         var len = RedisZSetService.service.zcard(redisConnectContext, key);
 
         var scanContext = scanZSetContextMap.getOrDefault(key, new ScanContext<>());
@@ -635,7 +630,7 @@ public class RightViewFragment {
             public void updateUI() {
                 super.updateUI();
                 if (Fn.isNotNull(dataTable)) {
-                    dataTableInit();
+                    initialize();
                 }
             }
         };
@@ -759,7 +754,7 @@ public class RightViewFragment {
             }
         }, BorderLayout.NORTH);
 
-        textEditor = TextEditor.newInstance("");
+        textEditor = TextEditor.newInstance();
         valueViewPanel.add(new JPanel() {
             {
                 setLayout(new BorderLayout());
@@ -1067,9 +1062,9 @@ public class RightViewFragment {
         toolBar1.add(saveBtn);
         final JToolBar.Separator toolBar$Separator3 = new JToolBar.Separator();
         toolBar1.add(toolBar$Separator3);
-        关闭Button = new JButton();
-        关闭Button.setText("关闭");
-        toolBar1.add(关闭Button);
+        closeBtn = new JButton();
+        closeBtn.setText("关闭");
+        toolBar1.add(closeBtn);
         dataPanel = new JPanel();
         dataPanel.setLayout(new BorderLayout(0, 0));
         bodyPanel.add(dataPanel, BorderLayout.CENTER);
@@ -1082,10 +1077,10 @@ public class RightViewFragment {
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         tableViewPanel.add(panel2, BorderLayout.CENTER);
-        panel2.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
+        panel2.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new GridLayoutManager(6, 5, new Insets(0, 0, 0, 0), -1, -1));
-        panel2.add(panel3, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panel2.add(panel3, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         panel3.add(tableSearchField, new GridConstraints(0, 0, 1, 5, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
         final Spacer spacer1 = new Spacer();
         panel3.add(spacer1, new GridConstraints(5, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
