@@ -46,8 +46,7 @@ public class TextEditor extends JPanel {
         };
         this.setForeground(UIManager.getColor("foreground"));
         this.textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON);
-        //增加文本框，自动换行
-        this.textArea.setLineWrap(true);
+        this.textArea.setLineWrap(false);
         this.scrollPane = new RTextScrollPane(this.textArea);
         this.scrollPane.setBorder(BorderFactory.createEmptyBorder());
         this.scrollPane.setLineNumbersEnabled(true);

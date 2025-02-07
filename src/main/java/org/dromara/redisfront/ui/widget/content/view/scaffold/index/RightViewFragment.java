@@ -84,6 +84,7 @@ public class RightViewFragment {
     private JTextField fieldOrScoreField;
     private JComboBox<String> jComboBox;
     private final RedisConnectContext redisConnectContext;
+    private final TreeNodeInfo treeNodeInfo;
 
     private final Map<String, ScanContext<String>> scanSetContextMap;
     private final Map<String, ScanContext<String>> scanListContextMap;
@@ -107,15 +108,16 @@ public class RightViewFragment {
         refBtn.setEnabled(true);
     }
 
-    public RightViewFragment(RedisConnectContext redisConnectContext) {
+    public RightViewFragment(RedisConnectContext redisConnectContext, TreeNodeInfo treeNodeInfo) {
         this.redisConnectContext = redisConnectContext;
-        scanZSetContextMap = new LinkedHashMap<>();
-        scanSetContextMap = new LinkedHashMap<>();
-        scanListContextMap = new LinkedHashMap<>();
-        xRangeContextMap = new LinkedHashMap<>();
-        scanHashContextMap = new LinkedHashMap<>();
+        this.treeNodeInfo = treeNodeInfo;
+        this.scanZSetContextMap = new LinkedHashMap<>();
+        this.scanSetContextMap = new LinkedHashMap<>();
+        this.scanListContextMap = new LinkedHashMap<>();
+        this.xRangeContextMap = new LinkedHashMap<>();
+        this.scanHashContextMap = new LinkedHashMap<>();
         $$$setupUI$$$();
-        initialize();
+        this.initialize();
     }
 
     private void initialize() {
@@ -298,7 +300,6 @@ public class RightViewFragment {
                 tableDelBtn.setEnabled(false);
                 tableRefreshBtn.setEnabled(false);
             });
-
             switch (keyTypeEnum) {
                 case ZSET -> {
                     if (init)
@@ -325,7 +326,9 @@ public class RightViewFragment {
                         xRangeContextMap.put(key, new ScanContext<>());
                     loadStreamData(key);
                 }
-                default -> loadStringData(key);
+                default -> {
+                    loadStringData(key);
+                }
             }
 
             SwingUtilities.invokeLater(() -> {
@@ -340,6 +343,7 @@ public class RightViewFragment {
     }
 
     public void loadData(String key) {
+        String name = Thread.currentThread().getName();
         var type = RedisBasicService.service.type(redisConnectContext, key);
         if (Fn.notEqual(type, "none")) {
             var keyTypeEnum = KeyTypeEnum.valueOf(type.toUpperCase());

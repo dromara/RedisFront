@@ -1,6 +1,5 @@
 package org.dromara.redisfront.ui.widget.content.view.scaffold.index;
 
-import cn.hutool.core.date.StopWatch;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.quickswing.ui.app.page.QSPageItem;
@@ -47,16 +46,7 @@ public class IndexPageView extends QSPageItem<MainWidget> {
                 Object message = clickKeyTreeNodeEvent.getMessage();
                 if (message instanceof TreeNodeInfo treeNodeInfo) {
                     selectTreeNode = treeNodeInfo;
-                    SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> {
-                        String key = treeNodeInfo.key();
-                        StopWatch stopWatch = StopWatch.create("loadData");
-                        stopWatch.start();
-                        RightViewFragment rightViewFragment = new RightViewFragment(redisConnectContext);
-                        rightViewFragment.loadData(key);
-                        stopWatch.stop();
-                        log.info("加载key用时：{}/ms", stopWatch.getTotalTimeSeconds());
-                        return rightViewFragment;
-                    }, (o, e) -> {
+                    SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> new RightViewFragment(redisConnectContext, treeNodeInfo), (o, e) -> {
                         if (e == null && o instanceof RightViewFragment rightViewFragment) {
                             splitPane.setDividerSize(5);
                             splitPane.setRightComponent(new WrapperPanel(rightViewFragment.contentPanel()));
@@ -64,24 +54,6 @@ public class IndexPageView extends QSPageItem<MainWidget> {
                             owner.displayException(e);
                         }
                     });
-
-
-//                        dataViewForm.setRefreshBeforeHandler();
-//
-//                        dataViewForm.setRefreshAfterHandler(leftSearchFragment::scanAfterProcess);
-//
-//                        dataViewForm.setDeleteActionHandler(() -> {
-//                            leftSearchFragment.deleteActionPerformed();
-//                            splitPane.setRightComponent(NonePanel.getInstance());
-//                        });
-
-//                        dataViewForm.setCloseActionHandler(() -> splitPane.setRightComponent(NonePanel.getInstance()));
-
-                    //加载数据并展示
-//                        dataViewForm.dataChangeActionPerformed(treeNodeInfo.key(),
-//                                () -> SwingUtilities.invokeLater(() -> splitPane.setRightComponent(NonePanel.getInstance())),
-//                                () -> SwingUtilities.invokeLater(() -> splitPane.setRightComponent(dataViewForm.contentPanel())));
-
                 }
             }
         });
