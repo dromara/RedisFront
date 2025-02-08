@@ -2,12 +2,14 @@ package org.dromara.redisfront.ui.components.editor;
 
 
 import com.formdev.flatlaf.ui.FlatLineBorder;
+import org.dromara.redisfront.commons.Fn;
 import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.util.List;
 
 /**
  * TextEditorComponent
@@ -19,16 +21,54 @@ public class TextEditor extends JPanel {
     private final RSyntaxTextArea textArea;
     private final RTextScrollPane scrollPane;
 
+
     public static TextEditor newInstance() {
         return new TextEditor();
     }
 
-    public RSyntaxTextArea textArea() {
-        return textArea;
+    private class AsyncWriter extends SwingWorker<Void, String> {
+        private final String text;
+
+        private AsyncWriter(String text) {
+            this.text = text;
+        }
+
+        @Override
+        protected Void doInBackground() {
+            if (text.length() < 500) {
+                process(List.of(text));
+            } else {
+                for (int i = 0; i < text.length(); i += 500) {
+                    String chunk = text.substring(i, Math.min(i + 500, text.length()));
+                    publish(chunk);
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void process(List<String> chunks) {
+            for (String chunk : chunks) {
+                textArea.append(chunk);
+            }
+        }
+    }
+
+    public void clear() {
+        Fn.run(() -> textArea.append(""));
+    }
+
+    public void asyncAppendText(String text) {
+        AsyncWriter asyncWriter = new AsyncWriter(text);
+        asyncWriter.execute();
     }
 
     public void setText(String text) {
-        this.textArea.append(text);
+        Fn.run(() -> textArea.append(text));
+    }
+
+    public String getText() {
+        return this.textArea.getText();
     }
 
     public TextEditor() {

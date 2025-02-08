@@ -63,7 +63,7 @@ public class MainComponent extends Background {
                         .findFirst()
                         .ifPresent(component -> {
                             if (component instanceof MainContentComponent mainRightTabbedPanel) {
-                                SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> {
+                                SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
                                     fetchRedisMode(redisConnectContext);
                                     return new ContentTabView(owner, redisConnectContext);
                                 }, (o, e) -> {
@@ -87,7 +87,7 @@ public class MainComponent extends Background {
                                     }
                                 });
                             } else {
-                                SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> {
+                                SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
                                     fetchRedisMode(redisConnectContext);
                                     MainContentComponent mainTabbedPanel = createMainTabbedPanel(drawerAnimationAction);
                                     ContentTabView contentTabView = new ContentTabView(owner, redisConnectContext);

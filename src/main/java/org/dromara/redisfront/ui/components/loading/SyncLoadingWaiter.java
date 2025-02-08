@@ -13,7 +13,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 @Slf4j
-public class SyncLoadingWaiter extends SwingWorker<Object, Object> {
+class SyncLoadingWaiter extends SwingWorker<Object, Object> {
 
     private final Timer timer;
     private final AtomicInteger count;

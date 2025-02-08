@@ -50,7 +50,7 @@ public class SyncLoadingDialog extends QSDialog<MainWidget> {
     }
 
 
-    public static SyncLoadingDialog newInstance(MainWidget owner) {
+    public static SyncLoadingDialog builder(MainWidget owner) {
         return new SyncLoadingDialog(owner);
     }
 

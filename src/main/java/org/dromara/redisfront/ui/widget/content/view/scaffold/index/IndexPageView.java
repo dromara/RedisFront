@@ -46,7 +46,11 @@ public class IndexPageView extends QSPageItem<MainWidget> {
                 Object message = clickKeyTreeNodeEvent.getMessage();
                 if (message instanceof TreeNodeInfo treeNodeInfo) {
                     selectTreeNode = treeNodeInfo;
-                    SyncLoadingDialog.newInstance(owner).showSyncLoadingDialog(() -> new RightViewFragment(redisConnectContext, treeNodeInfo), (o, e) -> {
+                    SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
+                        RightViewFragment rightViewFragment = new RightViewFragment(redisConnectContext, treeNodeInfo,owner);
+                        rightViewFragment.loadData();
+                        return rightViewFragment;
+                    }, (o, e) -> {
                         if (e == null && o instanceof RightViewFragment rightViewFragment) {
                             splitPane.setDividerSize(5);
                             splitPane.setRightComponent(new WrapperPanel(rightViewFragment.contentPanel()));

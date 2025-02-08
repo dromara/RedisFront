@@ -9,9 +9,11 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 
+import javax.swing.*;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
 
 
 /**
@@ -22,6 +24,15 @@ import java.util.*;
 public class Fn {
 
     private Fn() {
+    }
+
+    public static void run(Runnable runnable) {
+        if (SwingUtilities.isEventDispatchThread()) {
+            runnable.run();
+        } else {
+            SwingUtilities.invokeLater(runnable);
+        }
+
     }
 
     public static boolean isNotEmpty(Collection<?> collection) {
