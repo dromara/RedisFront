@@ -64,7 +64,7 @@ public class TextEditor extends JPanel {
     }
 
     public void setText(String text) {
-        Fn.run(() -> textArea.append(text));
+        Fn.run(() -> textArea.setText(text));
     }
 
     public String getText() {
