@@ -520,7 +520,7 @@ public class RightViewFragment {
         });
     }
 
-    private void sloadZSetData(String key) {
+    private void loadZSetData(String key) {
         var len = RedisZSetService.service.zcard(redisConnectContext, key);
 
         var scanContext = scanZSetContextMap.getOrDefault(key, new ScanContext<>());
@@ -1006,7 +1006,7 @@ public class RightViewFragment {
         contentPanel = new JPanel();
         contentPanel.setLayout(new BorderLayout(0, 0));
         contentPanel.setMinimumSize(new Dimension(-1, -1));
-        contentPanel.setPreferredSize(new Dimension(618, -1));
+        contentPanel.setPreferredSize(new Dimension(-1, -1));
         bodyPanel.setLayout(new BorderLayout(0, 0));
         contentPanel.add(bodyPanel, BorderLayout.CENTER);
         basicPanel.setLayout(new GridLayoutManager(1, 5, new Insets(0, 0, 0, 0), -1, -1));

@@ -6,7 +6,7 @@
     </constraints>
     <properties>
       <minimumSize width="-1" height="-1"/>
-      <preferredSize width="618" height="-1"/>
+      <preferredSize width="-1" height="-1"/>
     </properties>
     <border type="none">
       <size top="0" left="5" bottom="0" right="0"/>
