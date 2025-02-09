@@ -112,11 +112,8 @@ public class RedisFrontComponent extends Background {
                 connectHandler.accept((RedisConnectContext) message);
             }
         });
-
-        this.mainLeftPanel = new SidebarComponent(owner, connectHandler, drawerAnimationAction, (key, index) -> {
-            System.out.println("drawerMenuItemEvent" + " key:" + key);
-            System.out.println("drawerMenuItemEvent" + " index:" + Arrays.toString(index));
-        }).buildPanel();
+        SidebarComponent sidebarComponent = new SidebarComponent(owner, connectHandler, drawerAnimationAction);
+        this.mainLeftPanel = sidebarComponent.buildPanel();
         parentPanel.add(mainLeftPanel, BorderLayout.WEST);
         this.add(parentPanel, BorderLayout.CENTER);
     }

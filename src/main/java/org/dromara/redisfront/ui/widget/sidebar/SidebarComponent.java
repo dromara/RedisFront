@@ -5,14 +5,15 @@ import com.formdev.flatlaf.util.SystemInfo;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
-import org.dromara.redisfront.ui.widget.handler.ConnectHandler;
-import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerMenuItemEvent;
-import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
 import org.dromara.redisfront.ui.widget.RedisFrontComponent;
-import org.dromara.redisfront.ui.widget.sidebar.tree.RedisConnectTree;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
+import org.dromara.redisfront.ui.widget.handler.ConnectHandler;
+import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
+import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerMenuItemEvent;
 import org.dromara.redisfront.ui.widget.sidebar.panel.LogoPanel;
 import org.dromara.redisfront.ui.widget.sidebar.panel.ThemesChangePanel;
+import org.dromara.redisfront.ui.widget.sidebar.tree.RedisConnectTree;
+import org.jdesktop.swingx.JXTree;
 import raven.drawer.component.DrawerPanel;
 import raven.drawer.component.SimpleDrawerBuilder;
 import raven.drawer.component.footer.SimpleFooterData;
@@ -28,29 +29,21 @@ import java.awt.*;
 public class SidebarComponent extends SimpleDrawerBuilder {
 
     private final RedisFrontWidget owner;
-    private final ConnectHandler connectHandler;
     private final DrawerAnimationAction drawerAnimationAction;
-    private final DrawerMenuItemEvent drawerMenuItemEvent;
-
+    private final RedisConnectTree tree;
 
 
     public DrawerPanel buildPanel() {
-        DrawerPanel drawerPanel = new DrawerPanel(this) {
-            @Override
-            public void updateUI() {
-                super.updateUI();
-            }
-        };
+        DrawerPanel drawerPanel = new DrawerPanel(this);
         drawerPanel.setMinimumSize(new Dimension(250, -1));
         drawerPanel.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
         return drawerPanel;
     }
 
-    public SidebarComponent(RedisFrontWidget owner, ConnectHandler connectHandler, DrawerAnimationAction drawerAnimationAction, DrawerMenuItemEvent drawerMenuItemEvent) {
+    public SidebarComponent(RedisFrontWidget owner, ConnectHandler connectHandler, DrawerAnimationAction drawerAnimationAction) {
         this.owner = owner;
-        this.connectHandler = connectHandler;
+        this.tree = new RedisConnectTree(owner, connectHandler);
         this.drawerAnimationAction = drawerAnimationAction;
-        this.drawerMenuItemEvent = drawerMenuItemEvent;
     }
 
     @Override
@@ -94,7 +87,6 @@ public class SidebarComponent extends SimpleDrawerBuilder {
 
     @Override
     public Component getMenu() {
-        JTree tree = new RedisConnectTree(owner, connectHandler);
         JScrollPane scrollPane = createScroll(tree);
         scrollPane.setBorder(new EmptyBorder(0, 10, 0, 10));
         return scrollPane;

@@ -17,6 +17,7 @@ public class ConnectDetailEntity {
     private String password;
     private Integer enableSsl;
     private String connectMode;
+    private String setting;
     private String sslConfig;
     private String sshConfig;
 
@@ -29,11 +30,17 @@ public class ConnectDetailEntity {
         redisConnectContext.setUsername(username);
         redisConnectContext.setPassword(password);
         redisConnectContext.setConnectTypeMode(ConnectType.of(connectMode));
+        if (StrUtil.isNotEmpty(setting)) {
+            RedisConnectContext.SettingInfo settingInfo = JSONUtil.toBean(setting, RedisConnectContext.SettingInfo.class);
+            redisConnectContext.setSetting(settingInfo);
+        }
         if (StrUtil.isNotEmpty(sslConfig)) {
-            JSONUtil.toBean(sslConfig, RedisConnectContext.SslInfo.class);
+            RedisConnectContext.SslInfo sslInfo = JSONUtil.toBean(sslConfig, RedisConnectContext.SslInfo.class);
+            redisConnectContext.setSslInfo(sslInfo);
         }
         if (StrUtil.isNotEmpty(sshConfig)) {
-            JSONUtil.toBean(sshConfig, RedisConnectContext.SshInfo.class);
+            RedisConnectContext.SshInfo sshInfo = JSONUtil.toBean(sshConfig, RedisConnectContext.SshInfo.class);
+            redisConnectContext.setSshInfo(sshInfo);
         }
         return redisConnectContext;
     }

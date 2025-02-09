@@ -25,7 +25,7 @@ import java.util.Map;
 public class RedisConnectContext implements Serializable, Cloneable {
     private int id;
     private String title;
-    private String host = "191.0.0.1";
+    private String host = "127.0.0.1";
     private Integer port = 6379;
     private String localHost;
     private Integer localPort;
@@ -36,6 +36,7 @@ public class RedisConnectContext implements Serializable, Cloneable {
     private Boolean enableSsl = false;
     private ConnectType connectTypeMode;
     private RedisMode redisMode;
+    private SettingInfo setting;
     private SslInfo sslInfo;
     private SshInfo sshInfo;
 
@@ -48,6 +49,7 @@ public class RedisConnectContext implements Serializable, Cloneable {
         entity.setPassword(password);
         entity.setEnableSsl(enableSsl ? 1 : 0);
         entity.setConnectMode(connectTypeMode.name());
+        entity.setSetting(JSONUtil.toJsonStr(setting));
         entity.setSshConfig(JSONUtil.toJsonStr(sshInfo));
         entity.setSslConfig(JSONUtil.toJsonStr(sslInfo));
         return entity;
@@ -59,6 +61,22 @@ public class RedisConnectContext implements Serializable, Cloneable {
             return (RedisConnectContext) super.clone();
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
+        }
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class SettingInfo implements Serializable {
+        private Integer loadKeyNum;
+        private String keySeparator;
+        private Integer redisTimeout;
+        private Integer sshTimeout;
+
+
+        @Override
+        public String toString() {
+            return Fn.toJson(this);
         }
     }
 

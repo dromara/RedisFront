@@ -8,9 +8,9 @@ import com.intellij.uiDesigner.core.Spacer;
 import io.lettuce.core.RedisConnectionException;
 import org.dromara.quickswing.ui.app.QSDialog;
 import org.dromara.redisfront.RedisFrontContext;
+import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.commons.enums.ConnectType;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
-import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.dao.ConnectDetailDao;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.entity.ConnectDetailEntity;
@@ -74,7 +74,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
     private JLabel sshPasswordLabel;
     private JTabbedPane tabbedPane1;
     private JPanel redisPanel;
-    private JTextField keySeparator;
+    private JTextField keySeparatorField;
     private JTextField sshTimeoutTextField;
     private JTextField redisTimeoutTextField;
     private JTextField keyMaxLoadNum;
@@ -337,15 +337,30 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         } else if (enableSSLBtn.isSelected()) {
             return getSslConnectInfo(title);
         } else {
-            RedisConnectContext redisConnectContext = new RedisConnectContext();
-            redisConnectContext.setTitle(title);
-            redisConnectContext.setHost(hostField.getText());
-            redisConnectContext.setPort((Integer) portField.getValue());
-            redisConnectContext.setUsername(userField.getText());
-            redisConnectContext.setPassword(String.valueOf(passwordField.getPassword()));
-            redisConnectContext.setConnectTypeMode(ConnectType.NORMAL);
-            return redisConnectContext;
+            return getDefaultConnectInfo(title);
         }
+    }
+
+    private @NotNull RedisConnectContext getDefaultConnectInfo(String title) {
+        RedisConnectContext redisConnectContext = new RedisConnectContext();
+        redisConnectContext.setTitle(title);
+        redisConnectContext.setHost(hostField.getText());
+        redisConnectContext.setPort((Integer) portField.getValue());
+        redisConnectContext.setUsername(userField.getText());
+        redisConnectContext.setPassword(String.valueOf(passwordField.getPassword()));
+        redisConnectContext.setConnectTypeMode(ConnectType.NORMAL);
+        RedisConnectContext.SettingInfo settingInfo = getSettingInfo();
+        redisConnectContext.setSetting(settingInfo);
+        return redisConnectContext;
+    }
+
+    private RedisConnectContext.@NotNull SettingInfo getSettingInfo() {
+        return new RedisConnectContext.SettingInfo(
+                Integer.parseInt(keyMaxLoadNum.getText()),
+                keySeparatorField.getText(),
+                Integer.parseInt(redisTimeoutTextField.getText()),
+                Integer.parseInt(sshTimeoutTextField.getText())
+        );
     }
 
     private @NotNull RedisConnectContext getSslConnectInfo(String title) {
@@ -364,6 +379,8 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         redisConnectContext.setSslInfo(sslInfo);
         redisConnectContext.setEnableSsl(enableSSLBtn.isSelected());
         redisConnectContext.setConnectTypeMode(ConnectType.NORMAL);
+        RedisConnectContext.SettingInfo settingInfo = getSettingInfo();
+        redisConnectContext.setSetting(settingInfo);
         return redisConnectContext;
     }
 
@@ -384,6 +401,8 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         redisConnectContext.setSshInfo(sshInfo);
         redisConnectContext.setEnableSsl(enableSSLBtn.isSelected());
         redisConnectContext.setConnectTypeMode(ConnectType.SSH);
+        RedisConnectContext.SettingInfo settingInfo = getSettingInfo();
+        redisConnectContext.setSetting(settingInfo);
         return redisConnectContext;
     }
 
@@ -555,9 +574,9 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         redisPanel = new JPanel();
         redisPanel.setLayout(new GridLayoutManager(9, 2, new Insets(0, 0, 0, 0), -1, -1));
         panel3.add(redisPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        keySeparator = new JTextField();
-        keySeparator.setText(".");
-        redisPanel.add(keySeparator, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        keySeparatorField = new JTextField();
+        keySeparatorField.setText(".");
+        redisPanel.add(keySeparatorField, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         sshTimeoutTextField = new JTextField();
         sshTimeoutTextField.setText("1000");
         redisPanel.add(sshTimeoutTextField, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));

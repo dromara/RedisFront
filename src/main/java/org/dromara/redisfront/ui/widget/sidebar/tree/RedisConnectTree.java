@@ -15,8 +15,8 @@ import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 import org.dromara.redisfront.model.entity.ConnectGroupEntity;
 import org.dromara.redisfront.ui.dialog.AddConnectDialog;
 import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
-import org.dromara.redisfront.ui.widget.handler.ConnectHandler;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
+import org.dromara.redisfront.ui.widget.handler.ConnectHandler;
 import org.jdesktop.swingx.JXTree;
 import raven.toast.Notifications;
 
@@ -58,13 +58,13 @@ public class RedisConnectTree extends JXTree {
         this.setFocusable(false);
         this.putClientProperty(FlatClientProperties.STYLE,
                 "selectionArc:10;" +
-                        "rowHeight:25;" +
-                        "background:$RedisFront.main.background;" +
-                        "foreground:#ffffff;" +
-                        "[light]selectionBackground:darken(#FFFFFF,20%);" +
-                        "[light]selectionForeground:darken($Label.foreground,50%);" +
-                        "[dark]selectionBackground:darken($Label.foreground,50%);" +
-                        "showCellFocusIndicator:false;"
+                "rowHeight:25;" +
+                "background:$RedisFront.main.background;" +
+                "foreground:#ffffff;" +
+                "[light]selectionBackground:darken(#FFFFFF,20%);" +
+                "[light]selectionForeground:darken($Label.foreground,50%);" +
+                "[dark]selectionBackground:darken($Label.foreground,50%);" +
+                "showCellFocusIndicator:false;"
 
         );
         this.setModel(new DefaultTreeModel(new TreeNodeInfo()));
@@ -122,6 +122,7 @@ public class RedisConnectTree extends JXTree {
                 log.error(exception.getMessage(), exception);
                 Notifications.getInstance().show(Notifications.Type.ERROR, exception.getMessage());
             } else {
+                String name = Thread.currentThread().getName();
                 List<Object> expandedPaths = SwingUtils.saveExpandedPaths(this);
                 DefaultTreeModel model = new DefaultTreeModel(result);
                 this.setModel(model);

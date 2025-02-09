@@ -69,7 +69,7 @@ public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, Redi
 
     @Override
     protected void performBeforeInitialization(RedisFrontPrefs preferences) {
-        if (!preferences.getDBInitialized()) {
+        if (!preferences.getDBInitialized() && !FileUtil.exist(preferences.getDataPath() + File.separator + preferences.getDbFileName())) {
             DataSource datasource = getDatabaseManager().getDatasource();
             try {
                 DbUtil.use(datasource).execute(Constants.SQL_CREATE_CONNECT_GROUP);
