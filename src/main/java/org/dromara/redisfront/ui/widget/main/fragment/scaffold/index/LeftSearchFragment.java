@@ -20,7 +20,7 @@ import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.commons.utils.*;
 import org.dromara.redisfront.model.DbInfo;
-import org.dromara.redisfront.model.TreeNodeInfo;
+import org.dromara.redisfront.model.tree.TreeNodeInfo;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.context.ScanContext;
 import org.dromara.redisfront.service.*;
@@ -115,8 +115,6 @@ public class LeftSearchFragment {
 
     public synchronized void loadTreeModelData(String key) {
         try {
-//            LoadingUtils.showDialog(LocaleUtils.getMessageFromBundle("DataSearchForm.showDialog.message"));
-
             scanBeforeProcess();
             var scanKeysContext = scanKeysContextMap.get(redisConnectContext.getDatabase());
 
@@ -212,7 +210,6 @@ public class LeftSearchFragment {
             });
             scanAfterProcess();
         } catch (Exception e) {
-            e.printStackTrace();
             scanAfterProcess();
             if (e instanceof RedisFrontException) {
                 loadMoreBtn.setEnabled(false);
@@ -324,9 +321,8 @@ public class LeftSearchFragment {
             }
         };
         addBtn.setIcon(Icons.PLUS_ICON);
-        addBtn.putClientProperty(FlatClientProperties.BUTTON_TYPE, FlatClientProperties.BUTTON_TYPE_TAB);
         addBtn.setFocusable(false);
-        addBtn.addActionListener(e -> AddKeyDialog.showAddDialog(redisConnectContext, null, (key) -> {
+        addBtn.addActionListener(_ -> AddKeyDialog.showAddDialog(redisConnectContext, null, (_) -> {
             var res = JOptionPane.showConfirmDialog(RedisFrontMain.frame,
                     LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.message"),
                     LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.title"), JOptionPane.YES_NO_OPTION);
@@ -437,14 +433,14 @@ public class LeftSearchFragment {
 
         searchBtn = new JButton(new FlatSearchIcon());
         searchBtn.setFocusable(false);
-        searchBtn.addActionListener(actionEvent -> {
+        searchBtn.addActionListener(_ -> {
             scanKeysContextMap.put(redisConnectContext.getDatabase(), new ScanContext<>());
             scanKeysAndInitScanInfo();
         });
 
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchBtn);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
-        searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> {
+        searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) _ -> {
             scanKeysContextMap.put(redisConnectContext.getDatabase(), new ScanContext<>());
             searchTextField.setText("");
             scanKeysAndInitScanInfo();
@@ -738,7 +734,7 @@ public class LeftSearchFragment {
                 databaseComboBox.insertItemAt(dbInfo, i);
             }
         } else {
-            var dbInfo = dbList.get(0);
+            var dbInfo = dbList.getFirst();
             scanKeysContextMap.put(dbInfo.dbIndex(), new ScanContext<>());
             var dbSize = RedisBasicService.service.dbSize(redisConnectContext);
             dbInfo.setDbSize(dbSize);

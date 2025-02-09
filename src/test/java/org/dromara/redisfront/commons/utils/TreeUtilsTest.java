@@ -1,6 +1,6 @@
 package org.dromara.redisfront.commons.utils;
 
-import org.dromara.redisfront.model.TreeNodeInfo;
+import org.dromara.redisfront.model.tree.TreeNodeInfo;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;

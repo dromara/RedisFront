@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.handler;
+package org.dromara.redisfront.ui.handler;
 
 import java.util.function.BiConsumer;
 

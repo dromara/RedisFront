@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.quickswing.ui.app.page.QSPageItem;
 import org.dromara.redisfront.RedisFrontContext;
-import org.dromara.redisfront.model.TreeNodeInfo;
+import org.dromara.redisfront.model.tree.TreeNodeInfo;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
 import org.dromara.redisfront.ui.components.panel.BorderNonePanel;

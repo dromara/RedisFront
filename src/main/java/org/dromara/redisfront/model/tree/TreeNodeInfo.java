@@ -1,4 +1,4 @@
-package org.dromara.redisfront.model;
+package org.dromara.redisfront.model.tree;
 
 import cn.hutool.core.io.unit.DataSizeUtil;
 import lombok.Setter;

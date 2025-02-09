@@ -1,7 +1,6 @@
 package org.dromara.redisfront.ui.components.monitor;
 
 import org.dromara.redisfront.commons.Fn;
-import org.dromara.redisfront.model.RedisUsageInfo;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;
 import java.util.Map;

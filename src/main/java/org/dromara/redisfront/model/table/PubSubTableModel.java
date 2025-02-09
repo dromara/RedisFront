@@ -1,4 +1,6 @@
-package org.dromara.redisfront.model;
+package org.dromara.redisfront.model.table;
+
+import org.dromara.redisfront.model.MessageInfo;
 
 import javax.swing.table.DefaultTableModel;
 import java.util.List;

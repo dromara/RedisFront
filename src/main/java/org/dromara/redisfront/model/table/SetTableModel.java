@@ -1,4 +1,4 @@
-package org.dromara.redisfront.model;
+package org.dromara.redisfront.model.table;
 
 import cn.hutool.core.io.unit.DataSizeUtil;
 

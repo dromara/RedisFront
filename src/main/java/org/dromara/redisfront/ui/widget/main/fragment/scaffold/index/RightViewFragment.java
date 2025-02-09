@@ -14,21 +14,21 @@ import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.commons.enums.KeyTypeEnum;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.resources.Icons;
-import org.dromara.redisfront.commons.utils.AlertUtils;
 import org.dromara.redisfront.commons.utils.FutureUtils;
-import org.dromara.redisfront.commons.utils.LocaleUtils;
 import org.dromara.redisfront.commons.utils.SwingUtils;
-import org.dromara.redisfront.model.*;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.context.ScanContext;
+import org.dromara.redisfront.model.table.*;
 import org.dromara.redisfront.service.*;
 import org.dromara.redisfront.ui.components.editor.TextEditor;
 import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
 import org.dromara.redisfront.ui.dialog.AddOrUpdateItemDialog;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
+import org.dromara.redisfront.model.tree.TreeNodeInfo;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import raven.toast.Notifications;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -270,7 +270,7 @@ public class RightViewFragment {
 //                    );
 //                } else {
 //                    ttlField.setText("-2");
-//                    AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showInformationDialog.message"));
+//                    AlertUtils.showInformationDialog(owner.$tr("DataViewForm.showInformationDialog.message"));
 //                }
 //
 //            });
@@ -343,7 +343,7 @@ public class RightViewFragment {
                 default -> loadStringData(key);
             }
         } else {
-            owner.displayMessage("异常", LocaleUtils.getMessageFromBundle("DataViewForm.redisFrontException.message"));
+            owner.displayMessage("异常", owner.$tr("DataViewForm.redisFrontException.message"));
         }
     }
 
@@ -373,7 +373,7 @@ public class RightViewFragment {
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
             if (scanContext.getKeyList().size() >= 1000) {
                 System.gc();
-                throw new RedisFrontException(LocaleUtils.getMessageFromBundle("DataViewForm.redisFrontException.message"));
+                throw new RedisFrontException(owner.$tr("DataViewForm.redisFrontException.message"));
             }
             scanContext.getKeyList().addAll(new ArrayList<>(mapScanCursor.getMap().entrySet()));
         } else {
@@ -386,7 +386,7 @@ public class RightViewFragment {
 
         Fn.run(() -> {
             LoadAfterUpdate(len, DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getValue().getBytes().length).reduce(Integer::sum).orElse(0)), String.valueOf(scanContext.getKeyList().size()), mapScanCursor.isFinished());
-            keyLabel.setText(LocaleUtils.getMessageFromBundle("DataViewForm.keyLabel.title"));
+            keyLabel.setText(owner.$tr("DataViewForm.keyLabel.title"));
             keyLabel.setOpaque(true);
             keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
             tableViewPanel.setVisible(true);
@@ -410,7 +410,7 @@ public class RightViewFragment {
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
             if (scanContext.getKeyList().size() >= 2000) {
                 System.gc();
-                throw new RedisFrontException(LocaleUtils.getMessageFromBundle("DataViewForm.redisFrontException.message"));
+                throw new RedisFrontException(owner.$tr("DataViewForm.redisFrontException.message"));
             }
             scanContext.getKeyList().addAll(valueScanCursor.getValues());
         } else {
@@ -453,7 +453,7 @@ public class RightViewFragment {
         if (Fn.equal(scanContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanContext.getKeyList())) {
             if (scanContext.getKeyList().size() >= 2000) {
                 System.gc();
-                throw new RedisFrontException(LocaleUtils.getMessageFromBundle("DataViewForm.redisFrontException.message"));
+                throw new RedisFrontException(owner.$tr("DataViewForm.redisFrontException.message"));
             }
             scanContext.getKeyList().addAll(value);
         } else {
@@ -501,7 +501,7 @@ public class RightViewFragment {
         if (Fn.equal(xRangeContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(xRangeContext.getKeyList())) {
             if (xRangeContext.getKeyList().size() >= 2000) {
                 System.gc();
-                throw new RedisFrontException(LocaleUtils.getMessageFromBundle("DataViewForm.redisFrontException.message"));
+                throw new RedisFrontException(owner.$tr("DataViewForm.redisFrontException.message"));
             }
             xRangeContext.getKeyList().addAll(value);
         } else {
@@ -536,7 +536,7 @@ public class RightViewFragment {
             if (scanContext.getKeyList().size() >= 2000) {
                 scanContext.getKeyList().clear();
                 System.gc();
-                throw new RedisFrontException(LocaleUtils.getMessageFromBundle("DataViewForm.redisFrontException.message"));
+                throw new RedisFrontException(owner.$tr("DataViewForm.redisFrontException.message"));
             }
             scanContext.getKeyList().addAll(valueScanCursor.getValues());
         } else {
@@ -548,7 +548,7 @@ public class RightViewFragment {
         var sortedSetTableModel = new SortedSetTableModel(scanContext.getKeyList());
 
         Fn.run(() -> {
-            keyLabel.setText(LocaleUtils.getMessageFromBundle("DataViewForm.keyLabel.score.title"));
+            keyLabel.setText(owner.$tr("DataViewForm.keyLabel.score.title"));
             LoadAfterUpdate(len, DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getValue().getBytes().length).reduce(Integer::sum).orElse(0)), String.valueOf(scanContext.getKeyList().size()), valueScanCursor.isFinished());
             tableViewPanel.setVisible(true);
             dataTable.setModel(sortedSetTableModel);
@@ -563,10 +563,10 @@ public class RightViewFragment {
         currentCountField.setText(loadSize);
         allCountField.setText(String.valueOf(len));
         if (isFinished) {
-            loadMoreBtn.setText(LocaleUtils.getMessageFromBundle("DataViewForm.loadMoreBtn.complete.title"));
+            loadMoreBtn.setText(owner.$tr("DataViewForm.loadMoreBtn.complete.title"));
             loadMoreBtn.setEnabled(false);
         } else {
-            loadMoreBtn.setText(LocaleUtils.getMessageFromBundle("DataViewForm.loadMoreBtn.title"));
+            loadMoreBtn.setText(owner.$tr("DataViewForm.loadMoreBtn.title"));
             loadMoreBtn.setEnabled(true);
         }
 
@@ -586,18 +586,18 @@ public class RightViewFragment {
             case ZSET -> {
                 var score = (Double) dataTable.getValueAt(row, 1);
                 var value = (String) dataTable.getValueAt(row, 2);
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), score.toString(), value, redisConnectContext, keyTypeEnum, () -> {
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(owner.$tr("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), score.toString(), value, redisConnectContext, keyTypeEnum, () -> {
                 });
             }
             case HASH -> {
                 var key = (String) dataTable.getValueAt(row, 0);
                 var value = (String) dataTable.getValueAt(row, 1);
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), key, value, redisConnectContext, keyTypeEnum, () -> {
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(owner.$tr("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), key, value, redisConnectContext, keyTypeEnum, () -> {
                 });
             }
             case LIST, SET -> {
                 var value = (String) dataTable.getValueAt(row, 1);
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), null, value, redisConnectContext, keyTypeEnum, () -> {
+                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(owner.$tr("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), null, value, redisConnectContext, keyTypeEnum, () -> {
                 });
             }
         }
@@ -634,7 +634,7 @@ public class RightViewFragment {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setText(LocaleUtils.getMessageFromBundle("DataViewForm.keyLabel.title"));
+                setText(owner.$tr("DataViewForm.keyLabel.title"));
             }
         };
         keyLabel.setBorder(new EmptyBorder(0, 2, 0, 2));
@@ -667,8 +667,8 @@ public class RightViewFragment {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setText(LocaleUtils.getMessageFromBundle("DataViewForm.valueUpdateSaveBtn.title"));
-                setToolTipText(LocaleUtils.getMessageFromBundle("DataViewForm.valueUpdateSaveBtn.toolTip.text"));
+                setText(owner.$tr("DataViewForm.valueUpdateSaveBtn.title"));
+                setToolTipText(owner.$tr("DataViewForm.valueUpdateSaveBtn.toolTip.text"));
             }
         };
         valueUpdateSaveBtn.setEnabled(false);
@@ -715,9 +715,7 @@ public class RightViewFragment {
                     }
                 }
             }
-
-            AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("DataViewForm.showInformationDialog.updateSuccess.message"));
-
+            Notifications.getInstance().show(Notifications.Type.INFO, owner.$tr("DataViewForm.showInformationDialog.updateSuccess.message"));
         });
         jToolBar.add(valueUpdateSaveBtn);
 
@@ -792,8 +790,8 @@ public class RightViewFragment {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setText(LocaleUtils.getMessageFromBundle("DataViewForm.delBtn.title"));
-                setToolTipText(LocaleUtils.getMessageFromBundle("DataViewForm.delBtn.toolTip.Text"));
+                setText(owner.$tr("DataViewForm.delBtn.title"));
+                setToolTipText(owner.$tr("DataViewForm.delBtn.toolTip.Text"));
             }
         };
         delBtn.addActionListener(e -> {
@@ -804,8 +802,8 @@ public class RightViewFragment {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setText(LocaleUtils.getMessageFromBundle("DataViewForm.refBtn.title"));
-                setToolTipText(LocaleUtils.getMessageFromBundle("DataViewForm.refBtn.toolTip.Text"));
+                setText(owner.$tr("DataViewForm.refBtn.title"));
+                setToolTipText(owner.$tr("DataViewForm.refBtn.toolTip.Text"));
             }
         };
         refBtn.addActionListener(e -> reloadAllActionPerformed());
@@ -814,8 +812,8 @@ public class RightViewFragment {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setText(LocaleUtils.getMessageFromBundle("DataViewForm.saveBtn.title"));
-                setToolTipText(LocaleUtils.getMessageFromBundle("DataViewForm.saveBtn.toolTip.Text"));
+                setText(owner.$tr("DataViewForm.saveBtn.title"));
+                setToolTipText(owner.$tr("DataViewForm.saveBtn.toolTip.Text"));
             }
         };
         saveBtn.addActionListener((e) -> {
@@ -834,7 +832,7 @@ public class RightViewFragment {
             @Override
             public void updateUI() {
                 super.updateUI();
-                putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, LocaleUtils.getMessageFromBundle("DataViewForm.tableSearchField.placeholder.text"));
+                putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, owner.$tr("DataViewForm.tableSearchField.placeholder.text"));
             }
         };
 
@@ -850,7 +848,7 @@ public class RightViewFragment {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setText(LocaleUtils.getMessageFromBundle("DataViewForm.tableAddBtn.title"));
+                setText(owner.$tr("DataViewForm.tableAddBtn.title"));
             }
         };
 
@@ -876,7 +874,7 @@ public class RightViewFragment {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setText(LocaleUtils.getMessageFromBundle("DataViewForm.tableDelBtn.title"));
+                setText(owner.$tr("DataViewForm.tableDelBtn.title"));
             }
         };
         tableDelBtn.addActionListener(_ -> {
@@ -954,7 +952,7 @@ public class RightViewFragment {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setText(LocaleUtils.getMessageFromBundle("DataViewForm.tableRefreshBtn.title"));
+                setText(owner.$tr("DataViewForm.tableRefreshBtn.title"));
             }
         };
 
@@ -969,7 +967,7 @@ public class RightViewFragment {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setText(LocaleUtils.getMessageFromBundle("DataViewForm.pageNumLabel.title"));
+                setText(owner.$tr("DataViewForm.pageNumLabel.title"));
             }
         };
         pageNumLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
@@ -982,7 +980,7 @@ public class RightViewFragment {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setText(LocaleUtils.getMessageFromBundle("DataViewForm.pageSizeLabel.title"));
+                setText(owner.$tr("DataViewForm.pageSizeLabel.title"));
             }
         };
         pageSizeLabel.setBorder(new EmptyBorder(2, 2, 2, 2));

@@ -17,7 +17,7 @@ import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.commons.utils.JschUtils;
 import org.dromara.redisfront.commons.utils.LettuceUtils;
 import org.dromara.redisfront.commons.utils.LocaleUtils;
-import org.dromara.redisfront.model.RedisUsageInfo;
+import org.dromara.redisfront.ui.components.monitor.RedisUsageInfo;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
 import org.dromara.redisfront.ui.components.monitor.RedisMonitor;

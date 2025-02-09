@@ -1,4 +1,4 @@
-package org.dromara.redisfront.model;
+package org.dromara.redisfront.ui.components.monitor;
 import lombok.Data;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
