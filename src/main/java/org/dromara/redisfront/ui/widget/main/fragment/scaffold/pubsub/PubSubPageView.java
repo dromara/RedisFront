@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.content.view.scaffold.pubsub;
+package org.dromara.redisfront.ui.widget.main.fragment.scaffold.pubsub;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.intellij.uiDesigner.core.GridConstraints;
@@ -22,7 +22,7 @@ import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
 import io.lettuce.core.cluster.pubsub.RedisClusterPubSubListener;
 import io.lettuce.core.pubsub.RedisPubSubListener;
 import io.lettuce.core.pubsub.api.async.RedisPubSubAsyncCommands;
-import org.dromara.redisfront.ui.widget.MainWidget;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -38,7 +38,7 @@ import java.util.function.Consumer;
  *
  * @author Jin
  */
-public class PubSubPageView extends QSPageItem<MainWidget> implements RedisPubSubListener<String, String>, RedisClusterPubSubListener<String, String> {
+public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements RedisPubSubListener<String, String>, RedisClusterPubSubListener<String, String> {
 
     private RedisPubSubAsyncCommands<String, String> pubsub;
     private AbstractRedisClient redisClient;
@@ -55,7 +55,7 @@ public class PubSubPageView extends QSPageItem<MainWidget> implements RedisPubSu
     private String lastSubscribeChanel;
     private final RedisConnectContext redisConnectContext;
 
-    public PubSubPageView(RedisConnectContext redisConnectContext, MainWidget owner) {
+    public PubSubPageView(RedisConnectContext redisConnectContext, RedisFrontWidget owner) {
         $$$setupUI$$$();
         setLayout(new BorderLayout());
         add(rootPanel, BorderLayout.CENTER);
@@ -290,7 +290,7 @@ public class PubSubPageView extends QSPageItem<MainWidget> implements RedisPubSu
     }
 
     @Override
-    public MainWidget getApp() {
+    public RedisFrontWidget getApp() {
         return null;
     }
 

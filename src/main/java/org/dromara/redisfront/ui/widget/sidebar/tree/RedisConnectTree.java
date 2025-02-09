@@ -16,7 +16,7 @@ import org.dromara.redisfront.model.entity.ConnectGroupEntity;
 import org.dromara.redisfront.ui.dialog.AddConnectDialog;
 import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
 import org.dromara.redisfront.ui.handler.ConnectHandler;
-import org.dromara.redisfront.ui.widget.MainWidget;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.jdesktop.swingx.JXTree;
 import raven.toast.Notifications;
 
@@ -35,14 +35,14 @@ import java.util.List;
 
 @Slf4j
 public class RedisConnectTree extends JXTree {
-    private final MainWidget owner;
+    private final RedisFrontWidget owner;
     private final ConnectHandler connectHandler;
     private final RedisFrontContext context;
     private JPopupMenu treePopupMenu;
     private JPopupMenu treeNodePopupMenu;
     private JPopupMenu treeNodeGroupPopupMenu;
 
-    public RedisConnectTree(MainWidget owner, ConnectHandler connectHandler) {
+    public RedisConnectTree(RedisFrontWidget owner, ConnectHandler connectHandler) {
         this.owner = owner;
         this.connectHandler = connectHandler;
         this.context = (RedisFrontContext) owner.getContext();

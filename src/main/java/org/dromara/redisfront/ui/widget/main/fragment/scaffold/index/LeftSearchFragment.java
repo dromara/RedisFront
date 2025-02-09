@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.content.view.scaffold.index;
+package org.dromara.redisfront.ui.widget.main.fragment.scaffold.index;
 
 import cn.hutool.core.util.NumberUtil;
 import com.formdev.flatlaf.FlatClientProperties;
@@ -26,7 +26,7 @@ import org.dromara.redisfront.model.context.ScanContext;
 import org.dromara.redisfront.service.*;
 import org.dromara.redisfront.ui.dialog.AddKeyDialog;
 import org.dromara.redisfront.ui.event.ClickKeyTreeNodeEvent;
-import org.dromara.redisfront.ui.widget.MainWidget;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.jdesktop.swingx.JXTree;
 import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer;
 import org.slf4j.Logger;
@@ -61,7 +61,7 @@ import java.util.function.Consumer;
 public class LeftSearchFragment {
     private static final Logger log = LoggerFactory.getLogger(LeftSearchFragment.class);
     private static final String SEPARATOR_FLAG = "/";
-    private final MainWidget owner;
+    private final RedisFrontWidget owner;
     private final RedisFrontContext context;
     @Getter
     private JPanel contentPanel;
@@ -104,7 +104,7 @@ public class LeftSearchFragment {
 
     static final ExecutorService executorService = Executors.newFixedThreadPool(5);
 
-    public LeftSearchFragment(MainWidget owner, RedisConnectContext redisConnectContext) {
+    public LeftSearchFragment(RedisFrontWidget owner, RedisConnectContext redisConnectContext) {
         this.owner = owner;
         this.context = (RedisFrontContext) owner.getContext();
         this.redisConnectContext = redisConnectContext;

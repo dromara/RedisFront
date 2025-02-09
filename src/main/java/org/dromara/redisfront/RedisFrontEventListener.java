@@ -3,17 +3,17 @@ package org.dromara.redisfront;
 import org.dromara.quickswing.events.QSEvent;
 import org.dromara.quickswing.events.QSEventListener;
 import org.dromara.redisfront.model.event.RedisFrontEvent;
-import org.dromara.redisfront.ui.widget.MainWidget;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
-public class RedisFrontEventListener extends QSEventListener<MainWidget> {
+public class RedisFrontEventListener extends QSEventListener<RedisFrontWidget> {
     private static final Map<Integer, EventConsumer> listener = new ConcurrentHashMap<>();
 
-    public RedisFrontEventListener(MainWidget source) {
+    public RedisFrontEventListener(RedisFrontWidget source) {
         super(source);
         RedisFrontContext context = (RedisFrontContext) source.getContext();
         context.getEventBus().subscribe(this);

@@ -5,7 +5,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.quickswing.ui.app.QSDialog;
-import org.dromara.redisfront.ui.widget.MainWidget;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,12 +15,12 @@ import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 @Slf4j
-public class SyncLoadingDialog extends QSDialog<MainWidget> {
+public class SyncLoadingDialog extends QSDialog<RedisFrontWidget> {
     private JProgressBar progressBar;
     private JLabel messageLabel;
     private final SyncLoadingWaiter syncLoadingWaiter;
 
-    private SyncLoadingDialog(MainWidget owner) {
+    private SyncLoadingDialog(RedisFrontWidget owner) {
         super(owner, true);
         this.setResizable(true);
         this.setMinimumSize(new Dimension(500, 100));
@@ -50,7 +50,7 @@ public class SyncLoadingDialog extends QSDialog<MainWidget> {
     }
 
 
-    public static SyncLoadingDialog builder(MainWidget owner) {
+    public static SyncLoadingDialog builder(RedisFrontWidget owner) {
         return new SyncLoadingDialog(owner);
     }
 

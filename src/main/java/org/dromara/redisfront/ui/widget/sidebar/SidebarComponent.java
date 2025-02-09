@@ -8,9 +8,9 @@ import net.miginfocom.swing.MigLayout;
 import org.dromara.redisfront.ui.handler.ConnectHandler;
 import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerMenuItemEvent;
 import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
-import org.dromara.redisfront.ui.widget.MainComponent;
+import org.dromara.redisfront.ui.widget.RedisFrontComponent;
 import org.dromara.redisfront.ui.widget.sidebar.tree.RedisConnectTree;
-import org.dromara.redisfront.ui.widget.MainWidget;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.dromara.redisfront.ui.widget.sidebar.panel.LogoPanel;
 import org.dromara.redisfront.ui.widget.sidebar.panel.ThemesChangePanel;
 import raven.drawer.component.DrawerPanel;
@@ -25,9 +25,9 @@ import java.awt.*;
 
 @Getter
 @Slf4j
-public class MainSidebarComponent extends SimpleDrawerBuilder {
+public class SidebarComponent extends SimpleDrawerBuilder {
 
-    private final MainWidget owner;
+    private final RedisFrontWidget owner;
     private final ConnectHandler connectHandler;
     private final DrawerAnimationAction drawerAnimationAction;
     private final DrawerMenuItemEvent drawerMenuItemEvent;
@@ -46,7 +46,7 @@ public class MainSidebarComponent extends SimpleDrawerBuilder {
         return drawerPanel;
     }
 
-    public MainSidebarComponent(MainWidget owner, ConnectHandler connectHandler, DrawerAnimationAction drawerAnimationAction, DrawerMenuItemEvent drawerMenuItemEvent) {
+    public SidebarComponent(RedisFrontWidget owner, ConnectHandler connectHandler, DrawerAnimationAction drawerAnimationAction, DrawerMenuItemEvent drawerMenuItemEvent) {
         this.owner = owner;
         this.connectHandler = connectHandler;
         this.drawerAnimationAction = drawerAnimationAction;
@@ -107,6 +107,6 @@ public class MainSidebarComponent extends SimpleDrawerBuilder {
 
     @Override
     public int getDrawerWidth() {
-        return MainComponent.DEFAULT_DRAWER_WIDTH;
+        return RedisFrontComponent.DEFAULT_DRAWER_WIDTH;
     }
 }

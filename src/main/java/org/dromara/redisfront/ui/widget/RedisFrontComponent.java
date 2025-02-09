@@ -15,9 +15,9 @@ import org.dromara.redisfront.ui.components.panel.NonePanel;
 import org.dromara.redisfront.ui.event.OpenRedisConnectEvent;
 import org.dromara.redisfront.ui.handler.ConnectHandler;
 import org.dromara.redisfront.ui.handler.DrawerHandler;
-import org.dromara.redisfront.ui.widget.content.MainContentComponent;
-import org.dromara.redisfront.ui.widget.content.view.ContentTabView;
-import org.dromara.redisfront.ui.widget.sidebar.MainSidebarComponent;
+import org.dromara.redisfront.ui.widget.main.MainComponent;
+import org.dromara.redisfront.ui.widget.main.fragment.ContentTabView;
+import org.dromara.redisfront.ui.widget.sidebar.SidebarComponent;
 import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
 
 import javax.swing.*;
@@ -25,16 +25,16 @@ import java.awt.*;
 import java.util.Arrays;
 
 
-public class MainComponent extends Background {
+public class RedisFrontComponent extends Background {
 
     public static final int DEFAULT_DRAWER_WIDTH = 250;
 
-    private final MainWidget owner;
+    private final RedisFrontWidget owner;
     private final RedisFrontContext context;
     private JPanel mainLeftPanel;
     private JPanel mainRightPane;
 
-    public MainComponent(MainWidget owner) {
+    public RedisFrontComponent(RedisFrontWidget owner) {
         this.owner = owner;
         this.context = (RedisFrontContext) owner.getContext();
         this.setLayout(new BorderLayout());
@@ -62,7 +62,7 @@ public class MainComponent extends Background {
                 Arrays.stream(components)
                         .findFirst()
                         .ifPresent(component -> {
-                            if (component instanceof MainContentComponent mainRightTabbedPanel) {
+                            if (component instanceof MainComponent mainRightTabbedPanel) {
                                 SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
                                     fetchRedisMode(redisConnectContext);
                                     return new ContentTabView(owner, redisConnectContext);
@@ -89,14 +89,14 @@ public class MainComponent extends Background {
                             } else {
                                 SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
                                     fetchRedisMode(redisConnectContext);
-                                    MainContentComponent mainTabbedPanel = createMainTabbedPanel(drawerAnimationAction);
+                                    MainComponent mainTabbedPanel = createMainTabbedPanel(drawerAnimationAction);
                                     ContentTabView contentTabView = new ContentTabView(owner, redisConnectContext);
                                     mainTabbedPanel.addTab(redisConnectContext.getTitle(), contentTabView);
                                     return mainTabbedPanel;
                                 }, (ret, e) -> {
                                     if (e == null) {
                                         mainRightPane.remove(component);
-                                        mainRightPane.add((MainContentComponent) ret, BorderLayout.CENTER);
+                                        mainRightPane.add((MainComponent) ret, BorderLayout.CENTER);
                                         FlatLaf.updateUI();
                                     } else {
                                         owner.displayException(e);
@@ -113,7 +113,7 @@ public class MainComponent extends Background {
             }
         });
 
-        this.mainLeftPanel = new MainSidebarComponent(owner, connectHandler, drawerAnimationAction, (key, index) -> {
+        this.mainLeftPanel = new SidebarComponent(owner, connectHandler, drawerAnimationAction, (key, index) -> {
             System.out.println("drawerMenuItemEvent" + " key:" + key);
             System.out.println("drawerMenuItemEvent" + " index:" + Arrays.toString(index));
         }).buildPanel();
@@ -133,8 +133,8 @@ public class MainComponent extends Background {
         }
     }
 
-    private MainContentComponent createMainTabbedPanel(DrawerAnimationAction drawerAnimationAction) {
-        MainContentComponent mainRightTabbedPanel = new MainContentComponent(drawerAnimationAction, owner);
+    private MainComponent createMainTabbedPanel(DrawerAnimationAction drawerAnimationAction) {
+        MainComponent mainRightTabbedPanel = new MainComponent(drawerAnimationAction, owner);
         mainRightTabbedPanel.setTabCloseEvent(count -> {
             if (count == 0) {
                 if (!drawerAnimationAction.isDrawerOpen()) {

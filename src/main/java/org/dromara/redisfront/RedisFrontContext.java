@@ -10,7 +10,7 @@ import org.dromara.quickswing.excutor.QSTaskExecutor;
 import org.dromara.quickswing.ui.app.QSContext;
 import org.dromara.quickswing.ui.app.QSWidget;
 import org.dromara.redisfront.commons.constant.Constants;
-import org.dromara.redisfront.ui.widget.MainWidget;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import raven.popup.GlassPanePopup;
 
 import javax.sql.DataSource;
@@ -33,13 +33,13 @@ public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, Redi
     public final static QSTaskExecutor TASK_EXECUTOR = new QSTaskExecutor(Executors.newVirtualThreadPerTaskExecutor());
 
     @Override
-    protected MainWidget createApplication(String[] args, RedisFrontPrefs preferences) {
+    protected RedisFrontWidget createApplication(String[] args, RedisFrontPrefs preferences) {
         ToolTipManager.sharedInstance().setInitialDelay(5);
         ToolTipManager.sharedInstance().setLightWeightPopupEnabled(true);
         FlatLaf.registerCustomDefaultsSource(Constants.APP_THEME_PACKAGE);
         FlatLaf.setUseNativeWindowDecorations(true);
         FlatMacLightLaf.setup();
-        return new MainWidget(this, Constants.APP_NAME, preferences);
+        return new RedisFrontWidget(this, Constants.APP_NAME, preferences);
     }
 
     @Override

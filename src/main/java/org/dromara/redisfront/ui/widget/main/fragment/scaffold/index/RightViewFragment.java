@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.content.view.scaffold.index;
+package org.dromara.redisfront.ui.widget.main.fragment.scaffold.index;
 
 import cn.hutool.core.io.unit.DataSizeUtil;
 import cn.hutool.json.JSONException;
@@ -25,7 +25,7 @@ import org.dromara.redisfront.service.*;
 import org.dromara.redisfront.ui.components.editor.TextEditor;
 import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
 import org.dromara.redisfront.ui.dialog.AddOrUpdateItemDialog;
-import org.dromara.redisfront.ui.widget.MainWidget;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +88,7 @@ public class RightViewFragment {
 
     private final RedisConnectContext redisConnectContext;
     private final TreeNodeInfo treeNodeInfo;
-    private final MainWidget owner;
+    private final RedisFrontWidget owner;
 
     private final Map<String, ScanContext<String>> scanSetContextMap;
     private final Map<String, ScanContext<String>> scanListContextMap;
@@ -101,7 +101,7 @@ public class RightViewFragment {
     private Long lastKeyTTL;
 
 
-    public RightViewFragment(RedisConnectContext redisConnectContext, TreeNodeInfo treeNodeInfo, MainWidget owner) {
+    public RightViewFragment(RedisConnectContext redisConnectContext, TreeNodeInfo treeNodeInfo, RedisFrontWidget owner) {
         this.redisConnectContext = redisConnectContext;
         this.treeNodeInfo = treeNodeInfo;
         this.owner = owner;

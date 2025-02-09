@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.content.view;
+package org.dromara.redisfront.ui.widget.main.fragment;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
@@ -13,11 +13,11 @@ import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
 import org.dromara.redisfront.ui.event.DrawerChangeEvent;
-import org.dromara.redisfront.ui.widget.MainWidget;
-import org.dromara.redisfront.ui.widget.content.view.scaffold.PageScaffold;
-import org.dromara.redisfront.ui.widget.content.view.scaffold.index.IndexPageView;
-import org.dromara.redisfront.ui.widget.content.view.scaffold.pubsub.PubSubPageView;
-import org.dromara.redisfront.ui.widget.content.view.scaffold.terminal.TerminalPageView;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
+import org.dromara.redisfront.ui.widget.main.fragment.scaffold.PageScaffold;
+import org.dromara.redisfront.ui.widget.main.fragment.scaffold.index.IndexPageView;
+import org.dromara.redisfront.ui.widget.main.fragment.scaffold.pubsub.PubSubPageView;
+import org.dromara.redisfront.ui.widget.main.fragment.scaffold.terminal.TerminalPageView;
 
 import javax.swing.*;
 import javax.swing.plaf.TabbedPaneUI;
@@ -26,12 +26,12 @@ import java.awt.*;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ContentTabView extends JTabbedPane {
-    private final MainWidget owner;
+    private final RedisFrontWidget owner;
     private final RedisFrontContext context;
     private final RedisFrontEventListener eventListener;
     private final RedisConnectContext redisConnectContext;
 
-    public ContentTabView(MainWidget owner, RedisConnectContext redisConnectContext) {
+    public ContentTabView(RedisFrontWidget owner, RedisConnectContext redisConnectContext) {
         this.owner = owner;
         this.context = (RedisFrontContext) owner.getContext();
         this.eventListener = owner.getEventListener();

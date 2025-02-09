@@ -4,7 +4,7 @@ package org.dromara.redisfront.ui.widget.sidebar.drawer;
 import lombok.Getter;
 import lombok.Setter;
 import org.dromara.quickswing.ui.app.QSAction;
-import org.dromara.redisfront.ui.widget.MainWidget;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.jdesktop.core.animation.timing.Animator;
 import org.jdesktop.core.animation.timing.TimingTarget;
 import org.jdesktop.core.animation.timing.TimingTargetAdapter;
@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-public class DrawerAnimationAction extends QSAction<MainWidget> {
+public class DrawerAnimationAction extends QSAction<RedisFrontWidget> {
     private Animator animator;
     @Getter
     private boolean drawerOpen = true;
@@ -26,7 +26,7 @@ public class DrawerAnimationAction extends QSAction<MainWidget> {
     private BiConsumer<Double,Boolean> handler;
     @Setter
     private Consumer<Boolean> afterProcess;
-    public DrawerAnimationAction(MainWidget app, BiConsumer<Double,Boolean> handler) {
+    public DrawerAnimationAction(RedisFrontWidget app, BiConsumer<Double,Boolean> handler) {
         super(app);
         this.handler = handler;
     }

@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.content.view.scaffold.index;
+package org.dromara.redisfront.ui.widget.main.fragment.scaffold.index;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -10,20 +10,20 @@ import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
 import org.dromara.redisfront.ui.components.panel.BorderNonePanel;
 import org.dromara.redisfront.ui.components.panel.WrapperPanel;
 import org.dromara.redisfront.ui.event.ClickKeyTreeNodeEvent;
-import org.dromara.redisfront.ui.widget.MainWidget;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 
 import javax.swing.*;
 
 @Getter
 @Slf4j
-public class IndexPageView extends QSPageItem<MainWidget> {
+public class IndexPageView extends QSPageItem<RedisFrontWidget> {
     private final RedisConnectContext redisConnectContext;
     private final JSplitPane splitPane;
-    private final MainWidget owner;
+    private final RedisFrontWidget owner;
     private final RedisFrontContext context;
     private TreeNodeInfo selectTreeNode;
 
-    public IndexPageView(RedisConnectContext redisConnectContext, MainWidget owner) {
+    public IndexPageView(RedisConnectContext redisConnectContext, RedisFrontWidget owner) {
         this.owner = owner;
         this.context = (RedisFrontContext) owner.getContext();
         this.redisConnectContext = redisConnectContext;
@@ -69,7 +69,7 @@ public class IndexPageView extends QSPageItem<MainWidget> {
     }
 
     @Override
-    public MainWidget getApp() {
+    public RedisFrontWidget getApp() {
         return owner;
     }
 

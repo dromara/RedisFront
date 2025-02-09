@@ -17,12 +17,12 @@ import javax.swing.*;
 import java.awt.*;
 
 @Getter
-public class MainWidget extends QSWidget<RedisFrontPrefs> {
+public class RedisFrontWidget extends QSWidget<RedisFrontPrefs> {
 
-    private final MainComponent mainComponent;
+    private final RedisFrontComponent redisFrontComponent;
     private final RedisFrontEventListener eventListener;
 
-    public MainWidget(QSContext<? extends QSWidget<RedisFrontPrefs>, RedisFrontPrefs> context, String title, RedisFrontPrefs prefs) throws HeadlessException {
+    public RedisFrontWidget(QSContext<? extends QSWidget<RedisFrontPrefs>, RedisFrontPrefs> context, String title, RedisFrontPrefs prefs) throws HeadlessException {
         super(context, title, prefs);
         if (SystemInfo.isWindows) {
             FlatLaf.setUseNativeWindowDecorations(true);
@@ -40,8 +40,8 @@ public class MainWidget extends QSWidget<RedisFrontPrefs> {
         this.setIconImages(Icons.MAIN_FRAME_ICON_IMAGES);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.eventListener = new RedisFrontEventListener(this);
-        this.mainComponent = new MainComponent(this);
-        this.setContentPane(mainComponent);
+        this.redisFrontComponent = new RedisFrontComponent(this);
+        this.setContentPane(redisFrontComponent);
     }
 
     public boolean isFullScreen() {

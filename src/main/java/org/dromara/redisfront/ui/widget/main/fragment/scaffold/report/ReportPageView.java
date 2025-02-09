@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.content.view.scaffold.report;
+package org.dromara.redisfront.ui.widget.main.fragment.scaffold.report;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.unit.DataSizeUtil;
@@ -12,7 +12,7 @@ import org.dromara.redisfront.commons.utils.FutureUtils;
 import org.dromara.redisfront.commons.utils.LettuceUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;
-import org.dromara.redisfront.ui.widget.MainWidget;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Jin
  */
-public class ReportPageView extends QSPageItem<MainWidget> {
+public class ReportPageView extends QSPageItem<RedisFrontWidget> {
 
     private JPanel contentPanel;
     private JPanel chartsPanel;
@@ -358,7 +358,7 @@ public class ReportPageView extends QSPageItem<MainWidget> {
 
 
     @Override
-    public MainWidget getApp() {
+    public RedisFrontWidget getApp() {
         return null;
     }
 

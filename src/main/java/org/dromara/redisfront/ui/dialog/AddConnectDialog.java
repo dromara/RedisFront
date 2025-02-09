@@ -17,7 +17,7 @@ import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.ui.event.OpenRedisConnectEvent;
 import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
-import org.dromara.redisfront.ui.widget.MainWidget;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.dromara.redisfront.ui.widget.sidebar.tree.RedisConnectTreeNode;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -31,7 +31,7 @@ import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
-public class AddConnectDialog extends QSDialog<MainWidget> {
+public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
     private static final Logger log = LoggerFactory.getLogger(AddConnectDialog.class);
     private final RedisFrontContext context;
     private Integer detailId;
@@ -74,7 +74,7 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
     private JLabel sshPasswordLabel;
 
 
-    public static AddConnectDialog getInstance(MainWidget app) {
+    public static AddConnectDialog getInstance(RedisFrontWidget app) {
         return new AddConnectDialog(app);
     }
 
@@ -105,7 +105,7 @@ public class AddConnectDialog extends QSDialog<MainWidget> {
         this.pack();
     }
 
-    private AddConnectDialog(MainWidget app) {
+    private AddConnectDialog(RedisFrontWidget app) {
         super(app, app.$tr("AddConnectDialog.Title"));
         this.context = (RedisFrontContext) app.getContext();
         $$$setupUI$$$();

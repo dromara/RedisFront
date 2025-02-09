@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.content;
+package org.dromara.redisfront.ui.widget.main;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
@@ -22,8 +22,8 @@ import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
 import org.dromara.redisfront.ui.components.monitor.RedisMonitor;
 import org.dromara.redisfront.ui.event.DrawerChangeEvent;
-import org.dromara.redisfront.ui.widget.MainWidget;
-import org.dromara.redisfront.ui.widget.content.view.ContentTabView;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
+import org.dromara.redisfront.ui.widget.main.fragment.ContentTabView;
 import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
 
 import javax.swing.*;
@@ -49,8 +49,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 @Slf4j
-public class MainContentComponent extends JPanel {
-    private final MainWidget owner;
+public class MainComponent extends JPanel {
+    private final RedisFrontWidget owner;
     private final RedisFrontContext redisFrontContext;
     private final DrawerAnimationAction action;
     private final Map<Integer, ScheduledExecutorService> executorServiceMap;
@@ -64,7 +64,7 @@ public class MainContentComponent extends JPanel {
     private Consumer<Integer> tabCloseEvent;
 
 
-    public MainContentComponent(DrawerAnimationAction action, MainWidget owner) {
+    public MainComponent(DrawerAnimationAction action, RedisFrontWidget owner) {
         this.owner = owner;
         this.action = action;
         this.redisFrontContext = (RedisFrontContext) owner.getContext();

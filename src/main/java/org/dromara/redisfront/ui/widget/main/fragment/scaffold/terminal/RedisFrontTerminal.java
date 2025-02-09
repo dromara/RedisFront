@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.content.view.scaffold.terminal;
+package org.dromara.redisfront.ui.widget.main.fragment.scaffold.terminal;
 
 import cn.hutool.core.date.DateUtil;
 import org.dromara.redisfront.commons.enums.RedisMode;
