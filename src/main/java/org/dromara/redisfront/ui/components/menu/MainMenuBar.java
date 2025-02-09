@@ -1,4 +1,17 @@
-//package org.dromara.redisfront.ui.support;
+import com.formdev.flatlaf.FlatClientProperties;
+import org.dromara.redisfront.RedisFrontMain;
+import org.dromara.redisfront.commons.constant.Constants;
+import org.dromara.redisfront.commons.resources.Icons;
+import org.dromara.redisfront.commons.utils.LocaleUtils;
+
+import javax.swing.*;//package org.dromara.redisfront.ui.support;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 //
 //import cn.hutool.core.io.FileUtil;
 //import cn.hutool.json.JSONUtil;
@@ -264,31 +277,7 @@
 //            }
 //        });
 //
-//        JOptionPane.showMessageDialog(RedisFrontMain.frame, new Object[]{
-//                        new JPanel() {
-//                            {
-//                                setLayout(new BorderLayout());
-//                                add(new JLabel(Icons.REDIS_ICON), BorderLayout.WEST);
-//                                add(new JPanel() {
-//                                    {
-//                                        setLayout(new BorderLayout());
-//                                        setBorder(new EmptyBorder(10, 10, 10, 10));
-//                                        add(titleLabel, BorderLayout.NORTH);
-//                                        add(new JLabel("Cross-platform redis gui clinet"), BorderLayout.CENTER);
-//                                        add(new JPanel() {
-//                                            {
-//                                                setLayout(new BorderLayout());
-//                                                add(new JLabel("Version " + Constants.APP_VERSION), BorderLayout.NORTH);
-//                                                add(linkLabel, BorderLayout.CENTER);
-//                                            }
-//                                        }, BorderLayout.SOUTH);
 //
-//                                    }
-//                                }, BorderLayout.CENTER);
-//                            }
-//                        }
-//                }, LocaleUtils.getMenu("Menu.Help.About").title(),
-//                JOptionPane.PLAIN_MESSAGE);
 //    }
 //
 //    /*
