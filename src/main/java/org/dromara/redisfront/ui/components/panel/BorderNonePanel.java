@@ -1,7 +1,5 @@
 package org.dromara.redisfront.ui.components.panel;
 
-import com.formdev.flatlaf.FlatClientProperties;
-import com.formdev.flatlaf.ui.FlatLineBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -11,7 +9,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.LayerUI;
 import java.awt.*;
 
-import static org.dromara.redisfront.commons.resources.Icons.REDIS_A_ICON;
 import static org.dromara.redisfront.commons.resources.Icons.REDIS_ICON_45x45;
 
 public class BorderNonePanel extends JPanel {
@@ -21,20 +18,16 @@ public class BorderNonePanel extends JPanel {
         setOpaque(false);
         JPanel bodyPanel = getContentPanel();
         bodyPanel.setOpaque(false);
-        var flatLineBorder = new FlatLineBorder(new Insets(10, 10, 10, 10), UIManager.getColor("Component.borderColor"),1,5);
-        JPanel contentPanel = new JPanel(){
+        JPanel contentPanel = new JPanel() {
             @Override
             public void updateUI() {
                 super.updateUI();
-//                setBorder(flatLineBorder);
                 add(bodyPanel, BorderLayout.CENTER);
             }
         };
-//        contentPanel.setBorder(flatLineBorder);
         contentPanel.setLayout(new BorderLayout());
         contentPanel.add(bodyPanel, BorderLayout.CENTER);
-//        contentPanel.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.nonePanel.background");
-        setBorder(new EmptyBorder(8,8,8,8));
+        setBorder(new EmptyBorder(8, 8, 8, 8));
         setLayout(new BorderLayout());
         add(contentPanel, BorderLayout.CENTER);
     }

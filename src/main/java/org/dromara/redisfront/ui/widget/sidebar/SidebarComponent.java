@@ -5,7 +5,7 @@ import com.formdev.flatlaf.util.SystemInfo;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
-import org.dromara.redisfront.ui.handler.ConnectHandler;
+import org.dromara.redisfront.ui.widget.handler.ConnectHandler;
 import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerMenuItemEvent;
 import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
 import org.dromara.redisfront.ui.widget.RedisFrontComponent;

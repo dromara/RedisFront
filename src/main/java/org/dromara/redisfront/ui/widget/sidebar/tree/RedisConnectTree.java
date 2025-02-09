@@ -15,7 +15,7 @@ import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 import org.dromara.redisfront.model.entity.ConnectGroupEntity;
 import org.dromara.redisfront.ui.dialog.AddConnectDialog;
 import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
-import org.dromara.redisfront.ui.handler.ConnectHandler;
+import org.dromara.redisfront.ui.widget.handler.ConnectHandler;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.jdesktop.swingx.JXTree;
 import raven.toast.Notifications;
