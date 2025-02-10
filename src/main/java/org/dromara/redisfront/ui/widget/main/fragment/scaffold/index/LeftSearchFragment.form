@@ -31,11 +31,14 @@
                 <children>
                   <component id="fafaa" class="javax.swing.JComboBox" binding="databaseComboBox" custom-create="true">
                     <constraints border-constraint="West"/>
-                    <properties/>
+                    <properties>
+                      <font size="16"/>
+                    </properties>
                   </component>
                   <component id="523a3" class="javax.swing.JButton" binding="addBtn" custom-create="true">
                     <constraints border-constraint="Center"/>
                     <properties>
+                      <font size="16"/>
                       <horizontalAlignment value="0"/>
                       <horizontalTextPosition value="11"/>
                       <text resource-bundle="org/dromara/redisfront/RedisFront" key="DataSearchForm.addBtn.title"/>
@@ -49,12 +52,14 @@
                       <component id="93472" class="javax.swing.JButton" binding="refreshBtn" custom-create="true">
                         <constraints border-constraint="Center"/>
                         <properties>
+                          <font size="16"/>
                           <text value=""/>
                         </properties>
                       </component>
                       <component id="e51fb" class="javax.swing.JButton" binding="deleteAllBtn" custom-create="true">
                         <constraints border-constraint="East"/>
                         <properties>
+                          <font size="16"/>
                           <text value=""/>
                         </properties>
                       </component>

@@ -10,6 +10,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import io.lettuce.core.*;
+import org.dromara.quickswing.ui.swing.AnimateButton;
 import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.commons.enums.KeyTypeEnum;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
@@ -61,13 +62,13 @@ public class RightViewFragment {
     private JPanel valueViewPanel;
     private JPanel basicPanel;
     private JLabel keyTypeLabel;
-    private JButton delBtn;
-    private JButton refBtn;
+    private AnimateButton delBtn;
+    private AnimateButton refBtn;
     private JLabel keyLabel;
     private JLabel lengthLabel;
     private JLabel keySizeLabel;
     private JButton valueUpdateSaveBtn;
-    private JButton saveBtn;
+    private AnimateButton saveBtn;
     private JTextField ttlField;
     private JTextField tableSearchField;
     private JButton tableAddBtn;
@@ -786,36 +787,61 @@ public class RightViewFragment {
         ttlField = new JTextField();
         ttlField.setSize(5, -1);
         ttlField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, ttlLabel);
-        delBtn = new JButton() {
+        delBtn = new AnimateButton() {
             @Override
             public void updateUI() {
                 super.updateUI();
                 setText(owner.$tr("DataViewForm.delBtn.title"));
                 setToolTipText(owner.$tr("DataViewForm.delBtn.toolTip.Text"));
+                setBackground(UIManager.getColor("RedisFront.animateButton.background"));
             }
         };
+        delBtn.setText(owner.$tr("DataViewForm.delBtn.title"));
+        delBtn.setIcon(Icons.DELETE_A_ICON);
+        delBtn.setEffectColor(Color.red);
+        delBtn.setBackground(UIManager.getColor("RedisFront.animateButton.background"));
+        delBtn.setBorder(new EmptyBorder(5, 5, 5, 5));
+        delBtn.setArcHeight(10);
+        delBtn.setArcWidth(10);
         delBtn.addActionListener(e -> {
 //            deleteActionHandler.handle()
         });
 
-        refBtn = new JButton() {
+        refBtn = new AnimateButton() {
             @Override
             public void updateUI() {
                 super.updateUI();
                 setText(owner.$tr("DataViewForm.refBtn.title"));
                 setToolTipText(owner.$tr("DataViewForm.refBtn.toolTip.Text"));
+                setBackground(UIManager.getColor("RedisFront.animateButton.background"));
             }
         };
+        refBtn.setText(owner.$tr("DataViewForm.refBtn.title"));
+        refBtn.setBackground(UIManager.getColor("RedisFront.animateButton.background"));
+        refBtn.setIcon(Icons.REFRESH_A_ICON);
+        refBtn.setEffectColor(Color.GREEN);
+        refBtn.setArcHeight(10);
+        refBtn.setArcWidth(10);
+        refBtn.setBorder(new EmptyBorder(5, 5, 5, 5));
         refBtn.addActionListener(e -> reloadAllActionPerformed());
-
-        saveBtn = new JButton() {
+        saveBtn = new AnimateButton() {
             @Override
             public void updateUI() {
                 super.updateUI();
                 setText(owner.$tr("DataViewForm.saveBtn.title"));
                 setToolTipText(owner.$tr("DataViewForm.saveBtn.toolTip.Text"));
+                setBackground(UIManager.getColor("RedisFront.animateButton.background"));
             }
         };
+        saveBtn.setText(owner.$tr("DataViewForm.saveBtn.title"));
+        saveBtn.setBackground(UIManager.getColor("RedisFront.animateButton.background"));
+        saveBtn.setIcon(Icons.SAVE_A_ICON);
+        saveBtn.setEffectColor(Color.blue);
+        saveBtn.setBorder(new EmptyBorder(5, 5, 5, 5));
+        saveBtn.setArcHeight(10);
+        saveBtn.setArcWidth(10);
+
+
         saveBtn.addActionListener((e) -> {
             String ttl = ttlField.getText();
             String key = keyField.getText();
@@ -1007,33 +1033,45 @@ public class RightViewFragment {
         contentPanel.setPreferredSize(new Dimension(-1, -1));
         bodyPanel.setLayout(new BorderLayout(0, 0));
         contentPanel.add(bodyPanel, BorderLayout.CENTER);
-        basicPanel.setLayout(new GridLayoutManager(1, 5, new Insets(0, 0, 0, 0), -1, -1));
+        basicPanel.setLayout(new GridLayoutManager(2, 4, new Insets(0, 0, 0, 0), -1, -1));
         bodyPanel.add(basicPanel, BorderLayout.NORTH);
-        Font keyTypeLabelFont = this.$$$getFont$$$(null, Font.BOLD, 14, keyTypeLabel.getFont());
+        Font keyTypeLabelFont = this.$$$getFont$$$(null, Font.BOLD, -1, keyTypeLabel.getFont());
         if (keyTypeLabelFont != null) keyTypeLabel.setFont(keyTypeLabelFont);
         keyTypeLabel.setText("");
         basicPanel.add(keyTypeLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         keyField = new JTextField();
+        Font keyFieldFont = this.$$$getFont$$$(null, -1, -1, keyField.getFont());
+        if (keyFieldFont != null) keyField.setFont(keyFieldFont);
         basicPanel.add(keyField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        Font ttlFieldFont = this.$$$getFont$$$(null, -1, -1, ttlField.getFont());
+        if (ttlFieldFont != null) ttlField.setFont(ttlFieldFont);
         basicPanel.add(ttlField, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(100, -1), null, 0, false));
         final JToolBar toolBar1 = new JToolBar();
-        basicPanel.add(toolBar1, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 20), null, 0, false));
+        basicPanel.add(toolBar1, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 20), null, 0, false));
+        Font delBtnFont = this.$$$getFont$$$(null, -1, 12, delBtn.getFont());
+        if (delBtnFont != null) delBtn.setFont(delBtnFont);
+        delBtn.setMargin(new Insets(0, 0, 0, 10));
         this.$$$loadButtonText$$$(delBtn, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "DataViewForm.delBtn.title"));
         delBtn.setToolTipText(this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "DataViewForm.delBtn.toolTip.Text"));
         toolBar1.add(delBtn);
         final JToolBar.Separator toolBar$Separator1 = new JToolBar.Separator();
         toolBar1.add(toolBar$Separator1);
+        Font refBtnFont = this.$$$getFont$$$(null, -1, 12, refBtn.getFont());
+        if (refBtnFont != null) refBtn.setFont(refBtnFont);
+        refBtn.setMargin(new Insets(0, 0, 0, 10));
         this.$$$loadButtonText$$$(refBtn, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "DataViewForm.refBtn.title"));
         refBtn.setToolTipText(this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "DataViewForm.refBtn.toolTip.Text"));
         toolBar1.add(refBtn);
         final JToolBar.Separator toolBar$Separator2 = new JToolBar.Separator();
         toolBar1.add(toolBar$Separator2);
+        Font saveBtnFont = this.$$$getFont$$$(null, -1, 12, saveBtn.getFont());
+        if (saveBtnFont != null) saveBtn.setFont(saveBtnFont);
         this.$$$loadButtonText$$$(saveBtn, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "DataViewForm.saveBtn.title"));
         saveBtn.setToolTipText(this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "DataViewForm.saveBtn.toolTip.Text"));
         toolBar1.add(saveBtn);
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
-        basicPanel.add(panel1, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        basicPanel.add(panel1, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         lengthLabel = new JLabel();
         lengthLabel.setText("");
         panel1.add(lengthLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));

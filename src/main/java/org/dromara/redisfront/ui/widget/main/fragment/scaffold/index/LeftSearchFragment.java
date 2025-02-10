@@ -35,7 +35,9 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.plaf.FontUIResource;
 import javax.swing.text.JTextComponent;
+import javax.swing.text.StyleContext;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
@@ -44,10 +46,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -374,7 +373,7 @@ public class LeftSearchFragment {
                 this::scanBeforeProcess,
                 this::scanAfterProcess
         ));
-        deleteAllBtn.setIcon(Icons.DELETE_1_ICON);
+        deleteAllBtn.setIcon(Icons.DELETE_B_ICON);
 
 
         databaseComboBox = new JComboBox<>();
@@ -777,7 +776,11 @@ public class LeftSearchFragment {
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new BorderLayout(0, 0));
         panel1.add(panel2, BorderLayout.NORTH);
+        Font databaseComboBoxFont = this.$$$getFont$$$(null, -1, 16, databaseComboBox.getFont());
+        if (databaseComboBoxFont != null) databaseComboBox.setFont(databaseComboBoxFont);
         panel2.add(databaseComboBox, BorderLayout.WEST);
+        Font addBtnFont = this.$$$getFont$$$(null, -1, 16, addBtn.getFont());
+        if (addBtnFont != null) addBtn.setFont(addBtnFont);
         addBtn.setHorizontalAlignment(0);
         addBtn.setHorizontalTextPosition(11);
         this.$$$loadButtonText$$$(addBtn, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "DataSearchForm.addBtn.title"));
@@ -785,8 +788,12 @@ public class LeftSearchFragment {
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new BorderLayout(0, 0));
         panel2.add(panel3, BorderLayout.EAST);
+        Font refreshBtnFont = this.$$$getFont$$$(null, -1, 16, refreshBtn.getFont());
+        if (refreshBtnFont != null) refreshBtn.setFont(refreshBtnFont);
         refreshBtn.setText("");
         panel3.add(refreshBtn, BorderLayout.CENTER);
+        Font deleteAllBtnFont = this.$$$getFont$$$(null, -1, 16, deleteAllBtn.getFont());
+        if (deleteAllBtnFont != null) deleteAllBtn.setFont(deleteAllBtnFont);
         deleteAllBtn.setText("");
         panel3.add(deleteAllBtn, BorderLayout.EAST);
         final JPanel panel4 = new JPanel();
@@ -818,6 +825,28 @@ public class LeftSearchFragment {
         allField.setEnabled(false);
         allField.setVisible(true);
         loadMorePanel.add(allField, new GridConstraints(0, 2, 1, 9, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(135, -1), null, 0, false));
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    private Font $$$getFont$$$(String fontName, int style, int size, Font currentFont) {
+        if (currentFont == null) return null;
+        String resultName;
+        if (fontName == null) {
+            resultName = currentFont.getName();
+        } else {
+            Font testFont = new Font(fontName, Font.PLAIN, 10);
+            if (testFont.canDisplay('a') && testFont.canDisplay('1')) {
+                resultName = fontName;
+            } else {
+                resultName = currentFont.getName();
+            }
+        }
+        Font font = new Font(resultName, style >= 0 ? style : currentFont.getStyle(), size >= 0 ? size : currentFont.getSize());
+        boolean isMac = System.getProperty("os.name", "").toLowerCase(Locale.ENGLISH).startsWith("mac");
+        Font fontWithFallback = isMac ? new Font(font.getFamily(), font.getStyle(), font.getSize()) : new StyleContext().getFont(font.getFamily(), font.getStyle(), font.getSize());
+        return fontWithFallback instanceof FontUIResource ? fontWithFallback : new FontUIResource(fontWithFallback);
     }
 
     private static Method $$$cachedGetBundleMethod$$$ = null;
