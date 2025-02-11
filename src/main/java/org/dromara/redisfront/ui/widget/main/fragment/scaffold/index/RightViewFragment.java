@@ -67,7 +67,7 @@ public class RightViewFragment {
     private JLabel keyLabel;
     private JLabel lengthLabel;
     private JLabel keySizeLabel;
-    private JButton valueUpdateSaveBtn;
+    private AnimateButton valueUpdateSaveBtn;
     private AnimateButton saveBtn;
     private JTextField ttlField;
     private JTextField tableSearchField;
@@ -356,6 +356,7 @@ public class RightViewFragment {
             valueUpdateSaveBtn.setEnabled(true);
             lengthLabel.setText("Length: " + strLen);
             keySizeLabel.setText("Size: " + Fn.getDataSize(value));
+            dataSplitPanel.setDividerSize(0);
         });
         jsonValueFormat(value);
     }
@@ -664,14 +665,18 @@ public class RightViewFragment {
         });
         jComboBox.setBackground(UIManager.getColor("FlatEditorPane.background"));
         jToolBar.add(jComboBox);
-        valueUpdateSaveBtn = new JButton() {
+        valueUpdateSaveBtn = new AnimateButton() {
             @Override
             public void updateUI() {
                 super.updateUI();
                 setText(owner.$tr("DataViewForm.valueUpdateSaveBtn.title"));
                 setToolTipText(owner.$tr("DataViewForm.valueUpdateSaveBtn.toolTip.text"));
+                setBackground(UIManager.getColor("RedisFront.animateButton.background"));
             }
         };
+        valueUpdateSaveBtn.setEffectColor(Color.decode("#ff9900"));
+        valueUpdateSaveBtn.setBorder(new EmptyBorder(6, 6, 6, 6));
+        valueUpdateSaveBtn.setBackground(UIManager.getColor("RedisFront.animateButton.background"));
         valueUpdateSaveBtn.setEnabled(false);
         valueUpdateSaveBtn.setIcon(Icons.SAVE_ICON);
         valueUpdateSaveBtn.addActionListener((_) -> {

@@ -41,7 +41,7 @@ public class Icons {
     public static final Icon DELETE_ICON = new FlatSVGIcon("icons/delete.svg",16,16);
     public static final Icon DELETE_B_ICON = new FlatSVGIcon("icons/delete_b.svg",16,16);
     public static final Icon DELETE_A_ICON = new FlatSVGIcon("icons/delete_a.svg",16,16);
-    public static final Icon SAVE_ICON = new FlatSVGIcon("icons/save.svg",16,16);
+    public static final Icon SAVE_ICON = new FlatSVGIcon("icons/save.svg",17,17);
     public static final Icon SAVE_A_ICON = new FlatSVGIcon("icons/save_a.svg",16,16);
     public static final Icon CONTENT_TAB_DATA_ICON = new FlatSVGIcon("icons/table.svg",24,24);
     public static final Icon CONTENT_TAB_COMMAND_ICON = new FlatSVGIcon("icons/db_cli2.svg",24,24);
