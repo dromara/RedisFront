@@ -674,8 +674,8 @@ public class RightViewFragment {
                 setBackground(UIManager.getColor("RedisFront.animateButton.background"));
             }
         };
-        valueUpdateSaveBtn.setEffectColor(Color.decode("#ff9900"));
-        valueUpdateSaveBtn.setBorder(new EmptyBorder(6, 6, 6, 6));
+        valueUpdateSaveBtn.setEffectColor(Color.decode("#389FD6"));
+        valueUpdateSaveBtn.setBorder(new EmptyBorder(5, 5, 5, 5));
         valueUpdateSaveBtn.setBackground(UIManager.getColor("RedisFront.animateButton.background"));
         valueUpdateSaveBtn.setEnabled(false);
         valueUpdateSaveBtn.setIcon(Icons.SAVE_ICON);
