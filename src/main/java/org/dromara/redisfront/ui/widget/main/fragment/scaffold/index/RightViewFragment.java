@@ -18,7 +18,7 @@ import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.commons.utils.FutureUtils;
 import org.dromara.redisfront.commons.utils.SwingUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
-import org.dromara.redisfront.model.context.ScanContext;
+import org.dromara.redisfront.model.context.RedisScanContext;
 import org.dromara.redisfront.model.table.*;
 import org.dromara.redisfront.service.*;
 import org.dromara.redisfront.ui.components.editor.TextEditor;
@@ -91,12 +91,12 @@ public class RightViewFragment {
     private final TreeNodeInfo treeNodeInfo;
     private final RedisFrontWidget owner;
 
-    private final Map<String, ScanContext<String>> scanSetContextMap;
-    private final Map<String, ScanContext<String>> scanListContextMap;
+    private final Map<String, RedisScanContext<String>> scanSetContextMap;
+    private final Map<String, RedisScanContext<String>> scanListContextMap;
 
-    private final Map<String, ScanContext<StreamMessage<String, String>>> xRangeContextMap;
-    private final Map<String, ScanContext<ScoredValue<String>>> scanZSetContextMap;
-    private final Map<String, ScanContext<Map.Entry<String, String>>> scanHashContextMap;
+    private final Map<String, RedisScanContext<StreamMessage<String, String>>> xRangeContextMap;
+    private final Map<String, RedisScanContext<ScoredValue<String>>> scanZSetContextMap;
+    private final Map<String, RedisScanContext<Map.Entry<String, String>>> scanHashContextMap;
 
     private String lastKeyName;
     private Long lastKeyTTL;
@@ -289,27 +289,27 @@ public class RightViewFragment {
             switch (keyTypeEnum) {
                 case ZSET -> {
                     if (init)
-                        scanZSetContextMap.put(key, new ScanContext<>());
+                        scanZSetContextMap.put(key, new RedisScanContext<>());
                     loadZSetData(key);
                 }
                 case HASH -> {
                     if (init)
-                        scanHashContextMap.put(key, new ScanContext<>());
+                        scanHashContextMap.put(key, new RedisScanContext<>());
                     loadHashData(key);
                 }
                 case LIST -> {
                     if (init)
-                        scanListContextMap.put(key, new ScanContext<>());
+                        scanListContextMap.put(key, new RedisScanContext<>());
                     loadListData(key);
                 }
                 case SET -> {
                     if (init)
-                        scanSetContextMap.put(key, new ScanContext<>());
+                        scanSetContextMap.put(key, new RedisScanContext<>());
                     loadSetData(key);
                 }
                 case STREAM -> {
                     if (init)
-                        xRangeContextMap.put(key, new ScanContext<>());
+                        xRangeContextMap.put(key, new RedisScanContext<>());
                     loadStreamData(key);
                 }
                 default -> {
@@ -363,7 +363,7 @@ public class RightViewFragment {
 
     private void loadHashData(String key) {
         var len = RedisHashService.service.hlen(redisConnectContext, key);
-        var scanContext = scanHashContextMap.getOrDefault(key, new ScanContext<>());
+        var scanContext = scanHashContextMap.getOrDefault(key, new RedisScanContext<>());
         var lastSearchKey = scanContext.getSearchKey();
 
         scanContext.setSearchKey(tableSearchField.getText());
@@ -400,7 +400,7 @@ public class RightViewFragment {
 
     private void loadSetData(String key) {
         var len = RedisSetService.service.scard(redisConnectContext, key);
-        var scanContext = scanSetContextMap.getOrDefault(key, new ScanContext<>());
+        var scanContext = scanSetContextMap.getOrDefault(key, new RedisScanContext<>());
 
         var lastSearchKey = scanContext.getSearchKey();
         scanContext.setSearchKey(tableSearchField.getText());
@@ -436,7 +436,7 @@ public class RightViewFragment {
     private void loadListData(String key) {
         var len = RedisListService.service.llen(redisConnectContext, key);
 
-        var scanContext = scanListContextMap.getOrDefault(key, new ScanContext<>());
+        var scanContext = scanListContextMap.getOrDefault(key, new RedisScanContext<>());
 
         var lastSearchKey = scanContext.getSearchKey();
         scanContext.setSearchKey(tableSearchField.getText());
@@ -484,7 +484,7 @@ public class RightViewFragment {
     private void loadStreamData(String key) {
         var len = RedisStreamService.service.xlen(redisConnectContext, key);
 
-        var xRangeContext = xRangeContextMap.getOrDefault(key, new ScanContext<>());
+        var xRangeContext = xRangeContextMap.getOrDefault(key, new RedisScanContext<>());
 
         var lastSearchKey = xRangeContext.getSearchKey();
         xRangeContext.setSearchKey(tableSearchField.getText());
@@ -525,7 +525,7 @@ public class RightViewFragment {
     private void loadZSetData(String key) {
         var len = RedisZSetService.service.zcard(redisConnectContext, key);
 
-        var scanContext = scanZSetContextMap.getOrDefault(key, new ScanContext<>());
+        var scanContext = scanZSetContextMap.getOrDefault(key, new RedisScanContext<>());
 
         var lastSearchKey = scanContext.getSearchKey();
         scanContext.setSearchKey(tableSearchField.getText());

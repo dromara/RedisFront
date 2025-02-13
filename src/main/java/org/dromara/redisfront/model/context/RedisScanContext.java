@@ -8,7 +8,7 @@ import io.lettuce.core.ScanCursor;
 
 import java.util.List;
 
-public class ScanContext<T> {
+public class RedisScanContext<T> {
     @Setter
     private ScanCursor scanCursor;
     @Setter

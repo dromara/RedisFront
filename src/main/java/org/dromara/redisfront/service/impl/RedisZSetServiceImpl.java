@@ -2,7 +2,7 @@ package org.dromara.redisfront.service.impl;
 
 import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.model.context.RedisConnectContext;
-import org.dromara.redisfront.model.context.ScanContext;
+import org.dromara.redisfront.model.context.RedisScanContext;
 import org.dromara.redisfront.service.RedisZSetService;
 import org.dromara.redisfront.ui.dialog.LogsDialog;
 import io.lettuce.core.*;
@@ -142,7 +142,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
     @Override
     public ScoredValueScanCursor<String> zscan(RedisConnectContext redisConnectContext, String key, ScanArgs scanArgs) {
 
-        ScanContext.MyScanArgs myScanArgs = (ScanContext.MyScanArgs) scanArgs;
+        RedisScanContext.MyScanArgs myScanArgs = (RedisScanContext.MyScanArgs) scanArgs;
         var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("ZSCAN ".concat(key).concat(" ").concat(myScanArgs.getCommandStr()));
         LogsDialog.appendLog(logInfo);
 
@@ -157,7 +157,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
     public ScoredValueScanCursor<String> zscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor, ScanArgs scanArgs) {
 
 
-        ScanContext.MyScanArgs myScanArgs = (ScanContext.MyScanArgs) scanArgs;
+        RedisScanContext.MyScanArgs myScanArgs = (RedisScanContext.MyScanArgs) scanArgs;
         var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("ZSCAN ".concat(key).concat(" ").concat(scanCursor.getCursor()).concat(myScanArgs.getCommandStr()));
         LogsDialog.appendLog(logInfo);
 

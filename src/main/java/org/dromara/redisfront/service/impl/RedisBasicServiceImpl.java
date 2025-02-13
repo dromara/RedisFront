@@ -5,7 +5,7 @@ import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.commons.utils.LettuceUtils;
 import org.dromara.redisfront.model.ClusterNode;
 import org.dromara.redisfront.model.context.RedisConnectContext;
-import org.dromara.redisfront.model.context.ScanContext;
+import org.dromara.redisfront.model.context.RedisScanContext;
 import org.dromara.redisfront.ui.dialog.LogsDialog;
 import io.lettuce.core.KeyScanCursor;
 import io.lettuce.core.ScanArgs;
@@ -67,7 +67,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
     @Override
     public KeyScanCursor<String> scan(RedisConnectContext redisConnectContext, ScanArgs scanArgs) {
 
-        ScanContext.MyScanArgs myScanArgs = (ScanContext.MyScanArgs) scanArgs;
+        RedisScanContext.MyScanArgs myScanArgs = (RedisScanContext.MyScanArgs) scanArgs;
         var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("SCAN ".concat(myScanArgs.getCommandStr()));
         LogsDialog.appendLog(logInfo);
 
@@ -81,7 +81,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
     @Override
     public KeyScanCursor<String> scan(RedisConnectContext redisConnectContext, ScanCursor scanCursor, ScanArgs scanArgs) {
 
-        ScanContext.MyScanArgs myScanArgs = (ScanContext.MyScanArgs) scanArgs;
+        RedisScanContext.MyScanArgs myScanArgs = (RedisScanContext.MyScanArgs) scanArgs;
         var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("SCAN ".concat(scanCursor.getCursor()).concat(myScanArgs.getCommandStr()));
         LogsDialog.appendLog(logInfo);
 
