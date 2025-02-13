@@ -13,16 +13,16 @@ import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 @Slf4j
-class SyncLoadingWaiter extends SwingWorker<Object, Object> {
+class SyncLoadingWaiter<T> extends SwingWorker<T, Object> {
 
     private final Timer timer;
     private final AtomicInteger count;
     private final SyncLoadingDialog syncLoadingDialog;
     private static final String TIMEOUT_MESSAGE_KEY = "LoadingDialog.loadInfoLabel.timeout.message";
     @Setter
-    private Supplier<Object> supplier;
+    private Supplier<T> supplier;
     @Setter
-    private BiConsumer<Object, Exception> biConsumer;
+    private BiConsumer<T, Exception> biConsumer;
 
     public SyncLoadingWaiter(SyncLoadingDialog syncLoadingDialog) {
         this.syncLoadingDialog = syncLoadingDialog;
@@ -52,13 +52,12 @@ class SyncLoadingWaiter extends SwingWorker<Object, Object> {
         this.timer.stop();
         this.syncLoadingDialog.setVisible(false);
         this.syncLoadingDialog.dispose();
-
     }
 
     @Override
     protected void done() {
         try {
-            Object object = this.get();
+            T object = this.get();
             this.biConsumer.accept(object, null);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -82,7 +81,7 @@ class SyncLoadingWaiter extends SwingWorker<Object, Object> {
     }
 
     @Override
-    protected Object doInBackground() {
+    protected T doInBackground() {
         Assert.notNull(supplier, "supplier must not be null");
         return supplier.get();
     }

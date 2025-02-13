@@ -18,14 +18,12 @@ import java.util.function.Supplier;
 public class SyncLoadingDialog extends QSDialog<RedisFrontWidget> {
     private JProgressBar progressBar;
     private JLabel messageLabel;
-    private final SyncLoadingWaiter syncLoadingWaiter;
 
     private SyncLoadingDialog(RedisFrontWidget owner) {
         super(owner, true);
         this.setResizable(true);
         this.setMinimumSize(new Dimension(500, 100));
         this.setupUI();
-        syncLoadingWaiter = new SyncLoadingWaiter(this);
     }
 
     protected void setProgressValue(int value) {
@@ -54,7 +52,8 @@ public class SyncLoadingDialog extends QSDialog<RedisFrontWidget> {
         return new SyncLoadingDialog(owner);
     }
 
-    public void showSyncLoadingDialog(Supplier<Object> supplier, BiConsumer<Object, Exception> biConsumer) {
+    public <T> void showSyncLoadingDialog(Supplier<T> supplier, BiConsumer<T, Exception> biConsumer) {
+        SyncLoadingWaiter<T> syncLoadingWaiter = new SyncLoadingWaiter<>(this);
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -63,9 +62,9 @@ public class SyncLoadingDialog extends QSDialog<RedisFrontWidget> {
                 super.windowClosing(e);
             }
         });
-        this.syncLoadingWaiter.setSupplier(supplier);
-        this.syncLoadingWaiter.setBiConsumer(biConsumer);
-        this.syncLoadingWaiter.execute();
+        syncLoadingWaiter.setSupplier(supplier);
+        syncLoadingWaiter.setBiConsumer(biConsumer);
+        syncLoadingWaiter.execute();
         this.setLocationRelativeTo(getOwner());
         this.setVisible(true);
         this.pack();

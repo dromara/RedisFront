@@ -41,10 +41,10 @@ public class TreeUtils {
             var node = root;
             var cells = row.split(delim);
 
-            var keyLength = (StrUtil.join("", (Object) cells).toCharArray().length + cells.length - 1);
+            var keyLength = (StrUtil.join("", (Object) cells).length() + cells.length - 1);
 
-            if (row.contains(delim) && row.toCharArray().length - keyLength >= 2) {
-                var lastStr = StrUtil.sub(row, keyLength, row.toCharArray().length - 1);
+            if (row.contains(delim) && row.length() - keyLength >= 2) {
+                var lastStr = StrUtil.sub(row, keyLength, row.length() - 1);
                 ArrayList<String> tmpList = new ArrayList<>(Arrays.asList(cells));
                 tmpList.add(lastStr);
                 cells = tmpList.toArray(new String[]{});

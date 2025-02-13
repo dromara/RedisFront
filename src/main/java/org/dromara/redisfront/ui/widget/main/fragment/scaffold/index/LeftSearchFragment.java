@@ -5,10 +5,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import io.lettuce.core.MapScanCursor;
-import io.lettuce.core.RedisCommandExecutionException;
-import io.lettuce.core.ScoredValueScanCursor;
-import io.lettuce.core.ValueScanCursor;
+import io.lettuce.core.*;
 import lombok.Getter;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.RedisFrontMain;
@@ -23,7 +20,9 @@ import org.dromara.redisfront.model.DbInfo;
 import org.dromara.redisfront.model.tree.TreeNodeInfo;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.context.RedisScanContext;
+import org.dromara.redisfront.model.turbo.Turbo3;
 import org.dromara.redisfront.service.*;
+import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
 import org.dromara.redisfront.ui.dialog.AddKeyDialog;
 import org.dromara.redisfront.ui.event.ClickKeyTreeNodeEvent;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
@@ -112,13 +111,12 @@ public class LeftSearchFragment {
     }
 
 
-    public synchronized void loadTreeModelData(String key) {
-        try {
-            scanBeforeProcess();
+    public void loadTreeModelData(String key) {
+        SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
             var scanKeysContext = scanKeysContextMap.get(redisConnectContext.getDatabase());
 
             if (Fn.isNull(scanKeysContext.getLimit())) {
-                Long limit = owner.getPrefs().getState().getLong(Constants.KEY_KEY_MAX_LOAD_NUM, 10000L);
+                Long limit = Long.valueOf(redisConnectContext.getSetting().getLoadKeyNum());
                 scanKeysContext.setLimit(limit);
             }
 
@@ -130,7 +128,7 @@ public class LeftSearchFragment {
                 var scanInfo = all.split(SEPARATOR_FLAG);
                 if (scanInfo.length > 1) {
                     if (Fn.equal(scanInfo[1], "null")) {
-                        throw new RedisFrontException(LocaleUtils.getMessageFromBundle("DataSearchForm.exception.databaseIsNull.message"), true);
+                        throw new RedisFrontException(owner.$tr("DataSearchForm.exception.databaseIsNull.message"), true);
                     } else {
                         scanKeysContext.setLimit(Long.valueOf(scanInfo[1]));
                     }
@@ -140,11 +138,9 @@ public class LeftSearchFragment {
 
             }
 
-            var keyScanCursor = RedisBasicService.service.scan(redisConnectContext, scanKeysContext.getScanCursor(), scanKeysContext.getScanArgs());
+            KeyScanCursor<String> keyScanCursor = RedisBasicService.service.scan(redisConnectContext, scanKeysContext.getScanCursor(), scanKeysContext.getScanArgs());
             scanKeysContext.setScanCursor(keyScanCursor);
             log.debug("本次扫描到：{}", keyScanCursor.getKeys().size());
-
-            LoadingUtils.closeDialog();
 
             var scanKeysList = new ArrayList<>(keyScanCursor.getKeys());
 
@@ -161,94 +157,63 @@ public class LeftSearchFragment {
             if (Fn.equal(scanKeysContext.getSearchKey(), lastSearchKey) && Fn.isNotEmpty(scanKeysContext.getKeyList())) {
                 if (scanKeysContext.getKeyList().size() >= 300000) {
                     System.gc();
-                    throw new RedisFrontException(LocaleUtils.getMessageFromBundle("DataSearchForm.exception.loadUpperLimit.message"));
+                    throw new RedisFrontException(owner.$tr("DataSearchForm.exception.loadUpperLimit.message"));
                 }
                 scanKeysContext.getKeyList().addAll(scanKeysList);
             } else {
                 scanKeysContext.setKeyList(scanKeysList);
             }
 
-            var delim = owner.getPrefs().getState().get(Constants.KEY_KEY_SEPARATOR, ":");
-
-            var treeModel = TreeUtils.toTreeModel(new HashSet<>(scanKeysContext.getKeyList()), delim);
-
+            var delim = redisConnectContext.getSetting().getKeySeparator();
+            DefaultTreeModel treeModel = TreeUtils.toTreeModel(new HashSet<>(scanKeysContext.getKeyList()), delim);
             var finalKeyScanCursor = keyScanCursor;
-            SwingUtilities.invokeLater(() -> {
-                currentField.setText(String.valueOf(scanKeysContext.getKeyList().size()));
-                loadMoreBtn.setEnabled(!finalKeyScanCursor.isFinished());
-                var all = allField.getText();
-                var scanInfo = all.split(SEPARATOR_FLAG);
-                if (scanInfo.length > 1) {
-                    var current = Long.parseLong(scanInfo[0]);
-                    var allSize = NumberUtil.isNumber(scanInfo[1]) ? Long.parseLong(scanInfo[1]) : 0;
-                    //如果全部扫描完成！
-                    if (current >= allSize && scanKeysContext.getKeyList().size() == allSize) {
-                        loadMoreBtn.setText(LocaleUtils.getMessageFromBundle("DataSearchForm.loadMoreBtn.complete.title"));
-                        loadMoreBtn.setEnabled(false);
-                        return;
-                    } else {
-                        allField.setText((current + scanKeysContext.getLimit()) + SEPARATOR_FLAG + allSize);
-                        var title = LocaleUtils.getMessageFromBundle("DataSearchForm.allField.toolTipText.title");
-                        allField.setToolTipText(String.format(title, current, allSize));
-                    }
-
-                } else {
-                    var title = LocaleUtils.getMessageFromBundle("DataSearchForm.allField.toolTipText.title");
-                    allField.setToolTipText(String.format(title, scanKeysContext.getLimit(), all));
-                    allField.setText(scanKeysContext.getLimit() + SEPARATOR_FLAG + all);
-                }
-                if (loadMoreBtn.isEnabled()) {
-                    loadMoreBtn.setText(LocaleUtils.getMessageFromBundle("DataSearchForm.loadMoreBtn.title"));
-                    loadMoreBtn.requestFocus();
-                } else {
-                    loadMoreBtn.setText(LocaleUtils.getMessageFromBundle("DataSearchForm.loadMoreBtn.complete.title"));
-                    loadMoreBtn.setEnabled(false);
-                }
-                keyTree.setModel(treeModel);
-                keyTree.updateUI();
-            });
-            scanAfterProcess();
-        } catch (Exception e) {
-            scanAfterProcess();
-            if (e instanceof RedisFrontException) {
-                loadMoreBtn.setEnabled(false);
-                AlertUtils.showInformationDialog(e.getMessage());
-            } else {
-                throw e;
+            return new Turbo3<>(treeModel, finalKeyScanCursor, scanKeysContext);
+        }, (r, e) -> {
+            if (e != null) {
+                owner.displayException(e);
+                return;
             }
-        }
-
+            var treeModel = r.getT1();
+            var finalKeyScanCursor = r.getT2();
+            var scanKeysContext = r.getT3();
+            currentField.setText(String.valueOf(scanKeysContext.getKeyList().size()));
+            loadMoreBtn.setEnabled(!finalKeyScanCursor.isFinished());
+            var all = allField.getText();
+            var scanInfo = all.split(SEPARATOR_FLAG);
+            if (scanInfo.length > 1) {
+                var current = Long.parseLong(scanInfo[0]);
+                var allSize = NumberUtil.isNumber(scanInfo[1]) ? Long.parseLong(scanInfo[1]) : 0;
+                //如果全部扫描完成！
+                if (current >= allSize && scanKeysContext.getKeyList().size() == allSize) {
+                    loadMoreBtn.setText(owner.$tr("DataSearchForm.loadMoreBtn.complete.title"));
+                    loadMoreBtn.setEnabled(false);
+                    return;
+                } else {
+                    allField.setText((current + scanKeysContext.getLimit()) + SEPARATOR_FLAG + allSize);
+                    var title = owner.$tr("DataSearchForm.allField.toolTipText.title");
+                    allField.setToolTipText(String.format(title, current, allSize));
+                }
+            } else {
+                var title = owner.$tr("DataSearchForm.allField.toolTipText.title");
+                allField.setToolTipText(String.format(title, scanKeysContext.getLimit(), all));
+                allField.setText(scanKeysContext.getLimit() + SEPARATOR_FLAG + all);
+            }
+            keyTree.setModel(treeModel);
+            keyTree.updateUI();
+        });
     }
 
     public void scanKeysActionPerformed() {
-        FutureUtils.runAsync(() -> {
-
+        SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
             if (Fn.isEmpty(searchTextField.getText())) {
-                try {
-                    loadTreeModelData("*");
-                } catch (Exception throwable) {
-                    var cause = throwable.getCause();
-                    if (cause instanceof RedisCommandExecutionException) {
-                        scanBeforeProcess();
-                        addBtn.setEnabled(false);
-                        AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("DataSearchForm.showInformationDialog.message"), cause);
-                    } else {
-                        AlertUtils.showErrorDialog("ERROR", cause);
-                    }
-                }
+                loadTreeModelData("*");
             } else {
-                try {
-                    loadTreeModelData(searchTextField.getText());
-                } catch (Exception throwable) {
-                    var cause = throwable.getCause();
-                    if (cause instanceof RedisCommandExecutionException) {
-                        scanBeforeProcess();
-                        addBtn.setEnabled(false);
-                        AlertUtils.showInformationDialog(LocaleUtils.getMessageFromBundle("DataSearchForm.showInformationDialog.message"), cause);
-                    } else {
-                        AlertUtils.showErrorDialog("ERROR", cause);
-                    }
-                }
+                loadTreeModelData(searchTextField.getText());
+            }
+            return null;
+        }, (r, e) -> {
+            if (e != null) {
+                owner.displayException(e);
             }
         });
     }
@@ -270,7 +235,7 @@ public class LeftSearchFragment {
             refreshBtn.setEnabled(true);
             searchBtn.setEnabled(true);
             keyTree.setEnabled(true);
-            if (Fn.notEqual(loadMoreBtn.getText(), LocaleUtils.getMessageFromBundle("DataSearchForm.loadMoreBtn.complete.title"))) {
+            if (Fn.notEqual(loadMoreBtn.getText(), owner.$tr("DataSearchForm.loadMoreBtn.complete.title"))) {
                 loadMoreBtn.requestFocus();
                 loadMoreBtn.setEnabled(true);
             }
@@ -315,16 +280,16 @@ public class LeftSearchFragment {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setText(LocaleUtils.getMessageFromBundle("DataSearchForm.addBtn.title"));
-                setToolTipText(LocaleUtils.getMessageFromBundle("DataSearchForm.addBtn.title"));
+                setText(owner.$tr("DataSearchForm.addBtn.title"));
+                setToolTipText(owner.$tr("DataSearchForm.addBtn.title"));
             }
         };
         addBtn.setIcon(Icons.PLUS_ICON);
         addBtn.setFocusable(false);
         addBtn.addActionListener(_ -> AddKeyDialog.showAddDialog(redisConnectContext, null, (_) -> {
             var res = JOptionPane.showConfirmDialog(RedisFrontMain.frame,
-                    LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.message"),
-                    LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.title"), JOptionPane.YES_NO_OPTION);
+                    owner.$tr("DataSearchForm.showConfirmDialog.message"),
+                    owner.$tr("DataSearchForm.showConfirmDialog.title"), JOptionPane.YES_NO_OPTION);
             if (res == JOptionPane.YES_OPTION) {
                 scanKeysContextMap.put(redisConnectContext.getDatabase(), new RedisScanContext<>());
                 scanKeysAndInitScanInfo();
@@ -335,19 +300,17 @@ public class LeftSearchFragment {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setToolTipText(LocaleUtils.getMessageFromBundle("DataSearchForm.refreshBtn.title"));
+                setToolTipText(owner.$tr("DataSearchForm.refreshBtn.title"));
             }
         };
 
         //刷新按钮事件
         refreshBtn.addActionListener(e -> {
-            refreshBtn.setEnabled(false);
-            SwingUtilities.invokeLater(() -> {
-                var selectedIndex = databaseComboBox.getSelectedIndex();
-                searchTextField.setText("");
-                databaseComboBox.removeAllItems();
-                databaseComboBoxInit(selectedIndex);
-            });
+            var selectedIndex = databaseComboBox.getSelectedIndex();
+            searchTextField.setText("");
+            databaseComboBox.removeAllItems();
+            databaseComboBoxInit(selectedIndex);
+
         });
         refreshBtn.setFocusable(false);
         refreshBtn.setIcon(Icons.REFRESH_ICON);
@@ -356,14 +319,14 @@ public class LeftSearchFragment {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setToolTipText(LocaleUtils.getMessageFromBundle("DataSearchForm.deleteAllBtn.title"));
+                setToolTipText(owner.$tr("DataSearchForm.deleteAllBtn.title"));
             }
         };
         deleteAllBtn.setFocusable(false);
 
         deleteAllBtn.addActionListener(e -> FutureUtils.runAsync(
                 () -> {
-                    String operation = JOptionPane.showInputDialog(LocaleUtils.getMessageFromBundle("DataSearchForm.showInputDialog.title") + "\n “flushdb” or “flushall” ");
+                    String operation = JOptionPane.showInputDialog(owner.$tr("DataSearchForm.showInputDialog.title") + "\n “flushdb” or “flushall” ");
                     if (Fn.equal(operation, "flushdb")) {
                         RedisBasicService.service.flushdb(redisConnectContext);
                     } else if (Fn.equal(operation, "flushall")) {
@@ -382,13 +345,13 @@ public class LeftSearchFragment {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setText(LocaleUtils.getMessageFromBundle("DataSearchForm.loadMoreBtn.continue.title"));
+                setText(owner.$tr("DataSearchForm.loadMoreBtn.continue.title"));
             }
         };
         loadMoreBtn.setFocusable(false);
         loadMoreBtn.setIcon(Icons.LOAD_MORE_ICON);
         loadMoreBtn.addActionListener(e -> {
-            FutureUtils.runAsync(() -> LoadingUtils.showDialog(LocaleUtils.getMessageFromBundle("MainWindowForm.loading.title")));
+            FutureUtils.runAsync(() -> LoadingUtils.showDialog(owner.$tr("MainWindowForm.loading.title")));
             scanKeysActionPerformed();
         });
 
@@ -404,11 +367,10 @@ public class LeftSearchFragment {
             }
             redisConnectContext.setDatabase(db.dbIndex());
             scanKeysContextMap.put(redisConnectContext.getDatabase(), new RedisScanContext<>());
-            var limit = owner.getPrefs().getState().getLong(Constants.KEY_KEY_MAX_LOAD_NUM, 10000L);
+            var limit = redisConnectContext.getSetting().getLoadKeyNum();
             var flag = !Fn.isNull(db.dbSize()) && (db.dbSize() > limit);
             allField.setText(String.valueOf(db.dbSize()));
             loadMorePanel.setVisible(flag);
-            FutureUtils.runAsync(() -> LoadingUtils.showDialog(LocaleUtils.getMessageFromBundle("MainWindowForm.loading.title")));
             scanKeysActionPerformed();
         });
 
@@ -416,7 +378,7 @@ public class LeftSearchFragment {
             @Override
             public void updateUI() {
                 super.updateUI();
-                putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, LocaleUtils.getMessageFromBundle("DataSearchForm.searchTextField.placeholder.text"));
+                putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, owner.$tr("DataSearchForm.searchTextField.placeholder.text"));
             }
         };
 
@@ -472,7 +434,7 @@ public class LeftSearchFragment {
                     @Override
                     public void updateUI() {
                         super.updateUI();
-                        setText(LocaleUtils.getMessageFromBundle("DataSearchForm.addMenuItem.title"));
+                        setText(owner.$tr("DataSearchForm.addMenuItem.title"));
                     }
                 };
                 addMenuItem.addActionListener((e) -> {
@@ -480,8 +442,8 @@ public class LeftSearchFragment {
                     if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
                         AddKeyDialog.showAddDialog(redisConnectContext, treeNodeInfo.key(), (key) -> {
                             var res = JOptionPane.showConfirmDialog(RedisFrontMain.frame,
-                                    LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.message"),
-                                    LocaleUtils.getMessageFromBundle("DataSearchForm.showConfirmDialog.title"), JOptionPane.YES_NO_OPTION);
+                                    owner.$tr("DataSearchForm.showConfirmDialog.message"),
+                                    owner.$tr("DataSearchForm.showConfirmDialog.title"), JOptionPane.YES_NO_OPTION);
                             if (res == JOptionPane.YES_OPTION) {
                                 scanKeysContextMap.put(redisConnectContext.getDatabase(), new RedisScanContext<>());
                                 scanKeysAndInitScanInfo();
@@ -496,13 +458,13 @@ public class LeftSearchFragment {
                     @Override
                     public void updateUI() {
                         super.updateUI();
-                        setText(LocaleUtils.getMessageFromBundle("DataSearchForm.delMenuItem.title"));
+                        setText(owner.$tr("DataSearchForm.delMenuItem.title"));
                     }
                 };
                 delMenuItem.addActionListener((e) -> {
                     //删除，需要进行弹框确认，生产项目，如果大规模删除，就是灾难
                     int reply = AlertUtils.showConfirmDialog(
-                            LocaleUtils.getMessageFromBundle("DataSearchForm.delMenuItem.confirm"),
+                            owner.$tr("DataSearchForm.delMenuItem.confirm"),
                             JOptionPane.YES_NO_OPTION);
                     if (reply != JOptionPane.YES_OPTION) {
                         //用户：确认的不是YES, 返回
@@ -518,7 +480,7 @@ public class LeftSearchFragment {
                                         //前置方法
                                         () -> SwingUtilities.invokeLater(() -> {
                                             var title = treeNodeInfo.title();
-                                            treeNodeInfo.setTitle(title.concat(" ").concat(LocaleUtils.getMessageFromBundle("DataSearchForm.treeNodeInfo.del.doing.message")));
+                                            treeNodeInfo.setTitle(title.concat(" ").concat(owner.$tr("DataSearchForm.treeNodeInfo.del.doing.message")));
                                             keyTree.updateUI();
                                         }),
                                         //后置方法
@@ -535,7 +497,7 @@ public class LeftSearchFragment {
                     @Override
                     public void updateUI() {
                         super.updateUI();
-                        setText(LocaleUtils.getMessageFromBundle("DataSearchForm.memoryMenuItem.title"));
+                        setText(owner.$tr("DataSearchForm.memoryMenuItem.title"));
                     }
                 };
                 memoryMenuItem.addActionListener((e) -> {
@@ -548,7 +510,7 @@ public class LeftSearchFragment {
                         });
                         FutureUtils.runAsync(() -> {
                             SwingUtilities.invokeLater(() -> {
-                                treeNodeInfo.setTitle(title.concat(" ").concat(LocaleUtils.getMessageFromBundle("DataSearchForm.treeNodeInfo.memory.doing.message")));
+                                treeNodeInfo.setTitle(title.concat(" ").concat(owner.$tr("DataSearchForm.treeNodeInfo.memory.doing.message")));
                                 expandPath(selectionPath);
                                 keyTree.updateUI();
                             });
@@ -684,7 +646,7 @@ public class LeftSearchFragment {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setText(LocaleUtils.getMessageFromBundle("DataSearchForm.currentLabel.title"));
+                setText(owner.$tr("DataSearchForm.currentLabel.title"));
             }
         };
 
@@ -698,7 +660,7 @@ public class LeftSearchFragment {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setText(LocaleUtils.getMessageFromBundle("DataSearchForm.allLabel.title"));
+                setText(owner.$tr("DataSearchForm.allLabel.title"));
             }
         };
         allLabel.setOpaque(true);
@@ -748,9 +710,9 @@ public class LeftSearchFragment {
         var scanInfo = all.split(SEPARATOR_FLAG);
         if (scanInfo.length > 1) {
             allField.setText("0" + SEPARATOR_FLAG + scanInfo[1]);
-            allField.setToolTipText(String.format(LocaleUtils.getMessageFromBundle("DataSearchForm.allLabel.toolTip.text"), 0, scanInfo[1]));
+            allField.setToolTipText(String.format(owner.$tr("DataSearchForm.allLabel.toolTip.text"), 0, scanInfo[1]));
         }
-        FutureUtils.runAsync(() -> LoadingUtils.showDialog(LocaleUtils.getMessageFromBundle("MainWindowForm.loading.title")));
+        FutureUtils.runAsync(() -> LoadingUtils.showDialog(owner.$tr("MainWindowForm.loading.title")));
         scanKeysActionPerformed();
     }
 

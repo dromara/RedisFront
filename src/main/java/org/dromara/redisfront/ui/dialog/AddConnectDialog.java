@@ -265,17 +265,17 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
     }
 
     private void storageActionPerformed(ActionEvent actionEvent) {
-        var connectcontext = validGetConnectInfo();
+        var connectContext = validGetConnectInfo();
         if (testConnect()) {
             try {
-                ConnectDetailEntity connectDetailEntity = connectcontext.toEntity();
+                ConnectDetailEntity connectDetailEntity = connectContext.toEntity();
                 connectDetailEntity.setGroupId(groupId);
                 if (null == detailId) {
                     ConnectDetailDao.newInstance(this.context.getDatabaseManager().getDatasource()).save(connectDetailEntity);
                 } else {
                     ConnectDetailDao.newInstance(this.context.getDatabaseManager().getDatasource()).update(detailId, connectDetailEntity);
                 }
-                this.context.getEventBus().publish(new RefreshConnectTreeEvent(connectcontext));
+                this.context.getEventBus().publish(new RefreshConnectTreeEvent(connectContext));
                 dispose();
             } catch (SQLException e) {
                 getOwner().displayException($tr("AddConnectDialog.save.fail.message"), e);
@@ -431,6 +431,12 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             sshPrivateKeyFile.setVisible(enableSshPrivateKey.isSelected());
             sshPrivateKeyBtn.setVisible(enableSshPrivateKey.isSelected());
             sshPrivateKeyFile.setText(redisConnectContext.getSshInfo().getPrivateKeyPath());
+        }
+        if (Fn.isNotEmpty(redisConnectContext.getSetting())) {
+            keyMaxLoadNum.setText(String.valueOf(redisConnectContext.getSetting().getLoadKeyNum()));
+            keySeparatorField.setText(redisConnectContext.getSetting().getKeySeparator());
+            redisTimeoutTextField.setText(String.valueOf(redisConnectContext.getSetting().getRedisTimeout()));
+            sshTimeoutTextField.setText(String.valueOf(redisConnectContext.getSetting().getSshTimeout()));
         }
     }
 

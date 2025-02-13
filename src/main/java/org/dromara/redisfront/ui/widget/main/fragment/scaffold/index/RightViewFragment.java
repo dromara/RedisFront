@@ -103,9 +103,9 @@ public class RightViewFragment {
 
 
     public RightViewFragment(RedisConnectContext redisConnectContext, TreeNodeInfo treeNodeInfo, RedisFrontWidget owner) {
+        this.owner = owner;
         this.redisConnectContext = redisConnectContext;
         this.treeNodeInfo = treeNodeInfo;
-        this.owner = owner;
         this.scanZSetContextMap = new LinkedHashMap<>();
         this.scanSetContextMap = new LinkedHashMap<>();
         this.scanListContextMap = new LinkedHashMap<>();
