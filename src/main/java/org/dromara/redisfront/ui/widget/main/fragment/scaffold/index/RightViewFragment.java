@@ -674,6 +674,7 @@ public class RightViewFragment {
                 setBackground(UIManager.getColor("RedisFront.animateButton.background"));
             }
         };
+        valueUpdateSaveBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         valueUpdateSaveBtn.setEffectColor(Color.decode("#389FD6"));
         valueUpdateSaveBtn.setBorder(new EmptyBorder(5, 5, 5, 5));
         valueUpdateSaveBtn.setBackground(UIManager.getColor("RedisFront.animateButton.background"));
@@ -838,6 +839,7 @@ public class RightViewFragment {
                 setBackground(UIManager.getColor("RedisFront.animateButton.background"));
             }
         };
+        saveBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         saveBtn.setText(owner.$tr("DataViewForm.saveBtn.title"));
         saveBtn.setBackground(UIManager.getColor("RedisFront.animateButton.background"));
         saveBtn.setIcon(Icons.SAVE_A_ICON);
