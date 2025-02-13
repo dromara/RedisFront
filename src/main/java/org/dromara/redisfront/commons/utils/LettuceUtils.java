@@ -38,7 +38,6 @@ public class LettuceUtils {
     private static final ConcurrentSkipListSet<Integer> PORT_SET = new ConcurrentSkipListSet<>();
     private static final int MIN_PORT = 32768;
     private static final int MAX_PORT = 65535;
-    private static final Duration TIMEOUT = Duration.ofMillis(3000);
 
     private LettuceUtils() {
     }
@@ -211,7 +210,7 @@ public class LettuceUtils {
                 .withPort(Fn.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH) ? redisConnectContext.getLocalPort() : redisConnectContext.getPort())
                 .withSsl(redisConnectContext.getEnableSsl())
                 .withDatabase(redisConnectContext.getDatabase())
-                .withTimeout(TIMEOUT)
+                .withTimeout(Duration.ofMillis(redisConnectContext.getSetting().getRedisTimeout()))
                 .build();
 
         if (Fn.isNotEmpty(redisConnectContext.getUsername()) && Fn.isNotEmpty(password)) {

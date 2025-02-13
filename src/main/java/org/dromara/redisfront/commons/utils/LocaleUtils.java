@@ -11,6 +11,7 @@ import java.util.ResourceBundle;
  *
  * @author Jin
  */
+@Deprecated
 public class LocaleUtils {
 
     private static Method cachedGetBundleMethod = null;

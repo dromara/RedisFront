@@ -63,7 +63,7 @@ public class JschUtils {
                     }
                     Session newSession = createSession(redisConnectContext);
                     try {
-                        newSession.setTimeout(1000);
+                        newSession.setTimeout(redisConnectContext.getSetting().getSshTimeout());
                         newSession.connect();
                         String remoteHost = getRemoteAddress(redisConnectContext);
                         JschUtil.bindPort(newSession, remoteHost, redisConnectContext.getPort(), redisConnectContext.getLocalPort());

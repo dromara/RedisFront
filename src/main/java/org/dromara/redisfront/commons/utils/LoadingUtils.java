@@ -11,6 +11,7 @@ import java.awt.*;
  *
  * @author Jin
  */
+@Deprecated
 public class LoadingUtils {
 
     private static SyncLoadingDialog syncLoadingDialog;

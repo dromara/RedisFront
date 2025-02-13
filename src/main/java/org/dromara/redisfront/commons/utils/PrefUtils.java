@@ -5,6 +5,7 @@ import java.util.prefs.Preferences;
 /**
  * @author Karl Tauber
  */
+@Deprecated
 public class PrefUtils {
 
     private PrefUtils() {
