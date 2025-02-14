@@ -1,4 +1,1 @@
-<svg t="1738166319381" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"
-     p-id="12917" width="16" height="16">
-    <path fill="#999999" d="M640 384V0h-256v384H0v256h384V1024h256V640H1024v-256H640z" p-id="12918"></path>
-</svg>
+<svg t="1739534645981" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5157" width="200" height="200"><path d="M512 1024A512 512 0 1 0 512 0a512 512 0 0 0 0 1024zM448 448V256h128v192h192v128H576v192H448V576H256V448h192z" fill="#F04925" p-id="5158"></path></svg>

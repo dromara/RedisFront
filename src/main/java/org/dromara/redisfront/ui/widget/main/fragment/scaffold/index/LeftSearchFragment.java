@@ -740,7 +740,7 @@ public class LeftSearchFragment {
         Font databaseComboBoxFont = this.$$$getFont$$$(null, -1, 16, databaseComboBox.getFont());
         if (databaseComboBoxFont != null) databaseComboBox.setFont(databaseComboBoxFont);
         panel2.add(databaseComboBox, BorderLayout.WEST);
-        Font addBtnFont = this.$$$getFont$$$(null, -1, 16, addBtn.getFont());
+        Font addBtnFont = this.$$$getFont$$$(null, Font.BOLD, 16, addBtn.getFont());
         if (addBtnFont != null) addBtn.setFont(addBtnFont);
         addBtn.setHorizontalAlignment(0);
         addBtn.setHorizontalTextPosition(11);

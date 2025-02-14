@@ -1,6 +1,5 @@
 package org.dromara.redisfront.ui.widget.main.fragment.scaffold.index;
 
-import cn.hutool.core.io.unit.DataSizeUtil;
 import cn.hutool.json.JSONException;
 import cn.hutool.json.JSONUtil;
 import com.formdev.flatlaf.FlatClientProperties;
@@ -9,25 +8,24 @@ import com.formdev.flatlaf.ui.FlatEmptyBorder;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import io.lettuce.core.*;
 import org.dromara.quickswing.ui.swing.AnimateButton;
 import org.dromara.redisfront.commons.enums.KeyTypeEnum;
-import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.commons.utils.FutureUtils;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.utils.SwingUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.context.RedisScanContext;
-import org.dromara.redisfront.model.table.*;
+import org.dromara.redisfront.model.table.HashTableModel;
+import org.dromara.redisfront.model.table.SortedSetTableModel;
+import org.dromara.redisfront.model.table.StreamTableModel;
 import org.dromara.redisfront.model.tree.TreeNodeInfo;
 import org.dromara.redisfront.service.*;
 import org.dromara.redisfront.ui.components.editor.TextEditor;
 import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
 import org.dromara.redisfront.ui.dialog.AddOrUpdateItemDialog;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
-import org.dromara.redisfront.ui.widget.main.fragment.scaffold.index.fetch.impl.HashDataFetcher;
-import org.dromara.redisfront.ui.widget.main.fragment.scaffold.index.fetch.impl.StringDataFetcher;
+import org.dromara.redisfront.ui.widget.main.fragment.scaffold.index.fetch.impl.*;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,12 +44,9 @@ import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.lang.reflect.Method;
-import java.util.LinkedHashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * DataViewForm
@@ -61,6 +56,7 @@ import java.util.stream.Collectors;
 public class RightViewFragment {
 
     private static final Logger log = LoggerFactory.getLogger(RightViewFragment.class);
+
     private JPanel contentPanel;
     private JTextField keyField;
     private JPanel bodyPanel;
@@ -96,15 +92,13 @@ public class RightViewFragment {
     private final TreeNodeInfo treeNodeInfo;
     private final RedisFrontWidget owner;
 
-    private final Map<String, RedisScanContext<String>> scanSetContextMap;
-    private final Map<String, RedisScanContext<String>> scanListContextMap;
-
-    private final Map<String, RedisScanContext<StreamMessage<String, String>>> xRangeContextMap;
-    private final Map<String, RedisScanContext<ScoredValue<String>>> scanZSetContextMap;
-
 
     private final StringDataFetcher stringDataFetcher;
     private final HashDataFetcher hashDataFetcher;
+    private final SetDataFetcher setDataFetcher;
+    private final ZSetDataFetcher zSetDataFetcher;
+    private final ListDataFetcher listDataFetcher;
+    private final StreamDataFetcher streamDataFetcher;
 
     private String lastKeyName;
     private Long lastKeyTTL;
@@ -115,10 +109,6 @@ public class RightViewFragment {
         this.owner = owner;
         this.redisConnectContext = redisConnectContext;
         this.treeNodeInfo = treeNodeInfo;
-        this.scanZSetContextMap = new LinkedHashMap<>();
-        this.scanSetContextMap = new LinkedHashMap<>();
-        this.scanListContextMap = new LinkedHashMap<>();
-        this.xRangeContextMap = new LinkedHashMap<>();
 
         this.stringDataFetcher = new StringDataFetcher(redisConnectContext, treeNodeInfo.key(), turbo -> {
             tableViewPanel.setVisible(false);
@@ -135,7 +125,51 @@ public class RightViewFragment {
             keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
             tableViewPanel.setVisible(true);
             dataTable.setModel(turbo.getT2());
-            LoadAfterUpdate(turbo.getT1(), turbo.getT3(), turbo.getT4(), turbo.getT5());
+            loadDataInfo(turbo.getT1(), turbo.getT3(), turbo.getT4(), turbo.getT5());
+            SwingUtils.removeAllComponent(dataPanel);
+            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
+        }, owner.getResourceBundle());
+
+        this.setDataFetcher = new SetDataFetcher(redisConnectContext, treeNodeInfo.key(), turbo -> {
+            keyLabel.setText(owner.$tr("DataViewForm.keyLabel.title"));
+            keyLabel.setOpaque(true);
+            keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
+            tableViewPanel.setVisible(true);
+            dataTable.setModel(turbo.getT2());
+            loadDataInfo(turbo.getT1(), turbo.getT3(), turbo.getT4(), turbo.getT5());
+            SwingUtils.removeAllComponent(dataPanel);
+            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
+        }, owner.getResourceBundle());
+
+        this.zSetDataFetcher = new ZSetDataFetcher(redisConnectContext, treeNodeInfo.key(), turbo -> {
+            keyLabel.setText(owner.$tr("DataViewForm.keyLabel.title"));
+            keyLabel.setOpaque(true);
+            keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
+            tableViewPanel.setVisible(true);
+            dataTable.setModel(turbo.getT2());
+            loadDataInfo(turbo.getT1(), turbo.getT3(), turbo.getT4(), turbo.getT5());
+            SwingUtils.removeAllComponent(dataPanel);
+            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
+        }, owner.getResourceBundle());
+
+        this.listDataFetcher = new ListDataFetcher(redisConnectContext, treeNodeInfo.key(), turbo -> {
+            keyLabel.setText(owner.$tr("DataViewForm.keyLabel.title"));
+            keyLabel.setOpaque(true);
+            keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
+            tableViewPanel.setVisible(true);
+            dataTable.setModel(turbo.getT2());
+            loadDataInfo(turbo.getT1(), turbo.getT3(), turbo.getT4(), turbo.getT5());
+            SwingUtils.removeAllComponent(dataPanel);
+            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
+        }, owner.getResourceBundle());
+
+        this.streamDataFetcher = new StreamDataFetcher(redisConnectContext, treeNodeInfo.key(), turbo -> {
+            keyLabel.setText(owner.$tr("DataViewForm.keyLabel.title"));
+            keyLabel.setOpaque(true);
+            keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
+            tableViewPanel.setVisible(true);
+            dataTable.setModel(turbo.getT2());
+            loadDataInfo(turbo.getT1(), turbo.getT3(), turbo.getT4(), turbo.getT5());
             SwingUtils.removeAllComponent(dataPanel);
             dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
         }, owner.getResourceBundle());
@@ -317,32 +351,42 @@ public class RightViewFragment {
 
             switch (keyTypeEnum) {
                 case ZSET -> {
-                    if (reset)
-                        scanZSetContextMap.put(key, new RedisScanContext<>());
-                    loadZSetData(key);
+                    zSetDataFetcher.setSkey(key);
+                    if (reset) {
+                        zSetDataFetcher.reset();
+                    }
+                    zSetDataFetcher.fetchData();
                 }
                 case HASH -> {
-                    if (reset)
-                        hashDataFetcher.fetchData();
-                    fetchHashData(key, reset);
+                    hashDataFetcher.setHkey(key);
+                    if (reset) {
+                        hashDataFetcher.reset();
+                    }
+                    hashDataFetcher.fetchData();
                 }
                 case LIST -> {
-                    if (reset)
-                        scanListContextMap.put(key, new RedisScanContext<>());
-                    loadListData(key);
+                    listDataFetcher.setSkey(key);
+                    if (reset) {
+                        listDataFetcher.reset();
+                    }
+                    listDataFetcher.fetchData();
                 }
                 case SET -> {
-                    if (reset)
-                        scanSetContextMap.put(key, new RedisScanContext<>());
-                    loadSetData(key);
+                    setDataFetcher.setSkey(key);
+                    if (reset) {
+                        setDataFetcher.reset();
+                    }
+                    setDataFetcher.fetchData();
                 }
                 case STREAM -> {
-                    if (reset)
-                        xRangeContextMap.put(key, new RedisScanContext<>());
-                    loadStreamData(key);
+                    streamDataFetcher.setSkey(key);
+                    if (reset) {
+                        streamDataFetcher.reset();
+                    }
+                    streamDataFetcher.fetchData();
                 }
                 default -> {
-                    loadStringData(key);
+                    zSetDataFetcher.fetchData();
                 }
             }
         });
@@ -356,11 +400,11 @@ public class RightViewFragment {
             lastKeyTTL = RedisBasicService.service.ttl(redisConnectContext, key);
             lastKeyName = key;
             switch (keyTypeEnum) {
-                case ZSET -> loadZSetData(lastKeyName);
-                case HASH -> fetchHashData(lastKeyName);
-                case SET -> loadSetData(lastKeyName);
-                case LIST -> loadListData(lastKeyName);
-                case STREAM -> loadStreamData(lastKeyName);
+                case ZSET -> zSetDataFetcher.fetchData();
+                case HASH -> hashDataFetcher.fetchData();
+                case SET -> setDataFetcher.fetchData();
+                case LIST -> listDataFetcher.fetchData();
+                case STREAM -> streamDataFetcher.fetchData();
                 default -> stringDataFetcher.fetchData();
             }
         } else {
@@ -375,197 +419,16 @@ public class RightViewFragment {
         this.ttlField.setText(lastKeyTTL.toString());
         this.keyField.setText(lastKeyName);
         switch (keyTypeEnum) {
-            case ZSET -> loadZSetData(lastKeyName);
-            case HASH -> loadHashData();
-            case SET -> loadSetData(lastKeyName);
-            case LIST -> loadListData(lastKeyName);
-            case STREAM -> loadStreamData(lastKeyName);
-            default -> loadStringData(lastKeyName);
+            case ZSET -> zSetDataFetcher.loadData();
+            case HASH -> hashDataFetcher.loadData();
+            case SET -> setDataFetcher.loadData();
+            case LIST -> listDataFetcher.loadData();
+            case STREAM -> streamDataFetcher.loadData();
+            default -> stringDataFetcher.loadData();
         }
     }
 
-    private void loadStringData(String key) {
-        stringDataFetcher.loadData();
-    }
-
-    private void fetchHashData(String key) {
-        fetchHashData(key, false);
-    }
-
-    private void fetchHashData(String key, Boolean reset) {
-        hashDataFetcher.setHkey(key);
-        if (reset) {
-            hashDataFetcher.reset();
-        }
-        hashDataFetcher.fetchData();
-    }
-
-    private void loadHashData() {
-        hashDataFetcher.loadData();
-    }
-
-    private void loadSetData(String key) {
-        var len = RedisSetService.service.scard(redisConnectContext, key);
-        var scanContext = scanSetContextMap.getOrDefault(key, new RedisScanContext<>());
-
-        var lastSearchKey = scanContext.getSearchKey();
-        scanContext.setSearchKey(tableSearchField.getText());
-        scanContext.setLimit(500L);
-
-        var valueScanCursor = RedisSetService.service.sscan(redisConnectContext, key, scanContext.getScanCursor(), scanContext.getScanArgs());
-        scanContext.setScanCursor(valueScanCursor);
-
-        if (RedisFrontUtils.equal(scanContext.getSearchKey(), lastSearchKey) && RedisFrontUtils.isNotEmpty(scanContext.getKeyList())) {
-            if (scanContext.getKeyList().size() >= 2000) {
-                System.gc();
-                throw new RedisFrontException(owner.$tr("DataViewForm.redisFrontException.message"));
-            }
-            scanContext.getKeyList().addAll(valueScanCursor.getValues());
-        } else {
-            scanContext.setKeyList(valueScanCursor.getValues());
-        }
-
-
-        scanSetContextMap.put(key, scanContext);
-
-        var setTableModel = new SetTableModel(scanContext.getKeyList());
-
-        RedisFrontUtils.run(() -> {
-            LoadAfterUpdate(len, DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)), String.valueOf(scanContext.getKeyList().size()), valueScanCursor.isFinished());
-            tableViewPanel.setVisible(true);
-            dataTable.setModel(setTableModel);
-            SwingUtils.removeAllComponent(dataPanel);
-            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
-        });
-    }
-
-    private void loadListData(String key) {
-        var len = RedisListService.service.llen(redisConnectContext, key);
-
-        var scanContext = scanListContextMap.getOrDefault(key, new RedisScanContext<>());
-
-        var lastSearchKey = scanContext.getSearchKey();
-        scanContext.setSearchKey(tableSearchField.getText());
-        scanContext.setLimit(500L);
-        var start = Long.parseLong(scanContext.getScanCursor().getCursor());
-        var stop = start + (scanContext.getLimit() - 1);
-        var value = RedisListService.service.lrange(redisConnectContext, key, start, stop);
-
-        var nextCursor = start + scanContext.getLimit();
-        if (nextCursor >= len) {
-            scanContext.setScanCursor(new ScanCursor(String.valueOf(len), true));
-        } else {
-            scanContext.setScanCursor(new ScanCursor(String.valueOf(nextCursor), false));
-        }
-
-        if (RedisFrontUtils.equal(scanContext.getSearchKey(), lastSearchKey) && RedisFrontUtils.isNotEmpty(scanContext.getKeyList())) {
-            if (scanContext.getKeyList().size() >= 2000) {
-                System.gc();
-                throw new RedisFrontException(owner.$tr("DataViewForm.redisFrontException.message"));
-            }
-            scanContext.getKeyList().addAll(value);
-        } else {
-            scanContext.setKeyList(value);
-        }
-
-        scanListContextMap.put(key, scanContext);
-        ListTableModel listTableModel;
-        if (RedisFrontUtils.isNotEmpty(tableSearchField.getText())) {
-            var findList = scanContext.getKeyList().stream().filter(s -> s.contains(tableSearchField.getText())).collect(Collectors.toList());
-            listTableModel = new ListTableModel(findList);
-        } else {
-            listTableModel = new ListTableModel(scanContext.getKeyList());
-        }
-
-        final var finalListTableModel = listTableModel;
-        RedisFrontUtils.run(() -> {
-            LoadAfterUpdate(len, DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0)), String.valueOf(scanContext.getKeyList().size()), scanContext.getScanCursor().isFinished());
-            tableViewPanel.setVisible(true);
-            dataTable.setModel(finalListTableModel);
-            SwingUtils.removeAllComponent(dataPanel);
-            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
-        });
-    }
-
-    private void loadStreamData(String key) {
-        var len = RedisStreamService.service.xlen(redisConnectContext, key);
-
-        var xRangeContext = xRangeContextMap.getOrDefault(key, new RedisScanContext<>());
-
-        var lastSearchKey = xRangeContext.getSearchKey();
-        xRangeContext.setSearchKey(tableSearchField.getText());
-        xRangeContext.setLimit(500L);
-        var start = Long.parseLong(xRangeContext.getScanCursor().getCursor());
-        var stop = start + (xRangeContext.getLimit() - 1);
-        var value = RedisStreamService.service.xrange(redisConnectContext, key, Range.unbounded(), Limit.create(start, stop));
-
-        var nextCursor = start + xRangeContext.getLimit();
-        if (nextCursor >= len) {
-            xRangeContext.setScanCursor(new ScanCursor(String.valueOf(len), true));
-        } else {
-            xRangeContext.setScanCursor(new ScanCursor(String.valueOf(nextCursor), false));
-        }
-
-        if (RedisFrontUtils.equal(xRangeContext.getSearchKey(), lastSearchKey) && RedisFrontUtils.isNotEmpty(xRangeContext.getKeyList())) {
-            if (xRangeContext.getKeyList().size() >= 2000) {
-                System.gc();
-                throw new RedisFrontException(owner.$tr("DataViewForm.redisFrontException.message"));
-            }
-            xRangeContext.getKeyList().addAll(value);
-        } else {
-            xRangeContext.setKeyList(value);
-        }
-
-        xRangeContextMap.put(key, xRangeContext);
-
-        final var finalListTableModel = new StreamTableModel(xRangeContext.getKeyList());
-        RedisFrontUtils.run(() -> {
-            LoadAfterUpdate(len, DataSizeUtil.format(xRangeContext.getKeyList().stream().map(e -> RedisFrontUtils.getByteSize(e.getBody())).reduce(Integer::sum).orElse(0)), String.valueOf(xRangeContext.getKeyList().size()), xRangeContext.getScanCursor().isFinished());
-            tableViewPanel.setVisible(true);
-            dataTable.setModel(finalListTableModel);
-            SwingUtils.removeAllComponent(dataPanel);
-            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
-        });
-    }
-
-    private void loadZSetData(String key) {
-        var len = RedisZSetService.service.zcard(redisConnectContext, key);
-
-        var scanContext = scanZSetContextMap.getOrDefault(key, new RedisScanContext<>());
-
-        var lastSearchKey = scanContext.getSearchKey();
-        scanContext.setSearchKey(tableSearchField.getText());
-        scanContext.setLimit(500L);
-
-        var valueScanCursor = RedisZSetService.service.zscan(redisConnectContext, key, scanContext.getScanCursor(), scanContext.getScanArgs());
-        scanContext.setScanCursor(valueScanCursor);
-
-        if (RedisFrontUtils.equal(scanContext.getSearchKey(), lastSearchKey) && RedisFrontUtils.isNotEmpty(scanContext.getKeyList())) {
-            if (scanContext.getKeyList().size() >= 2000) {
-                scanContext.getKeyList().clear();
-                System.gc();
-                throw new RedisFrontException(owner.$tr("DataViewForm.redisFrontException.message"));
-            }
-            scanContext.getKeyList().addAll(valueScanCursor.getValues());
-        } else {
-            scanContext.setKeyList(valueScanCursor.getValues());
-        }
-
-        scanZSetContextMap.put(key, scanContext);
-
-        var sortedSetTableModel = new SortedSetTableModel(scanContext.getKeyList());
-
-        RedisFrontUtils.run(() -> {
-            keyLabel.setText(owner.$tr("DataViewForm.keyLabel.score.title"));
-            LoadAfterUpdate(len, DataSizeUtil.format(scanContext.getKeyList().stream().map(e -> e.getValue().getBytes().length).reduce(Integer::sum).orElse(0)), String.valueOf(scanContext.getKeyList().size()), valueScanCursor.isFinished());
-            tableViewPanel.setVisible(true);
-            dataTable.setModel(sortedSetTableModel);
-            SwingUtils.removeAllComponent(dataPanel);
-            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
-        });
-    }
-
-    private void LoadAfterUpdate(Long len, String dataSize, String loadSize, Boolean isFinished) {
+    private void loadDataInfo(Long len, String dataSize, String loadSize, Boolean isFinished) {
         lengthLabel.setText("Length: " + len);
         keySizeLabel.setText("Size: " + dataSize);
         currentCountField.setText(loadSize);
