@@ -4,8 +4,8 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.quickswing.ui.app.page.QSPageItem;
 import org.dromara.redisfront.RedisFrontContext;
-import org.dromara.redisfront.model.tree.TreeNodeInfo;
 import org.dromara.redisfront.model.context.RedisConnectContext;
+import org.dromara.redisfront.model.tree.TreeNodeInfo;
 import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
 import org.dromara.redisfront.ui.components.panel.BorderNonePanel;
 import org.dromara.redisfront.ui.components.panel.WrapperPanel;
@@ -43,17 +43,20 @@ public class IndexPageView extends QSPageItem<RedisFrontWidget> {
                 if (redisConnectContext.getId() != clickKeyTreeNodeEvent.getId()) {
                     return;
                 }
+                int dividerLocation = this.splitPane.getDividerLocation();
                 Object message = clickKeyTreeNodeEvent.getMessage();
                 if (message instanceof TreeNodeInfo treeNodeInfo) {
                     selectTreeNode = treeNodeInfo;
                     SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
-                        RightViewFragment rightViewFragment = new RightViewFragment(redisConnectContext, treeNodeInfo,owner);
-                        rightViewFragment.loadData();
+                        RightViewFragment rightViewFragment = new RightViewFragment(redisConnectContext, treeNodeInfo, owner);
+                        rightViewFragment.fetchData();
                         return rightViewFragment;
-                    }, (o, e) -> {
-                        if (e == null && o instanceof RightViewFragment rightViewFragment) {
-                            splitPane.setDividerSize(5);
-                            splitPane.setRightComponent(new WrapperPanel(rightViewFragment.contentPanel()));
+                    }, (rightViewFragment, e) -> {
+                        if (e == null) {
+                            this.splitPane.setDividerSize(5);
+                            this.splitPane.setDividerLocation(dividerLocation);
+                            this.splitPane.setRightComponent(new WrapperPanel(rightViewFragment.contentPanel()));
+                            rightViewFragment.loadData();
                         } else {
                             owner.displayException(e);
                         }

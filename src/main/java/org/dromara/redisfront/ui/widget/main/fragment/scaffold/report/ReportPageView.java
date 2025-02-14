@@ -7,7 +7,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.quickswing.ui.app.page.QSPageItem;
-import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.utils.FutureUtils;
 import org.dromara.redisfront.commons.utils.LettuceUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
@@ -104,10 +104,10 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
                                     var instantaneousInputKbps = (String) statInfo.get("instantaneous_input_kbps");
                                     var instantaneousOutputKbps = (String) statInfo.get("instantaneous_output_kbps");
                                     var instantaneousOpsPerSec = (String) statInfo.get("instantaneous_ops_per_sec");
-                                    if (Fn.isNotEmpty(instantaneousOpsPerSec)) {
+                                    if (RedisFrontUtils.isNotEmpty(instantaneousOpsPerSec)) {
                                         SwingUtilities.invokeLater(() -> processCommandsValue.setText(instantaneousOpsPerSec));
                                     }
-                                    if (Fn.isNotEmpty(instantaneousInputKbps) && Fn.isNotEmpty(instantaneousOutputKbps)) {
+                                    if (RedisFrontUtils.isNotEmpty(instantaneousInputKbps) && RedisFrontUtils.isNotEmpty(instantaneousOutputKbps)) {
                                         float in = Float.parseFloat(instantaneousInputKbps) * 1024;
                                         float out = Float.parseFloat(instantaneousOutputKbps) * 1024;
                                         var value = DataSizeUtil.format((long) in) + "/" + DataSizeUtil.format((long) out);
@@ -118,7 +118,7 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
 
                         FutureUtils.supplyAsync(() -> RedisBasicService.service.getClientInfo(redisConnectContext), clientInfo -> {
                                     var connectedClients = (String) clientInfo.get("connected_clients");
-                                    if (Fn.isNotEmpty(connectedClients)) {
+                                    if (RedisFrontUtils.isNotEmpty(connectedClients)) {
                                         SwingUtilities.invokeLater(() -> clientsValue.setText(connectedClients));
                                     }
                                 }
@@ -131,7 +131,7 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
                         FutureUtils.supplyAsync(() -> RedisBasicService.service.getCpuInfo(redisConnectContext), cpuInfo -> {
                                     var currentTimeSecond = DateUtil.currentSeconds();
                                     var usedCpuSys = (String) cpuInfo.get("used_cpu_sys");
-                                    if (Fn.isNotEmpty(usedCpuSys)) {
+                                    if (RedisFrontUtils.isNotEmpty(usedCpuSys)) {
                                         var currentUsedCpuSys = Double.parseDouble(usedCpuSys);
                                         if (lastUsedCpuSys[0] != 0L && lastUsedCpuSys[0] != currentUsedCpuSys && lastTimeSecond[0] != currentTimeSecond) {
                                             var percentStr = ((currentUsedCpuSys - lastUsedCpuSys[0]) / (currentTimeSecond - lastTimeSecond[0]));
@@ -149,7 +149,7 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
                         FutureUtils.supplyAsync(() -> RedisBasicService.service.getMemoryInfo(redisConnectContext), memoryInfo -> {
                             var usedMemory = (String) memoryInfo.get("used_memory");
 
-                            if (Fn.isNotEmpty(usedMemory)) {
+                            if (RedisFrontUtils.isNotEmpty(usedMemory)) {
                                 timeSeries.add(lastSecond[0], Double.parseDouble(usedMemory));
                                 lastSecond[0] = (Second) lastSecond[0].next();
                                 XYPlot.setDataset(new TimeSeriesCollection(timeSeries));
@@ -164,7 +164,7 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
     private void slowLogActionPerformed() {
         FutureUtils.runAsync(() -> {
             List<Object> objectList = LettuceUtils.exec(redisConnectContext, commands -> commands.slowlogGet(128));
-            if (Fn.isNotEmpty(objectList)) {
+            if (RedisFrontUtils.isNotEmpty(objectList)) {
                 var slowLogShowTextStrBuilder = new StringBuilder();
                 for (Object slowLogObj : objectList) {
                     if (slowLogObj instanceof List<?> slowLogs) {

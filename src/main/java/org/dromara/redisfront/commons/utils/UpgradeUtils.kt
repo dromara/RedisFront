@@ -3,7 +3,6 @@ package org.dromara.redisfront.commons.utils
 import cn.hutool.http.HttpUtil
 import cn.hutool.json.JSONUtil
 import org.dromara.redisfront.commons.constant.Constants
-import org.dromara.redisfront.commons.Fn
 
 /**
  *  Upgrade
@@ -29,7 +28,7 @@ open class UpgradeUtils {
                 val body = httpResponse.body()
                 val versionObject = JSONUtil.parseObj(body)
                 val newVersion = versionObject.getStr("version")
-                if (Fn.equal(currentVersion, newVersion)) {
+                if (RedisFrontUtils.equal(currentVersion, newVersion)) {
                     return
                 }
 
@@ -37,9 +36,9 @@ open class UpgradeUtils {
                 val newVersionArray = newVersion.split(".")
 
                 if (currentVersion.length == newVersion.length) {
-                    val xIsTrue = Fn.equal(currentVersionArray[0], newVersionArray[0])
-                    val yIsTrue = Fn.equal(currentVersionArray[1], newVersionArray[1])
-                    val zIsTrue = Fn.equal(currentVersionArray[2], newVersionArray[2])
+                    val xIsTrue = RedisFrontUtils.equal(currentVersionArray[0], newVersionArray[0])
+                    val yIsTrue = RedisFrontUtils.equal(currentVersionArray[1], newVersionArray[1])
+                    val zIsTrue = RedisFrontUtils.equal(currentVersionArray[2], newVersionArray[2])
                     if (xIsTrue && yIsTrue && zIsTrue) {
                         return
                     }

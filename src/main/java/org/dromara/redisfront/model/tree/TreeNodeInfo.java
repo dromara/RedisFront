@@ -2,7 +2,7 @@ package org.dromara.redisfront.model.tree;
 
 import cn.hutool.core.io.unit.DataSizeUtil;
 import lombok.Getter;
-import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
@@ -36,7 +36,7 @@ public class TreeNodeInfo extends DefaultMutableTreeNode implements Comparator<T
     }
 
     public Integer memorySize() {
-        return Fn.isNull(memorySize) ? 0 : memorySize;
+        return RedisFrontUtils.isNull(memorySize) ? 0 : memorySize;
     }
 
     public String title() {

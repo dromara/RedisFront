@@ -47,13 +47,15 @@ public class SyncLoadingDialog extends QSDialog<RedisFrontWidget> {
         progressBar.setMinimumSize(new Dimension(-1, 10));
     }
 
-
     public static SyncLoadingDialog builder(RedisFrontWidget owner) {
         return new SyncLoadingDialog(owner);
     }
 
     public <T> void showSyncLoadingDialog(Supplier<T> supplier, BiConsumer<T, Exception> biConsumer) {
         SyncLoadingWaiter<T> syncLoadingWaiter = new SyncLoadingWaiter<>(this);
+        syncLoadingWaiter.setSupplier(supplier);
+        syncLoadingWaiter.setBiConsumer(biConsumer);
+        syncLoadingWaiter.execute();
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -62,9 +64,6 @@ public class SyncLoadingDialog extends QSDialog<RedisFrontWidget> {
                 super.windowClosing(e);
             }
         });
-        syncLoadingWaiter.setSupplier(supplier);
-        syncLoadingWaiter.setBiConsumer(biConsumer);
-        syncLoadingWaiter.execute();
         this.setLocationRelativeTo(getOwner());
         this.setVisible(true);
         this.pack();

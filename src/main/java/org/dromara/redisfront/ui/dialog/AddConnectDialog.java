@@ -8,7 +8,7 @@ import com.intellij.uiDesigner.core.Spacer;
 import io.lettuce.core.RedisConnectionException;
 import org.dromara.quickswing.ui.app.QSDialog;
 import org.dromara.redisfront.RedisFrontContext;
-import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.enums.ConnectType;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.dao.ConnectDetailDao;
@@ -215,7 +215,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
                 fileChooser.setFileFilter(new FileNameExtensionFilter("*.jks", "pem", "jks"));
                 fileChooser.showDialog(AddConnectDialog.this, "选择公钥文件");
                 var selectedFile = fileChooser.getSelectedFile();
-                if (Fn.isNotNull(selectedFile)) {
+                if (RedisFrontUtils.isNotNull(selectedFile)) {
                     publicKeyField.setText(selectedFile.getAbsolutePath());
                 }
             }
@@ -228,7 +228,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
                 fileChooser.setFileFilter(new FileNameExtensionFilter($tr("AddConnectDialog.FileChooser.sshPrivateKey.title"), "pem", "crt"));
                 fileChooser.showDialog(AddConnectDialog.this, $tr("AddConnectDialog.FileChooser.sshPrivateKey.btn"));
                 var selectedFile = fileChooser.getSelectedFile();
-                if (Fn.isNotNull(selectedFile)) {
+                if (RedisFrontUtils.isNotNull(selectedFile)) {
                     sshPrivateKeyFile.setText(selectedFile.getAbsolutePath());
                 }
             }
@@ -319,16 +319,16 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         var title = titleField.getText();
 
         if (enableSSHBtn.isSelected()) {
-            if (Fn.isEmpty(sshHostField.getText())) {
+            if (RedisFrontUtils.isEmpty(sshHostField.getText())) {
                 sshHostField.requestFocus();
                 throw new RedisFrontException($tr("AddConnectDialog.require.sshHost.message"), false);
             }
-            if (Fn.isEmpty(sshUserField.getText())) {
+            if (RedisFrontUtils.isEmpty(sshUserField.getText())) {
                 sshUserField.requestFocus();
                 throw new RedisFrontException($tr("AddConnectDialog.require.sshUser.message"), false);
             }
             if (enableSshPrivateKey.isSelected()) {
-                if (Fn.isEmpty(sshPrivateKeyFile.getText())) {
+                if (RedisFrontUtils.isEmpty(sshPrivateKeyFile.getText())) {
                     sshPrivateKeyFile.requestFocus();
                     throw new RedisFrontException($tr("AddConnectDialog.require.sshPrivateKey.message"), false);
                 }
@@ -427,12 +427,12 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             sshHostField.setText(redisConnectContext.getSshInfo().getHost());
             sshPasswordField.setText(redisConnectContext.getSshInfo().getPassword());
             sshPortField.setValue(redisConnectContext.getSshInfo().getPort());
-            enableSshPrivateKey.setSelected(Fn.isNotEmpty(redisConnectContext.getSshInfo().getPrivateKeyPath()));
+            enableSshPrivateKey.setSelected(RedisFrontUtils.isNotEmpty(redisConnectContext.getSshInfo().getPrivateKeyPath()));
             sshPrivateKeyFile.setVisible(enableSshPrivateKey.isSelected());
             sshPrivateKeyBtn.setVisible(enableSshPrivateKey.isSelected());
             sshPrivateKeyFile.setText(redisConnectContext.getSshInfo().getPrivateKeyPath());
         }
-        if (Fn.isNotEmpty(redisConnectContext.getSetting())) {
+        if (RedisFrontUtils.isNotEmpty(redisConnectContext.getSetting())) {
             keyMaxLoadNum.setText(String.valueOf(redisConnectContext.getSetting().getLoadKeyNum()));
             keySeparatorField.setText(redisConnectContext.getSetting().getKeySeparator());
             redisTimeoutTextField.setText(String.valueOf(redisConnectContext.getSetting().getRedisTimeout()));

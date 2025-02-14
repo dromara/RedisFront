@@ -1,8 +1,6 @@
 package org.dromara.redisfront.commons.utils;
 
 
-import org.dromara.redisfront.commons.Fn;
-
 import java.lang.reflect.Method;
 import java.util.ResourceBundle;
 
@@ -38,7 +36,7 @@ public class LocaleUtils {
     public static BundleInfo getMenu(String prefix) {
         var name = getMessageFromBundle(prefix.concat(".Title"));
         var mnemonicStr = getMessageFromBundle(prefix.concat(".Mnemonic"));
-        var mnemonic = Fn.isEmpty(mnemonicStr) ? 0 : (int) mnemonicStr.charAt(0);
+        var mnemonic = RedisFrontUtils.isEmpty(mnemonicStr) ? 0 : (int) mnemonicStr.charAt(0);
         var desc = getMessageFromBundle(prefix.concat(".Desc"));
         return new BundleInfo(name, mnemonic, desc);
     }

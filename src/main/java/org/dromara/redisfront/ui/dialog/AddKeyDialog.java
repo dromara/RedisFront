@@ -10,7 +10,7 @@ import org.dromara.redisfront.RedisFrontMain;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.enums.KeyTypeEnum;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
-import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.handler.ProcessHandler;
 import org.dromara.redisfront.commons.resources.AbstractDialog;
 import org.dromara.redisfront.commons.utils.AlertUtils;
@@ -83,7 +83,7 @@ public class AddKeyDialog extends AbstractDialog<String> {
 
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        if (Fn.isNotEmpty(parent)) {
+        if (RedisFrontUtils.isNotEmpty(parent)) {
             var separatorLabel = new JLabel();
             var separator = PrefUtils.getState().get(Constants.KEY_KEY_SEPARATOR, ":");
             parentKey = parent + separator;
@@ -116,10 +116,10 @@ public class AddKeyDialog extends AbstractDialog<String> {
             @Override
             public boolean verify(JComponent input) {
                 JTextField jTextField = (JTextField) input;
-                if (Fn.notEqual("*", jTextField.getText()) && jTextField.getText().contains("-")) {
+                if (RedisFrontUtils.notEqual("*", jTextField.getText()) && jTextField.getText().contains("-")) {
                     return Arrays.stream(jTextField.getText().split("-")).allMatch(NumberUtil::isNumber);
                 }
-                return NumberUtil.isNumber(jTextField.getText()) || Fn.equal("*", jTextField.getText());
+                return NumberUtil.isNumber(jTextField.getText()) || RedisFrontUtils.equal("*", jTextField.getText());
             }
         });
         ttlSpinner.setValue(-1);
@@ -142,7 +142,7 @@ public class AddKeyDialog extends AbstractDialog<String> {
 
         keyTypeComboBox.addActionListener(e -> {
             String selectItem = (String) keyTypeComboBox.getSelectedItem();
-            if (Fn.equal(KeyTypeEnum.HASH.typeName(), selectItem)) {
+            if (RedisFrontUtils.equal(KeyTypeEnum.HASH.typeName(), selectItem)) {
                 hashKeyField.setVisible(true);
                 hashKeyLabel.setVisible(true);
 
@@ -152,7 +152,7 @@ public class AddKeyDialog extends AbstractDialog<String> {
                 streamField.setVisible(false);
                 streamLabel.setVisible(false);
 
-            } else if (Fn.equal(KeyTypeEnum.STREAM.typeName(), selectItem)) {
+            } else if (RedisFrontUtils.equal(KeyTypeEnum.STREAM.typeName(), selectItem)) {
                 hashKeyField.setVisible(false);
                 hashKeyLabel.setVisible(false);
 
@@ -162,7 +162,7 @@ public class AddKeyDialog extends AbstractDialog<String> {
                 streamField.setVisible(true);
                 streamLabel.setVisible(true);
 
-            } else if (Fn.equal(KeyTypeEnum.ZSET.typeName(), selectItem)) {
+            } else if (RedisFrontUtils.equal(KeyTypeEnum.ZSET.typeName(), selectItem)) {
                 hashKeyField.setVisible(false);
                 hashKeyLabel.setVisible(false);
 
@@ -189,27 +189,27 @@ public class AddKeyDialog extends AbstractDialog<String> {
     private void validParam() {
         var selectItem = (String) keyTypeComboBox.getSelectedItem();
 
-        if (Fn.isEmpty(keyNameField.getText())) {
+        if (RedisFrontUtils.isEmpty(keyNameField.getText())) {
             keyNameField.requestFocus();
             throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddKeyDialog.require.text"));
         }
 
-        if (Fn.equal(KeyTypeEnum.HASH.typeName(), selectItem) && Fn.isEmpty(hashKeyField.getText())) {
+        if (RedisFrontUtils.equal(KeyTypeEnum.HASH.typeName(), selectItem) && RedisFrontUtils.isEmpty(hashKeyField.getText())) {
             hashKeyField.requestFocus();
             throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddKeyDialog.require.text"));
         }
 
-        if (Fn.equal(KeyTypeEnum.STREAM.typeName(), selectItem) && Fn.isEmpty(streamField.getText())) {
+        if (RedisFrontUtils.equal(KeyTypeEnum.STREAM.typeName(), selectItem) && RedisFrontUtils.isEmpty(streamField.getText())) {
             streamField.requestFocus();
             throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddKeyDialog.require.text"));
         }
 
-        if (Fn.equal(KeyTypeEnum.ZSET.typeName(), selectItem) && Fn.isEmpty(zSetScoreField.getText())) {
+        if (RedisFrontUtils.equal(KeyTypeEnum.ZSET.typeName(), selectItem) && RedisFrontUtils.isEmpty(zSetScoreField.getText())) {
             zSetScoreField.requestFocus();
             throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddKeyDialog.require.text"));
         }
 
-        if (Fn.isEmpty(keyValueField.getText())) {
+        if (RedisFrontUtils.isEmpty(keyValueField.getText())) {
             keyValueField.requestFocus();
             throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddKeyDialog.require.text"));
         }
@@ -223,9 +223,9 @@ public class AddKeyDialog extends AbstractDialog<String> {
         var ttl = ((Integer) ttlSpinner.getValue());
         var selectItem = (String) keyTypeComboBox.getSelectedItem();
 
-        if (Fn.equal(KeyTypeEnum.HASH.typeName(), selectItem)) {
+        if (RedisFrontUtils.equal(KeyTypeEnum.HASH.typeName(), selectItem)) {
             RedisHashService.service.hset(redisConnectContext, key, hashKeyField.getText(), keyValueField.getText());
-        } else if (Fn.equal(KeyTypeEnum.STREAM.typeName(), selectItem)) {
+        } else if (RedisFrontUtils.equal(KeyTypeEnum.STREAM.typeName(), selectItem)) {
             var serverInfo = RedisBasicService.service.getServerInfo(redisConnectContext);
             var redisVersion = serverInfo.get("redis_version");
             var x = redisVersion.toString().split("\\.")[0];
@@ -235,7 +235,7 @@ public class AddKeyDialog extends AbstractDialog<String> {
             } else if (JSONUtil.isTypeJSON(value)) {
                 HashMap<String, String> bodyMap = new HashMap<>();
                 JSONUtil.parseObj(value).forEach((key1, value1) -> bodyMap.put(key1, value1.toString()));
-                if (Fn.equal(streamField.getText(), "*")) {
+                if (RedisFrontUtils.equal(streamField.getText(), "*")) {
                     RedisStreamService.service.xadd(redisConnectContext, key, bodyMap);
                 } else {
                     RedisStreamService.service.xadd(redisConnectContext, streamField.getText(), key, bodyMap);
@@ -246,11 +246,11 @@ public class AddKeyDialog extends AbstractDialog<String> {
                 return;
             }
 
-        } else if (Fn.equal(KeyTypeEnum.SET.typeName(), selectItem)) {
+        } else if (RedisFrontUtils.equal(KeyTypeEnum.SET.typeName(), selectItem)) {
             RedisSetService.service.sadd(redisConnectContext, key, value);
-        } else if (Fn.equal(KeyTypeEnum.LIST.typeName(), selectItem)) {
+        } else if (RedisFrontUtils.equal(KeyTypeEnum.LIST.typeName(), selectItem)) {
             RedisListService.service.lpush(redisConnectContext, key, value);
-        } else if (Fn.equal(KeyTypeEnum.ZSET.typeName(), selectItem)) {
+        } else if (RedisFrontUtils.equal(KeyTypeEnum.ZSET.typeName(), selectItem)) {
             RedisZSetService.service.zadd(redisConnectContext, key, Double.parseDouble(zSetScoreField.getText()), value);
         } else {
             RedisStringService.service.set(redisConnectContext, key, value);

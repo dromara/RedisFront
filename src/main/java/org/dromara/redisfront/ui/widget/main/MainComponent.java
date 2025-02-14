@@ -10,7 +10,7 @@ import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
 import org.dromara.quickswing.constant.QSOs;
 import org.dromara.redisfront.RedisFrontContext;
-import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.enums.ConnectType;
 import org.dromara.redisfront.commons.resources.Icons;
@@ -151,7 +151,7 @@ public class MainComponent extends JPanel {
                     executorService.shutdownNow();
                 }
                 //关闭ssh会话
-                if (Fn.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
+                if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
                     JschUtils.closeSession(redisConnectContext);
                     LettuceUtils.removeTmpLocalPort(redisConnectContext);
                 }

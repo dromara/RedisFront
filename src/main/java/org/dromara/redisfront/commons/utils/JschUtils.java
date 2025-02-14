@@ -4,7 +4,6 @@ import cn.hutool.extra.ssh.JschUtil;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import io.lettuce.core.cluster.RedisClusterClient;
-import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 
@@ -22,9 +21,9 @@ public class JschUtils {
 
     public static Session createSession(RedisConnectContext redisConnectContext) {
         RedisConnectContext.SshInfo sshInfo = redisConnectContext.getSshInfo();
-        if (Fn.isNotEmpty(sshInfo.getPrivateKeyPath()) && Fn.isNotEmpty(sshInfo.getPassword())) {
+        if (RedisFrontUtils.isNotEmpty(sshInfo.getPrivateKeyPath()) && RedisFrontUtils.isNotEmpty(sshInfo.getPassword())) {
             return JschUtil.createSession(sshInfo.getHost(), sshInfo.getPort(), sshInfo.getUser(), sshInfo.getPrivateKeyPath(), sshInfo.getPassword().getBytes());
-        } else if (Fn.isNotEmpty(sshInfo.getPrivateKeyPath())) {
+        } else if (RedisFrontUtils.isNotEmpty(sshInfo.getPrivateKeyPath())) {
             return JschUtil.createSession(sshInfo.getHost(), sshInfo.getPort(), sshInfo.getUser(), sshInfo.getPrivateKeyPath(), null);
         } else {
             return JschUtil.createSession(sshInfo.getHost(), sshInfo.getPort(), sshInfo.getUser(), sshInfo.getPassword());
@@ -33,7 +32,7 @@ public class JschUtils {
 
     private static String getRemoteAddress(RedisConnectContext redisConnectContext) {
         var remoteAddress = redisConnectContext.getHost();
-        if (Fn.equal(remoteAddress, "127.0.0.1") || Fn.equal(remoteAddress.toLowerCase(), "localhost")) {
+        if (RedisFrontUtils.equal(remoteAddress, "127.0.0.1") || RedisFrontUtils.equal(remoteAddress.toLowerCase(), "localhost")) {
             remoteAddress = redisConnectContext.getSshInfo().getHost();
         }
         return remoteAddress;
@@ -47,7 +46,7 @@ public class JschUtils {
     }
 
     public static void openSession(RedisConnectContext redisConnectContext, RedisClusterClient clusterClient) {
-        if (Fn.isNotNull(redisConnectContext.getSshInfo())) {
+        if (RedisFrontUtils.isNotNull(redisConnectContext.getSshInfo())) {
             openSession(redisConnectContext);
         } else {
             clusterClient.getPartitions().forEach(redisClusterNode -> redisClusterNode.getUri().setHost(redisConnectContext.getHost()));
@@ -55,7 +54,7 @@ public class JschUtils {
     }
 
     public static void openSession(RedisConnectContext redisConnectContext) {
-        if (Fn.isNotNull(redisConnectContext.getSshInfo())) {
+        if (RedisFrontUtils.isNotNull(redisConnectContext.getSshInfo())) {
             try {
                 sessionMap.compute(redisConnectContext.getId(), (_, session) -> {
                     if (session != null && session.isConnected()) {

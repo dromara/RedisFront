@@ -15,12 +15,15 @@ import org.dromara.redisfront.RedisFrontEventListener;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ResourceBundle;
 
 @Getter
 public class RedisFrontWidget extends QSWidget<RedisFrontPrefs> {
 
     private final RedisFrontComponent redisFrontComponent;
     private final RedisFrontEventListener eventListener;
+
+    private static ResourceBundle resourceBundle;
 
     public RedisFrontWidget(QSContext<? extends QSWidget<RedisFrontPrefs>, RedisFrontPrefs> context, String title, RedisFrontPrefs prefs) throws HeadlessException {
         super(context, title, prefs);

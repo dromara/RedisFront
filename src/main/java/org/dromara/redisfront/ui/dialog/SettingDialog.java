@@ -11,7 +11,7 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.redisfront.RedisFrontMain;
 import org.dromara.redisfront.commons.constant.Constants;
-import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.resources.AbstractDialog;
 import org.dromara.redisfront.commons.utils.LocaleUtils;
 import org.dromara.redisfront.commons.utils.PrefUtils;
@@ -123,7 +123,7 @@ public class SettingDialog extends AbstractDialog<Void> {
                 .stream()
                 .filter(e -> {
                     String languageTag = PrefUtils.getState().get(Constants.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
-                    return Fn.equal(e.getValue(), languageTag);
+                    return RedisFrontUtils.equal(e.getValue(), languageTag);
                 }).findAny().orElseThrow());
     }
 
@@ -150,7 +150,7 @@ public class SettingDialog extends AbstractDialog<Void> {
         }
         fontSizeComboBox.addActionListener(e -> {
             String fontSizeStr = (String) fontSizeComboBox.getSelectedItem();
-            if (Fn.equal(fontSizeStr, PrefUtils.getState().get(Constants.KEY_FONT_SIZE, getDefaultFontSize()))) {
+            if (RedisFrontUtils.equal(fontSizeStr, PrefUtils.getState().get(Constants.KEY_FONT_SIZE, getDefaultFontSize()))) {
                 return;
             }
             this.updateFontSizeHandler(fontSizeStr);
@@ -189,7 +189,7 @@ public class SettingDialog extends AbstractDialog<Void> {
         });
         fontNameComboBox.addActionListener(e -> {
             String fontFamily = (String) fontNameComboBox.getSelectedItem();
-            if (Fn.equal(fontFamily, PrefUtils.getState().get(Constants.KEY_FONT_NAME, getDefaultFontFamily()))) {
+            if (RedisFrontUtils.equal(fontFamily, PrefUtils.getState().get(Constants.KEY_FONT_NAME, getDefaultFontFamily()))) {
                 return;
             }
             this.updateFontNameHandler(fontFamily);
@@ -251,7 +251,7 @@ public class SettingDialog extends AbstractDialog<Void> {
         var newLanguage = (Map.Entry<?, ?>) languageComboBox.getSelectedItem();
         var oldLanguage = PrefUtils.getState().get(Constants.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
         assert newLanguage != null;
-        if (Fn.notEqual(newLanguage.getValue(), oldLanguage)) {
+        if (RedisFrontUtils.notEqual(newLanguage.getValue(), oldLanguage)) {
             Locale.setDefault(Locale.forLanguageTag((String) newLanguage.getValue()));
             PrefUtils.getState().put(Constants.KEY_LANGUAGE, (String) newLanguage.getValue());
             FlatLaf.updateUI();

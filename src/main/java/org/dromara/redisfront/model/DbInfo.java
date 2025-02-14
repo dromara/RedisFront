@@ -1,7 +1,7 @@
 package org.dromara.redisfront.model;
 
 import lombok.Setter;
-import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 
 /**
  * DbInfo
@@ -43,6 +43,6 @@ public class DbInfo {
 
     @Override
     public String toString() {
-        return Fn.isNotEmpty(dbSize) ? dbName + " [" + dbSize + "]" : dbName;
+        return RedisFrontUtils.isNotEmpty(dbSize) ? dbName + " [" + dbSize + "]" : dbName;
     }
 }

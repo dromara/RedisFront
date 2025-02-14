@@ -1,6 +1,6 @@
 package org.dromara.redisfront.service;
 
-import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.model.ClusterNode;
 import org.dromara.redisfront.model.context.RedisConnectContext;
@@ -169,7 +169,7 @@ public interface RedisBasicService {
         Map<String, Object> result = new HashMap<>();
         String[] tokens = str.split("\r\n");
         for (String token : tokens) {
-            if (!Fn.startWith(token, "#") && Fn.isNotEmpty(token)) {
+            if (!RedisFrontUtils.startWith(token, "#") && RedisFrontUtils.isNotEmpty(token)) {
                 String[] values = token.split(":");
                 if (values.length > 1) {
                     result.put(values[0], values[1]);

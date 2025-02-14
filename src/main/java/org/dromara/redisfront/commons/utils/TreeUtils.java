@@ -1,7 +1,6 @@
 package org.dromara.redisfront.commons.utils;
 
 import lombok.Getter;
-import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.model.tree.TreeNodeInfo;
 
 import javax.swing.tree.DefaultTreeModel;
@@ -79,7 +78,7 @@ public class TreeUtils {
                     String key = entry.getKey().replace("->!N!", "");
                     StringTreeMap value = entry.getValue();
                     StringBuilder sb = new StringBuilder(parentKey.length() + key.length() + 1);
-                    if (!Fn.isEmpty(parentKey)) {
+                    if (!RedisFrontUtils.isEmpty(parentKey)) {
                         sb.append(parentKey).append(':');
                     }
                     sb.append(key);

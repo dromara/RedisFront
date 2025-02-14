@@ -1,6 +1,6 @@
 package org.dromara.redisfront.ui.components.monitor;
 
-import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;
 import java.util.Map;
@@ -46,7 +46,7 @@ public class RedisMonitor {
 
     private String memoryInfo() {
         Map<String, Object> memoryInfo = RedisBasicService.service.getMemoryInfo(context);
-        if(Fn.isEmpty(memoryInfo)){
+        if(RedisFrontUtils.isEmpty(memoryInfo)){
             return "00M";
         }
         return memoryInfo.get("used_memory_human").toString();

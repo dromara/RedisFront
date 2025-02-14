@@ -1,7 +1,6 @@
 package org.dromara.redisfront.commons.utils;
 
 import org.dromara.redisfront.RedisFrontMain;
-import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
 
 import java.awt.*;
@@ -33,7 +32,7 @@ public class LoadingUtils {
     }
 
     public synchronized static void closeDialog() {
-        if (Fn.isNotNull(syncLoadingDialog)) {
+        if (RedisFrontUtils.isNotNull(syncLoadingDialog)) {
             syncLoadingDialog.dispose();
             syncLoadingDialog = null;
         }

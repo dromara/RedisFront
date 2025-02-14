@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.enums.ConnectType;
 import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.model.entity.ConnectDetailEntity;
@@ -76,7 +76,7 @@ public class RedisConnectContext implements Serializable, Cloneable {
 
         @Override
         public String toString() {
-            return Fn.toJson(this);
+            return RedisFrontUtils.toJson(this);
         }
     }
 
@@ -92,7 +92,7 @@ public class RedisConnectContext implements Serializable, Cloneable {
 
         @Override
         public String toString() {
-            return Fn.toJson(this);
+            return RedisFrontUtils.toJson(this);
         }
     }
 
@@ -107,7 +107,7 @@ public class RedisConnectContext implements Serializable, Cloneable {
 
         @Override
         public String toString() {
-            return Fn.toJson(this);
+            return RedisFrontUtils.toJson(this);
         }
     }
 

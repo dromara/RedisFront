@@ -8,7 +8,7 @@ import org.dromara.quickswing.ui.app.page.QSPageItem;
 import org.dromara.redisfront.commons.enums.KeyTypeEnum;
 import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.commons.resources.Icons;
-import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.utils.AlertUtils;
 import org.dromara.redisfront.commons.utils.FutureUtils;
 import org.dromara.redisfront.commons.utils.JschUtils;
@@ -64,7 +64,7 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
             @Override
             public boolean verify(JComponent input) {
                 JTextField jTextField = (JTextField) input;
-                return Fn.isNotEmpty(jTextField.getText());
+                return RedisFrontUtils.isNotEmpty(jTextField.getText());
             }
         });
         subscribeChannel.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入需要监听的通道名称！");
@@ -75,7 +75,7 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
             @Override
             public boolean verify(JComponent input) {
                 JTextField jTextField = (JTextField) input;
-                var ret = Fn.isNotEmpty(jTextField.getText());
+                var ret = RedisFrontUtils.isNotEmpty(jTextField.getText());
                 enableSubscribe.setEnabled(ret);
                 return ret;
             }
@@ -90,9 +90,9 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
                 enableSubscribe.setToolTipText("点击开始监听！");
             } else {
                 subscribeChannel.setFocusable(false);
-                if (Fn.isEmpty(lastSubscribeChanel)) {
+                if (RedisFrontUtils.isEmpty(lastSubscribeChanel)) {
                     lastSubscribeChanel = channel;
-                } else if (Fn.endsWith(lastSubscribeChanel, channel)) {
+                } else if (RedisFrontUtils.endsWith(lastSubscribeChanel, channel)) {
                     SwingUtilities.invokeLater(() -> numLabel.setText("消息数量: 0 "));
                 }
                 pubsub.subscribe(channel);
@@ -111,7 +111,7 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
     }
 
     public void openConnection() {
-        if (Fn.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
+        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             FutureUtils.runAsync(() -> {
                 var redisUrl = LettuceUtils.getRedisURI(redisConnectContext);
                 redisClient = LettuceUtils.getRedisClusterClient(redisUrl, redisConnectContext);
@@ -131,7 +131,7 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
 
     public void disConnection() {
         enableSubscribe.setSelected(false);
-        if (Fn.isNotNull(pubsub)) {
+        if (RedisFrontUtils.isNotNull(pubsub)) {
             pubsub.getStatefulConnection().closeAsync().thenRun(() -> redisClient.shutdownAsync().thenRun(() -> {
                 if (redisConnectContext.getSshInfo() != null) {
                     JschUtils.closeSession(redisConnectContext);

@@ -5,7 +5,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.redisfront.RedisFrontMain;
-import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.enums.KeyTypeEnum;
 import org.dromara.redisfront.commons.handler.ActionHandler;
 import org.dromara.redisfront.commons.utils.AlertUtils;
@@ -56,7 +56,7 @@ public class AddOrUpdateItemDialog extends JDialog {
         this.value = value;
         this.fieldOrScore = fieldOrScore;
 
-        if (Fn.isNotEmpty(value)) {
+        if (RedisFrontUtils.isNotEmpty(value)) {
             valueTextArea.setText(value);
         }
 
@@ -97,38 +97,38 @@ public class AddOrUpdateItemDialog extends JDialog {
 
     private void onOK() {
         if (typeEnum.equals(KeyTypeEnum.ZSET) || typeEnum.equals(KeyTypeEnum.HASH)) {
-            if (Fn.isEmpty(nameField.getText())) {
+            if (RedisFrontUtils.isEmpty(nameField.getText())) {
                 nameField.requestFocus();
             }
         }
 
-        if (Fn.isEmpty(valueTextArea.getText())) {
+        if (RedisFrontUtils.isEmpty(valueTextArea.getText())) {
             valueTextArea.requestFocus();
         }
 
         if (typeEnum.equals(KeyTypeEnum.ZSET)) {
-            if (Fn.isNotEmpty(value)) {
+            if (RedisFrontUtils.isNotEmpty(value)) {
                 RedisZSetService.service.zrem(redisConnectContext, key, value);
             }
             RedisZSetService.service.zadd(redisConnectContext, key, Double.parseDouble(nameField.getText()), valueTextArea.getText());
         }
 
         if (typeEnum.equals(KeyTypeEnum.HASH)) {
-            if (Fn.isNotEmpty(fieldOrScore)) {
+            if (RedisFrontUtils.isNotEmpty(fieldOrScore)) {
                 RedisHashService.service.hdel(redisConnectContext, key, fieldOrScore);
             }
             RedisHashService.service.hset(redisConnectContext, key, nameField.getText(), valueTextArea.getText());
         }
 
         if (typeEnum.equals(KeyTypeEnum.LIST)) {
-            if (Fn.isNotEmpty(value)) {
+            if (RedisFrontUtils.isNotEmpty(value)) {
                 RedisListService.service.lrem(redisConnectContext, key, 1, value);
             }
             RedisListService.service.lpush(redisConnectContext, key, valueTextArea.getText());
         }
 
         if (typeEnum.equals(KeyTypeEnum.SET)) {
-            if (Fn.isNotEmpty(value)) {
+            if (RedisFrontUtils.isNotEmpty(value)) {
                 RedisSetService.service.srem(redisConnectContext, key, value);
             }
             RedisSetService.service.sadd(redisConnectContext, key, valueTextArea.getText());

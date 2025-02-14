@@ -2,7 +2,7 @@ package org.dromara.redisfront.model.context;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
 
@@ -19,14 +19,14 @@ public class RedisScanContext<T> {
     private List<T> keys;
 
     public ScanCursor getScanCursor() {
-        if (Fn.isNull(scanCursor)) {
+        if (RedisFrontUtils.isNull(scanCursor)) {
             return ScanCursor.INITIAL;
         }
         return scanCursor;
     }
 
     public String getSearchKey() {
-        return Fn.isNotEmpty(searchKey) ? searchKey : "*";
+        return RedisFrontUtils.isNotEmpty(searchKey) ? searchKey : "*";
     }
 
     public ScanArgs getScanArgs() {

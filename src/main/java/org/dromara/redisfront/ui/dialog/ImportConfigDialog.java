@@ -12,7 +12,7 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.redisfront.RedisFrontMain;
 import org.dromara.redisfront.commons.constant.Constants;
-import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.enums.ConnectType;
 import org.dromara.redisfront.commons.resources.AbstractDialog;
 import org.dromara.redisfront.commons.utils.AlertUtils;
@@ -109,7 +109,7 @@ public class ImportConfigDialog extends AbstractDialog<Void> {
                             var array = JSONUtil.parseArray(fileReader.readString());
                             for (Object o : array) {
                                 var data = (JSONObject) o;
-                                if (Fn.isNotNull(data.getRaw().get("type"))) {
+                                if (RedisFrontUtils.isNotNull(data.getRaw().get("type"))) {
                                     // 如果类型存在，那就是分组的redis配置
                                     var connections = JSONUtil.parseArray(JSONUtil.toJsonStr(data.get("connections")));
                                     for (Object connection : connections) {
@@ -137,19 +137,19 @@ public class ImportConfigDialog extends AbstractDialog<Void> {
 
     private RedisConnectContext genConnectInfo(Map<String, Object> raw) {
         var connectInfo = new RedisConnectContext();
-        if (Fn.isNotNull(raw.get("host"))) {
+        if (RedisFrontUtils.isNotNull(raw.get("host"))) {
             connectInfo.setHost((String) raw.get("host"));
         }
-        if (Fn.isNotNull(raw.get("port"))) {
+        if (RedisFrontUtils.isNotNull(raw.get("port"))) {
             connectInfo.setPort((Integer) raw.get("port"));
         }
-        if (Fn.isNotNull(raw.get("name"))) {
+        if (RedisFrontUtils.isNotNull(raw.get("name"))) {
             connectInfo.setTitle((String) raw.get("name"));
         }
-        if (Fn.isNotNull(raw.get("auth"))) {
+        if (RedisFrontUtils.isNotNull(raw.get("auth"))) {
             connectInfo.setPassword((String) raw.get("auth"));
         }
-        if (Fn.isNotNull(raw.get("username"))) {
+        if (RedisFrontUtils.isNotNull(raw.get("username"))) {
             connectInfo.setUsername((String) raw.get("username"));
         }
         connectInfo.setConnectTypeMode(ConnectType.NORMAL);
@@ -158,7 +158,7 @@ public class ImportConfigDialog extends AbstractDialog<Void> {
             connectInfo.getSshInfo().setHost((String) raw.get("ssh_host"));
             connectInfo.setConnectTypeMode(ConnectType.SSH);
         }
-        if (Fn.isNotNull(raw.get("ssh_port"))) {
+        if (RedisFrontUtils.isNotNull(raw.get("ssh_port"))) {
             connectInfo.getSshInfo().setPort((Integer) raw.get("ssh_port"));
             ///connectInfo.setConnectMode(Enum.Connect.SSH);
         }

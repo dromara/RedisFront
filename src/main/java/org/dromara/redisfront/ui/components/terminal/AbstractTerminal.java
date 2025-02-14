@@ -1,6 +1,6 @@
 package org.dromara.redisfront.ui.components.terminal;
 
-import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 
 import javax.swing.*;
@@ -56,7 +56,7 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
         this.println("");
         this.println("connection ".concat(connectInfo().getHost()).concat(":") + connectInfo().getPort() + " redis server success...");
         this.println("");
-        this.print(connectInfo().getHost().concat(":").concat(String.valueOf(connectInfo().getPassword())).concat(Fn.equal("0", databaseName()) ? "" : " [" + databaseName() + "] ").concat(">"));
+        this.print(connectInfo().getHost().concat(":").concat(String.valueOf(connectInfo().getPassword())).concat(RedisFrontUtils.equal("0", databaseName()) ? "" : " [" + databaseName() + "] ").concat(">"));
     }
 
     @Override
@@ -71,7 +71,7 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
 
             if ((subStartLength < subEndLength)) {
                 String input = terminal.getText().substring(subStartLength, subEndLength);
-                if (Fn.isNotEmpty(input)) {
+                if (RedisFrontUtils.isNotEmpty(input)) {
                     if (input.contains("\n") && !input.endsWith("\n")) {
                         var oldText = input;
                         input = input.replace("\n", "").concat("\n");
@@ -81,7 +81,7 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
                     }
 
                     var text = input.replace("\n", "");
-                    if (Fn.isNotEmpty(text)) {
+                    if (RedisFrontUtils.isNotEmpty(text)) {
                         commandHistory.add(text);
                         commandHistoryIndex = commandHistory.size() - 1;
                     }
@@ -90,7 +90,7 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
                 }
             }
             this.print("\n");
-            this.print(connectInfo().getHost().concat(":").concat(connectInfo().getPort().toString()).concat(Fn.equal("0", databaseName()) ? "" : "[" + databaseName() + "]").concat(">"));
+            this.print(connectInfo().getHost().concat(":").concat(connectInfo().getPort().toString()).concat(RedisFrontUtils.equal("0", databaseName()) ? "" : "[" + databaseName() + "]").concat(">"));
         } else if (currentKeyCode == KeyEvent.VK_ENTER) {
             e.consume();
             terminal.setText(terminal.getText().concat(String.valueOf(e.getKeyChar())));

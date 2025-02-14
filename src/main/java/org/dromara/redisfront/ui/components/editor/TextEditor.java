@@ -2,7 +2,6 @@ package org.dromara.redisfront.ui.components.editor;
 
 
 import com.formdev.flatlaf.ui.FlatLineBorder;
-import org.dromara.redisfront.commons.Fn;
 import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
@@ -55,7 +54,7 @@ public class TextEditor extends JPanel {
     }
 
     public void clear() {
-        Fn.run(() -> textArea.append(""));
+        textArea.append("");
     }
 
     public void asyncAppendText(String text) {
@@ -64,7 +63,7 @@ public class TextEditor extends JPanel {
     }
 
     public void setText(String text) {
-        Fn.run(() -> textArea.setText(text));
+        textArea.setText(text);
     }
 
     public String getText() {
@@ -89,7 +88,7 @@ public class TextEditor extends JPanel {
         this.textArea.setLineWrap(false);
         this.scrollPane = new RTextScrollPane(this.textArea);
         this.scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        this.scrollPane.setLineNumbersEnabled(true);
+        this.scrollPane.setLineNumbersEnabled(false);
         this.setLayout(new BorderLayout());
         this.add(scrollPane, BorderLayout.CENTER);
         this.updateTheme();

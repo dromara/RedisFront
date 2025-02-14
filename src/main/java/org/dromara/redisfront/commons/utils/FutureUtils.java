@@ -1,7 +1,6 @@
 package org.dromara.redisfront.commons.utils;
 
 
-import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.commons.handler.ProcessHandler;
 
 import java.util.concurrent.CompletableFuture;
@@ -58,7 +57,7 @@ public class FutureUtils {
 
     public static <T> CompletableFuture<Void> supplyAsync(Supplier<T> supplier, Consumer<T> consumer) {
         return CompletableFuture.supplyAsync(supplier, executorService).thenAccept(t -> {
-            if (Fn.isNotNull(t)) {
+            if (RedisFrontUtils.isNotNull(t)) {
                 consumer.accept(t);
             }
         });

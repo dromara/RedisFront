@@ -8,7 +8,7 @@ import io.lettuce.core.output.ArrayOutput;
 import io.lettuce.core.protocol.CommandArgs;
 import io.lettuce.core.protocol.CommandType;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
-import org.dromara.redisfront.commons.Fn;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.utils.LettuceUtils;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.ui.components.terminal.AbstractTerminal;
@@ -53,17 +53,17 @@ public class RedisFrontTerminal extends AbstractTerminal {
         try {
             var commandList = new ArrayList<>(List.of(inputText.split(" ")));
             var commandType = Arrays.stream(CommandType.values())
-                    .filter(e -> Fn.equal(e.name(), commandList.getFirst().toUpperCase()))
+                    .filter(e -> RedisFrontUtils.equal(e.name(), commandList.getFirst().toUpperCase()))
                     .findAny()
                     .orElseThrow(() -> new RedisFrontException("ERR unknown command '" + inputText + "'", false));
             commandList.removeFirst();
 
-            if (Fn.equal(connectInfo().getRedisMode(), RedisMode.CLUSTER)) {
+            if (RedisFrontUtils.equal(connectInfo().getRedisMode(), RedisMode.CLUSTER)) {
                 LettuceUtils.clusterRun(connectInfo(), redisCommands -> {
                     var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
                     println(format(res, ""));
                 });
-            } else if (Fn.equal(connectInfo().getRedisMode(), RedisMode.SENTINEL)) {
+            } else if (RedisFrontUtils.equal(connectInfo().getRedisMode(), RedisMode.SENTINEL)) {
                 LettuceUtils.sentinelRun(connectInfo(), redisCommands -> {
                     var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
                     println(format(res, ""));

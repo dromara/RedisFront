@@ -3,7 +3,6 @@ package org.dromara.redisfront.ui.components.loading;
 import cn.hutool.core.lang.Assert;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.redisfront.commons.Fn;
 
 import javax.swing.*;
 import java.util.List;
@@ -14,11 +13,14 @@ import java.util.function.Supplier;
 
 @Slf4j
 class SyncLoadingWaiter<T> extends SwingWorker<T, Object> {
+    private static final String TIMEOUT_MESSAGE_KEY = "LoadingDialog.loadInfoLabel.timeout.message";
+    private static final int TIMER_DELAY_MS = 1000;
+    private static final int MAX_PROGRESS = 100;
 
     private final Timer timer;
-    private final AtomicInteger count;
+    private final AtomicInteger progressCount;
     private final SyncLoadingDialog syncLoadingDialog;
-    private static final String TIMEOUT_MESSAGE_KEY = "LoadingDialog.loadInfoLabel.timeout.message";
+
     @Setter
     private Supplier<T> supplier;
     @Setter
@@ -26,25 +28,37 @@ class SyncLoadingWaiter<T> extends SwingWorker<T, Object> {
 
     public SyncLoadingWaiter(SyncLoadingDialog syncLoadingDialog) {
         this.syncLoadingDialog = syncLoadingDialog;
-        this.count = new AtomicInteger(0);
-        this.timer = new Timer(1000, _ -> {
-            if (count.get() < 100) {
-                setProgress(count.incrementAndGet());
-            } else {
-                this.publish("timeout");
-            }
-        });
+        this.progressCount = new AtomicInteger(0);
+        this.timer = new Timer(TIMER_DELAY_MS, _ -> updateProgress());
+        initPropertyChangeListener();
+    }
+    private void initPropertyChangeListener() {
         this.addPropertyChangeListener(event -> {
-            if (Fn.equal(event.getPropertyName(), "state")) {
-                if (StateValue.STARTED == event.getNewValue()) {
-                    this.timer.start();
-                } else if (StateValue.DONE == event.getNewValue()) {
-                    terminated();
-                }
-            } else if (Fn.equal(event.getPropertyName(), "progress")) {
-                this.syncLoadingDialog.setProgressValue((Integer) event.getNewValue());
+            switch (event.getPropertyName()) {
+                case "state":
+                    handleStateChange(event.getNewValue());
+                    break;
+                case "progress":
+                    syncLoadingDialog.setProgressValue((Integer) event.getNewValue());
+                    break;
             }
         });
+    }
+
+    private void handleStateChange(Object newState) {
+        if (StateValue.STARTED == newState) {
+            timer.start();
+        } else if (StateValue.DONE == newState) {
+            terminated();
+        }
+    }
+
+    private void updateProgress() {
+        if (progressCount.get() < MAX_PROGRESS) {
+            setProgress(progressCount.incrementAndGet());
+        } else {
+            publish("timeout");
+        }
     }
 
     public void terminated() {
@@ -57,26 +71,23 @@ class SyncLoadingWaiter<T> extends SwingWorker<T, Object> {
     @Override
     protected void done() {
         try {
-            T object = this.get();
-            this.biConsumer.accept(object, null);
+            T result = get();
+            this.biConsumer.accept(result, null);
+        } catch (CancellationException e) {
+            log.info("Task was cancelled: {}", e.getMessage());
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            if (e instanceof CancellationException) {
-                return;
-            }
+            log.error("Task execution failed: {}", e.getMessage(), e);
+            this.timer.stop();
             this.biConsumer.accept(null, e);
         }
     }
 
     @Override
     protected void process(List<Object> chunks) {
-        if (chunks.isEmpty()) {
-            return;
-        }
-        if (Fn.equal(chunks.getFirst(), "timeout")) {
-            this.timer.stop();
-            this.cancel(true);
-            this.syncLoadingDialog.setMessageValue(syncLoadingDialog.$tr(TIMEOUT_MESSAGE_KEY));
+        if (!chunks.isEmpty() && "timeout".equals(chunks.getFirst())) {
+            timer.stop();
+            cancel(true);
+            syncLoadingDialog.setMessageValue(syncLoadingDialog.$tr(TIMEOUT_MESSAGE_KEY));
         }
     }
 
