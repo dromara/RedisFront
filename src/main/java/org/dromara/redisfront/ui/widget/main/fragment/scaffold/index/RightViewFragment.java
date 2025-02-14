@@ -11,15 +11,14 @@ import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.quickswing.ui.swing.AnimateButton;
 import org.dromara.redisfront.commons.enums.KeyTypeEnum;
 import org.dromara.redisfront.commons.resources.Icons;
-import org.dromara.redisfront.commons.utils.FutureUtils;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.utils.SwingUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
-import org.dromara.redisfront.model.context.RedisScanContext;
 import org.dromara.redisfront.model.table.HashTableModel;
 import org.dromara.redisfront.model.table.SortedSetTableModel;
 import org.dromara.redisfront.model.table.StreamTableModel;
 import org.dromara.redisfront.model.tree.TreeNodeInfo;
+import org.dromara.redisfront.model.turbo.Turbo3;
 import org.dromara.redisfront.service.*;
 import org.dromara.redisfront.ui.components.editor.TextEditor;
 import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
@@ -288,6 +287,7 @@ public class RightViewFragment {
         if (refBtn.isEnabled()) {
             var key = keyField.getText();
             this.lastKeyName = key;
+
 //            FutureUtils.supplyAsync(() -> keyTypeLabel.getText(), keyType -> {
 //                if (Fn.notEqual(keyType, "none")) {
 //                    KeyTypeEnum keyTypeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
@@ -343,38 +343,42 @@ public class RightViewFragment {
     }
 
     private void reloadTableDataActionPerformed(Boolean reset) {
-        FutureUtils.runAsync(() -> {
+        SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
             var key = keyField.getText();
             this.lastKeyName = key;
             var keyType = keyTypeLabel.getText();
             var keyTypeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
-
+            String searchText = tableSearchField.getText();
             switch (keyTypeEnum) {
                 case ZSET -> {
-                    zSetDataFetcher.setSkey(key);
                     if (reset) {
                         zSetDataFetcher.reset();
+                    } else {
+                        zSetDataFetcher.setSkey(searchText);
                     }
                     zSetDataFetcher.fetchData();
                 }
                 case HASH -> {
-                    hashDataFetcher.setHkey(key);
                     if (reset) {
                         hashDataFetcher.reset();
+                    } else {
+                        hashDataFetcher.setHkey(searchText);
                     }
                     hashDataFetcher.fetchData();
                 }
                 case LIST -> {
-                    listDataFetcher.setSkey(key);
                     if (reset) {
                         listDataFetcher.reset();
+                    } else {
+                        listDataFetcher.setSkey(searchText);
                     }
                     listDataFetcher.fetchData();
                 }
                 case SET -> {
-                    setDataFetcher.setSkey(key);
                     if (reset) {
                         setDataFetcher.reset();
+                    } else {
+                        setDataFetcher.setSkey(searchText);
                     }
                     setDataFetcher.fetchData();
                 }
@@ -388,6 +392,11 @@ public class RightViewFragment {
                 default -> {
                     zSetDataFetcher.fetchData();
                 }
+            }
+            return null;
+        }, (_, e) -> {
+            if (e != null) {
+                Notifications.getInstance().show(Notifications.Type.ERROR, e.getMessage());
             }
         });
     }
@@ -440,39 +449,44 @@ public class RightViewFragment {
             loadMoreBtn.setText(owner.$tr("DataViewForm.loadMoreBtn.title"));
             loadMoreBtn.setEnabled(true);
         }
-
     }
 
 
     private void updateValueActionPerformed() {
         var row = dataTable.getSelectedRow();
-
-        if (row == -1) {
-            return;
-        }
-        var keyType = keyTypeLabel.getText();
-        KeyTypeEnum keyTypeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
-
-        switch (keyTypeEnum) {
-            case ZSET -> {
-                var score = (Double) dataTable.getValueAt(row, 1);
-                var value = (String) dataTable.getValueAt(row, 2);
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(owner.$tr("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), score.toString(), value, redisConnectContext, keyTypeEnum, () -> {
-                });
+        SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
+            if (row != -1) {
+                var keyType = keyTypeLabel.getText();
+                KeyTypeEnum keyTypeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
+                switch (keyTypeEnum) {
+                    case ZSET -> {
+                        var score = (Double) dataTable.getValueAt(row, 1);
+                        var value = (String) dataTable.getValueAt(row, 2);
+                        return new Turbo3<>(keyTypeEnum, score.toString(), value);
+                    }
+                    case HASH -> {
+                        var key = (String) dataTable.getValueAt(row, 0);
+                        var value = (String) dataTable.getValueAt(row, 1);
+                        return new Turbo3<>(keyTypeEnum, key, value);
+                    }
+                    case LIST, SET -> {
+                        var value = (String) dataTable.getValueAt(row, 1);
+                        return new Turbo3<KeyTypeEnum, String, String>(keyTypeEnum, null, value);
+                    }
+                }
             }
-            case HASH -> {
-                var key = (String) dataTable.getValueAt(row, 0);
-                var value = (String) dataTable.getValueAt(row, 1);
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(owner.$tr("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), key, value, redisConnectContext, keyTypeEnum, () -> {
-                });
+            return null;
+        }, (turbo, e) -> {
+            if (e != null) {
+                Notifications.getInstance().show(Notifications.Type.INFO, e.getMessage());
+            } else {
+                switch (turbo.getT1()) {
+                    case ZSET, LIST, SET, HASH ->
+                            AddOrUpdateItemDialog.showAddOrUpdateItemDialog(owner.$tr("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), turbo.getT2(), turbo.getT3(), redisConnectContext, keyTypeEnum, () -> {
+                            });
+                }
             }
-            case LIST, SET -> {
-                var value = (String) dataTable.getValueAt(row, 1);
-                AddOrUpdateItemDialog.showAddOrUpdateItemDialog(owner.$tr("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), null, value, redisConnectContext, keyTypeEnum, () -> {
-                });
-            }
-        }
-
+        });
     }
 
     private void createUIComponents() {
@@ -550,51 +564,54 @@ public class RightViewFragment {
         valueUpdateSaveBtn.setEnabled(false);
         valueUpdateSaveBtn.setIcon(Icons.SAVE_ICON);
         valueUpdateSaveBtn.addActionListener((_) -> {
-
             var keyType = keyTypeLabel.getText();
             KeyTypeEnum typeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
             var key = keyField.getText();
             var newValue = textEditor.getText();
+            SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
+                if (typeEnum.equals(KeyTypeEnum.STRING)) {
+                    RedisBasicService.service.del(redisConnectContext, key);
+                    RedisStringService.service.set(redisConnectContext, key, newValue);
+                } else {
+                    var row = dataTable.getSelectedRow();
+                    if (row != -1) {
 
-            if (typeEnum.equals(KeyTypeEnum.STRING)) {
-                RedisBasicService.service.del(redisConnectContext, key);
-                RedisStringService.service.set(redisConnectContext, key, newValue);
-            } else {
-                var row = dataTable.getSelectedRow();
-
-                if (row == -1) {
+                        switch (typeEnum) {
+                            case HASH -> {
+                                var fieldOrScore = fieldOrScoreField.getText();
+                                var filed = (String) dataTable.getValueAt(row, 0);
+                                RedisHashService.service.hdel(redisConnectContext, key, filed);
+                                RedisHashService.service.hset(redisConnectContext, key, fieldOrScore, newValue);
+                            }
+                            case ZSET -> {
+                                var fieldOrScore = fieldOrScoreField.getText();
+                                var value = (String) dataTable.getValueAt(row, 2);
+                                RedisZSetService.service.zrem(redisConnectContext, key, value);
+                                RedisZSetService.service.zadd(redisConnectContext, key, Double.parseDouble(fieldOrScore), newValue);
+                            }
+                            case LIST -> {
+                                var value = (String) dataTable.getValueAt(row, 1);
+                                RedisListService.service.lrem(redisConnectContext, key, 1, value);
+                                RedisListService.service.lpush(redisConnectContext, key, newValue);
+                            }
+                            case SET -> {
+                                var value = (String) dataTable.getValueAt(row, 1);
+                                RedisSetService.service.srem(redisConnectContext, key, value);
+                                RedisSetService.service.sadd(redisConnectContext, key, newValue);
+                            }
+                        }
+                    }
+                }
+                return null;
+            }, (_, e) -> {
+                if (e == null) {
+                    Notifications.getInstance().show(Notifications.Type.INFO, owner.$tr("DataViewForm.showInformationDialog.updateSuccess.message"));
                     return;
                 }
-
-                switch (typeEnum) {
-                    case HASH -> {
-                        var fieldOrScore = fieldOrScoreField.getText();
-                        var filed = (String) dataTable.getValueAt(row, 0);
-                        RedisHashService.service.hdel(redisConnectContext, key, filed);
-                        RedisHashService.service.hset(redisConnectContext, key, fieldOrScore, newValue);
-                    }
-                    case ZSET -> {
-                        var fieldOrScore = fieldOrScoreField.getText();
-                        var value = (String) dataTable.getValueAt(row, 2);
-                        RedisZSetService.service.zrem(redisConnectContext, key, value);
-                        RedisZSetService.service.zadd(redisConnectContext, key, Double.parseDouble(fieldOrScore), newValue);
-                    }
-                    case LIST -> {
-                        var value = (String) dataTable.getValueAt(row, 1);
-                        RedisListService.service.lrem(redisConnectContext, key, 1, value);
-                        RedisListService.service.lpush(redisConnectContext, key, newValue);
-                    }
-                    case SET -> {
-                        var value = (String) dataTable.getValueAt(row, 1);
-                        RedisSetService.service.srem(redisConnectContext, key, value);
-                        RedisSetService.service.sadd(redisConnectContext, key, newValue);
-                    }
-                }
-            }
-            Notifications.getInstance().show(Notifications.Type.INFO, owner.$tr("DataViewForm.showInformationDialog.updateSuccess.message"));
+                Notifications.getInstance().show(Notifications.Type.INFO, owner.$tr("DataViewForm.showInformationDialog.updateSuccess.message"));
+            });
         });
         jToolBar.add(valueUpdateSaveBtn);
-
 
         valueViewPanel.add(new JPanel() {
             @Override
@@ -699,6 +716,7 @@ public class RightViewFragment {
         refBtn.setArcWidth(10);
         refBtn.setBorder(new EmptyBorder(5, 5, 5, 5));
         refBtn.addActionListener(e -> reloadAllActionPerformed());
+
         saveBtn = new AnimateButton() {
             @Override
             public void updateUI() {
@@ -858,11 +876,8 @@ public class RightViewFragment {
             }
         };
 
-        tableRefreshBtn.addActionListener(e -> {
-            if (tableRefreshBtn.isEnabled()) {
-                tableRefreshBtn.setEnabled(false);
-                reloadTableDataActionPerformed(true);
-            }
+        tableRefreshBtn.addActionListener(_ -> {
+            reloadTableDataActionPerformed(true);
         });
 
         var pageNumLabel = new JLabel() {
