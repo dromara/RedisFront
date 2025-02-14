@@ -69,14 +69,15 @@ public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, Redi
 
     @Override
     protected void performBeforeInitialization(RedisFrontPrefs preferences) {
-        if (!preferences.getDBInitialized() && !FileUtil.exist(preferences.getDataPath() + File.separator + preferences.getDbFileName())) {
+        String dbPath = preferences.getDataPath() + File.separator + preferences.getDbFileName() + ";";
+        if (!preferences.getDBInitialized() || !FileUtil.exist(dbPath)) {
             DataSource datasource = getDatabaseManager().getDatasource();
             try {
+                DbUtil.use(datasource).execute("drop table connect_group");
                 DbUtil.use(datasource).execute(Constants.SQL_CREATE_CONNECT_GROUP);
-//                DbUtil.use(datasource).execute("drop table connect_group");
                 log.info("创建 connect_group 表完成！");
+                DbUtil.use(datasource).execute("drop table connect_detail");
                 DbUtil.use(datasource).execute(Constants.SQL_CREATE_CONNECT_DETAIL);
-//                DbUtil.use(datasource).execute("drop table connect_detail");
                 log.info("创建 connect_detail 表完成！");
                 preferences.setDBInitialized(true);
             } catch (SQLException e) {

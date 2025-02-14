@@ -1,6 +1,6 @@
 package org.dromara.redisfront.commons.utils;
 
-import cn.hutool.core.util.StrUtil;
+import lombok.Getter;
 import org.dromara.redisfront.commons.Fn;
 import org.dromara.redisfront.model.tree.TreeNodeInfo;
 
@@ -19,7 +19,7 @@ public class TreeUtils {
     private TreeUtils() {
     }
 
-    public static synchronized DefaultTreeModel toTreeModel(Set<String> rows, String delim) {
+    public static DefaultTreeModel toTreeModel(Set<String> rows, String delim) {
         var rootNode = new TreeNodeInfo();
         var stringTreeMap = toStringTreeMap(rows, delim);
         var treeNodeInfos = convertTreeNodeInfoSet(stringTreeMap, "");
@@ -27,39 +27,25 @@ public class TreeUtils {
         return new DefaultTreeModel(rootNode);
     }
 
-    /**
-     * 字符串集合转 StringTreeMap
-     *
-     * @param rows  字符串集合
-     * @param delim 分隔符
-     * @return StringTreeMap
-     */
     public static StringTreeMap toStringTreeMap(Set<String> rows, String delim) {
-        var root = new StringTreeMap();
-        for (var row : rows.stream().parallel().sorted().toList()) {
-
-            var node = root;
-            var cells = row.split(delim);
-
-            var keyLength = (StrUtil.join("", (Object) cells).length() + cells.length - 1);
-
-            if (row.contains(delim) && row.length() - keyLength >= 2) {
-                var lastStr = StrUtil.sub(row, keyLength, row.length() - 1);
-                ArrayList<String> tmpList = new ArrayList<>(Arrays.asList(cells));
-                tmpList.add(lastStr);
-                cells = tmpList.toArray(new String[]{});
-            } else if (Fn.endsWith(row, delim)) {
-                cells[cells.length - 1] = cells[cells.length - 1].concat(delim);
+        StringTreeMap root = new StringTreeMap();
+        for (String row : rows) {
+            String[] cells = splitKey(row, delim);
+            StringTreeMap node = root;
+            // 处理末尾分隔符
+            if (row.endsWith(delim)) {
+                cells[cells.length - 1] += delim;
             }
-
             for (int i = 0; i < cells.length; i++) {
                 String cell = cells[i];
-                var child = node.get(cell);
+                boolean isLeaf = (i == cells.length - 1);
+                StringTreeMap child = node.get(cell);
                 if (child == null) {
-                    if (i == cells.length - 1) {
-                        cell += "->!N!";
+                    child = new StringTreeMap();
+                    if (isLeaf) {
+                        child.markLeafNode();
                     }
-                    node.put(cell, child = new StringTreeMap());
+                    node.put(cell, child);
                 }
                 node = child;
             }
@@ -67,33 +53,55 @@ public class TreeUtils {
         return root;
     }
 
+    private static String[] splitKey(String row, String delim) {
+        List<String> parts = new ArrayList<>();
+        int delimLen = delim.length();
+        int pos;
+
+        while ((pos = row.indexOf(delim)) != -1) {
+            parts.add(row.substring(0, pos));
+            row = row.substring(pos + delimLen);
+        }
+        parts.add(row);
+        return parts.toArray(new String[0]);
+    }
 
     /**
      * 递归转换TreeNode集合
      *
      * @param stringTreeMap StringTreeMap
+     * @param parentKey parentKey
      * @return Set<TreeNodeInfo>
      */
     public static Set<TreeNodeInfo> convertTreeNodeInfoSet(StringTreeMap stringTreeMap, String parentKey) {
-        return stringTreeMap.entrySet().stream().parallel().map(treeMapEntry -> {
-            String key = treeMapEntry.getKey().replace("->!N!", "");
-            //完整的KeyName
-            var fullKeyName = (Fn.isEmpty(parentKey) ? "" : parentKey.concat(":")).concat(key);
-            var treeNodeInfo = new TreeNodeInfo(key, fullKeyName);
-            //递归查找下级
-            convertTreeNodeInfoSet(treeMapEntry.getValue(), fullKeyName)
-                    .forEach(treeNodeInfo::add);
-            return treeNodeInfo;
-        }).sorted(Comparator.comparing(TreeNodeInfo::key)).collect(Collectors.toCollection(LinkedHashSet::new));
+        return stringTreeMap.entrySet().stream()
+                .map(entry -> {
+                    String key = entry.getKey().replace("->!N!", "");
+                    StringTreeMap value = entry.getValue();
+                    StringBuilder sb = new StringBuilder(parentKey.length() + key.length() + 1);
+                    if (!Fn.isEmpty(parentKey)) {
+                        sb.append(parentKey).append(':');
+                    }
+                    sb.append(key);
+                    String fullKeyName = sb.toString();
+                    TreeNodeInfo node = new TreeNodeInfo(key, fullKeyName, value.isLeafNode);
+                    convertTreeNodeInfoSet(value, fullKeyName).forEach(node::add);
+                    return node;
+                })
+                .sorted(Comparator.comparing(TreeNodeInfo::key))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-   public static class StringTreeMap extends TreeMap<String, StringTreeMap> {
+
+    @Getter
+    public static class StringTreeMap extends LinkedHashMap<String, StringTreeMap> {
         @Serial
         private static final long serialVersionUID = 1L;
 
-        @Override
-        public Comparator<? super String> comparator() {
-            return Comparator.reverseOrder();
+        private transient boolean isLeafNode = false;
+
+        public void markLeafNode() {
+            this.isLeafNode = true;
         }
     }
 
