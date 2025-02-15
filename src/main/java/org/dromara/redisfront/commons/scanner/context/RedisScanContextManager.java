@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.scanner.context;
+package org.dromara.redisfront.commons.scanner.context;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

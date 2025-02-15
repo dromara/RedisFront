@@ -16,7 +16,6 @@ import org.dromara.redisfront.model.ClusterNode;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.ui.dialog.LogsDialog;
-import org.dromara.redisfront.ui.scanner.context.RedisScanContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

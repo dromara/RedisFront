@@ -18,7 +18,7 @@ import org.dromara.redisfront.commons.utils.*;
 import org.dromara.redisfront.model.DbInfo;
 import org.dromara.redisfront.model.tree.TreeNodeInfo;
 import org.dromara.redisfront.model.context.RedisConnectContext;
-import org.dromara.redisfront.ui.scanner.context.RedisScanContext;
+import org.dromara.redisfront.commons.scanner.context.RedisScanContext;
 import org.dromara.redisfront.model.turbo.Turbo3;
 import org.dromara.redisfront.service.*;
 import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;

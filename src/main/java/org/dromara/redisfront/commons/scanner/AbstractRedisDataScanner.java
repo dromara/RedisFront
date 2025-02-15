@@ -1,13 +1,10 @@
-package org.dromara.redisfront.ui.scanner;
+package org.dromara.redisfront.commons.scanner;
 
-import cn.hutool.core.collection.CollUtil;
-import org.dromara.redisfront.commons.exception.RedisFrontException;
-import org.dromara.redisfront.commons.utils.RedisFrontUtils;
+import org.dromara.redisfront.commons.scanner.context.RedisScanContext;
+import org.dromara.redisfront.commons.scanner.context.RedisScanContextManager;
+import org.dromara.redisfront.commons.scanner.model.ScanDataResult;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.handler.RefreshHandler;
-import org.dromara.redisfront.ui.scanner.context.RedisScanContext;
-import org.dromara.redisfront.ui.scanner.context.RedisScanContextManager;
-import org.dromara.redisfront.ui.scanner.model.ScanDataResult;
 
 import java.util.*;
 

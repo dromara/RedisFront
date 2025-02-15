@@ -2,7 +2,6 @@ package org.dromara.redisfront.service.impl;
 
 import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.model.context.RedisConnectContext;
-import org.dromara.redisfront.ui.scanner.context.RedisScanContext;
 import org.dromara.redisfront.service.RedisZSetService;
 import org.dromara.redisfront.ui.dialog.LogsDialog;
 import io.lettuce.core.*;

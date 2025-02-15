@@ -1,13 +1,14 @@
-package org.dromara.redisfront.ui.scanner;
+package org.dromara.redisfront.commons.scanner.core;
 
 import io.lettuce.core.ScanCursor;
 import lombok.Getter;
 import lombok.Setter;
+import org.dromara.redisfront.commons.scanner.AbstractRedisDataScanner;
+import org.dromara.redisfront.commons.scanner.model.ScanDataResult;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.table.ListTableModel;
 import org.dromara.redisfront.service.RedisListService;
 import org.dromara.redisfront.ui.handler.RefreshHandler;
-import org.dromara.redisfront.ui.scanner.model.ScanDataResult;
 
 import java.util.Collection;
 import java.util.List;

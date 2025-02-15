@@ -1,11 +1,11 @@
-package org.dromara.redisfront.ui.scanner;
+package org.dromara.redisfront.commons.scanner.core;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.dromara.redisfront.commons.scanner.RedisDataScanner;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.turbo.Turbo2;
 import org.dromara.redisfront.service.RedisStringService;
-import org.dromara.redisfront.ui.scanner.RedisDataScanner;
 
 import java.util.function.Consumer;
 

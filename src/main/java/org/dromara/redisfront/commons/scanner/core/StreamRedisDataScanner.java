@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.scanner;
+package org.dromara.redisfront.commons.scanner.core;
 
 import cn.hutool.core.io.unit.DataSizeUtil;
 import cn.hutool.core.util.StrUtil;
@@ -9,13 +9,13 @@ import io.lettuce.core.StreamMessage;
 import lombok.Getter;
 import lombok.Setter;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
+import org.dromara.redisfront.commons.scanner.RedisDataScanner;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
-import org.dromara.redisfront.ui.scanner.context.RedisScanContext;
+import org.dromara.redisfront.commons.scanner.context.RedisScanContext;
 import org.dromara.redisfront.model.table.StreamTableModel;
 import org.dromara.redisfront.model.turbo.Turbo5;
 import org.dromara.redisfront.service.RedisStreamService;
-import org.dromara.redisfront.ui.scanner.RedisDataScanner;
 
 import java.util.LinkedHashMap;
 import java.util.List;
