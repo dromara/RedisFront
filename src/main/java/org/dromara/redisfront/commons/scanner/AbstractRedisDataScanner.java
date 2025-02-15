@@ -4,7 +4,7 @@ import org.dromara.redisfront.commons.scanner.context.RedisScanContext;
 import org.dromara.redisfront.commons.scanner.context.RedisScanContextManager;
 import org.dromara.redisfront.commons.scanner.model.ScanDataResult;
 import org.dromara.redisfront.model.context.RedisConnectContext;
-import org.dromara.redisfront.ui.handler.RefreshHandler;
+import org.dromara.redisfront.commons.scanner.handler.ScanDataRefreshHandler;
 
 import java.util.*;
 
@@ -13,15 +13,15 @@ public abstract class AbstractRedisDataScanner<T, M> implements RedisDataScanner
     protected final ResourceBundle tr;
     protected final Map<String, RedisScanContext<T>> contextMap;
     protected final RedisScanContextManager<T> redisScanContextManager = new RedisScanContextManager<>();
-    protected final RefreshHandler<ScanDataResult<M>> refreshHandler;
+    protected final ScanDataRefreshHandler<ScanDataResult<M>> scanDataRefreshHandler;
 
     private final ScanDataResult<M> scanDataResult = new ScanDataResult<>();
 
 
-    public AbstractRedisDataScanner(RedisConnectContext redisConnectContext, ResourceBundle tr, RefreshHandler<ScanDataResult<M>> refreshHandler) {
+    public AbstractRedisDataScanner(RedisConnectContext redisConnectContext, ResourceBundle tr, ScanDataRefreshHandler<ScanDataResult<M>> scanDataRefreshHandler) {
         this.redisConnectContext = redisConnectContext;
         this.tr = tr;
-        this.refreshHandler = refreshHandler;
+        this.scanDataRefreshHandler = scanDataRefreshHandler;
         this.contextMap = new LinkedHashMap<>();
     }
 
@@ -39,7 +39,7 @@ public abstract class AbstractRedisDataScanner<T, M> implements RedisDataScanner
 
     @Override
     public void refreshUI() {
-        refreshHandler.accept(scanDataResult);
+        scanDataRefreshHandler.accept(scanDataResult);
     }
 
 }

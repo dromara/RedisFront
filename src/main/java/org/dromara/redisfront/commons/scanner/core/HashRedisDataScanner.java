@@ -8,7 +8,7 @@ import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.table.HashTableModel;
 import org.dromara.redisfront.service.RedisHashService;
-import org.dromara.redisfront.ui.handler.RefreshHandler;
+import org.dromara.redisfront.commons.scanner.handler.ScanDataRefreshHandler;
 import org.dromara.redisfront.commons.scanner.model.ScanDataResult;
 
 import java.util.Collection;
@@ -19,7 +19,7 @@ import java.util.ResourceBundle;
 public class HashRedisDataScanner extends AbstractRedisDataScanner<Map.Entry<String, String>, HashTableModel> {
     private final String key;
 
-    public HashRedisDataScanner(RedisConnectContext redisConnectContext, String key, RefreshHandler<ScanDataResult<HashTableModel>> consumer, ResourceBundle tr) {
+    public HashRedisDataScanner(RedisConnectContext redisConnectContext, String key, ScanDataRefreshHandler<ScanDataResult<HashTableModel>> consumer, ResourceBundle tr) {
         super(redisConnectContext, tr, consumer);
         this.key = key;
     }

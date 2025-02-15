@@ -8,7 +8,7 @@ import org.dromara.redisfront.commons.scanner.model.ScanDataResult;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.table.ListTableModel;
 import org.dromara.redisfront.service.RedisListService;
-import org.dromara.redisfront.ui.handler.RefreshHandler;
+import org.dromara.redisfront.commons.scanner.handler.ScanDataRefreshHandler;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,8 +19,8 @@ public class ListRedisDataScanner extends AbstractRedisDataScanner<String, ListT
     @Getter
     private String key;
 
-    public ListRedisDataScanner(RedisConnectContext redisConnectContext, String key, RefreshHandler<ScanDataResult<ListTableModel>> refreshHandler, ResourceBundle tr) {
-        super(redisConnectContext, tr, refreshHandler);
+    public ListRedisDataScanner(RedisConnectContext redisConnectContext, String key, ScanDataRefreshHandler<ScanDataResult<ListTableModel>> scanDataRefreshHandler, ResourceBundle tr) {
+        super(redisConnectContext, tr, scanDataRefreshHandler);
         this.key = key;
     }
 
