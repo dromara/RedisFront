@@ -1,15 +1,15 @@
-package org.dromara.redisfront.ui.widget.main.fragment.scaffold.index.fetch.impl;
+package org.dromara.redisfront.ui.scanner;
 
 import lombok.Getter;
 import lombok.Setter;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.turbo.Turbo2;
 import org.dromara.redisfront.service.RedisStringService;
-import org.dromara.redisfront.ui.widget.main.fragment.scaffold.index.fetch.DataFetcher;
+import org.dromara.redisfront.ui.scanner.RedisDataScanner;
 
 import java.util.function.Consumer;
 
-public class StringDataFetcher implements DataFetcher {
+public class StringRedisDataScanner implements RedisDataScanner {
     private final RedisConnectContext redisConnectContext;
     private final Consumer<Turbo2<Long, String>> consumer;
     private Long strLen;
@@ -18,20 +18,20 @@ public class StringDataFetcher implements DataFetcher {
     @Getter
     private String key;
 
-    public StringDataFetcher(RedisConnectContext redisConnectContext, String key, Consumer<Turbo2<Long, String>> consumer) {
+    public StringRedisDataScanner(RedisConnectContext redisConnectContext, String key, Consumer<Turbo2<Long, String>> consumer) {
         this.redisConnectContext = redisConnectContext;
         this.consumer = consumer;
         this.key = key;
     }
 
     @Override
-    public void fetchData() {
+    public void fetchData(String fetchKey) {
         strLen = RedisStringService.service.strlen(redisConnectContext, key);
         value = RedisStringService.service.get(redisConnectContext, key);
     }
 
     @Override
-    public void loadData() {
+    public void refreshUI() {
         consumer.accept(new Turbo2<>(strLen, value));
     }
 }

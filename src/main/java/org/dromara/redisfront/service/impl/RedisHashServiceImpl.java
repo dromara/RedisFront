@@ -2,7 +2,7 @@ package org.dromara.redisfront.service.impl;
 
 import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.model.context.RedisConnectContext;
-import org.dromara.redisfront.model.context.RedisScanContext;
+import org.dromara.redisfront.ui.scanner.context.RedisScanContext;
 import io.lettuce.core.MapScanCursor;
 import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
@@ -71,11 +71,6 @@ public class RedisHashServiceImpl implements RedisHashService {
 
     @Override
     public MapScanCursor<String, String> hscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor, ScanArgs scanArgs) {
-
-        RedisScanContext.MyScanArgs myScanArgs = (RedisScanContext.MyScanArgs) scanArgs;
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("HSCAN ".concat(key).concat(" ").concat(scanCursor.getCursor()).concat(myScanArgs.getCommandStr()));
-        LogsDialog.appendLog(logInfo);
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.hscan(key, scanCursor, scanArgs));
         } else {

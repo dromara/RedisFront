@@ -1,7 +1,7 @@
 package org.dromara.redisfront.service.impl;
 import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.model.context.RedisConnectContext;
-import org.dromara.redisfront.model.context.RedisScanContext;
+import org.dromara.redisfront.ui.scanner.context.RedisScanContext;
 import org.dromara.redisfront.ui.dialog.LogsDialog;
 import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
@@ -188,12 +188,6 @@ public class RedisSetServiceImpl implements RedisSetService {
 
     @Override
     public ValueScanCursor<String> sscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor, ScanArgs scanArgs) {
-
-
-        RedisScanContext.MyScanArgs myScanArgs = (RedisScanContext.MyScanArgs) scanArgs;
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("SSCAN ".concat(key).concat(" ").concat(scanCursor.getCursor()).concat(myScanArgs.getCommandStr()));
-        LogsDialog.appendLog(logInfo);
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.sscan(key, scanCursor, scanArgs));
         } else {

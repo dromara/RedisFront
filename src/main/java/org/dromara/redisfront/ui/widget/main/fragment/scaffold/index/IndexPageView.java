@@ -49,14 +49,14 @@ public class IndexPageView extends QSPageItem<RedisFrontWidget> {
                     selectTreeNode = treeNodeInfo;
                     SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
                         RightViewFragment rightViewFragment = new RightViewFragment(redisConnectContext, treeNodeInfo, owner);
-                        rightViewFragment.fetchData();
+                        rightViewFragment.fetchRemoteData();
                         return rightViewFragment;
                     }, (rightViewFragment, e) -> {
                         if (e == null) {
                             this.splitPane.setDividerSize(5);
                             this.splitPane.setDividerLocation(dividerLocation);
                             this.splitPane.setRightComponent(new WrapperPanel(rightViewFragment.contentPanel()));
-                            rightViewFragment.loadData();
+                            rightViewFragment.refreshUI();
                         } else {
                             owner.displayException(e);
                         }

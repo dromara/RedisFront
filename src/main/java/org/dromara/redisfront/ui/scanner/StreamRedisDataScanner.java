@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.widget.main.fragment.scaffold.index.fetch.impl;
+package org.dromara.redisfront.ui.scanner;
 
 import cn.hutool.core.io.unit.DataSizeUtil;
 import cn.hutool.core.util.StrUtil;
@@ -11,19 +11,19 @@ import lombok.Setter;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
-import org.dromara.redisfront.model.context.RedisScanContext;
-import org.dromara.redisfront.model.table.HashTableModel;
+import org.dromara.redisfront.ui.scanner.context.RedisScanContext;
 import org.dromara.redisfront.model.table.StreamTableModel;
 import org.dromara.redisfront.model.turbo.Turbo5;
 import org.dromara.redisfront.service.RedisStreamService;
-import org.dromara.redisfront.ui.widget.main.fragment.scaffold.index.fetch.DataFetcher;
+import org.dromara.redisfront.ui.scanner.RedisDataScanner;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
-public class StreamDataFetcher implements DataFetcher {
+public class StreamRedisDataScanner implements RedisDataScanner {
     private final RedisConnectContext redisConnectContext;
     private final Consumer<Turbo5<Long, StreamTableModel, String, String, Boolean>> consumer;
     private final Map<String, RedisScanContext<StreamMessage<String, String>>> xRangeContextMap;
@@ -41,7 +41,7 @@ public class StreamDataFetcher implements DataFetcher {
     private String loadSize;
     private Boolean finished;
 
-    public StreamDataFetcher(RedisConnectContext redisConnectContext, String key, Consumer<Turbo5<Long, StreamTableModel, String, String, Boolean>> consumer, ResourceBundle tr) {
+    public StreamRedisDataScanner(RedisConnectContext redisConnectContext, String key, Consumer<Turbo5<Long, StreamTableModel, String, String, Boolean>> consumer, ResourceBundle tr) {
         this.redisConnectContext = redisConnectContext;
         this.consumer = consumer;
         this.key = key;
@@ -50,14 +50,14 @@ public class StreamDataFetcher implements DataFetcher {
     }
 
     @Override
-    public void fetchData() {
+    public void fetchData(String fetchKey) {
 
         len = RedisStreamService.service.xlen(redisConnectContext, key);
 
         var xRangeContext = xRangeContextMap.getOrDefault(key, new RedisScanContext<>());
 
         var lastSearchKey = xRangeContext.getSearchKey();
-        if (StrUtil.isNotBlank(skey)) {
+        if (StrUtil.isNotEmpty(skey)) {
             xRangeContext.setSearchKey(skey);
         } else {
             xRangeContext.setSearchKey("*");
@@ -86,7 +86,7 @@ public class StreamDataFetcher implements DataFetcher {
 
         xRangeContextMap.put(key, xRangeContext);
 
-        streamTableModel = new StreamTableModel(xRangeContext.getKeyList());
+        streamTableModel = new StreamTableModel((List<StreamMessage<String, String>>) xRangeContext.getKeyList());
 
         dataSize = DataSizeUtil.format(xRangeContext.getKeyList().stream().map(e -> RedisFrontUtils.getByteSize(e.getBody())).reduce(Integer::sum).orElse(0));
         loadSize = String.valueOf(xRangeContext.getKeyList().size());
@@ -94,7 +94,7 @@ public class StreamDataFetcher implements DataFetcher {
     }
 
     @Override
-    public void loadData() {
+    public void refreshUI() {
         consumer.accept(new Turbo5<>(len, streamTableModel, dataSize, loadSize, finished));
     }
 

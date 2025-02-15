@@ -13,6 +13,7 @@ import com.surelogic.Utility;
 import javax.swing.*;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
 
@@ -94,20 +95,22 @@ public class RedisFrontUtils {
     }
 
     public static String toJson(Object obj) {
-        var s = JSONUtil.parse(obj).toStringPretty();
         return JSONUtil.parse(obj).toStringPretty();
     }
 
 
     public static int getByteSize(Object data) {
-        int byteSize = 0;
-        try (var byteArrayOutputStream = new ByteArrayOutputStream(); var os = new ObjectOutputStream(byteArrayOutputStream)) {
-            os.writeObject(data);
-            byteSize = byteArrayOutputStream.size();
-        } catch (Exception e) {
-            return byteSize;
+        if (data instanceof String) {
+            return ((String) data).getBytes(StandardCharsets.UTF_8).length;
         }
-        return byteSize;
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+             ObjectOutputStream outputStream = new ObjectOutputStream(byteArrayOutputStream)) {
+            outputStream.writeObject(data);
+            outputStream.flush();
+            return byteArrayOutputStream.size();
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     public static String getDataSize(String str) {

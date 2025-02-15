@@ -1,12 +1,5 @@
 package org.dromara.redisfront.service.impl;
 
-import org.dromara.redisfront.commons.utils.RedisFrontUtils;
-import org.dromara.redisfront.commons.enums.RedisMode;
-import org.dromara.redisfront.commons.utils.LettuceUtils;
-import org.dromara.redisfront.model.ClusterNode;
-import org.dromara.redisfront.model.context.RedisConnectContext;
-import org.dromara.redisfront.model.context.RedisScanContext;
-import org.dromara.redisfront.ui.dialog.LogsDialog;
 import io.lettuce.core.KeyScanCursor;
 import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
@@ -16,7 +9,14 @@ import io.lettuce.core.api.sync.RedisServerCommands;
 import io.lettuce.core.cluster.api.sync.RedisAdvancedClusterCommands;
 import io.lettuce.core.cluster.api.sync.RedisClusterCommands;
 import io.lettuce.core.output.KeyStreamingChannel;
+import org.dromara.redisfront.commons.enums.RedisMode;
+import org.dromara.redisfront.commons.utils.LettuceUtils;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
+import org.dromara.redisfront.model.ClusterNode;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;
+import org.dromara.redisfront.ui.dialog.LogsDialog;
+import org.dromara.redisfront.ui.scanner.context.RedisScanContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,11 +66,6 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public KeyScanCursor<String> scan(RedisConnectContext redisConnectContext, ScanArgs scanArgs) {
-
-        RedisScanContext.MyScanArgs myScanArgs = (RedisScanContext.MyScanArgs) scanArgs;
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("SCAN ".concat(myScanArgs.getCommandStr()));
-        LogsDialog.appendLog(logInfo);
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.scan(scanArgs));
         } else {
@@ -80,10 +75,6 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public KeyScanCursor<String> scan(RedisConnectContext redisConnectContext, ScanCursor scanCursor, ScanArgs scanArgs) {
-
-        RedisScanContext.MyScanArgs myScanArgs = (RedisScanContext.MyScanArgs) scanArgs;
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("SCAN ".concat(scanCursor.getCursor()).concat(myScanArgs.getCommandStr()));
-        LogsDialog.appendLog(logInfo);
 
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.scan(scanCursor, scanArgs));
