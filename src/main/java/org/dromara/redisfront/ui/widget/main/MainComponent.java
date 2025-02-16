@@ -200,7 +200,7 @@ public class MainComponent extends JPanel {
                             });
                         }
 
-                    }, 1, 5, TimeUnit.SECONDS);
+                    }, 1, 3, TimeUnit.SECONDS);
                     executorServiceMap.put(redisConnectContext.getId(), scheduler);
                 }
                 displayId = redisConnectContext.getId();

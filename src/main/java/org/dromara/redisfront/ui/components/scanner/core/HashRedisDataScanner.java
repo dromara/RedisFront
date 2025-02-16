@@ -1,15 +1,15 @@
-package org.dromara.redisfront.commons.scanner.core;
+package org.dromara.redisfront.ui.components.scanner.core;
 
 import com.google.common.collect.Lists;
 import io.lettuce.core.MapScanCursor;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
-import org.dromara.redisfront.commons.scanner.AbstractRedisDataScanner;
+import org.dromara.redisfront.ui.components.scanner.AbstractRedisDataScanner;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.table.HashTableModel;
 import org.dromara.redisfront.service.RedisHashService;
-import org.dromara.redisfront.commons.scanner.handler.ScanDataRefreshHandler;
-import org.dromara.redisfront.commons.scanner.model.ScanDataResult;
+import org.dromara.redisfront.ui.components.scanner.handler.ScanDataRefreshHandler;
+import org.dromara.redisfront.ui.components.scanner.model.ScanDataResult;
 
 import java.util.Collection;
 import java.util.List;

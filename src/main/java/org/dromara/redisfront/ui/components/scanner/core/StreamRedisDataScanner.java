@@ -1,4 +1,4 @@
-package org.dromara.redisfront.commons.scanner.core;
+package org.dromara.redisfront.ui.components.scanner.core;
 
 import io.lettuce.core.Limit;
 import io.lettuce.core.Range;
@@ -7,9 +7,9 @@ import io.lettuce.core.StreamMessage;
 import lombok.Getter;
 import lombok.Setter;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
-import org.dromara.redisfront.commons.scanner.AbstractRedisDataScanner;
-import org.dromara.redisfront.commons.scanner.handler.ScanDataRefreshHandler;
-import org.dromara.redisfront.commons.scanner.model.ScanDataResult;
+import org.dromara.redisfront.ui.components.scanner.AbstractRedisDataScanner;
+import org.dromara.redisfront.ui.components.scanner.handler.ScanDataRefreshHandler;
+import org.dromara.redisfront.ui.components.scanner.model.ScanDataResult;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.table.StreamTableModel;

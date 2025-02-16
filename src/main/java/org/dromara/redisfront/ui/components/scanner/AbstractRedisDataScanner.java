@@ -1,10 +1,10 @@
-package org.dromara.redisfront.commons.scanner;
+package org.dromara.redisfront.ui.components.scanner;
 
-import org.dromara.redisfront.commons.scanner.context.RedisScanContext;
-import org.dromara.redisfront.commons.scanner.context.RedisScanContextManager;
-import org.dromara.redisfront.commons.scanner.model.ScanDataResult;
+import org.dromara.redisfront.ui.components.scanner.context.RedisScanContext;
+import org.dromara.redisfront.ui.components.scanner.context.RedisScanContextManager;
+import org.dromara.redisfront.ui.components.scanner.model.ScanDataResult;
 import org.dromara.redisfront.model.context.RedisConnectContext;
-import org.dromara.redisfront.commons.scanner.handler.ScanDataRefreshHandler;
+import org.dromara.redisfront.ui.components.scanner.handler.ScanDataRefreshHandler;
 
 import java.util.*;
 

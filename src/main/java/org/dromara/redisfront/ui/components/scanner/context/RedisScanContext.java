@@ -1,4 +1,4 @@
-package org.dromara.redisfront.commons.scanner.context;
+package org.dromara.redisfront.ui.components.scanner.context;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.unit.DataSizeUtil;

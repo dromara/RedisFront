@@ -1,12 +1,10 @@
-package org.dromara.redisfront.commons.scanner.core;
+package org.dromara.redisfront.ui.components.scanner.core;
 
-import org.dromara.redisfront.commons.scanner.RedisDataScanner;
-import org.dromara.redisfront.commons.scanner.handler.ScanDataRefreshHandler;
+import org.dromara.redisfront.ui.components.scanner.RedisDataScanner;
+import org.dromara.redisfront.ui.components.scanner.handler.ScanDataRefreshHandler;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.turbo.Turbo2;
 import org.dromara.redisfront.service.RedisStringService;
-
-import java.util.function.Consumer;
 
 public class StringRedisDataScanner implements RedisDataScanner {
     private final RedisConnectContext redisConnectContext;

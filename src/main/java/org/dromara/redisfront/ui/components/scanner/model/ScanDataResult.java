@@ -1,4 +1,4 @@
-package org.dromara.redisfront.commons.scanner.model;
+package org.dromara.redisfront.ui.components.scanner.model;
 
 import lombok.Data;
 

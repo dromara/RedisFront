@@ -1,4 +1,4 @@
-package org.dromara.redisfront.commons.scanner;
+package org.dromara.redisfront.ui.components.scanner;
 
 public interface RedisDataScanner {
     void fetchData(String key);

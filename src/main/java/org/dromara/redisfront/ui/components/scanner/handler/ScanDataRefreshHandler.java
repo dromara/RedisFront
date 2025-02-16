@@ -1,4 +1,4 @@
-package org.dromara.redisfront.commons.scanner.handler;
+package org.dromara.redisfront.ui.components.scanner.handler;
 
 import java.util.function.Consumer;
 

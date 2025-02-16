@@ -32,13 +32,13 @@
                   <component id="fafaa" class="javax.swing.JComboBox" binding="databaseComboBox" custom-create="true">
                     <constraints border-constraint="West"/>
                     <properties>
-                      <font size="16"/>
+                      <font/>
                     </properties>
                   </component>
                   <component id="523a3" class="javax.swing.JButton" binding="addBtn" custom-create="true">
                     <constraints border-constraint="Center"/>
                     <properties>
-                      <font size="16" style="1"/>
+                      <font/>
                       <horizontalAlignment value="0"/>
                       <horizontalTextPosition value="11"/>
                       <text resource-bundle="org/dromara/redisfront/RedisFront" key="DataSearchForm.addBtn.title"/>
