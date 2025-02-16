@@ -55,7 +55,4 @@ public class SetRedisDataScanner extends AbstractRedisDataScanner<String, SetTab
         return RedisSetService.service.scard(redisConnectContext, key);
     }
 
-    public void reset() {
-        redisScanContextManager.reset(key);
-    }
 }

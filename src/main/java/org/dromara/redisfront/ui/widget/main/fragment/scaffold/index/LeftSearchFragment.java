@@ -283,7 +283,7 @@ public class LeftSearchFragment {
                 setToolTipText(owner.$tr("DataSearchForm.addBtn.title"));
             }
         };
-        addBtn.setIcon(Icons.PLUS_ICON);
+        addBtn.setIcon(Icons.PLUS_ICON_16X16);
         addBtn.setFocusable(false);
         addBtn.addActionListener(_ -> AddKeyDialog.showAddDialog(redisConnectContext, null, (_) -> {
             var res = JOptionPane.showConfirmDialog(RedisFrontMain.frame,

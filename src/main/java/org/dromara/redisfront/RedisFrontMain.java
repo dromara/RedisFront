@@ -1,10 +1,14 @@
 package org.dromara.redisfront;
+import cn.hutool.core.img.ColorUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.quickswing.QSApplicationInitializer;
 import org.dromara.quickswing.ui.app.QSWidget;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import raven.toast.Notifications;
+
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * Application
@@ -23,6 +27,9 @@ public class RedisFrontMain {
             QSWidget<RedisFrontPrefs> application = context.createApplication(args);
             application.setLocationRelativeTo(null);
             application.setVisible(true);
+            Color object = UIManager.getColor("ComboBox.buttonBackground");
+            ColorUtil.toHex(object);
+            System.out.println();
         });
 
         log.info("RedisFront started");

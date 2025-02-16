@@ -51,10 +51,6 @@ public class ListRedisDataScanner extends AbstractRedisDataScanner<String, ListT
         return new ListTableModel((List<String>) data);
     }
 
-    public void reset() {
-        redisScanContextManager.reset(key);
-    }
-
     @Override
     protected Long getLen() {
         return RedisListService.service.llen(redisConnectContext, key);

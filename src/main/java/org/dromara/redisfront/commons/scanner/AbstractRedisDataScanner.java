@@ -30,7 +30,7 @@ public abstract class AbstractRedisDataScanner<T, M> implements RedisDataScanner
     protected abstract Long getLen();
 
     protected void updateState(RedisScanContext<T> scanContext) {
-        scanDataResult.setTableModel(createModel(scanContext.getKeyList()));
+        scanDataResult.setData(createModel(scanContext.getKeyList()));
         scanDataResult.setLen(getLen());
         scanDataResult.setLoadSize(scanContext.getLoadSize());
         scanDataResult.setDataSize(scanContext.getDataLength());
@@ -40,6 +40,14 @@ public abstract class AbstractRedisDataScanner<T, M> implements RedisDataScanner
     @Override
     public void refreshUI() {
         scanDataRefreshHandler.accept(scanDataResult);
+    }
+
+    protected RedisScanContext<T> getContextByKey(String key) {
+        return redisScanContextManager.getContext(key);
+    }
+
+    public void reset(String key)  {
+        redisScanContextManager.reset(key);
     }
 
 }

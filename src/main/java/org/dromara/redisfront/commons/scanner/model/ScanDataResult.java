@@ -13,5 +13,5 @@ public class ScanDataResult<M> {
 
     private Boolean isFinished;
 
-    private M tableModel;
+    private M data;
 }

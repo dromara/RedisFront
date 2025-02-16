@@ -44,10 +44,6 @@ public class RedisStringServiceImpl implements RedisStringService {
 
     @Override
     public Long strlen(RedisConnectContext redisConnectContext, String key) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("STRLEN ".concat(key));
-        LogsDialog.appendLog(logInfo);
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.strlen(key));
         } else {

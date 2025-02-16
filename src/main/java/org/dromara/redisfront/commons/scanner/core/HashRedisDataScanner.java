@@ -26,7 +26,7 @@ public class HashRedisDataScanner extends AbstractRedisDataScanner<Map.Entry<Str
 
     @Override
     public void fetchData(String fetchKey) {
-        var scanContext = redisScanContextManager.getContext(key);
+        var scanContext = getContextByKey(key);
 
         if (RedisFrontUtils.isNotEmpty(scanContext.getKeyList()) && scanContext.getKeyList().size() >= 1000) {
             throw new RedisFrontException(tr.getString("DataViewForm.redisFrontException.message"));
@@ -41,11 +41,6 @@ public class HashRedisDataScanner extends AbstractRedisDataScanner<Map.Entry<Str
         scanContext.setKeyList(Lists.newArrayList(mapScanCursor.getMap().entrySet()));
 
         updateState(scanContext);
-    }
-
-
-    public void reset() {
-        redisScanContextManager.reset(key);
     }
 
     @Override

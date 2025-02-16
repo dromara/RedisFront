@@ -44,6 +44,8 @@ public class ZSetRedisDataScanner extends AbstractRedisDataScanner<ScoredValue<S
         scanContext.setScanCursor(valueScanCursor);
 
         scanContext.setKeyList(valueScanCursor.getValues());
+
+        updateState(scanContext);
     }
 
     @Override
@@ -56,7 +58,4 @@ public class ZSetRedisDataScanner extends AbstractRedisDataScanner<ScoredValue<S
         return RedisZSetService.service.zcard(redisConnectContext, key);
     }
 
-    public void reset() {
-        redisScanContextManager.reset(key);
-    }
 }

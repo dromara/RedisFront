@@ -109,7 +109,7 @@ public class RightViewFragment {
         this.redisConnectContext = redisConnectContext;
         this.treeNodeInfo = treeNodeInfo;
 
-        this.stringDataFetcher = new StringRedisDataScanner(redisConnectContext, treeNodeInfo.key(), turbo -> {
+        this.stringDataFetcher = new StringRedisDataScanner(redisConnectContext, turbo -> {
             tableViewPanel.setVisible(false);
             valueUpdateSaveBtn.setEnabled(true);
             lengthLabel.setText("Length: " + turbo.getT1());
@@ -123,7 +123,7 @@ public class RightViewFragment {
             keyLabel.setOpaque(true);
             keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
             tableViewPanel.setVisible(true);
-            dataTable.setModel(scanData.getTableModel());
+            dataTable.setModel(scanData.getData());
             refreshTableUI(scanData.getLen(), scanData.getDataSize(), scanData.getLoadSize(), scanData.getIsFinished());
             SwingUtils.removeAllComponent(dataPanel);
             dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
@@ -134,7 +134,7 @@ public class RightViewFragment {
             keyLabel.setOpaque(true);
             keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
             tableViewPanel.setVisible(true);
-            dataTable.setModel(scanData.getTableModel());
+            dataTable.setModel(scanData.getData());
             refreshTableUI(scanData.getLen(), scanData.getDataSize(), scanData.getLoadSize(), scanData.getIsFinished());
             SwingUtils.removeAllComponent(dataPanel);
             dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
@@ -145,7 +145,7 @@ public class RightViewFragment {
             keyLabel.setOpaque(true);
             keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
             tableViewPanel.setVisible(true);
-            dataTable.setModel(scanData.getTableModel());
+            dataTable.setModel(scanData.getData());
             refreshTableUI(scanData.getLen(), scanData.getDataSize(), scanData.getLoadSize(), scanData.getIsFinished());
             SwingUtils.removeAllComponent(dataPanel);
             dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
@@ -157,19 +157,19 @@ public class RightViewFragment {
             keyLabel.setOpaque(true);
             keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
             tableViewPanel.setVisible(true);
-            dataTable.setModel(scanData.getTableModel());
+            dataTable.setModel(scanData.getData());
             refreshTableUI(scanData.getLen(), scanData.getDataSize(), scanData.getLoadSize(), scanData.getIsFinished());
             SwingUtils.removeAllComponent(dataPanel);
             dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
         }, owner.getResourceBundle());
 
-        this.streamDataFetcher = new StreamRedisDataScanner(redisConnectContext, treeNodeInfo.key(), turbo -> {
+        this.streamDataFetcher = new StreamRedisDataScanner(redisConnectContext, treeNodeInfo.key(), scanData -> {
             keyLabel.setText(owner.$tr("DataViewForm.keyLabel.title"));
             keyLabel.setOpaque(true);
             keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
             tableViewPanel.setVisible(true);
-            dataTable.setModel(turbo.getT2());
-            refreshTableUI(turbo.getT1(), turbo.getT3(), turbo.getT4(), turbo.getT5());
+            dataTable.setModel(scanData.getData());
+            refreshTableUI(scanData.getLen(), scanData.getDataSize(), scanData.getLoadSize(), scanData.getIsFinished());
             SwingUtils.removeAllComponent(dataPanel);
             dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
         }, owner.getResourceBundle());
@@ -353,31 +353,31 @@ public class RightViewFragment {
             switch (keyTypeEnum) {
                 case ZSET -> {
                     if (reset) {
-                        zSetDataFetcher.reset();
+                        zSetDataFetcher.reset(key);
                     }
                     zSetDataFetcher.fetchData(searchText);
                 }
                 case HASH -> {
                     if (reset) {
-                        hashDataFetcher.reset();
+                        hashDataFetcher.reset(key);
                     }
                     hashDataFetcher.fetchData(searchText);
                 }
                 case LIST -> {
                     if (reset) {
-                        listDataFetcher.reset();
+                        listDataFetcher.reset(key);
                     }
                     listDataFetcher.fetchData(searchText);
                 }
                 case SET -> {
                     if (reset) {
-                        setDataFetcher.reset();
+                        setDataFetcher.reset(key);
                     }
                     setDataFetcher.fetchData(searchText);
                 }
                 case STREAM -> {
                     if (reset) {
-                        streamDataFetcher.reset();
+                        streamDataFetcher.reset(key);
                     }
                     streamDataFetcher.fetchData(searchText);
                 }
@@ -415,7 +415,7 @@ public class RightViewFragment {
                 case SET -> setDataFetcher.fetchData(null);
                 case LIST -> listDataFetcher.fetchData(null);
                 case STREAM -> streamDataFetcher.fetchData(null);
-                default -> stringDataFetcher.fetchData(null);
+                default -> stringDataFetcher.fetchData(key);
             }
         } else {
             owner.displayMessage("异常", owner.$tr("DataViewForm.redisFrontException.message"));
