@@ -129,24 +129,24 @@ public class RightViewFragment {
             dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
         }, owner.getResourceBundle());
 
-        this.setDataFetcher = new SetRedisDataScanner(redisConnectContext, treeNodeInfo.key(), turbo -> {
+        this.setDataFetcher = new SetRedisDataScanner(redisConnectContext, treeNodeInfo.key(), scanData -> {
             keyLabel.setText(owner.$tr("DataViewForm.keyLabel.title"));
             keyLabel.setOpaque(true);
             keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
             tableViewPanel.setVisible(true);
-            dataTable.setModel(turbo.getT2());
-            refreshTableUI(turbo.getT1(), turbo.getT3(), turbo.getT4(), turbo.getT5());
+            dataTable.setModel(scanData.getTableModel());
+            refreshTableUI(scanData.getLen(), scanData.getDataSize(), scanData.getLoadSize(), scanData.getIsFinished());
             SwingUtils.removeAllComponent(dataPanel);
             dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
         }, owner.getResourceBundle());
 
-        this.zSetDataFetcher = new ZSetRedisDataScanner(redisConnectContext, treeNodeInfo.key(), turbo -> {
+        this.zSetDataFetcher = new ZSetRedisDataScanner(redisConnectContext, treeNodeInfo.key(), scanData -> {
             keyLabel.setText(owner.$tr("DataViewForm.keyLabel.title"));
             keyLabel.setOpaque(true);
             keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
             tableViewPanel.setVisible(true);
-            dataTable.setModel(turbo.getT2());
-            refreshTableUI(turbo.getT1(), turbo.getT3(), turbo.getT4(), turbo.getT5());
+            dataTable.setModel(scanData.getTableModel());
+            refreshTableUI(scanData.getLen(), scanData.getDataSize(), scanData.getLoadSize(), scanData.getIsFinished());
             SwingUtils.removeAllComponent(dataPanel);
             dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
         }, owner.getResourceBundle());
@@ -354,8 +354,6 @@ public class RightViewFragment {
                 case ZSET -> {
                     if (reset) {
                         zSetDataFetcher.reset();
-                    } else {
-                        zSetDataFetcher.setSkey(searchText);
                     }
                     zSetDataFetcher.fetchData(searchText);
                 }

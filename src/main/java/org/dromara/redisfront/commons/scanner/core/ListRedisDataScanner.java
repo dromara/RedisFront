@@ -4,19 +4,20 @@ import io.lettuce.core.ScanCursor;
 import lombok.Getter;
 import lombok.Setter;
 import org.dromara.redisfront.commons.scanner.AbstractRedisDataScanner;
+import org.dromara.redisfront.commons.scanner.handler.ScanDataRefreshHandler;
 import org.dromara.redisfront.commons.scanner.model.ScanDataResult;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.table.ListTableModel;
 import org.dromara.redisfront.service.RedisListService;
-import org.dromara.redisfront.commons.scanner.handler.ScanDataRefreshHandler;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.ResourceBundle;
 
+@Setter
+@Getter
 public class ListRedisDataScanner extends AbstractRedisDataScanner<String, ListTableModel> {
-    @Setter
-    @Getter
+
     private String key;
 
     public ListRedisDataScanner(RedisConnectContext redisConnectContext, String key, ScanDataRefreshHandler<ScanDataResult<ListTableModel>> scanDataRefreshHandler, ResourceBundle tr) {
