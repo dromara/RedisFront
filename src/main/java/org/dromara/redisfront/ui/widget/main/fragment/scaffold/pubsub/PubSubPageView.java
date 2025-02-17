@@ -80,7 +80,7 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
                 return ret;
             }
         });
-        enableSubscribe.addItemListener(e -> {
+        enableSubscribe.addItemListener(_ -> {
             var channel = subscribeChannel.getText();
             if (!enableSubscribe.isSelected()) {
                 subscribeChannel.setFocusable(true);

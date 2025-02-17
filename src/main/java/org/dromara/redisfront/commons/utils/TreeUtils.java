@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
  */
 public class TreeUtils {
 
+    public static final String TOKEN = "__@__";
+
     private TreeUtils() {
     }
 
@@ -46,10 +48,13 @@ public class TreeUtils {
                     }
                     node.put(cell, child);
                 } else {
-                    if (isLeaf) {
+                    //解决 分组与叶子节点 同名问题
+                    if (isLeaf || child.isLeafNode) {
                         child = new StringTreeMap();
-                        child.markLeafNode();
-                        node.put("_@_" + cell, child);
+                        if (isLeaf) {
+                            child.markLeafNode();
+                        }
+                        node.put(TOKEN + cell, child);
                     }
                 }
                 node = child;
@@ -79,10 +84,9 @@ public class TreeUtils {
      * @return Set<TreeNodeInfo>
      */
     public static Set<TreeNodeInfo> convertTreeNodeInfoSet(StringTreeMap stringTreeMap, String parentKey, String delim) {
-
         return stringTreeMap.entrySet().stream()
                 .map(entry -> {
-                    String key = entry.getKey().replace("_@_", "");
+                    String key = entry.getKey().replace(TOKEN, "");
                     StringTreeMap value = entry.getValue();
                     StringBuilder sb = new StringBuilder(parentKey.length() + key.length() + 1);
                     if (!RedisFrontUtils.isEmpty(parentKey)) {
