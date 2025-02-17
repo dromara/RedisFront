@@ -81,7 +81,6 @@ public class LeftSearchFragment {
     private JButton deleteAllBtn;
     private volatile Map<Integer, RedisScanContext<String>> scanKeysContextMap;
     private final RedisConnectContext redisConnectContext;
-    private JButton searchBtn;
 
     private final ArrayList<DbInfo> dbList = new ArrayList<>() {
         {
@@ -276,7 +275,7 @@ public class LeftSearchFragment {
                         owner.$tr("DataSearchForm.showConfirmDialog.title"), JOptionPane.YES_NO_OPTION);
                 if (res == JOptionPane.YES_OPTION) {
                     scanKeysContextMap.put(redisConnectContext.getDatabase(), new RedisScanContext<>());
-                    scanKeysAndInitScanInfo();
+                    scanKeysAndUpdateScanInfo();
                 }
             }
         });
@@ -290,7 +289,7 @@ public class LeftSearchFragment {
         };
 
         //刷新按钮事件
-        refreshBtn.addActionListener(e -> {
+        refreshBtn.addActionListener(_ -> {
             var selectedIndex = databaseComboBox.getSelectedIndex();
             searchTextField.setText("");
             databaseComboBox.removeAllItems();
@@ -318,7 +317,13 @@ public class LeftSearchFragment {
                     RedisBasicService.service.flushall(redisConnectContext);
                 }
                 return null;
-            }, (_, _) -> doScanRemoteData());
+            }, (_, e) -> {
+                if (e != null) {
+                    owner.displayException(e);
+                    return;
+                }
+                refreshBtn.doClick();
+            });
 
         });
         deleteAllBtn.setIcon(Icons.DELETE_B_ICON);
@@ -369,16 +374,16 @@ public class LeftSearchFragment {
             public void keyPressed(KeyEvent e) {
                 if (RedisFrontUtils.equal(e.getKeyCode(), KeyEvent.VK_ENTER)) {
                     scanKeysContextMap.put(redisConnectContext.getDatabase(), new RedisScanContext<>());
-                    scanKeysAndInitScanInfo();
+                    scanKeysAndUpdateScanInfo();
                 }
             }
         });
 
-        searchBtn = new JButton(new FlatSearchIcon());
+        JButton searchBtn = new JButton(new FlatSearchIcon());
         searchBtn.setFocusable(false);
         searchBtn.addActionListener(_ -> {
             scanKeysContextMap.put(redisConnectContext.getDatabase(), new RedisScanContext<>());
-            scanKeysAndInitScanInfo();
+            scanKeysAndUpdateScanInfo();
         });
 
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchBtn);
@@ -386,7 +391,7 @@ public class LeftSearchFragment {
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) _ -> {
             scanKeysContextMap.put(redisConnectContext.getDatabase(), new RedisScanContext<>());
             searchTextField.setText("");
-            scanKeysAndInitScanInfo();
+            scanKeysAndUpdateScanInfo();
         });
 
 
@@ -686,7 +691,7 @@ public class LeftSearchFragment {
         databaseComboBox.setSelectedIndex(selectedIndex);
     }
 
-    private void scanKeysAndInitScanInfo() {
+    private void scanKeysAndUpdateScanInfo() {
         var all = allField.getText();
         var scanInfo = all.split(SEPARATOR_FLAG);
         if (scanInfo.length > 1) {

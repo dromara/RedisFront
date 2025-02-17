@@ -12,6 +12,7 @@ import org.dromara.redisfront.RedisFrontEventListener;
 import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
+import org.dromara.redisfront.ui.dialog.SettingDialog;
 import org.dromara.redisfront.ui.event.DrawerChangeEvent;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.dromara.redisfront.ui.widget.main.fragment.scaffold.PageScaffold;
@@ -77,7 +78,9 @@ public class ContentTabView extends JTabbedPane {
         this.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, true);
         FlatToolBar settingToolBar = new FlatToolBar();
         settingToolBar.setLayout(new MigLayout(new LC().align("center", "bottom")));
-        settingToolBar.add(new JButton(Icons.SETTING_ICON_40x40));
+        JButton button = new JButton(Icons.SETTING_ICON_40x40);
+        button.addActionListener(_-> SettingDialog.showSettingDialog(owner));
+        settingToolBar.add(button);
         this.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, settingToolBar);
     }
 
