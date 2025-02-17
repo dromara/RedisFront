@@ -1,5 +1,6 @@
 package org.dromara.redisfront.commons.utils;
 
+import cn.hutool.core.util.StrUtil;
 import lombok.Getter;
 import org.dromara.redisfront.model.tree.TreeNodeInfo;
 
@@ -21,7 +22,7 @@ public class TreeUtils {
     public static DefaultTreeModel toTreeModel(Set<String> rows, String delim) {
         var rootNode = new TreeNodeInfo();
         var stringTreeMap = toStringTreeMap(rows, delim);
-        var treeNodeInfos = convertTreeNodeInfoSet(stringTreeMap, "");
+        var treeNodeInfos = convertTreeNodeInfoSet(stringTreeMap, "", delim);
         treeNodeInfos.forEach(rootNode::add);
         return new DefaultTreeModel(rootNode);
     }
@@ -31,7 +32,6 @@ public class TreeUtils {
         for (String row : rows) {
             String[] cells = splitKey(row, delim);
             StringTreeMap node = root;
-            // 处理末尾分隔符
             if (row.endsWith(delim)) {
                 cells[cells.length - 1] += delim;
             }
@@ -45,6 +45,12 @@ public class TreeUtils {
                         child.markLeafNode();
                     }
                     node.put(cell, child);
+                } else {
+                    if (isLeaf) {
+                        child = new StringTreeMap();
+                        child.markLeafNode();
+                        node.put("_@_" + cell, child);
+                    }
                 }
                 node = child;
             }
@@ -69,22 +75,25 @@ public class TreeUtils {
      * 递归转换TreeNode集合
      *
      * @param stringTreeMap StringTreeMap
-     * @param parentKey parentKey
+     * @param parentKey     parentKey
      * @return Set<TreeNodeInfo>
      */
-    public static Set<TreeNodeInfo> convertTreeNodeInfoSet(StringTreeMap stringTreeMap, String parentKey) {
+    public static Set<TreeNodeInfo> convertTreeNodeInfoSet(StringTreeMap stringTreeMap, String parentKey, String delim) {
+
         return stringTreeMap.entrySet().stream()
                 .map(entry -> {
-                    String key = entry.getKey().replace("->!N!", "");
+                    String key = entry.getKey().replace("_@_", "");
                     StringTreeMap value = entry.getValue();
                     StringBuilder sb = new StringBuilder(parentKey.length() + key.length() + 1);
                     if (!RedisFrontUtils.isEmpty(parentKey)) {
-                        sb.append(parentKey).append(':');
+                        sb.append(parentKey).append(delim);
                     }
-                    sb.append(key);
+                    if (!value.isLeafNode || !StrUtil.equals(key, delim)) {
+                        sb.append(key);
+                    }
                     String fullKeyName = sb.toString();
                     TreeNodeInfo node = new TreeNodeInfo(key, fullKeyName, value.isLeafNode);
-                    convertTreeNodeInfoSet(value, fullKeyName).forEach(node::add);
+                    convertTreeNodeInfoSet(value, fullKeyName, delim).forEach(node::add);
                     return node;
                 })
                 .sorted(Comparator.comparing(TreeNodeInfo::key))

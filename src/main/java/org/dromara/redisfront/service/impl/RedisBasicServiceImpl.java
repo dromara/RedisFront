@@ -175,11 +175,6 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public String type(RedisConnectContext redisConnectContext, String key) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext)
-                .setInfo("type ".concat(key).toUpperCase());
-        LogsDialog.appendLog(logInfo);
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.type(key));
         } else {

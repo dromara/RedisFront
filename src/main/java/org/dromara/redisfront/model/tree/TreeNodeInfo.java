@@ -63,7 +63,8 @@ public class TreeNodeInfo extends DefaultMutableTreeNode implements Comparator<T
         if (this == o) return true;
         if (!(o instanceof TreeNodeInfo that)) return false;
         return Objects.equals(key, that.key) &&
-                Objects.equals(title, that.title);
+                Objects.equals(title, that.title) &&
+                Objects.equals(isLeafNode, that.isLeafNode);
     }
 
     @Override

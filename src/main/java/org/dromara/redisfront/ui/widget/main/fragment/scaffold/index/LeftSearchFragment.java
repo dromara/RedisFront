@@ -15,7 +15,10 @@ import org.dromara.redisfront.commons.enums.KeyTypeEnum;
 import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.resources.Icons;
-import org.dromara.redisfront.commons.utils.*;
+import org.dromara.redisfront.commons.utils.AlertUtils;
+import org.dromara.redisfront.commons.utils.FutureUtils;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
+import org.dromara.redisfront.commons.utils.TreeUtils;
 import org.dromara.redisfront.model.DbInfo;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.tree.TreeNodeInfo;
@@ -46,7 +49,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -205,47 +207,23 @@ public class LeftSearchFragment {
         });
     }
 
-    public void scanKeysActionPerformed() {
-        SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
+    public void doScanRemoteData() {
+        SyncLoadingDialog.builder(owner, owner.$tr("MainWindowForm.loading.title")).showSyncLoadingDialog(() -> {
             if (RedisFrontUtils.isEmpty(searchTextField.getText())) {
                 loadTreeModelData("*");
             } else {
                 loadTreeModelData(searchTextField.getText());
             }
             return null;
-        }, (r, e) -> {
+        }, (_, e) -> {
             if (e != null) {
                 owner.displayException(e);
             }
         });
     }
 
-    public void scanBeforeProcess() {
-        SwingUtilities.invokeLater(() -> {
-            searchTextField.setEnabled(false);
-            refreshBtn.setEnabled(false);
-            searchBtn.setEnabled(false);
-            keyTree.setEnabled(false);
-            loadMoreBtn.setEnabled(false);
-            databaseComboBox.setEnabled(false);
-        });
-    }
 
-    public void scanAfterProcess() {
-        SwingUtilities.invokeLater(() -> {
-            searchTextField.setEnabled(true);
-            refreshBtn.setEnabled(true);
-            searchBtn.setEnabled(true);
-            keyTree.setEnabled(true);
-            if (RedisFrontUtils.notEqual(loadMoreBtn.getText(), owner.$tr("DataSearchForm.loadMoreBtn.complete.title"))) {
-                loadMoreBtn.requestFocus();
-                loadMoreBtn.setEnabled(true);
-            }
-            databaseComboBox.setEnabled(RedisFrontUtils.notEqual(redisConnectContext.getRedisMode(), RedisMode.CLUSTER));
-        });
-    }
-
-    public void deleteActionPerformed() {
+    public void doDeleteRemoteData() {
         var treeModel = (DefaultTreeModel) keyTree.getModel();
         var selectNode = keyTree.getLastSelectedPathComponent();
         if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
@@ -256,13 +234,13 @@ public class LeftSearchFragment {
         }
     }
 
-    public void deleteActionPerformed(TreeNodeInfo treeNodeInfo) {
+    public void doDeleteRemoteData(TreeNodeInfo treeNodeInfo) {
         if (treeNodeInfo.getChildCount() > 0) {
             for (int i = 0; i < treeNodeInfo.getChildCount(); i++) {
                 var subNode = (TreeNodeInfo) treeNodeInfo.getChildAt(i);
-                deleteActionPerformed(subNode);
+                doDeleteRemoteData(subNode);
             }
-        } else {
+        } else if (treeNodeInfo.getIsLeafNode()) {
             RedisBasicService.service.del(redisConnectContext, treeNodeInfo.key());
         }
     }
@@ -331,18 +309,18 @@ public class LeftSearchFragment {
         };
         deleteAllBtn.setFocusable(false);
 
-        deleteAllBtn.addActionListener(e -> FutureUtils.runAsync(
-                () -> {
-                    String operation = JOptionPane.showInputDialog(owner.$tr("DataSearchForm.showInputDialog.title") + "\n “flushdb” or “flushall” ");
-                    if (RedisFrontUtils.equal(operation, "flushdb")) {
-                        RedisBasicService.service.flushdb(redisConnectContext);
-                    } else if (RedisFrontUtils.equal(operation, "flushall")) {
-                        RedisBasicService.service.flushall(redisConnectContext);
-                    }
-                },
-                this::scanBeforeProcess,
-                this::scanAfterProcess
-        ));
+        deleteAllBtn.addActionListener(_ -> {
+            String operation = JOptionPane.showInputDialog(owner.$tr("DataSearchForm.showInputDialog.title") + "\n “flushdb” or “flushall” ");
+            SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
+                if (RedisFrontUtils.equal(operation, "flushdb")) {
+                    RedisBasicService.service.flushdb(redisConnectContext);
+                } else if (RedisFrontUtils.equal(operation, "flushall")) {
+                    RedisBasicService.service.flushall(redisConnectContext);
+                }
+                return null;
+            }, (_, _) -> doScanRemoteData());
+
+        });
         deleteAllBtn.setIcon(Icons.DELETE_B_ICON);
 
 
@@ -357,10 +335,7 @@ public class LeftSearchFragment {
         };
         loadMoreBtn.setFocusable(false);
         loadMoreBtn.setIcon(Icons.LOAD_MORE_ICON);
-        loadMoreBtn.addActionListener(e -> {
-            FutureUtils.runAsync(() -> LoadingUtils.showDialog(owner.$tr("MainWindowForm.loading.title")));
-            scanKeysActionPerformed();
-        });
+        loadMoreBtn.addActionListener(_ -> doScanRemoteData());
 
 
         scanKeysContextMap = new ConcurrentHashMap<>();
@@ -378,7 +353,7 @@ public class LeftSearchFragment {
             var flag = !RedisFrontUtils.isNull(db.dbSize()) && (db.dbSize() > limit);
             allField.setText(String.valueOf(db.dbSize()));
             loadMorePanel.setVisible(flag);
-            scanKeysActionPerformed();
+            doScanRemoteData();
         });
 
         searchTextField = new JTextField() {
@@ -475,18 +450,15 @@ public class LeftSearchFragment {
                     if (RedisFrontUtils.isNotEmpty(selectionPaths)) {
                         for (TreePath selectionPath : selectionPaths) {
                             if (selectionPath.getLastPathComponent() instanceof TreeNodeInfo treeNodeInfo) {
-                                List<Object> objects = SwingUtils.saveExpandedPaths(keyTree);
                                 var title = treeNodeInfo.title();
                                 treeNodeInfo.setTitle(title.concat(" ").concat(owner.$tr("DataSearchForm.treeNodeInfo.del.doing.message")));
                                 keyTree.updateUI();
-
                                 SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
-                                    deleteActionPerformed(treeNodeInfo);
-                                    return null;
-                                }, (_, exp) -> {
-                                    if (exp == null) {
-                                        treeModel.removeNodeFromParent(treeNodeInfo);
-                                        SwingUtils.restoreExpandedPaths(keyTree, treeModel, objects);
+                                    doDeleteRemoteData(treeNodeInfo);
+                                    return findTreeNodeParent(treeNodeInfo);
+                                }, (e, ex) -> {
+                                    if (ex == null) {
+                                        treeModel.removeNodeFromParent(e);
                                     }
                                 });
                             }
@@ -672,6 +644,14 @@ public class LeftSearchFragment {
 
     }
 
+    private TreeNodeInfo findTreeNodeParent(TreeNodeInfo treeNodeInfo) {
+        TreeNodeInfo parent = (TreeNodeInfo) treeNodeInfo.getParent();
+        if (parent == null || parent.getChildCount() > 1) {
+            return treeNodeInfo;
+        }
+        return findTreeNodeParent(parent);
+    }
+
     private void databaseComboBoxInit(int selectedIndex) {
         if (RedisFrontUtils.notEqual(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             Map<String, String> databases = RedisBasicService.service.configGet(redisConnectContext, "databases");
@@ -713,8 +693,7 @@ public class LeftSearchFragment {
             allField.setText("0" + SEPARATOR_FLAG + scanInfo[1]);
             allField.setToolTipText(String.format(owner.$tr("DataSearchForm.allLabel.toolTip.text"), 0, scanInfo[1]));
         }
-        FutureUtils.runAsync(() -> LoadingUtils.showDialog(owner.$tr("MainWindowForm.loading.title")));
-        scanKeysActionPerformed();
+        doScanRemoteData();
     }
 
     /**
