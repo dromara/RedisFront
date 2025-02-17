@@ -105,7 +105,7 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
             var count = RedisPubSubService.service.publish(redisConnectContext, channelField.getText(), messageField.getText());
             SwingUtilities.invokeLater(() -> {
                 messageField.setText("");
-                AlertUtils.showInformationDialog("成功发布 " + count + " 条消息！");
+                AlertUtils.showInformationDialog(getApp(), "成功发布 " + count + " 条消息！");
             });
         }));
     }

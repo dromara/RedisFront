@@ -1,21 +1,18 @@
 package org.dromara.redisfront.ui.dialog;
 
 
-import cn.hutool.core.util.NumberUtil;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.FlatAnimatedLafChange;
 import com.formdev.flatlaf.ui.FlatUIUtils;
-import com.formdev.flatlaf.util.StringUtils;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import org.dromara.redisfront.RedisFrontMain;
+import org.dromara.quickswing.ui.app.QSDialog;
+import org.dromara.redisfront.RedisFrontPrefs;
 import org.dromara.redisfront.commons.constant.Constants;
-import org.dromara.redisfront.commons.utils.RedisFrontUtils;
-import org.dromara.redisfront.commons.resources.AbstractDialog;
-import org.dromara.redisfront.commons.utils.LocaleUtils;
 import org.dromara.redisfront.commons.utils.PrefUtils;
-import org.dromara.redisfront.commons.utils.ThemeUtils;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -24,49 +21,38 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.*;
+import java.util.prefs.Preferences;
 
-public class SettingDialog extends AbstractDialog<Void> {
+public class SettingDialog extends QSDialog<RedisFrontWidget> {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
-    private JPanel themePanel;
     private JPanel fontPanel;
-    private JPanel redisPanel;
     private JComboBox<String> fontSizeComboBox;
     private JComboBox<String> fontNameComboBox;
-    private JComboBox<ThemeUtils.ThemeInfo> themeNameComboBox;
-    private JTextField keySeparator;
-    private JTextField keyMaxLoadNum;
     private JLabel fontLabel;
     private JLabel fontSizeLabel;
-    private JLabel themeLabel;
-    private JLabel loadNumLabel;
-    private JLabel keySeparatorLabel;
     private JPanel languagePanel;
     private JLabel languageLabel;
     private JComboBox<Map.Entry<String, String>> languageComboBox;
-    private JTextField redisTimeoutTextField;
-    private JTextField sshTimeoutTextField;
-    private JLabel sshTimeoutLabel;
-    private JLabel redisTimeoutLabel;
+    private final Preferences preferences;
 
-    public static void showSettingDialog() {
-        var settingDialog = new SettingDialog(RedisFrontMain.frame);
+
+    public static void showSettingDialog(RedisFrontWidget owner) {
+        var settingDialog = new SettingDialog(owner);
         settingDialog.setMinimumSize(new Dimension(550, 400));
-        settingDialog.setLocationRelativeTo(RedisFrontMain.frame);
+        settingDialog.setLocationRelativeTo(owner);
         settingDialog.pack();
         settingDialog.setVisible(true);
     }
 
-    public SettingDialog(Frame owner) {
-        super(owner);
+    public SettingDialog(RedisFrontWidget owner) {
+        super(owner, owner.$tr("SettingDialog.Window.Title"), true);
+        preferences = getOwner().getPrefs().getState();
         $$$setupUI$$$();
-        setTitle(LocaleUtils.get("SettingDialog.Window").title());
         setContentPane(contentPane);
-        setModal(true);
         getRootPane().setDefaultButton(buttonOK);
         buttonOK.addActionListener(e -> onOK());
         buttonCancel.addActionListener(e -> onCancel());
@@ -76,32 +62,11 @@ public class SettingDialog extends AbstractDialog<Void> {
                 onCancel();
             }
         });
-        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-        initThemeNameComboBox();
+        contentPane.registerKeyboardAction(_ -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         initFontComboBox();
         initFontSizeComboBox();
         initLanguageComboBox();
         initLabelText();
-        initTimeoutConfig();
-    }
-
-    private void initTimeoutConfig() {
-        redisTimeoutTextField.setInputVerifier(new InputVerifier() {
-            @Override
-            public boolean verify(JComponent input) {
-                var textField = (JTextField) input;
-                return NumberUtil.isNumber(textField.getText());
-            }
-        });
-        redisTimeoutTextField.setText(PrefUtils.getState().get(Constants.KEY_REDIS_TIMEOUT, "1000"));
-        sshTimeoutTextField.setInputVerifier(new InputVerifier() {
-            @Override
-            public boolean verify(JComponent input) {
-                var textField = (JTextField) input;
-                return NumberUtil.isNumber(textField.getText());
-            }
-        });
-        sshTimeoutTextField.setText(PrefUtils.getState().get(Constants.KEY_SSH_TIMEOUT, "1000"));
     }
 
     private void initLanguageComboBox() {
@@ -122,24 +87,15 @@ public class SettingDialog extends AbstractDialog<Void> {
                 .entrySet()
                 .stream()
                 .filter(e -> {
-                    String languageTag = PrefUtils.getState().get(Constants.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
+                    String languageTag = preferences.get(Constants.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
                     return RedisFrontUtils.equal(e.getValue(), languageTag);
                 }).findAny().orElseThrow());
     }
 
     private void initLabelText() {
-        fontLabel.setText(LocaleUtils.get("SettingDialog.FontLabel").title());
-        fontSizeLabel.setText(LocaleUtils.get("SettingDialog.FontSizeLabel").title());
-        themeLabel.setText(LocaleUtils.get("SettingDialog.ThemeLabel").title());
-        languageLabel.setText(LocaleUtils.get("SettingDialog.LanguageLabel").title());
-
-        keySeparatorLabel.setText(LocaleUtils.get("SettingDialog.KeySeparatorLabel").title());
-        keySeparator.setText(PrefUtils.getState().get(Constants.KEY_KEY_SEPARATOR, ":"));
-
-        loadNumLabel.setText(LocaleUtils.get("SettingDialog.LoadNumLabel").title());
-        keyMaxLoadNum.setText(PrefUtils.getState().get(Constants.KEY_KEY_MAX_LOAD_NUM, "5000"));
-
-
+        fontLabel.setText(getOwner().$tr("SettingDialog.FontLabel.Title"));
+        fontSizeLabel.setText(getOwner().$tr("SettingDialog.FontSizeLabel.Title"));
+        languageLabel.setText(getOwner().$tr("SettingDialog.LanguageLabel.Title"));
     }
 
     private void initFontSizeComboBox() {
@@ -150,12 +106,12 @@ public class SettingDialog extends AbstractDialog<Void> {
         }
         fontSizeComboBox.addActionListener(e -> {
             String fontSizeStr = (String) fontSizeComboBox.getSelectedItem();
-            if (RedisFrontUtils.equal(fontSizeStr, PrefUtils.getState().get(Constants.KEY_FONT_SIZE, getDefaultFontSize()))) {
+            if (RedisFrontUtils.equal(fontSizeStr, preferences.get(Constants.KEY_FONT_SIZE, getDefaultFontSize()))) {
                 return;
             }
             this.updateFontSizeHandler(fontSizeStr);
         });
-        fontSizeComboBox.setSelectedItem(PrefUtils.getState().get(Constants.KEY_FONT_SIZE, getDefaultFontSize()));
+        fontSizeComboBox.setSelectedItem(preferences.get(Constants.KEY_FONT_SIZE, getDefaultFontSize()));
     }
 
     //获取默认字体大小
@@ -189,12 +145,12 @@ public class SettingDialog extends AbstractDialog<Void> {
         });
         fontNameComboBox.addActionListener(e -> {
             String fontFamily = (String) fontNameComboBox.getSelectedItem();
-            if (RedisFrontUtils.equal(fontFamily, PrefUtils.getState().get(Constants.KEY_FONT_NAME, getDefaultFontFamily()))) {
+            if (RedisFrontUtils.equal(fontFamily, preferences.get(Constants.KEY_FONT_NAME, getDefaultFontFamily()))) {
                 return;
             }
             this.updateFontNameHandler(fontFamily);
         });
-        fontNameComboBox.setSelectedItem(PrefUtils.getState().get(Constants.KEY_FONT_NAME, getDefaultFontFamily()));
+        fontNameComboBox.setSelectedItem(preferences.get(Constants.KEY_FONT_NAME, getDefaultFontFamily()));
     }
 
     //获取默认字体大小
@@ -202,15 +158,6 @@ public class SettingDialog extends AbstractDialog<Void> {
         return String.valueOf(UIManager.getFont("defaultFont").getFontName());
     }
 
-
-    private void initThemeNameComboBox() {
-     themeNameComboBox.addActionListener(e -> {
-            JComboBox<?> selected = (JComboBox<?>) e.getSource();
-            ThemeUtils.ThemeInfo themeInfo = (ThemeUtils.ThemeInfo) selected.getSelectedItem();
-            ThemeUtils.changeTheme(themeInfo);
-        });
-        themeNameComboBox.setSelectedIndex(Integer.parseInt(PrefUtils.getState().get(Constants.KEY_THEME_SELECT_INDEX, "0")));
-    }
 
     private void updateFontSizeHandler(String fontSize) {
         var font = UIManager.getFont("defaultFont");
@@ -230,30 +177,20 @@ public class SettingDialog extends AbstractDialog<Void> {
     }
 
     private void onOK() {
-
-        PrefUtils.getState().put(Constants.KEY_KEY_SEPARATOR, keySeparator.getText());
-        PrefUtils.getState().put(Constants.KEY_KEY_MAX_LOAD_NUM, keyMaxLoadNum.getText());
-        //风格
-        ThemeUtils.ThemeInfo themeInfo = (ThemeUtils.ThemeInfo) themeNameComboBox.getSelectedItem();
-        String themeName = StringUtils.isEmpty(Objects.requireNonNull(themeInfo).lafClassName()) ? "R_" + themeInfo.resourceName() : themeInfo.lafClassName();
-        PrefUtils.getState().put(Constants.KEY_THEME, themeName);
-        PrefUtils.getState().put(Constants.KEY_THEME_SELECT_INDEX, String.valueOf(themeNameComboBox.getSelectedIndex()));
         //字体名称
         String fontFamily = (String) fontNameComboBox.getSelectedItem();
-        PrefUtils.getState().put(Constants.KEY_FONT_NAME, fontFamily);
+        preferences.put(Constants.KEY_FONT_NAME, fontFamily);
         //字体大小
         String fontSizeStr = (String) fontSizeComboBox.getSelectedItem();
-        PrefUtils.getState().put(Constants.KEY_FONT_SIZE, fontSizeStr);
-        PrefUtils.getState().put(Constants.KEY_SSH_TIMEOUT, sshTimeoutTextField.getText());
-        PrefUtils.getState().put(Constants.KEY_REDIS_TIMEOUT, redisTimeoutTextField.getText());
+        preferences.put(Constants.KEY_FONT_SIZE, fontSizeStr);
 
         //语言
         var newLanguage = (Map.Entry<?, ?>) languageComboBox.getSelectedItem();
-        var oldLanguage = PrefUtils.getState().get(Constants.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
+        var oldLanguage = preferences.get(Constants.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
         assert newLanguage != null;
         if (RedisFrontUtils.notEqual(newLanguage.getValue(), oldLanguage)) {
             Locale.setDefault(Locale.forLanguageTag((String) newLanguage.getValue()));
-            PrefUtils.getState().put(Constants.KEY_LANGUAGE, (String) newLanguage.getValue());
+            preferences.put(Constants.KEY_LANGUAGE, (String) newLanguage.getValue());
             FlatLaf.updateUI();
         }
         dispose();
@@ -264,47 +201,10 @@ public class SettingDialog extends AbstractDialog<Void> {
     }
 
     private void createUIComponents() {
-        themePanel = new JPanel();
-        themePanel.setBorder(new TitledBorder(LocaleUtils.get("SettingDialog.ThemePanel").title()));
         languagePanel = new JPanel();
-        languagePanel.setBorder(new TitledBorder(LocaleUtils.get("SettingDialog.LanguagePanel").title()));
+        languagePanel.setBorder(new TitledBorder(getOwner().$tr("SettingDialog.LanguagePanel.Title")));
         fontPanel = new JPanel();
-        fontPanel.setBorder(new TitledBorder(LocaleUtils.get("SettingDialog.FontPanel").title()));
-        redisPanel = new JPanel();
-        redisPanel.setBorder(new TitledBorder(LocaleUtils.get("SettingDialog.RedisPanel").title()));
-        themeNameComboBox = new JComboBox<>() {
-            @Override
-            public void setSelectedItem(Object item) {
-                var themeInfo = (ThemeUtils.ThemeInfo) item;
-                if (themeInfo == null) {
-                    return;
-                }
-                //忽略分类符号
-                if (themeInfo.name().startsWith("**")) {
-                    return;
-                }
-                super.setSelectedItem(item);
-            }
-
-            {
-                setRenderer(new DefaultListCellRenderer() {
-                    @Override
-                    public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                        super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                        var themeInfo = (ThemeUtils.ThemeInfo) value;
-                        if (themeInfo.name().startsWith("Material Theme UI Lite /")) {
-                            setText(themeInfo.name().replace("Material Theme UI Lite /", ""));
-                        }
-                        if (themeInfo.name().startsWith("**")) {
-                            setEnabled(false);
-                        }
-                        return this;
-                    }
-                });
-
-            }
-        };
-
+        fontPanel.setBorder(new TitledBorder(getOwner().$tr("SettingDialog.FontPanel.Title")));
     }
 
     /**
@@ -333,46 +233,8 @@ public class SettingDialog extends AbstractDialog<Void> {
         buttonCancel.setText("取消");
         panel2.add(buttonCancel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();
-        panel3.setLayout(new GridLayoutManager(4, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panel3.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
         contentPane.add(panel3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        themePanel.setLayout(new GridLayoutManager(1, 4, new Insets(0, 0, 0, 0), -1, -1));
-        panel3.add(themePanel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        themeLabel = new JLabel();
-        themeLabel.setText("风格");
-        themePanel.add(themeLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        themePanel.add(themeNameComboBox, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(380, -1), null, null, 0, false));
-        final Spacer spacer2 = new Spacer();
-        themePanel.add(spacer2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        final Spacer spacer3 = new Spacer();
-        themePanel.add(spacer3, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        redisPanel.setLayout(new GridLayoutManager(2, 6, new Insets(0, 0, 0, 0), -1, -1));
-        panel3.add(redisPanel, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        keySeparatorLabel = new JLabel();
-        keySeparatorLabel.setText("分隔符");
-        redisPanel.add(keySeparatorLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        keySeparator = new JTextField();
-        redisPanel.add(keySeparator, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-        loadNumLabel = new JLabel();
-        loadNumLabel.setText("key加载数");
-        redisPanel.add(loadNumLabel, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        keyMaxLoadNum = new JTextField();
-        redisPanel.add(keyMaxLoadNum, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-        final Spacer spacer4 = new Spacer();
-        redisPanel.add(spacer4, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        final Spacer spacer5 = new Spacer();
-        redisPanel.add(spacer5, new GridConstraints(0, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        sshTimeoutLabel = new JLabel();
-        this.$$$loadLabelText$$$(sshTimeoutLabel, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "SettingDialog.sshTimeoutLabel.Title"));
-        redisPanel.add(sshTimeoutLabel, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        redisTimeoutLabel = new JLabel();
-        this.$$$loadLabelText$$$(redisTimeoutLabel, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "SettingDialog.redisTimeoutLabel.Title"));
-        redisPanel.add(redisTimeoutLabel, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        redisTimeoutTextField = new JTextField();
-        redisTimeoutTextField.setText("1000");
-        redisPanel.add(redisTimeoutTextField, new GridConstraints(1, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-        sshTimeoutTextField = new JTextField();
-        sshTimeoutTextField.setText("1000");
-        redisPanel.add(sshTimeoutTextField, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         fontPanel.setLayout(new GridLayoutManager(1, 6, new Insets(0, 0, 0, 0), -1, -1));
         panel3.add(fontPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         fontLabel = new JLabel();
@@ -385,10 +247,10 @@ public class SettingDialog extends AbstractDialog<Void> {
         fontPanel.add(fontSizeLabel, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         fontSizeComboBox = new JComboBox();
         fontPanel.add(fontSizeComboBox, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(180, -1), null, null, 0, false));
-        final Spacer spacer6 = new Spacer();
-        fontPanel.add(spacer6, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        final Spacer spacer7 = new Spacer();
-        fontPanel.add(spacer7, new GridConstraints(0, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer2 = new Spacer();
+        fontPanel.add(spacer2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer3 = new Spacer();
+        fontPanel.add(spacer3, new GridConstraints(0, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         languagePanel.setLayout(new GridLayoutManager(1, 4, new Insets(0, 0, 0, 0), -1, -1));
         panel3.add(languagePanel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         languageLabel = new JLabel();
@@ -396,54 +258,10 @@ public class SettingDialog extends AbstractDialog<Void> {
         languagePanel.add(languageLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         languageComboBox = new JComboBox();
         languagePanel.add(languageComboBox, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, new Dimension(380, -1), null, null, 0, false));
-        final Spacer spacer8 = new Spacer();
-        languagePanel.add(spacer8, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        final Spacer spacer9 = new Spacer();
-        languagePanel.add(spacer9, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-    }
-
-    private static Method $$$cachedGetBundleMethod$$$ = null;
-
-    private String $$$getMessageFromBundle$$$(String path, String key) {
-        ResourceBundle bundle;
-        try {
-            Class<?> thisClass = this.getClass();
-            if ($$$cachedGetBundleMethod$$$ == null) {
-                Class<?> dynamicBundleClass = thisClass.getClassLoader().loadClass("com.intellij.DynamicBundle");
-                $$$cachedGetBundleMethod$$$ = dynamicBundleClass.getMethod("getBundle", String.class, Class.class);
-            }
-            bundle = (ResourceBundle) $$$cachedGetBundleMethod$$$.invoke(null, path, thisClass);
-        } catch (Exception e) {
-            bundle = ResourceBundle.getBundle(path);
-        }
-        return bundle.getString(key);
-    }
-
-    /**
-     * @noinspection ALL
-     */
-    private void $$$loadLabelText$$$(JLabel component, String text) {
-        StringBuffer result = new StringBuffer();
-        boolean haveMnemonic = false;
-        char mnemonic = '\0';
-        int mnemonicIndex = -1;
-        for (int i = 0; i < text.length(); i++) {
-            if (text.charAt(i) == '&') {
-                i++;
-                if (i == text.length()) break;
-                if (!haveMnemonic && text.charAt(i) != '&') {
-                    haveMnemonic = true;
-                    mnemonic = text.charAt(i);
-                    mnemonicIndex = result.length();
-                }
-            }
-            result.append(text.charAt(i));
-        }
-        component.setText(result.toString());
-        if (haveMnemonic) {
-            component.setDisplayedMnemonic(mnemonic);
-            component.setDisplayedMnemonicIndex(mnemonicIndex);
-        }
+        final Spacer spacer4 = new Spacer();
+        languagePanel.add(spacer4, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer5 = new Spacer();
+        languagePanel.add(spacer5, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
     }
 
     /**

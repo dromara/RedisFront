@@ -2,6 +2,7 @@ package org.dromara.redisfront.model.tree;
 
 import cn.hutool.core.io.unit.DataSizeUtil;
 import lombok.Getter;
+import org.dromara.quickswing.tree.QSTreeNode;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -17,7 +18,7 @@ import java.util.Objects;
  */
 
 @Getter
-public class TreeNodeInfo extends DefaultMutableTreeNode implements Comparator<TreeNode> {
+public class TreeNodeInfo extends DefaultMutableTreeNode implements Comparator<TreeNode>, QSTreeNode<String> {
 
     private String title;
     private String key;
@@ -114,5 +115,10 @@ public class TreeNodeInfo extends DefaultMutableTreeNode implements Comparator<T
         String countInfo = (level > 1 ? directChildren : stats[1]) + "";
         String memoryInfo = stats[0] == 0 ? "" : " [ " + DataSizeUtil.format(stats[0]) + " ]  ";
         return String.format("%s (%s) %s", title, countInfo, memoryInfo);
+    }
+
+    @Override
+    public String id() {
+        return key;
     }
 }

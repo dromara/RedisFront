@@ -12,7 +12,6 @@ import org.dromara.quickswing.ui.swing.AnimateButton;
 import org.dromara.redisfront.commons.enums.KeyTypeEnum;
 import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
-import org.dromara.redisfront.commons.utils.SwingUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.table.HashTableModel;
 import org.dromara.redisfront.model.table.SortedSetTableModel;
@@ -25,7 +24,7 @@ import org.dromara.redisfront.ui.components.editor.TextEditor;
 import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
 import org.dromara.redisfront.ui.components.scanner.core.*;
 import org.dromara.redisfront.ui.components.scanner.model.ScanDataResult;
-import org.dromara.redisfront.ui.dialog.AddOrUpdateItemDialog;
+import org.dromara.redisfront.ui.dialog.AddOrUpdateValueDialog;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.slf4j.Logger;
@@ -460,7 +459,7 @@ public class RightViewFragment {
             } else {
                 switch (turbo.getT1()) {
                     case ZSET, LIST, SET, HASH ->
-                            AddOrUpdateItemDialog.showAddOrUpdateItemDialog(owner.$tr("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), turbo.getT2(), turbo.getT3(), redisConnectContext, keyTypeEnum, () -> {
+                            AddOrUpdateValueDialog.showAddOrUpdateItemDialog(owner.$tr("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), turbo.getT2(), turbo.getT3(), redisConnectContext, keyTypeEnum, () -> {
                             });
                 }
             }
@@ -756,15 +755,15 @@ public class RightViewFragment {
 
             switch (keyTypeEnum) {
                 case ZSET ->
-                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("ZSET", keyField.getText(), null, null, redisConnectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
+                        AddOrUpdateValueDialog.showAddOrUpdateItemDialog("ZSET", keyField.getText(), null, null, redisConnectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
                 case HASH ->
-                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("HASH", keyField.getText(), null, null, redisConnectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
+                        AddOrUpdateValueDialog.showAddOrUpdateItemDialog("HASH", keyField.getText(), null, null, redisConnectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
                 case LIST ->
-                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("LIST", keyField.getText(), null, null, redisConnectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
+                        AddOrUpdateValueDialog.showAddOrUpdateItemDialog("LIST", keyField.getText(), null, null, redisConnectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
                 case SET ->
-                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("SET", keyField.getText(), null, null, redisConnectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
+                        AddOrUpdateValueDialog.showAddOrUpdateItemDialog("SET", keyField.getText(), null, null, redisConnectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
                 case STREAM ->
-                        AddOrUpdateItemDialog.showAddOrUpdateItemDialog("STREAM", keyField.getText(), null, null, redisConnectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
+                        AddOrUpdateValueDialog.showAddOrUpdateItemDialog("STREAM", keyField.getText(), null, null, redisConnectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
             }
         });
 

@@ -19,7 +19,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.HashMap;
 
-public class AddOrUpdateItemDialog extends JDialog {
+public class AddOrUpdateValueDialog extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -35,7 +35,7 @@ public class AddOrUpdateItemDialog extends JDialog {
     private final RedisConnectContext redisConnectContext;
 
     public static void showAddOrUpdateItemDialog(String title, String key, String fieldOrScore, String value, RedisConnectContext redisConnectContext, KeyTypeEnum typeEnum, ActionHandler addSuccessHandler) {
-        var addOrUpdateItemDialog = new AddOrUpdateItemDialog(title, key, fieldOrScore, value, redisConnectContext, typeEnum, addSuccessHandler);
+        var addOrUpdateItemDialog = new AddOrUpdateValueDialog(title, key, fieldOrScore, value, redisConnectContext, typeEnum, addSuccessHandler);
         addOrUpdateItemDialog.setResizable(false);
         addOrUpdateItemDialog.setLocationRelativeTo(RedisFrontMain.frame);
         addOrUpdateItemDialog.pack();
@@ -43,7 +43,7 @@ public class AddOrUpdateItemDialog extends JDialog {
     }
 
 
-    public AddOrUpdateItemDialog(String title, String key, String fieldOrScore, String value, RedisConnectContext redisConnectContext, KeyTypeEnum typeEnum, ActionHandler addSuccessHandler) {
+    public AddOrUpdateValueDialog(String title, String key, String fieldOrScore, String value, RedisConnectContext redisConnectContext, KeyTypeEnum typeEnum, ActionHandler addSuccessHandler) {
         super(RedisFrontMain.frame);
         setContentPane(contentPane);
         setTitle(title);
@@ -140,7 +140,7 @@ public class AddOrUpdateItemDialog extends JDialog {
                 JSONUtil.parseObj(valueTextArea.getText()).forEach((k, v) -> bodyMap.put(k, v.toString()));
                 RedisStreamService.service.xadd(redisConnectContext, key, bodyMap);
             } else {
-                AlertUtils.showInformationDialog("stream 请输入JSON - {key:value} 格式数据！");
+                AlertUtils.showInformationDialog(getOwner(), "stream 请输入JSON - {key:value} 格式数据！");
                 valueTextArea.requestFocus();
                 return;
             }

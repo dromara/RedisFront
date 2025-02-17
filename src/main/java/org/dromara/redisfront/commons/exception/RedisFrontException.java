@@ -1,10 +1,17 @@
 package org.dromara.redisfront.commons.exception;
 
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.swing.*;
 import java.util.function.Supplier;
 
 public class RedisFrontException extends RuntimeException implements Supplier<Object> {
 
     private final Boolean showMessage;
+    @Getter
+    @Setter
+    private JComponent component;
 
     public Boolean showMessage() {
         return showMessage;
@@ -14,6 +21,14 @@ public class RedisFrontException extends RuntimeException implements Supplier<Ob
         super(message);
         this.showMessage = false;
     }
+
+    public RedisFrontException(String message,JComponent component) {
+        super(message);
+        this.showMessage = false;
+        this.component = component;
+    }
+
+
 
     public RedisFrontException(String message, Boolean showMessage) {
         super(message);

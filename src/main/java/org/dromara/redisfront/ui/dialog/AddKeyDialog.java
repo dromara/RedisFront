@@ -6,18 +6,16 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import org.dromara.redisfront.RedisFrontMain;
-import org.dromara.redisfront.commons.constant.Constants;
+import org.dromara.quickswing.ui.app.QSDialog;
+import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.commons.enums.KeyTypeEnum;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
-import org.dromara.redisfront.commons.handler.ProcessHandler;
-import org.dromara.redisfront.commons.resources.AbstractDialog;
-import org.dromara.redisfront.commons.utils.AlertUtils;
-import org.dromara.redisfront.commons.utils.LocaleUtils;
-import org.dromara.redisfront.commons.utils.PrefUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.*;
+import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
+import org.dromara.redisfront.ui.event.AddKeySuccessEvent;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -30,7 +28,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.ResourceBundle;
 
-public class AddKeyDialog extends AbstractDialog<String> {
+public class AddKeyDialog extends QSDialog<RedisFrontWidget> {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -51,68 +49,64 @@ public class AddKeyDialog extends AbstractDialog<String> {
     private final String parentKey;
 
     private final RedisConnectContext redisConnectContext;
+    private final RedisFrontContext redisFrontContext;
 
-    public static void showAddDialog(RedisConnectContext redisConnectContext, String parent, ProcessHandler<String> addSuccessProcessHandler) {
-        var addKeyDialog = new AddKeyDialog(redisConnectContext, parent, addSuccessProcessHandler);
+    public static void showAddDialog(RedisFrontWidget redisFrontWidget, RedisConnectContext redisConnectContext, String parent) {
+        var addKeyDialog = new AddKeyDialog(redisFrontWidget, redisConnectContext, parent);
         addKeyDialog.setResizable(false);
-        addKeyDialog.setLocationRelativeTo(RedisFrontMain.frame);
+        addKeyDialog.setLocationRelativeTo(redisFrontWidget);
         addKeyDialog.pack();
         addKeyDialog.setVisible(true);
     }
 
-    public AddKeyDialog(RedisConnectContext redisConnectContext, String parent, ProcessHandler<String> addSuccessProcessHandler) {
-        super(RedisFrontMain.frame);
-        this.setModal(true);
-        this.setResizable(true);
+    public AddKeyDialog(RedisFrontWidget redisFrontWidget, RedisConnectContext redisConnectContext, String parent) {
+        super(redisFrontWidget, redisFrontWidget.$tr("AddKeyDialog.title"), true);
         this.setMinimumSize(new Dimension(500, 400));
-        this.setContentPane(contentPane);
-        getRootPane().setDefaultButton(buttonOK);
-        setTitle(LocaleUtils.getMessageFromBundle("AddKeyDialog.title"));
+        this.redisFrontContext = (RedisFrontContext) redisFrontWidget.getContext();
         this.redisConnectContext = redisConnectContext;
-        this.processHandler = addSuccessProcessHandler;
-        buttonOK.addActionListener(e -> onOK());
-
-        buttonCancel.addActionListener(e -> onCancel());
-
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
+        this.buttonOK.addActionListener(_ -> onOK());
+        this.buttonCancel.addActionListener(_ -> onCancel());
+        this.setContentPane(contentPane);
+        this.getRootPane().setDefaultButton(buttonOK);
+        this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        this.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 onCancel();
             }
         });
 
-        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        this.contentPane.registerKeyboardAction(_ -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         if (RedisFrontUtils.isNotEmpty(parent)) {
             var separatorLabel = new JLabel();
-            var separator = PrefUtils.getState().get(Constants.KEY_KEY_SEPARATOR, ":");
-            parentKey = parent + separator;
+            var separator = redisConnectContext.getSetting().getKeySeparator();
+            this.parentKey = parent + separator + " ";
             separatorLabel.setText(parentKey);
             separatorLabel.setOpaque(true);
             separatorLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
-            keyNameField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, separatorLabel);
+            this.keyNameField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, separatorLabel);
         } else {
-            parentKey = "";
+            this.parentKey = "";
         }
 
         for (KeyTypeEnum typeEnum : KeyTypeEnum.values()) {
-            keyTypeComboBox.addItem(typeEnum.typeName());
+            this.keyTypeComboBox.addItem(typeEnum.typeName());
         }
 
-        scoreLabel.setVisible(false);
-        hashKeyLabel.setVisible(false);
-        streamLabel.setVisible(false);
-        hashKeyField.setVisible(false);
-        zSetScoreField.setVisible(false);
-        zSetScoreField.setInputVerifier(new InputVerifier() {
+        this.scoreLabel.setVisible(false);
+        this.hashKeyLabel.setVisible(false);
+        this.streamLabel.setVisible(false);
+        this.hashKeyField.setVisible(false);
+        this.zSetScoreField.setVisible(false);
+        this.zSetScoreField.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
                 JTextField jTextField = (JTextField) input;
                 return NumberUtil.isNumber(jTextField.getText());
             }
         });
-        streamField.setVisible(false);
-        streamField.setInputVerifier(new InputVerifier() {
+        this.streamField.setVisible(false);
+        this.streamField.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
                 JTextField jTextField = (JTextField) input;
@@ -122,64 +116,64 @@ public class AddKeyDialog extends AbstractDialog<String> {
                 return NumberUtil.isNumber(jTextField.getText()) || RedisFrontUtils.equal("*", jTextField.getText());
             }
         });
-        ttlSpinner.setValue(-1);
+        this.ttlSpinner.setValue(-1);
 
-        keyNameField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, LocaleUtils.getMessageFromBundle("AddKeyDialog.keyNameField.placeholder.text"));
+        this.keyNameField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, getOwner().$tr("AddKeyDialog.keyNameField.placeholder.text"));
 
         initComponentListener();
     }
 
     private void initComponentListener() {
 
-        ttlSpinner.addChangeListener(e -> {
+        this.ttlSpinner.addChangeListener(_ -> {
             if (((Integer) ttlSpinner.getValue()) < 0) {
-                ttlSpinner.setValue(-1);
+                this.ttlSpinner.setValue(-1);
             }
             if (((Integer) ttlSpinner.getValue()) == 0) {
-                ttlSpinner.setValue(1);
+                this.ttlSpinner.setValue(1);
             }
         });
 
-        keyTypeComboBox.addActionListener(e -> {
+        this.keyTypeComboBox.addActionListener(_ -> {
             String selectItem = (String) keyTypeComboBox.getSelectedItem();
             if (RedisFrontUtils.equal(KeyTypeEnum.HASH.typeName(), selectItem)) {
-                hashKeyField.setVisible(true);
-                hashKeyLabel.setVisible(true);
+                this.hashKeyField.setVisible(true);
+                this.hashKeyLabel.setVisible(true);
 
-                zSetScoreField.setVisible(false);
-                scoreLabel.setVisible(false);
+                this.zSetScoreField.setVisible(false);
+                this.scoreLabel.setVisible(false);
 
-                streamField.setVisible(false);
-                streamLabel.setVisible(false);
+                this.streamField.setVisible(false);
+                this.streamLabel.setVisible(false);
 
             } else if (RedisFrontUtils.equal(KeyTypeEnum.STREAM.typeName(), selectItem)) {
-                hashKeyField.setVisible(false);
-                hashKeyLabel.setVisible(false);
+                this.hashKeyField.setVisible(false);
+                this.hashKeyLabel.setVisible(false);
 
-                zSetScoreField.setVisible(false);
-                scoreLabel.setVisible(false);
+                this.zSetScoreField.setVisible(false);
+                this.scoreLabel.setVisible(false);
 
-                streamField.setVisible(true);
-                streamLabel.setVisible(true);
+                this.streamField.setVisible(true);
+                this.streamLabel.setVisible(true);
 
             } else if (RedisFrontUtils.equal(KeyTypeEnum.ZSET.typeName(), selectItem)) {
-                hashKeyField.setVisible(false);
-                hashKeyLabel.setVisible(false);
+                this.hashKeyField.setVisible(false);
+                this.hashKeyLabel.setVisible(false);
 
-                zSetScoreField.setVisible(true);
-                scoreLabel.setVisible(true);
+                this.zSetScoreField.setVisible(true);
+                this.scoreLabel.setVisible(true);
 
-                streamLabel.setVisible(false);
-                streamField.setVisible(false);
+                this.streamLabel.setVisible(false);
+                this.streamField.setVisible(false);
             } else {
-                hashKeyField.setVisible(false);
-                hashKeyLabel.setVisible(false);
+                this.hashKeyField.setVisible(false);
+                this.hashKeyLabel.setVisible(false);
 
-                zSetScoreField.setVisible(false);
-                scoreLabel.setVisible(false);
+                this.zSetScoreField.setVisible(false);
+                this.scoreLabel.setVisible(false);
 
-                streamField.setVisible(false);
-                streamLabel.setVisible(false);
+                this.streamField.setVisible(false);
+                this.streamLabel.setVisible(false);
             }
         });
 
@@ -190,79 +184,86 @@ public class AddKeyDialog extends AbstractDialog<String> {
         var selectItem = (String) keyTypeComboBox.getSelectedItem();
 
         if (RedisFrontUtils.isEmpty(keyNameField.getText())) {
-            keyNameField.requestFocus();
-            throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddKeyDialog.require.text"));
+            throw new RedisFrontException(getOwner().$tr("AddKeyDialog.require.text"), keyNameField);
+        }
+
+        if (RedisFrontUtils.startWith(keyNameField.getText(), redisConnectContext.getSetting().getKeySeparator()) || RedisFrontUtils.endsWith(keyNameField.getText(), redisConnectContext.getSetting().getKeySeparator())) {
+            throw new RedisFrontException("key不能以 ’" + redisConnectContext.getSetting().getKeySeparator() + "' 开头或结尾！", keyNameField);
         }
 
         if (RedisFrontUtils.equal(KeyTypeEnum.HASH.typeName(), selectItem) && RedisFrontUtils.isEmpty(hashKeyField.getText())) {
-            hashKeyField.requestFocus();
-            throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddKeyDialog.require.text"));
+            throw new RedisFrontException(getOwner().$tr("AddKeyDialog.require.text"), hashKeyField);
         }
 
         if (RedisFrontUtils.equal(KeyTypeEnum.STREAM.typeName(), selectItem) && RedisFrontUtils.isEmpty(streamField.getText())) {
-            streamField.requestFocus();
-            throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddKeyDialog.require.text"));
+            throw new RedisFrontException(getOwner().$tr("AddKeyDialog.require.text"), streamField);
         }
 
         if (RedisFrontUtils.equal(KeyTypeEnum.ZSET.typeName(), selectItem) && RedisFrontUtils.isEmpty(zSetScoreField.getText())) {
-            zSetScoreField.requestFocus();
-            throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddKeyDialog.require.text"));
+            throw new RedisFrontException(getOwner().$tr("AddKeyDialog.require.text"), zSetScoreField);
         }
 
         if (RedisFrontUtils.isEmpty(keyValueField.getText())) {
-            keyValueField.requestFocus();
-            throw new RedisFrontException(LocaleUtils.getMessageFromBundle("AddKeyDialog.require.text"));
+            throw new RedisFrontException(getOwner().$tr("AddKeyDialog.require.text"), keyValueField);
         }
     }
 
     private void onOK() {
-        validParam();
+        SyncLoadingDialog.builder(getOwner()).showSyncLoadingDialog(() -> {
+            validParam();
+            var key = parentKey + keyNameField.getText();
+            var value = keyValueField.getText();
+            var ttl = ((Integer) ttlSpinner.getValue());
+            var selectItem = (String) keyTypeComboBox.getSelectedItem();
 
-        var key = parentKey + keyNameField.getText();
-        var value = keyValueField.getText();
-        var ttl = ((Integer) ttlSpinner.getValue());
-        var selectItem = (String) keyTypeComboBox.getSelectedItem();
-
-        if (RedisFrontUtils.equal(KeyTypeEnum.HASH.typeName(), selectItem)) {
-            RedisHashService.service.hset(redisConnectContext, key, hashKeyField.getText(), keyValueField.getText());
-        } else if (RedisFrontUtils.equal(KeyTypeEnum.STREAM.typeName(), selectItem)) {
-            var serverInfo = RedisBasicService.service.getServerInfo(redisConnectContext);
-            var redisVersion = serverInfo.get("redis_version");
-            var x = redisVersion.toString().split("\\.")[0];
-            if (Integer.parseInt(x) < 5) {
-                AlertUtils.showInformationDialog("Redis版本过低，不支持Stream - [ 当前版本：" + redisVersion + " ]");
-                return;
-            } else if (JSONUtil.isTypeJSON(value)) {
-                HashMap<String, String> bodyMap = new HashMap<>();
-                JSONUtil.parseObj(value).forEach((key1, value1) -> bodyMap.put(key1, value1.toString()));
-                if (RedisFrontUtils.equal(streamField.getText(), "*")) {
-                    RedisStreamService.service.xadd(redisConnectContext, key, bodyMap);
+            if (RedisFrontUtils.equal(KeyTypeEnum.HASH.typeName(), selectItem)) {
+                RedisHashService.service.hset(redisConnectContext, key, hashKeyField.getText(), keyValueField.getText());
+            } else if (RedisFrontUtils.equal(KeyTypeEnum.STREAM.typeName(), selectItem)) {
+                var serverInfo = RedisBasicService.service.getServerInfo(redisConnectContext);
+                var redisVersion = serverInfo.get("redis_version");
+                var x = redisVersion.toString().split("\\.")[0];
+                if (Integer.parseInt(x) < 5) {
+                    throw new RedisFrontException("Redis版本过低，不支持Stream - [ 当前版本：" + redisVersion + " ]");
+                } else if (JSONUtil.isTypeJSON(value)) {
+                    HashMap<String, String> bodyMap = new HashMap<>();
+                    JSONUtil.parseObj(value).forEach((key1, value1) -> bodyMap.put(key1, value1.toString()));
+                    if (RedisFrontUtils.equal(streamField.getText(), "*")) {
+                        RedisStreamService.service.xadd(redisConnectContext, key, bodyMap);
+                    } else {
+                        RedisStreamService.service.xadd(redisConnectContext, streamField.getText(), key, bodyMap);
+                    }
                 } else {
-                    RedisStreamService.service.xadd(redisConnectContext, streamField.getText(), key, bodyMap);
+                    RedisFrontException redisFrontException = new RedisFrontException("stream 请输入JSON格式数据！");
+                    redisFrontException.setComponent(this.keyValueField);
+                    throw redisFrontException;
+                }
+
+            } else if (RedisFrontUtils.equal(KeyTypeEnum.SET.typeName(), selectItem)) {
+                RedisSetService.service.sadd(redisConnectContext, key, value);
+            } else if (RedisFrontUtils.equal(KeyTypeEnum.LIST.typeName(), selectItem)) {
+                RedisListService.service.lpush(redisConnectContext, key, value);
+            } else if (RedisFrontUtils.equal(KeyTypeEnum.ZSET.typeName(), selectItem)) {
+                RedisZSetService.service.zadd(redisConnectContext, key, Double.parseDouble(zSetScoreField.getText()), value);
+            } else {
+                RedisStringService.service.set(redisConnectContext, key, value);
+            }
+            if (ttl > 0) {
+                RedisBasicService.service.expire(redisConnectContext, key, ttl.longValue());
+            }
+            return key;
+        }, (key, ex) -> {
+            if (ex != null) {
+                if (ex instanceof RedisFrontException redisFrontException) {
+                    getOwner().displayException(redisFrontException);
+                    redisFrontException.getComponent().requestFocus();
+                } else {
+                    getOwner().displayException(ex);
                 }
             } else {
-                AlertUtils.showInformationDialog("stream 请输入JSON格式数据！");
-                keyValueField.requestFocus();
-                return;
+                this.dispose();
+                this.redisFrontContext.getEventBus().publish(new AddKeySuccessEvent(key));
             }
-
-        } else if (RedisFrontUtils.equal(KeyTypeEnum.SET.typeName(), selectItem)) {
-            RedisSetService.service.sadd(redisConnectContext, key, value);
-        } else if (RedisFrontUtils.equal(KeyTypeEnum.LIST.typeName(), selectItem)) {
-            RedisListService.service.lpush(redisConnectContext, key, value);
-        } else if (RedisFrontUtils.equal(KeyTypeEnum.ZSET.typeName(), selectItem)) {
-            RedisZSetService.service.zadd(redisConnectContext, key, Double.parseDouble(zSetScoreField.getText()), value);
-        } else {
-            RedisStringService.service.set(redisConnectContext, key, value);
-        }
-
-        if (ttl > 0) {
-            RedisBasicService.service.expire(redisConnectContext, key, ttl.longValue());
-        }
-
-        dispose();
-        //添加成功回調
-        processHandler.processHandler(key);
+        });
     }
 
     private void onCancel() {

@@ -97,11 +97,11 @@ public class ImportConfigDialog extends AbstractDialog<Void> {
 //                                ConnectDetailDao.DAO.save(connectInfo);
                             }
                         }
-                        AlertUtils.showInformationDialog("导入完成");
+                        AlertUtils.showInformationDialog(null, "导入完成");
                     } catch (IORuntimeException e) {
-                        AlertUtils.showErrorDialog("配置读取异常", e);
+                        AlertUtils.showErrorDialog(null, "配置读取异常", e);
                     } catch (JSONException je) {
-                        AlertUtils.showErrorDialog("配置文件转换出现异常", je);
+                        AlertUtils.showErrorDialog(null, "配置文件转换出现异常", je);
                     }
                 } else if ("导入RDM配置".equals(selectedItem)) {
                     try {
@@ -124,12 +124,12 @@ public class ImportConfigDialog extends AbstractDialog<Void> {
                             }
                         }
                     } catch (IORuntimeException e) {
-                        AlertUtils.showInformationDialog("RDM配置读取异常");
+                        AlertUtils.showInformationDialog(null, "RDM配置读取异常");
                         throw new RuntimeException(e);
                     }
                 }
             } else {
-                AlertUtils.showInformationDialog("配置无法正常读取");
+                AlertUtils.showInformationDialog(null, "配置无法正常读取");
             }
         }
         dispose();

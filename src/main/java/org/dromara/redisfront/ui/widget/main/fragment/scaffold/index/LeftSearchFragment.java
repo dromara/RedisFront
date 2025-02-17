@@ -5,24 +5,26 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import io.lettuce.core.*;
+import io.lettuce.core.KeyScanCursor;
+import io.lettuce.core.MapScanCursor;
+import io.lettuce.core.ScoredValueScanCursor;
+import io.lettuce.core.ValueScanCursor;
 import lombok.Getter;
 import org.dromara.redisfront.RedisFrontContext;
-import org.dromara.redisfront.RedisFrontMain;
-import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.enums.KeyTypeEnum;
 import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.commons.utils.*;
 import org.dromara.redisfront.model.DbInfo;
-import org.dromara.redisfront.model.tree.TreeNodeInfo;
 import org.dromara.redisfront.model.context.RedisConnectContext;
-import org.dromara.redisfront.ui.components.scanner.context.RedisScanContext;
+import org.dromara.redisfront.model.tree.TreeNodeInfo;
 import org.dromara.redisfront.model.turbo.Turbo3;
 import org.dromara.redisfront.service.*;
 import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
+import org.dromara.redisfront.ui.components.scanner.context.RedisScanContext;
 import org.dromara.redisfront.ui.dialog.AddKeyDialog;
+import org.dromara.redisfront.ui.event.AddKeySuccessEvent;
 import org.dromara.redisfront.ui.event.ClickKeyTreeNodeEvent;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.jdesktop.swingx.JXTree;
@@ -44,6 +46,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -285,15 +288,20 @@ public class LeftSearchFragment {
         };
         addBtn.setIcon(Icons.PLUS_ICON_16X16);
         addBtn.setFocusable(false);
-        addBtn.addActionListener(_ -> AddKeyDialog.showAddDialog(redisConnectContext, null, (_) -> {
-            var res = JOptionPane.showConfirmDialog(RedisFrontMain.frame,
-                    owner.$tr("DataSearchForm.showConfirmDialog.message"),
-                    owner.$tr("DataSearchForm.showConfirmDialog.title"), JOptionPane.YES_NO_OPTION);
-            if (res == JOptionPane.YES_OPTION) {
-                scanKeysContextMap.put(redisConnectContext.getDatabase(), new RedisScanContext<>());
-                scanKeysAndInitScanInfo();
+        addBtn.addActionListener(_ -> AddKeyDialog.showAddDialog(owner, redisConnectContext, null));
+
+        this.owner.getEventListener().bind(redisConnectContext.getId(), AddKeySuccessEvent.class, qsEvent -> {
+            if (qsEvent instanceof AddKeySuccessEvent addKeySuccessEvent) {
+                Object message = addKeySuccessEvent.getMessage();
+                var res = JOptionPane.showConfirmDialog(owner,
+                        owner.$tr("DataSearchForm.showConfirmDialog.message"),
+                        owner.$tr("DataSearchForm.showConfirmDialog.title"), JOptionPane.YES_NO_OPTION);
+                if (res == JOptionPane.YES_OPTION) {
+                    scanKeysContextMap.put(redisConnectContext.getDatabase(), new RedisScanContext<>());
+                    scanKeysAndInitScanInfo();
+                }
             }
-        }));
+        });
 
         refreshBtn = new JButton() {
             @Override
@@ -436,18 +444,10 @@ public class LeftSearchFragment {
                         setText(owner.$tr("DataSearchForm.addMenuItem.title"));
                     }
                 };
-                addMenuItem.addActionListener((e) -> {
+                addMenuItem.addActionListener(_ -> {
                     var selectNode = keyTree.getLastSelectedPathComponent();
                     if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
-                        AddKeyDialog.showAddDialog(redisConnectContext, treeNodeInfo.key(), (key) -> {
-                            var res = JOptionPane.showConfirmDialog(RedisFrontMain.frame,
-                                    owner.$tr("DataSearchForm.showConfirmDialog.message"),
-                                    owner.$tr("DataSearchForm.showConfirmDialog.title"), JOptionPane.YES_NO_OPTION);
-                            if (res == JOptionPane.YES_OPTION) {
-                                scanKeysContextMap.put(redisConnectContext.getDatabase(), new RedisScanContext<>());
-                                scanKeysAndInitScanInfo();
-                            }
-                        });
+                        AddKeyDialog.showAddDialog(owner, redisConnectContext, treeNodeInfo.key());
                     }
                 });
                 add(addMenuItem);
@@ -460,9 +460,9 @@ public class LeftSearchFragment {
                         setText(owner.$tr("DataSearchForm.delMenuItem.title"));
                     }
                 };
-                delMenuItem.addActionListener((e) -> {
+                delMenuItem.addActionListener((_) -> {
                     //删除，需要进行弹框确认，生产项目，如果大规模删除，就是灾难
-                    int reply = AlertUtils.showConfirmDialog(
+                    int reply = AlertUtils.showConfirmDialog(owner,
                             owner.$tr("DataSearchForm.delMenuItem.confirm"),
                             JOptionPane.YES_NO_OPTION);
                     if (reply != JOptionPane.YES_OPTION) {
@@ -475,18 +475,22 @@ public class LeftSearchFragment {
                     if (RedisFrontUtils.isNotEmpty(selectionPaths)) {
                         for (TreePath selectionPath : selectionPaths) {
                             if (selectionPath.getLastPathComponent() instanceof TreeNodeInfo treeNodeInfo) {
-                                FutureUtils.runAsync(() -> deleteActionPerformed(treeNodeInfo),
-                                        //前置方法
-                                        () -> SwingUtilities.invokeLater(() -> {
-                                            var title = treeNodeInfo.title();
-                                            treeNodeInfo.setTitle(title.concat(" ").concat(owner.$tr("DataSearchForm.treeNodeInfo.del.doing.message")));
-                                            keyTree.updateUI();
-                                        }),
-                                        //后置方法
-                                        () -> SwingUtilities.invokeLater(() -> treeModel.removeNodeFromParent(treeNodeInfo)));
+                                List<Object> objects = SwingUtils.saveExpandedPaths(keyTree);
+                                var title = treeNodeInfo.title();
+                                treeNodeInfo.setTitle(title.concat(" ").concat(owner.$tr("DataSearchForm.treeNodeInfo.del.doing.message")));
+                                keyTree.updateUI();
+
+                                SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
+                                    deleteActionPerformed(treeNodeInfo);
+                                    return null;
+                                }, (_, exp) -> {
+                                    if (exp == null) {
+                                        treeModel.removeNodeFromParent(treeNodeInfo);
+                                        SwingUtils.restoreExpandedPaths(keyTree, treeModel, objects);
+                                    }
+                                });
                             }
                         }
-
                     }
                 });
                 add(delMenuItem);
@@ -513,9 +517,7 @@ public class LeftSearchFragment {
                                 expandPath(selectionPath);
                                 keyTree.updateUI();
                             });
-
                             memoryAnalysis(treeNodeInfo);
-
                             SwingUtilities.invokeLater(() -> {
                                 treeNodeInfo.setTitle(title);
                                 keyTree.updateUI();

@@ -22,20 +22,18 @@ public class RedisFrontEventListener extends QSEventListener<RedisFrontWidget> {
     @Override
     protected void onEvent(QSEvent qsEvent) {
         if (qsEvent instanceof RedisFrontEvent redisFrontEvent) {
-            EventConsumer eventConsumer = listener.get(redisFrontEvent.getRedisConnectContext().getId());
-            if (eventConsumer != null) {
-                eventConsumer.forEach((name, consumer) -> {
-                    if (name.equals(redisFrontEvent.getClass().getName())) {
-                        consumer.accept(redisFrontEvent);
-                    }
-                });
-            }
-        } else {
-            for (Map<String, Consumer<QSEvent>> consumerMap : listener.values()) {
-                for (Consumer<QSEvent> consumer : consumerMap.values()) {
-                    consumer.accept(qsEvent);
+            if (redisFrontEvent.getRedisConnectContext() != null) {
+                EventConsumer eventConsumer = listener.get(redisFrontEvent.getRedisConnectContext().getId());
+                if (eventConsumer != null) {
+                    eventConsumer.forEach((name, consumer) -> {
+                        if (name.equals(redisFrontEvent.getClass().getName())) {
+                            consumer.accept(redisFrontEvent);
+                        }
+                    });
                 }
             }
+        } else {
+            listener.forEach((_, eventConsumer) -> eventConsumer.forEach((_, consumer) -> consumer.accept(qsEvent)));
         }
     }
 
