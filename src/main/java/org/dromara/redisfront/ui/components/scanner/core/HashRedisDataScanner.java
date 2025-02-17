@@ -26,7 +26,7 @@ public class HashRedisDataScanner extends AbstractRedisDataScanner<Map.Entry<Str
 
     @Override
     public void fetchData(String fetchKey) {
-        var scanContext = getContextByKey(key);
+        var scanContext = getContext(key);
 
         if (RedisFrontUtils.isNotEmpty(scanContext.getKeyList()) && scanContext.getKeyList().size() >= 1000) {
             throw new RedisFrontException(tr.getString("DataViewForm.redisFrontException.message"));

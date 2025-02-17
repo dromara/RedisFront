@@ -18,11 +18,13 @@ import org.dromara.redisfront.model.table.HashTableModel;
 import org.dromara.redisfront.model.table.SortedSetTableModel;
 import org.dromara.redisfront.model.table.StreamTableModel;
 import org.dromara.redisfront.model.tree.TreeNodeInfo;
+import org.dromara.redisfront.model.turbo.Turbo2;
 import org.dromara.redisfront.model.turbo.Turbo3;
 import org.dromara.redisfront.service.*;
 import org.dromara.redisfront.ui.components.editor.TextEditor;
 import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
 import org.dromara.redisfront.ui.components.scanner.core.*;
+import org.dromara.redisfront.ui.components.scanner.model.ScanDataResult;
 import org.dromara.redisfront.ui.dialog.AddOrUpdateItemDialog;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -35,6 +37,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableModel;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.StyleContext;
 import java.awt.*;
@@ -91,7 +94,6 @@ public class RightViewFragment {
     private final TreeNodeInfo treeNodeInfo;
     private final RedisFrontWidget owner;
 
-
     private final StringRedisDataScanner stringDataFetcher;
     private final HashRedisDataScanner hashDataFetcher;
     private final SetRedisDataScanner setDataFetcher;
@@ -109,73 +111,72 @@ public class RightViewFragment {
         this.redisConnectContext = redisConnectContext;
         this.treeNodeInfo = treeNodeInfo;
 
-        this.stringDataFetcher = new StringRedisDataScanner(redisConnectContext, turbo -> {
-            tableViewPanel.setVisible(false);
-            valueUpdateSaveBtn.setEnabled(true);
-            lengthLabel.setText("Length: " + turbo.getT1());
-            keySizeLabel.setText("Size: " + RedisFrontUtils.getDataSize(turbo.getT2()));
-            dataSplitPanel.setDividerSize(0);
-            jsonValueFormat(turbo.getT2());
-        });
+        this.stringDataFetcher = new StringRedisDataScanner(
+                redisConnectContext,
+                this::refreshStringUI);
 
-        this.hashDataFetcher = new HashRedisDataScanner(redisConnectContext, treeNodeInfo.key(), scanData -> {
-            keyLabel.setText(owner.$tr("DataViewForm.keyLabel.title"));
-            keyLabel.setOpaque(true);
-            keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
-            tableViewPanel.setVisible(true);
-            dataTable.setModel(scanData.getData());
-            refreshTableUI(scanData.getLen(), scanData.getDataSize(), scanData.getLoadSize(), scanData.getIsFinished());
-            SwingUtils.removeAllComponent(dataPanel);
-            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
-        }, owner.getResourceBundle());
+        this.hashDataFetcher = new HashRedisDataScanner(
+                redisConnectContext,
+                treeNodeInfo.key(),
+                this::refreshTableUI,
+                owner.getResourceBundle());
 
-        this.setDataFetcher = new SetRedisDataScanner(redisConnectContext, treeNodeInfo.key(), scanData -> {
-            keyLabel.setText(owner.$tr("DataViewForm.keyLabel.title"));
-            keyLabel.setOpaque(true);
-            keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
-            tableViewPanel.setVisible(true);
-            dataTable.setModel(scanData.getData());
-            refreshTableUI(scanData.getLen(), scanData.getDataSize(), scanData.getLoadSize(), scanData.getIsFinished());
-            SwingUtils.removeAllComponent(dataPanel);
-            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
-        }, owner.getResourceBundle());
+        this.setDataFetcher = new SetRedisDataScanner(
+                redisConnectContext,
+                treeNodeInfo.key(),
+                this::refreshTableUI,
+                owner.getResourceBundle());
 
-        this.zSetDataFetcher = new ZSetRedisDataScanner(redisConnectContext, treeNodeInfo.key(), scanData -> {
-            keyLabel.setText(owner.$tr("DataViewForm.keyLabel.title"));
-            keyLabel.setOpaque(true);
-            keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
-            tableViewPanel.setVisible(true);
-            dataTable.setModel(scanData.getData());
-            refreshTableUI(scanData.getLen(), scanData.getDataSize(), scanData.getLoadSize(), scanData.getIsFinished());
-            SwingUtils.removeAllComponent(dataPanel);
-            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
-        }, owner.getResourceBundle());
+        this.zSetDataFetcher = new ZSetRedisDataScanner(
+                redisConnectContext,
+                treeNodeInfo.key(),
+                this::refreshTableUI,
+                owner.getResourceBundle());
 
-        this.listDataFetcher = new ListRedisDataScanner(redisConnectContext, treeNodeInfo.key(), scanData -> {
+        this.listDataFetcher = new ListRedisDataScanner(
+                redisConnectContext,
+                treeNodeInfo.key(),
+                this::refreshTableUI,
+                owner.getResourceBundle());
 
-            keyLabel.setText(owner.$tr("DataViewForm.keyLabel.title"));
-            keyLabel.setOpaque(true);
-            keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
-            tableViewPanel.setVisible(true);
-            dataTable.setModel(scanData.getData());
-            refreshTableUI(scanData.getLen(), scanData.getDataSize(), scanData.getLoadSize(), scanData.getIsFinished());
-            SwingUtils.removeAllComponent(dataPanel);
-            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
-        }, owner.getResourceBundle());
-
-        this.streamDataFetcher = new StreamRedisDataScanner(redisConnectContext, treeNodeInfo.key(), scanData -> {
-            keyLabel.setText(owner.$tr("DataViewForm.keyLabel.title"));
-            keyLabel.setOpaque(true);
-            keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
-            tableViewPanel.setVisible(true);
-            dataTable.setModel(scanData.getData());
-            refreshTableUI(scanData.getLen(), scanData.getDataSize(), scanData.getLoadSize(), scanData.getIsFinished());
-            SwingUtils.removeAllComponent(dataPanel);
-            dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
-        }, owner.getResourceBundle());
+        this.streamDataFetcher = new StreamRedisDataScanner(
+                redisConnectContext,
+                treeNodeInfo.key(),
+                this::refreshTableUI,
+                owner.getResourceBundle());
 
         $$$setupUI$$$();
         this.initialize();
+    }
+
+    private void refreshStringUI(Turbo2<Long, String> turbo) {
+        tableViewPanel.setVisible(false);
+        valueUpdateSaveBtn.setEnabled(true);
+        lengthLabel.setText("Length: " + turbo.getT1());
+        keySizeLabel.setText("Size: " + RedisFrontUtils.getDataSize(turbo.getT2()));
+        dataSplitPanel.setDividerSize(0);
+        jsonValueFormat(turbo.getT2());
+    }
+
+    private <T extends TableModel> void refreshTableUI(ScanDataResult<T> scanData) {
+        keyLabel.setText(owner.$tr("DataViewForm.keyLabel.title"));
+        keyLabel.setOpaque(true);
+        keyLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        tableViewPanel.setVisible(true);
+        dataTable.setModel(scanData.getData());
+        lengthLabel.setText("Length: " + scanData.getLen());
+        keySizeLabel.setText("Size: " + scanData.getDataSize());
+        currentCountField.setText(scanData.getLoadSize());
+        allCountField.setText(String.valueOf(scanData.getLen()));
+        if (scanData.getIsFinished()) {
+            loadMoreBtn.setText(owner.$tr("DataViewForm.loadMoreBtn.complete.title"));
+            loadMoreBtn.setEnabled(false);
+        } else {
+            loadMoreBtn.setText(owner.$tr("DataViewForm.loadMoreBtn.title"));
+            loadMoreBtn.setEnabled(true);
+        }
+        dataPanel.remove(dataSplitPanel);
+        dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
     }
 
     private void initialize() {
@@ -381,9 +382,7 @@ public class RightViewFragment {
                     }
                     streamDataFetcher.fetchData(searchText);
                 }
-                default -> {
-                    zSetDataFetcher.fetchData(key);
-                }
+                default -> zSetDataFetcher.fetchData(key);
             }
             return keyTypeEnum;
         }, (_, e) -> {
@@ -391,18 +390,11 @@ public class RightViewFragment {
                 Notifications.getInstance().show(Notifications.Type.ERROR, e.getMessage());
                 return;
             }
-            switch (keyTypeEnum) {
-                case ZSET -> zSetDataFetcher.refreshUI();
-                case HASH -> hashDataFetcher.refreshUI();
-                case LIST -> listDataFetcher.refreshUI();
-                case SET -> setDataFetcher.refreshUI();
-                case STREAM -> streamDataFetcher.refreshUI();
-                default -> stringDataFetcher.refreshUI();
-            }
+            refreshUI();
         });
     }
 
-    public void fetchRemoteData() {
+    public void fetchData() {
         String key = treeNodeInfo.key();
         var type = RedisBasicService.service.type(redisConnectContext, key);
         if (RedisFrontUtils.notEqual(type, "none")) {
@@ -437,21 +429,6 @@ public class RightViewFragment {
             default -> stringDataFetcher.refreshUI();
         }
     }
-
-    private void refreshTableUI(Long len, String dataSize, String loadSize, Boolean isFinished) {
-        lengthLabel.setText("Length: " + len);
-        keySizeLabel.setText("Size: " + dataSize);
-        currentCountField.setText(loadSize);
-        allCountField.setText(String.valueOf(len));
-        if (isFinished) {
-            loadMoreBtn.setText(owner.$tr("DataViewForm.loadMoreBtn.complete.title"));
-            loadMoreBtn.setEnabled(false);
-        } else {
-            loadMoreBtn.setText(owner.$tr("DataViewForm.loadMoreBtn.title"));
-            loadMoreBtn.setEnabled(true);
-        }
-    }
-
 
     private void updateValueActionPerformed() {
         var row = dataTable.getSelectedRow();

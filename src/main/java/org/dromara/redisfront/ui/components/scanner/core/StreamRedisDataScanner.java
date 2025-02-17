@@ -38,7 +38,7 @@ public class StreamRedisDataScanner extends AbstractRedisDataScanner<StreamMessa
     @Override
     public void fetchData(String fetchKey) {
 
-        var scanContext = getContextByKey(key);
+        var scanContext = getContext(key);
 
 
         if (RedisFrontUtils.isNotEmpty(scanContext.getKeyList()) && scanContext.getKeyList().size() >= 1000) {

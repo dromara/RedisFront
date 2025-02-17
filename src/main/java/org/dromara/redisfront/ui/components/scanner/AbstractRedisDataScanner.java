@@ -1,14 +1,18 @@
 package org.dromara.redisfront.ui.components.scanner;
 
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.scanner.context.RedisScanContext;
 import org.dromara.redisfront.ui.components.scanner.context.RedisScanContextManager;
-import org.dromara.redisfront.ui.components.scanner.model.ScanDataResult;
-import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.scanner.handler.ScanDataRefreshHandler;
+import org.dromara.redisfront.ui.components.scanner.model.ScanDataResult;
 
-import java.util.*;
+import javax.swing.table.TableModel;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.ResourceBundle;
 
-public abstract class AbstractRedisDataScanner<T, M> implements RedisDataScanner {
+public abstract class AbstractRedisDataScanner<T, M extends TableModel> implements RedisDataScanner {
     protected final RedisConnectContext redisConnectContext;
     protected final ResourceBundle tr;
     protected final Map<String, RedisScanContext<T>> contextMap;
@@ -42,11 +46,11 @@ public abstract class AbstractRedisDataScanner<T, M> implements RedisDataScanner
         scanDataRefreshHandler.accept(scanDataResult);
     }
 
-    protected RedisScanContext<T> getContextByKey(String key) {
+    protected RedisScanContext<T> getContext(String key) {
         return redisScanContextManager.getContext(key);
     }
 
-    public void reset(String key)  {
+    public void reset(String key) {
         redisScanContextManager.reset(key);
     }
 
