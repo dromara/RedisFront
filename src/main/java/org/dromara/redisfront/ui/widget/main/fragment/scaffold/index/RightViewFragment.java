@@ -25,6 +25,7 @@ import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
 import org.dromara.redisfront.ui.components.scanner.core.*;
 import org.dromara.redisfront.ui.components.scanner.model.ScanDataResult;
 import org.dromara.redisfront.ui.dialog.AddOrUpdateValueDialog;
+import org.dromara.redisfront.ui.event.KeyDeleteSuccessEvent;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.slf4j.Logger;
@@ -110,39 +111,17 @@ public class RightViewFragment {
         this.redisConnectContext = redisConnectContext;
         this.treeNodeInfo = treeNodeInfo;
 
-        this.stringDataFetcher = new StringRedisDataScanner(
-                redisConnectContext,
-                this::refreshStringUI);
+        this.stringDataFetcher = new StringRedisDataScanner(redisConnectContext, this::refreshStringUI);
 
-        this.hashDataFetcher = new HashRedisDataScanner(
-                redisConnectContext,
-                treeNodeInfo.key(),
-                this::refreshTableUI,
-                owner.getResourceBundle());
+        this.hashDataFetcher = new HashRedisDataScanner(redisConnectContext, treeNodeInfo.key(), this::refreshTableUI, owner.getResourceBundle());
 
-        this.setDataFetcher = new SetRedisDataScanner(
-                redisConnectContext,
-                treeNodeInfo.key(),
-                this::refreshTableUI,
-                owner.getResourceBundle());
+        this.setDataFetcher = new SetRedisDataScanner(redisConnectContext, treeNodeInfo.key(), this::refreshTableUI, owner.getResourceBundle());
 
-        this.zSetDataFetcher = new ZSetRedisDataScanner(
-                redisConnectContext,
-                treeNodeInfo.key(),
-                this::refreshTableUI,
-                owner.getResourceBundle());
+        this.zSetDataFetcher = new ZSetRedisDataScanner(redisConnectContext, treeNodeInfo.key(), this::refreshTableUI, owner.getResourceBundle());
 
-        this.listDataFetcher = new ListRedisDataScanner(
-                redisConnectContext,
-                treeNodeInfo.key(),
-                this::refreshTableUI,
-                owner.getResourceBundle());
+        this.listDataFetcher = new ListRedisDataScanner(redisConnectContext, treeNodeInfo.key(), this::refreshTableUI, owner.getResourceBundle());
 
-        this.streamDataFetcher = new StreamRedisDataScanner(
-                redisConnectContext,
-                treeNodeInfo.key(),
-                this::refreshTableUI,
-                owner.getResourceBundle());
+        this.streamDataFetcher = new StreamRedisDataScanner(redisConnectContext, treeNodeInfo.key(), this::refreshTableUI, owner.getResourceBundle());
 
         $$$setupUI$$$();
         this.initialize();
@@ -207,7 +186,7 @@ public class RightViewFragment {
                     if (dataTable.getModel() instanceof SortedSetTableModel) {
                         var value = dataTable.getValueAt(row, 2);
                         var score = dataTable.getValueAt(row, 1);
-                        RedisFrontUtils.run(() -> {
+                        RedisFrontUtils.runEDT(() -> {
                             fieldOrScoreField.setText(score.toString());
                             valueUpdateSaveBtn.setEnabled(true);
                             jsonValueFormat((String) value);
@@ -215,7 +194,7 @@ public class RightViewFragment {
                     } else if (dataTable.getModel() instanceof HashTableModel) {
                         var value = dataTable.getValueAt(row, 1);
                         var key = dataTable.getValueAt(row, 0);
-                        RedisFrontUtils.run(() -> {
+                        RedisFrontUtils.runEDT(() -> {
                             fieldOrScoreField.setText(key.toString());
                             valueUpdateSaveBtn.setEnabled(true);
                             jsonValueFormat((String) value);
@@ -232,7 +211,7 @@ public class RightViewFragment {
                         }
                     } else {
                         var value = dataTable.getValueAt(row, 1);
-                        RedisFrontUtils.run(() -> {
+                        RedisFrontUtils.runEDT(() -> {
                             valueUpdateSaveBtn.setEnabled(true);
                             jsonValueFormat((String) value);
                         });
@@ -285,61 +264,12 @@ public class RightViewFragment {
     }
 
     private void reloadAllActionPerformed() {
-        if (refBtn.isEnabled()) {
-            var key = keyField.getText();
-            this.lastKeyName = key;
-
-//            FutureUtils.supplyAsync(() -> keyTypeLabel.getText(), keyType -> {
-//                if (Fn.notEqual(keyType, "none")) {
-//                    KeyTypeEnum keyTypeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
-//                    FutureUtils.runAsync(() ->
-//                                    loadDataActionPerformed(key, () -> {
-//                                        Fn.run(() -> {
-//                                            refreshDisableBtn();
-////
-//                                            SwingUtils.removeAllComponent(dataPanel);
-////                                            dataPanel.add(LoadingPanel.newInstance(), BorderLayout.CENTER);
-//                                            dataPanel.updateUI();
-//                                        });
-//                                        //加载数据
-//                                        {
-//                                            if (keyTypeEnum == KeyTypeEnum.STRING || keyTypeEnum == KeyTypeEnum.JSON) {
-//                                                loadStringActionPerformed(key);
-//                                            }
-//                                            if (keyTypeEnum.equals(KeyTypeEnum.ZSET)) {
-//                                                this.scanZSetContextMap.put(key, new ScanContext<>());
-//                                            }
-//                                            if (keyTypeEnum.equals(KeyTypeEnum.HASH)) {
-//                                                this.scanHashContextMap.put(key, new ScanContext<>());
-//                                            }
-//                                            if (keyTypeEnum.equals(KeyTypeEnum.LIST)) {
-//                                                this.scanListContextMap.put(key, new ScanContext<>());
-//                                            }
-//                                            if (keyTypeEnum.equals(KeyTypeEnum.SET)) {
-//                                                this.scanSetContextMap.put(key, new ScanContext<>());
-//                                            }
-//                                            if (keyTypeEnum.equals(KeyTypeEnum.STREAM)) {
-//                                                this.xRangeContextMap.put(key, new ScanContext<>());
-//                                            }
-//                                        }
-//                                    }, () -> Fn.run(() -> {
-//                                        refreshEnableBtn();
-////                                refreshAfterHandler.handle();
-//                                        SwingUtils.removeAllComponent(dataPanel);
-//                                        dataPanel.add(dataSplitPanel, BorderLayout.CENTER);
-//                                        dataPanel.updateUI();
-//                                    })), throwable -> {
-////                        refreshAfterHandler.handle()
-//                            }
-//
-//                    );
-//                } else {
-//                    ttlField.setText("-2");
-//                    AlertUtils.showInformationDialog(owner.$tr("DataViewForm.showInformationDialog.message"));
-//                }
-//
-//            });
-
+        String keyType = keyTypeLabel.getText();
+        if (RedisFrontUtils.notEqual(keyType, "none")) {
+            reloadTableDataActionPerformed(true);
+        } else {
+            ttlField.setText("-2");
+            owner.displayMessage("Key not found", owner.$tr("DataViewForm.showInformationDialog.message"));
         }
     }
 
@@ -381,7 +311,7 @@ public class RightViewFragment {
                     }
                     streamDataFetcher.fetchData(searchText);
                 }
-                default -> zSetDataFetcher.fetchData(key);
+                default -> stringDataFetcher.fetchData(key);
             }
             return keyTypeEnum;
         }, (_, e) -> {
@@ -393,7 +323,7 @@ public class RightViewFragment {
         });
     }
 
-    public void fetchData() {
+    public void fetchDataActionPerformed() {
         String key = treeNodeInfo.key();
         var type = RedisBasicService.service.type(redisConnectContext, key);
         if (RedisFrontUtils.notEqual(type, "none")) {
@@ -459,7 +389,7 @@ public class RightViewFragment {
             } else {
                 switch (turbo.getT1()) {
                     case ZSET, LIST, SET, HASH ->
-                            AddOrUpdateValueDialog.showAddOrUpdateItemDialog(owner.$tr("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), turbo.getT2(), turbo.getT3(), redisConnectContext, keyTypeEnum, () -> {
+                            AddOrUpdateValueDialog.showDialog(owner, owner.$tr("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), turbo.getT2(), turbo.getT3(), redisConnectContext, keyTypeEnum, () -> {
                             });
                 }
             }
@@ -672,8 +602,15 @@ public class RightViewFragment {
         delBtn.setBorder(new EmptyBorder(5, 5, 5, 5));
         delBtn.setArcHeight(10);
         delBtn.setArcWidth(10);
-        delBtn.addActionListener(e -> {
-//            deleteActionHandler.handle()
+        delBtn.addActionListener(_ -> {
+            var key = keyField.getText();
+            SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> RedisBasicService.service.del(redisConnectContext, key), (_, e) -> {
+                if (e == null) {
+                    owner.getContext().getEventBus().publish(new KeyDeleteSuccessEvent(key, redisConnectContext.getId()));
+                    return;
+                }
+                Notifications.getInstance().show(Notifications.Type.ERROR, "key删除失败！");
+            });
         });
 
         refBtn = new AnimateButton() {
@@ -692,7 +629,7 @@ public class RightViewFragment {
         refBtn.setArcHeight(10);
         refBtn.setArcWidth(10);
         refBtn.setBorder(new EmptyBorder(5, 5, 5, 5));
-        refBtn.addActionListener(e -> reloadAllActionPerformed());
+        refBtn.addActionListener(_ -> reloadAllActionPerformed());
 
         saveBtn = new AnimateButton() {
             @Override
@@ -737,7 +674,7 @@ public class RightViewFragment {
         searchBtn.addActionListener(_ -> reloadTableDataActionPerformed(true));
         tableSearchField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchBtn);
         tableSearchField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
-        tableSearchField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) textField -> {
+        tableSearchField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) _ -> {
             tableSearchField.setText("");
             reloadTableDataActionPerformed(true);
         });
@@ -752,18 +689,18 @@ public class RightViewFragment {
         tableAddBtn.addActionListener((_) -> {
             var keyType = keyTypeLabel.getText();
             KeyTypeEnum keyTypeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
-
+            String key = keyField.getText();
             switch (keyTypeEnum) {
                 case ZSET ->
-                        AddOrUpdateValueDialog.showAddOrUpdateItemDialog("ZSET", keyField.getText(), null, null, redisConnectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
+                        AddOrUpdateValueDialog.showDialog(owner, "ZSET", key, null, null, redisConnectContext, keyTypeEnum, tableRefreshBtn::doClick);
                 case HASH ->
-                        AddOrUpdateValueDialog.showAddOrUpdateItemDialog("HASH", keyField.getText(), null, null, redisConnectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
+                        AddOrUpdateValueDialog.showDialog(owner, "HASH", key, null, null, redisConnectContext, keyTypeEnum, tableRefreshBtn::doClick);
                 case LIST ->
-                        AddOrUpdateValueDialog.showAddOrUpdateItemDialog("LIST", keyField.getText(), null, null, redisConnectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
+                        AddOrUpdateValueDialog.showDialog(owner, "LIST", key, null, null, redisConnectContext, keyTypeEnum, tableRefreshBtn::doClick);
                 case SET ->
-                        AddOrUpdateValueDialog.showAddOrUpdateItemDialog("SET", keyField.getText(), null, null, redisConnectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
+                        AddOrUpdateValueDialog.showDialog(owner, "SET", key, null, null, redisConnectContext, keyTypeEnum, tableRefreshBtn::doClick);
                 case STREAM ->
-                        AddOrUpdateValueDialog.showAddOrUpdateItemDialog("STREAM", keyField.getText(), null, null, redisConnectContext, keyTypeEnum, () -> tableRefreshBtn.doClick());
+                        AddOrUpdateValueDialog.showDialog(owner, "STREAM", key, null, null, redisConnectContext, keyTypeEnum, tableRefreshBtn::doClick);
             }
         });
 
@@ -777,9 +714,6 @@ public class RightViewFragment {
         tableDelBtn.addActionListener(_ -> {
             SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
                 var row = dataTable.getSelectedRow();
-                Runnable afterHandler = () -> {
-
-                };
                 if (row != -1) {
                     tableDelBtn.setEnabled(false);
                     var keyType = keyTypeLabel.getText();
@@ -790,7 +724,7 @@ public class RightViewFragment {
                         case ZSET -> {
                             var value = (String) dataTable.getValueAt(row, 2);
                             RedisZSetService.service.zrem(redisConnectContext, key, value);
-                            afterHandler = () -> {
+                            return (Runnable) () -> {
                                 fieldOrScoreField.setText("");
                                 textEditor.clear();
                                 valueUpdateSaveBtn.setEnabled(false);
@@ -799,7 +733,7 @@ public class RightViewFragment {
                         case HASH -> {
                             var field = (String) dataTable.getValueAt(row, 0);
                             RedisHashService.service.hdel(redisConnectContext, key, field);
-                            afterHandler = () -> {
+                            return (Runnable) () -> {
                                 fieldOrScoreField.setText("");
                                 textEditor.clear();
                                 valueUpdateSaveBtn.setEnabled(false);
@@ -808,7 +742,7 @@ public class RightViewFragment {
                         case LIST -> {
                             var value = (String) dataTable.getValueAt(row, 1);
                             RedisListService.service.lrem(redisConnectContext, key, 1, value);
-                            afterHandler = () -> {
+                            return (Runnable) () -> {
                                 textEditor.clear();
                                 valueUpdateSaveBtn.setEnabled(false);
                             };
@@ -816,7 +750,7 @@ public class RightViewFragment {
                         case SET -> {
                             var value = (String) dataTable.getValueAt(row, 1);
                             RedisSetService.service.srem(redisConnectContext, key, value);
-                            afterHandler = () -> {
+                            return (Runnable) () -> {
                                 textEditor.clear();
                                 valueUpdateSaveBtn.setEnabled(false);
                             };
@@ -824,7 +758,7 @@ public class RightViewFragment {
                         case STREAM -> {
                             var id = (String) dataTable.getValueAt(row, 1);
                             RedisStreamService.service.xdel(redisConnectContext, key, id);
-                            afterHandler = () -> {
+                            return (Runnable) () -> {
                                 fieldOrScoreField.setText("");
                                 textEditor.clear();
                                 valueUpdateSaveBtn.setEnabled(false);
@@ -832,12 +766,13 @@ public class RightViewFragment {
                         }
                     }
                 }
-                return afterHandler;
-            }, (o, e) -> {
+                return (Runnable) () -> {
+                };
+            }, (runnable, e) -> {
                 if (e != null) {
                     owner.displayException(e);
                 } else {
-                    ((Runnable) o).run();
+                    runnable.run();
                     tableDelBtn.setEnabled(false);
                     reloadTableDataActionPerformed(true);
                 }

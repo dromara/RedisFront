@@ -4,10 +4,10 @@ import lombok.Getter;
 import org.dromara.quickswing.events.QSEvent;
 
 @Getter
-public class AddKeySuccessEvent extends QSEvent {
+public class KeyDeleteSuccessEvent extends QSEvent {
     private final Integer id;
-    public AddKeySuccessEvent(Object message, Integer id) {
-        super(message);
+    public KeyDeleteSuccessEvent(Object source, Integer id) {
+        super(source);
         this.id = id;
     }
 }

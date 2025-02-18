@@ -10,6 +10,7 @@ import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
 import org.dromara.redisfront.ui.components.panel.BorderNonePanel;
 import org.dromara.redisfront.ui.components.panel.WrapperPanel;
 import org.dromara.redisfront.ui.event.ClickKeyTreeNodeEvent;
+import org.dromara.redisfront.ui.event.KeyDeleteSuccessEvent;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 
 import javax.swing.*;
@@ -49,7 +50,7 @@ public class IndexPageView extends QSPageItem<RedisFrontWidget> {
                     selectTreeNode = treeNodeInfo;
                     SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
                         RightViewFragment rightViewFragment = new RightViewFragment(redisConnectContext, treeNodeInfo, owner);
-                        rightViewFragment.fetchData();
+                        rightViewFragment.fetchDataActionPerformed();
                         return rightViewFragment;
                     }, (rightViewFragment, e) -> {
                         if (e == null) {
@@ -62,6 +63,15 @@ public class IndexPageView extends QSPageItem<RedisFrontWidget> {
                         }
                     });
                 }
+            }
+        });
+        this.owner.getEventListener().bind(redisConnectContext.getId(), KeyDeleteSuccessEvent.class, qsEvent -> {
+            if (qsEvent instanceof KeyDeleteSuccessEvent KeyDeleteSuccessEvent) {
+                if (redisConnectContext.getId() != KeyDeleteSuccessEvent.getId()) {
+                    return;
+                }
+                this.splitPane.setDividerSize(0);
+                this.splitPane.setRightComponent(new BorderNonePanel());
             }
         });
     }

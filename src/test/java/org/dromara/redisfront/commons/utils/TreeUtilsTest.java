@@ -17,8 +17,10 @@ public class TreeUtilsTest {
     @Test
     public void test1() {
         Set<String> rows = new HashSet<>();
-        rows.add("A:0: 456");
-        rows.add("A:0");
+        rows.add("111: 111");
+        rows.add("111: 111: 111");
+        rows.add("111: 111: 000");
+        rows.add("111: 111: BBB");
 //        Set<TreeNodeInfo> treeNodeInfos = TreeUtils.convertTreeNodeInfoSet(TreeUtils.toStringTreeMap(rows, ":"), "",":");
         DefaultTreeModel treeModel = TreeUtils.toTreeModel(rows, ":");
         System.out.println();

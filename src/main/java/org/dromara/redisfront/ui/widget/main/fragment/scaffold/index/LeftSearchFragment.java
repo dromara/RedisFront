@@ -29,9 +29,11 @@ import org.dromara.redisfront.ui.components.scanner.context.RedisScanContext;
 import org.dromara.redisfront.ui.dialog.AddKeyDialog;
 import org.dromara.redisfront.ui.event.AddKeySuccessEvent;
 import org.dromara.redisfront.ui.event.ClickKeyTreeNodeEvent;
+import org.dromara.redisfront.ui.event.KeyDeleteSuccessEvent;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.jdesktop.swingx.JXTree;
 import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,137 +113,15 @@ public class LeftSearchFragment {
         this.redisConnectContext = redisConnectContext;
         $$$setupUI$$$();
         this.databaseComboBox.setSelectedIndex(0);
-    }
 
-
-    public void loadTreeModelData(String key) {
-        SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
-            var scanKeysContext = scanKeysContextMap.get(redisConnectContext.getDatabase());
-
-            if (RedisFrontUtils.isNull(scanKeysContext.getLimit())) {
-                Long limit = Long.valueOf(redisConnectContext.getSetting().getLoadKeyNum());
-                scanKeysContext.setLimit(limit);
-            }
-
-            var lastSearchKey = scanKeysContext.getSearchKey();
-            scanKeysContext.setSearchKey(key);
-
-            if (!key.contains("*")) {
-                var all = allField.getText();
-                var scanInfo = all.split(SEPARATOR_FLAG);
-                if (scanInfo.length > 1) {
-                    if (RedisFrontUtils.equal(scanInfo[1], "null")) {
-                        throw new RedisFrontException(owner.$tr("DataSearchForm.exception.databaseIsNull.message"), true);
-                    } else {
-                        scanKeysContext.setLimit(Long.valueOf(scanInfo[1]));
-                    }
-                } else {
-                    scanKeysContext.setLimit(Long.valueOf(all));
-                }
-
-            }
-
-            KeyScanCursor<String> keyScanCursor = RedisBasicService.service.scan(redisConnectContext, scanKeysContext.getScanCursor(), scanKeysContext.getScanArgs());
-            scanKeysContext.setScanCursor(keyScanCursor);
-            log.debug("本次扫描到：{}", keyScanCursor.getKeys().size());
-
-            var scanKeysList = new ArrayList<>(keyScanCursor.getKeys());
-
-            //模糊匹配(模糊匹配在key数量小于 limit 的情况加全部查询出来)
-            if (!loadMorePanel.isVisible() && RedisFrontUtils.equal("*", key)) {
-                while (RedisFrontUtils.equal("*", key) && !keyScanCursor.isFinished()) {
-                    keyScanCursor = RedisBasicService.service.scan(redisConnectContext, scanKeysContext.getScanCursor(), scanKeysContext.getScanArgs());
-                    scanKeysContext.setScanCursor(keyScanCursor);
-                    scanKeysList.addAll(keyScanCursor.getKeys());
-                }
-            }
-
-            //数据扫描上限判断！
-            if (RedisFrontUtils.equal(scanKeysContext.getSearchKey(), lastSearchKey) && RedisFrontUtils.isNotEmpty(scanKeysContext.getKeyList())) {
-                if (scanKeysContext.getKeyList().size() >= 300000) {
-                    System.gc();
-                    throw new RedisFrontException(owner.$tr("DataSearchForm.exception.loadUpperLimit.message"));
-                }
-                scanKeysContext.getKeyList().addAll(scanKeysList);
-            } else {
-                scanKeysContext.setKeyList(scanKeysList);
-            }
-
-            var delim = redisConnectContext.getSetting().getKeySeparator();
-            DefaultTreeModel treeModel = TreeUtils.toTreeModel(new HashSet<>(scanKeysContext.getKeyList()), delim);
-            var finalKeyScanCursor = keyScanCursor;
-            return new Turbo3<>(treeModel, finalKeyScanCursor, scanKeysContext);
-        }, (r, e) -> {
-            if (e != null) {
-                owner.displayException(e);
-                return;
-            }
-            var treeModel = r.getT1();
-            var finalKeyScanCursor = r.getT2();
-            var scanKeysContext = r.getT3();
-            currentField.setText(String.valueOf(scanKeysContext.getKeyList().size()));
-            loadMoreBtn.setEnabled(!finalKeyScanCursor.isFinished());
-            var all = allField.getText();
-            var scanInfo = all.split(SEPARATOR_FLAG);
-            if (scanInfo.length > 1) {
-                var current = Long.parseLong(scanInfo[0]);
-                var allSize = NumberUtil.isNumber(scanInfo[1]) ? Long.parseLong(scanInfo[1]) : 0;
-                //如果全部扫描完成！
-                if (current >= allSize && scanKeysContext.getKeyList().size() == allSize) {
-                    loadMoreBtn.setText(owner.$tr("DataSearchForm.loadMoreBtn.complete.title"));
-                    loadMoreBtn.setEnabled(false);
+        this.owner.getEventListener().bind(redisConnectContext.getId(), KeyDeleteSuccessEvent.class, qsEvent -> {
+            if (qsEvent instanceof KeyDeleteSuccessEvent KeyDeleteSuccessEvent) {
+                if (redisConnectContext.getId() != KeyDeleteSuccessEvent.getId()) {
                     return;
-                } else {
-                    allField.setText((current + scanKeysContext.getLimit()) + SEPARATOR_FLAG + allSize);
-                    var title = owner.$tr("DataSearchForm.allField.toolTipText.title");
-                    allField.setToolTipText(String.format(title, current, allSize));
                 }
-            } else {
-                var title = owner.$tr("DataSearchForm.allField.toolTipText.title");
-                allField.setToolTipText(String.format(title, scanKeysContext.getLimit(), all));
-                allField.setText(scanKeysContext.getLimit() + SEPARATOR_FLAG + all);
-            }
-            keyTree.setModel(treeModel);
-            keyTree.updateUI();
-        });
-    }
-
-    public void doScanRemoteData() {
-        SyncLoadingDialog.builder(owner, owner.$tr("MainWindowForm.loading.title")).showSyncLoadingDialog(() -> {
-            if (RedisFrontUtils.isEmpty(searchTextField.getText())) {
-                loadTreeModelData("*");
-            } else {
-                loadTreeModelData(searchTextField.getText());
-            }
-            return null;
-        }, (_, e) -> {
-            if (e != null) {
-                owner.displayException(e);
+                refreshBtn.doClick();
             }
         });
-    }
-
-
-    public void doDeleteRemoteData() {
-        var treeModel = (DefaultTreeModel) keyTree.getModel();
-        var selectNode = keyTree.getLastSelectedPathComponent();
-        if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
-            if (treeNodeInfo.getParent() != null) {
-                RedisBasicService.service.del(redisConnectContext, treeNodeInfo.key());
-                treeModel.removeNodeFromParent(treeNodeInfo);
-            }
-        }
-    }
-
-    public void doDeleteRemoteData(TreeNodeInfo treeNodeInfo) {
-        if (treeNodeInfo.getChildCount() > 0) {
-            for (int i = 0; i < treeNodeInfo.getChildCount(); i++) {
-                var subNode = (TreeNodeInfo) treeNodeInfo.getChildAt(i);
-                doDeleteRemoteData(subNode);
-            }
-        } else if (treeNodeInfo.getIsLeafNode()) {
-            RedisBasicService.service.del(redisConnectContext, treeNodeInfo.key());
-        }
     }
 
     private void createUIComponents() {
@@ -269,13 +149,15 @@ public class LeftSearchFragment {
 
         this.owner.getEventListener().bind(redisConnectContext.getId(), AddKeySuccessEvent.class, qsEvent -> {
             if (qsEvent instanceof AddKeySuccessEvent addKeySuccessEvent) {
-                Object message = addKeySuccessEvent.getMessage();
-                var res = JOptionPane.showConfirmDialog(owner,
-                        owner.$tr("DataSearchForm.showConfirmDialog.message"),
-                        owner.$tr("DataSearchForm.showConfirmDialog.title"), JOptionPane.YES_NO_OPTION);
-                if (res == JOptionPane.YES_OPTION) {
-                    scanKeysContextMap.put(redisConnectContext.getDatabase(), new RedisScanContext<>());
-                    scanKeysAndUpdateScanInfo();
+                if (redisConnectContext.getId() == addKeySuccessEvent.getId()) {
+                    Object message = addKeySuccessEvent.getMessage();
+                    var res = JOptionPane.showConfirmDialog(owner,
+                            owner.$tr("DataSearchForm.showConfirmDialog.message"),
+                            owner.$tr("DataSearchForm.showConfirmDialog.title"), JOptionPane.YES_NO_OPTION);
+                    if (res == JOptionPane.YES_OPTION) {
+                        scanKeysContextMap.put(redisConnectContext.getDatabase(), new RedisScanContext<>());
+                        scanKeysAndUpdateScanInfo();
+                    }
                 }
             }
         });
@@ -293,7 +175,7 @@ public class LeftSearchFragment {
             var selectedIndex = databaseComboBox.getSelectedIndex();
             searchTextField.setText("");
             databaseComboBox.removeAllItems();
-            databaseComboBoxInit(selectedIndex);
+            changeDatabaseActionPerformed(selectedIndex);
 
         });
         refreshBtn.setFocusable(false);
@@ -340,14 +222,14 @@ public class LeftSearchFragment {
         };
         loadMoreBtn.setFocusable(false);
         loadMoreBtn.setIcon(Icons.LOAD_MORE_ICON);
-        loadMoreBtn.addActionListener(_ -> doScanRemoteData());
+        loadMoreBtn.addActionListener(_ -> scanKeysActionPerformed());
 
 
         scanKeysContextMap = new ConcurrentHashMap<>();
 
-        databaseComboBoxInit(0);
+        changeDatabaseActionPerformed(0);
 
-        databaseComboBox.addActionListener(e -> {
+        databaseComboBox.addActionListener(_ -> {
             var db = (DbInfo) databaseComboBox.getSelectedItem();
             if (RedisFrontUtils.isNull(db)) {
                 return;
@@ -358,7 +240,7 @@ public class LeftSearchFragment {
             var flag = !RedisFrontUtils.isNull(db.dbSize()) && (db.dbSize() > limit);
             allField.setText(String.valueOf(db.dbSize()));
             loadMorePanel.setVisible(flag);
-            doScanRemoteData();
+            scanKeysActionPerformed();
         });
 
         searchTextField = new JTextField() {
@@ -416,63 +298,20 @@ public class LeftSearchFragment {
 
         var popupMenu = new JPopupMenu() {
             {
-                //添加 Add
-                var addMenuItem = new JMenuItem() {
-                    @Override
-                    public void updateUI() {
-                        super.updateUI();
-                        setText(owner.$tr("DataSearchForm.addMenuItem.title"));
-                    }
-                };
-                addMenuItem.addActionListener(_ -> {
-                    var selectNode = keyTree.getLastSelectedPathComponent();
-                    if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
-                        AddKeyDialog.showAddDialog(owner, redisConnectContext, treeNodeInfo.key());
-                    }
-                });
+                //天机 Add
+                var addMenuItem = getAddMenuItem();
                 add(addMenuItem);
 
                 //删除 Delete
-                var delMenuItem = new JMenuItem() {
-                    @Override
-                    public void updateUI() {
-                        super.updateUI();
-                        setText(owner.$tr("DataSearchForm.delMenuItem.title"));
-                    }
-                };
-                delMenuItem.addActionListener((_) -> {
-                    //删除，需要进行弹框确认，生产项目，如果大规模删除，就是灾难
-                    int reply = AlertUtils.showConfirmDialog(owner,
-                            owner.$tr("DataSearchForm.delMenuItem.confirm"),
-                            JOptionPane.YES_NO_OPTION);
-                    if (reply != JOptionPane.YES_OPTION) {
-                        //用户：确认的不是YES, 返回
-                        return;
-                    }
-
-                    DefaultTreeModel treeModel = (DefaultTreeModel) keyTree.getModel();
-                    var selectionPaths = keyTree.getSelectionModel().getSelectionPaths();
-                    if (RedisFrontUtils.isNotEmpty(selectionPaths)) {
-                        for (TreePath selectionPath : selectionPaths) {
-                            if (selectionPath.getLastPathComponent() instanceof TreeNodeInfo treeNodeInfo) {
-                                var title = treeNodeInfo.title();
-                                treeNodeInfo.setTitle(title.concat(" ").concat(owner.$tr("DataSearchForm.treeNodeInfo.del.doing.message")));
-                                keyTree.updateUI();
-                                SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
-                                    doDeleteRemoteData(treeNodeInfo);
-                                    return findTreeNodeParent(treeNodeInfo);
-                                }, (e, ex) -> {
-                                    if (ex == null) {
-                                        treeModel.removeNodeFromParent(e);
-                                    }
-                                });
-                            }
-                        }
-                    }
-                });
+                var delMenuItem = getDelMenuItem();
                 add(delMenuItem);
 
                 //内存分析 Memory analysis
+                var memoryMenuItem = getMemoryMenuItem();
+                add(memoryMenuItem);
+            }
+
+            private @NotNull JMenuItem getMemoryMenuItem() {
                 var memoryMenuItem = new JMenuItem() {
                     @Override
                     public void updateUI() {
@@ -502,7 +341,65 @@ public class LeftSearchFragment {
                         }, executorService);
                     }
                 });
-                add(memoryMenuItem);
+                return memoryMenuItem;
+            }
+
+            private @NotNull JMenuItem getDelMenuItem() {
+                var delMenuItem = new JMenuItem() {
+                    @Override
+                    public void updateUI() {
+                        super.updateUI();
+                        setText(owner.$tr("DataSearchForm.delMenuItem.title"));
+                    }
+                };
+                delMenuItem.addActionListener((_) -> {
+                    //删除，需要进行弹框确认，生产项目，如果大规模删除，就是灾难
+                    int reply = AlertUtils.showConfirmDialog(owner,
+                            owner.$tr("DataSearchForm.delMenuItem.confirm"),
+                            JOptionPane.YES_NO_OPTION);
+                    if (reply != JOptionPane.YES_OPTION) {
+                        //用户：确认的不是YES, 返回
+                        return;
+                    }
+
+                    DefaultTreeModel treeModel = (DefaultTreeModel) keyTree.getModel();
+                    var selectionPaths = keyTree.getSelectionModel().getSelectionPaths();
+                    if (RedisFrontUtils.isNotEmpty(selectionPaths)) {
+                        for (TreePath selectionPath : selectionPaths) {
+                            if (selectionPath.getLastPathComponent() instanceof TreeNodeInfo treeNodeInfo) {
+                                var title = treeNodeInfo.title();
+                                treeNodeInfo.setTitle(title.concat(" ").concat(owner.$tr("DataSearchForm.treeNodeInfo.del.doing.message")));
+                                keyTree.updateUI();
+                                SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
+                                    deleteKeysActionPerformed(treeNodeInfo);
+                                    return findTreeNodeParent(treeNodeInfo);
+                                }, (e, ex) -> {
+                                    if (ex == null) {
+                                        treeModel.removeNodeFromParent(e);
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
+                return delMenuItem;
+            }
+
+            private @NotNull JMenuItem getAddMenuItem() {
+                var addMenuItem = new JMenuItem() {
+                    @Override
+                    public void updateUI() {
+                        super.updateUI();
+                        setText(owner.$tr("DataSearchForm.addMenuItem.title"));
+                    }
+                };
+                addMenuItem.addActionListener(_ -> {
+                    var selectNode = keyTree.getLastSelectedPathComponent();
+                    if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
+                        AddKeyDialog.showAddDialog(owner, redisConnectContext, treeNodeInfo.key());
+                    }
+                });
+                return addMenuItem;
             }
 
             private void expandPath(TreePath treePath) {
@@ -649,15 +546,139 @@ public class LeftSearchFragment {
 
     }
 
+
+    public void loadTreeModelData(String key) {
+        SyncLoadingDialog.builder(owner, owner.$tr("MainWindowForm.loading.title")).showSyncLoadingDialog(() -> {
+            var scanKeysContext = scanKeysContextMap.get(redisConnectContext.getDatabase());
+
+            if (RedisFrontUtils.isNull(scanKeysContext.getLimit())) {
+                Long limit = Long.valueOf(redisConnectContext.getSetting().getLoadKeyNum());
+                scanKeysContext.setLimit(limit);
+            }
+
+            var lastSearchKey = scanKeysContext.getSearchKey();
+            scanKeysContext.setSearchKey(key);
+
+            if (!key.contains("*")) {
+                var all = allField.getText();
+                var scanInfo = all.split(SEPARATOR_FLAG);
+                if (scanInfo.length > 1) {
+                    if (RedisFrontUtils.equal(scanInfo[1], "null")) {
+                        throw new RedisFrontException(owner.$tr("DataSearchForm.exception.databaseIsNull.message"), true);
+                    } else {
+                        scanKeysContext.setLimit(Long.valueOf(scanInfo[1]));
+                    }
+                } else {
+                    scanKeysContext.setLimit(Long.valueOf(all));
+                }
+
+            }
+
+            KeyScanCursor<String> keyScanCursor = RedisBasicService.service.scan(redisConnectContext, scanKeysContext.getScanCursor(), scanKeysContext.getScanArgs());
+            scanKeysContext.setScanCursor(keyScanCursor);
+            log.debug("本次扫描到：{}", keyScanCursor.getKeys().size());
+
+            var scanKeysList = new ArrayList<>(keyScanCursor.getKeys());
+
+            //模糊匹配(模糊匹配在key数量小于 limit 的情况加全部查询出来)
+            if (!loadMorePanel.isVisible() && RedisFrontUtils.equal("*", key)) {
+                while (RedisFrontUtils.equal("*", key) && !keyScanCursor.isFinished()) {
+                    keyScanCursor = RedisBasicService.service.scan(redisConnectContext, scanKeysContext.getScanCursor(), scanKeysContext.getScanArgs());
+                    scanKeysContext.setScanCursor(keyScanCursor);
+                    scanKeysList.addAll(keyScanCursor.getKeys());
+                }
+            }
+
+            //数据扫描上限判断！
+            if (RedisFrontUtils.equal(scanKeysContext.getSearchKey(), lastSearchKey) && RedisFrontUtils.isNotEmpty(scanKeysContext.getKeyList())) {
+                if (scanKeysContext.getKeyList().size() >= 300000) {
+                    System.gc();
+                    throw new RedisFrontException(owner.$tr("DataSearchForm.exception.loadUpperLimit.message"));
+                }
+                scanKeysContext.getKeyList().addAll(scanKeysList);
+            } else {
+                scanKeysContext.setKeyList(scanKeysList);
+            }
+
+            var delim = redisConnectContext.getSetting().getKeySeparator();
+            DefaultTreeModel treeModel = TreeUtils.toTreeModel(new HashSet<>(scanKeysContext.getKeyList()), delim);
+            var finalKeyScanCursor = keyScanCursor;
+            return new Turbo3<>(treeModel, finalKeyScanCursor, scanKeysContext);
+        }, (r, e) -> {
+            if (e != null) {
+                owner.displayException(e);
+                return;
+            }
+            var treeModel = r.getT1();
+            var finalKeyScanCursor = r.getT2();
+            var scanKeysContext = r.getT3();
+            currentField.setText(String.valueOf(scanKeysContext.getKeyList().size()));
+            loadMoreBtn.setEnabled(!finalKeyScanCursor.isFinished());
+            var all = allField.getText();
+            var scanInfo = all.split(SEPARATOR_FLAG);
+            if (scanInfo.length > 1) {
+                var current = Long.parseLong(scanInfo[0]);
+                var allSize = NumberUtil.isNumber(scanInfo[1]) ? Long.parseLong(scanInfo[1]) : 0;
+                //如果全部扫描完成！
+                if (current >= allSize && scanKeysContext.getKeyList().size() == allSize) {
+                    loadMoreBtn.setText(owner.$tr("DataSearchForm.loadMoreBtn.complete.title"));
+                    loadMoreBtn.setEnabled(false);
+                    return;
+                } else {
+                    allField.setText((current + scanKeysContext.getLimit()) + SEPARATOR_FLAG + allSize);
+                    var title = owner.$tr("DataSearchForm.allField.toolTipText.title");
+                    allField.setToolTipText(String.format(title, current, allSize));
+                }
+            } else {
+                var title = owner.$tr("DataSearchForm.allField.toolTipText.title");
+                allField.setToolTipText(String.format(title, scanKeysContext.getLimit(), all));
+                allField.setText(scanKeysContext.getLimit() + SEPARATOR_FLAG + all);
+            }
+            keyTree.setModel(treeModel);
+            keyTree.updateUI();
+        });
+    }
+
+    public void scanKeysActionPerformed() {
+        if (RedisFrontUtils.isEmpty(searchTextField.getText())) {
+            loadTreeModelData("*");
+        } else {
+            loadTreeModelData(searchTextField.getText());
+        }
+    }
+
+
+    public void deleteKeysActionPerformed() {
+        var treeModel = (DefaultTreeModel) keyTree.getModel();
+        var selectNode = keyTree.getLastSelectedPathComponent();
+        if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
+            if (treeNodeInfo.getParent() != null) {
+                RedisBasicService.service.del(redisConnectContext, treeNodeInfo.key());
+                treeModel.removeNodeFromParent(treeNodeInfo);
+            }
+        }
+    }
+
+    public void deleteKeysActionPerformed(TreeNodeInfo treeNodeInfo) {
+        if (treeNodeInfo.getChildCount() > 0) {
+            for (int i = 0; i < treeNodeInfo.getChildCount(); i++) {
+                var subNode = (TreeNodeInfo) treeNodeInfo.getChildAt(i);
+                deleteKeysActionPerformed(subNode);
+            }
+        } else if (treeNodeInfo.getIsLeafNode()) {
+            RedisBasicService.service.del(redisConnectContext, treeNodeInfo.key());
+        }
+    }
+
     private TreeNodeInfo findTreeNodeParent(TreeNodeInfo treeNodeInfo) {
         TreeNodeInfo parent = (TreeNodeInfo) treeNodeInfo.getParent();
-        if (parent == null || parent.getChildCount() > 1) {
+        if (parent == null || parent.key() == null || parent.getChildCount() > 1) {
             return treeNodeInfo;
         }
         return findTreeNodeParent(parent);
     }
 
-    private void databaseComboBoxInit(int selectedIndex) {
+    private void changeDatabaseActionPerformed(int selectedIndex) {
         if (RedisFrontUtils.notEqual(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             Map<String, String> databases = RedisBasicService.service.configGet(redisConnectContext, "databases");
             var dbNum = Integer.parseInt(databases.get("databases"));
@@ -698,7 +719,7 @@ public class LeftSearchFragment {
             allField.setText("0" + SEPARATOR_FLAG + scanInfo[1]);
             allField.setToolTipText(String.format(owner.$tr("DataSearchForm.allLabel.toolTip.text"), 0, scanInfo[1]));
         }
-        doScanRemoteData();
+        scanKeysActionPerformed();
     }
 
     /**

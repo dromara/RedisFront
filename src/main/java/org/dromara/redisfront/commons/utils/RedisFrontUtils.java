@@ -8,14 +8,22 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import com.formdev.flatlaf.FlatLaf;
 import com.surelogic.Utility;
+import lombok.extern.slf4j.Slf4j;
+import org.dromara.quickswing.tree.QSTreeNode;
+import org.jdesktop.swingx.JXTree;
 
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
+import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.Map;
+import java.util.List;
+import java.util.*;
 
 
 /**
@@ -23,16 +31,10 @@ import java.util.Map;
  *
  * @author Jin
  */
+@Slf4j
 @Utility
 public class RedisFrontUtils {
-    public static void run(Runnable runnable) {
-        if (SwingUtilities.isEventDispatchThread()) {
-            runnable.run();
-        } else {
-            SwingUtilities.invokeLater(runnable);
-        }
 
-    }
 
     public static boolean isNotEmpty(Collection<?> collection) {
         return CollectionUtil.isNotEmpty(collection);
@@ -120,5 +122,57 @@ public class RedisFrontUtils {
         return DataSizeUtil.format(0);
     }
 
+
+    public static void revalidateAndRepaintAllFramesAndDialogs() {
+        FlatLaf.revalidateAndRepaintAllFramesAndDialogs();
+    }
+
+    public static void removeAllComponent(JComponent component) {
+        for (Component c : component.getComponents()) {
+            component.remove(c);
+        }
+        revalidateAndRepaintAllFramesAndDialogs();
+    }
+
+    public static java.util.List<Object> saveExpandedPaths(JXTree tree) {
+        java.util.List<Object> savedPaths = new ArrayList<>();
+        TreePath rootPath = new TreePath(tree.getModel().getRoot());
+        Enumeration<TreePath> expandedPaths = tree.getExpandedDescendants(rootPath);
+        if (expandedPaths != null) {
+            while (expandedPaths.hasMoreElements()) {
+                TreePath path = expandedPaths.nextElement();
+                if (path.getParentPath() != null) {
+                    QSTreeNode<?> pathComponent = (QSTreeNode<?>) path.getLastPathComponent();
+                    savedPaths.add(pathComponent.id());
+                }
+            }
+        } else {
+            log.warn("No expanded nodes.");
+        }
+        return savedPaths;
+    }
+
+    public static void restoreExpandedPaths(JTree tree, TreeModel model, List<Object> savedPaths) {
+        DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+        for (Object id : savedPaths) {
+            for (int i = 0; i < root.getChildCount(); i++) {
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) root.getChildAt(i);
+                TreePath treePath = new TreePath(node.getPath());
+                QSTreeNode<?> data = (QSTreeNode<?>) treePath.getLastPathComponent();
+                if (ObjectUtil.equals(data.id(), id)) {
+                    tree.expandPath(treePath);
+                    break;
+                }
+            }
+        }
+    }
+
+    public static void runEDT(Runnable runnable) {
+        if (SwingUtilities.isEventDispatchThread()) {
+            runnable.run();
+        } else {
+            SwingUtilities.invokeLater(runnable);
+        }
+    }
 
 }

@@ -4,13 +4,14 @@ import cn.hutool.json.JSONUtil;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import org.dromara.redisfront.RedisFrontMain;
-import org.dromara.redisfront.commons.utils.RedisFrontUtils;
+import org.dromara.quickswing.ui.app.QSDialog;
 import org.dromara.redisfront.commons.enums.KeyTypeEnum;
-import org.dromara.redisfront.commons.handler.ActionHandler;
-import org.dromara.redisfront.commons.utils.AlertUtils;
+import org.dromara.redisfront.commons.exception.RedisFrontException;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.*;
+import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,7 +20,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.HashMap;
 
-public class AddOrUpdateValueDialog extends JDialog {
+public class AddOrUpdateValueDialog extends QSDialog<RedisFrontWidget> {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -27,29 +28,27 @@ public class AddOrUpdateValueDialog extends JDialog {
     private JTextPane valueTextArea;
     private JLabel nameLabel;
     private JLabel valueLabel;
-    private final ActionHandler addSuccessHandler;
     private final KeyTypeEnum typeEnum;
     private final String fieldOrScore;
     private final String value;
     private final String key;
     private final RedisConnectContext redisConnectContext;
+    private final Runnable runnable;
 
-    public static void showAddOrUpdateItemDialog(String title, String key, String fieldOrScore, String value, RedisConnectContext redisConnectContext, KeyTypeEnum typeEnum, ActionHandler addSuccessHandler) {
-        var addOrUpdateItemDialog = new AddOrUpdateValueDialog(title, key, fieldOrScore, value, redisConnectContext, typeEnum, addSuccessHandler);
+    public static void showDialog(RedisFrontWidget redisFrontWidget, String title, String key, String fieldOrScore, String value, RedisConnectContext redisConnectContext, KeyTypeEnum typeEnum, Runnable runnable) {
+        var addOrUpdateItemDialog = new AddOrUpdateValueDialog(redisFrontWidget, title, key, fieldOrScore, value, redisConnectContext, typeEnum, runnable);
         addOrUpdateItemDialog.setResizable(false);
-        addOrUpdateItemDialog.setLocationRelativeTo(RedisFrontMain.frame);
+        addOrUpdateItemDialog.setLocationRelativeTo(redisFrontWidget);
         addOrUpdateItemDialog.pack();
         addOrUpdateItemDialog.setVisible(true);
     }
 
 
-    public AddOrUpdateValueDialog(String title, String key, String fieldOrScore, String value, RedisConnectContext redisConnectContext, KeyTypeEnum typeEnum, ActionHandler addSuccessHandler) {
-        super(RedisFrontMain.frame);
-        setContentPane(contentPane);
-        setTitle(title);
-        setModal(true);
-        setMinimumSize(new Dimension(400, 300));
-        this.addSuccessHandler = addSuccessHandler;
+    public AddOrUpdateValueDialog(RedisFrontWidget redisFrontWidget, String title, String key, String fieldOrScore, String value, RedisConnectContext redisConnectContext, KeyTypeEnum typeEnum, Runnable runnable) {
+        super(redisFrontWidget, title, true);
+        this.runnable = runnable;
+        this.setContentPane(contentPane);
+        this.setMinimumSize(new Dimension(400, 300));
         this.typeEnum = typeEnum;
         this.key = key;
         this.redisConnectContext = redisConnectContext;
@@ -57,42 +56,42 @@ public class AddOrUpdateValueDialog extends JDialog {
         this.fieldOrScore = fieldOrScore;
 
         if (RedisFrontUtils.isNotEmpty(value)) {
-            valueTextArea.setText(value);
+            this.valueTextArea.setText(value);
         }
 
         if (typeEnum.equals(KeyTypeEnum.ZSET) || typeEnum.equals(KeyTypeEnum.HASH)) {
             this.nameField.setText(fieldOrScore);
-            nameLabel.setVisible(true);
-            nameLabel.setText(typeEnum.equals(KeyTypeEnum.ZSET) ? "分数" : "键");
-            nameField.setVisible(true);
+            this.nameLabel.setVisible(true);
+            this.nameLabel.setText(typeEnum.equals(KeyTypeEnum.ZSET) ? "分数" : "键");
+            this.nameField.setVisible(true);
         } else if (typeEnum.equals(KeyTypeEnum.STREAM)) {
             this.nameField.setText(fieldOrScore);
-            nameLabel.setVisible(true);
-            nameLabel.setText("ID");
-            nameField.setVisible(true);
-            nameField.setText("*");
-            nameField.setEnabled(false);
+            this.nameLabel.setVisible(true);
+            this.nameLabel.setText("ID");
+            this.nameField.setVisible(true);
+            this.nameField.setText("*");
+            this.nameField.setEnabled(false);
         } else {
-            nameLabel.setVisible(false);
-            nameField.setVisible(false);
+            this.nameLabel.setVisible(false);
+            this.nameField.setVisible(false);
         }
 
-        initComponentListener();
+        this.initComponentListener();
     }
 
     private void initComponentListener() {
-        getRootPane().setDefaultButton(buttonOK);
-        buttonOK.addActionListener(e -> onOK());
-        buttonCancel.addActionListener(e -> onCancel());
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        this.getRootPane().setDefaultButton(buttonOK);
+        this.buttonOK.addActionListener(_ -> onOK());
+        this.buttonCancel.addActionListener(_ -> onCancel());
+        this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-        valueLabel.setText("值");
-        addWindowListener(new WindowAdapter() {
+        this.valueLabel.setText("值");
+        this.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 onCancel();
             }
         });
-        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        this.contentPane.registerKeyboardAction(_ -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     private void onOK() {
@@ -106,52 +105,61 @@ public class AddOrUpdateValueDialog extends JDialog {
             valueTextArea.requestFocus();
         }
 
-        if (typeEnum.equals(KeyTypeEnum.ZSET)) {
-            if (RedisFrontUtils.isNotEmpty(value)) {
-                RedisZSetService.service.zrem(redisConnectContext, key, value);
+        SyncLoadingDialog.builder(getOwner()).showSyncLoadingDialog(() -> {
+            if (typeEnum.equals(KeyTypeEnum.ZSET)) {
+                if (RedisFrontUtils.isNotEmpty(value)) {
+                    RedisZSetService.service.zrem(redisConnectContext, key, value);
+                }
+                RedisZSetService.service.zadd(redisConnectContext, key, Double.parseDouble(nameField.getText()), valueTextArea.getText());
             }
-            RedisZSetService.service.zadd(redisConnectContext, key, Double.parseDouble(nameField.getText()), valueTextArea.getText());
-        }
 
-        if (typeEnum.equals(KeyTypeEnum.HASH)) {
-            if (RedisFrontUtils.isNotEmpty(fieldOrScore)) {
-                RedisHashService.service.hdel(redisConnectContext, key, fieldOrScore);
+            if (typeEnum.equals(KeyTypeEnum.HASH)) {
+                if (RedisFrontUtils.isNotEmpty(fieldOrScore)) {
+                    RedisHashService.service.hdel(redisConnectContext, key, fieldOrScore);
+                }
+                RedisHashService.service.hset(redisConnectContext, key, nameField.getText(), valueTextArea.getText());
             }
-            RedisHashService.service.hset(redisConnectContext, key, nameField.getText(), valueTextArea.getText());
-        }
 
-        if (typeEnum.equals(KeyTypeEnum.LIST)) {
-            if (RedisFrontUtils.isNotEmpty(value)) {
-                RedisListService.service.lrem(redisConnectContext, key, 1, value);
+            if (typeEnum.equals(KeyTypeEnum.LIST)) {
+                if (RedisFrontUtils.isNotEmpty(value)) {
+                    RedisListService.service.lrem(redisConnectContext, key, 1, value);
+                }
+                RedisListService.service.lpush(redisConnectContext, key, valueTextArea.getText());
             }
-            RedisListService.service.lpush(redisConnectContext, key, valueTextArea.getText());
-        }
 
-        if (typeEnum.equals(KeyTypeEnum.SET)) {
-            if (RedisFrontUtils.isNotEmpty(value)) {
-                RedisSetService.service.srem(redisConnectContext, key, value);
+            if (typeEnum.equals(KeyTypeEnum.SET)) {
+                if (RedisFrontUtils.isNotEmpty(value)) {
+                    RedisSetService.service.srem(redisConnectContext, key, value);
+                }
+                RedisSetService.service.sadd(redisConnectContext, key, valueTextArea.getText());
             }
-            RedisSetService.service.sadd(redisConnectContext, key, valueTextArea.getText());
-        }
 
-        if (typeEnum.equals(KeyTypeEnum.STREAM)) {
-            if (JSONUtil.isTypeJSON(valueTextArea.getText())) {
-                HashMap<String, String> bodyMap = new HashMap<>();
-                JSONUtil.parseObj(valueTextArea.getText()).forEach((k, v) -> bodyMap.put(k, v.toString()));
-                RedisStreamService.service.xadd(redisConnectContext, key, bodyMap);
+            if (typeEnum.equals(KeyTypeEnum.STREAM)) {
+                if (JSONUtil.isTypeJSON(valueTextArea.getText())) {
+                    HashMap<String, String> bodyMap = new HashMap<>();
+                    JSONUtil.parseObj(valueTextArea.getText()).forEach((k, v) -> bodyMap.put(k, v.toString()));
+                    RedisStreamService.service.xadd(redisConnectContext, key, bodyMap);
+                } else {
+                    throw new RedisFrontException("stream 请输入JSON - {key:value} 格式数据！", valueTextArea);
+                }
+            }
+            return 0;
+        }, (_, e) -> {
+            if (e == null) {
+                this.runnable.run();
+                this.setVisible(false);
+                this.dispose();
             } else {
-                AlertUtils.showInformationDialog(getOwner(), "stream 请输入JSON - {key:value} 格式数据！");
-                valueTextArea.requestFocus();
-                return;
+                if (e instanceof RedisFrontException redisFrontException) {
+                    redisFrontException.getComponent().requestFocus();
+                }
+                this.getOwner().displayException(e);
             }
-        }
-
-        dispose();
-        addSuccessHandler.handle();
+        });
     }
 
     private void onCancel() {
-        dispose();
+        this.dispose();
     }
 
     {

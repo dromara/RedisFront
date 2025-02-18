@@ -41,6 +41,10 @@ public class TreeUtils {
                 String cell = cells[i];
                 boolean isLeaf = (i == cells.length - 1);
                 StringTreeMap child = node.get(cell);
+                if (child != null && child.isLeafNode && node.size() > 1) {
+                    child = node.get(TOKEN + cell);
+                    System.out.println();
+                }
                 if (child == null) {
                     child = new StringTreeMap();
                     if (isLeaf) {
@@ -48,14 +52,15 @@ public class TreeUtils {
                     }
                     node.put(cell, child);
                 } else {
-                    //解决 分组与叶子节点 同名问题
                     if (isLeaf || child.isLeafNode) {
                         child = new StringTreeMap();
                         if (isLeaf) {
                             child.markLeafNode();
                         }
+                        //解决 分组与叶子节点 同名问题
                         node.put(TOKEN + cell, child);
                     }
+
                 }
                 node = child;
             }

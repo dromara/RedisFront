@@ -261,7 +261,7 @@ public class AddKeyDialog extends QSDialog<RedisFrontWidget> {
                 }
             } else {
                 this.dispose();
-                this.redisFrontContext.getEventBus().publish(new AddKeySuccessEvent(key));
+                this.redisFrontContext.getEventBus().publish(new AddKeySuccessEvent(key, redisConnectContext.getId()));
             }
         });
     }

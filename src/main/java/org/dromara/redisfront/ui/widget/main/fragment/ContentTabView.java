@@ -10,6 +10,7 @@ import net.miginfocom.swing.MigLayout;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.RedisFrontEventListener;
 import org.dromara.redisfront.commons.resources.Icons;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
 import org.dromara.redisfront.ui.dialog.SettingDialog;
@@ -59,7 +60,7 @@ public class ContentTabView extends JTabbedPane {
             if (qsEvent instanceof DrawerChangeEvent drawerChangeEvent) {
                 Object message = drawerChangeEvent.getMessage();
                 if (message instanceof Insets insets) {
-                    SwingUtilities.invokeLater(() -> {
+                    RedisFrontUtils.runEDT(()->{
                         putClientProperty(FlatClientProperties.TABBED_PANE_TAB_INSETS, insets);
                         FlatLaf.updateUI();
                     });
