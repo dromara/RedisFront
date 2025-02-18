@@ -1,8 +1,6 @@
 package org.dromara.redisfront.commons.utils;
 
 
-import org.dromara.redisfront.commons.handler.ProcessHandler;
-
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -48,9 +46,9 @@ public class FutureUtils {
                 .thenRunAsync(afterHandler, executorService);
     }
 
-    public static CompletableFuture<Void> runAsync(Runnable runnable, ProcessHandler<Throwable> throwableProcessHandler) {
+    public static CompletableFuture<Void> runAsync(Runnable runnable, Consumer<Throwable> consumer) {
         return CompletableFuture.runAsync(runnable, executorService).exceptionallyAsync(throwable -> {
-            throwableProcessHandler.processHandler(throwable);
+            consumer.accept(throwable);
             return null;
         });
     }

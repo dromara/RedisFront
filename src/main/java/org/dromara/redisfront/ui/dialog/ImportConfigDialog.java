@@ -10,14 +10,15 @@ import cn.hutool.json.JSONUtil;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
+import org.dromara.quickswing.ui.app.QSDialog;
 import org.dromara.redisfront.RedisFrontMain;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.enums.ConnectType;
-import org.dromara.redisfront.commons.resources.AbstractDialog;
 import org.dromara.redisfront.commons.utils.AlertUtils;
 import org.dromara.redisfront.commons.utils.LocaleUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -26,7 +27,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Map;
 
-public class ImportConfigDialog extends AbstractDialog<Void> {
+public class ImportConfigDialog extends QSDialog<RedisFrontWidget> {
 
     private JComboBox<String> importModel;
 
@@ -40,8 +41,8 @@ public class ImportConfigDialog extends AbstractDialog<Void> {
 
     private JLabel modelLabel;
 
-    public static void showImportDialog() {
-        var importConfigDialog = new ImportConfigDialog(RedisFrontMain.frame);
+    public static void showImportDialog(RedisFrontWidget owner) {
+        var importConfigDialog = new ImportConfigDialog(owner);
         importConfigDialog.setMinimumSize(new Dimension(400, 200));
         importConfigDialog.setLocationRelativeTo(RedisFrontMain.frame);
         importConfigDialog.pack();
@@ -54,8 +55,8 @@ public class ImportConfigDialog extends AbstractDialog<Void> {
         importModel.setSelectedItem("导入RedisFront配置");
     }
 
-    public ImportConfigDialog(Frame owner) {
-        super(owner);
+    public ImportConfigDialog(RedisFrontWidget owner) {
+        super(owner, true);
         $$$setupUI$$$();
         initImportModel();
         setContentPane(contentPane);
