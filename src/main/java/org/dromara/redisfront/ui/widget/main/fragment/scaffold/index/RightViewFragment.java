@@ -277,6 +277,7 @@ public class RightViewFragment {
         SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
             var key = keyField.getText();
             this.lastKeyName = key;
+            this.lastKeyTTL = RedisBasicService.service.ttl(redisConnectContext, key);
             var keyType = keyTypeLabel.getText();
             var keyTypeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
             String searchText = tableSearchField.getText();
@@ -313,7 +314,7 @@ public class RightViewFragment {
                 }
                 default -> stringDataFetcher.fetchData(key);
             }
-            return keyTypeEnum;
+            return 0;
         }, (_, e) -> {
             if (e != null) {
                 Notifications.getInstance().show(Notifications.Type.ERROR, e.getMessage());
@@ -604,13 +605,15 @@ public class RightViewFragment {
         delBtn.setArcWidth(10);
         delBtn.addActionListener(_ -> {
             var key = keyField.getText();
-            SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> RedisBasicService.service.del(redisConnectContext, key), (_, e) -> {
-                if (e == null) {
-                    owner.getContext().getEventBus().publish(new KeyDeleteSuccessEvent(key, redisConnectContext.getId()));
-                    return;
-                }
-                Notifications.getInstance().show(Notifications.Type.ERROR, "key删除失败！");
-            });
+            SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() ->
+                            RedisBasicService.service.del(redisConnectContext, key),
+                    (_, e) -> {
+                        if (e == null) {
+                            owner.getContext().getEventBus().publish(new KeyDeleteSuccessEvent(key, redisConnectContext.getId()));
+                            return;
+                        }
+                        Notifications.getInstance().show(Notifications.Type.ERROR, "key删除失败！");
+                    });
         });
 
         refBtn = new AnimateButton() {
@@ -649,19 +652,28 @@ public class RightViewFragment {
         saveBtn.setArcHeight(10);
         saveBtn.setArcWidth(10);
 
-
         saveBtn.addActionListener((_) -> {
             String ttl = ttlField.getText();
             String key = keyField.getText();
-            if (RedisFrontUtils.notEqual(key, lastKeyName)) {
-                RedisBasicService.service.rename(redisConnectContext, lastKeyName, key);
-            }
-            if (RedisFrontUtils.notEqual(ttl, lastKeyTTL.toString())) {
-                RedisBasicService.service.expire(redisConnectContext, key, Long.valueOf(ttl));
-            }
-            reloadAllActionPerformed();
-
+            SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
+                if (RedisFrontUtils.notEqual(key, lastKeyName)) {
+                    lastKeyName = key;
+                    RedisBasicService.service.rename(redisConnectContext, lastKeyName, key);
+                }
+                if (RedisFrontUtils.notEqual(ttl, lastKeyTTL.toString())) {
+                    lastKeyTTL = Long.valueOf(ttl);
+                    RedisBasicService.service.expire(redisConnectContext, key, Long.valueOf(ttl));
+                }
+                return null;
+            }, (_, e) -> {
+                if (e == null) {
+                    reloadAllActionPerformed();
+                } else {
+                    Notifications.getInstance().show(Notifications.Type.ERROR, "key保存失败！");
+                }
+            });
         });
+
         tableSearchField = new JTextField() {
             @Override
             public void updateUI() {

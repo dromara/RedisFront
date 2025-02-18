@@ -22,6 +22,7 @@ public class IndexPageView extends QSPageItem<RedisFrontWidget> {
     private final JSplitPane splitPane;
     private final RedisFrontWidget owner;
     private final RedisFrontContext context;
+    private final LeftSearchFragment leftSearchFragment;
     private TreeNodeInfo selectTreeNode;
 
     public IndexPageView(RedisConnectContext redisConnectContext, RedisFrontWidget owner) {
@@ -29,13 +30,13 @@ public class IndexPageView extends QSPageItem<RedisFrontWidget> {
         this.context = (RedisFrontContext) owner.getContext();
         this.redisConnectContext = redisConnectContext;
         this.splitPane = new JSplitPane();
+        this.leftSearchFragment = new LeftSearchFragment(owner, redisConnectContext);
         this.setupUI();
 
     }
 
     @Override
     public void onLoad() {
-        var leftSearchFragment = new LeftSearchFragment(owner, redisConnectContext);
         this.splitPane.setDividerSize(0);
         this.splitPane.setLeftComponent(leftSearchFragment.getContentPanel());
         this.splitPane.setRightComponent(new BorderNonePanel());
@@ -65,6 +66,7 @@ public class IndexPageView extends QSPageItem<RedisFrontWidget> {
                 }
             }
         });
+
         this.owner.getEventListener().bind(redisConnectContext.getId(), KeyDeleteSuccessEvent.class, qsEvent -> {
             if (qsEvent instanceof KeyDeleteSuccessEvent KeyDeleteSuccessEvent) {
                 if (redisConnectContext.getId() != KeyDeleteSuccessEvent.getId()) {
@@ -72,6 +74,7 @@ public class IndexPageView extends QSPageItem<RedisFrontWidget> {
                 }
                 this.splitPane.setDividerSize(0);
                 this.splitPane.setRightComponent(new BorderNonePanel());
+                leftSearchFragment.getRefreshBtn().doClick();
             }
         });
     }

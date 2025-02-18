@@ -12,15 +12,25 @@ import javax.swing.*;
 public class TerminalPageView extends QSPageItem<RedisFrontWidget> {
     @Getter
     private final RedisConnectContext redisConnectContext;
-
-    private final RedisFrontTerminal terminal ;
     @Getter
     private final RedisFrontWidget owner;
+
+    private RedisFrontTerminal terminal;
 
     public TerminalPageView(RedisConnectContext redisConnectContext, RedisFrontWidget owner) {
         this.redisConnectContext = redisConnectContext;
         this.owner = owner;
+        this.setupUI();
+    }
+
+    @Override
+    public void onLoad() {
         this.terminal = new RedisFrontTerminal(redisConnectContext);
+    }
+
+    @Override
+    public void onChange() {
+        super.onChange();
     }
 
     @Override

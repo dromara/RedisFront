@@ -125,6 +125,7 @@ public class RedisFrontTerminal extends AbstractTerminal {
         return String.valueOf(redisConnectContext.getDatabase());
     }
 
+
 }
 
 

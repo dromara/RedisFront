@@ -56,7 +56,7 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
         this.println("");
         this.println("connection ".concat(connectInfo().getHost()).concat(":") + connectInfo().getPort() + " redis server success...");
         this.println("");
-        this.print(connectInfo().getHost().concat(":").concat(String.valueOf(connectInfo().getPassword())).concat(RedisFrontUtils.equal("0", databaseName()) ? "" : " [" + databaseName() + "] ").concat(">"));
+        this.print(connectInfo().getHost().concat(":").concat(String.valueOf(connectInfo().getPort())).concat(RedisFrontUtils.equal("0", databaseName()) ? "" : " [" + databaseName() + "] ").concat(">"));
     }
 
     @Override

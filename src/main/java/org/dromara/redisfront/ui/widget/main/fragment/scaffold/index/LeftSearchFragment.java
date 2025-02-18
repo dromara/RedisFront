@@ -29,7 +29,6 @@ import org.dromara.redisfront.ui.components.scanner.context.RedisScanContext;
 import org.dromara.redisfront.ui.dialog.AddKeyDialog;
 import org.dromara.redisfront.ui.event.AddKeySuccessEvent;
 import org.dromara.redisfront.ui.event.ClickKeyTreeNodeEvent;
-import org.dromara.redisfront.ui.event.KeyDeleteSuccessEvent;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.jdesktop.swingx.JXTree;
 import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer;
@@ -62,12 +61,12 @@ import java.util.function.Consumer;
  *
  * @author Jin
  */
+@Getter
 public class LeftSearchFragment {
     private static final Logger log = LoggerFactory.getLogger(LeftSearchFragment.class);
     private static final String SEPARATOR_FLAG = "/";
     private final RedisFrontWidget owner;
     private final RedisFrontContext context;
-    @Getter
     private JPanel contentPanel;
     private JXTree keyTree;
     private JTextField searchTextField;
@@ -113,15 +112,6 @@ public class LeftSearchFragment {
         this.redisConnectContext = redisConnectContext;
         $$$setupUI$$$();
         this.databaseComboBox.setSelectedIndex(0);
-
-        this.owner.getEventListener().bind(redisConnectContext.getId(), KeyDeleteSuccessEvent.class, qsEvent -> {
-            if (qsEvent instanceof KeyDeleteSuccessEvent KeyDeleteSuccessEvent) {
-                if (redisConnectContext.getId() != KeyDeleteSuccessEvent.getId()) {
-                    return;
-                }
-                refreshBtn.doClick();
-            }
-        });
     }
 
     private void createUIComponents() {
@@ -176,7 +166,6 @@ public class LeftSearchFragment {
             searchTextField.setText("");
             databaseComboBox.removeAllItems();
             changeDatabaseActionPerformed(selectedIndex);
-
         });
         refreshBtn.setFocusable(false);
         refreshBtn.setIcon(Icons.REFRESH_ICON);
@@ -319,7 +308,7 @@ public class LeftSearchFragment {
                         setText(owner.$tr("DataSearchForm.memoryMenuItem.title"));
                     }
                 };
-                memoryMenuItem.addActionListener((e) -> {
+                memoryMenuItem.addActionListener(_ -> {
                     var selectionPath = keyTree.getLeadSelectionPath();
                     var selectNode = selectionPath.getLastPathComponent();
                     if (selectNode instanceof TreeNodeInfo treeNodeInfo) {

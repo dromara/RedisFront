@@ -56,6 +56,7 @@ public class ContentTabView extends JTabbedPane {
         this.addTab("订阅", Icons.MQ_ICON, pageScaffold);
         //数据窗口
         this.addTab("数据", Icons.CONTENT_TAB_INFO_ICON, new JPanel());
+
         this.eventListener.bind(redisConnectContext.getId(), DrawerChangeEvent.class, qsEvent -> {
             if (qsEvent instanceof DrawerChangeEvent drawerChangeEvent) {
                 Object message = drawerChangeEvent.getMessage();
