@@ -1,6 +1,7 @@
 
 package org.dromara.redisfront.ui.components.terminal;
 
+import cn.hutool.core.util.StrUtil;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.jdesktop.swingx.JXList;
@@ -15,7 +16,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.regex.Pattern;
+import java.util.Arrays;
 
 public abstract class AbstractTerminal extends JPanel implements KeyListener, CaretListener {
     protected final JTextArea terminal;
@@ -40,8 +41,37 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
         setBorder(new EmptyBorder(10, 10, 10, 10));
         terminal = new JTextArea();
         terminal.setBackground(UIManager.getColor("TextArea.background"));
+        terminal.setFont(UIManager.getFont("TextArea.font").deriveFont(15f));
         terminal.addKeyListener(this);
         terminal.addCaretListener(this);
+        terminal.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                // 获取当前光标位置
+                int caretPos = terminal.getCaretPosition();
+                // 当光标处于保护区域时阻止操作
+                shouldConsumeEvent = caretPos <= lastSelectionStart;
+                if (shouldConsumeEvent) {
+                    terminal.setCaretPosition(Math.min(terminal.getText().length(), lastSelectionStart));
+                }
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+            }
+        });
+
+        JPopupMenu jPopupMenu = new JPopupMenu();
+        JMenuItem menuItem = new JMenuItem("清空");
+        menuItem.addActionListener(_ -> {
+            terminal.setText("");
+            this.print("\n");
+            this.print(buildPrompt());
+        });
+        jPopupMenu.add(menuItem);
+        terminal.setComponentPopupMenu(jPopupMenu);
+
         commandHistory = new ArrayList<>();
         commandHistoryIndex = 0;
         add(new JScrollPane(terminal), BorderLayout.CENTER);
@@ -88,10 +118,13 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
             e.consume();
             return;
         }
+        if (currentKeyCode == KeyEvent.VK_ENTER && suggestionWindow.isVisible()) {
+            e.consume();
+            return;
+        }
         if (currentKeyCode == KeyEvent.VK_ENTER && e.getKeyChar() == '\n') {
             int subStartLength = lastSelectionStart;
             int subEndLength = terminal.getText().length();
-
             if (subStartLength < subEndLength) {
                 String input = terminal.getText().substring(subStartLength, subEndLength);
                 if (RedisFrontUtils.isNotEmpty(input)) {
@@ -102,13 +135,11 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
                     } else {
                         input = input.concat("\n");
                     }
-
                     String text = input.replace("\n", "");
                     if (RedisFrontUtils.isNotEmpty(text)) {
                         commandHistory.add(text);
                         commandHistoryIndex = commandHistory.size();
                     }
-
                     this.inputProcessHandler(input.trim());
                 }
             }
@@ -120,30 +151,32 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
         }
     }
 
-    private void updateCommandFromHistory(int indexOffset) {
-        if (commandHistory.isEmpty()) return;
-
-        int newIndex = commandHistoryIndex + indexOffset;
-        newIndex = Math.max(newIndex, 0); // 防止负数索引
-        newIndex = Math.min(newIndex, commandHistory.size());
-
-        String input = terminal.getText().substring(0, lastSelectionStart);
-        if (newIndex < commandHistory.size()) {
-            commandHistoryIndex = newIndex;
-            terminal.setText(input.concat(commandHistory.get(commandHistoryIndex)));
-        } else {
-            commandHistoryIndex = commandHistory.size();
-            terminal.setText(input);
-        }
-    }
 
     @Override
     public void keyPressed(KeyEvent e) {
         currentKeyCode = e.getKeyCode();
+        if (currentKeyCode == KeyEvent.VK_TAB || suggestionWindow.isVisible()) {
+            e.consume();
+            shouldConsumeEvent = true;
+            return;
+        }
+        if (currentKeyCode == KeyEvent.VK_BACK_SPACE || currentKeyCode == KeyEvent.VK_LEFT) {
+            commandHistoryIndex = 0;
+            // 获取当前光标位置
+            int caretPos = terminal.getCaretPosition();
+            // 当光标处于保护区域时阻止操作
+            shouldConsumeEvent = caretPos <= lastSelectionStart;
+            if (shouldConsumeEvent) {
+                e.consume();
+                return;
+            }
+        }
+
         shouldConsumeEvent = (currentKeyCode == KeyEvent.VK_BACK_SPACE
-                || currentKeyCode == KeyEvent.VK_DOWN
+                && currentCaretPosition <= lastSelectionStart)
+                || ((currentKeyCode == KeyEvent.VK_DOWN
                 || currentKeyCode == KeyEvent.VK_LEFT)
-                && currentCaretPosition <= lastSelectionStart;
+                && currentCaretPosition <= lastSelectionStart);
 
         switch (currentKeyCode) {
             case KeyEvent.VK_UP:
@@ -195,7 +228,25 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
         currentCaretPosition = e.getDot();
         allowInputFlag = (currentCaretPosition >= lastSelectionStart);
         if (currentCaretPosition < lastSelectionStart) {
-            SwingUtilities.invokeLater(() -> terminal.setCaretPosition(lastSelectionStart));
+            SwingUtilities.invokeLater(() -> {
+                if (terminal.getCaretPosition() != lastSelectionStart) {
+                    if (commandHistoryIndex != 0) {
+                        var commandLength = 0;
+                        if (commandHistoryIndex < commandHistory.size()) {
+                            String command = commandHistory.get(commandHistoryIndex);
+                            commandLength = command.length();
+                        }
+                        int temp = lastSelectionStart + commandLength;
+                        if (temp > terminal.getText().length()) {
+                            temp = lastSelectionStart;
+                        }
+                        terminal.setCaretPosition(Math.min(terminal.getText().length(), temp));
+                        commandHistoryIndex = 0;
+                    }
+                } else {
+                    terminal.setCaretPosition(lastSelectionStart);
+                }
+            });
         }
         if (suggestionWindow.isVisible() &&
                 e.getDot() < lastSelectionStart) {
@@ -203,10 +254,33 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
         }
     }
 
+    private void updateCommandFromHistory(int indexOffset) {
+        if (commandHistory.isEmpty()) {
+            return;
+        }
+        int newIndex = commandHistoryIndex + indexOffset;
+        newIndex = Math.max(newIndex, 0);
+        newIndex = Math.min(newIndex, commandHistory.size());
+
+        String input = terminal.getText().substring(0, lastSelectionStart);
+        if (newIndex < commandHistory.size()) {
+            commandHistoryIndex = newIndex;
+            String historyCommand = commandHistory.get(commandHistoryIndex);
+            terminal.setText(input.concat(historyCommand));
+        } else {
+            commandHistoryIndex = commandHistory.size();
+            terminal.setText(input);
+        }
+    }
+
     private void initSuggestionComponents() {
         suggestionModel = new DefaultListModel<>();
         suggestionList = new JXList<>(suggestionModel);
         suggestionList.setCellRenderer(new DefaultListCellRenderer());
+        suggestionList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        suggestionList.setVisibleRowCount(5);
+        suggestionList.putClientProperty("JList.autoSelectOnMouseMove", true);
+        suggestionList.setRequestFocusEnabled(true);
         suggestionWindow = new JWindow();
         suggestionWindow.getContentPane().add(new JScrollPane(suggestionList));
         suggestionWindow.setSize(200, 150);
@@ -219,7 +293,6 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
         });
     }
 
-    // 新增自动完成逻辑
     private void showSuggestions(String inputPrefix) {
         suggestionModel.clear();
         String upperPrefix = inputPrefix.toUpperCase();
@@ -228,11 +301,14 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
                 suggestionModel.addElement(cmd);
             }
         }
-
         if (!suggestionModel.isEmpty()) {
             // 动态计算窗口尺寸
-            int width = suggestionList.getPreferredSize().width + 20;
-            int height = Math.min(suggestionList.getPreferredSize().height, 300);
+            int maxWidth = Arrays.stream(redisCommands)
+                    .mapToInt(cmd -> suggestionList.getFontMetrics(suggestionList.getFont()).stringWidth(cmd))
+                    .max().orElse(200);
+            int width = Math.min(maxWidth + 30, 400);
+            int height = Math.min(suggestionList.getPreferredSize().height + 30, 300);
+
             suggestionWindow.setSize(width, height);
 
             Point caretPos = terminal.getCaret().getMagicCaretPosition();
@@ -243,6 +319,7 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
                         screenPos.y + caretPos.y + terminal.getFont().getSize()
                 );
                 suggestionWindow.setVisible(true);
+                suggestionList.requestFocusInWindow();
                 suggestionList.setSelectedIndex(0);
             }
         } else {
@@ -254,35 +331,26 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
         String selected = suggestionList.getSelectedValue();
         if (selected != null) {
             String fullText = terminal.getText();
-            // 精确获取当前输入行（到第一个换行符为止）
             int lineEnd = fullText.indexOf('\n', lastSelectionStart);
             lineEnd = lineEnd == -1 ? fullText.length() : lineEnd;
             String currentLine = fullText.substring(lastSelectionStart, lineEnd);
 
-            // 构建智能替换内容
-            String newContent;
-            if (currentLine.isEmpty()) {
-                newContent = selected;
-            } else {
-                // 保留用户已输入部分的大小写
-                newContent = selected.startsWith(currentLine.toUpperCase())
-                        ? selected
-                        : currentLine + selected.substring(currentLine.length());
+            String upperInput = currentLine.toUpperCase();
+            if (selected.startsWith(upperInput)) {
+                String preservedPart = currentLine.isEmpty() ? ""
+                        : selected.substring(0, currentLine.length()).toLowerCase();
+                String originText = preservedPart + selected.substring(currentLine.length());
+                String newContent = StrUtil.isUpperCase(currentLine) ? originText.toUpperCase() : originText.toLowerCase();
+                String newText = fullText.substring(0, lastSelectionStart)
+                        + newContent
+                        + fullText.substring(lineEnd);
+                SwingUtilities.invokeLater(() -> {
+                    terminal.setText(newText);
+                    terminal.setCaretPosition(lastSelectionStart + newContent.length());
+                });
             }
-
-            // 精准替换当前行内容
-            String newText = fullText.substring(0, lastSelectionStart)
-                    + newContent
-                    + fullText.substring(lineEnd);
-
-            SwingUtilities.invokeLater(() -> {
-                terminal.setText(newText);
-                // 更新光标位置到新内容末尾
-                int newCaretPos = lastSelectionStart + newContent.length();
-                terminal.setCaretPosition(newCaretPos);
-                suggestionWindow.setVisible(false);
-            });
         }
+        SwingUtilities.invokeLater(() -> suggestionWindow.setVisible(false));
     }
 
     private String getCurrentInputLine() {
