@@ -16,7 +16,7 @@ import org.dromara.redisfront.ui.event.OpenRedisConnectEvent;
 import org.dromara.redisfront.ui.handler.ConnectHandler;
 import org.dromara.redisfront.ui.handler.DrawerHandler;
 import org.dromara.redisfront.ui.widget.main.MainComponent;
-import org.dromara.redisfront.ui.widget.main.fragment.ContentTabView;
+import org.dromara.redisfront.ui.widget.main.fragment.MainTabView;
 import org.dromara.redisfront.ui.widget.sidebar.SidebarComponent;
 import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
 
@@ -65,10 +65,10 @@ public class RedisFrontComponent extends Background {
                             if (component instanceof MainComponent mainRightTabbedPanel) {
                                 SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
                                     fetchRedisMode(redisConnectContext);
-                                    return new ContentTabView(owner, redisConnectContext);
+                                    return new MainTabView(owner, redisConnectContext);
                                 }, (o, e) -> {
                                     if (e == null) {
-                                        mainRightTabbedPanel.addTab(redisConnectContext.getTitle(), (ContentTabView) o);
+                                        mainRightTabbedPanel.addTab(redisConnectContext.getTitle(), (MainTabView) o);
                                     } else {
                                 /*
                                   连接失败时，弹出密码输入框，输入密码后重试
@@ -90,8 +90,8 @@ public class RedisFrontComponent extends Background {
                                 SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
                                     fetchRedisMode(redisConnectContext);
                                     MainComponent mainTabbedPanel = createMainTabbedPanel(drawerAnimationAction);
-                                    ContentTabView contentTabView = new ContentTabView(owner, redisConnectContext);
-                                    mainTabbedPanel.addTab(redisConnectContext.getTitle(), contentTabView);
+                                    MainTabView mainTabView = new MainTabView(owner, redisConnectContext);
+                                    mainTabbedPanel.addTab(redisConnectContext.getTitle(), mainTabView);
                                     return mainTabbedPanel;
                                 }, (ret, e) -> {
                                     if (e == null) {

@@ -1,8 +1,10 @@
 package org.dromara.redisfront;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.quickswing.ui.app.QSPrefs;
 
+@Slf4j
 public class RedisFrontPrefs extends QSPrefs {
     @Override
     protected String getKeyPrefix() {

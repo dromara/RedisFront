@@ -10,8 +10,10 @@ import org.dromara.quickswing.excutor.QSTaskExecutor;
 import org.dromara.quickswing.ui.app.QSContext;
 import org.dromara.quickswing.ui.app.QSWidget;
 import org.dromara.redisfront.commons.constant.Constants;
+import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import raven.popup.GlassPanePopup;
+import raven.toast.Notifications;
 
 import javax.sql.DataSource;
 import javax.swing.*;
@@ -90,6 +92,13 @@ public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, Redi
     @Override
     protected void performPostInitialization(QSWidget<RedisFrontPrefs> application, RedisFrontPrefs preferences) {
         GlassPanePopup.install(application);
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            if (throwable instanceof RedisFrontException redisFrontException) {
+                Notifications.getInstance().show(Notifications.Type.ERROR, redisFrontException.getMessage());
+            } else {
+                log.error("Thread {}", thread.getName(), throwable);
+            }
+        });
     }
 
     public String version() {

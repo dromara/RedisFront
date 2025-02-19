@@ -3,10 +3,9 @@ package org.dromara.redisfront.ui.dialog;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-
-import org.dromara.redisfront.RedisFrontMain;
-import org.dromara.redisfront.commons.utils.LocaleUtils;
+import org.dromara.quickswing.ui.app.QSDialog;
 import org.dromara.redisfront.model.LogInfo;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,12 +17,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class LogsDialog extends JDialog implements Runnable {
+public class LogsDialog extends QSDialog<RedisFrontWidget> implements Runnable {
     private JPanel contentPane;
     private JButton buttonCancel;
     private JTextArea textArea;
-
-    private static final LogsDialog logsDialog;
 
     private static final LinkedBlockingQueue<LogInfo> queue = new LinkedBlockingQueue<>();
 
@@ -31,22 +28,9 @@ public class LogsDialog extends JDialog implements Runnable {
         queue.add(logInfo);
     }
 
-    static {
-        logsDialog = new LogsDialog();
-    }
-
-    public static void showLogsDialog() {
-        logsDialog.setResizable(true);
-        logsDialog.setLocationRelativeTo(RedisFrontMain.frame);
-        logsDialog.pack();
-        logsDialog.setVisible(true);
-    }
-
-    public LogsDialog() {
-        super(RedisFrontMain.frame);
+    public LogsDialog(RedisFrontWidget redisFrontWidget) {
+        super(redisFrontWidget, redisFrontWidget.$tr("LogsDialog.title"), true);
         setContentPane(contentPane);
-        setTitle(LocaleUtils.getMessageFromBundle("LogsDialog.title"));
-        setModal(true);
         setPreferredSize(new Dimension(800, 600));
         buttonCancel.addActionListener(e -> onCancel());
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -63,7 +47,7 @@ public class LogsDialog extends JDialog implements Runnable {
         var cleanMenu = new JPopupMenu();
         cleanMenu.add(new JMenuItem() {
             {
-                setText(LocaleUtils.getMessageFromBundle("LogsDialog.cleanMenu.title"));
+                setText(redisFrontWidget.$tr("LogsDialog.cleanMenu.title"));
                 addActionListener((event) -> textArea.setText(""));
             }
         });

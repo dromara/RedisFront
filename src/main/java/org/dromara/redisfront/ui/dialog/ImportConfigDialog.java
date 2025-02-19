@@ -11,12 +11,10 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.quickswing.ui.app.QSDialog;
-import org.dromara.redisfront.RedisFrontMain;
 import org.dromara.redisfront.commons.constant.Constants;
-import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.enums.ConnectType;
 import org.dromara.redisfront.commons.utils.AlertUtils;
-import org.dromara.redisfront.commons.utils.LocaleUtils;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 
@@ -44,7 +42,7 @@ public class ImportConfigDialog extends QSDialog<RedisFrontWidget> {
     public static void showImportDialog(RedisFrontWidget owner) {
         var importConfigDialog = new ImportConfigDialog(owner);
         importConfigDialog.setMinimumSize(new Dimension(400, 200));
-        importConfigDialog.setLocationRelativeTo(RedisFrontMain.frame);
+        importConfigDialog.setLocationRelativeTo(owner);
         importConfigDialog.pack();
         importConfigDialog.setVisible(true);
     }
@@ -82,7 +80,7 @@ public class ImportConfigDialog extends QSDialog<RedisFrontWidget> {
         // 设置文件过滤，仅支持json配置导入
         fileChooser.setFileFilter(new FileNameExtensionFilter(".json", "json"));
         // 打开文件选择框（线程将被阻塞, 直到选择框被关闭）
-        var result = fileChooser.showDialog(RedisFrontMain.frame, LocaleUtils.getMessageFromBundle("ConfigImport.saveBtn.title"));
+        var result = fileChooser.showDialog(getOwner(), getOwner().$tr("ConfigImport.saveBtn.title"));
         if (result == JFileChooser.APPROVE_OPTION) {
             var configFile = fileChooser.getSelectedFile();
             var fileReader = new FileReader(configFile);

@@ -27,13 +27,13 @@ import java.awt.*;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ContentTabView extends JTabbedPane {
+public class MainTabView extends JTabbedPane {
     private final RedisFrontWidget owner;
     private final RedisFrontContext context;
     private final RedisFrontEventListener eventListener;
     private final RedisConnectContext redisConnectContext;
 
-    public ContentTabView(RedisFrontWidget owner, RedisConnectContext redisConnectContext) {
+    public MainTabView(RedisFrontWidget owner, RedisConnectContext redisConnectContext) {
         this.owner = owner;
         this.context = (RedisFrontContext) owner.getContext();
         this.eventListener = owner.getEventListener();

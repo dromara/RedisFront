@@ -10,20 +10,20 @@ import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
 import org.dromara.quickswing.constant.QSOs;
 import org.dromara.redisfront.RedisFrontContext;
-import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.enums.ConnectType;
 import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.commons.utils.JschUtils;
 import org.dromara.redisfront.commons.utils.LettuceUtils;
-import org.dromara.redisfront.commons.utils.LocaleUtils;
-import org.dromara.redisfront.ui.components.monitor.RedisUsageInfo;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
 import org.dromara.redisfront.ui.components.monitor.RedisMonitor;
+import org.dromara.redisfront.ui.components.monitor.RedisUsageInfo;
 import org.dromara.redisfront.ui.event.DrawerChangeEvent;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
-import org.dromara.redisfront.ui.widget.main.fragment.ContentTabView;
+import org.dromara.redisfront.ui.widget.main.about.AboutPanel;
+import org.dromara.redisfront.ui.widget.main.fragment.MainTabView;
 import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
 
 import javax.swing.*;
@@ -34,9 +34,6 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -142,10 +139,10 @@ public class MainComponent extends JPanel {
         //Redis Tab 关闭事件
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
             Component component = tabbedPane.getComponentAt(tabIndex);
-            if (component instanceof ContentTabView contentTabView) {
+            if (component instanceof MainTabView mainTabView) {
 
                 //关闭线程池
-                RedisConnectContext redisConnectContext = contentTabView.getRedisConnectContext();
+                RedisConnectContext redisConnectContext = mainTabView.getRedisConnectContext();
                 ScheduledExecutorService executorService = executorServiceMap.remove(redisConnectContext.getId());
                 if (executorService != null) {
                     executorService.shutdownNow();
@@ -180,8 +177,8 @@ public class MainComponent extends JPanel {
             if (topTabbedPane.getSelectedIndex() == -1) {
                 return;
             }
-            if (topTabbedPane.getSelectedComponent() instanceof ContentTabView contentTabView) {
-                RedisConnectContext redisConnectContext = contentTabView.getRedisConnectContext();
+            if (topTabbedPane.getSelectedComponent() instanceof MainTabView mainTabView) {
+                RedisConnectContext redisConnectContext = mainTabView.getRedisConnectContext();
                 if (!executorServiceMap.containsKey(redisConnectContext.getId())) {
                     RedisMonitor monitor = new RedisMonitor(redisConnectContext);
                     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -210,6 +207,15 @@ public class MainComponent extends JPanel {
         this.add(topTabbedPane, BorderLayout.CENTER);
     }
 
+    JPanel aboutPanel;
+
+    @Override
+    public void updateUI() {
+        if (aboutPanel != null) {
+            aboutPanel.updateUI();
+        }
+        super.updateUI();
+    }
 
     private void initBottomToolBar() {
         Box verticalBox = Box.createVerticalBox();
@@ -239,85 +245,47 @@ public class MainComponent extends JPanel {
         var version = new JLabel();
         {
             version.setText(Constants.APP_VERSION);
-            RedisFrontContext context = (RedisFrontContext) owner.getContext();
-            version.setToolTipText("关于RedisFront");
+            version.setToolTipText(owner.$tr("Menu.Help.About.Title"));
             version.setIcon(Icons.REDIS_TEXT_80x16);
-            var titleLabel = new JLabel("RedisFront");
-            titleLabel.putClientProperty(FlatClientProperties.STYLE_CLASS, "h3");
             version.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            var link = "https://redisfront.dromara.org";
-            var linkLabel = new JLabel("<html><a href=\"#\">" + link + "</a></html>");
-            linkLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            linkLabel.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    try {
-                        Desktop.getDesktop().browse(new URI(link));
-                    } catch (IOException | URISyntaxException ex) {
-                        JOptionPane.showMessageDialog(linkLabel, "Failed to open '" + link + "' in browser.", "About",
-                                JOptionPane.PLAIN_MESSAGE);
-                    }
-                }
-            });
-            JPanel aboutPanel = new JPanel() {
-                {
-                    setLayout(new BorderLayout());
-                    add(new JLabel(Icons.REDIS_ICON), BorderLayout.WEST);
-                    add(new JPanel() {
-                        {
-                            setLayout(new BorderLayout());
-                            setBorder(new EmptyBorder(10, 10, 10, 10));
-                            add(titleLabel, BorderLayout.NORTH);
-                            add(new JLabel("Cross-platform redis gui clinet"), BorderLayout.CENTER);
-                            add(new JPanel() {
-                                {
-                                    setLayout(new BorderLayout());
-                                    add(new JLabel("Version " + Constants.APP_VERSION), BorderLayout.NORTH);
-                                    add(linkLabel, BorderLayout.CENTER);
-                                    add(new JLabel("https://www.dromara.org"), BorderLayout.NORTH);
-                                }
-                            }, BorderLayout.SOUTH);
-
-                        }
-                    }, BorderLayout.CENTER);
-                }
-            };
             version.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     JOptionPane.showMessageDialog(owner, new Object[]{
-                                    aboutPanel
-                            }, LocaleUtils.getMenu("Menu.Help.About").title(),
+                                    new AboutPanel()
+                            }, owner.$tr("Menu.Help.About.Title"),
                             JOptionPane.PLAIN_MESSAGE);
                 }
             });
         }
         rightToolBar.add(version, BorderLayout.EAST);
         verticalBox.add(rightToolBar);
+
+
         this.add(verticalBox, BorderLayout.SOUTH);
     }
 
-    public void addTab(String title, ContentTabView contentTabView) {
-        Optional<ContentTabView> matchedPanel = Arrays
+    public void addTab(String title, MainTabView mainTabView) {
+        Optional<MainTabView> matchedPanel = Arrays
                 .stream(topTabbedPane.getComponents())
                 .map(e -> {
-                    if (e instanceof ContentTabView) {
-                        return (ContentTabView) e;
+                    if (e instanceof MainTabView) {
+                        return (MainTabView) e;
                     } else {
                         return null;
                     }
                 })
                 .filter(Objects::nonNull)
                 .filter(e ->
-                        e.getRedisConnectContext().getId() == contentTabView.getRedisConnectContext().getId()
+                        e.getRedisConnectContext().getId() == mainTabView.getRedisConnectContext().getId()
                 )
                 .findFirst();
         if (matchedPanel.isPresent()) {
             topTabbedPane.setSelectedComponent(matchedPanel.get());
             return;
         }
-        topTabbedPane.addTab(title, Icons.REDIS_ICON_14x14, contentTabView);
-        topTabbedPane.setSelectedComponent(contentTabView);
+        topTabbedPane.addTab(title, Icons.REDIS_ICON_14x14, mainTabView);
+        topTabbedPane.setSelectedComponent(mainTabView);
 
     }
 }
