@@ -8,8 +8,14 @@
 
 RedisFront is a cross platform Redis desktop client tool developed based on Java Swing. It is simple to use and has complete functions. It supports stand-alone mode, cluster mode, sentry mode and SSH tunnel connection,Welcome to download and use.
 
-![RedisFront2024.1-dark](screenshot/RedisFront2024.1-dark-2.png)
-![RedisFront2024.1-dark](screenshot/RedisFront2024.1-light-2.png)
+![RedisFront](screenshot/latest/2025.1-dark-1.png)
+![RedisFront](screenshot/latest/2025.1-dark-2.png)
+![RedisFront](screenshot/latest/2025.1-dark-3.png)
+![RedisFront](screenshot/latest/2025.1-dark-4.png)
+![RedisFront](screenshot/latest/2025.1-light-1.png)
+![RedisFront](screenshot/latest/2025.1-light-2.png)
+![RedisFront](screenshot/latest/2025.1-light-3.png)
+![RedisFront](screenshot/latest/2025.1-light-4.png)
 
 ### 🌱 Download
 
