@@ -140,7 +140,6 @@ public class MainComponent extends JPanel {
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
             Component component = tabbedPane.getComponentAt(tabIndex);
             if (component instanceof MainTabView mainTabView) {
-
                 //关闭线程池
                 RedisConnectContext redisConnectContext = mainTabView.getRedisConnectContext();
                 ScheduledExecutorService executorService = executorServiceMap.remove(redisConnectContext.getId());

@@ -13,4 +13,8 @@ public class PageScaffold extends QSPageScaffold<QSPageItem<RedisFrontWidget>> {
     public void onChange() {
         super.onChange();
     }
+
+    public void onClose() {
+        super.onChange();
+    }
 }

@@ -3,7 +3,6 @@ package org.dromara.redisfront.ui.widget.main.fragment.scaffold.pubsub;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import com.intellij.uiDesigner.core.Spacer;
 import io.lettuce.core.AbstractRedisClient;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.cluster.RedisClusterClient;
@@ -116,6 +115,9 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
     }
 
     public void openConnection() {
+        if (pubsub != null) {
+            return;
+        }
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             FutureUtils.runAsync(() -> {
                 var redisUrl = LettuceUtils.getRedisURI(redisConnectContext);
