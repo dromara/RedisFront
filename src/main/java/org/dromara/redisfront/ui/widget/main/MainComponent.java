@@ -22,7 +22,7 @@ import org.dromara.redisfront.ui.components.monitor.RedisMonitor;
 import org.dromara.redisfront.ui.components.monitor.RedisUsageInfo;
 import org.dromara.redisfront.ui.event.DrawerChangeEvent;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
-import org.dromara.redisfront.ui.widget.main.about.AboutPanel;
+import org.dromara.redisfront.ui.widget.main.about.MainAboutPanel;
 import org.dromara.redisfront.ui.widget.main.fragment.MainTabView;
 import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
 
@@ -251,7 +251,7 @@ public class MainComponent extends JPanel {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     JOptionPane.showMessageDialog(owner, new Object[]{
-                                    new AboutPanel()
+                                    new MainAboutPanel()
                             }, owner.$tr("Menu.Help.About.Title"),
                             JOptionPane.PLAIN_MESSAGE);
                 }

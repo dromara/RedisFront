@@ -14,14 +14,14 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-public class AboutPanel extends JPanel {
+public class MainAboutPanel extends JPanel {
 
     private static final String PROJECT_URL = "https://redisfront.dromara.org";
     private static final String DROMARA_URL = "https://www.dromara.org";
     private static final String TITLE = "RedisFront";
     private static final String SUBTITLE = "Cross-platform Redis GUI Client";
 
-    public AboutPanel() {
+    public MainAboutPanel() {
         initUI();
     }
 

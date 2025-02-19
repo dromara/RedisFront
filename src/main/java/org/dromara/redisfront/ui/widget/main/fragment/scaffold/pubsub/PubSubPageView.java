@@ -69,7 +69,8 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
         subscribeChannel.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入需要监听的通道名称！");
         channelField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入通道名称！");
         messageField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入消息内容！");
-        infoLabel.setText("  消息未监听 ");
+        infoLabel.setText("监听未开启");
+        infoLabel.setIcon(Icons.STATUS_ERROR);
         enableSubscribe.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
@@ -84,8 +85,9 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
             if (!enableSubscribe.isSelected()) {
                 subscribeChannel.setFocusable(true);
                 pubsub.unsubscribe(channel);
-                infoLabel.setText("  监听已关闭 ");
-                enableSubscribe.setText("开启监听 ");
+                infoLabel.setText("监听已停止");
+                infoLabel.setIcon(Icons.STATUS_ERROR);
+                enableSubscribe.setText("开启监听");
                 enableSubscribe.setToolTipText("点击开始监听！");
             } else {
                 subscribeChannel.setFocusable(false);
@@ -95,8 +97,9 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
                     SwingUtilities.invokeLater(() -> numLabel.setText("消息数量: 0 "));
                 }
                 pubsub.subscribe(channel);
-                infoLabel.setText("  消息监听中 ");
-                enableSubscribe.setText("停止监听 ");
+                infoLabel.setText("监听已开启");
+                infoLabel.setIcon(Icons.STATUS_OK);
+                enableSubscribe.setText("停止监听");
                 enableSubscribe.setToolTipText("点击停止监听！");
             }
         });
