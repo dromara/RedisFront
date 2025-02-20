@@ -221,12 +221,7 @@ public class LettuceUtils {
 
     private static void configureOptions(RedisClusterClient redisClient, RedisConnectContext redisConnectContext) {
         ClusterTopologyRefreshOptions clusterTopologyRefreshOptions = ClusterTopologyRefreshOptions.builder()
-                .enablePeriodicRefresh(Duration.ofSeconds(3))
-                .enableAdaptiveRefreshTrigger(
-                        ClusterTopologyRefreshOptions.RefreshTrigger.MOVED_REDIRECT,
-                        ClusterTopologyRefreshOptions.RefreshTrigger.PERSISTENT_RECONNECTS,
-                        ClusterTopologyRefreshOptions.RefreshTrigger.UNCOVERED_SLOT
-                )
+                .enableAllAdaptiveRefreshTriggers()
                 .adaptiveRefreshTriggersTimeout(Duration.ofSeconds(10))
                 .build();
         var clusterClientOptions = ClusterClientOptions.builder()

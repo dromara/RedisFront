@@ -72,7 +72,7 @@ public class JschUtils {
                     }
                 });
             } catch (Exception e) {
-                throw new RedisFrontException("SSH 端口绑定失败，请重试!", e, false);
+                throw new RedisFrontException(e.getMessage(), e, false);
             }
         }
     }
