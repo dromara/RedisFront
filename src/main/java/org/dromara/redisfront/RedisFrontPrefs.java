@@ -18,14 +18,16 @@ public class RedisFrontPrefs extends QSPrefs {
 
     @Override
     protected void initDefaults() {
-
+        setDbFileName("redis-front.db");
     }
 
     public boolean getDBInitialized() {
-        return getState().getBoolean("databaseInitialized", false);
+        return getState().getBoolean("redis-front-databaseInitialized", false);
     }
 
     public void setDBInitialized(boolean databaseInitialized) {
-        getState().putBoolean("databaseInitialized", databaseInitialized);
+        getState().putBoolean("redis-front-databaseInitialized", databaseInitialized);
     }
+
+
 }
