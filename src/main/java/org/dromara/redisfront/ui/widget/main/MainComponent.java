@@ -59,6 +59,7 @@ public class MainComponent extends JPanel {
     private Integer displayId;
     @Setter
     private Consumer<Integer> tabCloseEvent;
+    private JLabel mode;
 
 
     public MainComponent(DrawerAnimationAction action, RedisFrontWidget owner) {
@@ -179,6 +180,9 @@ public class MainComponent extends JPanel {
             if (topTabbedPane.getSelectedComponent() instanceof MainTabView mainTabView) {
                 RedisConnectContext redisConnectContext = mainTabView.getRedisConnectContext();
                 if (!executorServiceMap.containsKey(redisConnectContext.getId())) {
+                    SwingUtilities.invokeLater(() -> {
+                        mode.setText(owner.$tr(redisConnectContext.getRedisMode().modeName));
+                    });
                     RedisMonitor monitor = new RedisMonitor(redisConnectContext);
                     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                     scheduler.scheduleAtFixedRate(() -> {
@@ -224,7 +228,7 @@ public class MainComponent extends JPanel {
         rightToolBar.setLayout(new BorderLayout());
         rightToolBar.setMargin(new Insets(0, 3, 0, 3));
 
-        var mode = new JLabel(Icons.MODE_ICON);
+        mode = new JLabel(Icons.MODE_ICON);
         mode.setText("单机模式");
         rightToolBar.add(mode, BorderLayout.WEST);
 

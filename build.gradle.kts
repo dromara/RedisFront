@@ -55,7 +55,7 @@ val supportUrl = "https://redisfront.dromara.org"
 
 val hutoolVersion = "5.8.25"
 val fifesoftVersion = "3.5.3"
-val lettuceVersion = "6.2.0.RELEASE"
+val lettuceVersion = "6.2.4.RELEASE"
 val logbackVersion = "1.4.12"
 
 val fatJar = false

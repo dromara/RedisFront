@@ -13,28 +13,23 @@ import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 
 @Setter
 @Getter
 public class RedisScanContext<T> {
     private static final long DEFAULT_SCAN_LIMIT = 100L;
 
+    @Setter
     private ScanCursor scanCursor;
     private Long limit = DEFAULT_SCAN_LIMIT;
     private String searchKey;
     private Collection<T> keys = Collections.emptyList();
 
-    public void setScanCursor(ScanCursor scanCursor) {
-        if (this.scanCursor == null) {
-            this.scanCursor = new ScanCursor(scanCursor.getCursor(), scanCursor.isFinished());
-        }
-        this.scanCursor.setCursor(scanCursor.getCursor());
-        this.scanCursor.setFinished(scanCursor.isFinished());
-    }
-
     public ScanCursor getScanCursor() {
-        return Optional.ofNullable(scanCursor).orElse(ScanCursor.INITIAL);
+        if (scanCursor == null) {
+            scanCursor = ScanCursor.INITIAL;
+        }
+        return scanCursor;
     }
 
     public ScanArgs getScanArgs() {

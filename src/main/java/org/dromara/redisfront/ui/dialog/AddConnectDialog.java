@@ -256,7 +256,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
                     getOwner().displayException($tr("AddConnectDialog.test.fail.message"), exception);
                 }
             } else if (exception instanceof RedisConnectionException) {
-                getOwner().displayException($tr("AddConnectDialog.test.fail.message"), exception.getCause());
+                getOwner().displayException($tr("AddConnectDialog.test.fail.message"), exception);
             } else {
                 getOwner().displayException($tr("AddConnectDialog.test.fail.message"), exception);
             }
