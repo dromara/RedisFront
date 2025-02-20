@@ -221,11 +221,11 @@ public class LettuceUtils {
 
     private static void configureOptions(RedisClusterClient redisClient, RedisConnectContext redisConnectContext) {
         ClusterTopologyRefreshOptions clusterTopologyRefreshOptions = ClusterTopologyRefreshOptions.builder()
-                .enablePeriodicRefresh(Duration.ofSeconds(3))     // 定期全量刷新（默认关闭）
+                .enablePeriodicRefresh(Duration.ofSeconds(3))
                 .enableAdaptiveRefreshTrigger(
-                        ClusterTopologyRefreshOptions.RefreshTrigger.MOVED_REDIRECT,       // 收到MOVED响应时触发刷新
-                        ClusterTopologyRefreshOptions.RefreshTrigger.PERSISTENT_RECONNECTS,// 持久连接失败时触发
-                        ClusterTopologyRefreshOptions.RefreshTrigger.PERSISTENT_RECONNECTS// 持久连接失败时触发
+                        ClusterTopologyRefreshOptions.RefreshTrigger.MOVED_REDIRECT,
+                        ClusterTopologyRefreshOptions.RefreshTrigger.PERSISTENT_RECONNECTS,
+                        ClusterTopologyRefreshOptions.RefreshTrigger.UNCOVERED_SLOT
                 )
                 .adaptiveRefreshTriggersTimeout(Duration.ofSeconds(10))
                 .build();
