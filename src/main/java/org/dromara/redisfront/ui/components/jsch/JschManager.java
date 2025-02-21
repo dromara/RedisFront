@@ -1,11 +1,10 @@
 package org.dromara.redisfront.ui.components.jsch;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.RandomUtil;
 import cn.hutool.extra.ssh.JschUtil;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.utils.JschUtils;
@@ -17,18 +16,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * JschManager
- * 32768 - 61000
  */
+@Slf4j
 public class JschManager implements AutoCloseable {
     private static final Map<Integer, Session> SESSION_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentSkipListSet<Integer> PORT_SET = new ConcurrentSkipListSet<>();
-    private static final int MIN_PORT = 32768;
-    private static final int MAX_PORT = 65535;
+    private static final int MIN_PORT = Integer.parseInt(System.getProperty("jsch.min.port", "32768"));
+    private static final int MAX_PORT = Integer.parseInt(System.getProperty("jsch.max.port", "65535"));
     private static final String LOCAL_HOST = "127.0.0.1";
     public final static JschManager MANAGER = new JschManager();
+    private final Lock portLock = new ReentrantLock();
 
     public void openSession(RedisConnectContext redisConnectContext) {
         redisConnectContext.setLocalHost(LOCAL_HOST);
@@ -50,13 +52,11 @@ public class JschManager implements AutoCloseable {
         }
     }
 
-
     private void createSession(RedisConnectContext redisConnectContext) {
         if (RedisFrontUtils.isNotNull(redisConnectContext.getSshInfo())) {
             try {
                 SESSION_MAP.compute(redisConnectContext.getId(), (_, session) -> {
                     if (session != null && session.isConnected()) {
-
                         return session;
                     }
                     Session newSession = JschUtils.createSession(redisConnectContext);
@@ -67,10 +67,15 @@ public class JschManager implements AutoCloseable {
                         JschUtil.bindPort(newSession, remoteHost, redisConnectContext.getPort(), redisConnectContext.getLocalPort());
                         return newSession;
                     } catch (JSchException e) {
-                        throw new RedisFrontException("SSH 连接失败 - " + e.getMessage());
+                        throw new RedisFrontException("SSH 连接失败 - " + e.getMessage(), e, false);
+                    } finally {
+                        if (!newSession.isConnected()) {
+                            newSession.disconnect();
+                        }
                     }
                 });
             } catch (Exception e) {
+                log.error("创建会话失败", e);
                 throw new RedisFrontException(e.getMessage(), e, false);
             }
         }
@@ -88,10 +93,10 @@ public class JschManager implements AutoCloseable {
         SESSION_MAP.compute(redisConnectContext.getId(), (_, session) -> {
             if (session != null && session.isConnected()) {
                 if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-                    redisConnectContext.getClusterLocalPort().forEach(((remotePort, localPort) -> {
+                    redisConnectContext.getClusterLocalPort().forEach((remotePort, localPort) -> {
                         String remoteHost = getRemoteAddress(redisConnectContext);
                         JschUtil.bindPort(session, remoteHost, remotePort, localPort);
-                    }));
+                    });
                 } else {
                     String remoteHost = getRemoteAddress(redisConnectContext);
                     JschUtil.bindPort(session, remoteHost, redisConnectContext.getPort(), redisConnectContext.getLocalPort());
@@ -103,22 +108,24 @@ public class JschManager implements AutoCloseable {
     }
 
     private int getTempLocalPort() {
-        int port;
-        do {
-            port = RandomUtil.randomInt(MIN_PORT, MAX_PORT);
-        } while (!PORT_SET.add(port));
-        return port;
+        portLock.lock();
+        try {
+            for (int i = MIN_PORT; i <= MAX_PORT; i++) {
+                if (PORT_SET.add(i)) {
+                    return i;
+                }
+            }
+            throw new RedisFrontException("无可用端口");
+        } finally {
+            portLock.unlock();
+        }
     }
 
     private void removeTmpLocalPort(RedisConnectContext redisConnectContext) {
         if (RedisFrontUtils.equal(RedisMode.CLUSTER, redisConnectContext.getRedisMode())) {
-            if (CollUtil.isNotEmpty(redisConnectContext.getClusterLocalPort())) {
-                redisConnectContext.getClusterLocalPort().forEach((_, v) -> PORT_SET.remove(v));
-            }
+            redisConnectContext.getClusterLocalPort().forEach((_, v) -> PORT_SET.remove(v));
         } else {
-            if (CollUtil.isNotEmpty(PORT_SET)) {
-                PORT_SET.remove(redisConnectContext.getLocalPort());
-            }
+            PORT_SET.remove(redisConnectContext.getLocalPort());
         }
     }
 
@@ -132,6 +139,6 @@ public class JschManager implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-
+        // 实现具体的关闭逻辑
     }
 }

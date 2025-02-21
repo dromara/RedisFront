@@ -33,14 +33,14 @@ public class LettuceUtils {
     private LettuceUtils() {
     }
 
-    public synchronized static Partitions getRedisClusterPartitions(RedisConnectContext redisConnectContext) {
+    public static Partitions getRedisClusterPartitions(RedisConnectContext redisConnectContext) {
         var redisURI = getRedisURI(redisConnectContext);
         try (var clusterClient = RedisClusterClient.create(redisURI)) {
             return clusterClient.getPartitions();
         }
     }
 
-    public synchronized static RedisClusterClient getRedisClusterClient(RedisURI redisURI, RedisConnectContext redisConnectContext) {
+    public static RedisClusterClient getRedisClusterClient(RedisURI redisURI, RedisConnectContext redisConnectContext) {
         var clusterClient = RedisClusterClient.create(redisURI);
         if (!RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
             clusterClient.getPartitions().forEach(redisClusterNode -> redisClusterNode.getUri().setHost(redisConnectContext.getHost()));
@@ -49,7 +49,7 @@ public class LettuceUtils {
         return clusterClient;
     }
 
-    public synchronized static void clusterRun(RedisConnectContext redisConnectContext, Consumer<RedisAdvancedClusterCommands<String, String>> consumer) {
+    public static void clusterRun(RedisConnectContext redisConnectContext, Consumer<RedisAdvancedClusterCommands<String, String>> consumer) {
         var redisURI = getRedisURI(redisConnectContext);
         try (var clusterClient = getRedisClusterClient(redisURI, redisConnectContext);
              var connection = clusterClient.connect()) {
@@ -60,9 +60,8 @@ public class LettuceUtils {
         }
     }
 
-    public synchronized static <T> T clusterExec(RedisConnectContext redisConnectContext, Function<RedisAdvancedClusterCommands<String, String>, T> function) {
+    public static <T> T clusterExec(RedisConnectContext redisConnectContext, Function<RedisAdvancedClusterCommands<String, String>, T> function) {
         var redisURI = getRedisURI(redisConnectContext);
-        ;
         try (var clusterClient = getRedisClusterClient(redisURI, redisConnectContext);
              var connection = clusterClient.connect()) {
             return function.apply(connection.sync());
@@ -73,7 +72,7 @@ public class LettuceUtils {
     }
 
 
-    public synchronized static void sentinelRun(RedisConnectContext redisConnectContext, Consumer<RedisSentinelCommands<String, String>> consumer) {
+    public static void sentinelRun(RedisConnectContext redisConnectContext, Consumer<RedisSentinelCommands<String, String>> consumer) {
         var redisURI = getRedisURI(redisConnectContext);
         try (var redisClient = io.lettuce.core.RedisClient.create(redisURI);
              var connection = redisClient.connectSentinel()) {
@@ -84,7 +83,7 @@ public class LettuceUtils {
         }
     }
 
-    public synchronized static <T> T sentinelExec(RedisConnectContext redisConnectContext, Function<RedisSentinelCommands<String, String>, T> function) {
+    public static <T> T sentinelExec(RedisConnectContext redisConnectContext, Function<RedisSentinelCommands<String, String>, T> function) {
         var redisURI = getRedisURI(redisConnectContext);
         try (var redisClient = io.lettuce.core.RedisClient.create(redisURI);
              var connection = redisClient.connectSentinel()) {
@@ -95,7 +94,7 @@ public class LettuceUtils {
         }
     }
 
-    public synchronized static void run(RedisConnectContext redisConnectContext, Consumer<RedisCommands<String, String>> consumer) {
+    public static void run(RedisConnectContext redisConnectContext, Consumer<RedisCommands<String, String>> consumer) {
         ;
         try (var redisClient = getRedisClient(redisConnectContext);
              var connection = redisClient.connect()) {
@@ -106,14 +105,14 @@ public class LettuceUtils {
         }
     }
 
-    public synchronized static RedisClient getRedisClient(RedisConnectContext redisConnectContext) {
+    public static RedisClient getRedisClient(RedisConnectContext redisConnectContext) {
         var redisURI = getRedisURI(redisConnectContext);
         var redisClient = RedisClient.create(redisURI);
         configureOptions(redisClient, redisConnectContext);
         return redisClient;
     }
 
-    public synchronized static <T> T exec(RedisConnectContext redisConnectContext, Function<RedisCommands<String, String>, T> function) {
+    public static <T> T exec(RedisConnectContext redisConnectContext, Function<RedisCommands<String, String>, T> function) {
         try (var redisClient = getRedisClient(redisConnectContext);
              var connection = redisClient.connect()) {
             return function.apply(connection.sync());
@@ -123,7 +122,7 @@ public class LettuceUtils {
         }
     }
 
-    public synchronized static RedisURI getRedisURI(RedisConnectContext redisConnectContext) {
+    public static RedisURI getRedisURI(RedisConnectContext redisConnectContext) {
         String host = "";
         String password = "";
         if (!StringUtil.isNullOrEmpty(redisConnectContext.getHost())) {
