@@ -1,0 +1,43 @@
+version: '1.0'
+name: pipeline-20250221
+displayName: pipeline-20250221
+triggers:
+  trigger: auto
+  push:
+    branches:
+      prefix:
+        - release-
+stages:
+  - name: stage-571cb146
+    displayName: 版本构建
+    strategy: naturally
+    trigger: auto
+    executor: []
+    steps:
+      - step: build@gradle
+        name: build_gradle
+        displayName: Gradle 构建
+        jdkVersion: '22'
+        gradleVersion: '4.4'
+        commands:
+          - '# Gradle默认构建命令'
+          - chmod +x ./gradlew
+          - ./gradlew build
+        artifacts:
+          - name: BUILD_ARTIFACT
+            path:
+              - ./target
+        caches:
+          - ~/.gradle/caches
+        notify: []
+        strategy:
+          retry: '0'
+      - step: publish@release_artifacts
+        name: publish_release_artifacts
+        displayName: 发布
+        dependArtifact: output
+        version: 2025.1.1.1
+        autoIncrement: true
+        notify: []
+        strategy:
+          retry: '0'
