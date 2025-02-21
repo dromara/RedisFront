@@ -249,12 +249,13 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
                 if (RedisBasicService.service.ping(redisConnectContext)) {
                     RedisMode redisModeEnum = RedisBasicService.service.getRedisModeEnum(redisConnectContext);
                     if (RedisMode.CLUSTER.equals(redisModeEnum) || RedisMode.SENTINEL.equals(redisModeEnum)) {
-                        var res = JOptionPane.showConfirmDialog(getOwner(),
-                                "是否重写集群地址？",
-                                "重写地址", JOptionPane.YES_NO_OPTION);
-                        if (res == JOptionPane.YES_OPTION) {
-                            redisConnectContext.getSetting().setRewriteHost(true);
-                        }
+//                        var res = JOptionPane.showConfirmDialog(getOwner(),
+//                                "是否重写集群地址？",
+//                                "重写地址", JOptionPane.YES_NO_OPTION);
+//                        if (res == JOptionPane.YES_OPTION) {
+//                            redisConnectContext.getSetting().setRewriteHost(true);
+//                        }
+                        getOwner().displayMessage($tr("AddConnectDialog.test.success.title"), $tr("AddConnectDialog.test.success.message"));
                     } else {
                         getOwner().displayMessage($tr("AddConnectDialog.test.success.title"), $tr("AddConnectDialog.test.success.message"));
                     }
