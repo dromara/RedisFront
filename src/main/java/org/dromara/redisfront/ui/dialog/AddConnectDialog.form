@@ -347,7 +347,7 @@
                       </grid>
                     </constraints>
                     <properties>
-                      <text value="."/>
+                      <text value=":"/>
                     </properties>
                   </component>
                   <component id="7cd89" class="javax.swing.JTextField" binding="sshTimeoutTextField">
