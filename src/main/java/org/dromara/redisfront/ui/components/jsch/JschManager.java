@@ -33,7 +33,11 @@ public class JschManager implements AutoCloseable {
     public void openSession(RedisConnectContext redisConnectContext) {
         redisConnectContext.setLocalHost(LOCAL_HOST);
         redisConnectContext.setLocalPort(getTempLocalPort());
-        createSession(redisConnectContext);
+        if (SESSION_MAP.get(redisConnectContext.getId()) == null || !SESSION_MAP.get(redisConnectContext.getId()).isConnected()) {
+            this.createSession(redisConnectContext);
+        } else {
+            this.rebindSession(redisConnectContext);
+        }
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             Map<Integer, Integer> clusterTempPort = new HashMap<>();
             for (RedisClusterNode partition : LettuceUtils.getRedisClusterPartitions(redisConnectContext)) {
@@ -42,34 +46,17 @@ public class JschManager implements AutoCloseable {
                 clusterTempPort.put(remotePort, port);
             }
             redisConnectContext.setClusterLocalPort(clusterTempPort);
-            this.bindClusterPort(redisConnectContext);
+            this.rebindSession(redisConnectContext);
         }
     }
 
-    private void bindClusterPort(RedisConnectContext redisConnectContext) {
-        SESSION_MAP.compute(redisConnectContext.getId(), (_, session) -> {
-            if (session != null && session.isConnected()) {
-                redisConnectContext.getClusterLocalPort().forEach(((remotePort, localPort) -> {
-                    try {
-                        session.setTimeout(redisConnectContext.getSetting().getSshTimeout());
-                        session.connect();
-                        String remoteHost = getRemoteAddress(redisConnectContext);
-                        JschUtil.bindPort(session, remoteHost, remotePort, localPort);
-                    } catch (JSchException e) {
-                        throw new RedisFrontException("SSH 连接失败 - " + e.getMessage());
-                    }
-                }));
-                return session;
-            }
-            return null;
-        });
-    }
 
     private void createSession(RedisConnectContext redisConnectContext) {
         if (RedisFrontUtils.isNotNull(redisConnectContext.getSshInfo())) {
             try {
                 SESSION_MAP.compute(redisConnectContext.getId(), (_, session) -> {
                     if (session != null && session.isConnected()) {
+
                         return session;
                     }
                     Session newSession = JschUtils.createSession(redisConnectContext);
@@ -95,6 +82,24 @@ public class JschManager implements AutoCloseable {
             session.disconnect();
         }
         removeTmpLocalPort(redisConnectContext);
+    }
+
+    private void rebindSession(RedisConnectContext redisConnectContext) {
+        SESSION_MAP.compute(redisConnectContext.getId(), (_, session) -> {
+            if (session != null && session.isConnected()) {
+                if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
+                    redisConnectContext.getClusterLocalPort().forEach(((remotePort, localPort) -> {
+                        String remoteHost = getRemoteAddress(redisConnectContext);
+                        JschUtil.bindPort(session, remoteHost, remotePort, localPort);
+                    }));
+                } else {
+                    String remoteHost = getRemoteAddress(redisConnectContext);
+                    JschUtil.bindPort(session, remoteHost, redisConnectContext.getPort(), redisConnectContext.getLocalPort());
+                }
+                return session;
+            }
+            return null;
+        });
     }
 
     private int getTempLocalPort() {
