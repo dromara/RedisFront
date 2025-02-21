@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 
 @Slf4j
 class SyncLoadingWaiter<T> extends SwingWorker<T, Object> {
-    private static final String TIMEOUT_MESSAGE_KEY = "LoadingDialog.loadInfoLabel.timeout.message";
+    private static final String TIMEOUT_MESSAGE_KEY = "SyncLoadingWaiter.loadInfoLabel.timeout.message";
     private static final int TIMER_DELAY_MS = 1000;
     private static final int MAX_PROGRESS = 100;
 

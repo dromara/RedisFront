@@ -64,7 +64,6 @@ import java.util.function.Consumer;
 @Getter
 public class LeftSearchFragment {
     private static final Logger log = LoggerFactory.getLogger(LeftSearchFragment.class);
-    private static final String SEPARATOR_FLAG = "/";
     private final RedisFrontWidget owner;
     private final RedisFrontContext context;
     private JPanel contentPanel;
@@ -550,17 +549,7 @@ public class LeftSearchFragment {
 
             if (!key.contains("*")) {
                 var all = allField.getText();
-                var scanInfo = all.split(SEPARATOR_FLAG);
-                if (scanInfo.length > 1) {
-                    if (RedisFrontUtils.equal(scanInfo[1], "null")) {
-                        throw new RedisFrontException(owner.$tr("DataSearchForm.exception.databaseIsNull.message"), true);
-                    } else {
-                        scanKeysContext.setLimit(Long.valueOf(scanInfo[1]));
-                    }
-                } else {
-                    scanKeysContext.setLimit(Long.valueOf(all));
-                }
-
+                scanKeysContext.setLimit(Long.valueOf(all));
             }
 
             KeyScanCursor<String> keyScanCursor = RedisBasicService.service.scan(redisConnectContext, scanKeysContext.getScanCursor(), scanKeysContext.getScanArgs());
@@ -593,36 +582,16 @@ public class LeftSearchFragment {
             DefaultTreeModel treeModel = TreeUtils.toTreeModel(new HashSet<>(scanKeysContext.getKeyList()), delim);
             var finalKeyScanCursor = keyScanCursor;
             return new Turbo3<>(treeModel, finalKeyScanCursor, scanKeysContext);
-        }, (r, e) -> {
+        }, (turbo, e) -> {
             if (e != null) {
                 owner.displayException(e);
                 return;
             }
-            var treeModel = r.getT1();
-            var finalKeyScanCursor = r.getT2();
-            var scanKeysContext = r.getT3();
+            var treeModel = turbo.getT1();
+            var keyScanCursor = turbo.getT2();
+            var scanKeysContext = turbo.getT3();
             currentField.setText(String.valueOf(scanKeysContext.getKeyList().size()));
-            loadMoreBtn.setEnabled(!finalKeyScanCursor.isFinished());
-            var all = allField.getText();
-            var scanInfo = all.split(SEPARATOR_FLAG);
-            if (scanInfo.length > 1) {
-                var current = Long.parseLong(scanInfo[0]);
-                var allSize = NumberUtil.isNumber(scanInfo[1]) ? Long.parseLong(scanInfo[1]) : 0;
-                //如果全部扫描完成！
-                if (current >= allSize && scanKeysContext.getKeyList().size() == allSize) {
-                    loadMoreBtn.setText(owner.$tr("DataSearchForm.loadMoreBtn.complete.title"));
-                    loadMoreBtn.setEnabled(false);
-                    return;
-                } else {
-                    allField.setText((current + scanKeysContext.getLimit()) + SEPARATOR_FLAG + allSize);
-                    var title = owner.$tr("DataSearchForm.allField.toolTipText.title");
-                    allField.setToolTipText(String.format(title, current, allSize));
-                }
-            } else {
-                var title = owner.$tr("DataSearchForm.allField.toolTipText.title");
-                allField.setToolTipText(String.format(title, scanKeysContext.getLimit(), all));
-                allField.setText(scanKeysContext.getLimit() + SEPARATOR_FLAG + all);
-            }
+            loadMoreBtn.setEnabled(!NumberUtil.equals(scanKeysContext.getKeyList().size(), Long.parseLong(allField.getText())) && !keyScanCursor.isFinished());
             keyTree.setModel(treeModel);
             keyTree.updateUI();
         });
@@ -702,12 +671,6 @@ public class LeftSearchFragment {
     }
 
     private void scanKeysAndUpdateScanInfo() {
-        var all = allField.getText();
-        var scanInfo = all.split(SEPARATOR_FLAG);
-        if (scanInfo.length > 1) {
-            allField.setText("0" + SEPARATOR_FLAG + scanInfo[1]);
-            allField.setToolTipText(String.format(owner.$tr("DataSearchForm.allLabel.toolTip.text"), 0, scanInfo[1]));
-        }
         scanKeysActionPerformed();
     }
 

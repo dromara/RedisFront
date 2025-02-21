@@ -55,11 +55,6 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
                     terminal.setCaretPosition(Math.min(terminal.getText().length(), lastSelectionStart));
                 }
             }
-
-            @Override
-            public void mouseClicked(MouseEvent e) {
-
-            }
         });
 
         JPopupMenu jPopupMenu = new JPopupMenu();

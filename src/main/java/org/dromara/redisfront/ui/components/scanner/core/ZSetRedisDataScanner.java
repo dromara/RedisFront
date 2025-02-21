@@ -30,7 +30,7 @@ public class ZSetRedisDataScanner extends AbstractRedisDataScanner<ScoredValue<S
     @Override
     public void fetchData(String fetchKey) {
 
-        var scanContext = redisScanContextManager.getContext(key);
+        var scanContext = getContext(key);
 
         if (RedisFrontUtils.isNotEmpty(scanContext.getKeyList()) && scanContext.getKeyList().size() >= 1000) {
             throw new RedisFrontException(tr.getString("DataViewForm.redisFrontException.message"));
@@ -39,6 +39,7 @@ public class ZSetRedisDataScanner extends AbstractRedisDataScanner<ScoredValue<S
         scanContext.setSearchKey(fetchKey);
 
         var valueScanCursor = RedisZSetService.service.zscan(redisConnectContext, key, scanContext.getScanCursor(), scanContext.getScanArgs());
+
         scanContext.setScanCursor(valueScanCursor);
 
         scanContext.setScanCursor(valueScanCursor);

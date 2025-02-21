@@ -21,7 +21,6 @@ public abstract class AbstractRedisDataScanner<T, M extends TableModel> implemen
 
     private final ScanDataResult<M> scanDataResult = new ScanDataResult<>();
 
-
     public AbstractRedisDataScanner(RedisConnectContext redisConnectContext, ResourceBundle tr, ScanDataRefreshHandler<ScanDataResult<M>> scanDataRefreshHandler) {
         this.redisConnectContext = redisConnectContext;
         this.tr = tr;
@@ -47,7 +46,11 @@ public abstract class AbstractRedisDataScanner<T, M extends TableModel> implemen
     }
 
     protected RedisScanContext<T> getContext(String key) {
-        return redisScanContextManager.getContext(key);
+        RedisScanContext<T> context = redisScanContextManager.getContext(key);
+        if (null == context.getLimit()) {
+            context.setLimit(Long.valueOf(redisConnectContext.getSetting().getLoadKeyNum()));
+        }
+        return context;
     }
 
     public void reset(String key) {

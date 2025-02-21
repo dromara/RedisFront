@@ -73,7 +73,6 @@ public class RedisConnectContext implements Serializable, Cloneable {
         private Integer redisTimeout;
         private Integer sshTimeout;
 
-
         @Override
         public String toString() {
             return RedisFrontUtils.toJson(this);

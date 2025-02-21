@@ -37,6 +37,10 @@ public class SetRedisDataScanner extends AbstractRedisDataScanner<String, SetTab
 
         scanContext.setSearchKey(fetchKey);
 
+        if (null == scanContext.getLimit()) {
+            scanContext.setLimit(Long.valueOf(redisConnectContext.getSetting().getLoadKeyNum()));
+        }
+
         var valueScanCursor = RedisSetService.service.sscan(redisConnectContext, key, scanContext.getScanCursor(), scanContext.getScanArgs());
         scanContext.setScanCursor(valueScanCursor);
 

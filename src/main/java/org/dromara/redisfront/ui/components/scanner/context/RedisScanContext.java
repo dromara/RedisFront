@@ -17,11 +17,10 @@ import java.util.Map;
 @Setter
 @Getter
 public class RedisScanContext<T> {
-    private static final long DEFAULT_SCAN_LIMIT = 100L;
 
     @Setter
     private ScanCursor scanCursor;
-    private Long limit = DEFAULT_SCAN_LIMIT;
+    private Long limit;
     private String searchKey;
     private Collection<T> keys = Collections.emptyList();
 
