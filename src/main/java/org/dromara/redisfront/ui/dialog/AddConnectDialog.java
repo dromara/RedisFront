@@ -8,13 +8,14 @@ import com.intellij.uiDesigner.core.Spacer;
 import io.lettuce.core.RedisConnectionException;
 import org.dromara.quickswing.ui.app.QSDialog;
 import org.dromara.redisfront.RedisFrontContext;
-import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.enums.ConnectType;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.dao.ConnectDetailDao;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 import org.dromara.redisfront.service.RedisBasicService;
+import org.dromara.redisfront.ui.components.jsch.JschManager;
 import org.dromara.redisfront.ui.event.OpenRedisConnectEvent;
 import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
@@ -240,12 +241,21 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
     private Boolean testConnect() {
         var connectSuccess = false;
         try {
-            var connectInfo = validGetConnectInfo();
-            if (RedisBasicService.service.ping(connectInfo)) {
-                getOwner().displayMessage($tr("AddConnectDialog.test.success.title"), $tr("AddConnectDialog.test.success.message"));
-                connectSuccess = true;
-            } else {
-                getOwner().displayMessage($tr("AddConnectDialog.test.fail.title"), $tr("AddConnectDialog.test.fail.message"));
+            var redisConnectContext = validGetConnectInfo();
+            if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
+                JschManager.MANAGER.openSession(redisConnectContext);
+            }
+            try {
+                if (RedisBasicService.service.ping(redisConnectContext)) {
+                    getOwner().displayMessage($tr("AddConnectDialog.test.success.title"), $tr("AddConnectDialog.test.success.message"));
+                    connectSuccess = true;
+                } else {
+                    getOwner().displayMessage($tr("AddConnectDialog.test.fail.title"), $tr("AddConnectDialog.test.fail.message"));
+                }
+            } finally {
+                if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
+                    JschManager.MANAGER.closeSession(redisConnectContext);
+                }
             }
         } catch (Exception exception) {
             log.error(exception.getMessage(), exception);
@@ -287,6 +297,9 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
     private void openActionPerformed(ActionEvent actionEvent) {
         var redisConnectContext = validGetConnectInfo();
         if (testConnect()) {
+            if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
+                JschManager.MANAGER.openSession(redisConnectContext);
+            }
             try {
                 ConnectDetailEntity connectDetailEntity = redisConnectContext.toEntity();
                 connectDetailEntity.setGroupId(groupId);
@@ -302,6 +315,9 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
                 dispose();
             } catch (SQLException e) {
                 getOwner().displayException($tr("AddConnectDialog.save.fail.message"), e);
+                if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
+                    JschManager.MANAGER.closeSession(redisConnectContext);
+                }
             }
         }
     }

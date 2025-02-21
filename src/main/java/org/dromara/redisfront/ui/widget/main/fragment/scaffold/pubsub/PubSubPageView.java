@@ -126,13 +126,11 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
                 var redisUrl = LettuceUtils.getRedisURI(redisConnectContext);
                 redisClient = LettuceUtils.getRedisClusterClient(redisUrl, redisConnectContext);
                 var connection = ((RedisClusterClient) redisClient).connectPubSub();
-                JschUtils.openSession(redisConnectContext, (RedisClusterClient) redisClient);
                 pubsub = connection.async();
             }).thenRun(() -> pubsub.getStatefulConnection().addListener(this));
         } else {
             FutureUtils.runAsync(() -> {
                 redisClient = LettuceUtils.getRedisClient(redisConnectContext);
-                JschUtils.openSession(redisConnectContext);
                 var connection = (((RedisClient) redisClient).connectPubSub());
                 pubsub = connection.async();
             }).thenRun(() -> pubsub.getStatefulConnection().addListener(this));
@@ -143,9 +141,7 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
         enableSubscribe.setSelected(false);
         if (RedisFrontUtils.isNotNull(pubsub)) {
             pubsub.getStatefulConnection().closeAsync().thenRun(() -> redisClient.shutdownAsync().thenRun(() -> {
-                if (redisConnectContext.getSshInfo() != null) {
-                    JschUtils.closeSession(redisConnectContext);
-                }
+                pubsub = null;
             }));
         }
     }

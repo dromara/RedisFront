@@ -6,10 +6,13 @@ import io.lettuce.core.api.sync.BaseRedisCommands;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
 import org.dromara.quickswing.ui.swing.Background;
 import org.dromara.redisfront.RedisFrontContext;
+import org.dromara.redisfront.commons.enums.ConnectType;
 import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.commons.utils.LettuceUtils;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;
+import org.dromara.redisfront.ui.components.jsch.JschManager;
 import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
 import org.dromara.redisfront.ui.components.panel.NonePanel;
 import org.dromara.redisfront.ui.event.OpenRedisConnectEvent;
@@ -62,6 +65,9 @@ public class RedisFrontComponent extends Background {
                 Arrays.stream(components)
                         .findFirst()
                         .ifPresent(component -> {
+                            if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
+                                JschManager.MANAGER.openSession(redisConnectContext);
+                            }
                             if (component instanceof MainComponent mainRightTabbedPanel) {
                                 SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
                                     fetchRedisMode(redisConnectContext);
@@ -84,6 +90,9 @@ public class RedisFrontComponent extends Background {
                                 }
                                  */
                                         owner.displayException(e);
+                                        if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
+                                            JschManager.MANAGER.closeSession(redisConnectContext);
+                                        }
                                     }
                                 });
                             } else {
@@ -93,13 +102,16 @@ public class RedisFrontComponent extends Background {
                                     MainTabView mainTabView = new MainTabView(owner, redisConnectContext);
                                     mainTabbedPanel.addTab(redisConnectContext.getTitle(), mainTabView);
                                     return mainTabbedPanel;
-                                }, (ret, e) -> {
+                                }, (mainComponent, e) -> {
                                     if (e == null) {
                                         mainRightPane.remove(component);
-                                        mainRightPane.add((MainComponent) ret, BorderLayout.CENTER);
+                                        mainRightPane.add(mainComponent, BorderLayout.CENTER);
                                         FlatLaf.updateUI();
                                     } else {
                                         owner.displayException(e);
+                                        if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
+                                            JschManager.MANAGER.closeSession(redisConnectContext);
+                                        }
                                     }
                                 });
                             }
