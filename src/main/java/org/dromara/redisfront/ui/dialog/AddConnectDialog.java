@@ -9,6 +9,7 @@ import io.lettuce.core.RedisConnectionException;
 import org.dromara.quickswing.ui.app.QSDialog;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.commons.enums.ConnectType;
+import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.dao.ConnectDetailDao;
@@ -83,7 +84,6 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
     private JLabel loadNumLabel;
     private JLabel redisTimeoutLabel;
     private JLabel sshTimeoutLabel;
-
 
     public static AddConnectDialog getInstance(RedisFrontWidget app) {
         return new AddConnectDialog(app);
@@ -247,7 +247,17 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             }
             try {
                 if (RedisBasicService.service.ping(redisConnectContext)) {
-                    getOwner().displayMessage($tr("AddConnectDialog.test.success.title"), $tr("AddConnectDialog.test.success.message"));
+                    RedisMode redisModeEnum = RedisBasicService.service.getRedisModeEnum(redisConnectContext);
+                    if (RedisMode.CLUSTER.equals(redisModeEnum) || RedisMode.SENTINEL.equals(redisModeEnum)) {
+                        var res = JOptionPane.showConfirmDialog(getOwner(),
+                                "是否重写集群地址？",
+                                "重写地址", JOptionPane.YES_NO_OPTION);
+                        if (res == JOptionPane.YES_OPTION) {
+                            redisConnectContext.getSetting().setRewriteHost(true);
+                        }
+                    } else {
+                        getOwner().displayMessage($tr("AddConnectDialog.test.success.title"), $tr("AddConnectDialog.test.success.message"));
+                    }
                     connectSuccess = true;
                 } else {
                     getOwner().displayMessage($tr("AddConnectDialog.test.fail.title"), $tr("AddConnectDialog.test.fail.message"));
@@ -375,7 +385,8 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
                 Integer.parseInt(keyMaxLoadNum.getText()),
                 keySeparatorField.getText(),
                 Integer.parseInt(redisTimeoutTextField.getText()),
-                Integer.parseInt(sshTimeoutTextField.getText())
+                Integer.parseInt(sshTimeoutTextField.getText()),
+                false
         );
     }
 
@@ -594,34 +605,34 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         panel3.setLayout(new GridLayoutManager(1, 1, new Insets(10, 20, 10, 20), -1, -1));
         tabbedPane1.addTab("设置", panel3);
         redisPanel = new JPanel();
-        redisPanel.setLayout(new GridLayoutManager(9, 2, new Insets(0, 0, 0, 0), -1, -1));
+        redisPanel.setLayout(new GridLayoutManager(9, 4, new Insets(0, 0, 0, 0), -1, -1));
         panel3.add(redisPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         keySeparatorField = new JTextField();
         keySeparatorField.setText(":");
-        redisPanel.add(keySeparatorField, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        redisPanel.add(keySeparatorField, new GridConstraints(3, 0, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         sshTimeoutTextField = new JTextField();
         sshTimeoutTextField.setText("1000");
-        redisPanel.add(sshTimeoutTextField, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        redisPanel.add(sshTimeoutTextField, new GridConstraints(7, 0, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final Spacer spacer3 = new Spacer();
-        redisPanel.add(spacer3, new GridConstraints(8, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        redisPanel.add(spacer3, new GridConstraints(8, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         redisTimeoutTextField = new JTextField();
         redisTimeoutTextField.setText("1000");
-        redisPanel.add(redisTimeoutTextField, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        redisPanel.add(redisTimeoutTextField, new GridConstraints(5, 0, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         keyMaxLoadNum = new JTextField();
         keyMaxLoadNum.setText("5000");
-        redisPanel.add(keyMaxLoadNum, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        redisPanel.add(keyMaxLoadNum, new GridConstraints(1, 0, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         keySeparatorLabel = new JLabel();
         keySeparatorLabel.setText("分隔符");
-        redisPanel.add(keySeparatorLabel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        redisPanel.add(keySeparatorLabel, new GridConstraints(2, 0, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         loadNumLabel = new JLabel();
         loadNumLabel.setText("加载数");
-        redisPanel.add(loadNumLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        redisPanel.add(loadNumLabel, new GridConstraints(0, 0, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         redisTimeoutLabel = new JLabel();
         this.$$$loadLabelText$$$(redisTimeoutLabel, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "SettingDialog.redisTimeoutLabel.Title"));
-        redisPanel.add(redisTimeoutLabel, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        redisPanel.add(redisTimeoutLabel, new GridConstraints(4, 0, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         sshTimeoutLabel = new JLabel();
         this.$$$loadLabelText$$$(sshTimeoutLabel, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "SettingDialog.sshTimeoutLabel.Title"));
-        redisPanel.add(sshTimeoutLabel, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        redisPanel.add(sshTimeoutLabel, new GridConstraints(6, 0, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel4 = new JPanel();
         panel4.setLayout(new BorderLayout(0, 0));
         panel4.setVisible(true);

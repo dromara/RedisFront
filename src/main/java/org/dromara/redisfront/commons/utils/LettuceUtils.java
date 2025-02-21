@@ -42,7 +42,7 @@ public class LettuceUtils {
 
     public static RedisClusterClient getRedisClusterClient(RedisURI redisURI, RedisConnectContext redisConnectContext) {
         var clusterClient = RedisClusterClient.create(redisURI);
-        if (!RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
+        if (redisConnectContext.getSetting().getRewriteHost()) {
             clusterClient.getPartitions().forEach(redisClusterNode -> redisClusterNode.getUri().setHost(redisConnectContext.getHost()));
         }
         configureOptions(clusterClient, redisConnectContext);
@@ -152,11 +152,13 @@ public class LettuceUtils {
 
     private static void configureOptions(RedisClusterClient redisClient, RedisConnectContext redisConnectContext) {
         ClusterTopologyRefreshOptions clusterTopologyRefreshOptions = ClusterTopologyRefreshOptions.builder()
+                .enablePeriodicRefresh(Duration.ofMinutes(5))
                 .enableAllAdaptiveRefreshTriggers()
                 .adaptiveRefreshTriggersTimeout(Duration.ofSeconds(10))
                 .build();
         var clusterClientOptions = ClusterClientOptions.builder()
                 .topologyRefreshOptions(clusterTopologyRefreshOptions)
+                .autoReconnect(true)
                 .build();
         if (redisConnectContext.getEnableSsl()) {
             if (redisConnectContext.getSslInfo() != null && RedisFrontUtils.isNotEmpty(redisConnectContext.getSslInfo().getPassword()) || RedisFrontUtils.isNotEmpty(redisConnectContext.getSslInfo().getPublicKeyFilePath())) {
