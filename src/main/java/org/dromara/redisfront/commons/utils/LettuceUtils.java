@@ -1,5 +1,6 @@
 package org.dromara.redisfront.commons.utils;
 
+import cn.hutool.core.collection.CollUtil;
 import io.lettuce.core.*;
 import io.lettuce.core.api.sync.RedisCommands;
 import io.lettuce.core.cluster.ClusterClientOptions;
@@ -42,8 +43,11 @@ public class LettuceUtils {
 
     public static RedisClusterClient getRedisClusterClient(RedisURI redisURI, RedisConnectContext redisConnectContext) {
         var clusterClient = RedisClusterClient.create(redisURI);
-        if (redisConnectContext.getSetting().getRewriteHost()) {
-            clusterClient.getPartitions().forEach(redisClusterNode -> redisClusterNode.getUri().setHost(redisConnectContext.getHost()));
+        if (CollUtil.isNotEmpty(redisConnectContext.getClusterLocalPort())) {
+            clusterClient.getPartitions().forEach(redisClusterNode -> {
+                redisClusterNode.getUri().setHost("127.0.0.1");
+                redisClusterNode.getUri().setPort(redisConnectContext.getClusterLocalPort().get(redisClusterNode.getUri().getPort()));
+            });
         }
         configureOptions(clusterClient, redisConnectContext);
         return clusterClient;

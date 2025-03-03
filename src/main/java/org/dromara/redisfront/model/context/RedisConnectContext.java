@@ -76,7 +76,7 @@ public class RedisConnectContext implements Serializable, Cloneable {
         private Boolean rewriteHost;
 
         public Boolean getRewriteHost() {
-            return rewriteHost != null && rewriteHost;
+            return true;
         }
 
         @Override

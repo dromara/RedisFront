@@ -1,5 +1,6 @@
 package org.dromara.redisfront.ui.components.jsch;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.extra.ssh.JschUtil;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
@@ -41,11 +42,16 @@ public class JschManager implements AutoCloseable {
         } else {
             this.rebindSession(redisConnectContext);
         }
+    }
+
+    public void openClusterSession(RedisConnectContext redisConnectContext) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             Map<Integer, Integer> clusterTempPort = new HashMap<>();
             for (RedisClusterNode partition : LettuceUtils.getRedisClusterPartitions(redisConnectContext)) {
                 var remotePort = partition.getUri().getPort();
                 int localPort = getTempLocalPort();
+                partition.getUri().setHost("127.0.0.1");
+                partition.getUri().setPort(localPort);
                 clusterTempPort.put(remotePort, localPort);
             }
             redisConnectContext.setClusterLocalPort(clusterTempPort);
@@ -125,7 +131,9 @@ public class JschManager implements AutoCloseable {
 
     private void removeTmpLocalPort(RedisConnectContext redisConnectContext) {
         if (RedisFrontUtils.equal(RedisMode.CLUSTER, redisConnectContext.getRedisMode())) {
-            redisConnectContext.getClusterLocalPort().forEach((_, v) -> PORT_SET.remove(v));
+            if (CollUtil.isNotEmpty(redisConnectContext.getClusterLocalPort())) {
+                redisConnectContext.getClusterLocalPort().forEach((_, v) -> PORT_SET.remove(v));
+            }
         } else {
             PORT_SET.remove(redisConnectContext.getLocalPort());
         }

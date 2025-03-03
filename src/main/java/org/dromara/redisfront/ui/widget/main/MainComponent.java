@@ -178,9 +178,7 @@ public class MainComponent extends JPanel {
             if (topTabbedPane.getSelectedComponent() instanceof MainTabView mainTabView) {
                 RedisConnectContext redisConnectContext = mainTabView.getRedisConnectContext();
                 if (!executorServiceMap.containsKey(redisConnectContext.getId())) {
-                    SwingUtilities.invokeLater(() -> {
-                        mode.setText(owner.$tr(redisConnectContext.getRedisMode().modeName));
-                    });
+                    SwingUtilities.invokeLater(() -> mode.setText(owner.$tr(redisConnectContext.getRedisMode().modeName)));
                     RedisMonitor monitor = new RedisMonitor(redisConnectContext);
                     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                     scheduler.scheduleAtFixedRate(() -> {

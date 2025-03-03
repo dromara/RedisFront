@@ -54,7 +54,7 @@ val organization = "dromara.org"
 val supportUrl = "https://redisfront.dromara.org"
 
 val hutoolVersion = "5.8.25"
-val fifesoftVersion = "3.5.3"
+val fifesoftVersion = "3.5.4"
 val lettuceVersion = "6.5.4.RELEASE"
 val logbackVersion = "1.4.12"
 

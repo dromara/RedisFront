@@ -140,6 +140,9 @@ public class RedisFrontComponent extends Background {
             redisConnectContext.setPort(Integer.valueOf(master.get("port")));
             LettuceUtils.run(redisConnectContext, BaseRedisCommands::ping);
         }
+        if (RedisMode.CLUSTER == redisConnectContext.getRedisMode()) {
+            JschManager.MANAGER.openClusterSession(redisConnectContext);
+        }
     }
 
     private MainComponent createMainTabbedPanel(DrawerAnimationAction drawerAnimationAction) {
