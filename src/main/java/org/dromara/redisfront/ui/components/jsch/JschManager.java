@@ -34,7 +34,8 @@ public class JschManager implements AutoCloseable {
 
     public void openSession(RedisConnectContext redisConnectContext) {
         redisConnectContext.setLocalHost(LOCAL_HOST);
-        redisConnectContext.setLocalPort(getTempLocalPort());
+        int tempLocalPort = getTempLocalPort();
+        redisConnectContext.setLocalPort(tempLocalPort);
         if (SESSION_MAP.get(redisConnectContext.getId()) == null || !SESSION_MAP.get(redisConnectContext.getId()).isConnected()) {
             this.createSession(redisConnectContext);
         } else {
@@ -44,8 +45,8 @@ public class JschManager implements AutoCloseable {
             Map<Integer, Integer> clusterTempPort = new HashMap<>();
             for (RedisClusterNode partition : LettuceUtils.getRedisClusterPartitions(redisConnectContext)) {
                 var remotePort = partition.getUri().getPort();
-                int port = getTempLocalPort();
-                clusterTempPort.put(remotePort, port);
+                int localPort = getTempLocalPort();
+                clusterTempPort.put(remotePort, localPort);
             }
             redisConnectContext.setClusterLocalPort(clusterTempPort);
             this.rebindSession(redisConnectContext);
@@ -99,7 +100,8 @@ public class JschManager implements AutoCloseable {
                     });
                 } else {
                     String remoteHost = getRemoteAddress(redisConnectContext);
-                    JschUtil.bindPort(session, remoteHost, redisConnectContext.getPort(), redisConnectContext.getLocalPort());
+                    Integer localPort = redisConnectContext.getLocalPort();
+                    boolean boundPort = JschUtil.bindPort(session, remoteHost, redisConnectContext.getPort(), localPort);
                 }
                 return session;
             }

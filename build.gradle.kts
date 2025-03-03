@@ -102,7 +102,7 @@ dependencies {
     implementation("org.bouncycastle:bcpkix-jdk15on:1.70")
     implementation("org.bouncycastle:bcprov-jdk15on:1.70")
     implementation("com.intellij:forms_rt:7.0.3")
-    implementation("com.jcraft:jsch:0.1.55")
+    implementation("com.github.mwiede:jsch:0.2.23")
     implementation("org.dromara:quick-swing:1.1-SNAPSHOT")
     implementation(kotlin("stdlib-jdk8"))
 }

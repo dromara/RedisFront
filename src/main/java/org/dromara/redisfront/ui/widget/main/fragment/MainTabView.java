@@ -19,6 +19,7 @@ import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.dromara.redisfront.ui.widget.main.fragment.scaffold.PageScaffold;
 import org.dromara.redisfront.ui.widget.main.fragment.scaffold.index.IndexPageView;
 import org.dromara.redisfront.ui.widget.main.fragment.scaffold.pubsub.PubSubPageView;
+import org.dromara.redisfront.ui.widget.main.fragment.scaffold.report.ReportPageView;
 import org.dromara.redisfront.ui.widget.main.fragment.scaffold.terminal.TerminalPageView;
 
 import javax.swing.*;
@@ -52,10 +53,12 @@ public class MainTabView extends JTabbedPane {
         //命令窗口
         pageScaffold = new PageScaffold(new TerminalPageView(redisConnectContext, owner));
         this.addTab("命令", Icons.CONTENT_TAB_COMMAND_ICON, pageScaffold);
+        //订阅窗口
         pageScaffold = new PageScaffold(new PubSubPageView(redisConnectContext, owner));
         this.addTab("订阅", Icons.MQ_ICON, pageScaffold);
         //数据窗口
-        this.addTab("数据", Icons.CONTENT_TAB_INFO_ICON, new JPanel());
+        pageScaffold = new PageScaffold(new ReportPageView(redisConnectContext, owner));
+        this.addTab("数据", Icons.CONTENT_TAB_INFO_ICON, pageScaffold);
 
         this.eventListener.bind(redisConnectContext.getId(), DrawerChangeEvent.class, qsEvent -> {
             if (qsEvent instanceof DrawerChangeEvent drawerChangeEvent) {

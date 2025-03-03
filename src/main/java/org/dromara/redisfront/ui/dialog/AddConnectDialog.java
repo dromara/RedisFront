@@ -265,7 +265,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
                 }
             } finally {
                 if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
-                    JschManager.MANAGER.closeSession(redisConnectContext);
+//                    JschManager.MANAGER.closeSession(redisConnectContext);
                 }
             }
         } catch (Exception exception) {
@@ -287,7 +287,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
 
     private void storageActionPerformed(ActionEvent actionEvent) {
         var connectContext = validGetConnectInfo();
-        if (testConnect()) {
+//        if (testConnect()) {
             try {
                 ConnectDetailEntity connectDetailEntity = connectContext.toEntity();
                 connectDetailEntity.setGroupId(groupId);
@@ -301,7 +301,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             } catch (SQLException e) {
                 getOwner().displayException($tr("AddConnectDialog.save.fail.message"), e);
             }
-        }
+//        }
     }
 
 

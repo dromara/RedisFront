@@ -7,7 +7,6 @@ public class FutureUtilsTest {
 
     @Test
     public void test5() throws InterruptedException {
-        FutureUtils.init();
         FutureUtils.runAsync(() -> {
             try {
                 Thread.sleep(50);

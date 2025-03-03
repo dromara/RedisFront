@@ -52,8 +52,6 @@ import java.awt.event.MouseEvent;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 /**
@@ -102,8 +100,6 @@ public class LeftSearchFragment {
             add(new DbInfo("DB15", 15));
         }
     };
-
-    static final ExecutorService executorService = Executors.newFixedThreadPool(5);
 
     public LeftSearchFragment(RedisFrontWidget owner, RedisConnectContext redisConnectContext) {
         this.owner = owner;
@@ -326,7 +322,7 @@ public class LeftSearchFragment {
                                 treeNodeInfo.setTitle(title);
                                 keyTree.updateUI();
                             });
-                        }, executorService);
+                        });
                     }
                 });
                 return memoryMenuItem;

@@ -15,13 +15,9 @@ import java.util.function.Supplier;
 public class FutureUtils {
     private static final int MAX_WORKER_THREADS = 10;
 
-    private static ExecutorService executorService;
+    private static final ExecutorService executorService;
 
-    public static ExecutorService getExecutorService() {
-        return executorService;
-    }
-
-    public static void init() {
+    static {
         executorService = Executors.newFixedThreadPool(MAX_WORKER_THREADS, runnable -> {
             final var threadFactory = Executors.defaultThreadFactory();
             final var newThread = threadFactory.newThread(runnable);
@@ -35,19 +31,8 @@ public class FutureUtils {
         return CompletableFuture.runAsync(runnable);
     }
 
-    public static CompletableFuture<Void> runAsync(Runnable runnable, ExecutorService executorService) {
-        return CompletableFuture.runAsync(runnable);
-    }
-
-    public static CompletableFuture<Void> runAsync(Runnable runnable, Runnable beforeHandler, Runnable afterHandler) {
-        return CompletableFuture
-                .runAsync(beforeHandler, executorService)
-                .thenRunAsync(runnable, executorService)
-                .thenRunAsync(afterHandler, executorService);
-    }
-
-    public static CompletableFuture<Void> runAsync(Runnable runnable, Consumer<Throwable> consumer) {
-        return CompletableFuture.runAsync(runnable, executorService).exceptionallyAsync(throwable -> {
+    public static void runAsync(Runnable runnable, Consumer<Throwable> consumer) {
+        CompletableFuture.runAsync(runnable, executorService).exceptionallyAsync(throwable -> {
             consumer.accept(throwable);
             return null;
         });

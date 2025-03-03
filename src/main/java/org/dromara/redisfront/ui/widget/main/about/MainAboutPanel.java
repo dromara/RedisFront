@@ -1,5 +1,6 @@
 package org.dromara.redisfront.ui.widget.main.about;
 
+import cn.hutool.core.swing.DesktopUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.resources.Icons;
@@ -99,20 +100,11 @@ public class MainAboutPanel extends JPanel {
         JLabel linkLabel = new JLabel("<html><a href='#'>" + text + "</a></html>");
         linkLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        // 添加悬停效果
         linkLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                try {
-                    Desktop.getDesktop().browse(new URI(url));
-                } catch (IOException | URISyntaxException ex) {
-                    JOptionPane.showMessageDialog(
-                            linkLabel,
-                            "Failed to open link:\n" + url,
-                            "Connection Error",
-                            JOptionPane.ERROR_MESSAGE
-                    );
-                }
+                    DesktopUtil.browse(url);
+
             }
         });
         return linkLabel;
