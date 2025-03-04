@@ -1,7 +1,8 @@
-package org.dromara.redisfront.commons.utils;
+package org.dromara.redisfront.commons.jsch;
 
 import cn.hutool.extra.ssh.JschUtil;
 import com.jcraft.jsch.Session;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 
 /**

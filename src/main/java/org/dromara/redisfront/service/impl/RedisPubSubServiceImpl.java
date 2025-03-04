@@ -2,7 +2,7 @@ package org.dromara.redisfront.service.impl;
 
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.enums.RedisMode;
-import org.dromara.redisfront.commons.utils.LettuceUtils;
+import org.dromara.redisfront.commons.lettuce.LettuceUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.RedisPubSubService;
 

@@ -6,7 +6,7 @@ import org.dromara.redisfront.service.RedisZSetService;
 import org.dromara.redisfront.ui.dialog.LogsDialog;
 import io.lettuce.core.*;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
-import org.dromara.redisfront.commons.utils.LettuceUtils;
+import org.dromara.redisfront.commons.lettuce.LettuceUtils;
 import org.dromara.redisfront.service.RedisBasicService;
 
 import java.util.Arrays;

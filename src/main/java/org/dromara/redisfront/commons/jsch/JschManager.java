@@ -1,4 +1,4 @@
-package org.dromara.redisfront.ui.components.jsch;
+package org.dromara.redisfront.commons.jsch;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.extra.ssh.JschUtil;
@@ -7,9 +7,8 @@ import com.jcraft.jsch.Session;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
+import org.dromara.redisfront.commons.lettuce.LettuceUtils;
 import org.dromara.redisfront.commons.pool.RedisConnectionPoolManager;
-import org.dromara.redisfront.commons.utils.JschUtils;
-import org.dromara.redisfront.commons.utils.LettuceUtils;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 
@@ -24,7 +23,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * JschManager
  */
 @Slf4j
-public class JschManager implements AutoCloseable {
+public class JschManager {
     private static final Map<Integer, Session> SESSION_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentSkipListSet<Integer> PORT_SET = new ConcurrentSkipListSet<>();
     private static final int MIN_PORT = Integer.parseInt(System.getProperty("jsch.min.port", "32768"));
@@ -105,7 +104,7 @@ public class JschManager implements AutoCloseable {
                 } else {
                     String remoteHost = getRemoteAddress(redisConnectContext);
                     Integer localPort = redisConnectContext.getLocalPort();
-                    boolean boundPort = JschUtil.bindPort(session, remoteHost, redisConnectContext.getPort(), localPort);
+                    JschUtil.bindPort(session, remoteHost, redisConnectContext.getPort(), localPort);
                 }
                 return session;
             }
@@ -145,8 +144,5 @@ public class JschManager implements AutoCloseable {
         return remoteAddress;
     }
 
-    @Override
-    public void close() throws Exception {
-        // 实现具体的关闭逻辑
-    }
+
 }

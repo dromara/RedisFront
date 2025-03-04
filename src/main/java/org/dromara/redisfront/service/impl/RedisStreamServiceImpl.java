@@ -3,7 +3,7 @@ import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import io.lettuce.core.*;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
-import org.dromara.redisfront.commons.utils.LettuceUtils;
+import org.dromara.redisfront.commons.lettuce.LettuceUtils;
 import org.dromara.redisfront.service.RedisStreamService;
 
 import java.util.List;

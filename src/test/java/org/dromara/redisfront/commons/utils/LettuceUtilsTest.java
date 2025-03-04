@@ -6,6 +6,7 @@ import io.lettuce.core.*;
 import io.lettuce.core.output.*;
 import io.lettuce.core.protocol.CommandArgs;
 import io.lettuce.core.protocol.CommandType;
+import org.dromara.redisfront.commons.lettuce.LettuceUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.junit.jupiter.api.Test;
 

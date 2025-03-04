@@ -16,7 +16,7 @@ import org.dromara.redisfront.dao.ConnectDetailDao;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 import org.dromara.redisfront.service.RedisBasicService;
-import org.dromara.redisfront.ui.components.jsch.JschManager;
+import org.dromara.redisfront.commons.jsch.JschManager;
 import org.dromara.redisfront.ui.event.OpenRedisConnectEvent;
 import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
@@ -265,7 +265,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
                 }
             } finally {
                 if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
-//                    JschManager.MANAGER.closeSession(redisConnectContext);
+                    JschManager.MANAGER.closeSession(redisConnectContext);
                 }
             }
         } catch (Exception exception) {

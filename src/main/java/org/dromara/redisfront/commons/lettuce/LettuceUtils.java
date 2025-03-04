@@ -1,4 +1,4 @@
-package org.dromara.redisfront.commons.utils;
+package org.dromara.redisfront.commons.lettuce;
 
 import cn.hutool.core.collection.CollUtil;
 import io.lettuce.core.*;
@@ -10,11 +10,13 @@ import io.lettuce.core.cluster.RedisClusterClient;
 import io.lettuce.core.cluster.api.StatefulRedisClusterConnection;
 import io.lettuce.core.cluster.api.sync.RedisAdvancedClusterCommands;
 import io.lettuce.core.cluster.models.partitions.Partitions;
+import io.lettuce.core.resource.ClientResources;
 import io.lettuce.core.sentinel.api.StatefulRedisSentinelConnection;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
 import io.netty.util.internal.StringUtil;
 import org.dromara.redisfront.commons.enums.ConnectType;
 import org.dromara.redisfront.commons.pool.RedisConnectionPoolManager;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +76,7 @@ public class LettuceUtils {
                 .enableAllAdaptiveRefreshTriggers()
                 .build();
         var clusterClientOptions = ClusterClientOptions.builder()
+                .autoReconnect(true)
                 .topologyRefreshOptions(clusterTopologyRefreshOptions)
                 .autoReconnect(true)
                 .disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS)
@@ -122,14 +125,8 @@ public class LettuceUtils {
     }
 
     public static RedisClusterClient getRedisClusterClient(RedisURI redisURI, RedisConnectContext redisConnectContext) {
-        var clusterClient = RedisClusterClient.create(redisURI);
-        if (CollUtil.isNotEmpty(redisConnectContext.getClusterLocalPort())) {
-            Partitions partitions = clusterClient.getPartitions();
-            partitions.forEach(redisClusterNode -> {
-                redisClusterNode.getUri().setHost("127.0.0.1");
-                redisClusterNode.getUri().setPort(redisConnectContext.getClusterLocalPort().get(redisClusterNode.getUri().getPort()));
-            });
-        }
+        AddressMappingResolver mappingResolver = new AddressMappingResolver(redisConnectContext);
+        var clusterClient = RedisClusterClient.create(ClientResources.builder().socketAddressResolver(mappingResolver).build(), redisURI);
         configureOptions(clusterClient, redisConnectContext);
         return clusterClient;
     }

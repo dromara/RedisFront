@@ -12,7 +12,7 @@ import io.lettuce.core.sentinel.api.StatefulRedisSentinelConnection;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-import org.dromara.redisfront.commons.utils.LettuceUtils;
+import org.dromara.redisfront.commons.lettuce.LettuceUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 
 import java.time.Duration;
@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class RedisConnectionPoolManager {
-    // 连接池配置参数
+
     private static final int MAX_TOTAL = 20;
     private static final int MAX_IDLE = 10;
     private static final int MIN_IDLE = 2;

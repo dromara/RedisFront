@@ -16,7 +16,6 @@ import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
-import org.dromara.redisfront.ui.components.jsch.JschManager;
 import org.dromara.redisfront.ui.components.monitor.RedisMonitor;
 import org.dromara.redisfront.ui.components.monitor.RedisUsageInfo;
 import org.dromara.redisfront.ui.event.DrawerChangeEvent;
@@ -147,9 +146,9 @@ public class MainComponent extends JPanel {
                     executorService.shutdownNow();
                 }
                 //关闭ssh会话
-//                if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
+                if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
 //                    JschManager.MANAGER.closeSession(redisConnectContext);
-//                }
+                }
                 //关闭移除消息监听器
                 owner.getEventListener().unbind(redisConnectContext.getId());
             }
