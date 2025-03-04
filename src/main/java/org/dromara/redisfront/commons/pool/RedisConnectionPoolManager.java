@@ -63,6 +63,7 @@ public class RedisConnectionPoolManager {
             return client.connect();
         });
     }
+
     public static StatefulRedisPubSubConnection<String, String> getConnectPubSub(RedisConnectContext context) {
         return getConnection(NORMAL_PUB_POOLS, context, () -> {
             RedisClient client = LettuceUtils.getRedisClient(context);
@@ -74,18 +75,17 @@ public class RedisConnectionPoolManager {
                                        RedisConnectContext context,
                                        ConnectionSupplier<T> supplier) {
         String poolKey = context.getId() + "_" + context.getRedisMode();
-
-        GenericObjectPool<T> pool = poolMap.computeIfAbsent(poolKey, _ -> {
-            GenericObjectPoolConfig<T> config = new GenericObjectPoolConfig<>();
-            config.setMaxTotal(MAX_TOTAL);
-            config.setMaxIdle(MAX_IDLE);
-            config.setMinIdle(MIN_IDLE);
-            config.setMaxWait(Duration.ofMillis(MAX_WAIT_MILLIS));
-            config.setTestOnBorrow(true);
-            config.setTestWhileIdle(true);
-            return new GenericObjectPool<>(new RedisConnectionFactory<>(supplier), config);
-        });
         try {
+            GenericObjectPool<T> pool = poolMap.computeIfAbsent(poolKey, _ -> {
+                GenericObjectPoolConfig<T> config = new GenericObjectPoolConfig<>();
+                config.setMaxTotal(MAX_TOTAL);
+                config.setMaxIdle(MAX_IDLE);
+                config.setMinIdle(MIN_IDLE);
+                config.setMaxWait(Duration.ofMillis(MAX_WAIT_MILLIS));
+                config.setTestOnBorrow(true);
+                config.setTestWhileIdle(true);
+                return new GenericObjectPool<>(new RedisConnectionFactory<>(supplier), config);
+            });
             return pool.borrowObject();
         } catch (Exception e) {
             throw new RuntimeException("Get connection failed", e);
@@ -119,10 +119,11 @@ public class RedisConnectionPoolManager {
     }
 
     private static void cleanupPools(String specificKey) {
-        cleanPoolMap(CLUSTER_POOLS,  specificKey);
+        cleanPoolMap(CLUSTER_POOLS, specificKey);
         cleanPoolMap(SENTINEL_POOLS, specificKey);
-        cleanPoolMap(NORMAL_POOLS,  specificKey);
+        cleanPoolMap(NORMAL_POOLS, specificKey);
     }
+
     private static <T> void cleanPoolMap(
             Map<String, GenericObjectPool<T>> poolMap,
             String specificKey) {
