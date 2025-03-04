@@ -15,7 +15,6 @@ import org.dromara.redisfront.commons.enums.KeyTypeEnum;
 import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.commons.utils.FutureUtils;
-import org.dromara.redisfront.commons.utils.JschUtils;
 import org.dromara.redisfront.commons.utils.LettuceUtils;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
@@ -123,7 +122,7 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
         }
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             FutureUtils.runAsync(() -> {
-                var redisUrl = LettuceUtils.getRedisURI(redisConnectContext);
+                var redisUrl = LettuceUtils.createRedisURI(redisConnectContext);
                 redisClient = LettuceUtils.getRedisClusterClient(redisUrl, redisConnectContext);
                 var connection = ((RedisClusterClient) redisClient).connectPubSub();
                 pubsub = connection.async();

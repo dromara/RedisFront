@@ -4,10 +4,10 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.extra.ssh.JschUtil;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
+import org.dromara.redisfront.commons.pool.RedisConnectionPoolManager;
 import org.dromara.redisfront.commons.utils.JschUtils;
 import org.dromara.redisfront.commons.utils.LettuceUtils;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
@@ -47,12 +47,9 @@ public class JschManager implements AutoCloseable {
     public void openClusterSession(RedisConnectContext redisConnectContext) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             Map<Integer, Integer> clusterTempPort = new HashMap<>();
-            for (RedisClusterNode partition : LettuceUtils.getRedisClusterPartitions(redisConnectContext)) {
-                var remotePort = partition.getUri().getPort();
+            for (Integer port : LettuceUtils.getRedisClusterPartitionPorts(redisConnectContext)) {
                 int localPort = getTempLocalPort();
-                partition.getUri().setHost("127.0.0.1");
-                partition.getUri().setPort(localPort);
-                clusterTempPort.put(remotePort, localPort);
+                clusterTempPort.put(port, localPort);
             }
             redisConnectContext.setClusterLocalPort(clusterTempPort);
             this.rebindSession(redisConnectContext);

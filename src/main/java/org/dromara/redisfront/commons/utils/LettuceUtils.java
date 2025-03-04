@@ -2,21 +2,27 @@ package org.dromara.redisfront.commons.utils;
 
 import cn.hutool.core.collection.CollUtil;
 import io.lettuce.core.*;
+import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
 import io.lettuce.core.cluster.ClusterClientOptions;
 import io.lettuce.core.cluster.ClusterTopologyRefreshOptions;
 import io.lettuce.core.cluster.RedisClusterClient;
+import io.lettuce.core.cluster.api.StatefulRedisClusterConnection;
 import io.lettuce.core.cluster.api.sync.RedisAdvancedClusterCommands;
 import io.lettuce.core.cluster.models.partitions.Partitions;
+import io.lettuce.core.sentinel.api.StatefulRedisSentinelConnection;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
 import io.netty.util.internal.StringUtil;
 import org.dromara.redisfront.commons.enums.ConnectType;
+import org.dromara.redisfront.commons.pool.RedisConnectionPoolManager;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.time.Duration;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -34,99 +40,7 @@ public class LettuceUtils {
     private LettuceUtils() {
     }
 
-    public static Partitions getRedisClusterPartitions(RedisConnectContext redisConnectContext) {
-        var redisURI = getRedisURI(redisConnectContext);
-        try (var clusterClient = RedisClusterClient.create(redisURI)) {
-            return clusterClient.getPartitions();
-        }
-    }
-
-    public static RedisClusterClient getRedisClusterClient(RedisURI redisURI, RedisConnectContext redisConnectContext) {
-        var clusterClient = RedisClusterClient.create(redisURI);
-        if (CollUtil.isNotEmpty(redisConnectContext.getClusterLocalPort())) {
-            clusterClient.getPartitions().forEach(redisClusterNode -> {
-                redisClusterNode.getUri().setHost("127.0.0.1");
-                redisClusterNode.getUri().setPort(redisConnectContext.getClusterLocalPort().get(redisClusterNode.getUri().getPort()));
-            });
-        }
-        configureOptions(clusterClient, redisConnectContext);
-        return clusterClient;
-    }
-
-    public static void clusterRun(RedisConnectContext redisConnectContext, Consumer<RedisAdvancedClusterCommands<String, String>> consumer) {
-        var redisURI = getRedisURI(redisConnectContext);
-        try (var clusterClient = getRedisClusterClient(redisURI, redisConnectContext);
-             var connection = clusterClient.connect()) {
-            consumer.accept(connection.sync());
-        } catch (Exception exception) {
-            log.error("redis连接失败！", exception);
-            throw exception;
-        }
-    }
-
-    public static <T> T clusterExec(RedisConnectContext redisConnectContext, Function<RedisAdvancedClusterCommands<String, String>, T> function) {
-        var redisURI = getRedisURI(redisConnectContext);
-        try (var clusterClient = getRedisClusterClient(redisURI, redisConnectContext);
-             var connection = clusterClient.connect()) {
-            return function.apply(connection.sync());
-        } catch (Exception exception) {
-            log.error("redis连接失败！", exception);
-            throw exception;
-        }
-    }
-
-
-    public static void sentinelRun(RedisConnectContext redisConnectContext, Consumer<RedisSentinelCommands<String, String>> consumer) {
-        var redisURI = getRedisURI(redisConnectContext);
-        try (var redisClient = io.lettuce.core.RedisClient.create(redisURI);
-             var connection = redisClient.connectSentinel()) {
-            consumer.accept(connection.sync());
-        } catch (Exception exception) {
-            log.error("redis连接失败！", exception);
-            throw exception;
-        }
-    }
-
-    public static <T> T sentinelExec(RedisConnectContext redisConnectContext, Function<RedisSentinelCommands<String, String>, T> function) {
-        var redisURI = getRedisURI(redisConnectContext);
-        try (var redisClient = io.lettuce.core.RedisClient.create(redisURI);
-             var connection = redisClient.connectSentinel()) {
-            return function.apply(connection.sync());
-        } catch (Exception exception) {
-            log.error("redis连接失败！", exception);
-            throw exception;
-        }
-    }
-
-    public static void run(RedisConnectContext redisConnectContext, Consumer<RedisCommands<String, String>> consumer) {
-        ;
-        try (var redisClient = getRedisClient(redisConnectContext);
-             var connection = redisClient.connect()) {
-            consumer.accept(connection.sync());
-        } catch (Exception exception) {
-            log.error("redis连接失败！", exception);
-            throw exception;
-        }
-    }
-
-    public static RedisClient getRedisClient(RedisConnectContext redisConnectContext) {
-        var redisURI = getRedisURI(redisConnectContext);
-        var redisClient = RedisClient.create(redisURI);
-        configureOptions(redisClient, redisConnectContext);
-        return redisClient;
-    }
-
-    public static <T> T exec(RedisConnectContext redisConnectContext, Function<RedisCommands<String, String>, T> function) {
-        try (var redisClient = getRedisClient(redisConnectContext);
-             var connection = redisClient.connect()) {
-            return function.apply(connection.sync());
-        } catch (Exception exception) {
-            log.error("redis连接失败！", exception);
-            throw exception;
-        }
-    }
-
-    public static RedisURI getRedisURI(RedisConnectContext redisConnectContext) {
+    public static RedisURI createRedisURI(RedisConnectContext redisConnectContext) {
         String host = "";
         String password = "";
         if (!StringUtil.isNullOrEmpty(redisConnectContext.getHost())) {
@@ -158,11 +72,18 @@ public class LettuceUtils {
         ClusterTopologyRefreshOptions clusterTopologyRefreshOptions = ClusterTopologyRefreshOptions.builder()
                 .enablePeriodicRefresh(Duration.ofMinutes(5))
                 .enableAllAdaptiveRefreshTriggers()
-                .adaptiveRefreshTriggersTimeout(Duration.ofSeconds(10))
                 .build();
         var clusterClientOptions = ClusterClientOptions.builder()
                 .topologyRefreshOptions(clusterTopologyRefreshOptions)
                 .autoReconnect(true)
+                .disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS)
+                .socketOptions(SocketOptions.builder()
+                        .keepAlive(true)
+                        .tcpNoDelay(true)
+                        .build())
+                .timeoutOptions(TimeoutOptions.builder()
+                        .fixedTimeout(Duration.ofSeconds(30))
+                        .build())
                 .build();
         if (redisConnectContext.getEnableSsl()) {
             if (redisConnectContext.getSslInfo() != null && RedisFrontUtils.isNotEmpty(redisConnectContext.getSslInfo().getPassword()) || RedisFrontUtils.isNotEmpty(redisConnectContext.getSslInfo().getPublicKeyFilePath())) {
@@ -189,4 +110,105 @@ public class LettuceUtils {
             }
         }
     }
+
+
+    public static Set<Integer> getRedisClusterPartitionPorts(RedisConnectContext redisConnectContext) {
+        Set<Integer> ports = new HashSet<>();
+        var redisURI = createRedisURI(redisConnectContext);
+        try (var clusterClient = RedisClusterClient.create(redisURI)) {
+            clusterClient.getPartitions().forEach(redisClusterNode -> ports.add(redisClusterNode.getUri().getPort()));
+        }
+        return ports;
+    }
+
+    public static RedisClusterClient getRedisClusterClient(RedisURI redisURI, RedisConnectContext redisConnectContext) {
+        var clusterClient = RedisClusterClient.create(redisURI);
+        if (CollUtil.isNotEmpty(redisConnectContext.getClusterLocalPort())) {
+            Partitions partitions = clusterClient.getPartitions();
+            partitions.forEach(redisClusterNode -> {
+                redisClusterNode.getUri().setHost("127.0.0.1");
+                redisClusterNode.getUri().setPort(redisConnectContext.getClusterLocalPort().get(redisClusterNode.getUri().getPort()));
+            });
+        }
+        configureOptions(clusterClient, redisConnectContext);
+        return clusterClient;
+    }
+
+    public static RedisClient getRedisClient(RedisConnectContext redisConnectContext) {
+        var redisURI = createRedisURI(redisConnectContext);
+        var redisClient = RedisClient.create(redisURI);
+        configureOptions(redisClient, redisConnectContext);
+        return redisClient;
+    }
+
+    public static void clusterRun(RedisConnectContext redisConnectContext, Consumer<RedisAdvancedClusterCommands<String, String>> consumer) {
+        try {
+            StatefulRedisClusterConnection<String, String> connection = RedisConnectionPoolManager.getClusterConnection(redisConnectContext);
+            consumer.accept(connection.sync());
+            RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
+        } catch (Exception exception) {
+            log.error("redis连接失败！", exception);
+            throw exception;
+        }
+    }
+
+    public static <T> T clusterExec(RedisConnectContext redisConnectContext, Function<RedisAdvancedClusterCommands<String, String>, T> function) {
+        try {
+            StatefulRedisClusterConnection<String, String> connection = RedisConnectionPoolManager.getClusterConnection(redisConnectContext);
+            T apply = function.apply(connection.sync());
+            RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
+            return apply;
+        } catch (Exception exception) {
+            log.error("redis连接失败！", exception);
+            throw exception;
+        }
+    }
+
+
+    public static void sentinelRun(RedisConnectContext redisConnectContext, Consumer<RedisSentinelCommands<String, String>> consumer) {
+        try {
+            StatefulRedisSentinelConnection<String, String> connection = RedisConnectionPoolManager.getSentinelConnection(redisConnectContext);
+            consumer.accept(connection.sync());
+            RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
+        } catch (Exception exception) {
+            log.error("redis连接失败！", exception);
+            throw exception;
+        }
+    }
+
+    public static <T> T sentinelExec(RedisConnectContext redisConnectContext, Function<RedisSentinelCommands<String, String>, T> function) {
+        try {
+            StatefulRedisSentinelConnection<String, String> connection = RedisConnectionPoolManager.getSentinelConnection(redisConnectContext);
+            T apply = function.apply(connection.sync());
+            RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
+            return apply;
+        } catch (Exception exception) {
+            log.error("redis连接失败！", exception);
+            throw exception;
+        }
+    }
+
+    public static void run(RedisConnectContext redisConnectContext, Consumer<RedisCommands<String, String>> consumer) {
+        try {
+            StatefulRedisConnection<String, String> connection = RedisConnectionPoolManager.getConnection(redisConnectContext);
+            consumer.accept(connection.sync());
+            RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
+        } catch (Exception exception) {
+            log.error("redis连接失败！", exception);
+            throw exception;
+        }
+    }
+
+    public static <T> T exec(RedisConnectContext redisConnectContext, Function<RedisCommands<String, String>, T> function) {
+        try {
+            StatefulRedisConnection<String, String> connection = RedisConnectionPoolManager.getConnection(redisConnectContext);
+            T apply = function.apply(connection.sync());
+            RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
+            return apply;
+        } catch (Exception exception) {
+            log.error("redis连接失败！", exception);
+            throw exception;
+        }
+    }
+
 }

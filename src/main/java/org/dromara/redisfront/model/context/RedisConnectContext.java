@@ -35,7 +35,7 @@ public class RedisConnectContext implements Serializable, Cloneable {
     private Integer database = 0;
     private Boolean enableSsl = false;
     private ConnectType connectTypeMode;
-    private RedisMode redisMode;
+    private RedisMode redisMode = RedisMode.STANDALONE;
     private SettingInfo setting;
     private SslInfo sslInfo;
     private SshInfo sshInfo;

@@ -104,6 +104,7 @@ dependencies {
     implementation("com.intellij:forms_rt:7.0.3")
     implementation("com.github.mwiede:jsch:0.2.23")
     implementation("org.dromara:quick-swing:1.1-SNAPSHOT")
+    implementation("org.apache.commons:commons-pool2:2.11.1")
     implementation(kotlin("stdlib-jdk8"))
 }
 
