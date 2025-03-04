@@ -147,9 +147,9 @@ public class MainComponent extends JPanel {
                     executorService.shutdownNow();
                 }
                 //关闭ssh会话
-                if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
-                    JschManager.MANAGER.closeSession(redisConnectContext);
-                }
+//                if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
+//                    JschManager.MANAGER.closeSession(redisConnectContext);
+//                }
                 //关闭移除消息监听器
                 owner.getEventListener().unbind(redisConnectContext.getId());
             }
@@ -182,18 +182,22 @@ public class MainComponent extends JPanel {
                     RedisMonitor monitor = new RedisMonitor(redisConnectContext);
                     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                     scheduler.scheduleAtFixedRate(() -> {
-                        RedisUsageInfo usage = monitor.getUsageInfo();
-                        log.debug("[Redis {} - {} ] 使用：{}\n", redisConnectContext.getTitle(), redisConnectContext.getHost(), usage);
-                        if (displayId == redisConnectContext.getId()) {
-                            SwingUtilities.invokeLater(() -> {
-                                memory.setText(usage.getMemory());
-                                memory.setToolTipText("[ Redis " + redisConnectContext.getTitle() + "@" + redisConnectContext.getHost() + " ]\n内存已使用：" + usage.getMemory());
-                                cpu.setText(usage.getCpu());
-                                cpu.setToolTipText("[ Redis " + redisConnectContext.getTitle() + "@" + redisConnectContext.getHost() + " ]\nCPU使用率：" + usage.getCpu());
-                                String networkRate = String.format("%.2fKB/s｜%.2fKB/s", usage.getNetwork().inputRate() / 1024, usage.getNetwork().outputRate() / 1024);
-                                network.setText(networkRate);
-                                network.setToolTipText("[ Redis " + redisConnectContext.getTitle() + "@" + redisConnectContext.getHost() + " ]\n网络传输：" + usage.getNetwork());
-                            });
+                        try {
+                            RedisUsageInfo usage = monitor.getUsageInfo();
+                            log.debug("[Redis {} - {} ] 使用：{}\n", redisConnectContext.getTitle(), redisConnectContext.getHost(), usage);
+                            if (displayId == redisConnectContext.getId()) {
+                                SwingUtilities.invokeLater(() -> {
+                                    memory.setText(usage.getMemory());
+                                    memory.setToolTipText("[ Redis " + redisConnectContext.getTitle() + "@" + redisConnectContext.getHost() + " ]\n内存已使用：" + usage.getMemory());
+                                    cpu.setText(usage.getCpu());
+                                    cpu.setToolTipText("[ Redis " + redisConnectContext.getTitle() + "@" + redisConnectContext.getHost() + " ]\nCPU使用率：" + usage.getCpu());
+                                    String networkRate = String.format("%.2fKB/s｜%.2fKB/s", usage.getNetwork().inputRate() / 1024, usage.getNetwork().outputRate() / 1024);
+                                    network.setText(networkRate);
+                                    network.setToolTipText("[ Redis " + redisConnectContext.getTitle() + "@" + redisConnectContext.getHost() + " ]\n网络传输：" + usage.getNetwork());
+                                });
+                            }
+                        } catch (Exception e) {
+                            log.error("获取Redis使用信息失败", e);
                         }
 
                     }, 1, 3, TimeUnit.SECONDS);

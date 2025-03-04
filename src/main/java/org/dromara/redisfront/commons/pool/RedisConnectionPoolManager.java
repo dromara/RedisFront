@@ -6,6 +6,8 @@ import io.lettuce.core.RedisURI;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.cluster.RedisClusterClient;
 import io.lettuce.core.cluster.api.StatefulRedisClusterConnection;
+import io.lettuce.core.cluster.pubsub.StatefulRedisClusterPubSubConnection;
+import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.sentinel.api.StatefulRedisSentinelConnection;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.impl.GenericObjectPool;
@@ -27,8 +29,18 @@ public class RedisConnectionPoolManager {
 
     // 连接池存储结构
     private static final Map<String, GenericObjectPool<StatefulRedisClusterConnection<String, String>>> CLUSTER_POOLS = new ConcurrentHashMap<>();
+    private static final Map<String, GenericObjectPool<StatefulRedisClusterPubSubConnection<String, String>>> CLUSTER_PUB_POOLS = new ConcurrentHashMap<>();
     private static final Map<String, GenericObjectPool<StatefulRedisSentinelConnection<String, String>>> SENTINEL_POOLS = new ConcurrentHashMap<>();
     private static final Map<String, GenericObjectPool<StatefulRedisConnection<String, String>>> NORMAL_POOLS = new ConcurrentHashMap<>();
+    private static final Map<String, GenericObjectPool<StatefulRedisPubSubConnection<String, String>>> NORMAL_PUB_POOLS = new ConcurrentHashMap<>();
+
+    public static StatefulRedisClusterPubSubConnection<String, String> getClusterConnectPubSub(RedisConnectContext context) {
+        return getConnection(CLUSTER_PUB_POOLS, context, () -> {
+            RedisURI uri = LettuceUtils.createRedisURI(context);
+            RedisClusterClient client = LettuceUtils.getRedisClusterClient(uri, context);
+            return client.connectPubSub();
+        });
+    }
 
     public static StatefulRedisClusterConnection<String, String> getClusterConnection(RedisConnectContext context) {
         return getConnection(CLUSTER_POOLS, context, () -> {
@@ -51,6 +63,12 @@ public class RedisConnectionPoolManager {
             return client.connect();
         });
     }
+    public static StatefulRedisPubSubConnection<String, String> getConnectPubSub(RedisConnectContext context) {
+        return getConnection(NORMAL_PUB_POOLS, context, () -> {
+            RedisClient client = LettuceUtils.getRedisClient(context);
+            return client.connectPubSub();
+        });
+    }
 
     private static <T> T getConnection(Map<String, GenericObjectPool<T>> poolMap,
                                        RedisConnectContext context,
@@ -67,7 +85,6 @@ public class RedisConnectionPoolManager {
             config.setTestWhileIdle(true);
             return new GenericObjectPool<>(new RedisConnectionFactory<>(supplier), config);
         });
-
         try {
             return pool.borrowObject();
         } catch (Exception e) {
@@ -101,7 +118,6 @@ public class RedisConnectionPoolManager {
         cleanupPools(poolKey);
     }
 
-    // 核心清理方法
     private static void cleanupPools(String specificKey) {
         cleanPoolMap(CLUSTER_POOLS,  specificKey);
         cleanPoolMap(SENTINEL_POOLS, specificKey);

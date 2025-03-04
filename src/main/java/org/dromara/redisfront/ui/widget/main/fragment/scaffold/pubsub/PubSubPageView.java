@@ -4,8 +4,6 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import io.lettuce.core.AbstractRedisClient;
-import io.lettuce.core.RedisClient;
-import io.lettuce.core.cluster.RedisClusterClient;
 import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
 import io.lettuce.core.cluster.pubsub.RedisClusterPubSubListener;
 import io.lettuce.core.pubsub.RedisPubSubListener;
@@ -13,9 +11,9 @@ import io.lettuce.core.pubsub.api.async.RedisPubSubAsyncCommands;
 import org.dromara.quickswing.ui.app.page.QSPageItem;
 import org.dromara.redisfront.commons.enums.KeyTypeEnum;
 import org.dromara.redisfront.commons.enums.RedisMode;
+import org.dromara.redisfront.commons.pool.RedisConnectionPoolManager;
 import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.commons.utils.FutureUtils;
-import org.dromara.redisfront.commons.utils.LettuceUtils;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.RedisPubSubService;
@@ -122,15 +120,12 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
         }
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             FutureUtils.runAsync(() -> {
-                var redisUrl = LettuceUtils.createRedisURI(redisConnectContext);
-                redisClient = LettuceUtils.getRedisClusterClient(redisUrl, redisConnectContext);
-                var connection = ((RedisClusterClient) redisClient).connectPubSub();
+                var connection = RedisConnectionPoolManager.getClusterConnectPubSub(redisConnectContext);
                 pubsub = connection.async();
             }).thenRun(() -> pubsub.getStatefulConnection().addListener(this));
         } else {
             FutureUtils.runAsync(() -> {
-                redisClient = LettuceUtils.getRedisClient(redisConnectContext);
-                var connection = (((RedisClient) redisClient).connectPubSub());
+                var connection = RedisConnectionPoolManager.getConnectPubSub(redisConnectContext);
                 pubsub = connection.async();
             }).thenRun(() -> pubsub.getStatefulConnection().addListener(this));
         }
@@ -228,8 +223,8 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
     @Override
     public void message(String channel, String message) {
         String sb = "----------------------------------" + "\n" +
-                "时间: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + " " + "\n" + "通道: " + channel + " " + "\n" +
-                "消息: " + message + "\n" + "\n";
+                    "时间: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + " " + "\n" + "通道: " + channel + " " + "\n" +
+                    "消息: " + message + "\n" + "\n";
         SwingUtilities.invokeLater(() -> {
             var tmp = numLabel.getText().split(":");
             numLabel.setText(tmp[0] + ":" + (Integer.parseInt(tmp[1].replace(" ", "")) + 1));
