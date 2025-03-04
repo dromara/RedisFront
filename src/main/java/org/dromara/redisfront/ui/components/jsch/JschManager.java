@@ -86,6 +86,7 @@ public class JschManager implements AutoCloseable {
     }
 
     public void closeSession(RedisConnectContext redisConnectContext) {
+        RedisConnectionPoolManager.cleanupContextPool(redisConnectContext);
         Session session = SESSION_MAP.remove(redisConnectContext.getId());
         if (session != null && session.isConnected()) {
             session.disconnect();

@@ -3,14 +3,11 @@ package org.dromara.redisfront.commons.pool;
 
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
-import io.lettuce.core.api.StatefulConnection;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.cluster.RedisClusterClient;
 import io.lettuce.core.cluster.api.StatefulRedisClusterConnection;
 import io.lettuce.core.sentinel.api.StatefulRedisSentinelConnection;
-import org.apache.commons.pool2.BasePooledObjectFactory;
-import org.apache.commons.pool2.PooledObject;
-import org.apache.commons.pool2.impl.DefaultPooledObject;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.dromara.redisfront.commons.utils.LettuceUtils;
@@ -20,6 +17,7 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 public class RedisConnectionPoolManager {
     // 连接池配置参数
     private static final int MAX_TOTAL = 20;
@@ -98,36 +96,43 @@ public class RedisConnectionPoolManager {
         }
     }
 
-    @FunctionalInterface
-    private interface ConnectionSupplier<T> {
-        T get() throws Exception;
+    public static void cleanupContextPool(RedisConnectContext context) {
+        String poolKey = context.getId() + "_" + context.getRedisMode();
+        cleanupPools(poolKey);
     }
 
-    private static class RedisConnectionFactory<T> extends BasePooledObjectFactory<T> {
-        private final ConnectionSupplier<T> supplier;
+    // 核心清理方法
+    private static void cleanupPools(String specificKey) {
+        cleanPoolMap(CLUSTER_POOLS,  specificKey);
+        cleanPoolMap(SENTINEL_POOLS, specificKey);
+        cleanPoolMap(NORMAL_POOLS,  specificKey);
+    }
+    private static <T> void cleanPoolMap(
+            Map<String, GenericObjectPool<T>> poolMap,
+            String specificKey) {
 
-        public RedisConnectionFactory(ConnectionSupplier<T> supplier) {
-            this.supplier = supplier;
-        }
+        poolMap.forEach((key, pool) -> {
+            if (key.equals(specificKey)) {
+                closeAndRemove(poolMap, key, pool);
+            }
+        });
+    }
 
-        @Override
-        public T create() throws Exception {
-            return supplier.get();
-        }
+    private static <T> void closeAndRemove(
+            Map<String, GenericObjectPool<T>> poolMap,
+            String key,
+            GenericObjectPool<T> pool) {
 
-        @Override
-        public PooledObject<T> wrap(T obj) {
-            return new DefaultPooledObject<>(obj);
-        }
-
-        @Override
-        public boolean validateObject(PooledObject<T> p) {
-            return ((StatefulConnection<?, ?>) p.getObject()).isOpen();
-        }
-
-        @Override
-        public void destroyObject(PooledObject<T> p) throws Exception {
-            ((StatefulConnection<?, ?>) p.getObject()).close();
+        try {
+            if (!pool.isClosed()) {
+                pool.close();
+                poolMap.remove(key);
+                log.info("Closed connection pool: {}", key);
+            }
+        } catch (Exception e) {
+            log.error("Close pool failed: {}", key, e);
         }
     }
+
+
 }
