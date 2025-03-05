@@ -47,7 +47,7 @@ allprojects {
     }
 }
 
-version = "2024.1"
+version = "2025.1-beta-1"
 
 val applicationName = "RedisFront"
 val organization = "dromara.org"

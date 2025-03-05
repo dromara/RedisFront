@@ -246,7 +246,7 @@ public class MainComponent extends JPanel {
         horizontalBox.add(network);
         var version = new JLabel();
         {
-            version.setText(Constants.APP_VERSION);
+            version.setText(redisFrontContext.version());
             version.setToolTipText(owner.$tr("Menu.Help.About.Title"));
             version.setIcon(Icons.REDIS_TEXT_80x16);
             version.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -254,7 +254,7 @@ public class MainComponent extends JPanel {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     JOptionPane.showMessageDialog(owner, new Object[]{
-                                    new MainAboutPanel()
+                                    new MainAboutPanel(owner)
                             }, owner.$tr("Menu.Help.About.Title"),
                             JOptionPane.PLAIN_MESSAGE);
                 }

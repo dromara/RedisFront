@@ -2,8 +2,14 @@ package org.dromara.redisfront.ui.widget.main.about;
 
 import cn.hutool.core.swing.DesktopUtil;
 import com.formdev.flatlaf.FlatClientProperties;
+import org.dromara.quickswing.ui.app.QSContext;
+import org.dromara.quickswing.ui.app.QSWidget;
+import org.dromara.redisfront.RedisFrontContext;
+import org.dromara.redisfront.RedisFrontMain;
+import org.dromara.redisfront.RedisFrontPrefs;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.resources.Icons;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -21,8 +27,12 @@ public class MainAboutPanel extends JPanel {
     private static final String DROMARA_URL = "https://www.dromara.org";
     private static final String TITLE = "RedisFront";
     private static final String SUBTITLE = "Cross-platform Redis GUI Client";
+    private final RedisFrontWidget owner;
+    private final RedisFrontContext context;
 
-    public MainAboutPanel() {
+    public MainAboutPanel(RedisFrontWidget owner) {
+        this.owner = owner;
+        this.context = (RedisFrontContext) owner.getContext();
         initUI();
     }
 
@@ -77,7 +87,7 @@ public class MainAboutPanel extends JPanel {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
         // 版本信息
-        JLabel versionLabel = createInfoLabel("Version " + Constants.APP_VERSION);
+        JLabel versionLabel = createInfoLabel("Version " + context.version());
         panel.add(versionLabel);
 
         // 项目链接
