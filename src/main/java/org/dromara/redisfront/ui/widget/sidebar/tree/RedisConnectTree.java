@@ -167,6 +167,17 @@ public class RedisConnectTree extends JXTree {
         this.initTreeNodePopupMenu(context, datasource);
         this.initTreeNodeGroupPopupMenu(context, datasource);
         this.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    TreePath selectionPath = getSelectionPath();
+                    if (selectionPath != null) {
+                        openConnectHandler(selectionPath);
+                    }
+                }
+            }
+
             @Override
             public void mousePressed(MouseEvent e) {
                 mouseReleased(e);
