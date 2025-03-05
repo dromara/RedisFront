@@ -28,7 +28,7 @@ public class ListRedisDataScanner extends AbstractRedisDataScanner<String, ListT
 
     @Override
     public void fetchData(String fetchKey) {
-        var scanContext = redisScanContextManager.getContext(key);
+        var scanContext = getContext(key);
 
         var start = Long.parseLong(scanContext.getScanCursor().getCursor());
         var stop = start + (scanContext.getLimit() - 1);
