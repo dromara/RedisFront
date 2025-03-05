@@ -1,11 +1,16 @@
 package org.dromara.redisfront.ui.widget.main.fragment.scaffold.index;
 
+import ch.qos.logback.core.encoder.JsonEscapeUtil;
 import cn.hutool.json.JSONException;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import cn.hutool.json.serialize.JSONArraySerializer;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.formdev.flatlaf.ui.FlatEmptyBorder;
+import com.formdev.flatlaf.util.StringUtils;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -29,6 +34,7 @@ import org.dromara.redisfront.ui.dialog.AddOrUpdateValueDialog;
 import org.dromara.redisfront.ui.event.KeyDeleteSuccessEvent;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.jfree.data.json.JSONUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import raven.toast.Notifications;
@@ -451,19 +457,18 @@ public class RightViewFragment {
                             String prettyStr = JSONUtil.toJsonPrettyStr(value);
                             textEditor.setText(prettyStr);
                         } else {
-                            if (value.length() > 2 && value.startsWith("\"") && value.endsWith("\"")) {
-                                value = value.substring(1, value.length() - 1);
-                                value = value.replace("\\", "");
-                                if (JSONUtil.isTypeJSON(value)) {
-                                    JSONObject parse = JSONUtil.parseObj(value);
-                                    textEditor.setText(parse.toStringPretty());
-                                }
+                            value = new Gson().fromJson(value, String.class);
+                            if (JSONUtil.isTypeJSON(value)) {
+                                textEditor.setText(JSONUtil.toJsonPrettyStr(value));
                             }
                         }
                     } catch (JSONException e) {
                         textEditor.setText(value);
                     }
                 } else {
+                    if (StringUtils.isEmpty(value)) {
+                        return;
+                    }
                     textEditor.setText(originalValue);
                 }
             }
