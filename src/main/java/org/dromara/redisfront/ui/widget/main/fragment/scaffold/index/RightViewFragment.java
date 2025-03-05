@@ -340,7 +340,7 @@ public class RightViewFragment {
                 default -> stringDataFetcher.fetchData(key);
             }
         } else {
-            owner.displayMessage("异常", owner.$tr("DataViewForm.redisFrontException.message"));
+            throw new RuntimeException("Key [ " + key + " ] load failed, please check the key!");
         }
     }
 

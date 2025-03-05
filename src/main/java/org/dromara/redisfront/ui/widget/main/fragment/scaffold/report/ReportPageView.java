@@ -1,5 +1,6 @@
 package org.dromara.redisfront.ui.widget.main.fragment.scaffold.report;
 
+import com.formdev.flatlaf.extras.components.FlatButton;
 import com.formdev.flatlaf.extras.components.FlatToggleButton;
 import org.dromara.quickswing.ui.app.page.QSPageItem;
 import org.dromara.redisfront.model.context.RedisConnectContext;
@@ -11,6 +12,8 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 
+import static com.formdev.flatlaf.FlatClientProperties.STYLE;
+
 /**
  * DataChartsForm
  *
@@ -19,22 +22,124 @@ import java.awt.*;
 public class ReportPageView extends QSPageItem<RedisFrontWidget> {
 
     private JPanel rootPanel;
+    private FlatToggleButton networkTgBtn;
+    private FlatToggleButton memoryTgBtn;
+    private FlatToggleButton connectTgBtn;
+    private FlatToggleButton commandTgBtn;
+    private FlatToggleButton clusterTgBtn;
+    private JPanel chartPanel;
     private final RedisFrontWidget owner;
     private final RedisNetworkChart redisNetworkChart;
+    private final RedisMemoryChart redisMemoryChart;
 
 
     public ReportPageView(final RedisConnectContext redisConnectContext, RedisFrontWidget owner) {
         this.owner = owner;
         this.redisNetworkChart = new RedisNetworkChart(redisConnectContext);
+        this.redisMemoryChart = new RedisMemoryChart(redisConnectContext);
         $$$setupUI$$$();
-        this.rootPanel.add(redisNetworkChart, BorderLayout.CENTER);
-        setupUI();
+        this.chartPanel.add(redisNetworkChart, BorderLayout.CENTER);
+        this.initializeUI();
+        this.setupUI();
+    }
+
+    private void configureToggleButton(FlatToggleButton button) {
+        button.setButtonType(FlatButton.ButtonType.tab);
+        button.setFocusable(false);
+        button.putClientProperty(STYLE,
+                "tab.underlineHeight:1;" +
+                        "[dark]tab.selectedForeground:$ToggleButton.tab.underlineColor;"
+                        + "[light]tab.selectedForeground:$RedisFront.main.background;"
+                        + "[light]tab.underlineColor:$RedisFront.main.background;"
+        );
+    }
+
+    private void initializeUI() {
+        this.networkTgBtn.setSelected(true);
+
+        this.configureToggleButton(networkTgBtn);
+        this.networkTgBtn.addActionListener(_ -> {
+            if (networkTgBtn.isSelected()) {
+                this.chartPanel.removeAll();
+                this.chartPanel.add(redisNetworkChart, BorderLayout.CENTER);
+                this.chartPanel.updateUI();
+                this.memoryTgBtn.setSelected(false);
+                this.connectTgBtn.setSelected(false);
+                this.commandTgBtn.setSelected(false);
+                this.clusterTgBtn.setSelected(false);
+            } else {
+                this.networkTgBtn.setSelected(true);
+            }
+        });
+
+        this.configureToggleButton(memoryTgBtn);
+        this.memoryTgBtn.addActionListener(_ -> {
+            if (memoryTgBtn.isSelected()) {
+                this.chartPanel.removeAll();
+                this.chartPanel.add(redisMemoryChart, BorderLayout.CENTER);
+                this.chartPanel.updateUI();
+                this.networkTgBtn.setSelected(false);
+                this.connectTgBtn.setSelected(false);
+                this.commandTgBtn.setSelected(false);
+                this.clusterTgBtn.setSelected(false);
+            } else {
+                this.memoryTgBtn.setSelected(true);
+            }
+        });
+
+        this.configureToggleButton(connectTgBtn);
+        this.connectTgBtn.addActionListener(_ -> {
+            if (connectTgBtn.isSelected()) {
+                this.chartPanel.removeAll();
+                this.chartPanel.add(redisMemoryChart, BorderLayout.CENTER);
+                this.chartPanel.updateUI();
+                this.networkTgBtn.setSelected(false);
+                this.memoryTgBtn.setSelected(false);
+                this.commandTgBtn.setSelected(false);
+                this.clusterTgBtn.setSelected(false);
+            } else {
+                this.connectTgBtn.setSelected(true);
+            }
+        });
+
+        this.configureToggleButton(commandTgBtn);
+        this.commandTgBtn.addActionListener(_ -> {
+            if (commandTgBtn.isSelected()) {
+                this.chartPanel.removeAll();
+                this.chartPanel.add(redisMemoryChart, BorderLayout.CENTER);
+                this.chartPanel.updateUI();
+                this.networkTgBtn.setSelected(false);
+                this.memoryTgBtn.setSelected(false);
+                this.connectTgBtn.setSelected(false);
+                this.clusterTgBtn.setSelected(false);
+            } else {
+                this.commandTgBtn.setSelected(true);
+            }
+        });
+
+        this.configureToggleButton(clusterTgBtn);
+        this.clusterTgBtn.addActionListener(_ -> {
+            if (clusterTgBtn.isSelected()) {
+                this.chartPanel.removeAll();
+                this.chartPanel.add(redisMemoryChart, BorderLayout.CENTER);
+                this.chartPanel.updateUI();
+                this.networkTgBtn.setSelected(false);
+                this.memoryTgBtn.setSelected(false);
+                this.connectTgBtn.setSelected(false);
+                this.commandTgBtn.setSelected(false);
+            } else {
+                this.clusterTgBtn.setSelected(true);
+            }
+        });
     }
 
     @Override
     public void updateUI() {
         if (redisNetworkChart != null) {
             redisNetworkChart.refreshUI();
+        }
+        if (redisMemoryChart != null) {
+            redisMemoryChart.refreshUI();
         }
     }
 
@@ -52,24 +157,27 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
         rootPanel.add(panel1, BorderLayout.SOUTH);
-        final FlatToggleButton flatToggleButton1 = new FlatToggleButton();
-        flatToggleButton1.setText("网络带宽");
-        panel1.add(flatToggleButton1);
-        final FlatToggleButton flatToggleButton2 = new FlatToggleButton();
-        flatToggleButton2.setText("内存指标");
-        panel1.add(flatToggleButton2);
-        final FlatToggleButton flatToggleButton3 = new FlatToggleButton();
-        flatToggleButton3.setText("连接状态");
-        panel1.add(flatToggleButton3);
-        final FlatToggleButton flatToggleButton4 = new FlatToggleButton();
-        flatToggleButton4.setText("命令统计");
-        panel1.add(flatToggleButton4);
-        final FlatToggleButton flatToggleButton5 = new FlatToggleButton();
-        flatToggleButton5.setText(" 集群参数");
-        panel1.add(flatToggleButton5);
-        final FlatToggleButton flatToggleButton6 = new FlatToggleButton();
-        flatToggleButton6.setText("复制监控");
-        panel1.add(flatToggleButton6);
+        networkTgBtn = new FlatToggleButton();
+        networkTgBtn.setText("网络使用");
+        panel1.add(networkTgBtn);
+        memoryTgBtn = new FlatToggleButton();
+        memoryTgBtn.setText("内存使用");
+        panel1.add(memoryTgBtn);
+        connectTgBtn = new FlatToggleButton();
+        connectTgBtn.setText("连接状态");
+        connectTgBtn.setVisible(false);
+        panel1.add(connectTgBtn);
+        commandTgBtn = new FlatToggleButton();
+        commandTgBtn.setText("命令统计");
+        commandTgBtn.setVisible(false);
+        panel1.add(commandTgBtn);
+        clusterTgBtn = new FlatToggleButton();
+        clusterTgBtn.setText(" 集群参数");
+        clusterTgBtn.setVisible(false);
+        panel1.add(clusterTgBtn);
+        chartPanel = new JPanel();
+        chartPanel.setLayout(new BorderLayout(0, 0));
+        rootPanel.add(chartPanel, BorderLayout.CENTER);
     }
 
     /**
@@ -89,4 +197,5 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
     protected JComponent getContentPanel() {
         return rootPanel;
     }
+
 }

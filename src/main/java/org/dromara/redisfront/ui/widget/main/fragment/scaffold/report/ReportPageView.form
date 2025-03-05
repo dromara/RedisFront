@@ -14,43 +14,46 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="b9d9a" class="com.formdev.flatlaf.extras.components.FlatToggleButton">
+          <component id="b9d9a" class="com.formdev.flatlaf.extras.components.FlatToggleButton" binding="networkTgBtn">
             <constraints/>
             <properties>
-              <text value="网络带宽"/>
+              <text value="网络使用"/>
             </properties>
           </component>
-          <component id="7ee33" class="com.formdev.flatlaf.extras.components.FlatToggleButton">
+          <component id="7ee33" class="com.formdev.flatlaf.extras.components.FlatToggleButton" binding="memoryTgBtn">
             <constraints/>
             <properties>
-              <text value="内存指标"/>
+              <text value="内存使用"/>
             </properties>
           </component>
-          <component id="b8c0" class="com.formdev.flatlaf.extras.components.FlatToggleButton">
+          <component id="b8c0" class="com.formdev.flatlaf.extras.components.FlatToggleButton" binding="connectTgBtn">
             <constraints/>
             <properties>
               <text value="连接状态"/>
+              <visible value="false"/>
             </properties>
           </component>
-          <component id="505f" class="com.formdev.flatlaf.extras.components.FlatToggleButton">
+          <component id="505f" class="com.formdev.flatlaf.extras.components.FlatToggleButton" binding="commandTgBtn">
             <constraints/>
             <properties>
               <text value="命令统计"/>
+              <visible value="false"/>
             </properties>
           </component>
-          <component id="344fe" class="com.formdev.flatlaf.extras.components.FlatToggleButton">
+          <component id="344fe" class="com.formdev.flatlaf.extras.components.FlatToggleButton" binding="clusterTgBtn">
             <constraints/>
             <properties>
               <text value=" 集群参数"/>
-            </properties>
-          </component>
-          <component id="de70" class="com.formdev.flatlaf.extras.components.FlatToggleButton">
-            <constraints/>
-            <properties>
-              <text value="复制监控"/>
+              <visible value="false"/>
             </properties>
           </component>
         </children>
+      </grid>
+      <grid id="34048" binding="chartPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints border-constraint="Center"/>
+        <properties/>
+        <border type="none"/>
+        <children/>
       </grid>
     </children>
   </grid>

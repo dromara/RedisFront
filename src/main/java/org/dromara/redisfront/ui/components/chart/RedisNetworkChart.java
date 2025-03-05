@@ -5,9 +5,13 @@ import org.dromara.redisfront.ui.components.monitor.RedisMonitor;
 import org.dromara.redisfront.ui.components.monitor.RedisUsageInfo;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class RedisNetworkChart extends AbstractRedisChart {
     private TimeSeries inSeries;
@@ -24,7 +28,7 @@ public class RedisNetworkChart extends AbstractRedisChart {
     private void initializeUI() {
         TimeSeriesCollection dataset = createDataset();
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
-                "Redis网络带宽占用",
+                "",
                 "",
                 "带宽 (KB/s)",
                 dataset,
@@ -59,12 +63,6 @@ public class RedisNetworkChart extends AbstractRedisChart {
         Millisecond now = new Millisecond();
         inSeries.addOrUpdate(now, networkStats.inputRate());
         outSeries.addOrUpdate(now, networkStats.outputRate());
-//        FutureUtils.supplyAsync(redisMonitor::calculateNetworkRate)
-//                .thenAccept(redisUsageInfo -> {
-//                    Millisecond now = new Millisecond();
-//                    inSeries.addOrUpdate(now, redisUsageInfo.inputRate());
-//                    outSeries.addOrUpdate(now, redisUsageInfo.outputRate());
-//                });
     }
 
 

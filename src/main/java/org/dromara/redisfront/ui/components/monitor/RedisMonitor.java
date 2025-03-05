@@ -3,6 +3,7 @@ package org.dromara.redisfront.ui.components.monitor;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;
+
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -46,10 +47,22 @@ public class RedisMonitor {
 
     private String memoryInfo() {
         Map<String, Object> memoryInfo = RedisBasicService.service.getMemoryInfo(context);
-        if(RedisFrontUtils.isEmpty(memoryInfo)){
+        if (RedisFrontUtils.isEmpty(memoryInfo)) {
             return "00M";
         }
         return memoryInfo.get("used_memory_human").toString();
+    }
+
+    public RedisUsageInfo.MemoryUsage memoryUsageInfo() {
+        Map<String, Object> memoryInfo = RedisBasicService.service.getMemoryInfo(context);
+        if (RedisFrontUtils.isEmpty(memoryInfo)) {
+            return new RedisUsageInfo.MemoryUsage(0, 0, 0);
+        }
+        return new RedisUsageInfo.MemoryUsage(
+                Double.parseDouble(memoryInfo.get("used_memory").toString()),
+                Double.parseDouble(memoryInfo.get("used_memory_rss").toString()),
+                Double.parseDouble(memoryInfo.get("used_memory").toString()) / Double.parseDouble(memoryInfo.get("used_memory_rss").toString())
+        );
     }
 
     public RedisUsageInfo.NetworkStats calculateNetworkRate() {

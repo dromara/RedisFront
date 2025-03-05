@@ -1,5 +1,6 @@
 package org.dromara.redisfront.ui.widget.main.fragment.scaffold.index;
 
+import cn.hutool.core.exceptions.ExceptionUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.quickswing.ui.app.page.QSPageItem;
@@ -60,7 +61,7 @@ public class IndexPageView extends QSPageItem<RedisFrontWidget> {
                             this.splitPane.setRightComponent(new WrapperPanel(rightViewFragment.contentPanel()));
                             rightViewFragment.refreshUI();
                         } else {
-                            owner.displayException(e);
+                            owner.displayException(ExceptionUtil.unwrap(e));
                         }
                     });
                 }

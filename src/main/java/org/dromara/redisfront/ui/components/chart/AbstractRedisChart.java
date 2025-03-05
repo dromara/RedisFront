@@ -20,7 +20,7 @@ public abstract class AbstractRedisChart extends JPanel {
     protected AbstractRedisChart(RedisConnectContext redisConnectContext) {
         this.redisConnectContext = redisConnectContext;
         this.setLayout(new BorderLayout());
-        Timer timer = new Timer(1000, _ -> updateDataset());
+        Timer timer = new Timer(2000, _ -> updateDataset());
         timer.start();
     }
 
