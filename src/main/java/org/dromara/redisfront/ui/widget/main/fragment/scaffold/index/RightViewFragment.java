@@ -1,6 +1,7 @@
 package org.dromara.redisfront.ui.widget.main.fragment.scaffold.index;
 
 import cn.hutool.json.JSONException;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
@@ -397,6 +398,8 @@ public class RightViewFragment {
         });
     }
 
+    String originalValue;
+
     private void createUIComponents() {
         bodyPanel = new JPanel() {
             @Override
@@ -442,15 +445,26 @@ public class RightViewFragment {
             String value = textEditor.getText();
             if (item instanceof String itemValue) {
                 if (RedisFrontUtils.equal(itemValue, SyntaxConstants.SYNTAX_STYLE_JSON)) {
-                    if (JSONUtil.isTypeJSON(value)) {
-                        try {
+                    originalValue = value;
+                    try {
+                        if (JSONUtil.isTypeJSON(value)) {
                             String prettyStr = JSONUtil.toJsonPrettyStr(value);
                             textEditor.setText(prettyStr);
-                        } catch (JSONException e) {
-                            //json格式化异常
-                            textEditor.setText(value);
+                        } else {
+                            if (value.length() > 2 && value.startsWith("\"") && value.endsWith("\"")) {
+                                value = value.substring(1, value.length() - 1);
+                                value = value.replace("\\", "");
+                                if (JSONUtil.isTypeJSON(value)) {
+                                    JSONObject parse = JSONUtil.parseObj(value);
+                                    textEditor.setText(parse.toStringPretty());
+                                }
+                            }
                         }
+                    } catch (JSONException e) {
+                        textEditor.setText(value);
                     }
+                } else {
+                    textEditor.setText(originalValue);
                 }
             }
         });
