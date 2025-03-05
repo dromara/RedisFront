@@ -66,6 +66,7 @@ val requireModules = listOf(
     "java.base",
     "java.logging",
     "java.sql",
+    "java.management",
     "java.naming"
 )
 

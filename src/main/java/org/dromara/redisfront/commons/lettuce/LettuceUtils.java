@@ -126,7 +126,9 @@ public class LettuceUtils {
 
     public static RedisClusterClient getRedisClusterClient(RedisURI redisURI, RedisConnectContext redisConnectContext) {
         AddressMappingResolver mappingResolver = new AddressMappingResolver(redisConnectContext);
-        var clusterClient = RedisClusterClient.create(ClientResources.builder().socketAddressResolver(mappingResolver).build(), redisURI);
+        var clusterClient = RedisClusterClient.create(ClientResources.builder()
+                .socketAddressResolver(mappingResolver)
+                .build(), redisURI);
         configureOptions(clusterClient, redisConnectContext);
         return clusterClient;
     }
