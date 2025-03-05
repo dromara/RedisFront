@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.dromara.redisfront.commons.enums.ConnectType;
 import org.dromara.redisfront.commons.enums.RedisMode;
+import org.dromara.redisfront.commons.utils.MD5Util;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 
@@ -40,6 +41,10 @@ public class RedisConnectContext implements Serializable, Cloneable {
     private SslInfo sslInfo;
     private SshInfo sshInfo;
     private Map<Integer, Integer> clusterLocalPort;
+
+    public String key() {
+        return MD5Util.encrypt(id + ":" + host + ":" + port + ":" + username + ":" + password + ":" + sslInfo + ":" + sshInfo);
+    }
 
     public ConnectDetailEntity toEntity() {
         ConnectDetailEntity entity = new ConnectDetailEntity();

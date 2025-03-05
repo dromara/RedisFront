@@ -36,7 +36,7 @@ public class RedisFrontWidget extends QSWidget<RedisFrontPrefs> {
                     FlatClientProperties.MACOS_WINDOW_BUTTONS_SPACING_MEDIUM);
         }
         this.setResizable(true);
-        this.setSize(1300, 800);
+        this.setSize(1260, 800);
         this.setIconImages(Icons.MAIN_FRAME_ICON_IMAGES);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.eventListener = new RedisFrontEventListener(this);

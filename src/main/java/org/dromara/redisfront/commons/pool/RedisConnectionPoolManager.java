@@ -27,7 +27,6 @@ public class RedisConnectionPoolManager {
     private static final int MIN_IDLE = 2;
     private static final long MAX_WAIT_MILLIS = 5000;
 
-    // 连接池存储结构
     private static final Map<String, GenericObjectPool<StatefulRedisClusterConnection<String, String>>> CLUSTER_POOLS = new ConcurrentHashMap<>();
     private static final Map<String, GenericObjectPool<StatefulRedisClusterPubSubConnection<String, String>>> CLUSTER_PUB_POOLS = new ConcurrentHashMap<>();
     private static final Map<String, GenericObjectPool<StatefulRedisSentinelConnection<String, String>>> SENTINEL_POOLS = new ConcurrentHashMap<>();
@@ -74,7 +73,7 @@ public class RedisConnectionPoolManager {
     private static <T> T getConnection(Map<String, GenericObjectPool<T>> poolMap,
                                        RedisConnectContext context,
                                        ConnectionSupplier<T> supplier) {
-        String poolKey = context.getId() + "_" + context.getRedisMode();
+        String poolKey = context.key();
         try {
             GenericObjectPool<T> pool = poolMap.computeIfAbsent(poolKey, _ -> {
                 GenericObjectPoolConfig<T> config = new GenericObjectPoolConfig<>();
@@ -88,22 +87,23 @@ public class RedisConnectionPoolManager {
             });
             return pool.borrowObject();
         } catch (Exception e) {
+            cleanupContextPool(context);
             throw new RuntimeException("Get connection failed", e);
         }
     }
 
     public static void closeConnection(RedisConnectContext context, StatefulRedisClusterConnection<String, String> connection) {
-        String poolKey = context.getId() + "_" + context.getRedisMode();
+        String poolKey = context.key();
         returnConnection(CLUSTER_POOLS.get(poolKey), connection);
     }
 
     public static void closeConnection(RedisConnectContext context, StatefulRedisSentinelConnection<String, String> connection) {
-        String poolKey = context.getId() + "_" + context.getRedisMode();
+        String poolKey = context.key();
         returnConnection(SENTINEL_POOLS.get(poolKey), connection);
     }
 
     public static void closeConnection(RedisConnectContext context, StatefulRedisConnection<String, String> connection) {
-        String poolKey = context.getId() + "_" + context.getRedisMode();
+        String poolKey = context.key();
         returnConnection(NORMAL_POOLS.get(poolKey), connection);
     }
 
@@ -114,7 +114,7 @@ public class RedisConnectionPoolManager {
     }
 
     public static void cleanupContextPool(RedisConnectContext context) {
-        String poolKey = context.getId() + "_" + context.getRedisMode();
+        String poolKey = context.key();
         cleanupPools(poolKey);
     }
 
@@ -150,6 +150,4 @@ public class RedisConnectionPoolManager {
             log.error("Close pool failed: {}", key, e);
         }
     }
-
-
 }
