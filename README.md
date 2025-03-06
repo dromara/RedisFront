@@ -13,8 +13,6 @@ RedisFront是一款基于Java Swing开发的跨平台Redis桌面客户端工具,
 ![RedisFront](screenshot/latest/2025.1-dark-1.png)
 ![RedisFront](screenshot/latest/2025.1-dark-2.png)
 
-[>> Click here to "README.md" with English!](./README_EN.md)
-
 ### 🌱 下载
 
 [https://gitcode.com/dromara/RedisFront/releases](https://gitcode.com/dromara/RedisFront/releases)
