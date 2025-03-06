@@ -1,16 +1,13 @@
 package org.dromara.redisfront.ui.widget.main.fragment.scaffold.index;
 
-import ch.qos.logback.core.encoder.JsonEscapeUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONException;
-import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import cn.hutool.json.serialize.JSONArraySerializer;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.formdev.flatlaf.ui.FlatEmptyBorder;
 import com.formdev.flatlaf.util.StringUtils;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -34,7 +31,6 @@ import org.dromara.redisfront.ui.dialog.AddOrUpdateValueDialog;
 import org.dromara.redisfront.ui.event.KeyDeleteSuccessEvent;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.jfree.data.json.JSONUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import raven.toast.Notifications;
@@ -107,10 +103,11 @@ public class RightViewFragment {
     private final ZSetRedisDataScanner zSetDataFetcher;
     private final ListRedisDataScanner listDataFetcher;
     private final StreamRedisDataScanner streamDataFetcher;
-
+    private final Gson gson = new Gson();
     private String lastKeyName;
     private Long lastKeyTTL;
     private KeyTypeEnum keyTypeEnum;
+    private String lastSyntaxStyle;
 
 
     public RightViewFragment(RedisConnectContext redisConnectContext, TreeNodeInfo treeNodeInfo, RedisFrontWidget owner) {
@@ -209,13 +206,15 @@ public class RightViewFragment {
                     } else if (dataTable.getModel() instanceof StreamTableModel) {
                         valueUpdateSaveBtn.setEnabled(true);
                         var value = dataTable.getValueAt(row, 2);
-                        try {
-                            String prettyStr = JSONUtil.toJsonPrettyStr(value);
-                            textEditor.setText(prettyStr);
-                        } catch (Exception ex) {
-                            //json格式化异常
-                            textEditor.setText(value.toString());
-                        }
+                        RedisFrontUtils.runEDT(() -> {
+                            try {
+                                String prettyStr = JSONUtil.toJsonPrettyStr(value);
+                                textEditor.setText(prettyStr);
+                            } catch (Exception ex) {
+                                //json格式化异常
+                                textEditor.setText(value.toString());
+                            }
+                        });
                     } else {
                         var value = dataTable.getValueAt(row, 1);
                         RedisFrontUtils.runEDT(() -> {
@@ -404,8 +403,6 @@ public class RightViewFragment {
         });
     }
 
-    String originalValue;
-
     private void createUIComponents() {
         bodyPanel = new JPanel() {
             @Override
@@ -451,13 +448,13 @@ public class RightViewFragment {
             String value = textEditor.getText();
             if (item instanceof String itemValue) {
                 if (RedisFrontUtils.equal(itemValue, SyntaxConstants.SYNTAX_STYLE_JSON)) {
-                    originalValue = value;
+                    this.lastSyntaxStyle = SyntaxConstants.SYNTAX_STYLE_JSON;
                     try {
                         if (JSONUtil.isTypeJSON(value)) {
                             String prettyStr = JSONUtil.toJsonPrettyStr(value);
                             textEditor.setText(prettyStr);
                         } else {
-                            value = new Gson().fromJson(value, String.class);
+                            value = gson.fromJson(value, String.class);
                             if (JSONUtil.isTypeJSON(value)) {
                                 textEditor.setText(JSONUtil.toJsonPrettyStr(value));
                             }
@@ -469,7 +466,13 @@ public class RightViewFragment {
                     if (StringUtils.isEmpty(value)) {
                         return;
                     }
-                    textEditor.setText(originalValue);
+                    if (this.lastSyntaxStyle.equals(SyntaxConstants.SYNTAX_STYLE_JSON)) {
+                        if (JSONUtil.isTypeJSON(value)) {
+                            value = JSONUtil.parse(value).toJSONString(0);
+                            value = gson.toJson(value);
+                        }
+                        textEditor.setText(value);
+                    }
                 }
             }
         });
@@ -495,6 +498,12 @@ public class RightViewFragment {
             KeyTypeEnum typeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
             var key = keyField.getText();
             var newValue = textEditor.getText();
+            if (StrUtil.isNotEmpty(lastSyntaxStyle)) {
+                int i = JOptionPane.showConfirmDialog(owner, owner.$tr("DataViewForm.valueUpdateSaveBtn.syntaxStyleTip"), owner.$tr("DataViewForm.valueUpdateSaveBtn.syntaxStyleTipTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (i == JOptionPane.CANCEL_OPTION) {
+                    return;
+                }
+            }
             SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
                 if (typeEnum.equals(KeyTypeEnum.STRING)) {
                     RedisBasicService.service.del(redisConnectContext, key);
