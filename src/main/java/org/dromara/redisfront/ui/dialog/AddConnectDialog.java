@@ -122,7 +122,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         $$$setupUI$$$();
         this.setModal(true);
         this.setResizable(true);
-        this.setMinimumSize(new Dimension(400, 350));
+        this.setMinimumSize(new Dimension(450, 350));
         this.setContentPane(contentPane);
         this.getRootPane().setDefaultButton(openBtn);
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -288,19 +288,19 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
     private void storageActionPerformed(ActionEvent actionEvent) {
         var connectContext = validGetConnectInfo();
 //        if (testConnect()) {
-            try {
-                ConnectDetailEntity connectDetailEntity = connectContext.toEntity();
-                connectDetailEntity.setGroupId(groupId);
-                if (null == detailId) {
-                    ConnectDetailDao.newInstance(this.context.getDatabaseManager().getDatasource()).save(connectDetailEntity);
-                } else {
-                    ConnectDetailDao.newInstance(this.context.getDatabaseManager().getDatasource()).update(detailId, connectDetailEntity);
-                }
-                this.context.getEventBus().publish(new RefreshConnectTreeEvent(connectContext));
-                dispose();
-            } catch (SQLException e) {
-                getOwner().displayException($tr("AddConnectDialog.save.fail.message"), e);
+        try {
+            ConnectDetailEntity connectDetailEntity = connectContext.toEntity();
+            connectDetailEntity.setGroupId(groupId);
+            if (null == detailId) {
+                ConnectDetailDao.newInstance(this.context.getDatabaseManager().getDatasource()).save(connectDetailEntity);
+            } else {
+                ConnectDetailDao.newInstance(this.context.getDatabaseManager().getDatasource()).update(detailId, connectDetailEntity);
             }
+            this.context.getEventBus().publish(new RefreshConnectTreeEvent(connectContext));
+            dispose();
+        } catch (SQLException e) {
+            getOwner().displayException($tr("AddConnectDialog.save.fail.message"), e);
+        }
 //        }
     }
 
@@ -513,7 +513,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         panel1.setLayout(new GridLayoutManager(1, 1, new Insets(10, 20, 10, 20), -1, -1));
         tabbedPane1.addTab("连接", panel1);
         final JPanel panel2 = new JPanel();
-        panel2.setLayout(new GridLayoutManager(3, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panel2.setLayout(new GridLayoutManager(3, 1, new Insets(0, 0, 0, 10), -1, -1));
         panel1.add(panel2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         sslPanel.setLayout(new GridLayoutManager(2, 4, new Insets(0, 0, 0, 0), -1, -1));
         panel2.add(sslPanel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
@@ -606,7 +606,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         panel3.setLayout(new GridLayoutManager(1, 1, new Insets(10, 20, 10, 20), -1, -1));
         tabbedPane1.addTab("设置", panel3);
         redisPanel = new JPanel();
-        redisPanel.setLayout(new GridLayoutManager(9, 4, new Insets(0, 0, 0, 0), -1, -1));
+        redisPanel.setLayout(new GridLayoutManager(9, 4, new Insets(0, 0, 0, 10), -1, -1));
         panel3.add(redisPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         keySeparatorField = new JTextField();
         keySeparatorField.setText(":");
