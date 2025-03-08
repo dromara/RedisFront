@@ -10,7 +10,6 @@ import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
 import org.dromara.quickswing.constant.QSOs;
 import org.dromara.redisfront.RedisFrontContext;
-import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.enums.ConnectType;
 import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
@@ -22,6 +21,7 @@ import org.dromara.redisfront.ui.event.DrawerChangeEvent;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.dromara.redisfront.ui.widget.main.about.MainAboutPanel;
 import org.dromara.redisfront.ui.widget.main.fragment.MainTabView;
+import org.dromara.redisfront.ui.widget.main.listener.MouseDraggedListener;
 import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
 
 import javax.swing.*;
@@ -130,6 +130,12 @@ public class MainComponent extends JPanel {
                 super.setUI(new BoldTitleTabbedPaneUI());
             }
         };
+
+        if (SystemInfo.isLinux) {
+            topTabbedPane.addMouseListener(new MouseDraggedListener(owner));
+            topTabbedPane.addMouseMotionListener(new MouseDraggedListener(owner));
+        }
+
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_SCROLL_BUTTONS_POLICY, FlatClientProperties.TABBED_PANE_POLICY_AS_NEEDED);
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_LEADING);
