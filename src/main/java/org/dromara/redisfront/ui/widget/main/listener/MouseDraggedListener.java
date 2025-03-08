@@ -8,8 +8,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
 public class MouseDraggedListener implements MouseListener, MouseMotionListener {
-    private int mouseX, mouseY;
     private final RedisFrontWidget owner;
+    private static int mouseX, mouseY;
 
     public MouseDraggedListener(RedisFrontWidget owner) {
         this.owner = owner;
@@ -24,7 +24,6 @@ public class MouseDraggedListener implements MouseListener, MouseMotionListener 
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        // 计算新窗口位置
         int newX = owner.getX() + (e.getX() - mouseX);
         int newY = owner.getY() + (e.getY() - mouseY);
         this.owner.setLocation(newX, newY);
