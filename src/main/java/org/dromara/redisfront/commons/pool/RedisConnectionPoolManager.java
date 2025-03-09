@@ -1,7 +1,9 @@
 
 package org.dromara.redisfront.commons.pool;
 
+import cn.hutool.core.exceptions.ExceptionUtil;
 import io.lettuce.core.RedisClient;
+import io.lettuce.core.RedisCommandExecutionException;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.cluster.RedisClusterClient;
@@ -12,6 +14,7 @@ import io.lettuce.core.sentinel.api.StatefulRedisSentinelConnection;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.lettuce.LettuceUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 
@@ -20,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
+@SuppressWarnings("all")
 public class RedisConnectionPoolManager {
 
     private static final int MAX_TOTAL = 20;
@@ -86,9 +90,15 @@ public class RedisConnectionPoolManager {
                 return new GenericObjectPool<>(new RedisConnectionFactory<>(supplier), config);
             });
             return pool.borrowObject();
+
         } catch (Exception e) {
             cleanupContextPool(context);
-            throw new RuntimeException("Get connection failed", e);
+            if (ExceptionUtil.isCausedBy(e, RedisCommandExecutionException.class)) {
+                Throwable causedBy = ExceptionUtil.getCausedBy(e, RedisCommandExecutionException.class);
+                throw new RedisFrontException(causedBy.getMessage());
+            } else {
+                throw new RedisFrontException("Get connection failed", e, false);
+            }
         }
     }
 

@@ -10,9 +10,7 @@ import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
 import org.dromara.quickswing.constant.QSOs;
 import org.dromara.redisfront.RedisFrontContext;
-import org.dromara.redisfront.commons.enums.ConnectType;
 import org.dromara.redisfront.commons.resources.Icons;
-import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
 import org.dromara.redisfront.ui.components.monitor.RedisMonitor;
@@ -152,9 +150,9 @@ public class MainComponent extends JPanel {
                     executorService.shutdownNow();
                 }
                 //关闭ssh会话
-                if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
+//                if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
 //                    JschManager.MANAGER.closeSession(redisConnectContext);
-                }
+//                }
                 //关闭移除消息监听器
                 owner.getEventListener().unbind(redisConnectContext.getId());
             }
@@ -182,8 +180,8 @@ public class MainComponent extends JPanel {
             }
             if (topTabbedPane.getSelectedComponent() instanceof MainTabView mainTabView) {
                 RedisConnectContext redisConnectContext = mainTabView.getRedisConnectContext();
+                SwingUtilities.invokeLater(() -> mode.setText(owner.$tr(redisConnectContext.getRedisMode().modeName)));
                 if (!executorServiceMap.containsKey(redisConnectContext.getId())) {
-                    SwingUtilities.invokeLater(() -> mode.setText(owner.$tr(redisConnectContext.getRedisMode().modeName)));
                     RedisMonitor monitor = new RedisMonitor(redisConnectContext);
                     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                     scheduler.scheduleAtFixedRate(() -> {

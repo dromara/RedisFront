@@ -12,6 +12,7 @@ import com.formdev.flatlaf.FlatLaf;
 import com.surelogic.Utility;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.quickswing.tree.QSTreeNode;
+import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.jdesktop.swingx.JXTree;
 
 import javax.swing.*;
@@ -163,6 +164,18 @@ public class RedisFrontUtils {
                     tree.expandPath(treePath);
                     break;
                 }
+            }
+        }
+    }
+
+    public static void runEDTSync(Runnable runnable) {
+        if (SwingUtilities.isEventDispatchThread()) {
+            runnable.run();
+        } else {
+            try {
+                SwingUtilities.invokeAndWait(runnable);
+            } catch (Exception e) {
+                throw new RedisFrontException(e.getMessage());
             }
         }
     }

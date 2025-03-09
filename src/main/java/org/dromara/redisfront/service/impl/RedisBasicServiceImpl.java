@@ -213,6 +213,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
     @Override
     public List<ClusterNode> getClusterNodes(RedisConnectContext redisConnectContext) {
         String clusterNodes = LettuceUtils.exec(redisConnectContext, RedisClusterCommands::clusterNodes);
+        log.debug("获取到Redis [ {}:{} ] clusterNodes - {}", redisConnectContext.getHost(), redisConnectContext.getPort(), clusterNodes);
         return strToClusterNodes(clusterNodes);
     }
 
