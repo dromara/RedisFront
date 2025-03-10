@@ -12,7 +12,7 @@ public class Icons {
     public static final Icon LOGO_TEXT_ICON = new FlatSVGIcon("svg/redisfront_text.svg");
     public static final List<Image> MAIN_FRAME_ICON_IMAGES = FlatSVGUtils.createWindowIconImages("/svg/redisfront.svg");
     public static final Icon REDIS_ICON = new FlatSVGIcon("svg/redisfront.svg");
-    public static final Icon REDIS_ICON_45x45 = new FlatSVGIcon("svg/redisfront.svg",45,45);
+    public static final FlatSVGIcon REDIS_ICON_45x45 = new FlatSVGIcon("svg/redisfront.svg",45,45);
     public static final Icon REDIS_ICON_14x14 = new FlatSVGIcon("svg/redisfront.svg",18,18);
     public static final Icon REDIS_TEXT_80x16 = new FlatSVGIcon("svg/redisfront_text.svg",80,16);
     public static final Icon SETTING_ICON_40x40 = new FlatSVGIcon("icons/setting.svg",24,24);
@@ -49,5 +49,6 @@ public class Icons {
     public static final Icon STATUS_ERROR = new FlatSVGIcon("icons/status_error.svg",14,14);
     public static final Icon MATCH_SELECTED = new FlatSVGIcon("icons/regexSelected.svg",14,14);
     public static final Icon MATCH_UNSELECTED  = new FlatSVGIcon("icons/regex.svg",14,14);
+    public static final FlatSVGIcon NONE  = new FlatSVGIcon("icons/none.svg",64,64);
 
 }

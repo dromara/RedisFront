@@ -7,6 +7,7 @@ import com.formdev.flatlaf.util.SystemInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.quickswing.ui.app.QSAction;
 import org.dromara.redisfront.RedisFrontContext;
+import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.dao.ConnectDetailDao;
 import org.dromara.redisfront.dao.ConnectGroupDao;
@@ -49,6 +50,24 @@ public class RedisConnectTree extends JXTree {
         this.initializeUI();
         this.initializeActions();
         this.initializeComponents();
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (getModel().getChildCount(getModel().getRoot()) == 0) {
+            Graphics2D g2d = (Graphics2D) g;
+            Image noneImage = Icons.NONE.getImage();
+            g2d.setComposite(AlphaComposite.getInstance(
+                    AlphaComposite.SRC_OVER,
+                    0.2f
+            ));
+            int x = (getWidth() - noneImage.getWidth(null)) / 2;
+            int y = (getHeight() - noneImage.getHeight(null)-90) / 2;
+            g2d.drawImage(noneImage, x, y, null);
+            g2d.setFont(getFont().deriveFont(Font.BOLD, 15.5f));
+            g2d.drawString(owner.$tr("DataSearchForm.tree.none.text"), x, y + 80);
+        }
     }
 
     private void initializeUI() {
