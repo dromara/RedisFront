@@ -2,6 +2,9 @@ package org.dromara.redisfront.ui.widget.main.fragment.scaffold.index;
 
 import cn.hutool.core.util.NumberUtil;
 import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.extras.components.FlatButton;
+import com.formdev.flatlaf.extras.components.FlatToggleButton;
+import com.formdev.flatlaf.extras.components.FlatToolBar;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
@@ -79,6 +82,7 @@ public class LeftSearchFragment {
     private JButton deleteAllBtn;
     private volatile Map<Integer, RedisScanContext<String>> scanKeysContextMap;
     private final RedisConnectContext redisConnectContext;
+    private FlatToggleButton fuzzyMatchToggleButton;
 
     private final ArrayList<DbInfo> dbList = new ArrayList<>() {
         {
@@ -252,7 +256,18 @@ public class LeftSearchFragment {
             scanKeysAndUpdateScanInfo();
         });
 
-        searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchBtn);
+        fuzzyMatchToggleButton = new FlatToggleButton();
+        fuzzyMatchToggleButton.setButtonType(FlatButton.ButtonType.tab);
+        fuzzyMatchToggleButton.setTabUnderlineHeight(0);
+        fuzzyMatchToggleButton.setSelectedIcon(Icons.MATCH_SELECTED);
+        fuzzyMatchToggleButton.setIcon(Icons.MATCH_UNSELECTED);
+        fuzzyMatchToggleButton.setFocusable(false);
+        fuzzyMatchToggleButton.setToolTipText(owner.$tr("DataSearchForm.toggleButton.tooltip.text"));
+
+        FlatToolBar flatToolBar = new FlatToolBar();
+        flatToolBar.add(fuzzyMatchToggleButton);
+        flatToolBar.add(searchBtn);
+        searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, flatToolBar);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) _ -> {
             scanKeysContextMap.put(redisConnectContext.getDatabase(), new RedisScanContext<>());
@@ -594,10 +609,14 @@ public class LeftSearchFragment {
     }
 
     public void scanKeysActionPerformed() {
-        if (RedisFrontUtils.isEmpty(searchTextField.getText())) {
+        String searchTextFieldText = searchTextField.getText();
+        if (RedisFrontUtils.isEmpty(searchTextFieldText)) {
             loadTreeModelData("*");
         } else {
-            loadTreeModelData(searchTextField.getText());
+            if (fuzzyMatchToggleButton.isSelected()) {
+                searchTextFieldText += "*";
+            }
+            loadTreeModelData(searchTextFieldText);
         }
     }
 

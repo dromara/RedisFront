@@ -47,5 +47,7 @@ public class Icons {
     public static final Icon DRAWER_SHOW_OR_CLOSE_ICON = new FlatSVGIcon("icons/listFiles.svg",24,24);
     public static final Icon STATUS_OK = new FlatSVGIcon("icons/status_ok.svg",14,14);
     public static final Icon STATUS_ERROR = new FlatSVGIcon("icons/status_error.svg",14,14);
+    public static final Icon MATCH_SELECTED = new FlatSVGIcon("icons/regexSelected.svg",14,14);
+    public static final Icon MATCH_UNSELECTED  = new FlatSVGIcon("icons/regex.svg",14,14);
 
 }
