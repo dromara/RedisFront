@@ -2,7 +2,7 @@
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="org.dromara.redisfront.ui.widget.main.fragment.scaffold.report.ReportPageView">
   <grid id="27dc6" binding="rootPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
     <constraints>
-      <xy x="20" y="20" width="551" height="400"/>
+      <xy x="20" y="20" width="701" height="400"/>
     </constraints>
     <properties/>
     <border type="empty">
@@ -30,21 +30,21 @@
             <constraints/>
             <properties>
               <text value="连接状态"/>
-              <visible value="false"/>
+              <visible value="true"/>
             </properties>
           </component>
           <component id="505f" class="com.formdev.flatlaf.extras.components.FlatToggleButton" binding="commandTgBtn">
             <constraints/>
             <properties>
               <text value="命令统计"/>
-              <visible value="false"/>
+              <visible value="true"/>
             </properties>
           </component>
           <component id="344fe" class="com.formdev.flatlaf.extras.components.FlatToggleButton" binding="clusterTgBtn">
             <constraints/>
             <properties>
               <text value=" 集群参数"/>
-              <visible value="false"/>
+              <visible value="true"/>
             </properties>
           </component>
         </children>
