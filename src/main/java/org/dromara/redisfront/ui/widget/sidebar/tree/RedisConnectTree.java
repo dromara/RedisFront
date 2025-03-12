@@ -227,7 +227,7 @@ public class RedisConnectTree extends JXTree {
         treeNodeGroupPopupMenu = new JPopupMenu();
         treeNodeGroupPopupMenu.putClientProperty(FlatClientProperties.STYLE,
                 "[dark]background:darken(#FFFFFF,30%);");
-        JMenuItem addConnectMenuItem = new JMenuItem("添加连接") {
+        JMenuItem addConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.addConnect")) {
             {
                 addActionListener(_ -> {
                     TreePath selectionPath = getSelectionPath();
@@ -244,7 +244,7 @@ public class RedisConnectTree extends JXTree {
         treeNodeGroupPopupMenu.add(addConnectMenuItem);
         treeNodeGroupPopupMenu.addSeparator();
 
-        JMenuItem updateConnectMenuItem = new JMenuItem("编辑分组") {
+        JMenuItem updateConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.editConnectGroup")) {
             {
                 addActionListener(_ -> {
                     TreePath selectionPath = getSelectionPath();
@@ -254,7 +254,7 @@ public class RedisConnectTree extends JXTree {
                     Object lastPathComponent = selectionPath.getLastPathComponent();
                     if (lastPathComponent instanceof RedisConnectTreeNode redisConnectTreeItem) {
                         String groupName = redisConnectTreeItem.toString();
-                        String value = (String) JOptionPane.showInputDialog(owner, "分组名称", "修改分组", JOptionPane.PLAIN_MESSAGE, null, null, groupName);
+                        String value = (String) JOptionPane.showInputDialog(owner, owner.$tr("RedisConnectTree.popupMenu.connectGroupName"), owner.$tr("RedisConnectTree.popupMenu.editConnectGroup"), JOptionPane.PLAIN_MESSAGE, null, null, groupName);
                         if (StrUtil.isEmpty(value) || StrUtil.equals(value, groupName)) {
                             return;
                         }
@@ -267,7 +267,7 @@ public class RedisConnectTree extends JXTree {
                                 log.error(exception.getMessage());
                                 Notifications.getInstance().show(Notifications.Type.ERROR, exception.getMessage());
                             } else {
-                                Notifications.getInstance().show(Notifications.Type.SUCCESS, "修改成功！");
+                                Notifications.getInstance().show(Notifications.Type.SUCCESS, owner.$tr("RedisConnectTree.popupMenu.editConnectSuccess"));
                             }
                         });
                     }
@@ -275,7 +275,7 @@ public class RedisConnectTree extends JXTree {
             }
         };
         treeNodeGroupPopupMenu.add(updateConnectMenuItem);
-        JMenuItem deleteConnectMenuItem = new JMenuItem("删除分组") {
+        JMenuItem deleteConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.deleteConnectGroup")) {
             {
                 addActionListener(_ -> {
                     TreePath selectionPath = getSelectionPath();
@@ -294,7 +294,7 @@ public class RedisConnectTree extends JXTree {
                                 log.error(exception.getMessage());
                                 Notifications.getInstance().show(Notifications.Type.ERROR, exception.getMessage());
                             } else {
-                                Notifications.getInstance().show(Notifications.Type.SUCCESS, "删除成功！");
+                                Notifications.getInstance().show(Notifications.Type.SUCCESS, owner.$tr("RedisConnectTree.popupMenu.deleteConnectGroupSuccess"));
                             }
                         });
                     }
@@ -309,7 +309,7 @@ public class RedisConnectTree extends JXTree {
         treeNodePopupMenu.putClientProperty(FlatClientProperties.STYLE,
                 "[dark]background:darken(#FFFFFF,30%);");
 
-        JMenuItem openConnectMenuItem = new JMenuItem("打开连接") {
+        JMenuItem openConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.openConnect")) {
             {
                 addActionListener(_ -> {
                     TreePath selectionPath = getSelectionPath();
@@ -324,7 +324,7 @@ public class RedisConnectTree extends JXTree {
 
         treeNodePopupMenu.addSeparator();
 
-        JMenuItem editConnectMenuItem = new JMenuItem("编辑连接") {
+        JMenuItem editConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.editConnect")) {
             {
                 addActionListener(_ -> {
                     TreePath selectionPath = getSelectionPath();
@@ -340,7 +340,7 @@ public class RedisConnectTree extends JXTree {
         };
         treeNodePopupMenu.add(editConnectMenuItem);
 
-        JMenuItem deleteConnectMenuItem = new JMenuItem("删除连接") {
+        JMenuItem deleteConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.deleteConnect")) {
             {
                 addActionListener(_ -> {
                     TreePath selectionPath = getSelectionPath();
@@ -358,7 +358,7 @@ public class RedisConnectTree extends JXTree {
                                 log.error(exception.getMessage());
                                 Notifications.getInstance().show(Notifications.Type.ERROR, exception.getMessage());
                             } else {
-                                Notifications.getInstance().show(Notifications.Type.SUCCESS, "删除成功！");
+                                Notifications.getInstance().show(Notifications.Type.SUCCESS, owner.$tr("RedisConnectTree.popupMenu.deleteConnectSuccess"));
                             }
                         });
                     }
@@ -372,7 +372,7 @@ public class RedisConnectTree extends JXTree {
         treePopupMenu = new JPopupMenu();
         treePopupMenu.putClientProperty(FlatClientProperties.STYLE,
                 "[dark]background:darken(#FFFFFF,30%);");
-        JMenuItem addConnectGroupMenuItem = new JMenuItem("新建分组") {
+        JMenuItem addConnectGroupMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.addConnectGroup")) {
             {
                 addActionListener(_ -> {
                     context.taskExecute(() -> ConnectGroupDao.newInstance(datasource).count(), (count, exp) -> {
@@ -381,11 +381,11 @@ public class RedisConnectTree extends JXTree {
                             Notifications.getInstance().show(Notifications.Type.ERROR, exp.getMessage());
                             return;
                         }
-                        String groupName = "新建分组";
+                        String groupName = owner.$tr("RedisConnectTree.popupMenu.addConnectGroup");
                         if (count > 0) {
                             groupName += "(" + count + ")";
                         }
-                        String value = (String) JOptionPane.showInputDialog(owner, "分组名称", "添加分组", JOptionPane.QUESTION_MESSAGE, null, null, groupName);
+                        String value = (String) JOptionPane.showInputDialog(owner, owner.$tr("RedisConnectTree.popupMenu.connectGroupName"), owner.$tr("RedisConnectTree.popupMenu.addConnectGroup"), JOptionPane.QUESTION_MESSAGE, null, null, groupName);
                         if (StrUtil.isEmpty(value)) {
                             return;
                         }
@@ -398,7 +398,7 @@ public class RedisConnectTree extends JXTree {
                                 log.error(exception.getMessage());
                                 Notifications.getInstance().show(Notifications.Type.ERROR, exception.getMessage());
                             } else {
-                                Notifications.getInstance().show(Notifications.Type.SUCCESS, "添加成功！");
+                                Notifications.getInstance().show(Notifications.Type.SUCCESS, owner.$tr("RedisConnectTree.popupMenu.addConnectGroupSuccess"));
                             }
                         });
                     });
@@ -407,7 +407,7 @@ public class RedisConnectTree extends JXTree {
         };
         treePopupMenu.add(addConnectGroupMenuItem);
 
-        JMenuItem addConnectMenuItem = new JMenuItem("添加连接") {
+        JMenuItem addConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.openConnect")) {
             {
                 addActionListener(_ -> {
                     AddConnectDialog.getInstance(owner).showNewConnectDialog(null);
@@ -417,10 +417,10 @@ public class RedisConnectTree extends JXTree {
         treePopupMenu.add(addConnectMenuItem);
         treePopupMenu.addSeparator();
 
-        JMenuItem importConnectMenuItem = new JMenuItem("导入连接");
+        JMenuItem importConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.importConnect"));
         treePopupMenu.add(importConnectMenuItem);
 
-        JMenuItem exportConnectMenuItem = new JMenuItem("导出连接");
+        JMenuItem exportConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.exportConnect"));
         treePopupMenu.add(exportConnectMenuItem);
 
         owner.registerAction(this, new QSAction<>(owner) {
@@ -428,7 +428,7 @@ public class RedisConnectTree extends JXTree {
             public void handleAction(ActionEvent actionEvent) {
                 TreePath selectionPath = getSelectionPath();
                 if (selectionPath == null) {
-                    Notifications.getInstance().show(Notifications.Type.INFO, "请选择要打开的连接！");
+                    Notifications.getInstance().show(Notifications.Type.INFO, owner.$tr("RedisConnectTree.popupMenu.selectConnect"));
                     return;
                 }
                 openConnectHandler(selectionPath);
@@ -447,7 +447,6 @@ public class RedisConnectTree extends JXTree {
         Object pathComponent = selectionPath.getLastPathComponent();
         if (pathComponent instanceof RedisConnectTreeNode redisConnectTreeItem) {
             if (redisConnectTreeItem.getIsGroup()) {
-                Notifications.getInstance().show(Notifications.Type.INFO, "请选择要打开的连接！");
                 return;
             }
             connectHandler.accept(redisConnectTreeItem.getDetail().getConnectContext());

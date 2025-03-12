@@ -49,22 +49,22 @@ public class MainTabView extends JTabbedPane {
         });
         PageScaffold pageScaffold = new PageScaffold(new IndexPageView(redisConnectContext, owner));
         //主窗口
-        this.addTab("主页", Icons.CONTENT_TAB_DATA_ICON, pageScaffold);
+        this.addTab(owner.$tr("MainTabView.pageScaffold.home"), Icons.CONTENT_TAB_DATA_ICON, pageScaffold);
         //命令窗口
         pageScaffold = new PageScaffold(new TerminalPageView(redisConnectContext, owner));
-        this.addTab("命令", Icons.CONTENT_TAB_COMMAND_ICON, pageScaffold);
+        this.addTab(owner.$tr("MainTabView.pageScaffold.cmd"), Icons.CONTENT_TAB_COMMAND_ICON, pageScaffold);
         //订阅窗口
         pageScaffold = new PageScaffold(new PubSubPageView(redisConnectContext, owner));
-        this.addTab("订阅", Icons.MQ_ICON, pageScaffold);
+        this.addTab(owner.$tr("MainTabView.pageScaffold.sub"), Icons.MQ_ICON, pageScaffold);
         //数据窗口
         pageScaffold = new PageScaffold(new ReportPageView(redisConnectContext, owner));
-        this.addTab("数据", Icons.CONTENT_TAB_INFO_ICON, pageScaffold);
+        this.addTab(owner.$tr("MainTabView.pageScaffold.chart"), Icons.CONTENT_TAB_INFO_ICON, pageScaffold);
 
         this.eventListener.bind(redisConnectContext.getId(), DrawerChangeEvent.class, qsEvent -> {
             if (qsEvent instanceof DrawerChangeEvent drawerChangeEvent) {
                 Object message = drawerChangeEvent.getMessage();
                 if (message instanceof Insets insets) {
-                    RedisFrontUtils.runEDT(()->{
+                    RedisFrontUtils.runEDT(() -> {
                         putClientProperty(FlatClientProperties.TABBED_PANE_TAB_INSETS, insets);
                         FlatLaf.updateUI();
                     });
@@ -74,6 +74,9 @@ public class MainTabView extends JTabbedPane {
     }
 
     private void initializeUI() {
+        String fontSize = owner.$tr("MainTabView.pageScaffold.fontSize");
+        Font font = getFont();
+        setFont(font.deriveFont(Float.parseFloat(fontSize)));
         this.setTabPlacement(JTabbedPane.LEFT);
         this.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
         this.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_HEIGHT, 70);
@@ -84,7 +87,7 @@ public class MainTabView extends JTabbedPane {
         FlatToolBar settingToolBar = new FlatToolBar();
         settingToolBar.setLayout(new MigLayout(new LC().align("center", "bottom")));
         JButton button = new JButton(Icons.SETTING_ICON_40x40);
-        button.addActionListener(_-> SettingDialog.showSettingDialog(owner));
+        button.addActionListener(_ -> SettingDialog.showSettingDialog(owner));
         settingToolBar.add(button);
         this.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, settingToolBar);
     }

@@ -3,6 +3,7 @@ package org.dromara.redisfront.ui.components.chart;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.monitor.RedisMonitor;
 import org.dromara.redisfront.ui.components.monitor.RedisUsageInfo;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
@@ -17,11 +18,13 @@ public class RedisNetworkChart extends AbstractRedisChart {
     private TimeSeries inSeries;
     private TimeSeries outSeries;
     private final RedisMonitor redisMonitor;
+    private final RedisFrontWidget owner;
 
 
-    public RedisNetworkChart(RedisConnectContext redisConnectContext) {
+    public RedisNetworkChart(RedisConnectContext redisConnectContext, RedisFrontWidget owner) {
         super(redisConnectContext);
         this.redisMonitor = new RedisMonitor(redisConnectContext);
+        this.owner = owner;
         this.initializeUI();
     }
 
@@ -30,7 +33,7 @@ public class RedisNetworkChart extends AbstractRedisChart {
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
                 "",
                 "",
-                "带宽 (KB/s)",
+                owner.$tr("RedisNetworkChart.valueAxisLabel.text"),
                 dataset,
                 true,
                 true,
@@ -41,10 +44,10 @@ public class RedisNetworkChart extends AbstractRedisChart {
 
     private TimeSeriesCollection createDataset() {
         if (inSeries == null) {
-            inSeries = new TimeSeries("进流量");
+            inSeries = new TimeSeries(owner.$tr("RedisNetworkChart.inSeries.text"));
         }
         if (outSeries == null) {
-            outSeries = new TimeSeries("出流量");
+            outSeries = new TimeSeries(owner.$tr("RedisNetworkChart.outSeries.text"));
         }
         TimeSeriesCollection dataset = new TimeSeriesCollection();
         dataset.addSeries(inSeries);
