@@ -17,13 +17,13 @@
           <component id="b9d9a" class="com.formdev.flatlaf.extras.components.FlatToggleButton" binding="networkTgBtn">
             <constraints/>
             <properties>
-              <text value="网络使用"/>
+              <text resource-bundle="org/dromara/redisfront/RedisFront" key="ReportPageView.networkBtn.text"/>
             </properties>
           </component>
           <component id="7ee33" class="com.formdev.flatlaf.extras.components.FlatToggleButton" binding="memoryTgBtn">
             <constraints/>
             <properties>
-              <text value="内存使用"/>
+              <text resource-bundle="org/dromara/redisfront/RedisFront" key="ReportPageView.memoryBtn.text"/>
             </properties>
           </component>
           <component id="b8c0" class="com.formdev.flatlaf.extras.components.FlatToggleButton" binding="connectTgBtn">

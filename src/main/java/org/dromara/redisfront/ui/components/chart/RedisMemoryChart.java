@@ -3,6 +3,7 @@ package org.dromara.redisfront.ui.components.chart;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.monitor.RedisMonitor;
 import org.dromara.redisfront.ui.components.monitor.RedisUsageInfo;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
@@ -27,24 +28,26 @@ public class RedisMemoryChart extends AbstractRedisChart {
     private TimeSeries rssMemorySeries;
     private TimeSeries fragmentationSeries;
     private final RedisMonitor redisMonitor;
+    private final RedisFrontWidget owner;
 
     private XYPlot plot;
 
-    public RedisMemoryChart(RedisConnectContext redisConnectContext) {
+    public RedisMemoryChart(RedisConnectContext redisConnectContext, RedisFrontWidget owner) {
         super(redisConnectContext);
         this.redisMonitor = new RedisMonitor(redisConnectContext);
+        this.owner = owner;
         initializeUI();
     }
 
     private void initializeUI() {
         if (usedMemorySeries == null) {
-            usedMemorySeries = new TimeSeries("使用内存 (MB)");
+            usedMemorySeries = new TimeSeries(owner.$tr("RedisMemoryChart.usedMemorySeries.text"));
         }
         if (rssMemorySeries == null) {
-            rssMemorySeries = new TimeSeries("使用内存 RSS (MB)");
+            rssMemorySeries = new TimeSeries(owner.$tr("RedisMemoryChart.rssMemorySeries.text"));
         }
         if (fragmentationSeries == null) {
-            fragmentationSeries = new TimeSeries("碎片率");
+            fragmentationSeries = new TimeSeries(owner.$tr("RedisMemoryChart.fragmentationSeries.text"));
         }
 
         TimeSeriesCollection memoryDataset = new TimeSeriesCollection();
@@ -58,20 +61,20 @@ public class RedisMemoryChart extends AbstractRedisChart {
 
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
                 "",
-                "时间",
-                "内存 (MB)",
+                "",
+                owner.$tr("RedisMemoryChart.valueAxisLabel.text"),
                 memoryDataset
         );
         plot = chart.getXYPlot();
 
         Color flatBackground = UIManager.getColor("ChartPanel.textColor");
 
-        NumberAxis memoryAxis = new NumberAxis("内存 (MB)");
+        NumberAxis memoryAxis = new NumberAxis(owner.$tr("RedisMemoryChart.memoryAxis.text"));
         memoryAxis.setLabelPaint(flatBackground);
         memoryAxis.setTickLabelPaint(flatBackground);
         plot.setRangeAxis(0, memoryAxis);
 
-        NumberAxis fragmentationAxis = new NumberAxis("碎片率 Ratio");
+        NumberAxis fragmentationAxis = new NumberAxis(owner.$tr("RedisMemoryChart.fragmentationAxis.text"));
         fragmentationAxis.setLabelPaint(flatBackground);
         fragmentationAxis.setTickLabelPaint(flatBackground);
         fragmentationAxis.setAutoRangeIncludesZero(false);

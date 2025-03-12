@@ -122,7 +122,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         $$$setupUI$$$();
         this.setModal(true);
         this.setResizable(true);
-        this.setMinimumSize(new Dimension(450, 350));
+        this.setMinimumSize(new Dimension(480, 350));
         this.setContentPane(contentPane);
         this.getRootPane().setDefaultButton(openBtn);
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -511,7 +511,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         contentPane.add(tabbedPane1, BorderLayout.CENTER);
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new GridLayoutManager(1, 1, new Insets(10, 20, 10, 20), -1, -1));
-        tabbedPane1.addTab("连接", panel1);
+        tabbedPane1.addTab(this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "AddConnectDialog.tabConnect.title"), panel1);
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridLayoutManager(3, 1, new Insets(0, 0, 0, 10), -1, -1));
         panel1.add(panel2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
@@ -604,12 +604,13 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         basicPanel.add(enableSSHBtn, new GridConstraints(5, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new GridLayoutManager(1, 1, new Insets(10, 20, 10, 20), -1, -1));
-        tabbedPane1.addTab("设置", panel3);
+        tabbedPane1.addTab(this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "AddConnectDialog.tabSetting.title"), panel3);
         redisPanel = new JPanel();
         redisPanel.setLayout(new GridLayoutManager(9, 4, new Insets(0, 0, 0, 10), -1, -1));
         panel3.add(redisPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         keySeparatorField = new JTextField();
         keySeparatorField.setText(":");
+        keySeparatorField.setToolTipText(this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "AddConnectDialog.keySeparatorLabel.desc"));
         redisPanel.add(keySeparatorField, new GridConstraints(3, 0, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         sshTimeoutTextField = new JTextField();
         sshTimeoutTextField.setText("1000");
@@ -621,12 +622,13 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         redisPanel.add(redisTimeoutTextField, new GridConstraints(5, 0, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         keyMaxLoadNum = new JTextField();
         keyMaxLoadNum.setText("5000");
+        keyMaxLoadNum.setToolTipText(this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "AddConnectDialog.loadNumLabel.desc"));
         redisPanel.add(keyMaxLoadNum, new GridConstraints(1, 0, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         keySeparatorLabel = new JLabel();
-        keySeparatorLabel.setText("分隔符");
+        this.$$$loadLabelText$$$(keySeparatorLabel, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "AddConnectDialog.keySeparatorLabel.title"));
         redisPanel.add(keySeparatorLabel, new GridConstraints(2, 0, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         loadNumLabel = new JLabel();
-        loadNumLabel.setText("加载数");
+        this.$$$loadLabelText$$$(loadNumLabel, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "AddConnectDialog.loadNumLabel.title"));
         redisPanel.add(loadNumLabel, new GridConstraints(0, 0, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         redisTimeoutLabel = new JLabel();
         this.$$$loadLabelText$$$(redisTimeoutLabel, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "SettingDialog.redisTimeoutLabel.Title"));

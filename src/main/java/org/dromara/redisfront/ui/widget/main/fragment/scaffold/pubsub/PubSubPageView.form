@@ -17,9 +17,6 @@
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
-            <properties>
-              <text value="消息数量: 0 "/>
-            </properties>
           </component>
           <component id="6d350" class="javax.swing.JTextField" binding="subscribeChannel" custom-create="true">
             <constraints>
@@ -78,7 +75,7 @@
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="通道"/>
+              <text resource-bundle="org/dromara/redisfront/RedisFront" key="PubSubPageView.channelLabel.text"/>
             </properties>
           </component>
           <component id="9f761" class="javax.swing.JLabel">
@@ -86,7 +83,7 @@
               <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="消息"/>
+              <text resource-bundle="org/dromara/redisfront/RedisFront" key="PubSubPageView.messageLabel.text"/>
             </properties>
           </component>
           <component id="4cb6a" class="javax.swing.JTextField" binding="messageField">
@@ -102,7 +99,7 @@
               <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="发布消息"/>
+              <text resource-bundle="org/dromara/redisfront/RedisFront" key="PubSubPageView.publishBtn.text"/>
             </properties>
           </component>
         </children>

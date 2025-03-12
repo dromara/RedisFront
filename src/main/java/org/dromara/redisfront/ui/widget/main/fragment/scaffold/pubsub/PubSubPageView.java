@@ -25,8 +25,10 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
 /**
@@ -50,8 +52,11 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
     private JLabel infoLabel;
     private String lastSubscribeChanel;
     private final RedisConnectContext redisConnectContext;
+    private final RedisFrontWidget owner;
+    private Integer messageCount = 0;
 
     public PubSubPageView(RedisConnectContext redisConnectContext, RedisFrontWidget owner) {
+        this.owner = owner;
         $$$setupUI$$$();
         setLayout(new BorderLayout());
         add(rootPanel, BorderLayout.CENTER);
@@ -63,10 +68,11 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
                 return RedisFrontUtils.isNotEmpty(jTextField.getText());
             }
         });
-        subscribeChannel.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入需要监听的通道名称！");
-        channelField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入通道名称！");
-        messageField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "请输入消息内容！");
-        infoLabel.setText("监听未开启");
+        numLabel.setText(String.format(owner.$tr("PubSubPageView.numLabel.messageCount"), "0"));
+        subscribeChannel.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, owner.$tr("PubSubPageView.subscribeChannel.message"));
+        channelField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, owner.$tr("PubSubPageView.channelField.message"));
+        messageField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, owner.$tr("PubSubPageView.messageField.message"));
+        infoLabel.setText(owner.$tr("PubSubPageView.infoLabel.normalTitle"));
         infoLabel.setIcon(Icons.STATUS_ERROR);
         enableSubscribe.setInputVerifier(new InputVerifier() {
             @Override
@@ -82,29 +88,29 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
             if (!enableSubscribe.isSelected()) {
                 subscribeChannel.setFocusable(true);
                 pubsub.unsubscribe(channel);
-                infoLabel.setText("监听已停止");
+                infoLabel.setText(owner.$tr("PubSubPageView.infoLabel.stopTitle"));
                 infoLabel.setIcon(Icons.STATUS_ERROR);
-                enableSubscribe.setText("开启监听");
-                enableSubscribe.setToolTipText("点击开始监听！");
+                enableSubscribe.setText(owner.$tr("PubSubPageView.enableSubscribe.enableTitle"));
+                enableSubscribe.setToolTipText(owner.$tr("PubSubPageView.enableSubscribe.enableMessage"));
             } else {
                 subscribeChannel.setFocusable(false);
                 if (RedisFrontUtils.isEmpty(lastSubscribeChanel)) {
                     lastSubscribeChanel = channel;
                 } else if (RedisFrontUtils.endsWith(lastSubscribeChanel, channel)) {
-                    SwingUtilities.invokeLater(() -> numLabel.setText("消息数量: 0 "));
+                    SwingUtilities.invokeLater(() -> numLabel.setText(String.format(owner.$tr("PubSubPageView.numLabel.messageCount"), "0")));
                 }
                 pubsub.subscribe(channel);
-                infoLabel.setText("监听已开启");
+                infoLabel.setText(owner.$tr("PubSubPageView.infoLabel.startTitle"));
                 infoLabel.setIcon(Icons.STATUS_OK);
-                enableSubscribe.setText("停止监听");
-                enableSubscribe.setToolTipText("点击停止监听！");
+                enableSubscribe.setText(owner.$tr("PubSubPageView.enableSubscribe.disableTitle"));
+                enableSubscribe.setToolTipText(owner.$tr("PubSubPageView.enableSubscribe.disableMessage"));
             }
         });
         publishBtn.addActionListener(_ -> FutureUtils.runAsync(() -> {
-            var count = RedisPubSubService.service.publish(redisConnectContext, channelField.getText(), messageField.getText());
+            RedisPubSubService.service.publish(redisConnectContext, channelField.getText(), messageField.getText());
             SwingUtilities.invokeLater(() -> {
                 messageField.setText("");
-                Notifications.getInstance().show(Notifications.Type.SUCCESS, "成功发布 " + count + " 条消息！");
+                Notifications.getInstance().show(Notifications.Type.SUCCESS, owner.$tr("PubSubPageView.publishBtn.sendMessageSuccess"));
             });
         }));
     }
@@ -153,7 +159,6 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
         rootPanel.add(panel1, BorderLayout.NORTH);
-        numLabel.setText("消息数量: 0 ");
         panel1.add(numLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         panel1.add(subscribeChannel, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         infoLabel = new JLabel();
@@ -173,15 +178,86 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
         channelField = new JTextField();
         panel2.add(channelField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final JLabel label1 = new JLabel();
-        label1.setText("通道");
+        this.$$$loadLabelText$$$(label1, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "PubSubPageView.channelLabel.text"));
         panel2.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label2 = new JLabel();
-        label2.setText("消息");
+        this.$$$loadLabelText$$$(label2, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "PubSubPageView.messageLabel.text"));
         panel2.add(label2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         messageField = new JTextField();
         panel2.add(messageField, new GridConstraints(1, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-        publishBtn.setText("发布消息");
+        this.$$$loadButtonText$$$(publishBtn, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "PubSubPageView.publishBtn.text"));
         panel2.add(publishBtn, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+    }
+
+    private static Method $$$cachedGetBundleMethod$$$ = null;
+
+    private String $$$getMessageFromBundle$$$(String path, String key) {
+        ResourceBundle bundle;
+        try {
+            Class<?> thisClass = this.getClass();
+            if ($$$cachedGetBundleMethod$$$ == null) {
+                Class<?> dynamicBundleClass = thisClass.getClassLoader().loadClass("com.intellij.DynamicBundle");
+                $$$cachedGetBundleMethod$$$ = dynamicBundleClass.getMethod("getBundle", String.class, Class.class);
+            }
+            bundle = (ResourceBundle) $$$cachedGetBundleMethod$$$.invoke(null, path, thisClass);
+        } catch (Exception e) {
+            bundle = ResourceBundle.getBundle(path);
+        }
+        return bundle.getString(key);
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    private void $$$loadLabelText$$$(JLabel component, String text) {
+        StringBuffer result = new StringBuffer();
+        boolean haveMnemonic = false;
+        char mnemonic = '\0';
+        int mnemonicIndex = -1;
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i) == '&') {
+                i++;
+                if (i == text.length()) break;
+                if (!haveMnemonic && text.charAt(i) != '&') {
+                    haveMnemonic = true;
+                    mnemonic = text.charAt(i);
+                    mnemonicIndex = result.length();
+                }
+            }
+            result.append(text.charAt(i));
+        }
+        component.setText(result.toString());
+        if (haveMnemonic) {
+            component.setDisplayedMnemonic(mnemonic);
+            component.setDisplayedMnemonicIndex(mnemonicIndex);
+        }
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    private void $$$loadButtonText$$$(AbstractButton component, String text) {
+        StringBuffer result = new StringBuffer();
+        boolean haveMnemonic = false;
+        char mnemonic = '\0';
+        int mnemonicIndex = -1;
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i) == '&') {
+                i++;
+                if (i == text.length()) break;
+                if (!haveMnemonic && text.charAt(i) != '&') {
+                    haveMnemonic = true;
+                    mnemonic = text.charAt(i);
+                    mnemonicIndex = result.length();
+                }
+            }
+            result.append(text.charAt(i));
+        }
+        component.setText(result.toString());
+        if (haveMnemonic) {
+            component.setMnemonic(mnemonic);
+            component.setDisplayedMnemonicIndex(mnemonicIndex);
+        }
     }
 
     /**
@@ -197,7 +273,7 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
         rootPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
         enableSubscribe = new JToggleButton();
         enableSubscribe.setFocusable(false);
-        enableSubscribe.setText("开启监听 ");
+        enableSubscribe.setText(owner.$tr("PubSubPageView.enableSubscribe.enableTitle") + " ");
         enableSubscribe.setIcon(Icons.SUBSCRIBE_ICON);
         enableSubscribe.setSelectedIcon(Icons.UNSUBSCRIBE_ICON);
 
@@ -223,11 +299,11 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
     @Override
     public void message(String channel, String message) {
         String sb = "----------------------------------" + "\n" +
-                    "时间: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + " " + "\n" + "通道: " + channel + " " + "\n" +
-                    "消息: " + message + "\n" + "\n";
+                owner.$tr("PubSubPageView.message.time") + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + " " + "\n" + owner.$tr("PubSubPageView.message.channel") + channel + " " + "\n" +
+                owner.$tr("PubSubPageView.message.body") + message + "\n" + "\n";
+        messageCount++;
         SwingUtilities.invokeLater(() -> {
-            var tmp = numLabel.getText().split(":");
-            numLabel.setText(tmp[0] + ":" + (Integer.parseInt(tmp[1].replace(" ", "")) + 1));
+            numLabel.setText(String.format(owner.$tr("PubSubPageView.numLabel.messageCount"), messageCount));
             messageList.append(sb);
         });
     }

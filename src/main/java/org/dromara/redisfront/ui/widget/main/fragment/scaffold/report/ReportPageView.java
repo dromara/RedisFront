@@ -11,6 +11,8 @@ import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.lang.reflect.Method;
+import java.util.ResourceBundle;
 
 import static com.formdev.flatlaf.FlatClientProperties.STYLE;
 
@@ -35,8 +37,8 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
 
     public ReportPageView(final RedisConnectContext redisConnectContext, RedisFrontWidget owner) {
         this.owner = owner;
-        this.redisNetworkChart = new RedisNetworkChart(redisConnectContext);
-        this.redisMemoryChart = new RedisMemoryChart(redisConnectContext);
+        this.redisNetworkChart = new RedisNetworkChart(redisConnectContext, owner);
+        this.redisMemoryChart = new RedisMemoryChart(redisConnectContext, owner);
         $$$setupUI$$$();
         this.chartPanel.add(redisNetworkChart, BorderLayout.CENTER);
         this.initializeUI();
@@ -158,10 +160,10 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
         panel1.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
         rootPanel.add(panel1, BorderLayout.SOUTH);
         networkTgBtn = new FlatToggleButton();
-        networkTgBtn.setText("网络使用");
+        this.$$$loadButtonText$$$(networkTgBtn, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "ReportPageView.networkBtn.text"));
         panel1.add(networkTgBtn);
         memoryTgBtn = new FlatToggleButton();
-        memoryTgBtn.setText("内存使用");
+        this.$$$loadButtonText$$$(memoryTgBtn, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "ReportPageView.memoryBtn.text"));
         panel1.add(memoryTgBtn);
         connectTgBtn = new FlatToggleButton();
         connectTgBtn.setText("连接状态");
@@ -178,6 +180,50 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
         chartPanel = new JPanel();
         chartPanel.setLayout(new BorderLayout(0, 0));
         rootPanel.add(chartPanel, BorderLayout.CENTER);
+    }
+
+    private static Method $$$cachedGetBundleMethod$$$ = null;
+
+    private String $$$getMessageFromBundle$$$(String path, String key) {
+        ResourceBundle bundle;
+        try {
+            Class<?> thisClass = this.getClass();
+            if ($$$cachedGetBundleMethod$$$ == null) {
+                Class<?> dynamicBundleClass = thisClass.getClassLoader().loadClass("com.intellij.DynamicBundle");
+                $$$cachedGetBundleMethod$$$ = dynamicBundleClass.getMethod("getBundle", String.class, Class.class);
+            }
+            bundle = (ResourceBundle) $$$cachedGetBundleMethod$$$.invoke(null, path, thisClass);
+        } catch (Exception e) {
+            bundle = ResourceBundle.getBundle(path);
+        }
+        return bundle.getString(key);
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    private void $$$loadButtonText$$$(AbstractButton component, String text) {
+        StringBuffer result = new StringBuffer();
+        boolean haveMnemonic = false;
+        char mnemonic = '\0';
+        int mnemonicIndex = -1;
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i) == '&') {
+                i++;
+                if (i == text.length()) break;
+                if (!haveMnemonic && text.charAt(i) != '&') {
+                    haveMnemonic = true;
+                    mnemonic = text.charAt(i);
+                    mnemonicIndex = result.length();
+                }
+            }
+            result.append(text.charAt(i));
+        }
+        component.setText(result.toString());
+        if (haveMnemonic) {
+            component.setMnemonic(mnemonic);
+            component.setDisplayedMnemonicIndex(mnemonicIndex);
+        }
     }
 
     /**

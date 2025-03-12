@@ -88,7 +88,7 @@ public class MainComponent extends JPanel {
         if (SystemInfo.isMacOS) {
             toolBar.setMargin(new Insets(2, 5, 0, 0));
         } else {
-            toolBar.setMargin(new Insets(2, 6, 0, 0));
+            toolBar.setMargin(new Insets(2, 8, 0, 0));
         }
         var closeDrawerBtn = new JButton(Icons.DRAWER_SHOW_OR_CLOSE_ICON);
         closeDrawerBtn.addActionListener(action);
