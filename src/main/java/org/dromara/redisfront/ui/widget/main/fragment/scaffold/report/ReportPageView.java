@@ -48,11 +48,12 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
     private void configureToggleButton(FlatToggleButton button) {
         button.setButtonType(FlatButton.ButtonType.tab);
         button.setFocusable(false);
+        button.setTabUnderlineHeight(2);
         button.putClientProperty(STYLE,
                 "tab.underlineHeight:1;" +
-                        "[dark]tab.selectedForeground:$ToggleButton.tab.underlineColor;"
-                        + "[light]tab.selectedForeground:$RedisFront.main.background;"
-                        + "[light]tab.underlineColor:$RedisFront.main.background;"
+                "[dark]tab.selectedForeground:$ToggleButton.tab.underlineColor;"
+                + "[light]tab.selectedForeground:$RedisFront.main.background;"
+                + "[light]tab.underlineColor:$RedisFront.main.background;"
         );
     }
 
@@ -167,15 +168,15 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
         panel1.add(memoryTgBtn);
         connectTgBtn = new FlatToggleButton();
         connectTgBtn.setText("连接状态");
-        connectTgBtn.setVisible(false);
+        connectTgBtn.setVisible(true);
         panel1.add(connectTgBtn);
         commandTgBtn = new FlatToggleButton();
         commandTgBtn.setText("命令统计");
-        commandTgBtn.setVisible(false);
+        commandTgBtn.setVisible(true);
         panel1.add(commandTgBtn);
         clusterTgBtn = new FlatToggleButton();
         clusterTgBtn.setText(" 集群参数");
-        clusterTgBtn.setVisible(false);
+        clusterTgBtn.setVisible(true);
         panel1.add(clusterTgBtn);
         chartPanel = new JPanel();
         chartPanel.setLayout(new BorderLayout(0, 0));
