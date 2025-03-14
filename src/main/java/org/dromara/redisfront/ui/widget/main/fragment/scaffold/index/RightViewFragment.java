@@ -44,10 +44,7 @@ import javax.swing.table.TableModel;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.StyleContext;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -487,6 +484,18 @@ public class RightViewFragment {
                 setBackground(UIManager.getColor("RedisFront.animateButton.background"));
             }
         };
+        KeyStroke keyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK);
+
+        InputMap inputMap = valueUpdateSaveBtn.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        inputMap.put(keyStroke, "triggerSave");
+
+        ActionMap actionMap = valueUpdateSaveBtn.getActionMap();
+        actionMap.put("triggerSave", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                valueUpdateSaveBtn.doClick();
+            }
+        });
         valueUpdateSaveBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         valueUpdateSaveBtn.setEffectColor(Color.decode("#389FD6"));
         valueUpdateSaveBtn.setBorder(new EmptyBorder(5, 5, 5, 5));

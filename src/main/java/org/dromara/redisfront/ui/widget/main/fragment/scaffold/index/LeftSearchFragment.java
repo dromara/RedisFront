@@ -48,10 +48,7 @@ import javax.swing.text.StyleContext;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -303,6 +300,20 @@ public class LeftSearchFragment {
 
                 //删除 Delete
                 var delMenuItem = getDelMenuItem();
+
+                KeyStroke keyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK);
+
+                InputMap inputMap = keyTree.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+                inputMap.put(keyStroke, "triggerDelete");
+
+                ActionMap actionMap = keyTree.getActionMap();
+                actionMap.put("triggerDelete", new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        delMenuItem.doClick();
+                    }
+                });
+
                 add(delMenuItem);
 
                 //内存分析 Memory analysis
@@ -351,6 +362,7 @@ public class LeftSearchFragment {
                         setText(owner.$tr("DataSearchForm.delMenuItem.title"));
                     }
                 };
+
                 delMenuItem.addActionListener((_) -> {
                     //删除，需要进行弹框确认，生产项目，如果大规模删除，就是灾难
                     int reply = AlertUtils.showConfirmDialog(owner,
