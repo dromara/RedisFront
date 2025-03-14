@@ -15,10 +15,7 @@ import org.dromara.redisfront.ui.components.terminal.AbstractTerminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class RedisFrontTerminal extends AbstractTerminal {
     private static final Logger log = LoggerFactory.getLogger(RedisFrontTerminal.class);
@@ -51,6 +48,9 @@ public class RedisFrontTerminal extends AbstractTerminal {
     @Override
     protected void inputProcessHandler(String inputText) {
         try {
+            if (Objects.equals(inputText, "")){
+                return;
+            }
             var commandList = new ArrayList<>(List.of(inputText.split(" ")));
             var commandType = Arrays.stream(CommandType.values())
                     .filter(e -> RedisFrontUtils.equal(e.name(), commandList.getFirst().toUpperCase()))
