@@ -6,13 +6,9 @@ import org.dromara.redisfront.ui.components.monitor.RedisUsageInfo;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
-
-import javax.swing.*;
-import java.awt.*;
 
 public class RedisNetworkChart extends AbstractRedisChart {
     private TimeSeries inSeries;
@@ -64,8 +60,8 @@ public class RedisNetworkChart extends AbstractRedisChart {
     protected void updateDataset() {
         RedisUsageInfo.NetworkStats networkStats = redisMonitor.calculateNetworkRate();
         Millisecond now = new Millisecond();
-        inSeries.addOrUpdate(now, networkStats.inputRate());
-        outSeries.addOrUpdate(now, networkStats.outputRate());
+        inSeries.addOrUpdate(now, networkStats.inputRate() / 1024);
+        outSeries.addOrUpdate(now, networkStats.outputRate() / 1024);
     }
 
 

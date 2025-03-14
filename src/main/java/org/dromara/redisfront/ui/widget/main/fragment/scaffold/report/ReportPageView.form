@@ -44,7 +44,7 @@
             <constraints/>
             <properties>
               <text value=" 集群参数"/>
-              <visible value="true"/>
+              <visible value="false"/>
             </properties>
           </component>
         </children>

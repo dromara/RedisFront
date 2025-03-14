@@ -59,9 +59,9 @@ public class RedisMonitor {
             return new RedisUsageInfo.MemoryUsage(0, 0, 0);
         }
         return new RedisUsageInfo.MemoryUsage(
-                Double.parseDouble(memoryInfo.get("used_memory").toString()),
-                Double.parseDouble(memoryInfo.get("used_memory_rss").toString()),
-                Double.parseDouble(memoryInfo.get("used_memory").toString()) / Double.parseDouble(memoryInfo.get("used_memory_rss").toString())
+                Double.parseDouble(memoryInfo.get("used_memory").toString()) / (1024 * 1024),
+                Double.parseDouble(memoryInfo.get("used_memory_rss").toString()) / (1024 * 1024),
+                (Double.parseDouble(memoryInfo.get("used_memory").toString()) / (1024 * 1024)) / (Double.parseDouble(memoryInfo.get("used_memory_rss").toString()) / (1024 * 1024))
         );
     }
 
