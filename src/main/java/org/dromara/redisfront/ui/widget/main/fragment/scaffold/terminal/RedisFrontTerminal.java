@@ -15,7 +15,10 @@ import org.dromara.redisfront.ui.components.terminal.AbstractTerminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 public class RedisFrontTerminal extends AbstractTerminal {
     private static final Logger log = LoggerFactory.getLogger(RedisFrontTerminal.class);
