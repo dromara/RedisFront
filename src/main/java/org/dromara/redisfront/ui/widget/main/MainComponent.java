@@ -182,7 +182,7 @@ public class MainComponent extends JPanel {
                 RedisConnectContext redisConnectContext = mainTabView.getRedisConnectContext();
                 SwingUtilities.invokeLater(() -> mode.setText(owner.$tr(redisConnectContext.getRedisMode().modeName)));
                 if (!executorServiceMap.containsKey(redisConnectContext.getId())) {
-                    RedisMonitor monitor = new RedisMonitor(owner,redisConnectContext);
+                    RedisMonitor monitor = new RedisMonitor(owner, redisConnectContext);
                     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                     scheduler.scheduleAtFixedRate(() -> {
                         try {
@@ -191,12 +191,12 @@ public class MainComponent extends JPanel {
                             if (displayId == redisConnectContext.getId()) {
                                 SwingUtilities.invokeLater(() -> {
                                     memory.setText(usage.getMemory());
-                                    memory.setToolTipText("[ Redis " + redisConnectContext.getTitle() + "@" + redisConnectContext.getHost() + " ]\n内存已使用：" + usage.getMemory());
+                                    memory.setToolTipText(redisConnectContext.getHost() + " | Memory Usage => " + usage.getMemory());
                                     cpu.setText(usage.getCpu());
-                                    cpu.setToolTipText("[ Redis " + redisConnectContext.getTitle() + "@" + redisConnectContext.getHost() + " ]\nCPU使用率：" + usage.getCpu());
+                                    cpu.setToolTipText(redisConnectContext.getHost() + " | Cpu Usage => " + usage.getCpu());
                                     String networkRate = String.format("%.2fKB/s｜%.2fKB/s", usage.getNetwork().inputRate() / 1024, usage.getNetwork().outputRate() / 1024);
                                     network.setText(networkRate);
-                                    network.setToolTipText("[ Redis " + redisConnectContext.getTitle() + "@" + redisConnectContext.getHost() + " ]\n网络传输：" + usage.getNetwork());
+                                    network.setToolTipText(redisConnectContext.getHost() + " | NetWork Usage => " + usage.getNetwork());
                                 });
                             }
                         } catch (Exception e) {
