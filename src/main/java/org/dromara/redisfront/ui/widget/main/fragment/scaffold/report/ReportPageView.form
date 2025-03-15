@@ -2,7 +2,7 @@
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="org.dromara.redisfront.ui.widget.main.fragment.scaffold.report.ReportPageView">
   <grid id="27dc6" binding="rootPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
     <constraints>
-      <xy x="20" y="20" width="701" height="400"/>
+      <xy x="20" y="20" width="704" height="400"/>
     </constraints>
     <properties/>
     <border type="empty">
@@ -29,14 +29,14 @@
           <component id="b8c0" class="com.formdev.flatlaf.extras.components.FlatToggleButton" binding="connectTgBtn">
             <constraints/>
             <properties>
-              <text value="连接状态"/>
+              <text resource-bundle="org/dromara/redisfront/RedisFront" key="ReportPageView.clientsBtn.text"/>
               <visible value="true"/>
             </properties>
           </component>
           <component id="505f" class="com.formdev.flatlaf.extras.components.FlatToggleButton" binding="commandTgBtn">
             <constraints/>
             <properties>
-              <text value="命令统计"/>
+              <text resource-bundle="org/dromara/redisfront/RedisFront" key="ReportPageView.commandBtn.text"/>
               <visible value="true"/>
             </properties>
           </component>
