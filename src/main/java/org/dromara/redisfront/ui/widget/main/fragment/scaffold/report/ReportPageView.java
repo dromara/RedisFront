@@ -179,11 +179,11 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
         this.$$$loadButtonText$$$(memoryTgBtn, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "ReportPageView.memoryBtn.text"));
         panel1.add(memoryTgBtn);
         connectTgBtn = new FlatToggleButton();
-        connectTgBtn.setText("连接状态");
+        this.$$$loadButtonText$$$(connectTgBtn, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "ReportPageView.clientsBtn.text"));
         connectTgBtn.setVisible(true);
         panel1.add(connectTgBtn);
         commandTgBtn = new FlatToggleButton();
-        commandTgBtn.setText("命令统计");
+        this.$$$loadButtonText$$$(commandTgBtn, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "ReportPageView.commandBtn.text"));
         commandTgBtn.setVisible(true);
         panel1.add(commandTgBtn);
         clusterTgBtn = new FlatToggleButton();

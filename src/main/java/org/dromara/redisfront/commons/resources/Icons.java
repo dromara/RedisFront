@@ -16,6 +16,7 @@ public class Icons {
     public static final Icon REDIS_ICON_14x14 = new FlatSVGIcon("svg/redisfront.svg",18,18);
     public static final Icon REDIS_TEXT_80x16 = new FlatSVGIcon("svg/redisfront_text.svg",80,16);
     public static final Icon SETTING_ICON_40x40 = new FlatSVGIcon("icons/setting.svg",24,24);
+    public static final Icon REDIS_INFO_ICON_24x24 = new FlatSVGIcon("icons/redisInfo.svg",24,24);
     public static final Icon COLORS_ICON_45x45 = new FlatSVGIcon("svg/actions/colors.svg",14,14);
     public static final Icon COMMAND_ICON_16x16 = new FlatSVGIcon("icons/command.svg",14,14);
     public static final Icon FOLDER_ICON_14x14 = new FlatSVGIcon("icons/folder.svg",16,16);

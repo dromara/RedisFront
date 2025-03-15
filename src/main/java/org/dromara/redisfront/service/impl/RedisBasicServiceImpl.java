@@ -232,6 +232,13 @@ public class RedisBasicServiceImpl implements RedisBasicService {
     }
 
     @Override
+    public Map<String, Object> getInfo(RedisConnectContext redisConnectContext,String section) {
+        var info = LettuceUtils.exec(redisConnectContext,  redisCommands -> redisCommands.info(section));
+        log.debug("获取到Redis [ {}:{} ] Info - {}", redisConnectContext.getHost(), redisConnectContext.getPort(), info);
+        return strToMap(info);
+    }
+
+    @Override
     public Map<String, Object> getCpuInfo(RedisConnectContext redisConnectContext) {
         var cpuInfo = LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.info("cpu"));
         log.debug("获取到Redis [ {}:{} ] cpuInfo - {}", redisConnectContext.getHost(), redisConnectContext.getPort(), cpuInfo);

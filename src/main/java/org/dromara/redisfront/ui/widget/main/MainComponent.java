@@ -13,6 +13,7 @@ import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
+import org.dromara.redisfront.ui.components.info.RedisInfoPanel;
 import org.dromara.redisfront.ui.components.monitor.RedisMonitor;
 import org.dromara.redisfront.ui.components.monitor.RedisUsageInfo;
 import org.dromara.redisfront.ui.event.DrawerChangeEvent;
@@ -52,7 +53,7 @@ public class MainComponent extends JPanel {
     private final JLabel network = new JLabel(Icons.WIFI_ICON);
     private JTabbedPane topTabbedPane;
     private FlatToolBar toolBar;
-    private Integer displayId;
+    private RedisConnectContext currentRedisConnectContext;
     @Setter
     private Consumer<Integer> tabCloseEvent;
     private JLabel mode;
@@ -188,7 +189,7 @@ public class MainComponent extends JPanel {
                         try {
                             RedisUsageInfo usage = monitor.getUsageInfo();
                             log.debug("[Redis {} - {} ] 使用：{}\n", redisConnectContext.getTitle(), redisConnectContext.getHost(), usage);
-                            if (displayId == redisConnectContext.getId()) {
+                            if (currentRedisConnectContext.getId() == redisConnectContext.getId()) {
                                 SwingUtilities.invokeLater(() -> {
                                     memory.setText(usage.getMemory());
                                     memory.setToolTipText(redisConnectContext.getHost() + " | Memory Usage => " + usage.getMemory());
@@ -206,7 +207,7 @@ public class MainComponent extends JPanel {
                     }, 1, 3, TimeUnit.SECONDS);
                     executorServiceMap.put(redisConnectContext.getId(), scheduler);
                 }
-                displayId = redisConnectContext.getId();
+                this.currentRedisConnectContext = redisConnectContext;
             }
 
         });
@@ -233,6 +234,7 @@ public class MainComponent extends JPanel {
 
         mode = new JLabel(Icons.MODE_ICON);
         mode.setText("单机模式");
+        mode.setToolTipText("单机模式");
         rightToolBar.add(mode, BorderLayout.WEST);
 
         JPanel horizontalBox = new JPanel();

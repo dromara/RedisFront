@@ -13,6 +13,7 @@ import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
+import org.dromara.redisfront.ui.components.info.RedisInfoPanel;
 import org.dromara.redisfront.ui.dialog.SettingDialog;
 import org.dromara.redisfront.ui.event.DrawerChangeEvent;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
@@ -86,8 +87,15 @@ public class MainTabView extends JTabbedPane {
         this.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, true);
         FlatToolBar settingToolBar = new FlatToolBar();
         settingToolBar.setLayout(new MigLayout(new LC().align("center", "bottom")));
-        JButton button = new JButton(Icons.SETTING_ICON_40x40);
-        button.addActionListener(_ -> SettingDialog.showSettingDialog(owner));
+        JButton button = new JButton(Icons.REDIS_INFO_ICON_24x24);
+        button.setToolTipText("Redis Info");
+        button.addActionListener(_ -> {
+            JDialog infoDialog = new JDialog(owner, redisConnectContext.getHost());
+            infoDialog.setContentPane(new RedisInfoPanel(redisConnectContext));
+            infoDialog.setSize(800, 600);
+            infoDialog.setLocationRelativeTo(null);
+            infoDialog.setVisible(true);
+        });
         settingToolBar.add(button);
         this.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, settingToolBar);
     }

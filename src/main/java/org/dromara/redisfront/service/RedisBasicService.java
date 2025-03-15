@@ -116,6 +116,15 @@ public interface RedisBasicService {
     Map<String, Object> getInfo(RedisConnectContext redisConnectContext);
 
     /**
+     * 获取info
+     *
+     * @param redisConnectContext 连接信息
+     * @param section section
+     * @return Map
+     */
+    Map<String, Object> getInfo(RedisConnectContext redisConnectContext,String section);
+
+    /**
      * 获取cpu info
      *
      * @param redisConnectContext 连接信息
