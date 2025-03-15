@@ -41,7 +41,7 @@ public class RedisMonitor {
     }
 
     public RedisUsageInfo getUsageInfo() {
-        RedisUsageInfo redisUsageInfo = new RedisUsageInfo(owner);
+        RedisUsageInfo redisUsageInfo = new RedisUsageInfo();
         redisUsageInfo.setCpu(String.format("%.2f", calculateCpuUsage()) + "%");
         redisUsageInfo.setMemory(memoryInfo());
         redisUsageInfo.setNetwork(calculateNetworkRate());
@@ -63,12 +63,13 @@ public class RedisMonitor {
     public RedisUsageInfo.MemoryUsage memoryUsageInfo() {
         Map<String, Object> memoryInfo = RedisBasicService.service.getMemoryInfo(context);
         if (RedisFrontUtils.isEmpty(memoryInfo)) {
-            return new RedisUsageInfo.MemoryUsage(0, 0, 0);
+            return new RedisUsageInfo.MemoryUsage(0, 0, 0,owner.$tr("RedisUsageInfo.MemoryUsage.text"));
         }
         return new RedisUsageInfo.MemoryUsage(
                 Double.parseDouble(memoryInfo.get("used_memory").toString()) / (1024 * 1024),
                 Double.parseDouble(memoryInfo.get("used_memory_rss").toString()) / (1024 * 1024),
                 (Double.parseDouble(memoryInfo.get("used_memory").toString()) / (1024 * 1024)) / (Double.parseDouble(memoryInfo.get("used_memory_rss").toString()) / (1024 * 1024))
+                ,owner.$tr("RedisUsageInfo.MemoryUsage.text")
         );
     }
 
@@ -84,7 +85,7 @@ public class RedisMonitor {
 
         // 检查时间差是否有效
         if (elapsedSeconds <= 0) {
-            return new RedisUsageInfo.NetworkStats(0, 0); // 时间差无效，返回 0
+            return new RedisUsageInfo.NetworkStats(0, 0,owner.$tr("RedisUsageInfo.NetworkStats.text")); // 时间差无效，返回 0
         }
 
         // 计算字节数差值
@@ -99,7 +100,7 @@ public class RedisMonitor {
         lastInputBytes = currentInputBytes;
         lastOutputBytes = currentOutputBytes;
 
-        return new RedisUsageInfo.NetworkStats(inputRate, outputRate);
+        return new RedisUsageInfo.NetworkStats(inputRate, outputRate,owner.$tr("RedisUsageInfo.NetworkStats.text"));
     }
 
     protected double calculateCpuUsage() {
