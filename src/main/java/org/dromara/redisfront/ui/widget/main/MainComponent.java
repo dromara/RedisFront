@@ -182,7 +182,7 @@ public class MainComponent extends JPanel {
                 RedisConnectContext redisConnectContext = mainTabView.getRedisConnectContext();
                 SwingUtilities.invokeLater(() -> mode.setText(owner.$tr(redisConnectContext.getRedisMode().modeName)));
                 if (!executorServiceMap.containsKey(redisConnectContext.getId())) {
-                    RedisMonitor monitor = new RedisMonitor(redisConnectContext);
+                    RedisMonitor monitor = new RedisMonitor(owner,redisConnectContext);
                     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                     scheduler.scheduleAtFixedRate(() -> {
                         try {

@@ -1,5 +1,6 @@
 package org.dromara.redisfront.ui.components.chart;
 
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.monitor.RedisMonitor;
 import org.dromara.redisfront.ui.components.monitor.RedisUsageInfo;
@@ -23,6 +24,7 @@ import static org.jfree.chart.ui.RectangleAnchor.TOP_LEFT;
 import static org.jfree.chart.ui.TextAnchor.BOTTOM_LEFT;
 import static org.jfree.chart.ui.TextAnchor.TOP_RIGHT;
 
+@Slf4j
 public class RedisMemoryChart extends AbstractRedisChart {
     private TimeSeries usedMemorySeries;
     private TimeSeries rssMemorySeries;
@@ -34,7 +36,7 @@ public class RedisMemoryChart extends AbstractRedisChart {
 
     public RedisMemoryChart(RedisConnectContext redisConnectContext, RedisFrontWidget owner) {
         super(redisConnectContext);
-        this.redisMonitor = new RedisMonitor(redisConnectContext);
+        this.redisMonitor = new RedisMonitor(owner,redisConnectContext);
         this.owner = owner;
         initializeUI();
     }
@@ -103,7 +105,7 @@ public class RedisMemoryChart extends AbstractRedisChart {
         fragmentationRenderer.setSeriesPaint(0, new Color(0x00AE57));
         plot.setRenderer(2, fragmentationRenderer);
 
-        double maxMemory = 1200 * 100000;
+        double maxMemory = 1024;
         ValueMarker maxMemoryMarker = new ValueMarker(maxMemory);
         maxMemoryMarker.setPaint(Color.RED);
         maxMemoryMarker.setStroke(new BasicStroke(2.0f));
@@ -143,6 +145,10 @@ public class RedisMemoryChart extends AbstractRedisChart {
 
     @Override
     protected void updateDataset() {
-        updateData();
+        try {
+            updateData();
+        } catch (Exception e) {
+            log.error("updateData error", e);
+        }
     }
 }

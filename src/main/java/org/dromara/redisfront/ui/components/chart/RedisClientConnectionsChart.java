@@ -12,14 +12,12 @@ import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 
 @Slf4j
-public class RedisNetworkChart extends AbstractRedisChart {
-    private TimeSeries inSeries;
-    private TimeSeries outSeries;
+public class RedisClientConnectionsChart extends AbstractRedisChart {
+    private TimeSeries clientConnectionsSeries;
     private final RedisMonitor redisMonitor;
     private final RedisFrontWidget owner;
 
-
-    public RedisNetworkChart(RedisConnectContext redisConnectContext, RedisFrontWidget owner) {
+    public RedisClientConnectionsChart(RedisConnectContext redisConnectContext, RedisFrontWidget owner) {
         super(redisConnectContext);
         this.redisMonitor = new RedisMonitor(owner,redisConnectContext);
         this.owner = owner;
@@ -27,11 +25,17 @@ public class RedisNetworkChart extends AbstractRedisChart {
     }
 
     private void initializeUI() {
-        TimeSeriesCollection dataset = createDataset();
+        if (clientConnectionsSeries == null) {
+            clientConnectionsSeries = new TimeSeries(owner.$tr("RedisClientConnectionsChart.clientConnections.text"));
+        }
+
+        TimeSeriesCollection dataset = new TimeSeriesCollection();
+        dataset.addSeries(clientConnectionsSeries);
+
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
                 "",
                 "",
-                owner.$tr("RedisNetworkChart.valueAxisLabel.text"),
+                owner.$tr("RedisClientConnectionsChart.valueAxisLabel.text"),
                 dataset,
                 true,
                 true,
@@ -40,22 +44,16 @@ public class RedisNetworkChart extends AbstractRedisChart {
         setChart(chart);
     }
 
-    private TimeSeriesCollection createDataset() {
-        if (inSeries == null) {
-            inSeries = new TimeSeries(owner.$tr("RedisNetworkChart.inSeries.text"));
-        }
-        if (outSeries == null) {
-            outSeries = new TimeSeries(owner.$tr("RedisNetworkChart.outSeries.text"));
-        }
-        TimeSeriesCollection dataset = new TimeSeriesCollection();
-        dataset.addSeries(inSeries);
-        dataset.addSeries(outSeries);
-        return dataset;
-    }
-
     @Override
     public void rebuildUI() {
         this.initializeUI();
+    }
+
+
+    private void updateData() {
+        RedisUsageInfo redisUsageInfo = redisMonitor.getUsageInfo();
+        Millisecond now = new Millisecond();
+        clientConnectionsSeries.addOrUpdate(now, redisUsageInfo.getConnectedClients());
     }
 
     @Override
@@ -66,13 +64,4 @@ public class RedisNetworkChart extends AbstractRedisChart {
             log.error("updateData error", e);
         }
     }
-
-    private void updateData() {
-        RedisUsageInfo.NetworkStats networkStats = redisMonitor.calculateNetworkRate();
-        Millisecond now = new Millisecond();
-        inSeries.addOrUpdate(now, networkStats.inputRate() / 1024);
-        outSeries.addOrUpdate(now, networkStats.outputRate() / 1024);
-    }
-
-
 }

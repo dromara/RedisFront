@@ -3,11 +3,13 @@ package org.dromara.redisfront.ui.components.monitor;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class RedisMonitor {
+    private final RedisFrontWidget owner;
     private final RedisConnectContext context;
     private double lastUserCpu;
     private double lastSysCpu;
@@ -17,7 +19,8 @@ public class RedisMonitor {
     private double lastOutputBytes;
     private long lastIoCheckTime;
 
-    public RedisMonitor(RedisConnectContext context) {
+    public RedisMonitor(RedisFrontWidget owner, RedisConnectContext context) {
+        this.owner = owner;
         this.context = context;
         this.initializeCpu();
         this.initializeIO();
@@ -38,10 +41,14 @@ public class RedisMonitor {
     }
 
     public RedisUsageInfo getUsageInfo() {
-        RedisUsageInfo redisUsageInfo = new RedisUsageInfo();
+        RedisUsageInfo redisUsageInfo = new RedisUsageInfo(owner);
         redisUsageInfo.setCpu(String.format("%.2f", calculateCpuUsage()) + "%");
         redisUsageInfo.setMemory(memoryInfo());
         redisUsageInfo.setNetwork(calculateNetworkRate());
+        Object object = RedisBasicService.service.getClientInfo(context).get("connected_clients");
+        redisUsageInfo.setConnectedClients(Integer.valueOf(object.toString()));
+        object = RedisBasicService.service.getStatInfo(context).get("total_commands_processed");
+        redisUsageInfo.setCommandsProcessed(Long.valueOf(object.toString()));
         return redisUsageInfo;
     }
 

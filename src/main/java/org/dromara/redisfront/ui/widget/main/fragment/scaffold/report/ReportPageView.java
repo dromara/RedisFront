@@ -4,6 +4,8 @@ import com.formdev.flatlaf.extras.components.FlatButton;
 import com.formdev.flatlaf.extras.components.FlatToggleButton;
 import org.dromara.quickswing.ui.app.page.QSPageItem;
 import org.dromara.redisfront.model.context.RedisConnectContext;
+import org.dromara.redisfront.ui.components.chart.RedisClientConnectionsChart;
+import org.dromara.redisfront.ui.components.chart.RedisCommandStatsChart;
 import org.dromara.redisfront.ui.components.chart.RedisMemoryChart;
 import org.dromara.redisfront.ui.components.chart.RedisNetworkChart;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
@@ -33,12 +35,16 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
     private final RedisFrontWidget owner;
     private final RedisNetworkChart redisNetworkChart;
     private final RedisMemoryChart redisMemoryChart;
+    private final RedisClientConnectionsChart redisClientConnectionsChart;
+    private final RedisCommandStatsChart redisCommandStatsChart;
 
 
     public ReportPageView(final RedisConnectContext redisConnectContext, RedisFrontWidget owner) {
         this.owner = owner;
         this.redisNetworkChart = new RedisNetworkChart(redisConnectContext, owner);
         this.redisMemoryChart = new RedisMemoryChart(redisConnectContext, owner);
+        this.redisClientConnectionsChart = new RedisClientConnectionsChart(redisConnectContext, owner);
+        this.redisCommandStatsChart = new RedisCommandStatsChart(redisConnectContext, owner);
         $$$setupUI$$$();
         this.chartPanel.add(redisNetworkChart, BorderLayout.CENTER);
         this.initializeUI();
@@ -51,9 +57,9 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
         button.setTabUnderlineHeight(2);
         button.putClientProperty(STYLE,
                 "tab.underlineHeight:1;" +
-                        "[dark]tab.selectedForeground:$ToggleButton.tab.underlineColor;"
-                        + "[light]tab.selectedForeground:$RedisFront.main.background;"
-                        + "[light]tab.underlineColor:$RedisFront.main.background;"
+                "[dark]tab.selectedForeground:$ToggleButton.tab.underlineColor;"
+                + "[light]tab.selectedForeground:$RedisFront.main.background;"
+                + "[light]tab.underlineColor:$RedisFront.main.background;"
         );
     }
 
@@ -94,7 +100,7 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
         this.connectTgBtn.addActionListener(_ -> {
             if (connectTgBtn.isSelected()) {
                 this.chartPanel.removeAll();
-                this.chartPanel.add(redisMemoryChart, BorderLayout.CENTER);
+                this.chartPanel.add(redisClientConnectionsChart, BorderLayout.CENTER);
                 this.chartPanel.updateUI();
                 this.networkTgBtn.setSelected(false);
                 this.memoryTgBtn.setSelected(false);
@@ -109,7 +115,7 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
         this.commandTgBtn.addActionListener(_ -> {
             if (commandTgBtn.isSelected()) {
                 this.chartPanel.removeAll();
-                this.chartPanel.add(redisMemoryChart, BorderLayout.CENTER);
+                this.chartPanel.add(redisCommandStatsChart, BorderLayout.CENTER);
                 this.chartPanel.updateUI();
                 this.networkTgBtn.setSelected(false);
                 this.memoryTgBtn.setSelected(false);
@@ -143,6 +149,12 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
         }
         if (redisMemoryChart != null) {
             redisMemoryChart.refreshUI();
+        }
+        if (redisClientConnectionsChart != null) {
+            redisClientConnectionsChart.refreshUI();
+        }
+        if (redisCommandStatsChart != null) {
+            redisCommandStatsChart.refreshUI();
         }
     }
 

@@ -12,14 +12,17 @@ import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 
 @Slf4j
-public class RedisNetworkChart extends AbstractRedisChart {
-    private TimeSeries inSeries;
-    private TimeSeries outSeries;
+public class RedisCommandStatsChart extends AbstractRedisChart {
+    private TimeSeries commandProcessedSeries;
+    private TimeSeries qpsSeries;
+
     private final RedisMonitor redisMonitor;
     private final RedisFrontWidget owner;
 
+    private long lastCommandCount = 0;
+    private long lastTimestamp = System.currentTimeMillis();
 
-    public RedisNetworkChart(RedisConnectContext redisConnectContext, RedisFrontWidget owner) {
+    public RedisCommandStatsChart(RedisConnectContext redisConnectContext, RedisFrontWidget owner) {
         super(redisConnectContext);
         this.redisMonitor = new RedisMonitor(owner,redisConnectContext);
         this.owner = owner;
@@ -31,7 +34,7 @@ public class RedisNetworkChart extends AbstractRedisChart {
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
                 "",
                 "",
-                owner.$tr("RedisNetworkChart.valueAxisLabel.text"),
+                owner.$tr("RedisCommandStatsChart.valueAxisLabel"),
                 dataset,
                 true,
                 true,
@@ -41,15 +44,16 @@ public class RedisNetworkChart extends AbstractRedisChart {
     }
 
     private TimeSeriesCollection createDataset() {
-        if (inSeries == null) {
-            inSeries = new TimeSeries(owner.$tr("RedisNetworkChart.inSeries.text"));
+        if (commandProcessedSeries == null) {
+            commandProcessedSeries = new TimeSeries(owner.$tr("RedisCommandStatsChart.commandProcessed.text"));
         }
-        if (outSeries == null) {
-            outSeries = new TimeSeries(owner.$tr("RedisNetworkChart.outSeries.text"));
+        if (qpsSeries == null) {
+            qpsSeries = new TimeSeries(owner.$tr("RedisCommandStatsChart.qps.text"));
         }
+
         TimeSeriesCollection dataset = new TimeSeriesCollection();
-        dataset.addSeries(inSeries);
-        dataset.addSeries(outSeries);
+        dataset.addSeries(commandProcessedSeries);
+        dataset.addSeries(qpsSeries);
         return dataset;
     }
 
@@ -68,11 +72,28 @@ public class RedisNetworkChart extends AbstractRedisChart {
     }
 
     private void updateData() {
-        RedisUsageInfo.NetworkStats networkStats = redisMonitor.calculateNetworkRate();
+        RedisUsageInfo redisUsageInfo = redisMonitor.getUsageInfo();
         Millisecond now = new Millisecond();
-        inSeries.addOrUpdate(now, networkStats.inputRate() / 1024);
-        outSeries.addOrUpdate(now, networkStats.outputRate() / 1024);
+
+        // 获取当前命令执行总数
+        long currentCommandCount = redisUsageInfo.getCommandsProcessed();
+        long currentTime = System.currentTimeMillis();
+
+        // 计算 QPS
+        double qps = 0;
+        if (lastTimestamp != 0) {
+            long timeDiff = currentTime - lastTimestamp;
+            if (timeDiff > 0) {
+                qps = (currentCommandCount - lastCommandCount) * 1000.0 / timeDiff;
+            }
+        }
+
+        // 更新数据
+        commandProcessedSeries.addOrUpdate(now, currentCommandCount);
+        qpsSeries.addOrUpdate(now, qps);
+
+        // 记录本次数据
+        lastCommandCount = currentCommandCount;
+        lastTimestamp = currentTime;
     }
-
-
 }

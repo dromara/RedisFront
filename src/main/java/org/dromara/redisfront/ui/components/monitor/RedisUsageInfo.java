@@ -2,15 +2,20 @@ package org.dromara.redisfront.ui.components.monitor;
 
 import lombok.Data;
 import lombok.ToString;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.jetbrains.annotations.NotNull;
 
 @Data
 @ToString
 public class RedisUsageInfo {
+    private final RedisFrontWidget owner;
     private String cpu;
     private String memory;
     private NetworkStats network;
     private MemoryUsage memoryUsage;
+    private Integer connectedClients;
+    private Long commandsProcessed;
+
 
     public record NetworkStats(double inputRate, double outputRate) {
         @Override
@@ -32,5 +37,6 @@ public class RedisUsageInfo {
             return String.format("系统CPU使用率: %.2f%%, 进程CPU使用率: %.2f%%", systemCpuLoad * 100, processCpuLoad * 100);
         }
     }
+
 
 }
