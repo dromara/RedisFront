@@ -35,5 +35,3 @@ RedisFront is a cross-platform Redis client tool developed with Java Swing, comp
 
 ![JenBrains logo](assets/jetbrains.svg)
 
-
-
