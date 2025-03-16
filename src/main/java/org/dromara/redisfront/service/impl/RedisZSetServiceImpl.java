@@ -3,7 +3,6 @@ package org.dromara.redisfront.service.impl;
 import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.RedisZSetService;
-import org.dromara.redisfront.ui.dialog.LogsDialog;
 import io.lettuce.core.*;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.lettuce.LettuceUtils;
@@ -20,10 +19,6 @@ import java.util.List;
 public class RedisZSetServiceImpl implements RedisZSetService {
     @Override
     public Long zadd(RedisConnectContext redisConnectContext, String key, double score, String member) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("ZADD ".concat(key).concat(" ").concat(String.valueOf(score)).concat(" ").concat(member));
-        LogsDialog.appendLog(logInfo);
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.zadd(key, score, member));
         } else {
@@ -53,10 +48,6 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @Override
     public Long zcard(RedisConnectContext redisConnectContext, String key) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("ZCARD ".concat(key));
-        LogsDialog.appendLog(logInfo);
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.zcard(key));
         } else {
@@ -66,8 +57,6 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @Override
     public Long zrem(RedisConnectContext redisConnectContext, String key, String... members) {
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("ZREM ".concat(key).concat(" ").concat(Arrays.toString(members).replace("[", "").replace("]", "").replace(","," ")));
-        LogsDialog.appendLog(logInfo);
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.zrem(key, members));
         } else {

@@ -1,17 +1,14 @@
 package org.dromara.redisfront.service.impl;
 
-import org.dromara.redisfront.commons.enums.RedisMode;
-import org.dromara.redisfront.model.context.RedisConnectContext;
 import io.lettuce.core.MapScanCursor;
 import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
-import org.dromara.redisfront.commons.utils.RedisFrontUtils;
+import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.commons.lettuce.LettuceUtils;
-import org.dromara.redisfront.service.RedisBasicService;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.RedisHashService;
-import org.dromara.redisfront.ui.dialog.LogsDialog;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -79,10 +76,6 @@ public class RedisHashServiceImpl implements RedisHashService {
 
     @Override
     public MapScanCursor<String, String> hscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("HSCAN ".concat(key).concat(" ").concat(scanCursor.getCursor()));
-        LogsDialog.appendLog(logInfo);
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.hscan(key, scanCursor));
         } else {
@@ -92,9 +85,6 @@ public class RedisHashServiceImpl implements RedisHashService {
 
     @Override
     public Boolean hset(RedisConnectContext redisConnectContext, String key, String field, String value) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("HSET ".concat(key).concat(" ").concat(field).concat(" ").concat(value));
-        LogsDialog.appendLog(logInfo);
 
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.hset(key, field, value));
@@ -132,9 +122,6 @@ public class RedisHashServiceImpl implements RedisHashService {
 
     @Override
     public Long hdel(RedisConnectContext redisConnectContext, String key, String... fields) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("HSET ".concat(key).concat(" ").concat(Arrays.toString(fields).replace("[", "").replace("]", "").replace(","," ")));
-        LogsDialog.appendLog(logInfo);
 
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.hdel(key, fields));

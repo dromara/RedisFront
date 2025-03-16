@@ -11,10 +11,11 @@ import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.RedisFrontEventListener;
 import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
+import org.dromara.redisfront.model.LogInfo;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
-import org.dromara.redisfront.ui.components.info.RedisInfoPanel;
-import org.dromara.redisfront.ui.dialog.SettingDialog;
+import org.dromara.redisfront.ui.components.info.RedisInfoView;
+import org.dromara.redisfront.ui.event.CommandExecuteEvent;
 import org.dromara.redisfront.ui.event.DrawerChangeEvent;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.dromara.redisfront.ui.widget.main.fragment.scaffold.PageScaffold;
@@ -22,6 +23,7 @@ import org.dromara.redisfront.ui.widget.main.fragment.scaffold.index.IndexPageVi
 import org.dromara.redisfront.ui.widget.main.fragment.scaffold.pubsub.PubSubPageView;
 import org.dromara.redisfront.ui.widget.main.fragment.scaffold.report.ReportPageView;
 import org.dromara.redisfront.ui.widget.main.fragment.scaffold.terminal.TerminalPageView;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.plaf.TabbedPaneUI;
@@ -34,13 +36,15 @@ public class MainTabView extends JTabbedPane {
     private final RedisFrontContext context;
     private final RedisFrontEventListener eventListener;
     private final RedisConnectContext redisConnectContext;
+    private final RedisInfoView redisInfoView;
 
     public MainTabView(RedisFrontWidget owner, RedisConnectContext redisConnectContext) {
         this.owner = owner;
         this.context = (RedisFrontContext) owner.getContext();
         this.eventListener = owner.getEventListener();
         this.redisConnectContext = redisConnectContext;
-        initializeUI();
+        this.redisInfoView = new RedisInfoView(owner,redisConnectContext);
+        this.initializeUI();
         //tab 切换事件
         this.addChangeListener(e -> {
             var tabbedPane = (JTabbedPane) e.getSource();
@@ -72,12 +76,21 @@ public class MainTabView extends JTabbedPane {
                 }
             }
         });
+
+        this.eventListener.bind(redisConnectContext.getId(), CommandExecuteEvent.class, qsEvent -> {
+            if (qsEvent instanceof CommandExecuteEvent commandExecuteEvent) {
+                Object message = commandExecuteEvent.getMessage();
+                if (message instanceof LogInfo command) {
+                    redisInfoView.appendLog(command);
+                }
+            }
+        });
     }
 
     private void initializeUI() {
-        String fontSize = owner.$tr("MainTabView.pageScaffold.fontSize");
-        Font font = getFont();
-        setFont(font.deriveFont(Float.parseFloat(fontSize)));
+        final String fontSize = owner.$tr("MainTabView.pageScaffold.fontSize");
+        final Font font = getFont();
+        this.setFont(font.deriveFont(Float.parseFloat(fontSize)));
         this.setTabPlacement(JTabbedPane.LEFT);
         this.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
         this.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_HEIGHT, 70);
@@ -87,17 +100,23 @@ public class MainTabView extends JTabbedPane {
         this.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, true);
         FlatToolBar settingToolBar = new FlatToolBar();
         settingToolBar.setLayout(new MigLayout(new LC().align("center", "bottom")));
+        JButton button = getInfoButton();
+        settingToolBar.add(button);
+        this.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, settingToolBar);
+    }
+
+    private @NotNull JButton getInfoButton() {
         JButton button = new JButton(Icons.REDIS_INFO_ICON_24x24);
         button.setToolTipText("Redis Info");
+        JDialog infoDialog = new JDialog(owner, redisConnectContext.getHost());
         button.addActionListener(_ -> {
-            JDialog infoDialog = new JDialog(owner, redisConnectContext.getHost());
-            infoDialog.setContentPane(new RedisInfoPanel(redisConnectContext));
+            redisInfoView.refreshInfo();
+            infoDialog.setContentPane(redisInfoView);
             infoDialog.setSize(800, 600);
             infoDialog.setLocationRelativeTo(null);
             infoDialog.setVisible(true);
         });
-        settingToolBar.add(button);
-        this.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, settingToolBar);
+        return button;
     }
 
     @Override

@@ -2,7 +2,6 @@ package org.dromara.redisfront.service.impl;
 
 import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.model.context.RedisConnectContext;
-import org.dromara.redisfront.ui.dialog.LogsDialog;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.lettuce.LettuceUtils;
 import org.dromara.redisfront.service.RedisBasicService;
@@ -18,10 +17,6 @@ public class RedisStringServiceImpl implements RedisStringService {
     @Override
     public String set(RedisConnectContext redisConnectContext, String key, String value) {
 
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("SET ".concat(key).concat(" ").concat(value));
-        LogsDialog.appendLog(logInfo);
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.set(key, value));
         } else {
@@ -31,9 +26,6 @@ public class RedisStringServiceImpl implements RedisStringService {
 
     @Override
     public String get(RedisConnectContext redisConnectContext, String key) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("GET ".concat(key));
-        LogsDialog.appendLog(logInfo);
 
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.get(key));

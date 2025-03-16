@@ -1,10 +1,9 @@
 package org.dromara.redisfront.service.impl;
 
 import org.dromara.redisfront.commons.enums.RedisMode;
-import org.dromara.redisfront.model.context.RedisConnectContext;
-import org.dromara.redisfront.ui.dialog.LogsDialog;
-import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.lettuce.LettuceUtils;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.service.RedisListService;
 
@@ -19,10 +18,6 @@ import java.util.List;
 public class RedisListServiceImpl implements RedisListService {
     @Override
     public List<String> lrange(RedisConnectContext redisConnectContext, String key, long start, long stop) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("LRANGE ".concat(key).concat(" ").concat(String.valueOf(start)).concat(" ").concat(String.valueOf(stop)));
-        LogsDialog.appendLog(logInfo);
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.lrange(key, start, stop));
         } else {
@@ -32,10 +27,6 @@ public class RedisListServiceImpl implements RedisListService {
 
     @Override
     public Long lrem(RedisConnectContext redisConnectContext, String key, long count, String value) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("LREM ".concat(key).concat(" ").concat(String.valueOf(count)).concat(" ").concat(String.valueOf(value)));
-        LogsDialog.appendLog(logInfo);
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.lrem(key, count, value));
         } else {
@@ -45,10 +36,6 @@ public class RedisListServiceImpl implements RedisListService {
 
     @Override
     public Long llen(RedisConnectContext redisConnectContext, String key) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("LLEN ".concat(key).concat(" "));
-        LogsDialog.appendLog(logInfo);
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.llen(key));
         } else {
@@ -76,10 +63,6 @@ public class RedisListServiceImpl implements RedisListService {
 
     @Override
     public Long lpush(RedisConnectContext redisConnectContext, String key, String... values) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("LPUSH ".concat(key).concat(" ").concat(Arrays.toString(values).replace("[", "").replace("]", "").replace(","," ")));
-        LogsDialog.appendLog(logInfo);
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.lpush(key, values));
         } else {

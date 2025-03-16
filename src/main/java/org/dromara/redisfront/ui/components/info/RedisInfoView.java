@@ -1,37 +1,72 @@
 package org.dromara.redisfront.ui.components.info;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
+import org.dromara.redisfront.model.LogInfo;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
+import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
+import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 
 import javax.swing.*;
 import javax.swing.plaf.TabbedPaneUI;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.stream.Collectors;
 
-public class RedisInfoPanel extends JPanel {
+@Slf4j
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class RedisInfoView extends JPanel implements Runnable {
     private static final String[] INFO_SECTIONS = {"server", "memory", "clients", "stats", "cpu", "persistence", "cluster", "keyspace"};
     private static final String[] TABLE_COLUMNS = {"Key", "Value"};
 
     private final Map<String, DefaultTableModel> tableModels = new WeakHashMap<>();
-    private final RedisConnectContext context;
 
-    public RedisInfoPanel(RedisConnectContext context) {
+    private final LinkedBlockingQueue<LogInfo> queue = new LinkedBlockingQueue<>();
+
+    private final RedisConnectContext context;
+    private final RedisFrontWidget owner;
+
+    private final JTextArea textArea = new JTextArea();
+    private final Boolean running = true;
+
+    public RedisInfoView(RedisFrontWidget owner, RedisConnectContext context) {
         this.context = context;
+        this.owner = owner;
         initUI();
+        new Thread(this).start();
+    }
+
+    public void appendLog(LogInfo logInfo) {
+        queue.add(logInfo);
     }
 
     private void initUI() {
         setLayout(new BorderLayout());
         setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
+        this.textArea.setEditable(false);
+        this.textArea.setLineWrap(true);
         initTabbedPane();
         refreshInfo();
-//        addRefreshButton();
+    }
+
+    private String format(LogInfo logInfo) {
+        return logInfo.date().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                .concat(" - ")
+                .concat("[" + logInfo.ip() + "]")
+                .concat(" : ")
+                .concat(logInfo.info()).concat("\n");
     }
 
     private void initTabbedPane() {
@@ -41,11 +76,13 @@ public class RedisInfoPanel extends JPanel {
                 super.setUI(new BoldTitleTabbedPaneUI());
             }
         };
-        configureTabbedPaneProperties(tabbedPane);
+        this.configureTabbedPaneProperties(tabbedPane);
 
         for (String section : INFO_SECTIONS) {
             tabbedPane.addTab(createTabTitle(section), createTabContent(section));
         }
+
+        tabbedPane.addTab("logs", new JScrollPane(textArea));
 
         add(tabbedPane, BorderLayout.CENTER);
     }
@@ -83,36 +120,52 @@ public class RedisInfoPanel extends JPanel {
         return table;
     }
 
+
     public void refreshInfo() {
-        new SwingWorker<Void, Void>() {
-            @Override
-            protected Void doInBackground() {
-                try {
-                    for (String section : INFO_SECTIONS) {
-                        Map<String, Object> infoData = RedisBasicService.service.getInfo(context, section);
-                        if (infoData != null) {
-                            updateTableModel(tableModels.get(section), infoData);
+        SyncLoadingDialog
+                .builder(owner, "load info data")
+                .showSyncLoadingDialog(() ->
+                        Arrays.stream(INFO_SECTIONS)
+                                .map(section -> {
+                                    try {
+                                        LogStatusHolder.ignoredLog();
+                                        Map<String, Object> infoData = RedisBasicService.service.getInfo(context, section);
+                                        return new LogInfoData(section, infoData);
+                                    } finally {
+                                        LogStatusHolder.clear();
+                                    }
+                                }).collect(Collectors.toSet()), (infoData, e) -> {
+                    if (e != null) {
+                        owner.displayException(e);
+                    } else {
+                        for (LogInfoData logInfoData : infoData) {
+                            updateTableModel(tableModels.get(logInfoData.getKey()), logInfoData.getInfoData());
                         }
                     }
-                } catch (Exception e) {
-                    RedisFrontUtils.runEDT(() ->
-                            JOptionPane.showMessageDialog(RedisInfoPanel.this, "数据加载失败: " + e.getMessage()));
-                }
-                return null;
-            }
-        }.execute();
+                });
     }
 
     private void updateTableModel(DefaultTableModel model, Map<String, Object> data) {
-        RedisFrontUtils.runEDT(() -> {
-            model.setRowCount(0);
-            data.forEach((key, value) -> model.addRow(new Object[]{key, value}));
-        });
+        model.setRowCount(0);
+        data.forEach((key, value) -> model.addRow(new Object[]{key, value}));
     }
 
     private void addRefreshButton() {
         JButton refreshButton = new JButton("刷新");
-        refreshButton.addActionListener(e -> refreshInfo());
+        refreshButton.addActionListener(_ -> refreshInfo());
         add(refreshButton, BorderLayout.NORTH);
+    }
+
+    @Override
+    public void run() {
+        while (running) {
+            try {
+                LogInfo logInfo = queue.take();
+                String format = format(logInfo);
+                RedisFrontUtils.runEDT(() -> textArea.append(format));
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
+        }
     }
 }

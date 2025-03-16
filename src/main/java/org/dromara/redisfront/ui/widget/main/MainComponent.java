@@ -13,7 +13,6 @@ import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
-import org.dromara.redisfront.ui.components.info.RedisInfoPanel;
 import org.dromara.redisfront.ui.components.monitor.RedisMonitor;
 import org.dromara.redisfront.ui.components.monitor.RedisUsageInfo;
 import org.dromara.redisfront.ui.event.DrawerChangeEvent;

@@ -1,16 +1,14 @@
 package org.dromara.redisfront.service.impl;
-import org.dromara.redisfront.commons.enums.RedisMode;
-import org.dromara.redisfront.model.context.RedisConnectContext;
-import org.dromara.redisfront.ui.dialog.LogsDialog;
+
 import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
 import io.lettuce.core.ValueScanCursor;
-import org.dromara.redisfront.commons.utils.RedisFrontUtils;
+import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.commons.lettuce.LettuceUtils;
-import org.dromara.redisfront.service.RedisBasicService;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.RedisSetService;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -22,10 +20,6 @@ import java.util.Set;
 public class RedisSetServiceImpl implements RedisSetService {
     @Override
     public Long sadd(RedisConnectContext redisConnectContext, String key, String... members) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("SADD ".concat(key).concat(" ").concat(Arrays.toString(members).replace("[", "").replace("]", "").replace(","," ")));
-        LogsDialog.appendLog(logInfo);
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.sadd(key, members));
         } else {
@@ -35,10 +29,6 @@ public class RedisSetServiceImpl implements RedisSetService {
 
     @Override
     public Long scard(RedisConnectContext redisConnectContext, String key) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("SCARD ".concat(key));
-        LogsDialog.appendLog(logInfo);
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.scard(key));
         } else {
@@ -156,10 +146,6 @@ public class RedisSetServiceImpl implements RedisSetService {
 
     @Override
     public Long srem(RedisConnectContext redisConnectContext, String key, String... members) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("SREM ".concat(key).concat(" ").concat(Arrays.toString(members).replace("[", "").replace("]", "").replace(","," ")));
-        LogsDialog.appendLog(logInfo);
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.srem(key, members));
         } else {
@@ -196,9 +182,6 @@ public class RedisSetServiceImpl implements RedisSetService {
 
     @Override
     public ValueScanCursor<String> sscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("SSCAN ".concat(key).concat(" ").concat(scanCursor.getCursor()));
-        LogsDialog.appendLog(logInfo);
 
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.sscan(key, scanCursor));

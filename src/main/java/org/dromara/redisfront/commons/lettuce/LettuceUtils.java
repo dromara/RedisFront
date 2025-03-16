@@ -1,6 +1,5 @@
 package org.dromara.redisfront.commons.lettuce;
 
-import cn.hutool.core.collection.CollUtil;
 import io.lettuce.core.*;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
@@ -9,7 +8,6 @@ import io.lettuce.core.cluster.ClusterTopologyRefreshOptions;
 import io.lettuce.core.cluster.RedisClusterClient;
 import io.lettuce.core.cluster.api.StatefulRedisClusterConnection;
 import io.lettuce.core.cluster.api.sync.RedisAdvancedClusterCommands;
-import io.lettuce.core.cluster.models.partitions.Partitions;
 import io.lettuce.core.resource.ClientResources;
 import io.lettuce.core.sentinel.api.StatefulRedisSentinelConnection;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
@@ -114,7 +112,6 @@ public class LettuceUtils {
         }
     }
 
-
     public static Set<Integer> getRedisClusterPartitionPorts(RedisConnectContext redisConnectContext) {
         Set<Integer> ports = new HashSet<>();
         var redisURI = createRedisURI(redisConnectContext);
@@ -163,7 +160,6 @@ public class LettuceUtils {
         }
     }
 
-
     public static void sentinelRun(RedisConnectContext redisConnectContext, Consumer<RedisSentinelCommands<String, String>> consumer) {
         try {
             StatefulRedisSentinelConnection<String, String> connection = RedisConnectionPoolManager.getSentinelConnection(redisConnectContext);
@@ -206,7 +202,7 @@ public class LettuceUtils {
             return apply;
         } catch (Exception exception) {
             log.error("redis连接失败！", exception);
-            throw exception;
+              throw exception;
         }
     }
 

@@ -6,11 +6,14 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.quickswing.events.QSEvent;
+import org.dromara.quickswing.events.QSEventBus;
 import org.dromara.quickswing.excutor.QSTaskExecutor;
 import org.dromara.quickswing.ui.app.QSContext;
 import org.dromara.quickswing.ui.app.QSWidget;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
+import org.dromara.redisfront.commons.utils.FutureUtils;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import raven.popup.GlassPanePopup;
 import raven.toast.Notifications;
@@ -33,6 +36,15 @@ import java.util.function.BiFunction;
 public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, RedisFrontPrefs> {
 
     public final static QSTaskExecutor TASK_EXECUTOR = new QSTaskExecutor(Executors.newVirtualThreadPerTaskExecutor());
+    private static QSEventBus eventBus;
+
+    public RedisFrontContext() {
+        RedisFrontContext.eventBus = super.getEventBus();
+    }
+
+    public static void publishEvent(QSEvent event) {
+        FutureUtils.runAsync(() -> eventBus.publish(event));
+    }
 
     @Override
     protected RedisFrontWidget createApplication(String[] args, RedisFrontPrefs preferences) {
@@ -43,6 +55,7 @@ public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, Redi
         FlatMacLightLaf.setup();
         return new RedisFrontWidget(this, Constants.APP_NAME, preferences);
     }
+
 
     @Override
     protected RedisFrontPrefs loadPreferences(String[] args) {

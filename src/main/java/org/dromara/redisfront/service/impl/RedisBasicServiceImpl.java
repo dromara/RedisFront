@@ -15,7 +15,6 @@ import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.ClusterNode;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.RedisBasicService;
-import org.dromara.redisfront.ui.dialog.LogsDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,10 +28,6 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public String flushdb(RedisConnectContext redisConnectContext) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext)
-                .setInfo("flushdb".toUpperCase());
-        LogsDialog.appendLog(logInfo);
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, RedisAdvancedClusterCommands::flushdb);
         } else {
@@ -51,11 +46,6 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public String flushall(RedisConnectContext redisConnectContext) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext)
-                .setInfo("flushall".toUpperCase());
-        LogsDialog.appendLog(logInfo);
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, RedisAdvancedClusterCommands::flushall);
         } else {
@@ -74,7 +64,6 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public KeyScanCursor<String> scan(RedisConnectContext redisConnectContext, ScanCursor scanCursor, ScanArgs scanArgs) {
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.scan(scanCursor, scanArgs));
         } else {
@@ -84,10 +73,6 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public KeyScanCursor<String> scan(RedisConnectContext redisConnectContext, ScanCursor scanCursor) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext).setInfo("SCAN ".concat(scanCursor.getCursor()));
-        LogsDialog.appendLog(logInfo);
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.scan(scanCursor));
         } else {
@@ -133,11 +118,6 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public Long del(RedisConnectContext redisConnectContext, String key) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext)
-                .setInfo("del ".concat(key).toUpperCase());
-        LogsDialog.appendLog(logInfo);
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.del(key));
         } else {
@@ -147,11 +127,6 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public String rename(RedisConnectContext redisConnectContext, String key, String newKey) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext)
-                .setInfo("rename ".concat(key).concat(" ").concat(newKey).toUpperCase());
-        LogsDialog.appendLog(logInfo);
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.rename(key, newKey));
         } else {
@@ -161,11 +136,6 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public Boolean expire(RedisConnectContext redisConnectContext, String key, Long ttl) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext)
-                .setInfo("expire ".concat(key).toUpperCase());
-        LogsDialog.appendLog(logInfo);
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.expire(key, ttl));
         } else {
@@ -184,11 +154,6 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public Long ttl(RedisConnectContext redisConnectContext, String key) {
-
-        var logInfo = RedisBasicService.buildLogInfo(redisConnectContext)
-                .setInfo("ttl ".concat(key).toUpperCase());
-        LogsDialog.appendLog(logInfo);
-
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.ttl(key));
         } else {
@@ -232,8 +197,8 @@ public class RedisBasicServiceImpl implements RedisBasicService {
     }
 
     @Override
-    public Map<String, Object> getInfo(RedisConnectContext redisConnectContext,String section) {
-        var info = LettuceUtils.exec(redisConnectContext,  redisCommands -> redisCommands.info(section));
+    public Map<String, Object> getInfo(RedisConnectContext redisConnectContext, String section) {
+        var info = LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.info(section));
         log.debug("获取到Redis [ {}:{} ] Info - {}", redisConnectContext.getHost(), redisConnectContext.getPort(), info);
         return strToMap(info);
     }
