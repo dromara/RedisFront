@@ -11,6 +11,7 @@ import io.lettuce.core.cluster.api.StatefulRedisClusterConnection;
 import io.lettuce.core.cluster.pubsub.StatefulRedisClusterPubSubConnection;
 import io.lettuce.core.event.command.CommandListener;
 import io.lettuce.core.event.command.CommandStartedEvent;
+import io.lettuce.core.protocol.CommandArgs;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.sentinel.api.StatefulRedisSentinelConnection;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.lettuce.LettuceUtils;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.LogInfo;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.info.LogStatusHolder;
@@ -101,7 +103,8 @@ public class RedisConnectionPoolManager {
     private static void publishCommandEvent(CommandStartedEvent event, RedisConnectContext context) {
         if (LogStatusHolder.getIgnoredLog() == null) {
             String type = event.getCommand().getType().toString();
-            String commandString = event.getCommand().getArgs().toCommandString();
+            CommandArgs<Object, Object> args = event.getCommand().getArgs();
+            String commandString = RedisFrontUtils.isNotNull(args) ? args.toCommandString() : "";
             LogInfo logInfo = new LogInfo();
             logInfo.setIp(context.getHost());
             logInfo.setDate(LocalDateTime.now());
