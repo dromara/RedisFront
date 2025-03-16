@@ -7,41 +7,56 @@ import io.github.fvarrui.javapackager.model.*
 import io.github.fvarrui.javapackager.model.Platform
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.nio.charset.Charset
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 plugins {
     `java-library`
-    kotlin("jvm") version "1.7.20-RC"
+    kotlin("jvm") version "2.0.0"
 }
 
 buildscript {
     repositories {
-        maven("https://maven.aliyun.com/repository/public/")
         mavenLocal()
-        mavenCentral()
         dependencies {
-            classpath("io.github.fvarrui:javapackager:1.6.7")
+            classpath("io.github.fvarrui:javapackager:1.7.5")
         }
     }
 }
-
 plugins.apply("io.github.fvarrui.javapackager.plugin")
 
-version = "1.0.7"
+allprojects {
+    val repoUsername = "662c9a1d2df38b0129acf288"
+    val repoPassword = "pub-user"
+    repositories {
+        maven {
+            url = uri("https://packages.aliyun.com/maven/repository/2048752-snapshot-C7TcE7")
+            credentials {
+                username = repoUsername
+                password = repoPassword
+            }
+        }
+        maven {
+            url = uri("https://packages.aliyun.com/maven/repository/2048752-release-f1IHDo")
+            credentials {
+                username = repoUsername
+                password = repoPassword
+            }
+        }
+        mavenLocal()
+    }
+}
 
-val applicationName: String = "RedisFront"
-val organization: String = "dromara.org"
-val supportUrl: String = "https://dromara.org"
+version = "2025.1-beta-1"
 
-val flatlafVersion = "3.0"
-val hutoolVersion = "5.8.10"
-val fifesoftVersion = "3.2.0"
-val derbyVersion = "10.15.2.0"
-val lettuceVersion = "6.2.0.RELEASE"
-val logbackVersion = "1.4.1"
+val applicationName = "RedisFront"
+val organization = "dromara.org"
+val supportUrl = "https://redisfront.dromara.org"
+
+val hutoolVersion = "5.8.25"
+val fifesoftVersion = "3.5.4"
+val lettuceVersion = "6.5.4.RELEASE"
+val logbackVersion = "1.4.12"
 
 val fatJar = false
 
@@ -51,11 +66,12 @@ val requireModules = listOf(
     "java.base",
     "java.logging",
     "java.sql",
+    "java.management",
     "java.naming"
 )
 
-if (JavaVersion.current() < JavaVersion.VERSION_17)
-    throw RuntimeException("compile required Java ${JavaVersion.VERSION_17}, current Java ${JavaVersion.current()}")
+if (JavaVersion.current() < JavaVersion.VERSION_22)
+    throw RuntimeException("compile required Java ${JavaVersion.VERSION_22}, current Java ${JavaVersion.current()}")
 
 val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
@@ -70,34 +86,28 @@ println("-----------------------------------------------------------------------
 println()
 
 dependencies {
+    compileOnly("org.projectlombok:lombok:1.18.32")
+    annotationProcessor("org.projectlombok:lombok:1.18.32")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
     implementation("io.lettuce:lettuce-core:${lettuceVersion}")
-    implementation("io.netty:netty-common:4.1.82.Final")
-    implementation("com.formdev:flatlaf:${flatlafVersion}")
     implementation("org.jfree:jfreechart:1.5.3")
-    implementation("com.formdev:flatlaf-swingx:${flatlafVersion}")
-    implementation("com.formdev:flatlaf-intellij-themes:${flatlafVersion}")
-    implementation("com.formdev:flatlaf-extras:${flatlafVersion}")
     implementation("cn.hutool:hutool-extra:${hutoolVersion}")
     implementation("cn.hutool:hutool-json:${hutoolVersion}")
     implementation("cn.hutool:hutool-http:${hutoolVersion}")
-    implementation("org.apache.derby:derby:${derbyVersion}")
     implementation("com.fifesoft:rsyntaxtextarea:${fifesoftVersion}")
-    implementation("com.fifesoft:rstaui:${fifesoftVersion}")
     implementation("ch.qos.logback:logback-classic:${logbackVersion}")
     implementation("at.swimmesberger:swingx-core:1.6.8")
-    implementation("com.jgoodies:jgoodies-forms:1.9.0")
-    implementation("commons-net:commons-net:3.8.0")
+    implementation("commons-net:commons-net:3.9.0")
     implementation("org.bouncycastle:bcpkix-jdk15on:1.70")
     implementation("org.bouncycastle:bcprov-jdk15on:1.70")
     implementation("com.intellij:forms_rt:7.0.3")
-    implementation("com.jcraft:jsch:0.1.55")
+    implementation("com.github.mwiede:jsch:0.2.23")
+    implementation("org.dromara:quick-swing:1.1-SNAPSHOT")
+    implementation("org.apache.commons:commons-pool2:2.11.1")
+    implementation("com.google.code.gson:gson:2.10.1")
     implementation(kotlin("stdlib-jdk8"))
-}
-repositories {
-    mavenCentral()
 }
 
 tasks.test {
@@ -106,8 +116,6 @@ tasks.test {
 }
 
 tasks.compileJava {
-    sourceCompatibility = "17"
-    targetCompatibility = "17"
     options.encoding = "utf-8"
     options.isDeprecation = false
 }
@@ -121,7 +129,6 @@ tasks.processResources {
             )
         )
     }
-    updateVersion()
 }
 
 
@@ -129,8 +136,8 @@ tasks.jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     manifest {
-        attributes("Main-Class" to "com.redisfront.RedisFrontApplication")
-        attributes("Implementation-Vendor" to "www.redisfront.com")
+        attributes("Main-Class" to "org.dromara.redisfront.RedisFrontMain")
+        attributes("Implementation-Vendor" to "redisfront.dromara.org")
         attributes("Implementation-Copyright" to "redisfront")
         attributes("Implementation-Version" to project.version)
         attributes("Multi-Release" to "true")
@@ -161,7 +168,7 @@ tasks.jar {
 }
 
 configure<PackagePluginExtension> {
-    mainClass("com.redisfront.RedisFrontApplication")
+    mainClass("org.dromara.redisfront.RedisFrontMain")
     packagingJdk(File(System.getProperty("java.home")))
     bundleJre(true)
     customizedJre(true)
@@ -173,9 +180,9 @@ configure<PackagePluginExtension> {
 
 tasks.register<PackageTask>("packageForWindows") {
 
-    val innoSetupLanguageMap = LinkedHashMap<String, String>()
-    innoSetupLanguageMap["Chinese"] = "compiler:Languages\\ChineseSimplified.isl"
-    innoSetupLanguageMap["English"] = "compiler:Default.isl"
+    val languages = LinkedHashMap<String, String>()
+    languages["Chinese"] = "compiler:Languages\\ChineseSimplified.isl"
+    languages["English"] = "compiler:Default.isl"
 
     description = "package For Windows"
 
@@ -185,7 +192,6 @@ tasks.register<PackageTask>("packageForWindows") {
     platform = Platform.windows
     isCreateZipball = false
     winConfig(closureOf<WindowsConfig> {
-        icoFile = getIconFile("RedisFront.ico")
         headerType = HeaderType.gui
         originalFilename = applicationName
         copyright = applicationName
@@ -193,7 +199,7 @@ tasks.register<PackageTask>("packageForWindows") {
         productVersion = version
         fileVersion = version
         isGenerateSetup = true
-        setupLanguages = innoSetupLanguageMap
+        setupLanguages = languages
         isCreateZipball = true
         isGenerateMsi = false
         isGenerateMsm = false
@@ -214,7 +220,6 @@ tasks.register<PackageTask>("packageForLinux") {
 
     linuxConfig(
         closureOf<LinuxConfig> {
-            pngFile = getIconFile("RedisFront.png")
             isGenerateDeb = true
             isGenerateRpm = true
             isCreateTarball = true
@@ -225,7 +230,7 @@ tasks.register<PackageTask>("packageForLinux") {
     dependsOn(tasks.build)
 }
 
-tasks.register<PackageTask>("packageForMac_M1") {
+tasks.register<PackageTask>("packageForMac_arm") {
     description = "package For Mac"
     platform = Platform.mac
 
@@ -234,7 +239,6 @@ tasks.register<PackageTask>("packageForMac_M1") {
 
     macConfig(
         closureOf<MacConfig> {
-            icnsFile = getIconFile("RedisFront.icns")
             isGenerateDmg = true
             macStartup = MacStartup.ARM64
         } as Closure<MacConfig>
@@ -242,7 +246,7 @@ tasks.register<PackageTask>("packageForMac_M1") {
     dependsOn(tasks.build)
 }
 
-tasks.register<PackageTask>("packageForMac") {
+tasks.register<PackageTask>("packageForMac_x86") {
     description = "package For Mac"
     platform = Platform.mac
 
@@ -251,28 +255,9 @@ tasks.register<PackageTask>("packageForMac") {
 
     macConfig(
         closureOf<MacConfig> {
-            icnsFile = getIconFile("RedisFront.icns")
             isGenerateDmg = true
             macStartup = MacStartup.X86_64
         } as Closure<MacConfig>
     )
     dependsOn(tasks.build)
-}
-
-fun getIconFile(fileName: String): File {
-    return File(projectDir.absolutePath + File.separator + "assets" + File.separator + fileName)
-}
-
-fun updateVersion() {
-    val jsonFile = File(projectDir.absolutePath + File.separator + "assets" + File.separator + "version.json")
-    jsonFile.writeText("{\"version\": \"${version}\"}", Charset.forName("utf-8"))
-}
-
-val compileKotlin: KotlinCompile by tasks
-compileKotlin.kotlinOptions {
-    jvmTarget = "17"
-}
-val compileTestKotlin: KotlinCompile by tasks
-compileTestKotlin.kotlinOptions {
-    jvmTarget = "17"
 }
