@@ -71,6 +71,12 @@ public class RedisCommandStatsChart extends AbstractRedisChart {
         }
     }
 
+    @Override
+    protected void clearDataset() {
+        this.commandProcessedSeries.clear();
+        this.qpsSeries.clear();
+    }
+
     private void updateData() {
         RedisUsageInfo redisUsageInfo = redisMonitor.getUsageInfo();
         Millisecond now = new Millisecond();

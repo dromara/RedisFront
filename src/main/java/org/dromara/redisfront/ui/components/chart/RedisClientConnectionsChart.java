@@ -64,4 +64,9 @@ public class RedisClientConnectionsChart extends AbstractRedisChart {
             log.error("updateData error", e);
         }
     }
+
+    @Override
+    protected void clearDataset() {
+        clientConnectionsSeries.clear();
+    }
 }

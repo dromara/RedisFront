@@ -17,9 +17,6 @@ public class Constants {
     public static final String APP_THEME_PACKAGE = "org.dromara.redisfront.theme";
     public static final String APP_RESOURCE_BUNDLE = "org.dromara.redisfront.RedisFront";
 
-    public static final String APP_VERSION = PropsUtil.get("application.properties").getProperty("version", "2024.1");
-    public static final String APP_COPYRIGHT = PropsUtil.get("application.properties").getProperty("copyright", "RedisFront");
-
     public static final String SQL_CREATE_CONNECT_DETAIL = """
             create table connect_detail
             (

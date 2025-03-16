@@ -151,4 +151,11 @@ public class RedisMemoryChart extends AbstractRedisChart {
             log.error("updateData error", e);
         }
     }
+
+    @Override
+    protected void clearDataset() {
+        this.usedMemorySeries.clear();
+        this.rssMemorySeries.clear();
+        this.fragmentationSeries.clear();
+    }
 }

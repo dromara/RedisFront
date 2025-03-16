@@ -14,6 +14,7 @@ import org.dromara.quickswing.ui.app.QSWidget;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.utils.FutureUtils;
+import org.dromara.redisfront.commons.utils.UpgradeUtils;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import raven.popup.GlassPanePopup;
 import raven.toast.Notifications;
@@ -112,6 +113,7 @@ public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, Redi
                 log.error("Thread {}", thread.getName(), throwable);
             }
         });
+        FutureUtils.runAsync(() -> UpgradeUtils.checkVersion(version()));
     }
 
     public String version() {

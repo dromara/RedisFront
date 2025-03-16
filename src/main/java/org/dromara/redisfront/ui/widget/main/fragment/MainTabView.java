@@ -37,19 +37,24 @@ public class MainTabView extends JTabbedPane {
     private final RedisFrontEventListener eventListener;
     private final RedisConnectContext redisConnectContext;
     private final RedisInfoView redisInfoView;
+    private PageScaffold lastPageScaffold;
 
     public MainTabView(RedisFrontWidget owner, RedisConnectContext redisConnectContext) {
         this.owner = owner;
         this.context = (RedisFrontContext) owner.getContext();
         this.eventListener = owner.getEventListener();
         this.redisConnectContext = redisConnectContext;
-        this.redisInfoView = new RedisInfoView(owner,redisConnectContext);
+        this.redisInfoView = new RedisInfoView(owner, redisConnectContext);
         this.initializeUI();
         //tab 切换事件
         this.addChangeListener(e -> {
             var tabbedPane = (JTabbedPane) e.getSource();
             if (tabbedPane.getSelectedComponent() instanceof PageScaffold pageScaffold) {
                 pageScaffold.onChange();
+                if (lastPageScaffold != null) {
+                    lastPageScaffold.onClose();
+                }
+                lastPageScaffold = pageScaffold;
             }
         });
         PageScaffold pageScaffold = new PageScaffold(new IndexPageView(redisConnectContext, owner));
@@ -79,6 +84,9 @@ public class MainTabView extends JTabbedPane {
 
         this.eventListener.bind(redisConnectContext.getId(), CommandExecuteEvent.class, qsEvent -> {
             if (qsEvent instanceof CommandExecuteEvent commandExecuteEvent) {
+                if (redisConnectContext.getId() != commandExecuteEvent.getId()) {
+                    return;
+                }
                 Object message = commandExecuteEvent.getMessage();
                 if (message instanceof LogInfo command) {
                     redisInfoView.appendLog(command);
@@ -107,7 +115,7 @@ public class MainTabView extends JTabbedPane {
 
     private @NotNull JButton getInfoButton() {
         JButton button = new JButton(Icons.REDIS_INFO_ICON_24x24);
-        button.setToolTipText("Redis Info");
+        button.setToolTipText("More Info");
         JDialog infoDialog = new JDialog(owner, redisConnectContext.getHost());
         button.addActionListener(_ -> {
             redisInfoView.refreshInfo();

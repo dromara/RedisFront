@@ -1,8 +1,10 @@
 package org.dromara.redisfront.commons.utils
 
+import cn.hutool.core.swing.DesktopUtil
+import cn.hutool.core.util.StrUtil
 import cn.hutool.http.HttpUtil
 import cn.hutool.json.JSONUtil
-import org.dromara.redisfront.commons.constant.Constants
+import javax.swing.JOptionPane
 
 /**
  *  Upgrade
@@ -10,41 +12,33 @@ import org.dromara.redisfront.commons.constant.Constants
  */
 open class UpgradeUtils {
     companion object {
-        private const val checkUrl = "https://gitee.com/dromara/RedisFront/raw/master/assets/version.json"
-        private const val releaseUrl = "https://gitee.com/dromara/RedisFront/releases/"
+        private const val GITEE_URL = "https://gitee.com/dromara/RedisFront/raw/master/assets/version.json"
 
         @JvmStatic
-        fun checkVersion() {
-            val currentVersion = Constants.APP_VERSION
-            if (currentVersion.startsWith("@")) {
-                return
-            }
+        fun checkVersion(currentVersion: String) {
 
-            val httpRequest = HttpUtil.createGet(checkUrl)
+            val httpRequest = HttpUtil.createGet(GITEE_URL)
             val httpResponse = httpRequest.execute()
 
             if (httpResponse.isOk) {
-
                 val body = httpResponse.body()
                 val versionObject = JSONUtil.parseObj(body)
                 val newVersion = versionObject.getStr("version")
-                if (RedisFrontUtils.equal(currentVersion, newVersion)) {
+                if (StrUtil.compareVersion(newVersion, currentVersion) == 0) {
                     return
                 }
 
-                val currentVersionArray = currentVersion.split(".")
-                val newVersionArray = newVersion.split(".")
+                val downloadUrl =
+                    versionObject.getStr("downloadUrl") ?: "https://gitee.com/dromara/RedisFront/releases/"
 
-                if (currentVersion.length == newVersion.length) {
-                    val xIsTrue = RedisFrontUtils.equal(currentVersionArray[0], newVersionArray[0])
-                    val yIsTrue = RedisFrontUtils.equal(currentVersionArray[1], newVersionArray[1])
-                    val zIsTrue = RedisFrontUtils.equal(currentVersionArray[2], newVersionArray[2])
-                    if (xIsTrue && yIsTrue && zIsTrue) {
-                        return
-                    }
+                val confirmDialog =
+                    JOptionPane.showConfirmDialog(null, "发现新版本，是否下载？", "发现新版本", JOptionPane.YES_NO_OPTION)
+
+                if (confirmDialog != JOptionPane.YES_OPTION) {
+                    return
                 }
 
-
+                DesktopUtil.browse(downloadUrl)
             }
         }
     }

@@ -67,6 +67,12 @@ public class RedisNetworkChart extends AbstractRedisChart {
         }
     }
 
+    @Override
+    protected void clearDataset() {
+        this.inSeries.clear();
+        this.outSeries.clear();
+    }
+
     private void updateData() {
         RedisUsageInfo.NetworkStats networkStats = redisMonitor.calculateNetworkRate();
         Millisecond now = new Millisecond();

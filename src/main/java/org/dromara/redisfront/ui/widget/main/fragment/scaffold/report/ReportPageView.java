@@ -51,6 +51,22 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
         this.setupUI();
     }
 
+    @Override
+    public void onClose() {
+        this.redisNetworkChart.stopUpdateData();
+        this.redisMemoryChart.stopUpdateData();
+        this.redisClientConnectionsChart.stopUpdateData();
+        this.redisCommandStatsChart.stopUpdateData();
+    }
+
+    @Override
+    public void onChange() {
+        this.redisNetworkChart.startUpdateData();
+        this.redisMemoryChart.startUpdateData();
+        this.redisClientConnectionsChart.startUpdateData();
+        this.redisCommandStatsChart.startUpdateData();
+    }
+
     private void configureToggleButton(FlatToggleButton button) {
         button.setButtonType(FlatButton.ButtonType.tab);
         button.setFocusable(false);

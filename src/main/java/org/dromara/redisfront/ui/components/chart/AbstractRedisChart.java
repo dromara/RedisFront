@@ -16,11 +16,19 @@ import java.awt.*;
 @Getter
 public abstract class AbstractRedisChart extends JPanel {
     protected final RedisConnectContext redisConnectContext;
+    Timer timer = new Timer(2000, _ -> updateDataset());
 
     protected AbstractRedisChart(RedisConnectContext redisConnectContext) {
         this.redisConnectContext = redisConnectContext;
         this.setLayout(new BorderLayout());
-        Timer timer = new Timer(2000, _ -> updateDataset());
+    }
+
+    public void stopUpdateData() {
+        timer.stop();
+        clearDataset();
+    }
+
+    public void startUpdateData() {
         timer.start();
     }
 
@@ -82,5 +90,7 @@ public abstract class AbstractRedisChart extends JPanel {
     protected abstract void rebuildUI();
 
     protected abstract void updateDataset();
+
+    protected abstract void clearDataset();
 
 }
