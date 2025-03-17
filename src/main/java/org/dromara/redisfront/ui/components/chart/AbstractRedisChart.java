@@ -16,7 +16,7 @@ import java.awt.*;
 @Getter
 public abstract class AbstractRedisChart extends JPanel {
     protected final RedisConnectContext redisConnectContext;
-    Timer timer = new Timer(2000, _ -> updateDataset());
+    protected Timer timer = new Timer(2000, _ -> updateDataset());
 
     protected AbstractRedisChart(RedisConnectContext redisConnectContext) {
         this.redisConnectContext = redisConnectContext;

@@ -1,6 +1,7 @@
 package org.dromara.redisfront.commons.pool;
 
 import io.lettuce.core.api.StatefulConnection;
+import io.lettuce.core.resource.ClientResources;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
@@ -24,11 +25,19 @@ public class RedisConnectionFactory<T> extends BasePooledObjectFactory<T> {
 
     @Override
     public boolean validateObject(PooledObject<T> p) {
-        return ((StatefulConnection<?, ?>) p.getObject()).isOpen();
+        if (p.getObject() instanceof StatefulConnection<?, ?> statefulConnection) {
+            return statefulConnection.isOpen();
+        }
+        return false;
     }
 
     @Override
     public void destroyObject(PooledObject<T> p) {
-        ((StatefulConnection<?, ?>) p.getObject()).close();
+        if (p.getObject() instanceof StatefulConnection<?, ?> statefulConnection) {
+            ClientResources resources = statefulConnection.getResources();
+            statefulConnection.flushCommands();
+            statefulConnection.close();
+            resources.shutdown();
+        }
     }
 }

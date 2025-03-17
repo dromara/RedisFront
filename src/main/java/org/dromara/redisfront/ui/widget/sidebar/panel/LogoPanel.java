@@ -4,6 +4,9 @@ import org.dromara.redisfront.commons.resources.Icons;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.RoundRectangle2D;
 
 public class LogoPanel extends JPanel {
@@ -19,6 +22,14 @@ public class LogoPanel extends JPanel {
         this.setMaximumSize(new Dimension(190, 60));
         this.add(BorderLayout.WEST, new JLabel(Icons.REDIS_ICON_45x45));
         this.add(BorderLayout.CENTER, new JLabel(Icons.LOGO_TEXT_ICON));
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if(e.getClickCount() == 2){
+                    System.gc();
+                }
+            }
+        });
         JLabel subTitleLabel = new JLabel("Cross-Platform Redis GUI Client");
         subTitleLabel.setVerticalAlignment(JLabel.CENTER);
         subTitleLabel.setHorizontalAlignment(JLabel.CENTER);
