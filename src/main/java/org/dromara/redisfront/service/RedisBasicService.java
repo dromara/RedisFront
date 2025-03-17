@@ -190,9 +190,4 @@ public interface RedisBasicService {
         return result;
     }
 
-    static LogInfo buildLogInfo(RedisConnectContext redisConnectContext) {
-        return new LogInfo().setDate(LocalDateTime.now()).setIp(redisConnectContext.getHost());
-    }
-
-
 }

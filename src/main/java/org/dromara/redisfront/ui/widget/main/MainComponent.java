@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.extras.components.FlatToolBar;
 import com.formdev.flatlaf.util.SystemInfo;
+import io.lettuce.core.cluster.models.partitions.Partitions;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.layout.LC;
@@ -11,11 +12,14 @@ import net.miginfocom.swing.MigLayout;
 import org.dromara.quickswing.constant.QSOs;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.commons.enums.ConnectType;
+import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.commons.jsch.JschManager;
+import org.dromara.redisfront.commons.lettuce.LettuceUtils;
 import org.dromara.redisfront.commons.pool.RedisConnectionPoolManager;
 import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
+import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
 import org.dromara.redisfront.ui.components.monitor.RedisMonitor;
 import org.dromara.redisfront.ui.components.monitor.RedisUsageInfo;
@@ -23,7 +27,6 @@ import org.dromara.redisfront.ui.event.DrawerChangeEvent;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.dromara.redisfront.ui.widget.main.about.MainAboutPanel;
 import org.dromara.redisfront.ui.widget.main.fragment.MainTabView;
-import org.dromara.redisfront.ui.widget.main.fragment.scaffold.PageScaffold;
 import org.dromara.redisfront.ui.widget.main.listener.MouseDraggedListener;
 import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
 
@@ -45,6 +48,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class MainComponent extends JPanel {
@@ -148,12 +152,10 @@ public class MainComponent extends JPanel {
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
             Component component = tabbedPane.getComponentAt(tabIndex);
             if (component instanceof MainTabView mainTabView) {
-
+                //清理资源
                 mainTabView.clearUp();
-
                 //关闭线程池
                 RedisConnectContext redisConnectContext = mainTabView.getRedisConnectContext();
-
                 ScheduledExecutorService executorService = executorServiceMap.remove(redisConnectContext.getId());
                 if (executorService != null) {
                     executorService.shutdownNow();
@@ -191,7 +193,80 @@ public class MainComponent extends JPanel {
             }
             if (topTabbedPane.getSelectedComponent() instanceof MainTabView mainTabView) {
                 RedisConnectContext redisConnectContext = mainTabView.getRedisConnectContext();
-                SwingUtilities.invokeLater(() -> mode.setText(owner.$tr(redisConnectContext.getRedisMode().modeName)));
+                redisFrontContext.taskExecute(() -> {
+
+                    String sshMapping = "[Local] %s:%s ==> [Remote] %s:%s %s";
+                    String normalMapping = "[Remote] %s:%s %s";
+                    String extInfo = "";
+
+                    String format = """
+                            <html>
+                            <BR>
+                            <B>Host: </B>%s<BR>
+                            <B>Port: </B>%s<BR>
+                            <B>Mode: </B>%s<BR>
+                            <B>ConnectType: </B>%s<BR>
+                            <B>RedisVersion：</B>%s<BR>
+                            -----------------------------------------------------------------------------------------------------<BR>
+                            %s<BR>
+                            </Html>
+                            """;
+
+                    Map<String, Object> serverInfo = RedisBasicService.service.getServerInfo(redisConnectContext);
+                    if (redisConnectContext.getConnectTypeMode().equals(ConnectType.SSH)) {
+                        if (redisConnectContext.getRedisMode().equals(RedisMode.CLUSTER)) {
+                            Partitions clusterPartitions = LettuceUtils.getRedisClusterPartitions(redisConnectContext);
+                            extInfo = clusterPartitions.stream().map(clusterNode -> {
+                                var uri = clusterNode.getUri();
+                                Map<Integer, Integer> clusterLocalPort = redisConnectContext.getClusterLocalPort();
+                                return String.format(sshMapping, "127.0.0.1",
+                                        clusterLocalPort.get(uri.getPort()).toString(),
+                                        uri.getHost(),
+                                        uri.getPort(),
+                                        clusterNode.getFlags()
+                                );
+                            }).collect(Collectors.joining("<BR>"));
+                        } else {
+                            return String.format(sshMapping, "127.0.0.1",
+                                    redisConnectContext.getLocalPort(),
+                                    redisConnectContext.getHost(),
+                                    redisConnectContext.getPort()
+                                    , ""
+                            );
+                        }
+                    } else {
+                        if (redisConnectContext.getRedisMode().equals(RedisMode.CLUSTER)) {
+                            Partitions clusterPartitions = LettuceUtils.getRedisClusterPartitions(redisConnectContext);
+                            extInfo = clusterPartitions.stream().map(clusterNode -> {
+                                var uri = clusterNode.getUri();
+                                return String.format(normalMapping,
+                                        uri.getHost(),
+                                        uri.getPort(),
+                                        clusterNode.getFlags()
+                                );
+                            }).collect(Collectors.joining("<BR>"));
+                        }
+                    }
+
+                    return String.format(format,
+                            redisConnectContext.getHost(),
+                            redisConnectContext.getPort(),
+                            redisConnectContext.getRedisMode(),
+                            redisConnectContext.getConnectTypeMode(),
+                            serverInfo.get("redis_version").toString(),
+                            extInfo
+                    );
+                }, (result, ex) -> {
+                    if (ex != null) {
+                        owner.displayException(ex);
+                        return;
+                    }
+                    RedisFrontUtils.runEDT(() -> {
+                        mode.setText(owner.$tr(redisConnectContext.getRedisMode().modeName));
+                        mode.setToolTipText(result);
+                    });
+                });
+
                 if (!executorServiceMap.containsKey(redisConnectContext.getId())) {
                     RedisMonitor monitor = new RedisMonitor(owner, redisConnectContext);
                     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -224,16 +299,6 @@ public class MainComponent extends JPanel {
         this.add(topTabbedPane, BorderLayout.CENTER);
     }
 
-    JPanel aboutPanel;
-
-    @Override
-    public void updateUI() {
-        if (aboutPanel != null) {
-            aboutPanel.updateUI();
-        }
-        super.updateUI();
-    }
-
     private void initBottomToolBar() {
         Box verticalBox = Box.createVerticalBox();
         verticalBox.putClientProperty(FlatClientProperties.STYLE, "background:$RedisFront.main.background");
@@ -243,6 +308,7 @@ public class MainComponent extends JPanel {
         rightToolBar.setMargin(new Insets(0, 3, 0, 3));
 
         mode = new JLabel(Icons.MODE_ICON);
+        mode.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         mode.setText("单机模式");
         mode.setToolTipText("单机模式");
         rightToolBar.add(mode, BorderLayout.WEST);
