@@ -10,7 +10,11 @@ import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
 import org.dromara.quickswing.constant.QSOs;
 import org.dromara.redisfront.RedisFrontContext;
+import org.dromara.redisfront.commons.enums.ConnectType;
+import org.dromara.redisfront.commons.jsch.JschManager;
+import org.dromara.redisfront.commons.pool.RedisConnectionPoolManager;
 import org.dromara.redisfront.commons.resources.Icons;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
 import org.dromara.redisfront.ui.components.monitor.RedisMonitor;
@@ -19,6 +23,7 @@ import org.dromara.redisfront.ui.event.DrawerChangeEvent;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.dromara.redisfront.ui.widget.main.about.MainAboutPanel;
 import org.dromara.redisfront.ui.widget.main.fragment.MainTabView;
+import org.dromara.redisfront.ui.widget.main.fragment.scaffold.PageScaffold;
 import org.dromara.redisfront.ui.widget.main.listener.MouseDraggedListener;
 import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
 
@@ -143,16 +148,22 @@ public class MainComponent extends JPanel {
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
             Component component = tabbedPane.getComponentAt(tabIndex);
             if (component instanceof MainTabView mainTabView) {
+
+                mainTabView.clearUp();
+
                 //关闭线程池
                 RedisConnectContext redisConnectContext = mainTabView.getRedisConnectContext();
+
                 ScheduledExecutorService executorService = executorServiceMap.remove(redisConnectContext.getId());
                 if (executorService != null) {
                     executorService.shutdownNow();
                 }
+                //关闭连接池
+                RedisConnectionPoolManager.cleanupContextPool(redisConnectContext);
                 //关闭ssh会话
-//                if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
-//                    JschManager.MANAGER.closeSession(redisConnectContext);
-//                }
+                if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
+                    JschManager.MANAGER.closeSession(redisConnectContext);
+                }
                 //关闭移除消息监听器
                 owner.getEventListener().unbind(redisConnectContext.getId());
             }

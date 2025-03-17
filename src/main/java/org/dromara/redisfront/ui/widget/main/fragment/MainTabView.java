@@ -39,6 +39,15 @@ public class MainTabView extends JTabbedPane {
     private final RedisInfoView redisInfoView;
     private PageScaffold lastPageScaffold;
 
+    public void clearUp(){
+        for (int i = 0; i < getTabCount(); i++) {
+            Component tabComponentAt = getComponentAt(i);
+            if (tabComponentAt instanceof PageScaffold pageScaffold) {
+                pageScaffold.onClose();
+            }
+        }
+    }
+
     public MainTabView(RedisFrontWidget owner, RedisConnectContext redisConnectContext) {
         this.owner = owner;
         this.context = (RedisFrontContext) owner.getContext();

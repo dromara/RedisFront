@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @SuppressWarnings("all")
 public class RedisConnectionPoolManager {
 
-    private static final int MAX_TOTAL = 20;
+    private static final int MAX_TOTAL = 5;
     private static final int MAX_IDLE = 10;
     private static final int MIN_IDLE = 2;
     private static final long MAX_WAIT_MILLIS = 5000;
@@ -205,6 +205,7 @@ public class RedisConnectionPoolManager {
         try {
             if (!pool.isClosed()) {
                 pool.close();
+                pool.clear();
                 poolMap.remove(key);
                 log.info("Closed connection pool: {}", key);
             }
