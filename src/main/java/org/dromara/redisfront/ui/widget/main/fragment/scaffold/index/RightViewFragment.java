@@ -188,6 +188,7 @@ public class RightViewFragment {
                         var value = dataTable.getValueAt(row, 2);
                         var score = dataTable.getValueAt(row, 1);
                         RedisFrontUtils.runEDT(() -> {
+                            keyLabel.setText(owner.$tr("DataViewForm.keyLabel.score.title"));
                             fieldOrScoreField.setText(score.toString());
                             valueUpdateSaveBtn.setEnabled(true);
                             jsonValueFormat((String) value);
@@ -196,6 +197,7 @@ public class RightViewFragment {
                         var value = dataTable.getValueAt(row, 1);
                         var key = dataTable.getValueAt(row, 0);
                         RedisFrontUtils.runEDT(() -> {
+                            keyLabel.setText(owner.$tr("DataViewForm.keyLabel.title"));
                             fieldOrScoreField.setText(key.toString());
                             valueUpdateSaveBtn.setEnabled(true);
                             jsonValueFormat((String) value);

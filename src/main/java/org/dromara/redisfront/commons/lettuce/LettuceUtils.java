@@ -8,6 +8,7 @@ import io.lettuce.core.cluster.ClusterTopologyRefreshOptions;
 import io.lettuce.core.cluster.RedisClusterClient;
 import io.lettuce.core.cluster.api.StatefulRedisClusterConnection;
 import io.lettuce.core.cluster.api.sync.RedisAdvancedClusterCommands;
+import io.lettuce.core.cluster.models.partitions.Partitions;
 import io.lettuce.core.resource.ClientResources;
 import io.lettuce.core.sentinel.api.StatefulRedisSentinelConnection;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
@@ -119,6 +120,13 @@ public class LettuceUtils {
             clusterClient.getPartitions().forEach(redisClusterNode -> ports.add(redisClusterNode.getUri().getPort()));
         }
         return ports;
+    }
+
+    public static Partitions getRedisClusterPartitions(RedisConnectContext redisConnectContext) {
+        var redisURI = createRedisURI(redisConnectContext);
+        try (var clusterClient = RedisClusterClient.create(redisURI)) {
+           return clusterClient.getPartitions();
+        }
     }
 
     public static RedisClusterClient getRedisClusterClient(RedisURI redisURI, RedisConnectContext redisConnectContext) {
