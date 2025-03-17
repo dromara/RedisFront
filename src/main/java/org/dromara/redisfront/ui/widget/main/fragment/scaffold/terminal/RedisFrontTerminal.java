@@ -32,6 +32,10 @@ public class RedisFrontTerminal extends AbstractTerminal {
         printConnectedSuccessMessage();
     }
 
+    public void close() {
+
+    }
+
     public void ping() {
         try {
             if (RedisBasicService.service.ping(redisConnectContext)) {

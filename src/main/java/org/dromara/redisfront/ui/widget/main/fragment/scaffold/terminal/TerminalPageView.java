@@ -31,6 +31,7 @@ public class TerminalPageView extends QSPageItem<RedisFrontWidget> {
     @Override
     public void onChange() {
         super.onChange();
+        terminal.ping();
     }
 
     @Override
