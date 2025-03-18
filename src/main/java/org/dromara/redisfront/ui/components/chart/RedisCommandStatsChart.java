@@ -46,9 +46,13 @@ public class RedisCommandStatsChart extends AbstractRedisChart {
     private TimeSeriesCollection createDataset() {
         if (commandProcessedSeries == null) {
             commandProcessedSeries = new TimeSeries(owner.$tr("RedisCommandStatsChart.commandProcessed.text"));
+            commandProcessedSeries .setMaximumItemCount(30);
+            commandProcessedSeries .removeAgedItems(false);
         }
         if (qpsSeries == null) {
             qpsSeries = new TimeSeries(owner.$tr("RedisCommandStatsChart.qps.text"));
+            qpsSeries.setMaximumItemCount(30);
+            qpsSeries.removeAgedItems(false);
         }
 
         TimeSeriesCollection dataset = new TimeSeriesCollection();

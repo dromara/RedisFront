@@ -44,12 +44,18 @@ public class RedisMemoryChart extends AbstractRedisChart {
     private void initializeUI() {
         if (usedMemorySeries == null) {
             usedMemorySeries = new TimeSeries(owner.$tr("RedisMemoryChart.usedMemorySeries.text"));
+            usedMemorySeries.setMaximumItemCount(30);
+            usedMemorySeries.removeAgedItems(false);
         }
         if (rssMemorySeries == null) {
             rssMemorySeries = new TimeSeries(owner.$tr("RedisMemoryChart.rssMemorySeries.text"));
+            rssMemorySeries.setMaximumItemCount(30);
+            rssMemorySeries.removeAgedItems(false);
         }
         if (fragmentationSeries == null) {
             fragmentationSeries = new TimeSeries(owner.$tr("RedisMemoryChart.fragmentationSeries.text"));
+            fragmentationSeries.setMaximumItemCount(30);
+            fragmentationSeries.removeAgedItems(false);
         }
 
         TimeSeriesCollection memoryDataset = new TimeSeriesCollection();

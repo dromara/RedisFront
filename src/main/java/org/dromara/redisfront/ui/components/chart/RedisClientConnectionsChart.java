@@ -27,6 +27,8 @@ public class RedisClientConnectionsChart extends AbstractRedisChart {
     private void initializeUI() {
         if (clientConnectionsSeries == null) {
             clientConnectionsSeries = new TimeSeries(owner.$tr("RedisClientConnectionsChart.clientConnections.text"));
+            clientConnectionsSeries.setMaximumItemCount(30);
+            clientConnectionsSeries.removeAgedItems(false);
         }
 
         TimeSeriesCollection dataset = new TimeSeriesCollection();
