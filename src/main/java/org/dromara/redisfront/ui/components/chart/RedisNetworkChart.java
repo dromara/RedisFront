@@ -43,9 +43,13 @@ public class RedisNetworkChart extends AbstractRedisChart {
     private TimeSeriesCollection createDataset() {
         if (inSeries == null) {
             inSeries = new TimeSeries(owner.$tr("RedisNetworkChart.inSeries.text"));
+            inSeries.setMaximumItemCount(30);
+            inSeries.removeAgedItems(false);
         }
         if (outSeries == null) {
             outSeries = new TimeSeries(owner.$tr("RedisNetworkChart.outSeries.text"));
+            outSeries.setMaximumItemCount(30);
+            outSeries.removeAgedItems(false);
         }
         TimeSeriesCollection dataset = new TimeSeriesCollection();
         dataset.addSeries(inSeries);
