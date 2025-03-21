@@ -62,7 +62,7 @@ public class MainComponent extends JPanel {
     @Setter
     private Consumer<Integer> tabCloseEvent;
     private JLabel mode;
-    private String modeToolTip;
+
 
 
     public MainComponent(DrawerAnimationAction action, RedisFrontWidget owner) {
@@ -191,79 +191,10 @@ public class MainComponent extends JPanel {
             }
             if (topTabbedPane.getSelectedComponent() instanceof MainTabView mainTabView) {
                 RedisConnectContext redisConnectContext = mainTabView.getRedisConnectContext();
-                redisFrontContext.taskExecute(() -> {
-
-                    String sshMapping = "[Local] %s:%s ==> [Remote] %s:%s %s";
-                    String normalMapping = "[Remote] %s:%s %s";
-                    String extInfo = "";
-
-                    String format = """
-                            <html>
-                            <B>Host: </B>%s<BR>
-                            <B>Port: </B>%s<BR>
-                            <B>Mode: </B>%s<BR>
-                            <B>ConnectType: </B>%s<BR>
-                            <B>RedisVersion：</B>%s<BR>
-                            <BR>
-                            %s<BR>
-                            </Html>
-                            """;
-
-                    Map<String, Object> serverInfo = RedisBasicService.service.getServerInfo(redisConnectContext);
-                    if (redisConnectContext.getConnectTypeMode().equals(ConnectType.SSH)) {
-                        if (redisConnectContext.getRedisMode().equals(RedisMode.CLUSTER)) {
-                            Partitions clusterPartitions = LettuceUtils.getRedisClusterPartitions(redisConnectContext);
-                            extInfo = clusterPartitions.stream().map(clusterNode -> {
-                                var uri = clusterNode.getUri();
-                                Map<Integer, Integer> clusterLocalPort = redisConnectContext.getClusterLocalPort();
-                                return String.format(sshMapping, "127.0.0.1",
-                                        clusterLocalPort.get(uri.getPort()).toString(),
-                                        uri.getHost(),
-                                        uri.getPort(),
-                                        clusterNode.getFlags()
-                                );
-                            }).collect(Collectors.joining("<BR>"));
-                        } else {
-                            return String.format(sshMapping, "127.0.0.1",
-                                    redisConnectContext.getLocalPort(),
-                                    redisConnectContext.getHost(),
-                                    redisConnectContext.getPort()
-                                    , ""
-                            );
-                        }
-                    } else {
-                        if (redisConnectContext.getRedisMode().equals(RedisMode.CLUSTER)) {
-                            Partitions clusterPartitions = LettuceUtils.getRedisClusterPartitions(redisConnectContext);
-                            extInfo = clusterPartitions.stream().map(clusterNode -> {
-                                var uri = clusterNode.getUri();
-                                return String.format(normalMapping,
-                                        uri.getHost(),
-                                        uri.getPort(),
-                                        clusterNode.getFlags()
-                                );
-                            }).collect(Collectors.joining("<BR>"));
-                        }
-                    }
-
-                    return String.format(format,
-                            redisConnectContext.getHost(),
-                            redisConnectContext.getPort(),
-                            redisConnectContext.getRedisMode(),
-                            redisConnectContext.getConnectTypeMode(),
-                            serverInfo.get("redis_version").toString(),
-                            extInfo
-                    );
-                }, (result, ex) -> {
-                    if (ex != null) {
-                        owner.displayException(ex);
-                        return;
-                    }
-                    RedisFrontUtils.runEDT(() -> {
-                        mode.setText(owner.$tr(redisConnectContext.getRedisMode().modeName));
-                        modeToolTip = result;
-                    });
+                RedisFrontUtils.runEDT(() -> {
+                    mode.setText(owner.$tr(redisConnectContext.getRedisMode().modeName));
+                    mode.setToolTipText(redisConnectContext.getHost() + " | " + owner.$tr(redisConnectContext.getRedisMode().modeName));
                 });
-
                 executorServiceMap.computeIfAbsent(redisConnectContext.getId(), _ -> {
                     RedisMonitor monitor = new RedisMonitor(owner, redisConnectContext);
                     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -308,53 +239,6 @@ public class MainComponent extends JPanel {
         mode.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         mode.setText("单机模式");
         mode.setToolTipText("单机模式");
-        mode.addMouseListener(new MouseAdapter() {
-            private JWindow window; // 复用 JWindow 实例
-
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (window == null) {
-                    window = new JWindow();
-                    window.setAlwaysOnTop(true);
-                    JPanel panel = new JPanel();
-                    panel.setLayout(new BorderLayout());
-                    panel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
-                    JLabel infoLabel = new JLabel(modeToolTip);
-                    infoLabel.setBorder(new EmptyBorder(10, 10, 10, 10));
-                    panel.add(infoLabel, BorderLayout.CENTER);
-                    window.setContentPane(panel);
-                    window.pack();
-
-                    AWTEventListener eventListener = event -> {
-                        if (event instanceof MouseEvent mouseEvent) {
-                            if (mouseEvent.getID() == MouseEvent.MOUSE_CLICKED) {
-                                Point clickPoint = mouseEvent.getLocationOnScreen();
-                                Rectangle windowBounds = window.getBounds();
-                                if (!windowBounds.contains(clickPoint)) {
-                                    window.dispose();
-                                }
-                            }
-                        }
-                    };
-
-                    Toolkit.getDefaultToolkit().addAWTEventListener(eventListener, AWTEvent.MOUSE_EVENT_MASK);
-                }
-
-                Point location = e.getLocationOnScreen();
-                Dimension windowSize = window.getSize();
-                Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().getBounds();
-
-                if (location.x + windowSize.width > screenBounds.x + screenBounds.width) {
-                    location.x = screenBounds.x + screenBounds.width - windowSize.width;
-                }
-                if (location.y + windowSize.height > screenBounds.y + screenBounds.height) {
-                    location.y = screenBounds.y + screenBounds.height - windowSize.height;
-                }
-
-                window.setLocation(location);
-                window.setVisible(true);
-            }
-        });
         rightToolBar.add(mode, BorderLayout.WEST);
 
         JPanel horizontalBox = new JPanel();
