@@ -382,12 +382,15 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
     }
 
     private RedisConnectContext.@NotNull SettingInfo getSettingInfo() {
+        int keyMaxLoadNum = Integer.parseInt(this.keyMaxLoadNum.getText());
+        int redisTimeoutNum = Integer.parseInt(redisTimeoutTextField.getText());
+        int sshTimeoutNum = Integer.parseInt(sshTimeoutTextField.getText());
+        String keySeparator = keySeparatorField.getText();
         return new RedisConnectContext.SettingInfo(
-                Integer.parseInt(keyMaxLoadNum.getText()),
-                keySeparatorField.getText(),
-                Integer.parseInt(redisTimeoutTextField.getText()),
-                Integer.parseInt(sshTimeoutTextField.getText()),
-                false
+                keyMaxLoadNum,
+                keySeparator,
+                redisTimeoutNum,
+                sshTimeoutNum
         );
     }
 
