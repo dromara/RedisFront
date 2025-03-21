@@ -1,12 +1,18 @@
 package org.dromara.redisfront.ui.components.info;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import io.lettuce.core.cluster.models.partitions.Partitions;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.redisfront.RedisFrontContext;
+import org.dromara.redisfront.commons.enums.ConnectType;
+import org.dromara.redisfront.commons.enums.RedisMode;
+import org.dromara.redisfront.commons.lettuce.LettuceUtils;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.LogInfo;
 import org.dromara.redisfront.model.context.RedisConnectContext;
+import org.dromara.redisfront.model.turbo.Turbo2;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.ui.components.extend.BoldTitleTabbedPaneUI;
 import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
@@ -20,6 +26,7 @@ import java.awt.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
@@ -35,15 +42,33 @@ public class RedisInfoView extends JPanel implements Runnable {
 
     private final LinkedBlockingQueue<LogInfo> queue = new LinkedBlockingQueue<>();
 
-    private final RedisConnectContext context;
+    private final RedisConnectContext redisConnectContext;
+    private final RedisFrontContext redisFrontContext;
     private final RedisFrontWidget owner;
 
-    private final JTextArea textArea = new JTextArea();
-    private final Boolean running = true;
+    private final JTextArea textArea1 = new JTextArea();
+    private final JTextArea textArea2 = new JTextArea();
+    private JTabbedPane tabbedPane;
+    private Boolean running = true;
 
-    public RedisInfoView(RedisFrontWidget owner, RedisConnectContext context) {
-        this.context = context;
+    private final static String SSH_MAPPING = "[Local] %s:%s ==> [Remote] %s:%s %s \n";
+    private final static String NORMAL_MAPPING = "[Remote] %s:%s %s \n";
+    private final static String FORMAT_MESSAGE = """
+            
+            RedisHost: %s
+            RedisPort: %s
+            RedisMode: %s
+            RedisConnectType: %s
+            RedisVersion：%s \n
+            
+            %s
+            
+            """;
+
+    public RedisInfoView(RedisFrontWidget owner, RedisConnectContext redisConnectContext) {
+        this.redisConnectContext = redisConnectContext;
         this.owner = owner;
+        this.redisFrontContext = (RedisFrontContext) owner.getContext();
         initUI();
         new Thread(this).start();
     }
@@ -53,12 +78,14 @@ public class RedisInfoView extends JPanel implements Runnable {
     }
 
     private void initUI() {
-        setLayout(new BorderLayout());
-        setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
-        this.textArea.setEditable(false);
-        this.textArea.setLineWrap(true);
-        initTabbedPane();
-        refreshInfo();
+        this.setLayout(new BorderLayout());
+        this.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
+        this.textArea1.setEditable(false);
+        this.textArea2.setEditable(false);
+        this.textArea1.setLineWrap(true);
+        this.textArea2.setLineWrap(true);
+        this.initTabbedPane();
+        this.refreshInfo();
     }
 
     private String format(LogInfo logInfo) {
@@ -70,21 +97,20 @@ public class RedisInfoView extends JPanel implements Runnable {
     }
 
     private void initTabbedPane() {
-        JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT) {
+        this.tabbedPane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT) {
             @Override
             public void setUI(TabbedPaneUI ui) {
                 super.setUI(new BoldTitleTabbedPaneUI());
             }
         };
         this.configureTabbedPaneProperties(tabbedPane);
-
+        this.tabbedPane.addTab("Logs".toUpperCase(), new JScrollPane(textArea1));
+        this.tabbedPane.addTab("SSH".toUpperCase(), new JScrollPane(textArea2));
         for (String section : INFO_SECTIONS) {
-            tabbedPane.addTab(createTabTitle(section), createTabContent(section));
+            this.tabbedPane.addTab(createTabTitle(section).toUpperCase(), createTabContent(section));
         }
+        this.add(this.tabbedPane, BorderLayout.CENTER);
 
-        tabbedPane.addTab("logs", new JScrollPane(textArea));
-
-        add(tabbedPane, BorderLayout.CENTER);
     }
 
     private void configureTabbedPaneProperties(JTabbedPane pane) {
@@ -124,26 +150,80 @@ public class RedisInfoView extends JPanel implements Runnable {
     public void refreshInfo() {
         SyncLoadingDialog
                 .builder(owner, "load info data")
-                .showSyncLoadingDialog(() ->
-                        Arrays.stream(INFO_SECTIONS)
-                                .map(section -> {
-                                    try {
-                                        LogStatusHolder.ignoredLog();
-                                        Map<String, Object> infoData = RedisBasicService.service.getInfo(context, section);
-                                        return new LogInfoData(section, infoData);
-                                    } finally {
-                                        LogStatusHolder.clear();
-                                    }
-                                }).collect(Collectors.toSet()), (infoData, e) -> {
-                    if (e != null) {
-                        owner.displayException(e);
-                    } else {
-                        for (LogInfoData logInfoData : infoData) {
-                            updateTableModel(tableModels.get(logInfoData.getKey()), logInfoData.getInfoData());
+                .showSyncLoadingDialog(() -> {
+                            Turbo2<String, Set<LogInfoData>> turbo2 = new Turbo2<>();
+                            String sshInfoFormated = "";
+                            Map<String, Object> serverInfo = RedisBasicService.service.getServerInfo(redisConnectContext);
+                            if (redisConnectContext.getConnectTypeMode().equals(ConnectType.SSH)) {
+                                String localHost = "127.0.0.1";
+                                if (redisConnectContext.getRedisMode().equals(RedisMode.CLUSTER)) {
+                                    Partitions clusterPartitions = LettuceUtils.getRedisClusterPartitions(redisConnectContext);
+                                    sshInfoFormated = clusterPartitions.stream().map(clusterNode -> {
+                                        var uri = clusterNode.getUri();
+                                        Map<Integer, Integer> clusterLocalPort = redisConnectContext.getClusterLocalPort();
+                                        return String.format(SSH_MAPPING, localHost,
+                                                clusterLocalPort.get(uri.getPort()).toString(),
+                                                uri.getHost(),
+                                                uri.getPort(),
+                                                clusterNode.getFlags()
+                                        );
+                                    }).collect(Collectors.joining(""));
+                                } else {
+                                    sshInfoFormated = String.format(SSH_MAPPING, localHost,
+                                            redisConnectContext.getLocalPort(),
+                                            redisConnectContext.getHost(),
+                                            redisConnectContext.getPort()
+                                            , ""
+                                    );
+                                }
+                            } else {
+                                if (redisConnectContext.getRedisMode().equals(RedisMode.CLUSTER)) {
+                                    Partitions clusterPartitions = LettuceUtils.getRedisClusterPartitions(redisConnectContext);
+                                    sshInfoFormated = clusterPartitions.stream().map(clusterNode -> {
+                                        var uri = clusterNode.getUri();
+                                        return String.format(NORMAL_MAPPING,
+                                                uri.getHost(),
+                                                uri.getPort(),
+                                                clusterNode.getFlags()
+                                        );
+                                    }).collect(Collectors.joining(""));
+                                }
+                            }
+
+                            turbo2.setT1(String.format(FORMAT_MESSAGE,
+                                    redisConnectContext.getHost(),
+                                    redisConnectContext.getPort(),
+                                    redisConnectContext.getRedisMode(),
+                                    redisConnectContext.getConnectTypeMode(),
+                                    serverInfo.get("redis_version").toString(),
+                                    sshInfoFormated
+                            ));
+
+                            Set<LogInfoData> loginInfoData = Arrays.stream(INFO_SECTIONS)
+                                    .map(section -> {
+                                        try {
+                                            LogStatusHolder.ignoredLog();
+                                            Map<String, Object> infoData = RedisBasicService.service.getInfo(redisConnectContext, section);
+                                            return new LogInfoData(section, infoData);
+                                        } finally {
+                                            LogStatusHolder.clear();
+                                        }
+                                    }).collect(Collectors.toSet());
+                            turbo2.setT2(loginInfoData);
+                            return turbo2;
                         }
-                    }
-                });
+                        , (result, e) -> {
+                            if (e != null) {
+                                owner.displayException(e);
+                            } else {
+                                for (LogInfoData logInfoData : result.getT2()) {
+                                    updateTableModel(tableModels.get(logInfoData.getKey()), logInfoData.getInfoData());
+                                }
+                                textArea2.setText(result.getT1());
+                            }
+                        });
     }
+
 
     private void updateTableModel(DefaultTableModel model, Map<String, Object> data) {
         model.setRowCount(0);
@@ -162,7 +242,7 @@ public class RedisInfoView extends JPanel implements Runnable {
             try {
                 LogInfo logInfo = queue.take();
                 String format = format(logInfo);
-                RedisFrontUtils.runEDT(() -> textArea.append(format));
+                RedisFrontUtils.runEDT(() -> textArea1.append(format));
             } catch (Exception e) {
                 log.error(e.getMessage());
             }
