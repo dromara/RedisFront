@@ -34,10 +34,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.TabbedPaneUI;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -65,6 +62,7 @@ public class MainComponent extends JPanel {
     @Setter
     private Consumer<Integer> tabCloseEvent;
     private JLabel mode;
+    private String modeToolTip;
 
 
     public MainComponent(DrawerAnimationAction action, RedisFrontWidget owner) {
@@ -201,13 +199,12 @@ public class MainComponent extends JPanel {
 
                     String format = """
                             <html>
-                            <BR>
                             <B>Host: </B>%s<BR>
                             <B>Port: </B>%s<BR>
                             <B>Mode: </B>%s<BR>
                             <B>ConnectType: </B>%s<BR>
                             <B>RedisVersion：</B>%s<BR>
-                            -----------------------------------------------------------------------------------------------------<BR>
+                            <BR>
                             %s<BR>
                             </Html>
                             """;
@@ -263,11 +260,11 @@ public class MainComponent extends JPanel {
                     }
                     RedisFrontUtils.runEDT(() -> {
                         mode.setText(owner.$tr(redisConnectContext.getRedisMode().modeName));
-                        mode.setToolTipText(result);
+                        modeToolTip = result;
                     });
                 });
 
-                if (!executorServiceMap.containsKey(redisConnectContext.getId())) {
+                executorServiceMap.computeIfAbsent(redisConnectContext.getId(), _ -> {
                     RedisMonitor monitor = new RedisMonitor(owner, redisConnectContext);
                     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                     scheduler.scheduleAtFixedRate(() -> {
@@ -290,8 +287,8 @@ public class MainComponent extends JPanel {
                         }
 
                     }, 1, 3, TimeUnit.SECONDS);
-                    executorServiceMap.put(redisConnectContext.getId(), scheduler);
-                }
+                    return scheduler;
+                });
                 this.currentRedisConnectContext = redisConnectContext;
             }
 
@@ -311,6 +308,53 @@ public class MainComponent extends JPanel {
         mode.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         mode.setText("单机模式");
         mode.setToolTipText("单机模式");
+        mode.addMouseListener(new MouseAdapter() {
+            private JWindow window; // 复用 JWindow 实例
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (window == null) {
+                    window = new JWindow();
+                    window.setAlwaysOnTop(true);
+                    JPanel panel = new JPanel();
+                    panel.setLayout(new BorderLayout());
+                    panel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+                    JLabel infoLabel = new JLabel(modeToolTip);
+                    infoLabel.setBorder(new EmptyBorder(10, 10, 10, 10));
+                    panel.add(infoLabel, BorderLayout.CENTER);
+                    window.setContentPane(panel);
+                    window.pack();
+
+                    AWTEventListener eventListener = event -> {
+                        if (event instanceof MouseEvent mouseEvent) {
+                            if (mouseEvent.getID() == MouseEvent.MOUSE_CLICKED) {
+                                Point clickPoint = mouseEvent.getLocationOnScreen();
+                                Rectangle windowBounds = window.getBounds();
+                                if (!windowBounds.contains(clickPoint)) {
+                                    window.dispose();
+                                }
+                            }
+                        }
+                    };
+
+                    Toolkit.getDefaultToolkit().addAWTEventListener(eventListener, AWTEvent.MOUSE_EVENT_MASK);
+                }
+
+                Point location = e.getLocationOnScreen();
+                Dimension windowSize = window.getSize();
+                Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().getBounds();
+
+                if (location.x + windowSize.width > screenBounds.x + screenBounds.width) {
+                    location.x = screenBounds.x + screenBounds.width - windowSize.width;
+                }
+                if (location.y + windowSize.height > screenBounds.y + screenBounds.height) {
+                    location.y = screenBounds.y + screenBounds.height - windowSize.height;
+                }
+
+                window.setLocation(location);
+                window.setVisible(true);
+            }
+        });
         rightToolBar.add(mode, BorderLayout.WEST);
 
         JPanel horizontalBox = new JPanel();
