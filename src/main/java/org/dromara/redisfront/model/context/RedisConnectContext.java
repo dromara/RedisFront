@@ -1,6 +1,5 @@
 package org.dromara.redisfront.model.context;
 
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,7 +25,6 @@ import java.util.Map;
 @NoArgsConstructor
 public class RedisConnectContext implements Serializable, Cloneable {
 
-    private String key;
     private int id;
     private String title;
     private String host = "127.0.0.1";
@@ -45,10 +43,7 @@ public class RedisConnectContext implements Serializable, Cloneable {
     private Map<Integer, Integer> clusterLocalPort;
 
     public String key() {
-        if (StrUtil.isEmpty(key)) {
-            key = MD5Util.encrypt(id + ":" + host + ":" + localHost + ":" + port + ":" + localPort + ":" + username + ":" + password + ":" + sslInfo + ":" + sshInfo + ":" + database);
-        }
-        return key;
+        return MD5Util.encrypt(id + ":" + host + ":" + localHost + ":" + port + ":" + localPort + ":" + username + ":" + password + ":" + sslInfo + ":" + sshInfo + ":" + database);
     }
 
     public ConnectDetailEntity toEntity() {
