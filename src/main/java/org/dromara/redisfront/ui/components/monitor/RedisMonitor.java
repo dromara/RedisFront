@@ -114,7 +114,6 @@ public class RedisMonitor {
             LogStatusHolder.clear();
             double currentInputBytes = Double.parseDouble(currentStats.get("total_net_input_bytes").toString());
             double currentOutputBytes = Double.parseDouble(currentStats.get("total_net_output_bytes").toString());
-            currentStats.clear();
             // 计算时间差（单位：秒）
             long currentTime = System.nanoTime();
             double elapsedSeconds = TimeUnit.NANOSECONDS.toSeconds(currentTime - lastIoCheckTime);
