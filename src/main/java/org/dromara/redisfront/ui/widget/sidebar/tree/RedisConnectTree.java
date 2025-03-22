@@ -189,7 +189,7 @@ public class RedisConnectTree extends JXTree {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
+                if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1) {
                     TreePath selectionPath = getSelectionPath();
                     if (selectionPath != null) {
                         openConnectHandler(selectionPath);
