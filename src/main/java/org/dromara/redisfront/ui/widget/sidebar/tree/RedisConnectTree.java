@@ -407,7 +407,7 @@ public class RedisConnectTree extends JXTree {
         };
         treePopupMenu.add(addConnectGroupMenuItem);
 
-        JMenuItem addConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.openConnect")) {
+        JMenuItem addConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.addConnect")) {
             {
                 addActionListener(_ -> {
                     AddConnectDialog.getInstance(owner).showNewConnectDialog(null);
