@@ -4,6 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.db.DbUtil;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
+import com.formdev.flatlaf.util.SystemInfo;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.quickswing.events.QSEvent;
@@ -21,6 +22,7 @@ import raven.toast.Notifications;
 
 import javax.sql.DataSource;
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.concurrent.Callable;
@@ -49,6 +51,9 @@ public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, Redi
 
     @Override
     protected RedisFrontWidget createApplication(String[] args, RedisFrontPrefs preferences) {
+        if(SystemInfo.isWindows) {
+            setUIFont(new Font("Arial Unicode MS", Font.PLAIN, 13));
+        }
         ToolTipManager.sharedInstance().setInitialDelay(5);
         ToolTipManager.sharedInstance().setLightWeightPopupEnabled(true);
         FlatLaf.registerCustomDefaultsSource(Constants.APP_THEME_PACKAGE);
@@ -57,6 +62,12 @@ public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, Redi
         return new RedisFrontWidget(this, Constants.APP_NAME, preferences);
     }
 
+    private static void setUIFont(Font font) {
+        UIManager.put("TextArea.font", font);
+        UIManager.put("TextPane.font", font);
+        UIManager.put("EditorPane.font", font);
+        UIManager.put("TextField.font", font);
+    }
 
     @Override
     protected RedisFrontPrefs loadPreferences(String[] args) {
