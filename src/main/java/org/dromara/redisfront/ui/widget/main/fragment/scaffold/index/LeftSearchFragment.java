@@ -1,6 +1,7 @@
 package org.dromara.redisfront.ui.widget.main.fragment.scaffold.index;
 
 import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.StrUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.components.FlatButton;
 import com.formdev.flatlaf.extras.components.FlatToggleButton;
@@ -177,6 +178,9 @@ public class LeftSearchFragment {
 
         deleteAllBtn.addActionListener(_ -> {
             String operation = JOptionPane.showInputDialog(owner.$tr("DataSearchForm.showInputDialog.title") + "\n “flushdb” or “flushall” ");
+            if (StrUtil.isEmpty(operation)) {
+                return;
+            }
             SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
                 if (RedisFrontUtils.equal(operation, "flushdb")) {
                     RedisBasicService.service.flushdb(redisConnectContext);
@@ -191,7 +195,6 @@ public class LeftSearchFragment {
                 }
                 refreshBtn.doClick();
             });
-
         });
         deleteAllBtn.setIcon(Icons.DELETE_B_ICON);
 
