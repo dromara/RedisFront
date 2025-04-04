@@ -1,5 +1,6 @@
 package org.dromara.redisfront;
 
+import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.db.DbUtil;
 import com.formdev.flatlaf.FlatLaf;
@@ -119,7 +120,7 @@ public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, Redi
         GlassPanePopup.install(application);
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             if (throwable instanceof RedisFrontException redisFrontException) {
-                Notifications.getInstance().show(Notifications.Type.ERROR, redisFrontException.getMessage());
+                Notifications.getInstance().show(Notifications.Type.ERROR, ExceptionUtil.getRootCauseMessage(redisFrontException));
             } else {
                 log.error("Thread {}", thread.getName(), throwable);
             }

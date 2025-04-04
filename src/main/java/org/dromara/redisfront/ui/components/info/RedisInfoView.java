@@ -149,7 +149,7 @@ public class RedisInfoView extends JPanel implements Runnable {
 
     public void refreshInfo() {
         SyncLoadingDialog
-                .builder(owner, "load info data")
+                .builder(owner, "refreshing Redis Info")
                 .showSyncLoadingDialog(() -> {
                             Turbo2<String, Set<LogInfoData>> turbo2 = new Turbo2<>();
                             String sshInfoFormated = "";
