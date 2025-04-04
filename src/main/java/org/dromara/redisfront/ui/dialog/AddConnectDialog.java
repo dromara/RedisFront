@@ -1,5 +1,6 @@
 package org.dromara.redisfront.ui.dialog;
 
+import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.extra.ssh.JschRuntimeException;
 import com.formdev.flatlaf.util.StringUtils;
 import com.intellij.uiDesigner.core.GridConstraints;
@@ -274,12 +275,12 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
                 if (exception.getCause() instanceof JschRuntimeException jschRuntimeException) {
                     getOwner().displayException($tr("AddConnectDialog.test.fail.message"), jschRuntimeException.getCause());
                 } else {
-                    getOwner().displayException($tr("AddConnectDialog.test.fail.message"), exception);
+                    getOwner().displayException($tr("AddConnectDialog.test.fail.message"), ExceptionUtil.getRootCause(exception));
                 }
             } else if (exception instanceof RedisConnectionException) {
                 getOwner().displayException($tr("AddConnectDialog.test.fail.message"), exception);
             } else {
-                getOwner().displayException($tr("AddConnectDialog.test.fail.message"), exception);
+                getOwner().displayException($tr("AddConnectDialog.test.fail.message"), ExceptionUtil.getRootCause(exception));
             }
         }
         return connectSuccess;

@@ -144,12 +144,13 @@ public class RedisConnectionPoolManager {
             return pool.borrowObject();
 
         } catch (Exception e) {
+            log.error("Get connection failed: {}", poolKey, e);
             cleanupContextPool(context);
             if (ExceptionUtil.isCausedBy(e, RedisCommandExecutionException.class)) {
                 Throwable causedBy = ExceptionUtil.getCausedBy(e, RedisCommandExecutionException.class);
                 throw new RedisFrontException(causedBy.getMessage());
             } else {
-                throw new RedisFrontException("Get connection failed", e, false);
+                throw new RedisFrontException(e, false);
             }
         }
     }
