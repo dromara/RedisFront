@@ -18,6 +18,7 @@ import java.util.List;
 public class ConnectGroupDao {
     private final DataSource datasource;
     public static final String TABLE_NAME = "connect_group";
+
     public static ConnectGroupDao newInstance(DataSource datasource) {
         return new ConnectGroupDao(datasource);
     }
@@ -39,21 +40,21 @@ public class ConnectGroupDao {
         return entity.toBean(ConnectGroupEntity.class);
     }
 
-    public void save(String groupName) throws SQLException {
+    public Entity save(String groupName) throws SQLException {
         Entity connectGroup = Entity.create(TABLE_NAME);
         connectGroup.set("group_name", groupName);
         DbUtil.use(datasource).insert(connectGroup);
+        return connectGroup;
     }
 
-    public void update(Object id,String groupName) throws SQLException {
+    public void update(Object id, String groupName) throws SQLException {
         DbUtil.use(datasource).update(Entity.create(TABLE_NAME)
-                .set("group_name", groupName),
+                        .set("group_name", groupName),
                 Entity.create(TABLE_NAME)
-                .set("group_id", id));
+                        .set("group_id", id));
     }
 
     public void delete(Object id) throws SQLException {
         DbUtil.use(datasource).del(Entity.create(TABLE_NAME).set("group_id", id));
     }
-
 }

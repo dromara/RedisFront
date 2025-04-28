@@ -2,6 +2,7 @@ package org.dromara.redisfront.dao;
 
 import cn.hutool.db.DbUtil;
 import cn.hutool.db.Entity;
+import cn.hutool.json.JSONUtil;
 import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 
 import javax.sql.DataSource;
@@ -28,10 +29,14 @@ public class ConnectDetailDao {
     }
 
     public List<ConnectDetailEntity> loadAll() throws SQLException {
+        return DbUtil.use(datasource).findAll(Entity.create(TABLE_NAME), ConnectDetailEntity.class);
+    }
+
+    public List<ConnectDetailEntity> loadNoGroup() throws SQLException {
         return DbUtil.use(datasource).findAll(Entity.create(TABLE_NAME).set("group_id", -1), ConnectDetailEntity.class);
     }
 
-    public List<ConnectDetailEntity> loadAll(Object id) throws SQLException {
+    public List<ConnectDetailEntity> loadByGroup(Object id) throws SQLException {
         return DbUtil.use(datasource).findAll(Entity.create(TABLE_NAME).set("group_id", id), ConnectDetailEntity.class);
     }
 
@@ -54,8 +59,8 @@ public class ConnectDetailDao {
     public void delete(Object id) throws SQLException {
         DbUtil.use(datasource).del(TABLE_NAME, "id", id);
     }
+
     public void deleteByGroupId(Object id) throws SQLException {
         DbUtil.use(datasource).del(TABLE_NAME, "group_id", id);
     }
-
 }
