@@ -33,7 +33,7 @@ public class RedisFrontEventListener extends QSEventListener<RedisFrontWidget> {
                 }
             }
         } else {
-            listener.forEach((_, eventConsumer) -> eventConsumer.forEach((_, consumer) -> consumer.accept(qsEvent)));
+            listener.forEach((id, eventConsumer) -> eventConsumer.forEach((key, consumer) -> consumer.accept(qsEvent)));
         }
     }
 

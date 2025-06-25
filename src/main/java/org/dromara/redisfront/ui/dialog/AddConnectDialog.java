@@ -136,14 +136,14 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
     }
 
     private void initializeComponents() {
-        this.contentPane.registerKeyboardAction(_ -> dispose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        this.contentPane.registerKeyboardAction(e -> dispose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         this.sshPrivateKeyFile.setVisible(enableSshPrivateKey.isSelected());
         this.sshPrivateKeyBtn.setVisible(enableSshPrivateKey.isSelected());
 
         openBtn.addActionListener(this::openActionPerformed);
         storageBtn.addActionListener(this::storageActionPerformed);
 
-        showPasswordCheckBox.addActionListener(_ -> {
+        showPasswordCheckBox.addActionListener(e -> {
             if (showPasswordCheckBox.isSelected()) {
                 passwordField.setEchoChar((char) 0);
             } else {
@@ -151,7 +151,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             }
         });
 
-        showShhPassword.addActionListener(_ -> {
+        showShhPassword.addActionListener(e -> {
             if (showShhPassword.isSelected()) {
                 sshPasswordField.setEchoChar((char) 0);
             } else {
@@ -159,7 +159,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             }
         });
 
-        showSslPassword.addActionListener(_ -> {
+        showSslPassword.addActionListener(e -> {
             if (showPasswordCheckBox.isSelected()) {
                 sslPasswordField.setEchoChar((char) 0);
             } else {
@@ -167,7 +167,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             }
         });
 
-        enableSshPrivateKey.addActionListener(_ -> {
+        enableSshPrivateKey.addActionListener(e -> {
             if (enableSshPrivateKey.isSelected()) {
                 setSize(new Dimension(getWidth(), getHeight() + 20));
             } else {
@@ -177,7 +177,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             sshPrivateKeyBtn.setVisible(enableSshPrivateKey.isSelected());
         });
 
-        enableSSLBtn.addActionListener(_ -> {
+        enableSSLBtn.addActionListener(e -> {
             if (enableSSHBtn.isSelected()) {
                 enableSSHBtn.setSelected(false);
                 setSize(new Dimension(getWidth(), getHeight() - 120));
@@ -191,7 +191,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             }
         });
 
-        enableSSHBtn.addActionListener(_ -> {
+        enableSSHBtn.addActionListener(e -> {
             if (enableSSLBtn.isSelected()) {
                 enableSSLBtn.setSelected(false);
                 setSize(new Dimension(getWidth(), getHeight() - 130));
@@ -236,7 +236,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             }
         });
 
-        testBtn.addActionListener(_ -> testConnect());
+        testBtn.addActionListener(e -> testConnect());
     }
 
     private Boolean testConnect() {

@@ -64,8 +64,8 @@ public class AddKeyDialog extends QSDialog<RedisFrontWidget> {
         this.setMinimumSize(new Dimension(500, 400));
         this.redisFrontContext = (RedisFrontContext) redisFrontWidget.getContext();
         this.redisConnectContext = redisConnectContext;
-        this.buttonOK.addActionListener(_ -> onOK());
-        this.buttonCancel.addActionListener(_ -> onCancel());
+        this.buttonOK.addActionListener(e -> onOK());
+        this.buttonCancel.addActionListener(e -> onCancel());
         this.setContentPane(contentPane);
         this.getRootPane().setDefaultButton(buttonOK);
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -75,7 +75,7 @@ public class AddKeyDialog extends QSDialog<RedisFrontWidget> {
             }
         });
 
-        this.contentPane.registerKeyboardAction(_ -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        this.contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         if (RedisFrontUtils.isNotEmpty(parent)) {
             var separatorLabel = new JLabel();
@@ -125,7 +125,7 @@ public class AddKeyDialog extends QSDialog<RedisFrontWidget> {
 
     private void initComponentListener() {
 
-        this.ttlSpinner.addChangeListener(_ -> {
+        this.ttlSpinner.addChangeListener(changeEvent -> {
             if (((Integer) ttlSpinner.getValue()) < 0) {
                 this.ttlSpinner.setValue(-1);
             }
@@ -134,7 +134,7 @@ public class AddKeyDialog extends QSDialog<RedisFrontWidget> {
             }
         });
 
-        this.keyTypeComboBox.addActionListener(_ -> {
+        this.keyTypeComboBox.addActionListener(actionEvent -> {
             String selectItem = (String) keyTypeComboBox.getSelectedItem();
             if (RedisFrontUtils.equal(KeyTypeEnum.HASH.typeName(), selectItem)) {
                 this.hashKeyField.setVisible(true);

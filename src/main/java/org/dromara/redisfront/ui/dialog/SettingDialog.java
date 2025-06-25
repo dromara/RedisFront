@@ -61,7 +61,7 @@ public class SettingDialog extends QSDialog<RedisFrontWidget> {
                 onCancel();
             }
         });
-        contentPane.registerKeyboardAction(_ -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         initFontComboBox();
         initFontSizeComboBox();
         initLanguageComboBox();

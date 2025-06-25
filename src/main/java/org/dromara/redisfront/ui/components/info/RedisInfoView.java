@@ -232,7 +232,7 @@ public class RedisInfoView extends JPanel implements Runnable {
 
     private void addRefreshButton() {
         JButton refreshButton = new JButton("刷新");
-        refreshButton.addActionListener(_ -> refreshInfo());
+        refreshButton.addActionListener(e -> refreshInfo());
         add(refreshButton, BorderLayout.NORTH);
     }
 
