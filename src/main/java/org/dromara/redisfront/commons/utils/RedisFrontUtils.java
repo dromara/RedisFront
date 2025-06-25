@@ -18,10 +18,8 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
-import java.awt.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.*;
 
 /**
@@ -124,15 +122,9 @@ public class RedisFrontUtils {
         FlatLaf.revalidateAndRepaintAllFramesAndDialogs();
     }
 
-    public static void removeAllComponent(JComponent component) {
-        for (Component c : component.getComponents()) {
-            component.remove(c);
-        }
-        revalidateAndRepaintAllFramesAndDialogs();
-    }
 
-    public static java.util.List<Object> saveExpandedPaths(JXTree tree) {
-        java.util.List<Object> savedPaths = new ArrayList<>();
+    public static List<Object> saveExpandedPaths(JXTree tree) {
+        List<Object> savedPaths = new ArrayList<>();
         TreePath rootPath = new TreePath(tree.getModel().getRoot());
         Enumeration<TreePath> expandedPaths = tree.getExpandedDescendants(rootPath);
         if (expandedPaths != null) {
@@ -155,7 +147,7 @@ public class RedisFrontUtils {
     }
 
     private static void restoreExpandedPathsRecursive(JTree tree, DefaultMutableTreeNode node,
-            List<Object> savedPaths) {
+                                                      List<Object> savedPaths) {
         for (int i = 0; i < node.getChildCount(); i++) {
             DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(i);
             TreePath treePath = new TreePath(child.getPath());
@@ -174,7 +166,7 @@ public class RedisFrontUtils {
             try {
                 SwingUtilities.invokeAndWait(runnable);
             } catch (Exception e) {
-                throw new RedisFrontException(e.getMessage());
+                throw new RedisFrontException(e.getMessage(), e, false);
             }
         }
     }
