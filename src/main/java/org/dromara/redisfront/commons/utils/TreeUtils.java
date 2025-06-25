@@ -43,7 +43,6 @@ public class TreeUtils {
                 StringTreeMap child = node.get(cell);
                 if (child != null && child.isLeafNode && node.size() > 1) {
                     child = node.get(TOKEN + cell);
-                    System.out.println();
                 }
                 if (child == null) {
                     child = new StringTreeMap();
@@ -57,7 +56,7 @@ public class TreeUtils {
                         if (isLeaf) {
                             child.markLeafNode();
                         }
-                        //解决 分组与叶子节点 同名问题
+                        // 解决 分组与叶子节点 同名问题
                         node.put(TOKEN + cell, child);
                     }
 
@@ -88,7 +87,8 @@ public class TreeUtils {
      * @param parentKey     parentKey
      * @return Set<TreeNodeInfo>
      */
-    public static Set<TreeNodeInfo> convertTreeNodeInfoSet(StringTreeMap stringTreeMap, String parentKey, String delim) {
+    public static Set<TreeNodeInfo> convertTreeNodeInfoSet(StringTreeMap stringTreeMap, String parentKey,
+            String delim) {
         return stringTreeMap.entrySet().stream()
                 .map(entry -> {
                     String key = entry.getKey().replace(TOKEN, "");
@@ -109,7 +109,6 @@ public class TreeUtils {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-
     @Getter
     public static class StringTreeMap extends LinkedHashMap<String, StringTreeMap> {
         @Serial
@@ -121,6 +120,5 @@ public class TreeUtils {
             this.isLeafNode = true;
         }
     }
-
 
 }
