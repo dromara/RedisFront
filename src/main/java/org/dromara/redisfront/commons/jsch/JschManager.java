@@ -58,7 +58,7 @@ public class JschManager {
     private void createSession(RedisConnectContext redisConnectContext) {
         if (RedisFrontUtils.isNotNull(redisConnectContext.getSshInfo())) {
             try {
-                SESSION_MAP.compute(redisConnectContext.getId(), (_, session) -> {
+                SESSION_MAP.compute(redisConnectContext.getId(), (id, session) -> {
                     if (session != null && session.isConnected()) {
                         return session;
                     }
@@ -94,7 +94,7 @@ public class JschManager {
     }
 
     private void rebindSession(RedisConnectContext redisConnectContext) {
-        SESSION_MAP.compute(redisConnectContext.getId(), (_, session) -> {
+        SESSION_MAP.compute(redisConnectContext.getId(), (id, session) -> {
             if (session != null && session.isConnected()) {
                 if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
                     redisConnectContext.getClusterLocalPort().forEach((remotePort, localPort) -> {
@@ -129,7 +129,7 @@ public class JschManager {
     private void removeTmpLocalPort(RedisConnectContext redisConnectContext) {
         if (RedisFrontUtils.equal(RedisMode.CLUSTER, redisConnectContext.getRedisMode())) {
             if (CollUtil.isNotEmpty(redisConnectContext.getClusterLocalPort())) {
-                redisConnectContext.getClusterLocalPort().forEach((_, v) -> PORT_SET.remove(v));
+                redisConnectContext.getClusterLocalPort().forEach((k, v) -> PORT_SET.remove(v));
             }
         } else {
             PORT_SET.remove(redisConnectContext.getLocalPort());

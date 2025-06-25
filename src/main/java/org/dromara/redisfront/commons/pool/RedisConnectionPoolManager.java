@@ -131,7 +131,7 @@ public class RedisConnectionPoolManager {
                                        ConnectionSupplier<T> supplier) {
         String poolKey = context.key();
         try {
-            GenericObjectPool<T> pool = poolMap.computeIfAbsent(poolKey, _ -> {
+            GenericObjectPool<T> pool = poolMap.computeIfAbsent(poolKey, id -> {
                 GenericObjectPoolConfig<T> config = new GenericObjectPoolConfig<>();
                 config.setMaxTotal(MAX_TOTAL);
                 config.setMaxIdle(MAX_IDLE);

@@ -70,8 +70,8 @@ val requireModules = listOf(
     "java.naming"
 )
 
-if (JavaVersion.current() < JavaVersion.VERSION_22)
-    throw RuntimeException("compile required Java ${JavaVersion.VERSION_22}, current Java ${JavaVersion.current()}")
+if (JavaVersion.current() < JavaVersion.VERSION_21)
+    throw RuntimeException("compile required Java ${JavaVersion.VERSION_21}, current Java ${JavaVersion.current()}")
 
 val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 

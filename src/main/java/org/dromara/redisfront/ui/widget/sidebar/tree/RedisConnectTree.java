@@ -233,7 +233,7 @@ public class RedisConnectTree extends JXTree {
                 "[dark]background:darken(#FFFFFF,30%);");
         JMenuItem addConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.addConnect")) {
             {
-                addActionListener(_ -> {
+                addActionListener(e -> {
                     TreePath selectionPath = getSelectionPath();
                     if (selectionPath == null) {
                         return;
@@ -250,7 +250,7 @@ public class RedisConnectTree extends JXTree {
 
         JMenuItem updateConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.editConnectGroup")) {
             {
-                addActionListener(_ -> {
+                addActionListener(actionEvent -> {
                     TreePath selectionPath = getSelectionPath();
                     if (selectionPath == null) {
                         return;
@@ -266,7 +266,7 @@ public class RedisConnectTree extends JXTree {
                             ConnectGroupDao.newInstance(datasource).update(redisConnectTreeItem.id(), value);
                             context.getEventBus().publish(new RefreshConnectTreeEvent(null));
                             return null;
-                        }, (_, exception) -> {
+                        }, (o, exception) -> {
                             if (exception != null) {
                                 log.error(exception.getMessage());
                                 Notifications.getInstance().show(Notifications.Type.ERROR, exception.getMessage());
@@ -281,7 +281,7 @@ public class RedisConnectTree extends JXTree {
         treeNodeGroupPopupMenu.add(updateConnectMenuItem);
         JMenuItem deleteConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.deleteConnectGroup")) {
             {
-                addActionListener(_ -> {
+                addActionListener(actionEvent -> {
                     TreePath selectionPath = getSelectionPath();
                     if (selectionPath == null) {
                         return;
@@ -293,7 +293,7 @@ public class RedisConnectTree extends JXTree {
                             ConnectGroupDao.newInstance(datasource).delete(redisConnectTreeItem.id());
                             context.getEventBus().publish(new RefreshConnectTreeEvent(redisConnectTreeItem.id()));
                             return null;
-                        }, (_, exception) -> {
+                        }, (o, exception) -> {
                             if (exception != null) {
                                 log.error(exception.getMessage());
                                 Notifications.getInstance().show(Notifications.Type.ERROR, exception.getMessage());
@@ -315,7 +315,7 @@ public class RedisConnectTree extends JXTree {
 
         JMenuItem openConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.openConnect")) {
             {
-                addActionListener(_ -> {
+                addActionListener(actionEvent -> {
                     TreePath selectionPath = getSelectionPath();
                     if (selectionPath == null) {
                         return;
@@ -330,7 +330,7 @@ public class RedisConnectTree extends JXTree {
 
         JMenuItem editConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.editConnect")) {
             {
-                addActionListener(_ -> {
+                addActionListener(actionEvent -> {
                     TreePath selectionPath = getSelectionPath();
                     if (selectionPath == null) {
                         return;
@@ -346,7 +346,7 @@ public class RedisConnectTree extends JXTree {
 
         JMenuItem deleteConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.deleteConnect")) {
             {
-                addActionListener(_ -> {
+                addActionListener(a -> {
                     TreePath selectionPath = getSelectionPath();
                     if (selectionPath == null) {
                         return;
@@ -357,7 +357,7 @@ public class RedisConnectTree extends JXTree {
                             ConnectDetailDao.newInstance(datasource).delete(redisConnectTreeItem.id());
                             context.getEventBus().publish(new RefreshConnectTreeEvent(redisConnectTreeItem));
                             return null;
-                        }, (_, exception) -> {
+                        }, (r, exception) -> {
                             if (exception != null) {
                                 log.error(exception.getMessage());
                                 Notifications.getInstance().show(Notifications.Type.ERROR, exception.getMessage());
@@ -378,7 +378,7 @@ public class RedisConnectTree extends JXTree {
                 "[dark]background:darken(#FFFFFF,30%);");
         JMenuItem addConnectGroupMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.addConnectGroup")) {
             {
-                addActionListener(_ -> {
+                addActionListener(a -> {
                     context.taskExecute(() -> ConnectGroupDao.newInstance(datasource).count(), (count, exp) -> {
                         if (exp != null) {
                             log.error(exp.getMessage());
@@ -397,7 +397,7 @@ public class RedisConnectTree extends JXTree {
                             ConnectGroupDao.newInstance(datasource).save(value);
                             context.getEventBus().publish(new RefreshConnectTreeEvent(null));
                             return null;
-                        }, (_, exception) -> {
+                        }, (r, exception) -> {
                             if (exception != null) {
                                 log.error(exception.getMessage());
                                 Notifications.getInstance().show(Notifications.Type.ERROR, exception.getMessage());
@@ -413,7 +413,7 @@ public class RedisConnectTree extends JXTree {
 
         JMenuItem addConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.addConnect")) {
             {
-                addActionListener(_ -> {
+                addActionListener(actionEvent -> {
                     AddConnectDialog.getInstance(owner).showNewConnectDialog(null);
                 });
             }
@@ -459,7 +459,7 @@ public class RedisConnectTree extends JXTree {
                                 }
                                 context.getEventBus().publish(new RefreshConnectTreeEvent(null));
                                 return null;
-                            }, (_, exception) -> {
+                            }, (r, exception) -> {
                                 if (exception != null) {
                                     log.error(exception.getMessage());
                                     Notifications.getInstance().show(Notifications.Type.ERROR, exception.getMessage());

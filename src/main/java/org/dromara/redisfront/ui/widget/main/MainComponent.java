@@ -100,7 +100,7 @@ public class MainComponent extends JPanel {
         var closeDrawerBtn = new JButton(Icons.DRAWER_SHOW_OR_CLOSE_ICON);
         closeDrawerBtn.addActionListener(action);
         toolBar.add(closeDrawerBtn);
-        action.setBeforeProcess(_ -> closeDrawerBtn.setVisible(false));
+        action.setBeforeProcess(e -> closeDrawerBtn.setVisible(false));
         action.setAfterProcess(state -> {
             if (SystemInfo.isMacOS) {
                 if (owner.isFullScreen()) {
@@ -185,7 +185,7 @@ public class MainComponent extends JPanel {
             topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_INSETS, new Insets(0, 0, 0, 130));
         }
 
-        topTabbedPane.addChangeListener(_ -> {
+        topTabbedPane.addChangeListener(changeEvent -> {
             if (topTabbedPane.getSelectedIndex() == -1) {
                 return;
             }
@@ -195,7 +195,7 @@ public class MainComponent extends JPanel {
                     mode.setText(owner.$tr(redisConnectContext.getRedisMode().modeName));
                     mode.setToolTipText(redisConnectContext.getHost() + " | " + owner.$tr(redisConnectContext.getRedisMode().modeName));
                 });
-                executorServiceMap.computeIfAbsent(redisConnectContext.getId(), _ -> {
+                executorServiceMap.computeIfAbsent(redisConnectContext.getId(), id -> {
                     RedisMonitor monitor = new RedisMonitor(owner, redisConnectContext);
                     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                     scheduler.scheduleAtFixedRate(() -> {
@@ -213,8 +213,8 @@ public class MainComponent extends JPanel {
                                     network.setToolTipText(redisConnectContext.getHost() + " | NetWork Usage => " + usage.getNetwork());
                                 });
                             }
-                        } catch (Exception e) {
-                            log.error("获取Redis使用信息失败", e);
+                        } catch (Exception exception) {
+                            log.error("获取Redis使用信息失败", exception);
                         }
 
                     }, 1, 3, TimeUnit.SECONDS);
