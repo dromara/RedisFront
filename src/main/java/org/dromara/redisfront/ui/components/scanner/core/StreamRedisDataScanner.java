@@ -25,7 +25,6 @@ public class StreamRedisDataScanner extends AbstractRedisDataScanner<StreamMessa
 
     private String key;
     private StreamTableModel streamTableModel;
-    private Long len;
     private String dataSize;
     private String loadSize;
     private Boolean finished;
@@ -51,8 +50,8 @@ public class StreamRedisDataScanner extends AbstractRedisDataScanner<StreamMessa
 
         var nextCursor = start + scanContext.getLimit();
 
-        if (nextCursor >= len) {
-            scanContext.setScanCursor(new ScanCursor(String.valueOf(len), true));
+        if (nextCursor >= getLen()) {
+            scanContext.setScanCursor(new ScanCursor(String.valueOf(getLen()), true));
         } else {
             scanContext.setScanCursor(new ScanCursor(String.valueOf(nextCursor), false));
         }
