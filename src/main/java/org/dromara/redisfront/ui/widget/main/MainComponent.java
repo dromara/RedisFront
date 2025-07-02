@@ -237,8 +237,8 @@ public class MainComponent extends JPanel {
 
         mode = new JLabel(Icons.MODE_ICON);
         mode.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        mode.setText("单机模式");
-        mode.setToolTipText("单机模式");
+        mode.setText(getOwner().$tr("MainComponent.Text"));
+        mode.setToolTipText(getOwner().$tr("MainComponent.TipText"));
         rightToolBar.add(mode, BorderLayout.WEST);
 
         JPanel horizontalBox = new JPanel();

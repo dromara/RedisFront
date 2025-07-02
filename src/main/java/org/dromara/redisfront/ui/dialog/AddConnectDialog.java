@@ -110,7 +110,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             this.groupId = -1;
         }
         this.detailId = detail.getId();
-        this.setTitle("编辑连接 【" + detail.getName() + "】");
+        this.setTitle(String.format(getOwner().$tr("AddConnectDialog.title1"), detail.getName()));
         this.populateConnectInfo(detail.getConnectContext());
         this.setLocationRelativeTo(null);
         this.setVisible(true);
@@ -215,7 +215,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             public void mouseClicked(MouseEvent e) {
                 var fileChooser = new JFileChooser();
                 fileChooser.setFileFilter(new FileNameExtensionFilter("*.jks", "pem", "jks"));
-                fileChooser.showDialog(AddConnectDialog.this, "选择公钥文件");
+                fileChooser.showDialog(AddConnectDialog.this, getOwner().$tr("AddConnectDialog.FileChooser.sshPublicKey.btn"));
                 var selectedFile = fileChooser.getSelectedFile();
                 if (RedisFrontUtils.isNotNull(selectedFile)) {
                     publicKeyField.setText(selectedFile.getAbsolutePath());

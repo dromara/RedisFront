@@ -223,7 +223,7 @@ public class AddKeyDialog extends QSDialog<RedisFrontWidget> {
                 var redisVersion = serverInfo.get("redis_version");
                 var x = redisVersion.toString().split("\\.")[0];
                 if (Integer.parseInt(x) < 5) {
-                    throw new RedisFrontException("Redis版本过低，不支持Stream - [ 当前版本：" + redisVersion + " ]");
+                    throw new RedisFrontException(getOwner().$tr("AddKeyDialog.redisVersion.text"));
                 } else if (JSONUtil.isTypeJSON(value)) {
                     HashMap<String, String> bodyMap = new HashMap<>();
                     JSONUtil.parseObj(value).forEach((key1, value1) -> bodyMap.put(key1, value1.toString()));
@@ -233,7 +233,7 @@ public class AddKeyDialog extends QSDialog<RedisFrontWidget> {
                         RedisStreamService.service.xadd(redisConnectContext, streamField.getText(), key, bodyMap);
                     }
                 } else {
-                    RedisFrontException redisFrontException = new RedisFrontException("stream 请输入JSON格式数据！");
+                    RedisFrontException redisFrontException = new RedisFrontException(getOwner().$tr("AddKeyDialog.requireType.text"));
                     redisFrontException.setComponent(this.keyValueField);
                     throw redisFrontException;
                 }

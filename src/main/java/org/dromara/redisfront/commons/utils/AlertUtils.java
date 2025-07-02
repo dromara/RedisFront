@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * DialogUtil
+ * AlertUtils
  *
  * @author Jin
  */
