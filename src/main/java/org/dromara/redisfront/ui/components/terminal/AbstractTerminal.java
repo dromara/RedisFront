@@ -59,7 +59,7 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
 
         JPopupMenu jPopupMenu = new JPopupMenu();
         JMenuItem menuItem = new JMenuItem("清空");
-        menuItem.addActionListener(e -> {
+        menuItem.addActionListener(ignore -> {
             terminal.setText("");
             this.print("\n");
             this.print(buildPrompt());

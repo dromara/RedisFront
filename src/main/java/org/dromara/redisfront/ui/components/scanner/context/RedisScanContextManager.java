@@ -7,7 +7,7 @@ public class RedisScanContextManager<T> {
     private final Map<String, RedisScanContext<T>> contexts = new LinkedHashMap<>();
     
     public RedisScanContext<T> getContext(String key) {
-        return contexts.computeIfAbsent(key, e -> new RedisScanContext<>());
+        return contexts.computeIfAbsent(key, ignore -> new RedisScanContext<>());
     }
     
     public void reset(String key) {

@@ -39,8 +39,8 @@ public class ThemesChangePanel extends JPanel {
                 + "background:darken($RedisFront.main.background,5%)");
         JButton buttonLight = new JButton(createIcon("svg/light.svg"));
         JButton buttonDark = new JButton(createIcon("svg/dark.svg"));
-        buttonLight.addActionListener(e -> changeMode(false));
-        buttonDark.addActionListener(e -> changeMode(true));
+        buttonLight.addActionListener(ignore -> changeMode(false));
+        buttonDark.addActionListener(ignore -> changeMode(true));
         buttonLight.putClientProperty(FlatClientProperties.STYLE, "arc:999;"
                 + "[dark]background:null;"
                 + "[light]background:$RedisFront.main.background;"

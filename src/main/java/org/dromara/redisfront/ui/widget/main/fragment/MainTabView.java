@@ -126,7 +126,7 @@ public class MainTabView extends JTabbedPane {
         JButton button = new JButton(Icons.REDIS_INFO_ICON_24x24);
         button.setToolTipText("More Info");
         JDialog infoDialog = new JDialog(owner, redisConnectContext.getHost());
-        button.addActionListener(e -> {
+        button.addActionListener(ignore -> {
             redisInfoView.refreshInfo();
             infoDialog.setContentPane(redisInfoView);
             infoDialog.setSize(800, 600);

@@ -29,7 +29,7 @@ class SyncLoadingWaiter<T> extends SwingWorker<T, Object> {
     public SyncLoadingWaiter(SyncLoadingDialog syncLoadingDialog) {
         this.syncLoadingDialog = syncLoadingDialog;
         this.progressCount = new AtomicInteger(0);
-        this.timer = new Timer(TIMER_DELAY_MS, e -> updateProgress());
+        this.timer = new Timer(TIMER_DELAY_MS, ignore -> updateProgress());
         initPropertyChangeListener();
     }
     private void initPropertyChangeListener() {

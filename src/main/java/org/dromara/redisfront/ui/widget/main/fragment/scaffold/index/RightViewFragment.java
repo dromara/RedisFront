@@ -320,7 +320,7 @@ public class RightViewFragment {
                 default -> stringDataFetcher.fetchData(key);
             }
             return 0;
-        }, (r, e) -> {
+        }, (ignore,e) -> {
             if (e != null) {
                 Notifications.getInstance().show(Notifications.Type.ERROR, e.getMessage());
                 return;
@@ -442,7 +442,7 @@ public class RightViewFragment {
         jComboBox = new JComboBox<>();
         jComboBox.addItem(SyntaxConstants.SYNTAX_STYLE_NONE);
         jComboBox.addItem(SyntaxConstants.SYNTAX_STYLE_JSON);
-        jComboBox.addActionListener(actionEvent -> {
+        jComboBox.addActionListener(ignore -> {
             var item = jComboBox.getSelectedItem();
             String value = textEditor.getText();
             if (item instanceof String itemValue) {
@@ -504,7 +504,7 @@ public class RightViewFragment {
         valueUpdateSaveBtn.setBackground(UIManager.getColor("RedisFront.animateButton.background"));
         valueUpdateSaveBtn.setEnabled(false);
         valueUpdateSaveBtn.setIcon(Icons.SAVE_ICON);
-        valueUpdateSaveBtn.addActionListener((actionEvent) -> {
+        valueUpdateSaveBtn.addActionListener(ignore -> {
             var keyType = keyTypeLabel.getText();
             KeyTypeEnum typeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
             var key = keyField.getText();
@@ -550,7 +550,7 @@ public class RightViewFragment {
                     }
                 }
                 return null;
-            }, (o, e) -> {
+            }, (ignore1,e) -> {
                 if (e == null) {
                     Notifications.getInstance().show(Notifications.Type.INFO, owner.$tr("DataViewForm.showInformationDialog.updateSuccess.message"));
                     return;
@@ -582,7 +582,7 @@ public class RightViewFragment {
 
         loadMoreBtn = new JButton();
         loadMoreBtn.setIcon(Icons.LOAD_MORE_ICON);
-        loadMoreBtn.addActionListener((actionEvent) -> {
+        loadMoreBtn.addActionListener((ignore) -> {
             if (loadMoreBtn.isEnabled()) {
                 loadMoreBtn.setEnabled(false);
                 reloadTableDataActionPerformed(false);
@@ -642,11 +642,11 @@ public class RightViewFragment {
         delBtn.setBorder(new EmptyBorder(5, 5, 5, 5));
         delBtn.setArcHeight(10);
         delBtn.setArcWidth(10);
-        delBtn.addActionListener(actionEvent -> {
+        delBtn.addActionListener(ignore -> {
             var key = keyField.getText();
             SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() ->
                             RedisBasicService.service.del(redisConnectContext, key),
-                    (r, e) -> {
+                    (ignore1,e) -> {
                         if (e == null) {
                             owner.getContext().getEventBus().publish(new KeyDeleteSuccessEvent(key, redisConnectContext.getId()));
                             return;
@@ -671,7 +671,7 @@ public class RightViewFragment {
         refBtn.setArcHeight(10);
         refBtn.setArcWidth(10);
         refBtn.setBorder(new EmptyBorder(5, 5, 5, 5));
-        refBtn.addActionListener(a -> reloadAllActionPerformed());
+        refBtn.addActionListener(ignore -> reloadAllActionPerformed());
 
         saveBtn = new AnimateButton() {
             @Override
@@ -691,7 +691,7 @@ public class RightViewFragment {
         saveBtn.setArcHeight(10);
         saveBtn.setArcWidth(10);
 
-        saveBtn.addActionListener((actionEvent) -> {
+        saveBtn.addActionListener((ignore) -> {
             String ttl = ttlField.getText();
             String key = keyField.getText();
             SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
@@ -704,7 +704,7 @@ public class RightViewFragment {
                     RedisBasicService.service.expire(redisConnectContext, key, Long.valueOf(ttl));
                 }
                 return null;
-            }, (r, e) -> {
+            }, (ignore1,e) -> {
                 if (e == null) {
                     reloadAllActionPerformed();
                 } else {
@@ -722,10 +722,10 @@ public class RightViewFragment {
         };
 
         var searchBtn = new JButton(new FlatSearchIcon());
-        searchBtn.addActionListener(actionEvent -> reloadTableDataActionPerformed(true));
+        searchBtn.addActionListener(ignore -> reloadTableDataActionPerformed(true));
         tableSearchField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchBtn);
         tableSearchField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
-        tableSearchField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) jTextComponent -> {
+        tableSearchField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) ignore -> {
             tableSearchField.setText("");
             reloadTableDataActionPerformed(true);
         });
@@ -737,7 +737,7 @@ public class RightViewFragment {
             }
         };
 
-        tableAddBtn.addActionListener((actionEvent) -> {
+        tableAddBtn.addActionListener((ignore) -> {
             var keyType = keyTypeLabel.getText();
             KeyTypeEnum keyTypeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
             String key = keyField.getText();
@@ -762,7 +762,7 @@ public class RightViewFragment {
                 setText(owner.$tr("DataViewForm.tableDelBtn.title"));
             }
         };
-        tableDelBtn.addActionListener(actionEvent -> {
+        tableDelBtn.addActionListener(ignore -> {
             SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
                 var row = dataTable.getSelectedRow();
                 if (row != -1) {
@@ -839,7 +839,7 @@ public class RightViewFragment {
             }
         };
 
-        tableRefreshBtn.addActionListener(actionEvent -> {
+        tableRefreshBtn.addActionListener(ignore -> {
             reloadTableDataActionPerformed(true);
         });
 

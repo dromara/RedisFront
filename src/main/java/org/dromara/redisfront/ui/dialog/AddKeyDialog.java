@@ -64,8 +64,8 @@ public class AddKeyDialog extends QSDialog<RedisFrontWidget> {
         this.setMinimumSize(new Dimension(500, 400));
         this.redisFrontContext = (RedisFrontContext) redisFrontWidget.getContext();
         this.redisConnectContext = redisConnectContext;
-        this.buttonOK.addActionListener(e -> onOK());
-        this.buttonCancel.addActionListener(e -> onCancel());
+        this.buttonOK.addActionListener(ignore -> onOK());
+        this.buttonCancel.addActionListener(ignore -> onCancel());
         this.setContentPane(contentPane);
         this.getRootPane().setDefaultButton(buttonOK);
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -75,7 +75,7 @@ public class AddKeyDialog extends QSDialog<RedisFrontWidget> {
             }
         });
 
-        this.contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        this.contentPane.registerKeyboardAction(ignore -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         if (RedisFrontUtils.isNotEmpty(parent)) {
             var separatorLabel = new JLabel();
@@ -125,7 +125,7 @@ public class AddKeyDialog extends QSDialog<RedisFrontWidget> {
 
     private void initComponentListener() {
 
-        this.ttlSpinner.addChangeListener(changeEvent -> {
+        this.ttlSpinner.addChangeListener(ignore -> {
             if (((Integer) ttlSpinner.getValue()) < 0) {
                 this.ttlSpinner.setValue(-1);
             }
@@ -134,7 +134,7 @@ public class AddKeyDialog extends QSDialog<RedisFrontWidget> {
             }
         });
 
-        this.keyTypeComboBox.addActionListener(actionEvent -> {
+        this.keyTypeComboBox.addActionListener(ignore -> {
             String selectItem = (String) keyTypeComboBox.getSelectedItem();
             if (RedisFrontUtils.equal(KeyTypeEnum.HASH.typeName(), selectItem)) {
                 this.hashKeyField.setVisible(true);
@@ -223,7 +223,7 @@ public class AddKeyDialog extends QSDialog<RedisFrontWidget> {
                 var redisVersion = serverInfo.get("redis_version");
                 var x = redisVersion.toString().split("\\.")[0];
                 if (Integer.parseInt(x) < 5) {
-                    throw new RedisFrontException(getOwner().$tr("AddKeyDialog.redisVersion.text"));
+                    throw new RedisFrontException("Redis版本过低，不支持Stream - [ 当前版本：" + redisVersion + " ]");
                 } else if (JSONUtil.isTypeJSON(value)) {
                     HashMap<String, String> bodyMap = new HashMap<>();
                     JSONUtil.parseObj(value).forEach((key1, value1) -> bodyMap.put(key1, value1.toString()));
@@ -233,7 +233,7 @@ public class AddKeyDialog extends QSDialog<RedisFrontWidget> {
                         RedisStreamService.service.xadd(redisConnectContext, streamField.getText(), key, bodyMap);
                     }
                 } else {
-                    RedisFrontException redisFrontException = new RedisFrontException(getOwner().$tr("AddKeyDialog.requireType.text"));
+                    RedisFrontException redisFrontException = new RedisFrontException("stream 请输入JSON格式数据！");
                     redisFrontException.setComponent(this.keyValueField);
                     throw redisFrontException;
                 }
