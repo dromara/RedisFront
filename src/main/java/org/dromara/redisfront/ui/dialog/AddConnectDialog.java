@@ -1,6 +1,5 @@
 package org.dromara.redisfront.ui.dialog;
 
-import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.extra.ssh.JschRuntimeException;
 import com.formdev.flatlaf.util.StringUtils;
 import com.intellij.uiDesigner.core.GridConstraints;
@@ -110,7 +109,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             this.groupId = -1;
         }
         this.detailId = detail.getId();
-        this.setTitle(String.format(getOwner().$tr("AddConnectDialog.title1"), detail.getName()));
+        this.setTitle("编辑连接 【" + detail.getName() + "】");
         this.populateConnectInfo(detail.getConnectContext());
         this.setLocationRelativeTo(null);
         this.setVisible(true);
@@ -136,14 +135,14 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
     }
 
     private void initializeComponents() {
-        this.contentPane.registerKeyboardAction(e -> dispose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        this.contentPane.registerKeyboardAction(ignore -> dispose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         this.sshPrivateKeyFile.setVisible(enableSshPrivateKey.isSelected());
         this.sshPrivateKeyBtn.setVisible(enableSshPrivateKey.isSelected());
 
         openBtn.addActionListener(this::openActionPerformed);
         storageBtn.addActionListener(this::storageActionPerformed);
 
-        showPasswordCheckBox.addActionListener(e -> {
+        showPasswordCheckBox.addActionListener(ignore -> {
             if (showPasswordCheckBox.isSelected()) {
                 passwordField.setEchoChar((char) 0);
             } else {
@@ -151,7 +150,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             }
         });
 
-        showShhPassword.addActionListener(e -> {
+        showShhPassword.addActionListener(ignore -> {
             if (showShhPassword.isSelected()) {
                 sshPasswordField.setEchoChar((char) 0);
             } else {
@@ -159,7 +158,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             }
         });
 
-        showSslPassword.addActionListener(e -> {
+        showSslPassword.addActionListener(ignore -> {
             if (showPasswordCheckBox.isSelected()) {
                 sslPasswordField.setEchoChar((char) 0);
             } else {
@@ -167,7 +166,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             }
         });
 
-        enableSshPrivateKey.addActionListener(e -> {
+        enableSshPrivateKey.addActionListener(ignore -> {
             if (enableSshPrivateKey.isSelected()) {
                 setSize(new Dimension(getWidth(), getHeight() + 20));
             } else {
@@ -177,7 +176,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             sshPrivateKeyBtn.setVisible(enableSshPrivateKey.isSelected());
         });
 
-        enableSSLBtn.addActionListener(e -> {
+        enableSSLBtn.addActionListener(ignore -> {
             if (enableSSHBtn.isSelected()) {
                 enableSSHBtn.setSelected(false);
                 setSize(new Dimension(getWidth(), getHeight() - 120));
@@ -191,7 +190,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             }
         });
 
-        enableSSHBtn.addActionListener(e -> {
+        enableSSHBtn.addActionListener(ignore -> {
             if (enableSSLBtn.isSelected()) {
                 enableSSLBtn.setSelected(false);
                 setSize(new Dimension(getWidth(), getHeight() - 130));
@@ -215,7 +214,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             public void mouseClicked(MouseEvent e) {
                 var fileChooser = new JFileChooser();
                 fileChooser.setFileFilter(new FileNameExtensionFilter("*.jks", "pem", "jks"));
-                fileChooser.showDialog(AddConnectDialog.this, getOwner().$tr("AddConnectDialog.FileChooser.sshPublicKey.btn"));
+                fileChooser.showDialog(AddConnectDialog.this, "选择公钥文件");
                 var selectedFile = fileChooser.getSelectedFile();
                 if (RedisFrontUtils.isNotNull(selectedFile)) {
                     publicKeyField.setText(selectedFile.getAbsolutePath());
@@ -236,7 +235,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             }
         });
 
-        testBtn.addActionListener(e -> testConnect());
+        testBtn.addActionListener(ignore -> testConnect());
     }
 
     private Boolean testConnect() {
@@ -275,12 +274,12 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
                 if (exception.getCause() instanceof JschRuntimeException jschRuntimeException) {
                     getOwner().displayException($tr("AddConnectDialog.test.fail.message"), jschRuntimeException.getCause());
                 } else {
-                    getOwner().displayException($tr("AddConnectDialog.test.fail.message"), ExceptionUtil.getRootCause(exception));
+                    getOwner().displayException($tr("AddConnectDialog.test.fail.message"), exception);
                 }
             } else if (exception instanceof RedisConnectionException) {
                 getOwner().displayException($tr("AddConnectDialog.test.fail.message"), exception);
             } else {
-                getOwner().displayException($tr("AddConnectDialog.test.fail.message"), ExceptionUtil.getRootCause(exception));
+                getOwner().displayException($tr("AddConnectDialog.test.fail.message"), exception);
             }
         }
         return connectSuccess;

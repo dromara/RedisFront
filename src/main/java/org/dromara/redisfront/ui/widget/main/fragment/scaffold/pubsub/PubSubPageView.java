@@ -83,7 +83,7 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
                 return ret;
             }
         });
-        enableSubscribe.addItemListener(e -> {
+        enableSubscribe.addItemListener(ignore -> {
             var channel = subscribeChannel.getText();
             if (!enableSubscribe.isSelected()) {
                 subscribeChannel.setFocusable(true);
@@ -106,7 +106,7 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
                 enableSubscribe.setToolTipText(owner.$tr("PubSubPageView.enableSubscribe.disableMessage"));
             }
         });
-        publishBtn.addActionListener(e -> FutureUtils.runAsync(() -> {
+        publishBtn.addActionListener(ignore -> FutureUtils.runAsync(() -> {
             RedisPubSubService.service.publish(redisConnectContext, channelField.getText(), messageField.getText());
             SwingUtilities.invokeLater(() -> {
                 messageField.setText("");

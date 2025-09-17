@@ -83,7 +83,7 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
         this.networkTgBtn.setSelected(true);
 
         this.configureToggleButton(networkTgBtn);
-        this.networkTgBtn.addActionListener(e -> {
+        this.networkTgBtn.addActionListener(ignore -> {
             if (networkTgBtn.isSelected()) {
                 this.chartPanel.removeAll();
                 this.chartPanel.add(redisNetworkChart, BorderLayout.CENTER);
@@ -98,7 +98,7 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
         });
 
         this.configureToggleButton(memoryTgBtn);
-        this.memoryTgBtn.addActionListener(e -> {
+        this.memoryTgBtn.addActionListener(ignore -> {
             if (memoryTgBtn.isSelected()) {
                 this.chartPanel.removeAll();
                 this.chartPanel.add(redisMemoryChart, BorderLayout.CENTER);
@@ -113,7 +113,7 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
         });
 
         this.configureToggleButton(connectTgBtn);
-        this.connectTgBtn.addActionListener(e -> {
+        this.connectTgBtn.addActionListener(ignore -> {
             if (connectTgBtn.isSelected()) {
                 this.chartPanel.removeAll();
                 this.chartPanel.add(redisClientConnectionsChart, BorderLayout.CENTER);
@@ -128,7 +128,7 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
         });
 
         this.configureToggleButton(commandTgBtn);
-        this.commandTgBtn.addActionListener(e -> {
+        this.commandTgBtn.addActionListener(ignore -> {
             if (commandTgBtn.isSelected()) {
                 this.chartPanel.removeAll();
                 this.chartPanel.add(redisCommandStatsChart, BorderLayout.CENTER);
@@ -143,7 +143,7 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
         });
 
         this.configureToggleButton(clusterTgBtn);
-        this.clusterTgBtn.addActionListener(e -> {
+        this.clusterTgBtn.addActionListener(ignore -> {
             if (clusterTgBtn.isSelected()) {
                 this.chartPanel.removeAll();
                 this.chartPanel.add(redisMemoryChart, BorderLayout.CENTER);

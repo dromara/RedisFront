@@ -81,8 +81,8 @@ public class AddOrUpdateValueDialog extends QSDialog<RedisFrontWidget> {
 
     private void initComponentListener() {
         this.getRootPane().setDefaultButton(buttonOK);
-        this.buttonOK.addActionListener(e -> onOK());
-        this.buttonCancel.addActionListener(e -> onCancel());
+        this.buttonOK.addActionListener(ignore -> onOK());
+        this.buttonCancel.addActionListener(ignore -> onCancel());
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
         this.valueLabel.setText("值");
@@ -91,7 +91,7 @@ public class AddOrUpdateValueDialog extends QSDialog<RedisFrontWidget> {
                 onCancel();
             }
         });
-        this.contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        this.contentPane.registerKeyboardAction(ignore -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     private void onOK() {
@@ -144,7 +144,7 @@ public class AddOrUpdateValueDialog extends QSDialog<RedisFrontWidget> {
                 }
             }
             return 0;
-        }, (id, e) -> {
+        }, (ignore,e) -> {
             if (e == null) {
                 this.runnable.run();
                 this.setVisible(false);

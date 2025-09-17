@@ -1,7 +1,6 @@
 package org.dromara.redisfront.ui.widget.main.fragment.scaffold.index;
 
 import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.StrUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.components.FlatButton;
 import com.formdev.flatlaf.extras.components.FlatToggleButton;
@@ -132,7 +131,7 @@ public class LeftSearchFragment {
         };
         addBtn.setIcon(Icons.PLUS_ICON_16X16);
         addBtn.setFocusable(false);
-        addBtn.addActionListener(e -> AddKeyDialog.showAddDialog(owner, redisConnectContext, null));
+        addBtn.addActionListener(ignore -> AddKeyDialog.showAddDialog(owner, redisConnectContext, null));
 
         this.owner.getEventListener().bind(redisConnectContext.getId(), AddKeySuccessEvent.class, qsEvent -> {
             if (qsEvent instanceof AddKeySuccessEvent addKeySuccessEvent) {
@@ -158,7 +157,7 @@ public class LeftSearchFragment {
         };
 
         //刷新按钮事件
-        refreshBtn.addActionListener(e -> {
+        refreshBtn.addActionListener(ignore -> {
             var selectedIndex = databaseComboBox.getSelectedIndex();
             searchTextField.setText("");
             databaseComboBox.removeAllItems();
@@ -176,11 +175,8 @@ public class LeftSearchFragment {
         };
         deleteAllBtn.setFocusable(false);
 
-        deleteAllBtn.addActionListener(a -> {
+        deleteAllBtn.addActionListener(ignore -> {
             String operation = JOptionPane.showInputDialog(owner.$tr("DataSearchForm.showInputDialog.title") + "\n “flushdb” or “flushall” ");
-            if (StrUtil.isEmpty(operation)) {
-                return;
-            }
             SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
                 if (RedisFrontUtils.equal(operation, "flushdb")) {
                     RedisBasicService.service.flushdb(redisConnectContext);
@@ -188,13 +184,14 @@ public class LeftSearchFragment {
                     RedisBasicService.service.flushall(redisConnectContext);
                 }
                 return null;
-            }, (o, e) -> {
+            }, (ret,e) -> {
                 if (e != null) {
                     owner.displayException(e);
                     return;
                 }
                 refreshBtn.doClick();
             });
+
         });
         deleteAllBtn.setIcon(Icons.DELETE_B_ICON);
 
@@ -210,14 +207,14 @@ public class LeftSearchFragment {
         };
         loadMoreBtn.setFocusable(false);
         loadMoreBtn.setIcon(Icons.LOAD_MORE_ICON);
-        loadMoreBtn.addActionListener(actionEvent -> scanKeysActionPerformed());
+        loadMoreBtn.addActionListener(ignore -> scanKeysActionPerformed());
 
 
         scanKeysContextMap = new ConcurrentHashMap<>();
 
         changeDatabaseActionPerformed(0);
 
-        databaseComboBox.addActionListener(actionEvent -> {
+        databaseComboBox.addActionListener(ignore -> {
             var db = (DbInfo) databaseComboBox.getSelectedItem();
             if (RedisFrontUtils.isNull(db)) {
                 return;
@@ -251,7 +248,7 @@ public class LeftSearchFragment {
 
         JButton searchBtn = new JButton(new FlatSearchIcon());
         searchBtn.setFocusable(false);
-        searchBtn.addActionListener(actionEvent -> {
+        searchBtn.addActionListener(ignore -> {
             scanKeysContextMap.put(redisConnectContext.getDatabase(), new RedisScanContext<>());
             scanKeysAndUpdateScanInfo();
         });
@@ -269,7 +266,7 @@ public class LeftSearchFragment {
         flatToolBar.add(searchBtn);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, flatToolBar);
         searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
-        searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) jTextComponent -> {
+        searchTextField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) ignore -> {
             scanKeysContextMap.put(redisConnectContext.getDatabase(), new RedisScanContext<>());
             searchTextField.setText("");
             scanKeysAndUpdateScanInfo();
@@ -286,7 +283,7 @@ public class LeftSearchFragment {
                 setLeafIcon(Icons.TREE_KEY_ICON);
             }
         });
-        keyTree.addTreeSelectionListener(treeSelectionEvent -> {
+        keyTree.addTreeSelectionListener(ignore -> {
             var selectNode = keyTree.getLastSelectedPathComponent();
             if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
                 if (treeNodeInfo.getChildCount() == 0) {
@@ -332,7 +329,7 @@ public class LeftSearchFragment {
                         setText(owner.$tr("DataSearchForm.memoryMenuItem.title"));
                     }
                 };
-                memoryMenuItem.addActionListener(actionEvent -> {
+                memoryMenuItem.addActionListener(ignore -> {
                     var selectionPath = keyTree.getLeadSelectionPath();
                     var selectNode = selectionPath.getLastPathComponent();
                     if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
@@ -366,7 +363,7 @@ public class LeftSearchFragment {
                     }
                 };
 
-                delMenuItem.addActionListener((actionEvent) -> {
+                delMenuItem.addActionListener((result) -> {
                     //删除，需要进行弹框确认，生产项目，如果大规模删除，就是灾难
                     int reply = AlertUtils.showConfirmDialog(owner,
                             owner.$tr("DataSearchForm.delMenuItem.confirm"),
@@ -407,7 +404,7 @@ public class LeftSearchFragment {
                         setText(owner.$tr("DataSearchForm.addMenuItem.title"));
                     }
                 };
-                addMenuItem.addActionListener(actionEvent -> {
+                addMenuItem.addActionListener(ignore -> {
                     var selectNode = keyTree.getLastSelectedPathComponent();
                     if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
                         AddKeyDialog.showAddDialog(owner, redisConnectContext, treeNodeInfo.key());
