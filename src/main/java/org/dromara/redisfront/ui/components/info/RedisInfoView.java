@@ -160,9 +160,9 @@ public class RedisInfoView extends JPanel implements Runnable {
                                     Partitions clusterPartitions = LettuceUtils.getRedisClusterPartitions(redisConnectContext);
                                     sshInfoFormated = clusterPartitions.stream().map(clusterNode -> {
                                         var uri = clusterNode.getUri();
-                                        Map<Integer, Integer> clusterLocalPort = redisConnectContext.getClusterLocalPort();
+                                        Map<String, Integer> clusterLocalPort = redisConnectContext.getClusterLocalPort();
                                         return String.format(SSH_MAPPING, localHost,
-                                                clusterLocalPort.get(uri.getPort()).toString(),
+                                                clusterLocalPort.get(String.valueOf(uri.getPort())).toString(),
                                                 uri.getHost(),
                                                 uri.getPort(),
                                                 clusterNode.getFlags()

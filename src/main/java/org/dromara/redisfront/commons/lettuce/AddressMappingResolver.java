@@ -15,11 +15,12 @@ public class AddressMappingResolver extends SocketAddressResolver {
         this.redisConnectContext = redisConnectContext;
     }
 
-
     @Override
     public SocketAddress resolve(RedisURI redisURI) {
-        if (redisConnectContext.getSshInfo() != null && CollUtil.isNotEmpty(redisConnectContext.getClusterLocalPort())) {
-            Integer port = redisConnectContext.getClusterLocalPort().get(redisURI.getPort());
+        if (redisConnectContext.getSshInfo() != null
+                && CollUtil.isNotEmpty(redisConnectContext.getClusterLocalPort())) {
+            String key = redisURI.getHost() + ":" + redisURI.getPort();
+            Integer port = redisConnectContext.getClusterLocalPort().get(key);
             if (port != null) {
                 return new InetSocketAddress("127.0.0.1", port);
             }

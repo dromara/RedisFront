@@ -40,10 +40,11 @@ public class RedisConnectContext implements Serializable, Cloneable {
     private SettingInfo setting;
     private SslInfo sslInfo;
     private SshInfo sshInfo;
-    private Map<Integer, Integer> clusterLocalPort;
+    private Map<String, Integer> clusterLocalPort;
 
     public String key() {
-        return MD5Util.encrypt(id + ":" + host + ":" + localHost + ":" + port + ":" + localPort + ":" + username + ":" + password + ":" + sslInfo + ":" + sshInfo + ":" + database);
+        return MD5Util.encrypt(id + ":" + host + ":" + localHost + ":" + port + ":" + localPort + ":" + username + ":"
+                + password + ":" + sslInfo + ":" + sshInfo + ":" + database);
     }
 
     public ConnectDetailEntity toEntity() {
