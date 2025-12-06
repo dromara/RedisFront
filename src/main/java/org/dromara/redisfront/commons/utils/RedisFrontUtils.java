@@ -19,8 +19,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.*;
@@ -99,17 +98,19 @@ public class RedisFrontUtils {
     }
 
     public static int getByteSize(Object data) {
-        if (data instanceof String) {
-            return ((String) data).getBytes(StandardCharsets.UTF_8).length;
-        }
-        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                ObjectOutputStream outputStream = new ObjectOutputStream(byteArrayOutputStream)) {
-            outputStream.writeObject(data);
-            outputStream.flush();
-            return byteArrayOutputStream.size();
-        } catch (Exception e) {
+        if (data == null) {
             return 0;
         }
+        if (data instanceof byte[] bytes) {
+            return bytes.length;
+        }
+        if (data instanceof ByteBuffer byteBuffer) {
+            return byteBuffer.remaining();
+        }
+        if (data instanceof String str) {
+            return str.getBytes(StandardCharsets.UTF_8).length;
+        }
+        return String.valueOf(data).getBytes(StandardCharsets.UTF_8).length;
     }
 
     public static String getDataSize(String str) {
