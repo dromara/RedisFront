@@ -144,7 +144,7 @@ public class AddOrUpdateValueDialog extends QSDialog<RedisFrontWidget> {
                 }
             }
             return 0;
-        }, (ignore,e) -> {
+        }, (ignore, e) -> {
             if (e == null) {
                 this.runnable.run();
                 this.setVisible(false);
