@@ -4,7 +4,7 @@
 
 ![JDK](https://img.shields.io/badge/JDK-22-blue.svg)
 ![Apache 2.0](https://img.shields.io/badge/Apache-2.0-4green.svg)
-![Release](https://img.shields.io/badge/Release-2025.3-green.svg)
+![Release](https://img.shields.io/badge/Release-2026.1-green.svg)
 
 RedisFront 是一款基于 Java Swing 开发的跨平台 Redis 客户端工具，兼容多种主流操作系统 ( 包括 Windows, macOS 和 Linux ) , 通过可视化界面实现 Redis 数据管理与服务器状态监测，适用于开发调试与生产运维场景。
 
