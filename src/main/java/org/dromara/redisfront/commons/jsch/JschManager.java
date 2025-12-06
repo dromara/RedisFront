@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.net.Socket;
 
 /**
  * JschManager
@@ -145,13 +146,21 @@ public class JschManager {
         portLock.lock();
         try {
             for (int i = MIN_PORT; i <= MAX_PORT; i++) {
-                if (PORT_SET.add(i)) {
+                if (isPortAvailable(i) && PORT_SET.add(i)) {
                     return i;
                 }
             }
             throw new RedisFrontException("无可用端口");
         } finally {
             portLock.unlock();
+        }
+    }
+
+    private boolean isPortAvailable(int port) {
+        try (Socket ignored = new Socket("localhost", port)) {
+            return false;
+        } catch (Exception ignored) {
+            return true;
         }
     }
 
@@ -166,12 +175,7 @@ public class JschManager {
     }
 
     private static String getRemoteAddress(RedisConnectContext redisConnectContext) {
-        var remoteAddress = redisConnectContext.getHost();
-        if (RedisFrontUtils.equal(remoteAddress, "127.0.0.1")
-                || RedisFrontUtils.equal(remoteAddress.toLowerCase(), "localhost")) {
-            // remoteAddress = redisConnectContext.getSshInfo().getHost();
-        }
-        return remoteAddress;
+        return redisConnectContext.getHost();
     }
 
 }

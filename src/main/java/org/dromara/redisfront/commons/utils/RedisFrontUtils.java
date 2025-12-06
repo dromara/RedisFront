@@ -1,6 +1,5 @@
 package org.dromara.redisfront.commons.utils;
 
-
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.unit.DataSizeUtil;
 import cn.hutool.core.map.MapUtil;
@@ -26,7 +25,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.*;
 
-
 /**
  * 常用函数
  *
@@ -35,7 +33,6 @@ import java.util.*;
 @Slf4j
 @Utility
 public class RedisFrontUtils {
-
 
     public static boolean isNotEmpty(Collection<?> collection) {
         return CollectionUtil.isNotEmpty(collection);
@@ -101,13 +98,12 @@ public class RedisFrontUtils {
         return JSONUtil.parse(obj).toStringPretty();
     }
 
-
     public static int getByteSize(Object data) {
         if (data instanceof String) {
             return ((String) data).getBytes(StandardCharsets.UTF_8).length;
         }
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-             ObjectOutputStream outputStream = new ObjectOutputStream(byteArrayOutputStream)) {
+                ObjectOutputStream outputStream = new ObjectOutputStream(byteArrayOutputStream)) {
             outputStream.writeObject(data);
             outputStream.flush();
             return byteArrayOutputStream.size();
@@ -122,7 +118,6 @@ public class RedisFrontUtils {
         }
         return DataSizeUtil.format(0);
     }
-
 
     public static void revalidateAndRepaintAllFramesAndDialogs() {
         FlatLaf.revalidateAndRepaintAllFramesAndDialogs();
@@ -155,15 +150,18 @@ public class RedisFrontUtils {
 
     public static void restoreExpandedPaths(JTree tree, TreeModel model, List<Object> savedPaths) {
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
-        for (Object id : savedPaths) {
-            for (int i = 0; i < root.getChildCount(); i++) {
-                DefaultMutableTreeNode node = (DefaultMutableTreeNode) root.getChildAt(i);
-                TreePath treePath = new TreePath(node.getPath());
-                QSTreeNode<?> data = (QSTreeNode<?>) treePath.getLastPathComponent();
-                if (ObjectUtil.equals(data.id(), id)) {
-                    tree.expandPath(treePath);
-                    break;
-                }
+        restoreExpandedPathsRecursive(tree, root, savedPaths);
+    }
+
+    private static void restoreExpandedPathsRecursive(JTree tree, DefaultMutableTreeNode node,
+            List<Object> savedPaths) {
+        for (int i = 0; i < node.getChildCount(); i++) {
+            DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(i);
+            TreePath treePath = new TreePath(child.getPath());
+            QSTreeNode<?> data = (QSTreeNode<?>) treePath.getLastPathComponent();
+            if (savedPaths.contains(data.id())) {
+                tree.expandPath(treePath);
+                restoreExpandedPathsRecursive(tree, child, savedPaths);
             }
         }
     }
