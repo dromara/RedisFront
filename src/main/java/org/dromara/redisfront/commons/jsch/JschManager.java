@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.extra.ssh.JschUtil;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import io.lettuce.core.cluster.models.partitions.Partitions;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
@@ -11,6 +12,7 @@ import org.dromara.redisfront.commons.lettuce.LettuceUtils;
 import org.dromara.redisfront.commons.pool.RedisConnectionPoolManager;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,31 +57,36 @@ public class JschManager {
             var partitions = LettuceUtils.getRedisClusterPartitions(redisConnectContext);
 
             // 3. Allocate ports and Bind all nodes
-            Map<String, Integer> clusterTempPort = new HashMap<>();
-
-            // Add Seed Node mapping (Already bound in openSession but needs to be in Map
-            // for rebind compatibility)
-            clusterTempPort.put(redisConnectContext.getHost() + ":" + redisConnectContext.getPort(),
-                    redisConnectContext.getLocalPort());
-
-            for (var partition : partitions) {
-                String nodeHost = partition.getUri().getHost();
-                int nodePort = partition.getUri().getPort();
-                String key = nodeHost + ":" + nodePort;
-
-                // Skip if already bound (Seed Node)
-                if (clusterTempPort.containsKey(key)) {
-                    continue;
-                }
-
-                int localPort = getTempLocalPort();
-                clusterTempPort.put(key, localPort);
-            }
+            Map<String, Integer> clusterTempPort = getStringIntegerMap(redisConnectContext, partitions);
             redisConnectContext.setClusterLocalPort(clusterTempPort);
 
             // 4. Apply Bindings
             this.rebindSession(redisConnectContext);
         }
+    }
+
+    private @NotNull Map<String, Integer> getStringIntegerMap(RedisConnectContext redisConnectContext, Partitions partitions) {
+        Map<String, Integer> clusterTempPort = new HashMap<>();
+
+        // Add Seed Node mapping (Already bound in openSession but needs to be in Map
+        // for rebind compatibility)
+        clusterTempPort.put(redisConnectContext.getHost() + ":" + redisConnectContext.getPort(),
+                redisConnectContext.getLocalPort());
+
+        for (var partition : partitions) {
+            String nodeHost = partition.getUri().getHost();
+            int nodePort = partition.getUri().getPort();
+            String key = nodeHost + ":" + nodePort;
+
+            // Skip if already bound (Seed Node)
+            if (clusterTempPort.containsKey(key)) {
+                continue;
+            }
+
+            int localPort = getTempLocalPort();
+            clusterTempPort.put(key, localPort);
+        }
+        return clusterTempPort;
     }
 
     private void createSession(RedisConnectContext redisConnectContext) {

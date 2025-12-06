@@ -239,6 +239,7 @@ public class MainComponent extends JPanel {
         mode.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         mode.setText(owner.$tr("MainComponent.Text"));
         mode.setToolTipText(owner.$tr("MainComponent.TipText"));
+
         rightToolBar.add(mode, BorderLayout.WEST);
 
         JPanel horizontalBox = new JPanel();
