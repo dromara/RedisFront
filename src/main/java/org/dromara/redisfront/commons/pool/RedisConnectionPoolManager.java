@@ -46,7 +46,8 @@ public class RedisConnectionPoolManager {
     private static final Map<String, GenericObjectPool<StatefulRedisConnection<String, String>>> NORMAL_POOLS = new ConcurrentHashMap<>();
     private static final Map<String, GenericObjectPool<StatefulRedisPubSubConnection<String, String>>> NORMAL_PUB_POOLS = new ConcurrentHashMap<>();
 
-    public static StatefulRedisClusterPubSubConnection<String, String> getClusterConnectPubSub(RedisConnectContext context) {
+    public static StatefulRedisClusterPubSubConnection<String, String> getClusterConnectPubSub(
+            RedisConnectContext context) {
         return getConnection(CLUSTER_PUB_POOLS, context, () -> {
             RedisURI uri = LettuceUtils.createRedisURI(context);
             RedisClusterClient client = LettuceUtils.getRedisClusterClient(uri, context);
@@ -127,8 +128,8 @@ public class RedisConnectionPoolManager {
     }
 
     private static <T> T getConnection(Map<String, GenericObjectPool<T>> poolMap,
-                                       RedisConnectContext context,
-                                       ConnectionSupplier<T> supplier) {
+            RedisConnectContext context,
+            ConnectionSupplier<T> supplier) {
         String poolKey = context.key();
         try {
             GenericObjectPool<T> pool = poolMap.computeIfAbsent(poolKey, ignore -> {
@@ -154,17 +155,20 @@ public class RedisConnectionPoolManager {
         }
     }
 
-    public static void closeConnection(RedisConnectContext context, StatefulRedisClusterConnection<String, String> connection) {
+    public static void closeConnection(RedisConnectContext context,
+            StatefulRedisClusterConnection<String, String> connection) {
         String poolKey = context.key();
         returnConnection(CLUSTER_POOLS.get(poolKey), connection);
     }
 
-    public static void closeConnection(RedisConnectContext context, StatefulRedisSentinelConnection<String, String> connection) {
+    public static void closeConnection(RedisConnectContext context,
+            StatefulRedisSentinelConnection<String, String> connection) {
         String poolKey = context.key();
         returnConnection(SENTINEL_POOLS.get(poolKey), connection);
     }
 
-    public static void closeConnection(RedisConnectContext context, StatefulRedisConnection<String, String> connection) {
+    public static void closeConnection(RedisConnectContext context,
+            StatefulRedisConnection<String, String> connection) {
         String poolKey = context.key();
         returnConnection(NORMAL_POOLS.get(poolKey), connection);
     }
@@ -178,6 +182,7 @@ public class RedisConnectionPoolManager {
     public static void cleanupContextPool(RedisConnectContext context) {
         String poolKey = context.key();
         cleanupPools(poolKey);
+        LettuceUtils.close(context);
     }
 
     private static void cleanupPools(String specificKey) {

@@ -23,10 +23,11 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.time.Duration;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 
 /**
  * LettuceUtil
@@ -36,7 +37,8 @@ import java.util.function.Function;
 public class LettuceUtils {
 
     private static final Logger log = LoggerFactory.getLogger(LettuceUtils.class);
-
+    private static final Map<String, RedisClient> CLIENT_CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, RedisClusterClient> CLUSTER_CLIENT_CACHE = new ConcurrentHashMap<>();
 
     private LettuceUtils() {
     }
@@ -52,15 +54,20 @@ public class LettuceUtils {
         }
 
         var redisURI = RedisURI.builder()
-                .withHost(RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH) ? redisConnectContext.getLocalHost() : host)
-                .withPort(RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH) ? redisConnectContext.getLocalPort() : redisConnectContext.getPort())
+                .withHost(RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)
+                        ? redisConnectContext.getLocalHost()
+                        : host)
+                .withPort(RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)
+                        ? redisConnectContext.getLocalPort()
+                        : redisConnectContext.getPort())
                 .withSsl(redisConnectContext.getEnableSsl())
                 .withDatabase(redisConnectContext.getDatabase())
                 .withTimeout(Duration.ofMillis(redisConnectContext.getSetting().getRedisTimeout()))
                 .build();
 
         if (RedisFrontUtils.isNotEmpty(redisConnectContext.getUsername()) && RedisFrontUtils.isNotEmpty(password)) {
-            var staticCredentialsProvider = new StaticCredentialsProvider(redisConnectContext.getUsername(), password.toCharArray());
+            var staticCredentialsProvider = new StaticCredentialsProvider(redisConnectContext.getUsername(),
+                    password.toCharArray());
             redisURI.setCredentialsProvider(staticCredentialsProvider);
         } else if (RedisFrontUtils.isNotEmpty(password)) {
             var staticCredentialsProvider = new StaticCredentialsProvider(null, password.toCharArray());
@@ -88,12 +95,15 @@ public class LettuceUtils {
                         .build())
                 .build();
         if (redisConnectContext.getEnableSsl()) {
-            if (redisConnectContext.getSslInfo() != null && RedisFrontUtils.isNotEmpty(redisConnectContext.getSslInfo().getPassword()) || RedisFrontUtils.isNotEmpty(redisConnectContext.getSslInfo().getPublicKeyFilePath())) {
+            if (redisConnectContext.getSslInfo() != null
+                    && RedisFrontUtils.isNotEmpty(redisConnectContext.getSslInfo().getPassword())
+                    || RedisFrontUtils.isNotEmpty(redisConnectContext.getSslInfo().getPublicKeyFilePath())) {
                 clusterClientOptions = clusterClientOptions
                         .mutate()
                         .sslOptions(SslOptions.builder()
                                 .jdkSslProvider()
-                                .truststore(new File(redisConnectContext.getSslInfo().getPublicKeyFilePath()), redisConnectContext.getSslInfo().getPassword())
+                                .truststore(new File(redisConnectContext.getSslInfo().getPublicKeyFilePath()),
+                                        redisConnectContext.getSslInfo().getPassword())
                                 .build())
                         .build();
             }
@@ -103,10 +113,12 @@ public class LettuceUtils {
 
     private static void configureOptions(RedisClient redisClient, RedisConnectContext redisConnectContext) {
         if (redisConnectContext.getEnableSsl()) {
-            if (RedisFrontUtils.isNotEmpty(redisConnectContext.getSslInfo().getPassword()) || RedisFrontUtils.isNotEmpty(redisConnectContext.getSslInfo().getPublicKeyFilePath())) {
+            if (RedisFrontUtils.isNotEmpty(redisConnectContext.getSslInfo().getPassword())
+                    || RedisFrontUtils.isNotEmpty(redisConnectContext.getSslInfo().getPublicKeyFilePath())) {
                 var sslOptions = SslOptions.builder()
                         .jdkSslProvider()
-                        .truststore(new File(redisConnectContext.getSslInfo().getPublicKeyFilePath()), redisConnectContext.getSslInfo().getPassword())
+                        .truststore(new File(redisConnectContext.getSslInfo().getPublicKeyFilePath()),
+                                redisConnectContext.getSslInfo().getPassword())
                         .build();
                 redisClient.setOptions(ClientOptions.builder().sslOptions(sslOptions).build());
             }
@@ -125,29 +137,35 @@ public class LettuceUtils {
     public static Partitions getRedisClusterPartitions(RedisConnectContext redisConnectContext) {
         var redisURI = createRedisURI(redisConnectContext);
         try (var clusterClient = RedisClusterClient.create(redisURI)) {
-           return clusterClient.getPartitions();
+            return clusterClient.getPartitions();
         }
     }
 
     public static RedisClusterClient getRedisClusterClient(RedisURI redisURI, RedisConnectContext redisConnectContext) {
-        AddressMappingResolver mappingResolver = new AddressMappingResolver(redisConnectContext);
-        var clusterClient = RedisClusterClient.create(ClientResources.builder()
-                .socketAddressResolver(mappingResolver)
-                .build(), redisURI);
-        configureOptions(clusterClient, redisConnectContext);
-        return clusterClient;
+        return CLUSTER_CLIENT_CACHE.computeIfAbsent(redisConnectContext.key(), k -> {
+            AddressMappingResolver mappingResolver = new AddressMappingResolver(redisConnectContext);
+            var clusterClient = RedisClusterClient.create(ClientResources.builder()
+                    .socketAddressResolver(mappingResolver)
+                    .build(), redisURI);
+            configureOptions(clusterClient, redisConnectContext);
+            return clusterClient;
+        });
     }
 
     public static RedisClient getRedisClient(RedisConnectContext redisConnectContext) {
-        var redisURI = createRedisURI(redisConnectContext);
-        var redisClient = RedisClient.create(redisURI);
-        configureOptions(redisClient, redisConnectContext);
-        return redisClient;
+        return CLIENT_CACHE.computeIfAbsent(redisConnectContext.key(), k -> {
+            var redisURI = createRedisURI(redisConnectContext);
+            var redisClient = RedisClient.create(redisURI);
+            configureOptions(redisClient, redisConnectContext);
+            return redisClient;
+        });
     }
 
-    public static void clusterRun(RedisConnectContext redisConnectContext, Consumer<RedisAdvancedClusterCommands<String, String>> consumer) {
+    public static void clusterRun(RedisConnectContext redisConnectContext,
+            Consumer<RedisAdvancedClusterCommands<String, String>> consumer) {
         try {
-            StatefulRedisClusterConnection<String, String> connection = RedisConnectionPoolManager.getClusterConnection(redisConnectContext);
+            StatefulRedisClusterConnection<String, String> connection = RedisConnectionPoolManager
+                    .getClusterConnection(redisConnectContext);
             consumer.accept(connection.sync());
             RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
         } catch (Exception exception) {
@@ -156,9 +174,11 @@ public class LettuceUtils {
         }
     }
 
-    public static <T> T clusterExec(RedisConnectContext redisConnectContext, Function<RedisAdvancedClusterCommands<String, String>, T> function) {
+    public static <T> T clusterExec(RedisConnectContext redisConnectContext,
+            Function<RedisAdvancedClusterCommands<String, String>, T> function) {
         try {
-            StatefulRedisClusterConnection<String, String> connection = RedisConnectionPoolManager.getClusterConnection(redisConnectContext);
+            StatefulRedisClusterConnection<String, String> connection = RedisConnectionPoolManager
+                    .getClusterConnection(redisConnectContext);
             T apply = function.apply(connection.sync());
             RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
             return apply;
@@ -168,9 +188,11 @@ public class LettuceUtils {
         }
     }
 
-    public static void sentinelRun(RedisConnectContext redisConnectContext, Consumer<RedisSentinelCommands<String, String>> consumer) {
+    public static void sentinelRun(RedisConnectContext redisConnectContext,
+            Consumer<RedisSentinelCommands<String, String>> consumer) {
         try {
-            StatefulRedisSentinelConnection<String, String> connection = RedisConnectionPoolManager.getSentinelConnection(redisConnectContext);
+            StatefulRedisSentinelConnection<String, String> connection = RedisConnectionPoolManager
+                    .getSentinelConnection(redisConnectContext);
             consumer.accept(connection.sync());
             RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
         } catch (Exception exception) {
@@ -179,9 +201,11 @@ public class LettuceUtils {
         }
     }
 
-    public static <T> T sentinelExec(RedisConnectContext redisConnectContext, Function<RedisSentinelCommands<String, String>, T> function) {
+    public static <T> T sentinelExec(RedisConnectContext redisConnectContext,
+            Function<RedisSentinelCommands<String, String>, T> function) {
         try {
-            StatefulRedisSentinelConnection<String, String> connection = RedisConnectionPoolManager.getSentinelConnection(redisConnectContext);
+            StatefulRedisSentinelConnection<String, String> connection = RedisConnectionPoolManager
+                    .getSentinelConnection(redisConnectContext);
             T apply = function.apply(connection.sync());
             RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
             return apply;
@@ -193,7 +217,8 @@ public class LettuceUtils {
 
     public static void run(RedisConnectContext redisConnectContext, Consumer<RedisCommands<String, String>> consumer) {
         try {
-            StatefulRedisConnection<String, String> connection = RedisConnectionPoolManager.getConnection(redisConnectContext);
+            StatefulRedisConnection<String, String> connection = RedisConnectionPoolManager
+                    .getConnection(redisConnectContext);
             consumer.accept(connection.sync());
             RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
         } catch (Exception exception) {
@@ -202,15 +227,29 @@ public class LettuceUtils {
         }
     }
 
-    public static <T> T exec(RedisConnectContext redisConnectContext, Function<RedisCommands<String, String>, T> function) {
+    public static <T> T exec(RedisConnectContext redisConnectContext,
+            Function<RedisCommands<String, String>, T> function) {
         try {
-            StatefulRedisConnection<String, String> connection = RedisConnectionPoolManager.getConnection(redisConnectContext);
+            StatefulRedisConnection<String, String> connection = RedisConnectionPoolManager
+                    .getConnection(redisConnectContext);
             T apply = function.apply(connection.sync());
             RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
             return apply;
         } catch (Exception exception) {
             log.error("redis连接失败！", exception);
-              throw exception;
+            throw exception;
+        }
+    }
+
+    public static void close(RedisConnectContext context) {
+        String key = context.key();
+        if (CLIENT_CACHE.containsKey(key)) {
+            CLIENT_CACHE.get(key).shutdown();
+            CLIENT_CACHE.remove(key);
+        }
+        if (CLUSTER_CLIENT_CACHE.containsKey(key)) {
+            CLUSTER_CLIENT_CACHE.get(key).shutdown();
+            CLUSTER_CLIENT_CACHE.remove(key);
         }
     }
 

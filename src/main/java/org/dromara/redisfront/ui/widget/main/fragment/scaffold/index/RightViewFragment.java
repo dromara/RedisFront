@@ -320,7 +320,7 @@ public class RightViewFragment {
                 default -> stringDataFetcher.fetchData(key);
             }
             return 0;
-        }, (ignore,e) -> {
+        }, (ignore, e) -> {
             if (e != null) {
                 Notifications.getInstance().show(Notifications.Type.ERROR, e.getMessage());
                 return;
@@ -550,7 +550,7 @@ public class RightViewFragment {
                     }
                 }
                 return null;
-            }, (ignore1,e) -> {
+            }, (ignore1, e) -> {
                 if (e == null) {
                     Notifications.getInstance().show(Notifications.Type.INFO, owner.$tr("DataViewForm.showInformationDialog.updateSuccess.message"));
                     return;
@@ -646,7 +646,7 @@ public class RightViewFragment {
             var key = keyField.getText();
             SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() ->
                             RedisBasicService.service.del(redisConnectContext, key),
-                    (ignore1,e) -> {
+                    (ignore1, e) -> {
                         if (e == null) {
                             owner.getContext().getEventBus().publish(new KeyDeleteSuccessEvent(key, redisConnectContext.getId()));
                             return;
@@ -704,7 +704,7 @@ public class RightViewFragment {
                     RedisBasicService.service.expire(redisConnectContext, key, Long.valueOf(ttl));
                 }
                 return null;
-            }, (ignore1,e) -> {
+            }, (ignore1, e) -> {
                 if (e == null) {
                     reloadAllActionPerformed();
                 } else {

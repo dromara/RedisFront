@@ -184,7 +184,7 @@ public class LeftSearchFragment {
                     RedisBasicService.service.flushall(redisConnectContext);
                 }
                 return null;
-            }, (ret,e) -> {
+            }, (ret, e) -> {
                 if (e != null) {
                     owner.displayException(e);
                     return;

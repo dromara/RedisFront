@@ -1,12 +1,11 @@
 package org.dromara.redisfront.commons.pool;
 
 import io.lettuce.core.api.StatefulConnection;
-import lombok.extern.slf4j.Slf4j;
+import io.lettuce.core.resource.ClientResources;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 
-@Slf4j
 public class RedisConnectionFactory<T> extends BasePooledObjectFactory<T> {
     private final ConnectionSupplier<T> supplier;
 
@@ -35,15 +34,8 @@ public class RedisConnectionFactory<T> extends BasePooledObjectFactory<T> {
     @Override
     public void destroyObject(PooledObject<T> p) {
         if (p.getObject() instanceof StatefulConnection<?, ?> statefulConnection) {
-            try {
-                if (statefulConnection.isOpen()) {
-                    statefulConnection.flushCommands();
-                    statefulConnection.close();
-                }
-            } catch (Exception e) {
-                log.error("Close connection failed", e);
-            }
+            statefulConnection.flushCommands();
+            statefulConnection.close();
         }
     }
-
 }
