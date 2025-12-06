@@ -162,7 +162,7 @@ public class LettuceUtils {
     }
 
     public static void clusterRun(RedisConnectContext redisConnectContext,
-            Consumer<RedisAdvancedClusterCommands<String, String>> consumer) {
+                                  Consumer<RedisAdvancedClusterCommands<String, String>> consumer) {
         try {
             StatefulRedisClusterConnection<String, String> connection = RedisConnectionPoolManager
                     .getClusterConnection(redisConnectContext);
@@ -175,7 +175,7 @@ public class LettuceUtils {
     }
 
     public static <T> T clusterExec(RedisConnectContext redisConnectContext,
-            Function<RedisAdvancedClusterCommands<String, String>, T> function) {
+                                    Function<RedisAdvancedClusterCommands<String, String>, T> function) {
         try {
             StatefulRedisClusterConnection<String, String> connection = RedisConnectionPoolManager
                     .getClusterConnection(redisConnectContext);
@@ -189,7 +189,7 @@ public class LettuceUtils {
     }
 
     public static void sentinelRun(RedisConnectContext redisConnectContext,
-            Consumer<RedisSentinelCommands<String, String>> consumer) {
+                                   Consumer<RedisSentinelCommands<String, String>> consumer) {
         try {
             StatefulRedisSentinelConnection<String, String> connection = RedisConnectionPoolManager
                     .getSentinelConnection(redisConnectContext);
@@ -202,7 +202,7 @@ public class LettuceUtils {
     }
 
     public static <T> T sentinelExec(RedisConnectContext redisConnectContext,
-            Function<RedisSentinelCommands<String, String>, T> function) {
+                                     Function<RedisSentinelCommands<String, String>, T> function) {
         try {
             StatefulRedisSentinelConnection<String, String> connection = RedisConnectionPoolManager
                     .getSentinelConnection(redisConnectContext);
@@ -228,7 +228,7 @@ public class LettuceUtils {
     }
 
     public static <T> T exec(RedisConnectContext redisConnectContext,
-            Function<RedisCommands<String, String>, T> function) {
+                             Function<RedisCommands<String, String>, T> function) {
         try {
             StatefulRedisConnection<String, String> connection = RedisConnectionPoolManager
                     .getConnection(redisConnectContext);
@@ -243,13 +243,15 @@ public class LettuceUtils {
 
     public static void close(RedisConnectContext context) {
         String key = context.key();
-        if (CLIENT_CACHE.containsKey(key)) {
-            CLIENT_CACHE.get(key).shutdown();
-            CLIENT_CACHE.remove(key);
+        try (RedisClient redisClient = CLIENT_CACHE.remove(key)) {
+            if (redisClient != null) {
+                redisClient.shutdown();
+            }
         }
-        if (CLUSTER_CLIENT_CACHE.containsKey(key)) {
-            CLUSTER_CLIENT_CACHE.get(key).shutdown();
-            CLUSTER_CLIENT_CACHE.remove(key);
+        try (RedisClusterClient redisClusterClient = CLUSTER_CLIENT_CACHE.remove(key)) {
+            if (redisClusterClient != null) {
+                redisClusterClient.shutdown();
+            }
         }
     }
 
