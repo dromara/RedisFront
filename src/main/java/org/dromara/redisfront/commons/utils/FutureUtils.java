@@ -1,6 +1,5 @@
 package org.dromara.redisfront.commons.utils;
 
-
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -13,7 +12,7 @@ import java.util.function.Supplier;
  * @author Jin
  */
 public class FutureUtils {
-    private static final int MAX_WORKER_THREADS = 10;
+    private static final int MAX_WORKER_THREADS = Math.max(Runtime.getRuntime().availableProcessors() * 8, 32);
 
     private static final ExecutorService executorService;
 
