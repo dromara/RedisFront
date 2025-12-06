@@ -195,11 +195,10 @@ public class RedisConnectionPoolManager {
             Map<String, GenericObjectPool<T>> poolMap,
             String specificKey) {
 
-        poolMap.forEach((key, pool) -> {
-            if (key.equals(specificKey)) {
-                closeAndRemove(poolMap, key, pool);
-            }
-        });
+        GenericObjectPool<T> pool = poolMap.get(specificKey);
+        if (pool != null) {
+            closeAndRemove(poolMap, specificKey, pool);
+        }
     }
 
     private static <T> void closeAndRemove(
