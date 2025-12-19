@@ -29,6 +29,7 @@ import org.dromara.redisfront.ui.widget.main.about.MainAboutPanel;
 import org.dromara.redisfront.ui.widget.main.fragment.MainTabView;
 import org.dromara.redisfront.ui.widget.main.listener.MouseDraggedListener;
 import org.dromara.redisfront.ui.widget.sidebar.drawer.DrawerAnimationAction;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -144,8 +145,10 @@ public class MainComponent extends JPanel {
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_SCROLL_BUTTONS_POLICY, FlatClientProperties.TABBED_PANE_POLICY_AS_NEEDED);
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_TYPE, FlatClientProperties.TABBED_PANE_TAB_TYPE_UNDERLINED);
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_LEADING);
-        topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, true);
-        topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSABLE, true);
+        topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, false);
+        topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSABLE, false);
+        topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TABS_POPUP_POLICY, FlatClientProperties.TABBED_PANE_POLICY_NEVER);
+        topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_INSETS, new Insets(4, 4, 4, 4));
         //Redis Tab 关闭事件
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
             Component component = tabbedPane.getComponentAt(tabIndex);
@@ -297,8 +300,126 @@ public class MainComponent extends JPanel {
             topTabbedPane.setSelectedComponent(matchedPanel.get());
             return;
         }
+        int tabIndex = topTabbedPane.getTabCount();
         topTabbedPane.addTab(title, Icons.REDIS_ICON_14x14, mainTabView);
+
+        JPanel tabComponent = createCustomTabComponent(title, topTabbedPane, tabIndex);
+        topTabbedPane.setTabComponentAt(tabIndex, tabComponent);
         topTabbedPane.setSelectedComponent(mainTabView);
 
+    }
+
+    private JPanel createCustomTabComponent(String title, JTabbedPane tabbedPane, int index) {
+        final boolean[] isHovered = {false};
+
+        JPanel panel = getJPanel(tabbedPane, index, isHovered);
+
+        panel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (tabbedPane.getSelectedIndex() != index) {
+                    isHovered[0] = true;
+                    panel.repaint();
+                }
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                isHovered[0] = false;
+                panel.repaint();
+            }
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                tabbedPane.setSelectedIndex(index);
+            }
+        });
+
+        JLabel iconLabel = new JLabel(Icons.REDIS_ICON_14x14);
+        panel.add(iconLabel, BorderLayout.WEST);
+
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(titleLabel.getFont().deriveFont(12f));
+        panel.add(titleLabel, BorderLayout.CENTER);
+
+        JLabel closeLabel = new JLabel("×") {
+            @Override
+            public Dimension getPreferredSize() {
+                return new Dimension(16, 16);
+            }
+        };
+        closeLabel.setFont(new Font("Dialog", Font.PLAIN, 20));
+        closeLabel.setForeground(new Color(160, 160, 160));
+        closeLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        closeLabel.setVerticalAlignment(SwingConstants.CENTER);
+        closeLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        closeLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                closeLabel.setForeground(new Color(255, 100, 100));
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                closeLabel.setForeground(new Color(160, 160, 160));
+            }
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                @SuppressWarnings("unchecked")
+                BiConsumer<JTabbedPane, Integer> callback =
+                    (BiConsumer<JTabbedPane, Integer>) tabbedPane.getClientProperty(
+                        FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK
+                    );
+                if (callback != null) {
+                    callback.accept(tabbedPane, index);
+                }
+            }
+        });
+        panel.add(closeLabel, BorderLayout.EAST);
+
+        tabbedPane.addChangeListener(e -> {
+            labelChangeEvent(tabbedPane, index, titleLabel);
+            panel.repaint();
+        });
+
+        labelChangeEvent(tabbedPane, index, titleLabel);
+
+        return panel;
+    }
+
+    private void labelChangeEvent(JTabbedPane tabbedPane, int index, JLabel titleLabel) {
+        if (tabbedPane.getSelectedIndex() == index) {
+            titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 12f));
+            titleLabel.setForeground(new Color(220, 50, 50));
+        } else {
+            titleLabel.setFont(titleLabel.getFont().deriveFont(Font.PLAIN, 12f));
+            titleLabel.setForeground(UIManager.getColor("Label.foreground"));
+        }
+    }
+
+    private @NotNull JPanel getJPanel(JTabbedPane tabbedPane, int index, boolean[] isHovered) {
+        JPanel panel = new JPanel(new BorderLayout(5, 0)) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                if (tabbedPane.getSelectedIndex() == index) {
+                    g2d.setColor(new Color(128, 128, 128, 60));
+                    g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+                    g2d.setColor(new Color(200, 50, 50));
+                    g2d.setStroke(new BasicStroke(1));
+                    g2d.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 6, 6);
+                } else if (isHovered[0]) {
+                    g2d.setColor(new Color(128, 128, 128, 40));
+                    g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+                    g2d.setColor(new Color(128, 128, 128, 150));
+                    g2d.setStroke(new BasicStroke(1));
+                    g2d.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 6, 6);
+                }
+                g2d.dispose();
+            }
+        };
+        panel.setOpaque(false);
+        panel.setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 5));
+        return panel;
     }
 }
