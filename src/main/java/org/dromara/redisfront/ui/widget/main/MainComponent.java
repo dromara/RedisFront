@@ -312,26 +312,7 @@ public class MainComponent extends JPanel {
     private JPanel createCustomTabComponent(String title, JTabbedPane tabbedPane, int index) {
         final boolean[] isHovered = {false};
 
-        JPanel panel = getJPanel(tabbedPane, index, isHovered);
-
-        panel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                if (tabbedPane.getSelectedIndex() != index) {
-                    isHovered[0] = true;
-                    panel.repaint();
-                }
-            }
-            @Override
-            public void mouseExited(MouseEvent e) {
-                isHovered[0] = false;
-                panel.repaint();
-            }
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                tabbedPane.setSelectedIndex(index);
-            }
-        });
+        JPanel panel = getJPanel(tabbedPane, isHovered);
 
         JLabel iconLabel = new JLabel(Icons.REDIS_ICON_14x14);
         panel.add(iconLabel, BorderLayout.WEST);
@@ -345,15 +326,35 @@ public class MainComponent extends JPanel {
             public Dimension getPreferredSize() {
                 return new Dimension(16, 16);
             }
+            @Override
+            public Dimension getMinimumSize() {
+                return new Dimension(16, 16);
+            }
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(16, 16);
+            }
         };
         closeLabel.setFont(new Font("Dialog", Font.PLAIN, 20));
         closeLabel.setForeground(new Color(160, 160, 160));
         closeLabel.setHorizontalAlignment(SwingConstants.CENTER);
         closeLabel.setVerticalAlignment(SwingConstants.CENTER);
         closeLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        if (tabbedPane.getSelectedIndex() == index) {
+            closeLabel.setText("×");
+            closeLabel.setEnabled(true);
+        } else {
+            closeLabel.setText("");
+            closeLabel.setEnabled(false);
+        }
         closeLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
+                int currentIndex = tabbedPane.indexOfTabComponent(panel);
+                if (currentIndex >= 0 && tabbedPane.getSelectedIndex() != currentIndex) {
+                    isHovered[0] = true;
+                    panel.repaint();
+                }
                 closeLabel.setForeground(new Color(255, 100, 100));
             }
             @Override
@@ -368,14 +369,60 @@ public class MainComponent extends JPanel {
                         FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK
                     );
                 if (callback != null) {
-                    callback.accept(tabbedPane, index);
+                    int currentIndex = tabbedPane.indexOfTabComponent(panel);
+                    if (currentIndex >= 0) {
+                        callback.accept(tabbedPane, currentIndex);
+                    }
                 }
             }
         });
         panel.add(closeLabel, BorderLayout.EAST);
 
+        panel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                int currentIndex = tabbedPane.indexOfTabComponent(panel);
+                if (currentIndex >= 0 && tabbedPane.getSelectedIndex() != currentIndex) {
+                    isHovered[0] = true;
+                    closeLabel.setText("×");
+                    closeLabel.setEnabled(true);
+                    panel.repaint();
+                }
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                Point mousePos = e.getPoint();
+                if (!panel.contains(mousePos)) {
+                    int currentIndex = tabbedPane.indexOfTabComponent(panel);
+                    isHovered[0] = false;
+                    if (currentIndex >= 0 && tabbedPane.getSelectedIndex() != currentIndex) {
+                        closeLabel.setText("");
+                        closeLabel.setEnabled(false);
+                    }
+                    panel.repaint();
+                }
+            }
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int currentIndex = tabbedPane.indexOfTabComponent(panel);
+                if (currentIndex >= 0) {
+                    tabbedPane.setSelectedIndex(currentIndex);
+                }
+            }
+        });
+
         tabbedPane.addChangeListener(e -> {
-            labelChangeEvent(tabbedPane, index, titleLabel);
+            int currentIndex = tabbedPane.indexOfTabComponent(panel);
+            if (currentIndex >= 0) {
+                labelChangeEvent(tabbedPane, currentIndex, titleLabel);
+                if (tabbedPane.getSelectedIndex() == currentIndex) {
+                    closeLabel.setText("×");
+                    closeLabel.setEnabled(true);
+                } else {
+                    closeLabel.setText("");
+                    closeLabel.setEnabled(false);
+                }
+            }
             panel.repaint();
         });
 
@@ -394,7 +441,9 @@ public class MainComponent extends JPanel {
         }
     }
 
-    private @NotNull JPanel getJPanel(JTabbedPane tabbedPane, int index, boolean[] isHovered) {
+    private @NotNull JPanel getJPanel(JTabbedPane tabbedPane, boolean[] isHovered) {
+        final JPanel[] panelRef = new JPanel[1];
+        
         JPanel panel = new JPanel(new BorderLayout(5, 0)) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -402,7 +451,8 @@ public class MainComponent extends JPanel {
                 Graphics2D g2d = (Graphics2D) g.create();
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-                if (tabbedPane.getSelectedIndex() == index) {
+                int currentIndex = tabbedPane.indexOfTabComponent(panelRef[0]);
+                if (currentIndex >= 0 && tabbedPane.getSelectedIndex() == currentIndex) {
                     g2d.setColor(new Color(170, 169, 169, 63));
                     g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
                     g2d.setStroke(new BasicStroke(1));
@@ -419,6 +469,7 @@ public class MainComponent extends JPanel {
         };
         panel.setOpaque(false);
         panel.setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 5));
+        panelRef[0] = panel;
         return panel;
     }
 }
