@@ -54,6 +54,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * DataSearchForm
@@ -109,7 +110,7 @@ public class LeftSearchFragment {
         this.redisConnectContext = redisConnectContext;
         $$$setupUI$$$();
         int defaultDbIndex = 0;
-        if (RedisFrontUtils.isNotNull(redisConnectContext.getSetting()) 
+        if (RedisFrontUtils.isNotNull(redisConnectContext.getSetting())
                 && RedisFrontUtils.isNotNull(redisConnectContext.getSetting().getDefaultDatabase())) {
             defaultDbIndex = redisConnectContext.getSetting().getDefaultDatabase();
         }
@@ -580,7 +581,7 @@ public class LeftSearchFragment {
 
             String actualScanPattern = key;
             String clientFilterKeyword = null;
-            
+
             if (key.startsWith("*") && key.endsWith("*") && key.length() > 2) {
                 clientFilterKeyword = key.substring(1, key.length() - 1);
                 actualScanPattern = "*";
@@ -609,8 +610,8 @@ public class LeftSearchFragment {
             if (clientFilterKeyword != null) {
                 final String filterKeyword = clientFilterKeyword;
                 scanKeysList = scanKeysList.stream()
-                    .filter(k -> k.contains(filterKeyword))
-                    .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
+                        .filter(k -> k.contains(filterKeyword))
+                        .collect(Collectors.toCollection(ArrayList::new));
             }
 
             if (RedisFrontUtils.equal(scanKeysContext.getSearchKey(), lastSearchKey) && RedisFrontUtils.isNotEmpty(scanKeysContext.getKeyList())) {
