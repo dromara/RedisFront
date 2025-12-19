@@ -108,7 +108,12 @@ public class LeftSearchFragment {
         this.context = (RedisFrontContext) owner.getContext();
         this.redisConnectContext = redisConnectContext;
         $$$setupUI$$$();
-        this.databaseComboBox.setSelectedIndex(0);
+        int defaultDbIndex = 0;
+        if (RedisFrontUtils.isNotNull(redisConnectContext.getSetting()) 
+                && RedisFrontUtils.isNotNull(redisConnectContext.getSetting().getDefaultDatabase())) {
+            defaultDbIndex = redisConnectContext.getSetting().getDefaultDatabase();
+        }
+        this.databaseComboBox.setSelectedIndex(defaultDbIndex);
     }
 
     private void createUIComponents() {
