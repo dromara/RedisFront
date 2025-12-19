@@ -403,9 +403,8 @@ public class MainComponent extends JPanel {
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
                 if (tabbedPane.getSelectedIndex() == index) {
-                    g2d.setColor(new Color(128, 128, 128, 60));
+                    g2d.setColor(new Color(170, 169, 169, 63));
                     g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
-                    g2d.setColor(new Color(200, 50, 50));
                     g2d.setStroke(new BasicStroke(1));
                     g2d.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 6, 6);
                 } else if (isHovered[0]) {
