@@ -23,6 +23,7 @@ import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
 import org.dromara.redisfront.ui.handler.ConnectHandler;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.jdesktop.swingx.JXTree;
+import org.jetbrains.annotations.NotNull;
 import raven.toast.Notifications;
 
 import javax.sql.DataSource;
@@ -32,11 +33,13 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.*;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class RedisConnectTree extends JXTree {
@@ -54,6 +57,7 @@ public class RedisConnectTree extends JXTree {
         this.initializeUI();
         this.initializeActions();
         this.initializeComponents();
+        this.initializeDragAndDrop();
     }
 
     @Override
@@ -378,99 +382,92 @@ public class RedisConnectTree extends JXTree {
                 "[dark]background:darken(#FFFFFF,30%);");
         JMenuItem addConnectGroupMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.addConnectGroup")) {
             {
-                addActionListener(ignore -> {
-                    context.taskExecute(() -> ConnectGroupDao.newInstance(datasource).count(), (count, exp) -> {
-                        if (exp != null) {
-                            log.error(exp.getMessage());
-                            Notifications.getInstance().show(Notifications.Type.ERROR, exp.getMessage());
-                            return;
+                addActionListener(ignore -> context.taskExecute(() -> ConnectGroupDao.newInstance(datasource).count(), (count, exp) -> {
+                    if (exp != null) {
+                        log.error(exp.getMessage());
+                        Notifications.getInstance().show(Notifications.Type.ERROR, exp.getMessage());
+                        return;
+                    }
+                    String groupName = owner.$tr("RedisConnectTree.popupMenu.addConnectGroup");
+                    if (count > 0) {
+                        groupName += "(" + count + ")";
+                    }
+                    String value = (String) JOptionPane.showInputDialog(owner, owner.$tr("RedisConnectTree.popupMenu.connectGroupName"), owner.$tr("RedisConnectTree.popupMenu.addConnectGroup"), JOptionPane.QUESTION_MESSAGE, null, null, groupName);
+                    if (StrUtil.isEmpty(value)) {
+                        return;
+                    }
+                    context.taskExecute(() -> {
+                        ConnectGroupDao.newInstance(datasource).save(value);
+                        context.getEventBus().publish(new RefreshConnectTreeEvent(null));
+                        return null;
+                    }, (result,exception) -> {
+                        if (exception != null) {
+                            log.error(exception.getMessage());
+                            Notifications.getInstance().show(Notifications.Type.ERROR, exception.getMessage());
+                        } else {
+                            Notifications.getInstance().show(Notifications.Type.SUCCESS, owner.$tr("RedisConnectTree.popupMenu.addConnectGroupSuccess"));
                         }
-                        String groupName = owner.$tr("RedisConnectTree.popupMenu.addConnectGroup");
-                        if (count > 0) {
-                            groupName += "(" + count + ")";
-                        }
-                        String value = (String) JOptionPane.showInputDialog(owner, owner.$tr("RedisConnectTree.popupMenu.connectGroupName"), owner.$tr("RedisConnectTree.popupMenu.addConnectGroup"), JOptionPane.QUESTION_MESSAGE, null, null, groupName);
-                        if (StrUtil.isEmpty(value)) {
-                            return;
-                        }
-                        context.taskExecute(() -> {
-                            ConnectGroupDao.newInstance(datasource).save(value);
-                            context.getEventBus().publish(new RefreshConnectTreeEvent(null));
-                            return null;
-                        }, (result,exception) -> {
-                            if (exception != null) {
-                                log.error(exception.getMessage());
-                                Notifications.getInstance().show(Notifications.Type.ERROR, exception.getMessage());
-                            } else {
-                                Notifications.getInstance().show(Notifications.Type.SUCCESS, owner.$tr("RedisConnectTree.popupMenu.addConnectGroupSuccess"));
-                            }
-                        });
                     });
-                });
+                }));
             }
         };
         treePopupMenu.add(addConnectGroupMenuItem);
 
         JMenuItem addConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.addConnect")) {
             {
-                addActionListener(ignore -> {
-                    AddConnectDialog.getInstance(owner).showNewConnectDialog(null);
-                });
+                addActionListener(ignore -> AddConnectDialog.getInstance(owner).showNewConnectDialog(null));
             }
         };
         treePopupMenu.add(addConnectMenuItem);
         treePopupMenu.addSeparator();
 
         JMenuItem importConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.importConnect"));
-        importConnectMenuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                fileChooser.setDialogTitle(owner.$tr("RedisConnectTree.popupMenu.importConnect"));
-                fileChooser.setFileFilter(new FileNameExtensionFilter("RedisFront.json", "json"));
-                int result = fileChooser.showOpenDialog(owner);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = fileChooser.getSelectedFile();
-                    if (FileUtil.exist(selectedFile)) {
-                        try {
+        importConnectMenuItem.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            fileChooser.setDialogTitle(owner.$tr("RedisConnectTree.popupMenu.importConnect"));
+            fileChooser.setFileFilter(new FileNameExtensionFilter("RedisFront.json", "json"));
+            int result = fileChooser.showOpenDialog(owner);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                if (FileUtil.exist(selectedFile)) {
+                    try {
 
-                            context.taskExecute(() -> {
-                                ExportData exportData = JSONUtil.toBean(FileUtil.readUtf8String(selectedFile), ExportData.class);
-                                List<ConnectGroupEntity> groupEntityList = exportData.getGroups();
-                                List<ConnectDetailEntity> detailEntities = exportData.getDetails();
-                                if (CollUtil.isNotEmpty(groupEntityList)) {
-                                    for (ConnectGroupEntity connectGroupEntity : groupEntityList) {
-                                        Entity entity = ConnectGroupDao.newInstance(datasource).save(connectGroupEntity.getGroupName());
-                                        List<ConnectDetailEntity> entities = detailEntities.stream().filter(s -> s.getGroupId().equals(connectGroupEntity.getGroupId())).toList();
-                                        for (ConnectDetailEntity connectDetailEntity : entities) {
-                                            connectDetailEntity.setId(null);
-                                            connectDetailEntity.setGroupId(entity.getInt("id"));
-                                            ConnectDetailDao.newInstance(datasource).save(connectDetailEntity);
-                                            detailEntities.remove(connectDetailEntity);
-                                        }
+                        context.taskExecute(() -> {
+                            ExportData exportData = JSONUtil.toBean(FileUtil.readUtf8String(selectedFile), ExportData.class);
+                            List<ConnectGroupEntity> groupEntityList = exportData.getGroups();
+                            List<ConnectDetailEntity> detailEntities = exportData.getDetails();
+                            if (CollUtil.isNotEmpty(groupEntityList)) {
+                                for (ConnectGroupEntity connectGroupEntity : groupEntityList) {
+                                    Entity entity = ConnectGroupDao.newInstance(datasource).save(connectGroupEntity.getGroupName());
+                                    List<ConnectDetailEntity> entities = detailEntities.stream().filter(s -> s.getGroupId().equals(connectGroupEntity.getGroupId())).toList();
+                                    for (ConnectDetailEntity connectDetailEntity : entities) {
+                                        connectDetailEntity.setId(null);
+                                        connectDetailEntity.setGroupId(entity.getInt("id"));
+                                        ConnectDetailDao.newInstance(datasource).save(connectDetailEntity);
+                                        detailEntities.remove(connectDetailEntity);
                                     }
                                 }
-                                if (CollUtil.isNotEmpty(detailEntities)) {
-                                    for (ConnectDetailEntity detailEntity : detailEntities) {
-                                        detailEntity.setId(null);
-                                        ConnectDetailDao.newInstance(datasource).save(detailEntity);
-                                    }
+                            }
+                            if (CollUtil.isNotEmpty(detailEntities)) {
+                                for (ConnectDetailEntity detailEntity : detailEntities) {
+                                    detailEntity.setId(null);
+                                    ConnectDetailDao.newInstance(datasource).save(detailEntity);
                                 }
-                                context.getEventBus().publish(new RefreshConnectTreeEvent(null));
-                                return null;
-                            }, (data, exception) -> {
-                                if (exception != null) {
-                                    log.error(exception.getMessage());
-                                    Notifications.getInstance().show(Notifications.Type.ERROR, exception.getMessage());
-                                } else {
-                                    Notifications.getInstance().show(Notifications.Type.SUCCESS, owner.$tr("RedisConnectTree.popupMenu.importConnectSuccess"));
-                                }
-                            });
-                        } catch (Exception ex) {
-                            log.error(ex.getMessage());
-                            Notifications.getInstance().show(Notifications.Type.ERROR, ex.getMessage());
-                        }
+                            }
+                            context.getEventBus().publish(new RefreshConnectTreeEvent(null));
+                            return null;
+                        }, (data, exception) -> {
+                            if (exception != null) {
+                                log.error(exception.getMessage());
+                                Notifications.getInstance().show(Notifications.Type.ERROR, exception.getMessage());
+                            } else {
+                                Notifications.getInstance().show(Notifications.Type.SUCCESS, owner.$tr("RedisConnectTree.popupMenu.importConnectSuccess"));
+                            }
+                        });
+                    } catch (Exception ex) {
+                        log.error(ex.getMessage());
+                        Notifications.getInstance().show(Notifications.Type.ERROR, ex.getMessage());
                     }
                 }
             }
@@ -478,27 +475,24 @@ public class RedisConnectTree extends JXTree {
         treePopupMenu.add(importConnectMenuItem);
 
         JMenuItem exportConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.exportConnect"));
-        exportConnectMenuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                fileChooser.setDialogTitle(owner.$tr("RedisConnectTree.popupMenu.exportConnect"));
-                int result = fileChooser.showOpenDialog(owner);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = fileChooser.getSelectedFile();
-                    if (FileUtil.exist(selectedFile)) {
-                        try {
-                            List<ConnectGroupEntity> groupEntityList = ConnectGroupDao.newInstance(context.getDatabaseManager().getDatasource()).loadAll();
-                            List<ConnectDetailEntity> detailEntities = ConnectDetailDao.newInstance(context.getDatabaseManager().getDatasource()).loadAll();
-                            ExportData exportData = new ExportData();
-                            exportData.setGroups(groupEntityList);
-                            exportData.setDetails(detailEntities);
-                            FileUtil.writeUtf8String(JSONUtil.toJsonStr(exportData), selectedFile.getAbsolutePath() + File.separator + "RedisFront.json");
-                        } catch (SQLException ex) {
-                            log.error(ex.getMessage());
-                            Notifications.getInstance().show(Notifications.Type.ERROR, ex.getMessage());
-                        }
+        exportConnectMenuItem.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            fileChooser.setDialogTitle(owner.$tr("RedisConnectTree.popupMenu.exportConnect"));
+            int result = fileChooser.showOpenDialog(owner);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                if (FileUtil.exist(selectedFile)) {
+                    try {
+                        List<ConnectGroupEntity> groupEntityList = ConnectGroupDao.newInstance(context.getDatabaseManager().getDatasource()).loadAll();
+                        List<ConnectDetailEntity> detailEntities = ConnectDetailDao.newInstance(context.getDatabaseManager().getDatasource()).loadAll();
+                        ExportData exportData = new ExportData();
+                        exportData.setGroups(groupEntityList);
+                        exportData.setDetails(detailEntities);
+                        FileUtil.writeUtf8String(JSONUtil.toJsonStr(exportData), selectedFile.getAbsolutePath() + File.separator + "RedisFront.json");
+                    } catch (SQLException ex) {
+                        log.error(ex.getMessage());
+                        Notifications.getInstance().show(Notifications.Type.ERROR, ex.getMessage());
                     }
                 }
             }
@@ -532,6 +526,170 @@ public class RedisConnectTree extends JXTree {
                 return;
             }
             connectHandler.accept(redisConnectTreeItem.getDetail().getConnectContext());
+        }
+    }
+
+    private void initializeDragAndDrop() {
+        this.setDragEnabled(true);
+        this.setDropMode(DropMode.ON_OR_INSERT);
+
+        this.setTransferHandler(new TreeNodeTransferHandler());
+    }
+
+    private class TreeNodeTransferHandler extends TransferHandler {
+        private final DataFlavor nodeDataFlavor;
+
+        public TreeNodeTransferHandler() {
+            try {
+                String mimeType = DataFlavor.javaJVMLocalObjectMimeType +
+                        ";class=org.dromara.redisfront.ui.widget.sidebar.tree.RedisConnectTreeNode";
+                nodeDataFlavor = new DataFlavor(mimeType);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public int getSourceActions(JComponent c) {
+            return MOVE;
+        }
+
+        @Override
+        protected Transferable createTransferable(JComponent c) {
+            JTree tree = (JTree) c;
+            TreePath path = tree.getSelectionPath();
+            if (path != null) {
+                Object node = path.getLastPathComponent();
+                if (node instanceof RedisConnectTreeNode) {
+                    return new NodeTransferable((RedisConnectTreeNode) node);
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public boolean canImport(TransferSupport support) {
+            if (!support.isDrop()) {
+                return false;
+            }
+
+            if (!support.isDataFlavorSupported(nodeDataFlavor)) {
+                return false;
+            }
+
+            JTree.DropLocation dropLocation = (JTree.DropLocation) support.getDropLocation();
+            TreePath destPath = dropLocation.getPath();
+
+            if (destPath == null) {
+                return false;
+            }
+
+            try {
+                RedisConnectTreeNode draggedNode = (RedisConnectTreeNode) support.getTransferable().getTransferData(nodeDataFlavor);
+                Object destNode = destPath.getLastPathComponent();
+
+                if (draggedNode.getIsGroup()) {
+                    return false;
+                }
+
+                if (destNode instanceof RedisConnectTreeNode targetNode) {
+                    return targetNode.getIsGroup();
+                }
+
+                return destNode instanceof DefaultMutableTreeNode;
+
+            } catch (Exception e) {
+                log.error("拖拽验证失败", e);
+                return false;
+            }
+        }
+
+        @Override
+        public boolean importData(TransferSupport support) {
+            if (!canImport(support)) {
+                return false;
+            }
+
+            try {
+                RedisConnectTreeNode draggedNode = (RedisConnectTreeNode) support.getTransferable().getTransferData(nodeDataFlavor);
+                JTree.DropLocation dropLocation = (JTree.DropLocation) support.getDropLocation();
+                TreePath destPath = dropLocation.getPath();
+                Object destNode = destPath.getLastPathComponent();
+
+                Integer newGroupId;
+                String operationDesc;
+
+                if (destNode instanceof RedisConnectTreeNode targetNode) {
+                    if (!targetNode.getIsGroup()) {
+                        return false;
+                    }
+                    newGroupId = targetNode.id();
+                    operationDesc = owner.$tr("RedisConnectTree.drag.moveToGroup") + " " + targetNode;
+                } else {
+                    // 拖拽到根节点，设置为未分组
+                    newGroupId = -1;
+                    operationDesc = owner.$tr("RedisConnectTree.drag.moveToNoGroup");
+                }
+
+                // 更新数据库
+                Integer connectId = draggedNode.id();
+                Integer oldGroupId = draggedNode.getDetail().getGroupId();
+
+                // 如果分组没有变化，不需要更新
+                if (newGroupId.equals(oldGroupId)) {
+                    return false;
+                }
+
+                context.taskExecute(() -> {
+                    ConnectDetailDao.newInstance(context.getDatabaseManager().getDatasource())
+                            .updateGroupId(connectId, newGroupId);
+                    return null;
+                }, (result, exception) -> {
+                    if (exception != null) {
+                        log.error("更新连接分组失败", exception);
+                        Notifications.getInstance().show(Notifications.Type.ERROR,
+                                owner.$tr("RedisConnectTree.drag.updateFailed") + ": " + exception.getMessage());
+                    } else {
+                        Notifications.getInstance().show(Notifications.Type.SUCCESS, operationDesc);
+                        // 刷新树
+                        context.getEventBus().publish(new RefreshConnectTreeEvent(null));
+                    }
+                });
+
+                return true;
+
+            } catch (Exception e) {
+                log.error("拖拽导入失败", e);
+                Notifications.getInstance().show(Notifications.Type.ERROR,
+                        owner.$tr("RedisConnectTree.drag.importFailed") + ": " + e.getMessage());
+                return false;
+            }
+        }
+
+        private class NodeTransferable implements Transferable {
+            private final RedisConnectTreeNode node;
+
+            public NodeTransferable(RedisConnectTreeNode node) {
+                this.node = node;
+            }
+
+            @Override
+            public DataFlavor[] getTransferDataFlavors() {
+                return new DataFlavor[]{nodeDataFlavor};
+            }
+
+            @Override
+            public boolean isDataFlavorSupported(DataFlavor flavor) {
+                return nodeDataFlavor.equals(flavor);
+            }
+
+            @Override
+            public @NotNull Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
+                if (!isDataFlavorSupported(flavor)) {
+                    throw new UnsupportedFlavorException(flavor);
+                }
+                return node;
+            }
         }
     }
 

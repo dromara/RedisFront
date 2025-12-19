@@ -79,6 +79,11 @@ public class RedisConnectContext implements Serializable, Cloneable {
         private String keySeparator;
         private Integer redisTimeout;
         private Integer sshTimeout;
+        private Integer defaultDatabase;
+
+        public SettingInfo(Integer loadKeyNum, String keySeparator, Integer redisTimeout, Integer sshTimeout) {
+            this(loadKeyNum, keySeparator, redisTimeout, sshTimeout, 0);
+        }
 
         @Override
         public String toString() {

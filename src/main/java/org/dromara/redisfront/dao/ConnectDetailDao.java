@@ -63,4 +63,10 @@ public class ConnectDetailDao {
     public void deleteByGroupId(Object id) throws SQLException {
         DbUtil.use(datasource).del(TABLE_NAME, "group_id", id);
     }
+    public void updateGroupId(Object connectId, Object newGroupId) throws SQLException {
+        DbUtil.use(datasource).update(
+            Entity.create(TABLE_NAME).set("group_id", newGroupId),
+            Entity.create().set("id", connectId)
+        );
+    }
 }

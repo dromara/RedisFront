@@ -84,6 +84,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
     private JLabel loadNumLabel;
     private JLabel redisTimeoutLabel;
     private JLabel sshTimeoutLabel;
+    private JSpinner defaultDatabaseSpinner;
 
     public static AddConnectDialog getInstance(RedisFrontWidget app) {
         return new AddConnectDialog(app);
@@ -386,11 +387,21 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         int redisTimeoutNum = Integer.parseInt(redisTimeoutTextField.getText());
         int sshTimeoutNum = Integer.parseInt(sshTimeoutTextField.getText());
         String keySeparator = keySeparatorField.getText();
+        int defaultDatabase = 0;
+        try {
+            Object value = defaultDatabaseSpinner.getValue();
+            if (value != null) {
+                defaultDatabase = (Integer) value;
+            }
+        } catch (Exception e) {
+            log.error("defaultDatabaseSpinner value error", e);
+        }
         return new RedisConnectContext.SettingInfo(
                 keyMaxLoadNum,
                 keySeparator,
                 redisTimeoutNum,
-                sshTimeoutNum
+                sshTimeoutNum,
+                defaultDatabase
         );
     }
 
@@ -468,6 +479,9 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             keySeparatorField.setText(redisConnectContext.getSetting().getKeySeparator());
             redisTimeoutTextField.setText(String.valueOf(redisConnectContext.getSetting().getRedisTimeout()));
             sshTimeoutTextField.setText(String.valueOf(redisConnectContext.getSetting().getSshTimeout()));
+            if (RedisFrontUtils.isNotNull(redisConnectContext.getSetting().getDefaultDatabase())) {
+                defaultDatabaseSpinner.setValue(redisConnectContext.getSetting().getDefaultDatabase());
+            }
         }
     }
 
@@ -494,6 +508,33 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         sshPortField = new JSpinner();
         sshPortField.setEditor(new JSpinner.NumberEditor(sshPortField, "####"));
         sshPortField.setValue(22);
+        defaultDatabaseSpinner = new JSpinner();
+        defaultDatabaseSpinner.setModel(new SpinnerNumberModel(0, 0, 15, 1));
+        JSpinner.NumberEditor editor = new JSpinner.NumberEditor(defaultDatabaseSpinner, "#");
+        defaultDatabaseSpinner.setEditor(editor);
+        JFormattedTextField textField = editor.getTextField();
+        textField.setInputVerifier(new InputVerifier() {
+            @Override
+            public boolean verify(JComponent input) {
+                JFormattedTextField ftf = (JFormattedTextField) input;
+                String text = ftf.getText();
+                if (text == null || text.trim().isEmpty()) {
+                    ftf.setValue(0);
+                    return true;
+                }
+                try {
+                    int value = Integer.parseInt(text.trim());
+                    if (value < 0 || value > 15) {
+                        ftf.setValue(0);
+                        return false;
+                    }
+                    return true;
+                } catch (NumberFormatException e) {
+                    ftf.setValue(0);
+                    return false;
+                }
+            }
+        });
     }
 
     /**
@@ -570,7 +611,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         sshPasswordField = new JPasswordField();
         sshPanel.add(sshPasswordField, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         basicPanel = new JPanel();
-        basicPanel.setLayout(new GridLayoutManager(7, 4, new Insets(0, 0, 0, 0), -1, -1));
+        basicPanel.setLayout(new GridLayoutManager(9, 4, new Insets(0, 0, 0, 0), -1, -1));
         panel2.add(basicPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         titleLabel = new JLabel();
         this.$$$loadLabelText$$$(titleLabel, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "AddConnectDialog.titleLabel.Title"));
@@ -600,8 +641,12 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         enableSSLBtn.setEnabled(true);
         enableSSLBtn.setText("SSL/TLS");
         basicPanel.add(enableSSLBtn, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel defaultDatabaseLabel = new JLabel();
+        this.$$$loadLabelText$$$(defaultDatabaseLabel, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "AddConnectDialog.defaultDatabaseLabel.title"));
+        basicPanel.add(defaultDatabaseLabel, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        basicPanel.add(defaultDatabaseSpinner, new GridConstraints(6, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final Spacer spacer2 = new Spacer();
-        basicPanel.add(spacer2, new GridConstraints(6, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        basicPanel.add(spacer2, new GridConstraints(8, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         basicPanel.add(passwordField, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         enableSSHBtn.setText("SSH");
         basicPanel.add(enableSSHBtn, new GridConstraints(5, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
