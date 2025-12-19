@@ -578,27 +578,41 @@ public class LeftSearchFragment {
             var lastSearchKey = scanKeysContext.getSearchKey();
             scanKeysContext.setSearchKey(key);
 
-            if (!key.contains("*")) {
+            String actualScanPattern = key;
+            String clientFilterKeyword = null;
+            
+            if (key.startsWith("*") && key.endsWith("*") && key.length() > 2) {
+                clientFilterKeyword = key.substring(1, key.length() - 1);
+                actualScanPattern = "*";
+            }
+
+            if (!actualScanPattern.contains("*")) {
                 var all = allField.getText();
                 scanKeysContext.setLimit(Long.valueOf(all));
             }
 
+            scanKeysContext.setSearchKey(actualScanPattern);
             KeyScanCursor<String> keyScanCursor = RedisBasicService.service.scan(redisConnectContext, scanKeysContext.getScanCursor(), scanKeysContext.getScanArgs());
             scanKeysContext.setScanCursor(keyScanCursor);
             log.debug("本次扫描到：{}", keyScanCursor.getKeys().size());
 
             var scanKeysList = new ArrayList<>(keyScanCursor.getKeys());
 
-            //模糊匹配(模糊匹配在key数量小于 limit 的情况加全部查询出来)
-            if (!loadMorePanel.isVisible() && RedisFrontUtils.equal("*", key)) {
-                while (RedisFrontUtils.equal("*", key) && !keyScanCursor.isFinished()) {
+            if (!loadMorePanel.isVisible() && RedisFrontUtils.equal("*", actualScanPattern)) {
+                while (RedisFrontUtils.equal("*", actualScanPattern) && !keyScanCursor.isFinished()) {
                     keyScanCursor = RedisBasicService.service.scan(redisConnectContext, scanKeysContext.getScanCursor(), scanKeysContext.getScanArgs());
                     scanKeysContext.setScanCursor(keyScanCursor);
                     scanKeysList.addAll(keyScanCursor.getKeys());
                 }
             }
 
-            //数据扫描上限判断！
+            if (clientFilterKeyword != null) {
+                final String filterKeyword = clientFilterKeyword;
+                scanKeysList = scanKeysList.stream()
+                    .filter(k -> k.contains(filterKeyword))
+                    .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
+            }
+
             if (RedisFrontUtils.equal(scanKeysContext.getSearchKey(), lastSearchKey) && RedisFrontUtils.isNotEmpty(scanKeysContext.getKeyList())) {
                 if (scanKeysContext.getKeyList().size() >= 300000) {
                     System.gc();
@@ -634,7 +648,7 @@ public class LeftSearchFragment {
             loadTreeModelData("*");
         } else {
             if (fuzzyMatchToggleButton.isSelected()) {
-                searchTextFieldText += "*";
+                searchTextFieldText = "*" + searchTextFieldText + "*";
             }
             loadTreeModelData(searchTextFieldText);
         }
