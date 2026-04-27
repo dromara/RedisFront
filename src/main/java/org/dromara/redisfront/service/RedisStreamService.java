@@ -20,11 +20,11 @@ public interface RedisStreamService {
 
     Long xack(RedisConnectContext redisConnectContext, String key, String group, String... messageIds);
 
-    String xadd(RedisConnectContext redisConnectContext, String key, Map<String, String> body);
+    String xadd(RedisConnectContext redisConnectContext, String key, Map<String, byte[]> body);
 
-    String xadd(RedisConnectContext redisConnectContext, String id, String key, Map<String, String> body);
+    String xadd(RedisConnectContext redisConnectContext, String id, String key, Map<String, byte[]> body);
 
-    List<StreamMessage<String, String>> xrange(RedisConnectContext redisConnectContext, String key, Range<String> range, Limit limit);
+    List<StreamMessage<String, byte[]>> xrange(RedisConnectContext redisConnectContext, String key, Range<String> range, Limit limit);
 
     String xadd(RedisConnectContext redisConnectContext, String key, XAddArgs args, Object... keysAndValues);
 

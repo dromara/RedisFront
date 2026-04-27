@@ -1,5 +1,6 @@
 package org.dromara.redisfront.ui.widget.main.fragment.scaffold.index;
 
+import cn.hutool.core.io.unit.DataSizeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONException;
 import cn.hutool.json.JSONUtil;
@@ -12,6 +13,8 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.quickswing.ui.swing.AnimateButton;
+import org.dromara.redisfront.commons.codec.RedisValueCodec;
+import org.dromara.redisfront.commons.codec.ValueViewType;
 import org.dromara.redisfront.commons.enums.KeyTypeEnum;
 import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
@@ -22,6 +25,7 @@ import org.dromara.redisfront.model.table.StreamTableModel;
 import org.dromara.redisfront.model.tree.TreeNodeInfo;
 import org.dromara.redisfront.model.turbo.Turbo2;
 import org.dromara.redisfront.model.turbo.Turbo3;
+import org.dromara.redisfront.model.value.RedisValueItem;
 import org.dromara.redisfront.service.*;
 import org.dromara.redisfront.ui.components.editor.TextEditor;
 import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
@@ -46,6 +50,7 @@ import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.awt.event.*;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
@@ -128,11 +133,11 @@ public class RightViewFragment {
         this.initialize();
     }
 
-    private void refreshStringUI(Turbo2<Long, String> turbo) {
+    private void refreshStringUI(Turbo2<Long, RedisValueItem> turbo) {
         tableViewPanel.setVisible(false);
         valueUpdateSaveBtn.setEnabled(true);
         lengthLabel.setText("Length: " + turbo.getT1());
-        keySizeLabel.setText("Size: " + RedisFrontUtils.getDataSize(turbo.getT2()));
+        keySizeLabel.setText("Size: " + DataSizeUtil.format(turbo.getT2().byteLength()));
         dataSplitPanel.setDividerSize(0);
         jsonValueFormat(turbo.getT2());
     }
@@ -185,22 +190,22 @@ public class RightViewFragment {
                 if (e.getButton() == MouseEvent.BUTTON1 && row != -1) {
                     tableDelBtn.setEnabled(true);
                     if (dataTable.getModel() instanceof SortedSetTableModel) {
-                        var value = dataTable.getValueAt(row, 2);
+                        var value = (RedisValueItem) dataTable.getValueAt(row, 2);
                         var score = dataTable.getValueAt(row, 1);
                         RedisFrontUtils.runEDT(() -> {
                             keyLabel.setText(owner.$tr("DataViewForm.keyLabel.score.title"));
                             fieldOrScoreField.setText(score.toString());
                             valueUpdateSaveBtn.setEnabled(true);
-                            jsonValueFormat((String) value);
+                            jsonValueFormat(value);
                         });
                     } else if (dataTable.getModel() instanceof HashTableModel) {
-                        var value = dataTable.getValueAt(row, 1);
+                        var value = (RedisValueItem) dataTable.getValueAt(row, 1);
                         var key = dataTable.getValueAt(row, 0);
                         RedisFrontUtils.runEDT(() -> {
                             keyLabel.setText(owner.$tr("DataViewForm.keyLabel.title"));
                             fieldOrScoreField.setText(key.toString());
                             valueUpdateSaveBtn.setEnabled(true);
-                            jsonValueFormat((String) value);
+                            jsonValueFormat(value);
                         });
                     } else if (dataTable.getModel() instanceof StreamTableModel) {
                         valueUpdateSaveBtn.setEnabled(true);
@@ -215,10 +220,10 @@ public class RightViewFragment {
                             }
                         });
                     } else {
-                        var value = dataTable.getValueAt(row, 1);
+                        var value = (RedisValueItem) dataTable.getValueAt(row, 1);
                         RedisFrontUtils.runEDT(() -> {
                             valueUpdateSaveBtn.setEnabled(true);
-                            jsonValueFormat((String) value);
+                            jsonValueFormat(value);
                         });
                     }
                 } else if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2) {
@@ -261,6 +266,20 @@ public class RightViewFragment {
             }
         } else {
             textEditor.setText(value);
+        }
+    }
+
+    private void jsonValueFormat(RedisValueItem valueItem) {
+        if (valueItem == null) {
+            textEditor.setText("");
+            return;
+        }
+        var raw = valueItem.raw();
+        if (RedisValueCodec.isValidUtf8(raw)) {
+            jsonValueFormat(new String(raw, StandardCharsets.UTF_8));
+        } else {
+            jComboBox.setSelectedIndex(0);
+            textEditor.setText(valueItem.toString());
         }
     }
 
@@ -374,17 +393,17 @@ public class RightViewFragment {
                 switch (keyTypeEnum) {
                     case ZSET -> {
                         var score = (Double) dataTable.getValueAt(row, 1);
-                        var value = (String) dataTable.getValueAt(row, 2);
-                        return new Turbo3<>(keyTypeEnum, score.toString(), value);
+                        var value = (RedisValueItem) dataTable.getValueAt(row, 2);
+                        return new Turbo3<>(keyTypeEnum, score.toString(), value.toString());
                     }
                     case HASH -> {
                         var key = (String) dataTable.getValueAt(row, 0);
-                        var value = (String) dataTable.getValueAt(row, 1);
-                        return new Turbo3<>(keyTypeEnum, key, value);
+                        var value = (RedisValueItem) dataTable.getValueAt(row, 1);
+                        return new Turbo3<>(keyTypeEnum, key, value.toString());
                     }
                     case LIST, SET -> {
-                        var value = (String) dataTable.getValueAt(row, 1);
-                        return new Turbo3<KeyTypeEnum, String, String>(keyTypeEnum, null, value);
+                        var value = (RedisValueItem) dataTable.getValueAt(row, 1);
+                        return new Turbo3<KeyTypeEnum, String, String>(keyTypeEnum, null, value.toString());
                     }
                 }
             }
@@ -516,9 +535,10 @@ public class RightViewFragment {
                 }
             }
             SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
+                var newValueBytes = RedisValueCodec.decode(newValue, ValueViewType.AUTO);
                 if (typeEnum.equals(KeyTypeEnum.STRING)) {
                     RedisBasicService.service.del(redisConnectContext, key);
-                    RedisStringService.service.set(redisConnectContext, key, newValue);
+                    RedisStringService.service.set(redisConnectContext, key, newValueBytes);
                 } else {
                     var row = dataTable.getSelectedRow();
                     if (row != -1) {
@@ -528,23 +548,23 @@ public class RightViewFragment {
                                 var fieldOrScore = fieldOrScoreField.getText();
                                 var filed = (String) dataTable.getValueAt(row, 0);
                                 RedisHashService.service.hdel(redisConnectContext, key, filed);
-                                RedisHashService.service.hset(redisConnectContext, key, fieldOrScore, newValue);
+                                RedisHashService.service.hset(redisConnectContext, key, fieldOrScore, newValueBytes);
                             }
                             case ZSET -> {
                                 var fieldOrScore = fieldOrScoreField.getText();
-                                var value = (String) dataTable.getValueAt(row, 2);
-                                RedisZSetService.service.zrem(redisConnectContext, key, value);
-                                RedisZSetService.service.zadd(redisConnectContext, key, Double.parseDouble(fieldOrScore), newValue);
+                                var value = (RedisValueItem) dataTable.getValueAt(row, 2);
+                                RedisZSetService.service.zrem(redisConnectContext, key, value.raw());
+                                RedisZSetService.service.zadd(redisConnectContext, key, Double.parseDouble(fieldOrScore), newValueBytes);
                             }
                             case LIST -> {
-                                var value = (String) dataTable.getValueAt(row, 1);
-                                RedisListService.service.lrem(redisConnectContext, key, 1, value);
-                                RedisListService.service.lpush(redisConnectContext, key, newValue);
+                                var value = (RedisValueItem) dataTable.getValueAt(row, 1);
+                                RedisListService.service.lrem(redisConnectContext, key, 1, value.raw());
+                                RedisListService.service.lpush(redisConnectContext, key, newValueBytes);
                             }
                             case SET -> {
-                                var value = (String) dataTable.getValueAt(row, 1);
-                                RedisSetService.service.srem(redisConnectContext, key, value);
-                                RedisSetService.service.sadd(redisConnectContext, key, newValue);
+                                var value = (RedisValueItem) dataTable.getValueAt(row, 1);
+                                RedisSetService.service.srem(redisConnectContext, key, value.raw());
+                                RedisSetService.service.sadd(redisConnectContext, key, newValueBytes);
                             }
                         }
                     }
@@ -773,8 +793,8 @@ public class RightViewFragment {
 
                     switch (keyTypeEnum) {
                         case ZSET -> {
-                            var value = (String) dataTable.getValueAt(row, 2);
-                            RedisZSetService.service.zrem(redisConnectContext, key, value);
+                            var value = (RedisValueItem) dataTable.getValueAt(row, 2);
+                            RedisZSetService.service.zrem(redisConnectContext, key, value.raw());
                             return (Runnable) () -> {
                                 fieldOrScoreField.setText("");
                                 textEditor.clear();
@@ -791,16 +811,16 @@ public class RightViewFragment {
                             };
                         }
                         case LIST -> {
-                            var value = (String) dataTable.getValueAt(row, 1);
-                            RedisListService.service.lrem(redisConnectContext, key, 1, value);
+                            var value = (RedisValueItem) dataTable.getValueAt(row, 1);
+                            RedisListService.service.lrem(redisConnectContext, key, 1, value.raw());
                             return (Runnable) () -> {
                                 textEditor.clear();
                                 valueUpdateSaveBtn.setEnabled(false);
                             };
                         }
                         case SET -> {
-                            var value = (String) dataTable.getValueAt(row, 1);
-                            RedisSetService.service.srem(redisConnectContext, key, value);
+                            var value = (RedisValueItem) dataTable.getValueAt(row, 1);
+                            RedisSetService.service.srem(redisConnectContext, key, value.raw());
                             return (Runnable) () -> {
                                 textEditor.clear();
                                 valueUpdateSaveBtn.setEnabled(false);

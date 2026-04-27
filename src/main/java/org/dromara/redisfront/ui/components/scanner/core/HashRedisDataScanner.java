@@ -13,10 +13,11 @@ import org.dromara.redisfront.ui.components.scanner.model.ScanDataResult;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 
-public class HashRedisDataScanner extends AbstractRedisDataScanner<Map.Entry<String, String>, HashTableModel> {
+import java.util.Map;
+
+public class HashRedisDataScanner extends AbstractRedisDataScanner<Map.Entry<String, byte[]>, HashTableModel> {
     private final String key;
 
     public HashRedisDataScanner(RedisConnectContext redisConnectContext, String key, ScanDataRefreshHandler<ScanDataResult<HashTableModel>> consumer, ResourceBundle tr) {
@@ -34,7 +35,7 @@ public class HashRedisDataScanner extends AbstractRedisDataScanner<Map.Entry<Str
 
         scanContext.setSearchKey(fetchKey);
 
-        MapScanCursor<String, String> mapScanCursor = RedisHashService.service.hscan(redisConnectContext, key, scanContext.getScanCursor(), scanContext.getScanArgs());
+        MapScanCursor<String, byte[]> mapScanCursor = RedisHashService.service.hscan(redisConnectContext, key, scanContext.getScanCursor(), scanContext.getScanArgs());
 
         scanContext.setScanCursor(mapScanCursor);
 
@@ -44,8 +45,8 @@ public class HashRedisDataScanner extends AbstractRedisDataScanner<Map.Entry<Str
     }
 
     @Override
-    protected HashTableModel createModel(Collection<Map.Entry<String, String>> data) {
-        return new HashTableModel((List<Map.Entry<String, String>>) data);
+    protected HashTableModel createModel(Collection<Map.Entry<String, byte[]>> data) {
+        return new HashTableModel((List<Map.Entry<String, byte[]>>) data);
     }
 
     @Override

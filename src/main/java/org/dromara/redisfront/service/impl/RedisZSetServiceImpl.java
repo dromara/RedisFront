@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class RedisZSetServiceImpl implements RedisZSetService {
     @Override
-    public Long zadd(RedisConnectContext redisConnectContext, String key, double score, String member) {
+    public Long zadd(RedisConnectContext redisConnectContext, String key, double score, byte[] member) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.zadd(key, score, member));
         } else {
@@ -29,7 +29,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
 
     @SafeVarargs
     @Override
-    public final Long zadd(RedisConnectContext redisConnectContext, String key, ScoredValue<String>... scoredValues) {
+    public final Long zadd(RedisConnectContext redisConnectContext, String key, ScoredValue<byte[]>... scoredValues) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.zadd(key, scoredValues));
         } else {
@@ -38,7 +38,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
     }
 
     @Override
-    public Double zaddincr(RedisConnectContext redisConnectContext, String key, double score, String member) {
+    public Double zaddincr(RedisConnectContext redisConnectContext, String key, double score, byte[] member) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.zaddincr(key, score, member));
         } else {
@@ -56,7 +56,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
     }
 
     @Override
-    public Long zrem(RedisConnectContext redisConnectContext, String key, String... members) {
+    public Long zrem(RedisConnectContext redisConnectContext, String key, byte[]... members) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.zrem(key, members));
         } else {
@@ -65,7 +65,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
     }
 
     @Override
-    public List<ScoredValue<String>> zrange(RedisConnectContext redisConnectContext, String key, long start, long stop) {
+    public List<ScoredValue<byte[]>> zrange(RedisConnectContext redisConnectContext, String key, long start, long stop) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.zrangeWithScores(key, start, stop));
         } else {
@@ -83,7 +83,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
     }
 
     @Override
-    public List<String> zrangebyscore(RedisConnectContext redisConnectContext, String key, Range<? extends Number> range, Limit limit) {
+    public List<byte[]> zrangebyscore(RedisConnectContext redisConnectContext, String key, Range<? extends Number> range, Limit limit) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.zrangebyscore(key, range, limit));
         } else {
@@ -92,7 +92,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
     }
 
     @Override
-    public List<ScoredValue<String>> zrangebyscoreWithScores(RedisConnectContext redisConnectContext, String key, Range<? extends Number> range) {
+    public List<ScoredValue<byte[]>> zrangebyscoreWithScores(RedisConnectContext redisConnectContext, String key, Range<? extends Number> range) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.zrangebyscoreWithScores(key, range));
         } else {
@@ -101,7 +101,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
     }
 
     @Override
-    public List<String> zrevrangebyscore(RedisConnectContext redisConnectContext, String key, Range<? extends Number> range, Limit limit) {
+    public List<byte[]> zrevrangebyscore(RedisConnectContext redisConnectContext, String key, Range<? extends Number> range, Limit limit) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.zrevrangebyscore(key, range, limit));
         } else {
@@ -110,7 +110,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
     }
 
     @Override
-    public Long zrevrank(RedisConnectContext redisConnectContext, String key, String member) {
+    public Long zrevrank(RedisConnectContext redisConnectContext, String key, byte[] member) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.zrevrank(key, member));
         } else {
@@ -119,7 +119,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
     }
 
     @Override
-    public ScoredValueScanCursor<String> zscan(RedisConnectContext redisConnectContext, String key) {
+    public ScoredValueScanCursor<byte[]> zscan(RedisConnectContext redisConnectContext, String key) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.zscan(key));
         } else {
@@ -128,7 +128,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
     }
 
     @Override
-    public ScoredValueScanCursor<String> zscan(RedisConnectContext redisConnectContext, String key, ScanArgs scanArgs) {
+    public ScoredValueScanCursor<byte[]> zscan(RedisConnectContext redisConnectContext, String key, ScanArgs scanArgs) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.zscan(key, scanArgs));
         } else {
@@ -137,7 +137,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
     }
 
     @Override
-    public ScoredValueScanCursor<String> zscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor, ScanArgs scanArgs) {
+    public ScoredValueScanCursor<byte[]> zscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor, ScanArgs scanArgs) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.zscan(key, scanCursor, scanArgs));
         } else {
@@ -146,7 +146,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
     }
 
     @Override
-    public ScoredValueScanCursor<String> zscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor) {
+    public ScoredValueScanCursor<byte[]> zscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.zscan(key, scanCursor));
         } else {
@@ -155,7 +155,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
     }
 
     @Override
-    public Double zscore(RedisConnectContext redisConnectContext, String key, String member) {
+    public Double zscore(RedisConnectContext redisConnectContext, String key, byte[] member) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.zscore(key, member));
         } else {
@@ -164,7 +164,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
     }
 
     @Override
-    public ScoredValue<String> zpopmin(RedisConnectContext redisConnectContext, String key) {
+    public ScoredValue<byte[]> zpopmin(RedisConnectContext redisConnectContext, String key) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.zpopmin(key));
         } else {
@@ -173,7 +173,7 @@ public class RedisZSetServiceImpl implements RedisZSetService {
     }
 
     @Override
-    public List<ScoredValue<String>> zpopmin(RedisConnectContext redisConnectContext, String key, long count) {
+    public List<ScoredValue<byte[]>> zpopmin(RedisConnectContext redisConnectContext, String key, long count) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.zpopmin(key, count));
         } else {

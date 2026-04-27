@@ -21,7 +21,7 @@ import java.util.ResourceBundle;
 
 @Setter
 @Getter
-public class StreamRedisDataScanner extends AbstractRedisDataScanner<StreamMessage<String, String>, StreamTableModel> {
+public class StreamRedisDataScanner extends AbstractRedisDataScanner<StreamMessage<String, byte[]>, StreamTableModel> {
 
     private String key;
     private StreamTableModel streamTableModel;
@@ -62,8 +62,8 @@ public class StreamRedisDataScanner extends AbstractRedisDataScanner<StreamMessa
     }
 
     @Override
-    protected StreamTableModel createModel(Collection<StreamMessage<String, String>> data) {
-        return new StreamTableModel((List<StreamMessage<String, String>>) data);
+    protected StreamTableModel createModel(Collection<StreamMessage<String, byte[]>> data) {
+        return new StreamTableModel((List<StreamMessage<String, byte[]>>) data);
     }
 
     @Override

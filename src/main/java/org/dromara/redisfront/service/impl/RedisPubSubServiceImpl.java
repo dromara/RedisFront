@@ -1,8 +1,8 @@
 package org.dromara.redisfront.service.impl;
 
-import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.enums.RedisMode;
-import org.dromara.redisfront.commons.lettuce.LettuceUtils;
+import org.dromara.redisfront.commons.pool.RedisConnectionPoolManager;
+import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.RedisPubSubService;
 
@@ -16,10 +16,15 @@ public class RedisPubSubServiceImpl implements RedisPubSubService {
     @Override
     public Long publish(RedisConnectContext redisConnectContext, String channel, String message) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, clusterCommands -> clusterCommands.publish(channel, message));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.publish(channel, message));
+            var connection = RedisConnectionPoolManager.getClusterConnectPubSub(redisConnectContext);
+            var value = connection.sync().publish(channel, message);
+            RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
+            return value;
         }
+        var connection = RedisConnectionPoolManager.getConnectPubSub(redisConnectContext);
+        var value = connection.sync().publish(channel, message);
+        RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
+        return value;
     }
 
 }

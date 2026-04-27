@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class RedisListServiceImpl implements RedisListService {
     @Override
-    public List<String> lrange(RedisConnectContext redisConnectContext, String key, long start, long stop) {
+    public List<byte[]> lrange(RedisConnectContext redisConnectContext, String key, long start, long stop) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.lrange(key, start, stop));
         } else {
@@ -26,7 +26,7 @@ public class RedisListServiceImpl implements RedisListService {
     }
 
     @Override
-    public Long lrem(RedisConnectContext redisConnectContext, String key, long count, String value) {
+    public Long lrem(RedisConnectContext redisConnectContext, String key, long count, byte[] value) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.lrem(key, count, value));
         } else {
@@ -44,7 +44,7 @@ public class RedisListServiceImpl implements RedisListService {
     }
 
     @Override
-    public String lpop(RedisConnectContext redisConnectContext, String key) {
+    public byte[] lpop(RedisConnectContext redisConnectContext, String key) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.lpop(key));
         } else {
@@ -53,7 +53,7 @@ public class RedisListServiceImpl implements RedisListService {
     }
 
     @Override
-    public List<String> lpop(RedisConnectContext redisConnectContext, String key, long count) {
+    public List<byte[]> lpop(RedisConnectContext redisConnectContext, String key, long count) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.lpop(key, count));
         } else {
@@ -62,7 +62,7 @@ public class RedisListServiceImpl implements RedisListService {
     }
 
     @Override
-    public Long lpush(RedisConnectContext redisConnectContext, String key, String... values) {
+    public Long lpush(RedisConnectContext redisConnectContext, String key, byte[]... values) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.lpush(key, values));
         } else {
@@ -71,7 +71,7 @@ public class RedisListServiceImpl implements RedisListService {
     }
 
     @Override
-    public String lset(RedisConnectContext redisConnectContext, String key, long index, String value) {
+    public String lset(RedisConnectContext redisConnectContext, String key, long index, byte[] value) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.lset(key, index, value));
         } else {
@@ -80,7 +80,7 @@ public class RedisListServiceImpl implements RedisListService {
     }
 
     @Override
-    public String rpop(RedisConnectContext redisConnectContext, String key) {
+    public byte[] rpop(RedisConnectContext redisConnectContext, String key) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.rpop(key));
         } else {
@@ -89,7 +89,7 @@ public class RedisListServiceImpl implements RedisListService {
     }
 
     @Override
-    public List<String> rpop(RedisConnectContext redisConnectContext, String key, long count) {
+    public List<byte[]> rpop(RedisConnectContext redisConnectContext, String key, long count) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.rpop(key, count));
         } else {
@@ -98,7 +98,7 @@ public class RedisListServiceImpl implements RedisListService {
     }
 
     @Override
-    public Long rpush(RedisConnectContext redisConnectContext, String key, String... values) {
+    public Long rpush(RedisConnectContext redisConnectContext, String key, byte[]... values) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.rpush(key, values));
         } else {

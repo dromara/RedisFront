@@ -8,6 +8,8 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.quickswing.ui.app.QSDialog;
 import org.dromara.redisfront.RedisFrontContext;
+import org.dromara.redisfront.commons.codec.RedisValueCodec;
+import org.dromara.redisfront.commons.codec.ValueViewType;
 import org.dromara.redisfront.commons.enums.KeyTypeEnum;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
@@ -213,11 +215,12 @@ public class AddKeyDialog extends QSDialog<RedisFrontWidget> {
             validParam();
             var key = parentKey + keyNameField.getText();
             var value = keyValueField.getText();
+            var valueBytes = RedisValueCodec.decode(value, ValueViewType.AUTO);
             var ttl = ((Integer) ttlSpinner.getValue());
             var selectItem = (String) keyTypeComboBox.getSelectedItem();
 
             if (RedisFrontUtils.equal(KeyTypeEnum.HASH.typeName(), selectItem)) {
-                RedisHashService.service.hset(redisConnectContext, key, hashKeyField.getText(), keyValueField.getText());
+                RedisHashService.service.hset(redisConnectContext, key, hashKeyField.getText(), valueBytes);
             } else if (RedisFrontUtils.equal(KeyTypeEnum.STREAM.typeName(), selectItem)) {
                 var serverInfo = RedisBasicService.service.getServerInfo(redisConnectContext);
                 var redisVersion = serverInfo.get("redis_version");
@@ -225,8 +228,8 @@ public class AddKeyDialog extends QSDialog<RedisFrontWidget> {
                 if (Integer.parseInt(x) < 5) {
                     throw new RedisFrontException("Redis版本过低，不支持Stream - [ 当前版本：" + redisVersion + " ]");
                 } else if (JSONUtil.isTypeJSON(value)) {
-                    HashMap<String, String> bodyMap = new HashMap<>();
-                    JSONUtil.parseObj(value).forEach((key1, value1) -> bodyMap.put(key1, value1.toString()));
+                    HashMap<String, byte[]> bodyMap = new HashMap<>();
+                    JSONUtil.parseObj(value).forEach((key1, value1) -> bodyMap.put(key1, RedisValueCodec.decode(value1.toString(), ValueViewType.AUTO)));
                     if (RedisFrontUtils.equal(streamField.getText(), "*")) {
                         RedisStreamService.service.xadd(redisConnectContext, key, bodyMap);
                     } else {
@@ -239,13 +242,13 @@ public class AddKeyDialog extends QSDialog<RedisFrontWidget> {
                 }
 
             } else if (RedisFrontUtils.equal(KeyTypeEnum.SET.typeName(), selectItem)) {
-                RedisSetService.service.sadd(redisConnectContext, key, value);
+                RedisSetService.service.sadd(redisConnectContext, key, valueBytes);
             } else if (RedisFrontUtils.equal(KeyTypeEnum.LIST.typeName(), selectItem)) {
-                RedisListService.service.lpush(redisConnectContext, key, value);
+                RedisListService.service.lpush(redisConnectContext, key, valueBytes);
             } else if (RedisFrontUtils.equal(KeyTypeEnum.ZSET.typeName(), selectItem)) {
-                RedisZSetService.service.zadd(redisConnectContext, key, Double.parseDouble(zSetScoreField.getText()), value);
+                RedisZSetService.service.zadd(redisConnectContext, key, Double.parseDouble(zSetScoreField.getText()), valueBytes);
             } else {
-                RedisStringService.service.set(redisConnectContext, key, value);
+                RedisStringService.service.set(redisConnectContext, key, valueBytes);
             }
             if (ttl > 0) {
                 RedisBasicService.service.expire(redisConnectContext, key, ttl.longValue());

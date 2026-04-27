@@ -16,7 +16,7 @@ import java.util.ResourceBundle;
 
 @Setter
 @Getter
-public class ListRedisDataScanner extends AbstractRedisDataScanner<String, ListTableModel> {
+public class ListRedisDataScanner extends AbstractRedisDataScanner<byte[], ListTableModel> {
 
     private String key;
 
@@ -47,8 +47,8 @@ public class ListRedisDataScanner extends AbstractRedisDataScanner<String, ListT
     }
 
     @Override
-    protected ListTableModel createModel(Collection<String> data) {
-        return new ListTableModel((List<String>) data);
+    protected ListTableModel createModel(Collection<byte[]> data) {
+        return new ListTableModel((List<byte[]>) data);
     }
 
     @Override

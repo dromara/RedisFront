@@ -1,6 +1,7 @@
 package org.dromara.redisfront.model.table;
 
 import cn.hutool.core.io.unit.DataSizeUtil;
+import org.dromara.redisfront.model.value.RedisValueItem;
 
 import javax.swing.table.DefaultTableModel;
 import java.util.*;
@@ -17,17 +18,17 @@ public class HashTableModel extends DefaultTableModel {
             false, false, false, false, false, false
     };
 
-    public HashTableModel(List<Map.Entry<String, String>> dataList) {
+    public HashTableModel(List<Map.Entry<String, byte[]>> dataList) {
         var dataVector = new Object[dataList.size()][6];
         for (var i = 0; i < dataList.size(); i++) {
-            Map.Entry<String, String> Entry = dataList.get(i);
-            dataVector[i][0] = Entry.getKey();
-            dataVector[i][1] = Entry.getValue();
-            dataVector[i][2] = Entry.getKey().length();
-            dataVector[i][3] = DataSizeUtil.format(Entry.getKey().getBytes().length);
-            dataVector[i][4] = Entry.getValue().length();
-            dataVector[i][5] = DataSizeUtil.format(Entry.getValue().getBytes().length);
-;
+            Map.Entry<String, byte[]> entry = dataList.get(i);
+            RedisValueItem valueItem = new RedisValueItem(entry.getValue());
+            dataVector[i][0] = entry.getKey();
+            dataVector[i][1] = valueItem;
+            dataVector[i][2] = entry.getKey().length();
+            dataVector[i][3] = DataSizeUtil.format(entry.getKey().getBytes().length);
+            dataVector[i][4] = valueItem.toString().length();
+            dataVector[i][5] = DataSizeUtil.format(valueItem.byteLength());
         }
         this.setDataVector(dataVector, new String[]{"key", "Value", "KeyLength", "KeySize", "ValueLength", "ValueSize"});
     }

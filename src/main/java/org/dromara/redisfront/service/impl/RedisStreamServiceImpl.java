@@ -35,7 +35,7 @@ public class RedisStreamServiceImpl implements RedisStreamService {
     }
 
     @Override
-    public String xadd(RedisConnectContext redisConnectContext, String key, Map<String, String> body) {
+    public String xadd(RedisConnectContext redisConnectContext, String key, Map<String, byte[]> body) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.xadd(key, new XAddArgs(), body));
         } else {
@@ -44,7 +44,7 @@ public class RedisStreamServiceImpl implements RedisStreamService {
     }
 
     @Override
-    public String xadd(RedisConnectContext redisConnectContext, String id, String key, Map<String, String> body) {
+    public String xadd(RedisConnectContext redisConnectContext, String id, String key, Map<String, byte[]> body) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.xadd(key, XAddArgs.Builder.minId(id), body));
         } else {
@@ -53,7 +53,7 @@ public class RedisStreamServiceImpl implements RedisStreamService {
     }
 
     @Override
-    public List<StreamMessage<String, String>> xrange(RedisConnectContext redisConnectContext, String key, Range<String> range, Limit limit) {
+    public List<StreamMessage<String, byte[]>> xrange(RedisConnectContext redisConnectContext, String key, Range<String> range, Limit limit) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.xrange(key, range, limit));
         } else {

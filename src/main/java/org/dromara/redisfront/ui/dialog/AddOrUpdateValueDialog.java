@@ -5,6 +5,8 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.dromara.quickswing.ui.app.QSDialog;
+import org.dromara.redisfront.commons.codec.RedisValueCodec;
+import org.dromara.redisfront.commons.codec.ValueViewType;
 import org.dromara.redisfront.commons.enums.KeyTypeEnum;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
@@ -106,38 +108,39 @@ public class AddOrUpdateValueDialog extends QSDialog<RedisFrontWidget> {
         }
 
         SyncLoadingDialog.builder(getOwner()).showSyncLoadingDialog(() -> {
+            var newValueBytes = RedisValueCodec.decode(valueTextArea.getText(), ValueViewType.AUTO);
             if (typeEnum.equals(KeyTypeEnum.ZSET)) {
                 if (RedisFrontUtils.isNotEmpty(value)) {
-                    RedisZSetService.service.zrem(redisConnectContext, key, value);
+                    RedisZSetService.service.zrem(redisConnectContext, key, RedisValueCodec.decode(value, ValueViewType.AUTO));
                 }
-                RedisZSetService.service.zadd(redisConnectContext, key, Double.parseDouble(nameField.getText()), valueTextArea.getText());
+                RedisZSetService.service.zadd(redisConnectContext, key, Double.parseDouble(nameField.getText()), newValueBytes);
             }
 
             if (typeEnum.equals(KeyTypeEnum.HASH)) {
                 if (RedisFrontUtils.isNotEmpty(fieldOrScore)) {
                     RedisHashService.service.hdel(redisConnectContext, key, fieldOrScore);
                 }
-                RedisHashService.service.hset(redisConnectContext, key, nameField.getText(), valueTextArea.getText());
+                RedisHashService.service.hset(redisConnectContext, key, nameField.getText(), newValueBytes);
             }
 
             if (typeEnum.equals(KeyTypeEnum.LIST)) {
                 if (RedisFrontUtils.isNotEmpty(value)) {
-                    RedisListService.service.lrem(redisConnectContext, key, 1, value);
+                    RedisListService.service.lrem(redisConnectContext, key, 1, RedisValueCodec.decode(value, ValueViewType.AUTO));
                 }
-                RedisListService.service.lpush(redisConnectContext, key, valueTextArea.getText());
+                RedisListService.service.lpush(redisConnectContext, key, newValueBytes);
             }
 
             if (typeEnum.equals(KeyTypeEnum.SET)) {
                 if (RedisFrontUtils.isNotEmpty(value)) {
-                    RedisSetService.service.srem(redisConnectContext, key, value);
+                    RedisSetService.service.srem(redisConnectContext, key, RedisValueCodec.decode(value, ValueViewType.AUTO));
                 }
-                RedisSetService.service.sadd(redisConnectContext, key, valueTextArea.getText());
+                RedisSetService.service.sadd(redisConnectContext, key, newValueBytes);
             }
 
             if (typeEnum.equals(KeyTypeEnum.STREAM)) {
                 if (JSONUtil.isTypeJSON(valueTextArea.getText())) {
-                    HashMap<String, String> bodyMap = new HashMap<>();
-                    JSONUtil.parseObj(valueTextArea.getText()).forEach((k, v) -> bodyMap.put(k, v.toString()));
+                    HashMap<String, byte[]> bodyMap = new HashMap<>();
+                    JSONUtil.parseObj(valueTextArea.getText()).forEach((k, v) -> bodyMap.put(k, RedisValueCodec.decode(v.toString(), ValueViewType.AUTO)));
                     RedisStreamService.service.xadd(redisConnectContext, key, bodyMap);
                 } else {
                     throw new RedisFrontException("stream 请输入JSON - {key:value} 格式数据！", valueTextArea);
