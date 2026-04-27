@@ -13,47 +13,47 @@ public interface RedisSetService {
 
     RedisSetService service = new RedisSetServiceImpl();
 
-    Long sadd(RedisConnectContext redisConnectContext, String key, String... members);
+    Long sadd(RedisConnectContext redisConnectContext, String key, byte[]... members);
 
     Long scard(RedisConnectContext redisConnectContext, String key);
 
-    Set<String> sdiff(RedisConnectContext redisConnectContext, String... keys);
+    Set<byte[]> sdiff(RedisConnectContext redisConnectContext, String... keys);
 
 
     Long sdiffstore(RedisConnectContext redisConnectContext, String destination, String... keys);
 
 
-    Set<String> sinter(RedisConnectContext redisConnectContext, String... keys);
+    Set<byte[]> sinter(RedisConnectContext redisConnectContext, String... keys);
 
     Long sinterstore(RedisConnectContext redisConnectContext, String destination, String... keys);
 
-    Boolean sismember(RedisConnectContext redisConnectContext, String key, String member);
+    Boolean sismember(RedisConnectContext redisConnectContext, String key, byte[] member);
 
-    Set<String> smembers(RedisConnectContext redisConnectContext, String key);
+    Set<byte[]> smembers(RedisConnectContext redisConnectContext, String key);
 
-    List<Boolean> smismember(RedisConnectContext redisConnectContext, String key, String... members);
+    List<Boolean> smismember(RedisConnectContext redisConnectContext, String key, byte[]... members);
 
-    Boolean smove(RedisConnectContext redisConnectContext, String source, String destination, String member);
+    Boolean smove(RedisConnectContext redisConnectContext, String source, String destination, byte[] member);
 
-    String spop(RedisConnectContext redisConnectContext, String key);
+    byte[] spop(RedisConnectContext redisConnectContext, String key);
 
-    Set<String> spop(RedisConnectContext redisConnectContext, String key, long count);
+    Set<byte[]> spop(RedisConnectContext redisConnectContext, String key, long count);
 
-    String srandmember(RedisConnectContext redisConnectContext, String key);
+    byte[] srandmember(RedisConnectContext redisConnectContext, String key);
 
-    List<String> srandmember(RedisConnectContext redisConnectContext, String key, long count);
-
-
-    Long srem(RedisConnectContext redisConnectContext, String key, String... members);
-
-    Set<String> sunion(RedisConnectContext redisConnectContext, String... keys);
+    List<byte[]> srandmember(RedisConnectContext redisConnectContext, String key, long count);
 
 
-    ValueScanCursor<String> sscan(RedisConnectContext redisConnectContext, String key);
+    Long srem(RedisConnectContext redisConnectContext, String key, byte[]... members);
 
-    ValueScanCursor<String> sscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor, ScanArgs scanArgs);
+    Set<byte[]> sunion(RedisConnectContext redisConnectContext, String... keys);
 
-    ValueScanCursor<String> sscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor);
+
+    ValueScanCursor<byte[]> sscan(RedisConnectContext redisConnectContext, String key);
+
+    ValueScanCursor<byte[]> sscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor, ScanArgs scanArgs);
+
+    ValueScanCursor<byte[]> sscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor);
 
 
 }

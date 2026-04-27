@@ -9,6 +9,7 @@ import io.lettuce.core.StreamMessage;
 import lombok.Getter;
 import lombok.Setter;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
+import org.dromara.redisfront.model.value.RedisValueItem;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -49,6 +50,8 @@ public class RedisScanContext<T> {
         Integer sum = keys.stream()
                 .map(e -> switch (e) {
                     case String s -> s.getBytes().length;
+                    case byte[] bytes -> bytes.length;
+                    case RedisValueItem item -> item.byteLength();
                     case Map.Entry<?, ?> entry -> RedisFrontUtils.getByteSize(entry.getValue());
                     case StreamMessage<?, ?> message -> RedisFrontUtils.getByteSize(message.getBody());
                     case ScoredValue<?> scoredValue -> RedisFrontUtils.getByteSize(scoredValue.getValue());

@@ -9,39 +9,39 @@ import java.util.List;
 public interface RedisZSetService {
     RedisZSetService service = new RedisZSetServiceImpl();
 
-    Long zadd(RedisConnectContext redisConnectContext, String key, double score, String member);
+    Long zadd(RedisConnectContext redisConnectContext, String key, double score, byte[] member);
 
-    Long zadd(RedisConnectContext redisConnectContext, String key, ScoredValue<String>... scoredValues);
+    Long zadd(RedisConnectContext redisConnectContext, String key, ScoredValue<byte[]>... scoredValues);
 
-    Double zaddincr(RedisConnectContext redisConnectContext, String key, double score, String member);
+    Double zaddincr(RedisConnectContext redisConnectContext, String key, double score, byte[] member);
 
     Long zcard(RedisConnectContext redisConnectContext, String key);
 
-    Long zrem(RedisConnectContext redisConnectContext, String key, String... members);
-    List<ScoredValue<String>> zrange(RedisConnectContext redisConnectContext, String key, long start, long stop);
+    Long zrem(RedisConnectContext redisConnectContext, String key, byte[]... members);
+    List<ScoredValue<byte[]>> zrange(RedisConnectContext redisConnectContext, String key, long start, long stop);
 
     Long zcount(RedisConnectContext redisConnectContext, String key, Range<? extends Number> range);
 
-    List<String> zrangebyscore(RedisConnectContext redisConnectContext, String key, Range<? extends Number> range, Limit limit);
+    List<byte[]> zrangebyscore(RedisConnectContext redisConnectContext, String key, Range<? extends Number> range, Limit limit);
 
-    List<ScoredValue<String>> zrangebyscoreWithScores(RedisConnectContext redisConnectContext, String key, Range<? extends Number> range);
+    List<ScoredValue<byte[]>> zrangebyscoreWithScores(RedisConnectContext redisConnectContext, String key, Range<? extends Number> range);
 
-    List<String> zrevrangebyscore(RedisConnectContext redisConnectContext, String key, Range<? extends Number> range, Limit limit);
+    List<byte[]> zrevrangebyscore(RedisConnectContext redisConnectContext, String key, Range<? extends Number> range, Limit limit);
 
-    Long zrevrank(RedisConnectContext redisConnectContext, String key, String member);
+    Long zrevrank(RedisConnectContext redisConnectContext, String key, byte[] member);
 
-    ScoredValueScanCursor<String> zscan(RedisConnectContext redisConnectContext, String key);
+    ScoredValueScanCursor<byte[]> zscan(RedisConnectContext redisConnectContext, String key);
 
-    ScoredValueScanCursor<String> zscan(RedisConnectContext redisConnectContext, String key, ScanArgs scanArgs);
+    ScoredValueScanCursor<byte[]> zscan(RedisConnectContext redisConnectContext, String key, ScanArgs scanArgs);
 
-    ScoredValueScanCursor<String> zscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor, ScanArgs scanArgs);
+    ScoredValueScanCursor<byte[]> zscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor, ScanArgs scanArgs);
 
-    ScoredValueScanCursor<String> zscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor);
-    Double zscore(RedisConnectContext redisConnectContext, String key, String member);
+    ScoredValueScanCursor<byte[]> zscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor);
+    Double zscore(RedisConnectContext redisConnectContext, String key, byte[] member);
 
-    ScoredValue<String> zpopmin(RedisConnectContext redisConnectContext, String key);
+    ScoredValue<byte[]> zpopmin(RedisConnectContext redisConnectContext, String key);
 
-    List<ScoredValue<String>> zpopmin(RedisConnectContext redisConnectContext, String key, long count);
+    List<ScoredValue<byte[]>> zpopmin(RedisConnectContext redisConnectContext, String key, long count);
 
 
 }

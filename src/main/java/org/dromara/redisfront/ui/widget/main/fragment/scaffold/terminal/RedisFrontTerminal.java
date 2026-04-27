@@ -1,12 +1,15 @@
 package org.dromara.redisfront.ui.widget.main.fragment.scaffold.terminal;
 
 import cn.hutool.core.date.DateUtil;
-import org.dromara.redisfront.commons.enums.RedisMode;
-import org.dromara.redisfront.model.context.RedisConnectContext;
 import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.output.ArrayOutput;
 import io.lettuce.core.protocol.CommandArgs;
 import io.lettuce.core.protocol.CommandType;
+import org.dromara.redisfront.commons.enums.RedisMode;
+import org.dromara.redisfront.commons.codec.RedisValueCodec;
+import org.dromara.redisfront.commons.codec.Utf8KeyByteArrayValueCodec;
+import org.dromara.redisfront.commons.codec.ValueViewType;
+import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.lettuce.LettuceUtils;
@@ -23,6 +26,7 @@ import java.util.Objects;
 
 public class RedisFrontTerminal extends AbstractTerminal {
     private static final Logger log = LoggerFactory.getLogger(RedisFrontTerminal.class);
+    private static final Utf8KeyByteArrayValueCodec CODEC = new Utf8KeyByteArrayValueCodec();
     private final RedisConnectContext redisConnectContext;
 
     public RedisFrontTerminal(final RedisConnectContext redisConnectContext) {
@@ -64,7 +68,7 @@ public class RedisFrontTerminal extends AbstractTerminal {
 
             if (RedisFrontUtils.equal(connectInfo().getRedisMode(), RedisMode.CLUSTER)) {
                 LettuceUtils.clusterRun(connectInfo(), redisCommands -> {
-                    var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
+                    var res = redisCommands.dispatch(commandType, new ArrayOutput<>(CODEC), new CommandArgs<>(CODEC).addKeys(commandList));
                     println(format(res, ""));
                 });
             } else if (RedisFrontUtils.equal(connectInfo().getRedisMode(), RedisMode.SENTINEL)) {
@@ -84,10 +88,10 @@ public class RedisFrontTerminal extends AbstractTerminal {
                         commandList.removeFirst();
                         var message = commandList.toArray(new String[]{});
                         newCommandList.add(String.join(" ", message));
-                        var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(newCommandList));
+                        var res = redisCommands.dispatch(commandType, new ArrayOutput<>(CODEC), new CommandArgs<>(CODEC).addKeys(newCommandList));
                         println(format(res, ""));
                     } else {
-                        var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
+                        var res = redisCommands.dispatch(commandType, new ArrayOutput<>(CODEC), new CommandArgs<>(CODEC).addKeys(commandList));
                         println(format(res, ""));
                     }
 
@@ -108,10 +112,14 @@ public class RedisFrontTerminal extends AbstractTerminal {
                 var item = list.get(i);
                 if (item instanceof List<?> itemList) {
                     sb.append(space).append(i + 1).append(" ) ").append("\n").append(format(itemList, "  " + space));
+                } else if (item instanceof byte[] bytes) {
+                    sb.append(space).append(i + 1).append(" ) ").append(RedisValueCodec.encode(bytes, ValueViewType.AUTO)).append("\n");
                 } else {
                     sb.append(space).append(i + 1).append(" ) ").append(item).append("\n");
                 }
             }
+        } else if (s instanceof byte[] bytes) {
+            sb.append(RedisValueCodec.encode(bytes, ValueViewType.AUTO));
         } else {
             sb.append(s);
         }
@@ -131,5 +139,3 @@ public class RedisFrontTerminal extends AbstractTerminal {
 
 
 }
-
-

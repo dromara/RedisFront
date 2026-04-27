@@ -13,26 +13,26 @@ public interface RedisHashService {
 
     RedisHashService service = new RedisHashServiceImpl();
 
-    String hget(RedisConnectContext redisConnectContext, String key, String field);
+    byte[] hget(RedisConnectContext redisConnectContext, String key, String field);
 
-    Map<String, String> hgetall(RedisConnectContext redisConnectContext, String key);
+    Map<String, byte[]> hgetall(RedisConnectContext redisConnectContext, String key);
 
     List<String> hkeys(RedisConnectContext redisConnectContext, String key);
 
     Long hlen(RedisConnectContext redisConnectContext, String key);
 
-    String hmset(RedisConnectContext redisConnectContext, String key, Map<String, String> map);
+    String hmset(RedisConnectContext redisConnectContext, String key, Map<String, byte[]> map);
 
-    MapScanCursor<String, String> hscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor, ScanArgs scanArgs);
-    MapScanCursor<String, String> hscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor);
+    MapScanCursor<String, byte[]> hscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor, ScanArgs scanArgs);
+    MapScanCursor<String, byte[]> hscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor);
 
-    Boolean hset(RedisConnectContext redisConnectContext, String key, String field, String value);
+    Boolean hset(RedisConnectContext redisConnectContext, String key, String field, byte[] value);
 
-    Long hset(RedisConnectContext redisConnectContext, String key, Map<String, String> map);
+    Long hset(RedisConnectContext redisConnectContext, String key, Map<String, byte[]> map);
 
     Long hstrlen(RedisConnectContext redisConnectContext, String key, String field);
 
-    List<String> hvals(RedisConnectContext redisConnectContext, String key);
+    List<byte[]> hvals(RedisConnectContext redisConnectContext, String key);
 
     Long hdel(RedisConnectContext redisConnectContext, String key, String... fields);
 }

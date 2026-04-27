@@ -448,7 +448,7 @@ public class LeftSearchFragment {
                                 if (typeEnum.equals(KeyTypeEnum.STRING)) {
                                     var value = RedisStringService.service.get(redisConnectContext, treeNodeInfo.key());
                                     SwingUtilities.invokeLater(() -> {
-                                        treeNodeInfo.setMemorySize(value.length());
+                                        treeNodeInfo.setMemorySize(value.length);
                                         keyTree.updateUI();
                                     });
                                 }
@@ -462,7 +462,7 @@ public class LeftSearchFragment {
                                     }
                                     if (RedisFrontUtils.isNotEmpty(dataList)) {
                                         SwingUtilities.invokeLater(() -> {
-                                            treeNodeInfo.setMemorySize(dataList.stream().map(e -> e.getValue().getBytes().length).reduce(Integer::sum).orElse(0));
+                                            treeNodeInfo.setMemorySize(dataList.stream().map(e -> e.getValue().length).reduce(Integer::sum).orElse(0));
                                             keyTree.updateUI();
                                         });
                                     }
@@ -479,7 +479,7 @@ public class LeftSearchFragment {
 
                                     if (RedisFrontUtils.isNotEmpty(dataList)) {
                                         SwingUtilities.invokeLater(() -> {
-                                            treeNodeInfo.setMemorySize(dataList.stream().map(e -> e.getValue().getBytes().length).reduce(Integer::sum).orElse(0));
+                                            treeNodeInfo.setMemorySize(dataList.stream().map(e -> e.getValue().length).reduce(Integer::sum).orElse(0));
                                             keyTree.updateUI();
                                         });
                                     }
@@ -497,7 +497,7 @@ public class LeftSearchFragment {
                                     }
                                     if (RedisFrontUtils.isNotEmpty(dataList)) {
                                         SwingUtilities.invokeLater(() -> {
-                                            treeNodeInfo.setMemorySize(dataList.stream().map(e -> ((String) e).getBytes().length).reduce(Integer::sum).orElse(0));
+                                            treeNodeInfo.setMemorySize(dataList.stream().map(e -> ((byte[]) e).length).reduce(Integer::sum).orElse(0));
                                             keyTree.updateUI();
                                         });
                                     }
@@ -513,7 +513,7 @@ public class LeftSearchFragment {
                                     }
                                     if (RedisFrontUtils.isNotEmpty(dataList)) {
                                         SwingUtilities.invokeLater(() -> {
-                                            treeNodeInfo.setMemorySize(dataList.stream().map(e -> e.getBytes().length).reduce(Integer::sum).orElse(0));
+                                            treeNodeInfo.setMemorySize(dataList.stream().map(e -> ((byte[]) e).length).reduce(Integer::sum).orElse(0));
                                             keyTree.updateUI();
                                         });
                                     }

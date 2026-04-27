@@ -17,7 +17,7 @@ import java.util.ResourceBundle;
 
 @Setter
 @Getter
-public class SetRedisDataScanner extends AbstractRedisDataScanner<String, SetTableModel> {
+public class SetRedisDataScanner extends AbstractRedisDataScanner<byte[], SetTableModel> {
     private String key;
 
     public SetRedisDataScanner(RedisConnectContext redisConnectContext, String key, ScanDataRefreshHandler<ScanDataResult<SetTableModel>> scanDataRefreshHandler, ResourceBundle tr) {
@@ -50,8 +50,8 @@ public class SetRedisDataScanner extends AbstractRedisDataScanner<String, SetTab
     }
 
     @Override
-    protected SetTableModel createModel(Collection<String> data) {
-        return new SetTableModel((List<String>) data);
+    protected SetTableModel createModel(Collection<byte[]> data) {
+        return new SetTableModel((List<byte[]>) data);
     }
 
     @Override

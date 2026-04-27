@@ -161,11 +161,9 @@ public class LettuceUtils {
         });
     }
 
-    public static void clusterRun(RedisConnectContext redisConnectContext,
-                                  Consumer<RedisAdvancedClusterCommands<String, String>> consumer) {
+    public static void clusterRun(RedisConnectContext redisConnectContext, Consumer<RedisAdvancedClusterCommands<String, byte[]>> consumer) {
         try {
-            StatefulRedisClusterConnection<String, String> connection = RedisConnectionPoolManager
-                    .getClusterConnection(redisConnectContext);
+            StatefulRedisClusterConnection<String, byte[]> connection = RedisConnectionPoolManager.getClusterConnection(redisConnectContext);
             consumer.accept(connection.sync());
             RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
         } catch (Exception exception) {
@@ -174,11 +172,9 @@ public class LettuceUtils {
         }
     }
 
-    public static <T> T clusterExec(RedisConnectContext redisConnectContext,
-                                    Function<RedisAdvancedClusterCommands<String, String>, T> function) {
+    public static <T> T clusterExec(RedisConnectContext redisConnectContext, Function<RedisAdvancedClusterCommands<String, byte[]>, T> function) {
         try {
-            StatefulRedisClusterConnection<String, String> connection = RedisConnectionPoolManager
-                    .getClusterConnection(redisConnectContext);
+            StatefulRedisClusterConnection<String, byte[]> connection = RedisConnectionPoolManager.getClusterConnection(redisConnectContext);
             T apply = function.apply(connection.sync());
             RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
             return apply;
@@ -215,10 +211,9 @@ public class LettuceUtils {
         }
     }
 
-    public static void run(RedisConnectContext redisConnectContext, Consumer<RedisCommands<String, String>> consumer) {
+    public static void run(RedisConnectContext redisConnectContext, Consumer<RedisCommands<String, byte[]>> consumer) {
         try {
-            StatefulRedisConnection<String, String> connection = RedisConnectionPoolManager
-                    .getConnection(redisConnectContext);
+            StatefulRedisConnection<String, byte[]> connection = RedisConnectionPoolManager.getConnection(redisConnectContext);
             consumer.accept(connection.sync());
             RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
         } catch (Exception exception) {
@@ -227,11 +222,9 @@ public class LettuceUtils {
         }
     }
 
-    public static <T> T exec(RedisConnectContext redisConnectContext,
-                             Function<RedisCommands<String, String>, T> function) {
+    public static <T> T exec(RedisConnectContext redisConnectContext, Function<RedisCommands<String, byte[]>, T> function) {
         try {
-            StatefulRedisConnection<String, String> connection = RedisConnectionPoolManager
-                    .getConnection(redisConnectContext);
+            StatefulRedisConnection<String, byte[]> connection = RedisConnectionPoolManager.getConnection(redisConnectContext);
             T apply = function.apply(connection.sync());
             RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
             return apply;

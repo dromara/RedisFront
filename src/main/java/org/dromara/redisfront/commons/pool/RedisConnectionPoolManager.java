@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.dromara.redisfront.RedisFrontContext;
+import org.dromara.redisfront.commons.codec.Utf8KeyByteArrayValueCodec;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.lettuce.LettuceUtils;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
@@ -40,10 +41,12 @@ public class RedisConnectionPoolManager {
     private static final int MIN_IDLE = 2;
     private static final long MAX_WAIT_MILLIS = 5000;
 
-    private static final Map<String, GenericObjectPool<StatefulRedisClusterConnection<String, String>>> CLUSTER_POOLS = new ConcurrentHashMap<>();
+    private static final Utf8KeyByteArrayValueCodec UTF8_KEY_BYTE_ARRAY_VALUE_CODEC = new Utf8KeyByteArrayValueCodec();
+
+    private static final Map<String, GenericObjectPool<StatefulRedisClusterConnection<String, byte[]>>> CLUSTER_POOLS = new ConcurrentHashMap<>();
     private static final Map<String, GenericObjectPool<StatefulRedisClusterPubSubConnection<String, String>>> CLUSTER_PUB_POOLS = new ConcurrentHashMap<>();
     private static final Map<String, GenericObjectPool<StatefulRedisSentinelConnection<String, String>>> SENTINEL_POOLS = new ConcurrentHashMap<>();
-    private static final Map<String, GenericObjectPool<StatefulRedisConnection<String, String>>> NORMAL_POOLS = new ConcurrentHashMap<>();
+    private static final Map<String, GenericObjectPool<StatefulRedisConnection<String, byte[]>>> NORMAL_POOLS = new ConcurrentHashMap<>();
     private static final Map<String, GenericObjectPool<StatefulRedisPubSubConnection<String, String>>> NORMAL_PUB_POOLS = new ConcurrentHashMap<>();
 
     public static StatefulRedisClusterPubSubConnection<String, String> getClusterConnectPubSub(
@@ -61,7 +64,7 @@ public class RedisConnectionPoolManager {
         });
     }
 
-    public static StatefulRedisClusterConnection<String, String> getClusterConnection(RedisConnectContext context) {
+    public static StatefulRedisClusterConnection<String, byte[]> getClusterConnection(RedisConnectContext context) {
         return getConnection(CLUSTER_POOLS, context, () -> {
             RedisURI uri = LettuceUtils.createRedisURI(context);
             RedisClusterClient client = LettuceUtils.getRedisClusterClient(uri, context);
@@ -71,7 +74,7 @@ public class RedisConnectionPoolManager {
                     publishCommandEvent(event, context);
                 }
             });
-            return client.connect();
+            return client.connect(UTF8_KEY_BYTE_ARRAY_VALUE_CODEC);
         });
     }
 
@@ -88,7 +91,7 @@ public class RedisConnectionPoolManager {
         });
     }
 
-    public static StatefulRedisConnection<String, String> getConnection(RedisConnectContext context) {
+    public static StatefulRedisConnection<String, byte[]> getConnection(RedisConnectContext context) {
         return getConnection(NORMAL_POOLS, context, () -> {
             RedisClient client = LettuceUtils.getRedisClient(context);
             client.addListener(new CommandListener() {
@@ -97,7 +100,7 @@ public class RedisConnectionPoolManager {
                     publishCommandEvent(event, context);
                 }
             });
-            return client.connect();
+            return client.connect(UTF8_KEY_BYTE_ARRAY_VALUE_CODEC);
         });
     }
 
@@ -155,22 +158,29 @@ public class RedisConnectionPoolManager {
         }
     }
 
-    public static void closeConnection(RedisConnectContext context,
-            StatefulRedisClusterConnection<String, String> connection) {
+    public static void closeConnection(RedisConnectContext context, StatefulRedisClusterConnection<String, byte[]> connection) {
         String poolKey = context.key();
         returnConnection(CLUSTER_POOLS.get(poolKey), connection);
     }
 
-    public static void closeConnection(RedisConnectContext context,
-            StatefulRedisSentinelConnection<String, String> connection) {
+    public static void closeConnection(RedisConnectContext context, StatefulRedisClusterPubSubConnection<String, String> connection) {
+        String poolKey = context.key();
+        returnConnection(CLUSTER_PUB_POOLS.get(poolKey), connection);
+    }
+
+    public static void closeConnection(RedisConnectContext context, StatefulRedisSentinelConnection<String, String> connection) {
         String poolKey = context.key();
         returnConnection(SENTINEL_POOLS.get(poolKey), connection);
     }
 
-    public static void closeConnection(RedisConnectContext context,
-            StatefulRedisConnection<String, String> connection) {
+    public static void closeConnection(RedisConnectContext context, StatefulRedisConnection<String, byte[]> connection) {
         String poolKey = context.key();
         returnConnection(NORMAL_POOLS.get(poolKey), connection);
+    }
+
+    public static void closeConnection(RedisConnectContext context, StatefulRedisPubSubConnection<String, String> connection) {
+        String poolKey = context.key();
+        returnConnection(NORMAL_PUB_POOLS.get(poolKey), connection);
     }
 
     private static <T> void returnConnection(GenericObjectPool<T> pool, T connection) {
@@ -187,8 +197,10 @@ public class RedisConnectionPoolManager {
 
     private static void cleanupPools(String specificKey) {
         cleanPoolMap(CLUSTER_POOLS, specificKey);
+        cleanPoolMap(CLUSTER_PUB_POOLS, specificKey);
         cleanPoolMap(SENTINEL_POOLS, specificKey);
         cleanPoolMap(NORMAL_POOLS, specificKey);
+        cleanPoolMap(NORMAL_PUB_POOLS, specificKey);
     }
 
     private static <T> void cleanPoolMap(

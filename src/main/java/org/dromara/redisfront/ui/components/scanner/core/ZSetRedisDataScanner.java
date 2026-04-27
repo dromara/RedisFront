@@ -18,7 +18,7 @@ import java.util.ResourceBundle;
 
 @Setter
 @Getter
-public class ZSetRedisDataScanner extends AbstractRedisDataScanner<ScoredValue<String>, SortedSetTableModel> {
+public class ZSetRedisDataScanner extends AbstractRedisDataScanner<ScoredValue<byte[]>, SortedSetTableModel> {
     private String key;
 
     public ZSetRedisDataScanner(RedisConnectContext redisConnectContext, String key, ScanDataRefreshHandler<ScanDataResult<SortedSetTableModel>> scanDataRefreshHandler, ResourceBundle tr) {
@@ -50,8 +50,8 @@ public class ZSetRedisDataScanner extends AbstractRedisDataScanner<ScoredValue<S
     }
 
     @Override
-    protected SortedSetTableModel createModel(Collection<ScoredValue<String>> data) {
-        return new SortedSetTableModel((List<ScoredValue<String>>) data);
+    protected SortedSetTableModel createModel(Collection<ScoredValue<byte[]>> data) {
+        return new SortedSetTableModel((List<ScoredValue<byte[]>>) data);
     }
 
     @Override

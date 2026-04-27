@@ -11,24 +11,24 @@ public interface RedisListService {
 
     RedisListService service = new RedisListServiceImpl();
 
-    List<String> lrange(RedisConnectContext redisConnectContext, String key, long start, long stop);
+    List<byte[]> lrange(RedisConnectContext redisConnectContext, String key, long start, long stop);
 
-    Long lrem(RedisConnectContext redisConnectContext, String key, long count, String value);
+    Long lrem(RedisConnectContext redisConnectContext, String key, long count, byte[] value);
 
     Long llen(RedisConnectContext redisConnectContext, String key);
 
-    String lpop(RedisConnectContext redisConnectContext, String key);
+    byte[] lpop(RedisConnectContext redisConnectContext, String key);
 
-    List<String> lpop(RedisConnectContext redisConnectContext, String key, long count);
+    List<byte[]> lpop(RedisConnectContext redisConnectContext, String key, long count);
 
-    Long lpush(RedisConnectContext redisConnectContext, String key, String... values);
+    Long lpush(RedisConnectContext redisConnectContext, String key, byte[]... values);
 
-    String lset(RedisConnectContext redisConnectContext, String key, long index, String value);
+    String lset(RedisConnectContext redisConnectContext, String key, long index, byte[] value);
 
-    String rpop(RedisConnectContext redisConnectContext, String key);
+    byte[] rpop(RedisConnectContext redisConnectContext, String key);
 
-    List<String> rpop(RedisConnectContext redisConnectContext, String key, long count);
+    List<byte[]> rpop(RedisConnectContext redisConnectContext, String key, long count);
 
-    Long rpush(RedisConnectContext redisConnectContext, String key, String... values);
+    Long rpush(RedisConnectContext redisConnectContext, String key, byte[]... values);
 
 }

@@ -15,7 +15,7 @@ public class RedisStringServiceImpl implements RedisStringService {
 
 
     @Override
-    public String set(RedisConnectContext redisConnectContext, String key, String value) {
+    public String set(RedisConnectContext redisConnectContext, String key, byte[] value) {
 
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.set(key, value));
@@ -25,7 +25,7 @@ public class RedisStringServiceImpl implements RedisStringService {
     }
 
     @Override
-    public String get(RedisConnectContext redisConnectContext, String key) {
+    public byte[] get(RedisConnectContext redisConnectContext, String key) {
 
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.get(key));
@@ -44,7 +44,7 @@ public class RedisStringServiceImpl implements RedisStringService {
     }
 
     @Override
-    public String setex(RedisConnectContext redisConnectContext, String key, long seconds, String value) {
+    public String setex(RedisConnectContext redisConnectContext, String key, long seconds, byte[] value) {
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.setex(key, seconds, value));
         } else {
