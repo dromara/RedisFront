@@ -322,7 +322,16 @@ public class MainComponent extends JPanel {
         titleLabel.setFont(titleLabel.getFont().deriveFont(12f));
         panel.add(titleLabel, BorderLayout.CENTER);
 
-        JLabel closeLabel = new JLabel("×") {
+        JLabel closeLabel = new JLabel() {
+            private boolean showX;
+
+            @Override
+            public void setText(String text) {
+                showX = text != null && !text.isEmpty();
+                super.setText("");
+                repaint();
+            }
+
             @Override
             public Dimension getPreferredSize() {
                 return new Dimension(16, 16);
@@ -335,8 +344,28 @@ public class MainComponent extends JPanel {
             public Dimension getMaximumSize() {
                 return new Dimension(16, 16);
             }
+
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (!showX) {
+                    return;
+                }
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setColor(getForeground());
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int w = getWidth();
+                int h = getHeight();
+                int size = Math.min(w, h);
+                int pad = Math.max(3, Math.round(size * 0.25f));
+                float stroke = Math.max(1.2f, size / 10f);
+                g2.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g2.drawLine(pad, pad, w - pad - 1, h - pad - 1);
+                g2.drawLine(w - pad - 1, pad, pad, h - pad - 1);
+                g2.dispose();
+            }
         };
-        closeLabel.setFont(new Font("Dialog", Font.PLAIN, 20));
+        closeLabel.setFont(UIManager.getFont("defaultFont").deriveFont(Font.PLAIN, 16f));
         closeLabel.setForeground(new Color(160, 160, 160));
         closeLabel.setHorizontalAlignment(SwingConstants.CENTER);
         closeLabel.setVerticalAlignment(SwingConstants.CENTER);

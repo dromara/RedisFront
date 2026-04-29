@@ -10,6 +10,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import org.dromara.redisfront.commons.utils.ExceptionMessageUtils;
 
 @Slf4j
 class SyncLoadingWaiter<T> extends SwingWorker<T, Object> {
@@ -76,7 +77,8 @@ class SyncLoadingWaiter<T> extends SwingWorker<T, Object> {
         } catch (CancellationException e) {
             log.info("Task was cancelled: {}", e.getMessage());
         } catch (Exception e) {
-            log.error("Task execution failed: {}", e.getMessage(), e);
+            log.error("Task execution failed: {}", ExceptionMessageUtils.bestMessage(e));
+            log.debug("Task execution failed stack", e);
             this.timer.stop();
             this.biConsumer.accept(null, e);
         }
