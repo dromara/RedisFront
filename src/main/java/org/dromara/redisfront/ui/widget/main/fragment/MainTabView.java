@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import javax.swing.plaf.TabbedPaneUI;
 import java.awt.*;
+import java.util.Objects;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -94,7 +95,7 @@ public class MainTabView extends JTabbedPane {
 
         this.eventListener.bind(redisConnectContext.getId(), CommandExecuteEvent.class, qsEvent -> {
             if (qsEvent instanceof CommandExecuteEvent commandExecuteEvent) {
-                if (redisConnectContext.getId() != commandExecuteEvent.getId()) {
+                if (!matchEventId(redisConnectContext.getId(), commandExecuteEvent.getId())) {
                     return;
                 }
                 Object message = commandExecuteEvent.getMessage();
@@ -103,6 +104,10 @@ public class MainTabView extends JTabbedPane {
                 }
             }
         });
+    }
+
+    public static boolean matchEventId(int connectId, Integer eventId) {
+        return Objects.equals(connectId, eventId);
     }
 
     private void initializeUI() {
