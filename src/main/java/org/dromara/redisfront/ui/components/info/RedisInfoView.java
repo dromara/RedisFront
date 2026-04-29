@@ -49,7 +49,8 @@ public class RedisInfoView extends JPanel implements Runnable {
     private final JTextArea textArea1 = new JTextArea();
     private final JTextArea textArea2 = new JTextArea();
     private JTabbedPane tabbedPane;
-    private Boolean running = true;
+    private volatile boolean running = true;
+    private final Thread worker;
 
     private final static String SSH_MAPPING = "[Local] %s:%s ==> [Remote] %s:%s %s \n";
     private final static String NORMAL_MAPPING = "[Remote] %s:%s %s \n";
@@ -70,11 +71,18 @@ public class RedisInfoView extends JPanel implements Runnable {
         this.owner = owner;
         this.redisFrontContext = (RedisFrontContext) owner.getContext();
         initUI();
-        new Thread(this).start();
+        worker = new Thread(this, "RedisInfoView-" + redisConnectContext.getId());
+        worker.setDaemon(true);
+        worker.start();
     }
 
     public void appendLog(LogInfo logInfo) {
         queue.add(logInfo);
+    }
+
+    public void stop() {
+        running = false;
+        worker.interrupt();
     }
 
     private void initUI() {
@@ -154,7 +162,7 @@ public class RedisInfoView extends JPanel implements Runnable {
                             Turbo2<String, Set<LogInfoData>> turbo2 = new Turbo2<>();
                             String sshInfoFormated = "";
                             Map<String, Object> serverInfo = RedisBasicService.service.getServerInfo(redisConnectContext);
-                            if (redisConnectContext.getConnectTypeMode().equals(ConnectType.SSH)) {
+                            if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
                                 String localHost = "127.0.0.1";
                                 if (redisConnectContext.getRedisMode().equals(RedisMode.CLUSTER)) {
                                     Partitions clusterPartitions = LettuceUtils.getRedisClusterPartitions(redisConnectContext);
@@ -243,8 +251,11 @@ public class RedisInfoView extends JPanel implements Runnable {
                 LogInfo logInfo = queue.take();
                 String format = format(logInfo);
                 RedisFrontUtils.runEDT(() -> textArea1.append(format));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
             } catch (Exception e) {
-                log.error(e.getMessage());
+                log.error("RedisInfoView worker error", e);
             }
         }
     }
