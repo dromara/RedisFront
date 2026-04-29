@@ -51,6 +51,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
@@ -139,7 +140,6 @@ public class RightViewFragment {
 
     private void refreshStringUI(Turbo2<Long, RedisValueItem> turbo) {
         tableViewPanel.setVisible(false);
-        valueUpdateSaveBtn.setEnabled(true);
         lengthLabel.setText("Length: " + turbo.getT1());
         keySizeLabel.setText("Size: " + DataSizeUtil.format(turbo.getT2().byteLength()));
         dataSplitPanel.setDividerSize(0);
@@ -199,7 +199,6 @@ public class RightViewFragment {
                         RedisFrontUtils.runEDT(() -> {
                             keyLabel.setText(owner.$tr("DataViewForm.keyLabel.score.title"));
                             fieldOrScoreField.setText(String.valueOf(score));
-                            valueUpdateSaveBtn.setEnabled(true);
                             setCurrentValue(value);
                         });
                     } else if (dataTable.getModel() instanceof HashTableModel) {
@@ -208,14 +207,17 @@ public class RightViewFragment {
                         RedisFrontUtils.runEDT(() -> {
                             keyLabel.setText(owner.$tr("DataViewForm.keyLabel.title"));
                             fieldOrScoreField.setText(String.valueOf(key));
-                            valueUpdateSaveBtn.setEnabled(true);
                             setCurrentValue(value);
                         });
                     } else if (dataTable.getModel() instanceof StreamTableModel) {
                         valueUpdateSaveBtn.setEnabled(true);
                         var value = dataTable.getValueAt(row, 2);
                         RedisFrontUtils.runEDT(() -> {
-                            setCurrentValue(null);
+                            currentRawValue = null;
+                            if (valueViewComboBox != null) {
+                                valueViewComboBox.setEnabled(false);
+                            }
+                            textEditor.setEditable(true);
                             try {
                                 String prettyStr = JSONUtil.toJsonPrettyStr(value);
                                 textEditor.setText(prettyStr);
@@ -227,7 +229,6 @@ public class RightViewFragment {
                     } else {
                         var value = (RedisValueItem) dataTable.getValueAt(row, 1);
                         RedisFrontUtils.runEDT(() -> {
-                            valueUpdateSaveBtn.setEnabled(true);
                             setCurrentValue(value);
                         });
                     }
@@ -283,6 +284,7 @@ public class RightViewFragment {
                 valueViewComboBox.setEnabled(false);
             }
             textEditor.setText("");
+            refreshSaveButtonByView();
             return;
         }
         currentRawValue = valueItem.raw();
@@ -295,20 +297,46 @@ public class RightViewFragment {
     private void refreshEditorByView() {
         if (currentRawValue == null) {
             textEditor.setText("");
+            refreshSaveButtonByView();
             return;
         }
         ValueViewType viewType = lastValueViewType == null ? ValueViewType.AUTO : lastValueViewType;
-        boolean syntaxSupported = viewType == ValueViewType.AUTO || viewType == ValueViewType.UTF8;
+        boolean syntaxSupported = viewType == ValueViewType.AUTO
+                || viewType == ValueViewType.UTF8
+                || viewType == ValueViewType.GBK
+                || viewType == ValueViewType.GB18030;
+        boolean editable = viewType != ValueViewType.ESCAPED;
+        textEditor.setEditable(editable);
         jComboBox.setEnabled(syntaxSupported);
+        if (!editable) {
+            lastSyntaxStyle = null;
+            ignoreSyntaxComboEvent = true;
+            jComboBox.setSelectedIndex(0);
+            ignoreSyntaxComboEvent = false;
+            jComboBox.setEnabled(false);
+            textEditor.setText(RedisValueCodec.encode(currentRawValue, viewType));
+            refreshSaveButtonByView();
+            return;
+        }
         if (!syntaxSupported) {
             lastSyntaxStyle = null;
             ignoreSyntaxComboEvent = true;
             jComboBox.setSelectedIndex(0);
             ignoreSyntaxComboEvent = false;
             textEditor.setText(RedisValueCodec.encode(currentRawValue, viewType));
+            refreshSaveButtonByView();
             return;
         }
         jsonValueFormat(RedisValueCodec.encode(currentRawValue, viewType));
+        refreshSaveButtonByView();
+    }
+
+    private void refreshSaveButtonByView() {
+        if (valueUpdateSaveBtn == null) {
+            return;
+        }
+        boolean enabled = currentRawValue != null && lastValueViewType != ValueViewType.ESCAPED;
+        valueUpdateSaveBtn.setEnabled(enabled);
     }
 
     public JPanel contentPanel() {
@@ -534,6 +562,10 @@ public class RightViewFragment {
         valueViewComboBox = new JComboBox<>();
         valueViewComboBox.addItem(ValueViewType.AUTO);
         valueViewComboBox.addItem(ValueViewType.UTF8);
+        valueViewComboBox.addItem(ValueViewType.GBK);
+        valueViewComboBox.addItem(ValueViewType.GB18030);
+        valueViewComboBox.addItem(ValueViewType.LATIN1);
+        valueViewComboBox.addItem(ValueViewType.ESCAPED);
         valueViewComboBox.addItem(ValueViewType.BASE64);
         valueViewComboBox.addItem(ValueViewType.HEX);
         valueViewComboBox.setSelectedItem(ValueViewType.AUTO);
@@ -574,6 +606,10 @@ public class RightViewFragment {
         valueUpdateSaveBtn.setEnabled(false);
         valueUpdateSaveBtn.setIcon(Icons.SAVE_ICON);
         valueUpdateSaveBtn.addActionListener(ignore -> {
+            if (lastValueViewType == ValueViewType.ESCAPED) {
+                Notifications.getInstance().show(Notifications.Type.ERROR, "只读模式");
+                return;
+            }
             var keyType = keyTypeLabel.getText();
             KeyTypeEnum typeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
             var key = keyField.getText();
@@ -587,7 +623,6 @@ public class RightViewFragment {
             SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
                 var newValueBytes = RedisValueCodec.decode(newValue, lastValueViewType == null ? ValueViewType.AUTO : lastValueViewType);
                 if (typeEnum.equals(KeyTypeEnum.STRING)) {
-                    RedisBasicService.service.del(redisConnectContext, key);
                     RedisStringService.service.set(redisConnectContext, key, newValueBytes);
                 } else {
                     var row = dataTable.getSelectedRow();
@@ -597,23 +632,27 @@ public class RightViewFragment {
                             case HASH -> {
                                 var fieldOrScore = fieldOrScoreField.getText();
                                 var filed = (String) dataTable.getValueAt(row, 0);
-                                RedisHashService.service.hdel(redisConnectContext, key, filed);
+                                if (RedisFrontUtils.notEqual(filed, fieldOrScore)) {
+                                    RedisHashService.service.hdel(redisConnectContext, key, filed);
+                                }
                                 RedisHashService.service.hset(redisConnectContext, key, fieldOrScore, newValueBytes);
                             }
                             case ZSET -> {
                                 var fieldOrScore = fieldOrScoreField.getText();
                                 var value = (RedisValueItem) dataTable.getValueAt(row, 2);
-                                RedisZSetService.service.zrem(redisConnectContext, key, value.raw());
+                                if (!Arrays.equals(value.raw(), newValueBytes)) {
+                                    RedisZSetService.service.zrem(redisConnectContext, key, value.raw());
+                                }
                                 RedisZSetService.service.zadd(redisConnectContext, key, Double.parseDouble(fieldOrScore), newValueBytes);
                             }
                             case LIST -> {
-                                var value = (RedisValueItem) dataTable.getValueAt(row, 1);
-                                RedisListService.service.lrem(redisConnectContext, key, 1, value.raw());
-                                RedisListService.service.lpush(redisConnectContext, key, newValueBytes);
+                                RedisListService.service.lset(redisConnectContext, key, row, newValueBytes);
                             }
                             case SET -> {
                                 var value = (RedisValueItem) dataTable.getValueAt(row, 1);
-                                RedisSetService.service.srem(redisConnectContext, key, value.raw());
+                                if (!Arrays.equals(value.raw(), newValueBytes)) {
+                                    RedisSetService.service.srem(redisConnectContext, key, value.raw());
+                                }
                                 RedisSetService.service.sadd(redisConnectContext, key, newValueBytes);
                             }
                         }

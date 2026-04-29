@@ -70,6 +70,14 @@ public class TextEditor extends JPanel {
         return this.textArea.getText();
     }
 
+    public void setEditable(boolean editable) {
+        this.textArea.setEditable(editable);
+    }
+
+    public void setSyntaxEditingStyle(String style) {
+        this.textArea.setSyntaxEditingStyle(style);
+    }
+
     public TextEditor() {
         this.textArea = new RSyntaxTextArea() {
             {
