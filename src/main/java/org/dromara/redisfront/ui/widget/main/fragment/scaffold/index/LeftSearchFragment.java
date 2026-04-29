@@ -52,6 +52,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -435,6 +436,10 @@ public class LeftSearchFragment {
             }
 
             private void memoryAnalysis(TreeNodeInfo treeNodeInfo) {
+                if (SwingUtilities.isEventDispatchThread()) {
+                    FutureUtils.runAsync(() -> memoryAnalysis(treeNodeInfo));
+                    return;
+                }
                 if (treeNodeInfo.getChildCount() > 0) {
                     for (int i = 0; i < treeNodeInfo.getChildCount(); i++) {
                         memoryAnalysis((TreeNodeInfo) treeNodeInfo.getChildAt(i));
@@ -867,14 +872,14 @@ public class LeftSearchFragment {
         return contentPanel;
     }
 
-    static java.util.List<long[]> listPageRanges(long len, int pageSize) {
+    static List<long[]> listPageRanges(long len, int pageSize) {
         if (len <= 0) {
-            return java.util.List.of();
+            return List.of();
         }
         if (pageSize <= 0) {
             throw new IllegalArgumentException("pageSize must be > 0");
         }
-        java.util.List<long[]> ranges = new ArrayList<>();
+        List<long[]> ranges = new ArrayList<>();
         long start = 0;
         while (start < len) {
             long stop = Math.min(start + pageSize - 1L, len - 1L);

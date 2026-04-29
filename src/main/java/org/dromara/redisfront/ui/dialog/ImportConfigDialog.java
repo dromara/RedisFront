@@ -108,14 +108,17 @@ public class ImportConfigDialog extends QSDialog<RedisFrontWidget> {
                         if (JSONUtil.isTypeJSONArray(configText)) {
                             var array = JSONUtil.parseArray(configText);
                             for (Object o : array) {
-                                var data = (JSONObject) o;
+                                if (!(o instanceof JSONObject data)) {
+                                    continue;
+                                }
                                 if (RedisFrontUtils.isNotNull(data.getRaw().get("type"))) {
                                     // 如果类型存在，那就是分组的redis配置
                                     var connections = JSONUtil.parseArray(JSONUtil.toJsonStr(data.get("connections")));
                                     for (Object connection : connections) {
-                                        var groupConnection = (JSONObject) connection;
-                                        var connectInfo = genConnectInfo(groupConnection.getRaw());
+                                        if (connection instanceof JSONObject groupConnection) {
+                                            var connectInfo = genConnectInfo(groupConnection.getRaw());
 //                                        ConnectDetailDao.DAO.save(connectInfo);
+                                        }
                                     }
                                 } else {
                                     var connectInfo = genConnectInfo(data.getRaw());
@@ -141,7 +144,7 @@ public class ImportConfigDialog extends QSDialog<RedisFrontWidget> {
             connectInfo.setHost((String) raw.get("host"));
         }
         if (RedisFrontUtils.isNotNull(raw.get("port"))) {
-            connectInfo.setPort((Integer) raw.get("port"));
+            connectInfo.setPort(toInt(raw.get("port")));
         }
         if (RedisFrontUtils.isNotNull(raw.get("name"))) {
             connectInfo.setTitle((String) raw.get("name"));
@@ -159,7 +162,7 @@ public class ImportConfigDialog extends QSDialog<RedisFrontWidget> {
             connectInfo.setConnectTypeMode(ConnectType.SSH);
         }
         if (RedisFrontUtils.isNotNull(raw.get("ssh_port"))) {
-            connectInfo.getSshInfo().setPort((Integer) raw.get("ssh_port"));
+            connectInfo.getSshInfo().setPort(toInt(raw.get("ssh_port")));
             ///connectInfo.setConnectMode(Enum.Connect.SSH);
         }
         if (!StrUtil.isBlankIfStr(raw.get("ssh_user"))) {
@@ -175,6 +178,26 @@ public class ImportConfigDialog extends QSDialog<RedisFrontWidget> {
             connectInfo.setConnectTypeMode(ConnectType.SSH);
         }
         return connectInfo;
+    }
+
+    public static Integer toInt(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Integer i) {
+            return i;
+        }
+        if (value instanceof Number n) {
+            return n.intValue();
+        }
+        if (value instanceof String s) {
+            String trimmed = s.trim();
+            if (trimmed.isEmpty()) {
+                return null;
+            }
+            return Integer.parseInt(trimmed);
+        }
+        throw new IllegalArgumentException("Unsupported number type: " + value.getClass());
     }
 
     private void onCancel() {

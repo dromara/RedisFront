@@ -94,6 +94,7 @@ public class RightViewFragment {
     private TextEditor textEditor;
     private JTextField fieldOrScoreField;
     private JComboBox<String> jComboBox;
+    private JComboBox<ValueViewType> valueViewComboBox;
 
     private final RedisConnectContext redisConnectContext;
     private final TreeNodeInfo treeNodeInfo;
@@ -110,6 +111,9 @@ public class RightViewFragment {
     private Long lastKeyTTL;
     private KeyTypeEnum keyTypeEnum;
     private String lastSyntaxStyle;
+    private ValueViewType lastValueViewType = ValueViewType.AUTO;
+    private byte[] currentRawValue;
+    private boolean ignoreSyntaxComboEvent;
 
 
     public RightViewFragment(RedisConnectContext redisConnectContext, TreeNodeInfo treeNodeInfo, RedisFrontWidget owner) {
@@ -139,7 +143,7 @@ public class RightViewFragment {
         lengthLabel.setText("Length: " + turbo.getT1());
         keySizeLabel.setText("Size: " + DataSizeUtil.format(turbo.getT2().byteLength()));
         dataSplitPanel.setDividerSize(0);
-        jsonValueFormat(turbo.getT2());
+        setCurrentValue(turbo.getT2());
     }
 
     private <T extends TableModel> void refreshTableUI(ScanDataResult<T> scanData) {
@@ -194,36 +198,37 @@ public class RightViewFragment {
                         var score = dataTable.getValueAt(row, 1);
                         RedisFrontUtils.runEDT(() -> {
                             keyLabel.setText(owner.$tr("DataViewForm.keyLabel.score.title"));
-                            fieldOrScoreField.setText(score.toString());
+                            fieldOrScoreField.setText(String.valueOf(score));
                             valueUpdateSaveBtn.setEnabled(true);
-                            jsonValueFormat(value);
+                            setCurrentValue(value);
                         });
                     } else if (dataTable.getModel() instanceof HashTableModel) {
                         var value = (RedisValueItem) dataTable.getValueAt(row, 1);
                         var key = dataTable.getValueAt(row, 0);
                         RedisFrontUtils.runEDT(() -> {
                             keyLabel.setText(owner.$tr("DataViewForm.keyLabel.title"));
-                            fieldOrScoreField.setText(key.toString());
+                            fieldOrScoreField.setText(String.valueOf(key));
                             valueUpdateSaveBtn.setEnabled(true);
-                            jsonValueFormat(value);
+                            setCurrentValue(value);
                         });
                     } else if (dataTable.getModel() instanceof StreamTableModel) {
                         valueUpdateSaveBtn.setEnabled(true);
                         var value = dataTable.getValueAt(row, 2);
                         RedisFrontUtils.runEDT(() -> {
+                            setCurrentValue(null);
                             try {
                                 String prettyStr = JSONUtil.toJsonPrettyStr(value);
                                 textEditor.setText(prettyStr);
                             } catch (Exception ex) {
                                 //json格式化异常
-                                textEditor.setText(value.toString());
+                                textEditor.setText(String.valueOf(value));
                             }
                         });
                     } else {
                         var value = (RedisValueItem) dataTable.getValueAt(row, 1);
                         RedisFrontUtils.runEDT(() -> {
                             valueUpdateSaveBtn.setEnabled(true);
-                            jsonValueFormat(value);
+                            setCurrentValue(value);
                         });
                     }
                 } else if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2) {
@@ -259,7 +264,9 @@ public class RightViewFragment {
             try {
                 String prettyStr = JSONUtil.toJsonPrettyStr(value);
                 textEditor.setText(prettyStr);
+                ignoreSyntaxComboEvent = true;
                 jComboBox.setSelectedIndex(1);
+                ignoreSyntaxComboEvent = false;
             } catch (JSONException e) {
                 //json格式化异常
                 textEditor.setText(value);
@@ -269,18 +276,39 @@ public class RightViewFragment {
         }
     }
 
-    private void jsonValueFormat(RedisValueItem valueItem) {
+    private void setCurrentValue(RedisValueItem valueItem) {
         if (valueItem == null) {
+            currentRawValue = null;
+            if (valueViewComboBox != null) {
+                valueViewComboBox.setEnabled(false);
+            }
             textEditor.setText("");
             return;
         }
-        var raw = valueItem.raw();
-        if (RedisValueCodec.isValidUtf8(raw)) {
-            jsonValueFormat(new String(raw, StandardCharsets.UTF_8));
-        } else {
-            jComboBox.setSelectedIndex(0);
-            textEditor.setText(valueItem.toString());
+        currentRawValue = valueItem.raw();
+        if (valueViewComboBox != null) {
+            valueViewComboBox.setEnabled(true);
         }
+        refreshEditorByView();
+    }
+
+    private void refreshEditorByView() {
+        if (currentRawValue == null) {
+            textEditor.setText("");
+            return;
+        }
+        ValueViewType viewType = lastValueViewType == null ? ValueViewType.AUTO : lastValueViewType;
+        boolean syntaxSupported = viewType == ValueViewType.AUTO || viewType == ValueViewType.UTF8;
+        jComboBox.setEnabled(syntaxSupported);
+        if (!syntaxSupported) {
+            lastSyntaxStyle = null;
+            ignoreSyntaxComboEvent = true;
+            jComboBox.setSelectedIndex(0);
+            ignoreSyntaxComboEvent = false;
+            textEditor.setText(RedisValueCodec.encode(currentRawValue, viewType));
+            return;
+        }
+        jsonValueFormat(RedisValueCodec.encode(currentRawValue, viewType));
     }
 
     public JPanel contentPanel() {
@@ -412,10 +440,12 @@ public class RightViewFragment {
             if (e != null) {
                 Notifications.getInstance().show(Notifications.Type.INFO, e.getMessage());
             } else {
-                switch (turbo.getT1()) {
-                    case ZSET, LIST, SET, HASH ->
-                            AddOrUpdateValueDialog.showDialog(owner, owner.$tr("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), turbo.getT2(), turbo.getT3(), redisConnectContext, keyTypeEnum, () -> {
-                            });
+                if (turbo != null) {
+                    switch (turbo.getT1()) {
+                        case ZSET, LIST, SET, HASH ->
+                                AddOrUpdateValueDialog.showDialog(owner, owner.$tr("DataViewForm.showAddOrUpdateItemDialog.title"), keyField.getText(), turbo.getT2(), turbo.getT3(), redisConnectContext, keyTypeEnum, () -> {
+                                });
+                    }
                 }
             }
         });
@@ -462,6 +492,9 @@ public class RightViewFragment {
         jComboBox.addItem(SyntaxConstants.SYNTAX_STYLE_NONE);
         jComboBox.addItem(SyntaxConstants.SYNTAX_STYLE_JSON);
         jComboBox.addActionListener(ignore -> {
+            if (ignoreSyntaxComboEvent) {
+                return;
+            }
             var item = jComboBox.getSelectedItem();
             String value = textEditor.getText();
             if (item instanceof String itemValue) {
@@ -484,18 +517,35 @@ public class RightViewFragment {
                     if (StringUtils.isEmpty(value)) {
                         return;
                     }
-                    if (this.lastSyntaxStyle.equals(SyntaxConstants.SYNTAX_STYLE_JSON)) {
+                    if (RedisFrontUtils.equal(this.lastSyntaxStyle, SyntaxConstants.SYNTAX_STYLE_JSON)) {
                         if (JSONUtil.isTypeJSON(value)) {
                             value = JSONUtil.parse(value).toJSONString(0);
                             value = gson.toJson(value);
                         }
                         textEditor.setText(value);
                     }
+                    this.lastSyntaxStyle = null;
                 }
             }
         });
         jComboBox.setBackground(UIManager.getColor("FlatEditorPane.background"));
         jToolBar.add(jComboBox);
+
+        valueViewComboBox = new JComboBox<>();
+        valueViewComboBox.addItem(ValueViewType.AUTO);
+        valueViewComboBox.addItem(ValueViewType.UTF8);
+        valueViewComboBox.addItem(ValueViewType.BASE64);
+        valueViewComboBox.addItem(ValueViewType.HEX);
+        valueViewComboBox.setSelectedItem(ValueViewType.AUTO);
+        valueViewComboBox.addActionListener(ignore -> {
+            Object item = valueViewComboBox.getSelectedItem();
+            if (item instanceof ValueViewType valueViewType) {
+                lastValueViewType = valueViewType;
+                refreshEditorByView();
+            }
+        });
+        jToolBar.add(valueViewComboBox);
+
         valueUpdateSaveBtn = new AnimateButton() {
             @Override
             public void updateUI() {
@@ -535,7 +585,7 @@ public class RightViewFragment {
                 }
             }
             SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
-                var newValueBytes = RedisValueCodec.decode(newValue, ValueViewType.AUTO);
+                var newValueBytes = RedisValueCodec.decode(newValue, lastValueViewType == null ? ValueViewType.AUTO : lastValueViewType);
                 if (typeEnum.equals(KeyTypeEnum.STRING)) {
                     RedisBasicService.service.del(redisConnectContext, key);
                     RedisStringService.service.set(redisConnectContext, key, newValueBytes);
@@ -575,7 +625,11 @@ public class RightViewFragment {
                     Notifications.getInstance().show(Notifications.Type.INFO, owner.$tr("DataViewForm.showInformationDialog.updateSuccess.message"));
                     return;
                 }
-                Notifications.getInstance().show(Notifications.Type.INFO, owner.$tr("DataViewForm.showInformationDialog.updateSuccess.message"));
+                String msg = e.getMessage();
+                if (RedisFrontUtils.isEmpty(msg)) {
+                    msg = "同步失败";
+                }
+                Notifications.getInstance().show(Notifications.Type.ERROR, msg);
             });
         });
         jToolBar.add(valueUpdateSaveBtn);

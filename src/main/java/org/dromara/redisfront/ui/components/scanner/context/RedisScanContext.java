@@ -11,6 +11,7 @@ import lombok.Setter;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.value.RedisValueItem;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -23,7 +24,7 @@ public class RedisScanContext<T> {
     private ScanCursor scanCursor;
     private Long limit;
     private String searchKey;
-    private Collection<T> keys = Collections.emptyList();
+    private Collection<T> keys = new ArrayList<>();
 
     public ScanCursor getScanCursor() {
         if (scanCursor == null) {
@@ -67,15 +68,11 @@ public class RedisScanContext<T> {
     }
 
     public void setKeyList(Collection<T> keys) {
-        if (CollUtil.isNotEmpty(keys)) {
-            if (CollUtil.isNotEmpty(this.keys)) {
-                this.keys.addAll(keys);
-            } else {
-                this.keys = keys;
-            }
-        } else {
-            this.keys = Collections.emptyList();
+        if (CollUtil.isEmpty(keys)) {
+            this.keys.clear();
+            return;
         }
+        this.keys.addAll(keys);
     }
 
 }
