@@ -32,8 +32,16 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
     private JXList<String> suggestionList;
     private DefaultListModel<String> suggestionModel;
     private final String[] redisCommands = {
-            "SET", "GET", "DEL", "EXISTS", "EXPIRE",
-            "HGETALL", "HSET", "LPUSH", "RPOP", "SADD",
+            "PING", "ECHO", "AUTH", "SELECT",
+            "INFO", "CLIENT", "CONFIG", "SLOWLOG",
+            "DBSIZE", "KEYS", "SCAN", "TYPE", "TTL", "PTTL", "EXPIRE", "PEXPIRE", "PERSIST", "RENAME", "RENAMENX",
+            "GET", "MGET", "SET", "MSET", "SETNX", "SETEX", "PSETEX", "INCR", "DECR", "INCRBY", "DECRBY", "STRLEN", "APPEND",
+            "HGET", "HMGET", "HGETALL", "HSET", "HMSET", "HDEL", "HEXISTS", "HLEN", "HKEYS", "HVALS", "HINCRBY",
+            "LPUSH", "RPUSH", "LPOP", "RPOP", "LRANGE", "LLEN", "LINDEX", "LSET", "LTRIM",
+            "SADD", "SREM", "SMEMBERS", "SCARD", "SISMEMBER", "SPOP",
+            "ZADD", "ZREM", "ZRANGE", "ZREVRANGE", "ZSCORE", "ZCARD",
+            "PUBLISH", "SUBSCRIBE", "UNSUBSCRIBE", "PSUBSCRIBE", "PUNSUBSCRIBE",
+            "DEL", "UNLINK", "EXISTS",
             ":VIEW"
     };
 
