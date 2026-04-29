@@ -2,6 +2,7 @@ package org.dromara.redisfront.commons.codec;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
@@ -11,6 +12,8 @@ public final class RedisValueCodec {
 
     private static final String BASE64_PREFIX = "base64:";
     private static final String HEX_PREFIX = "hex:";
+    private static final Charset GBK = Charset.forName("GBK");
+    private static final Charset GB18030 = Charset.forName("GB18030");
 
     private RedisValueCodec() {
     }
@@ -22,6 +25,10 @@ public final class RedisValueCodec {
         return switch (type) {
             case AUTO -> encodeAuto(value);
             case UTF8 -> new String(value, StandardCharsets.UTF_8);
+            case GBK -> new String(value, GBK);
+            case GB18030 -> new String(value, GB18030);
+            case LATIN1 -> new String(value, StandardCharsets.ISO_8859_1);
+            case ESCAPED -> encodeEscaped(value);
             case BASE64 -> Base64.getEncoder().encodeToString(value);
             case HEX -> toHex(value);
         };
@@ -34,6 +41,10 @@ public final class RedisValueCodec {
         return switch (type) {
             case AUTO -> decodeAuto(text);
             case UTF8 -> text.getBytes(StandardCharsets.UTF_8);
+            case GBK -> text.getBytes(GBK);
+            case GB18030 -> text.getBytes(GB18030);
+            case LATIN1 -> text.getBytes(StandardCharsets.ISO_8859_1);
+            case ESCAPED -> throw new UnsupportedOperationException("ESCAPED view is read-only");
             case BASE64 -> decodeBase64(text);
             case HEX -> decodeHex(text);
         };
@@ -59,6 +70,31 @@ public final class RedisValueCodec {
             return new String(value, StandardCharsets.UTF_8);
         }
         return BASE64_PREFIX + Base64.getEncoder().encodeToString(value);
+    }
+
+    private static String encodeEscaped(byte[] value) {
+        StringBuilder sb = new StringBuilder(value.length * 4);
+        for (byte b : value) {
+            int v = b & 0xFF;
+            if (v == '\\') {
+                sb.append("\\\\");
+            } else if (v == '\"') {
+                sb.append("\\\"");
+            } else if (v == '\n') {
+                sb.append("\\n");
+            } else if (v == '\r') {
+                sb.append("\\r");
+            } else if (v == '\t') {
+                sb.append("\\t");
+            } else if (v >= 0x20 && v <= 0x7E) {
+                sb.append((char) v);
+            } else {
+                sb.append("\\x");
+                sb.append(toHexChar(v >>> 4));
+                sb.append(toHexChar(v & 0x0F));
+            }
+        }
+        return sb.toString();
     }
 
     private static byte[] decodeAuto(String text) {
@@ -133,4 +169,3 @@ public final class RedisValueCodec {
         return (char) (v < 10 ? ('0' + v) : ('a' + (v - 10)));
     }
 }
-
