@@ -28,6 +28,7 @@ public class RedisFrontTerminal extends AbstractTerminal {
     private static final Logger log = LoggerFactory.getLogger(RedisFrontTerminal.class);
     private static final Utf8KeyByteArrayValueCodec CODEC = new Utf8KeyByteArrayValueCodec();
     private final RedisConnectContext redisConnectContext;
+    private ValueViewType outputViewType = ValueViewType.AUTO;
 
     public RedisFrontTerminal(final RedisConnectContext redisConnectContext) {
         super();
@@ -59,6 +60,15 @@ public class RedisFrontTerminal extends AbstractTerminal {
             if (Objects.equals(inputText, "")){
                 return;
             }
+            String trimmed = inputText.trim();
+            if (trimmed.regionMatches(true, 0, ":view", 0, 5)) {
+                var parts = trimmed.split("\\s+");
+                if (parts.length >= 2) {
+                    outputViewType = resolveViewType(parts[1]);
+                }
+                println("view: " + outputViewType.name());
+                return;
+            }
             var commandList = new ArrayList<>(List.of(inputText.split(" ")));
             var commandType = Arrays.stream(CommandType.values())
                     .filter(e -> RedisFrontUtils.equal(e.name(), commandList.getFirst().toUpperCase()))
@@ -69,12 +79,12 @@ public class RedisFrontTerminal extends AbstractTerminal {
             if (RedisFrontUtils.equal(connectInfo().getRedisMode(), RedisMode.CLUSTER)) {
                 LettuceUtils.clusterRun(connectInfo(), redisCommands -> {
                     var res = redisCommands.dispatch(commandType, new ArrayOutput<>(CODEC), new CommandArgs<>(CODEC).addKeys(commandList));
-                    println(format(res, ""));
+                    println(format(res, "", outputViewType));
                 });
             } else if (RedisFrontUtils.equal(connectInfo().getRedisMode(), RedisMode.SENTINEL)) {
                 LettuceUtils.sentinelRun(connectInfo(), redisCommands -> {
                     var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
-                    println(format(res, ""));
+                    println(format(res, "", outputViewType));
                 });
             } else {
                 LettuceUtils.run(connectInfo(), redisCommands -> {
@@ -89,10 +99,10 @@ public class RedisFrontTerminal extends AbstractTerminal {
                         var message = commandList.toArray(new String[]{});
                         newCommandList.add(String.join(" ", message));
                         var res = redisCommands.dispatch(commandType, new ArrayOutput<>(CODEC), new CommandArgs<>(CODEC).addKeys(newCommandList));
-                        println(format(res, ""));
+                        println(format(res, "", outputViewType));
                     } else {
                         var res = redisCommands.dispatch(commandType, new ArrayOutput<>(CODEC), new CommandArgs<>(CODEC).addKeys(commandList));
-                        println(format(res, ""));
+                        println(format(res, "", outputViewType));
                     }
 
                 });
@@ -103,24 +113,45 @@ public class RedisFrontTerminal extends AbstractTerminal {
         }
     }
 
-    private static String format(Object s, String space) {
+    static ValueViewType resolveViewType(String input) {
+        if (input == null) {
+            return ValueViewType.AUTO;
+        }
+        String normalized = input.trim().toUpperCase().replace("-", "").replace("_", "");
+        if (normalized.isEmpty() || "AUTO".equals(normalized)) {
+            return ValueViewType.AUTO;
+        }
+        if ("LATIN1".equals(normalized) || "LATIN".equals(normalized) || "ISO88591".equals(normalized) || "ISO8859-1".equals(input.trim().toUpperCase())) {
+            return ValueViewType.LATIN1;
+        }
+        if ("GB18030".equals(normalized)) {
+            return ValueViewType.GB18030;
+        }
+        if ("GBK".equals(normalized)) {
+            return ValueViewType.GBK;
+        }
+        return ValueViewType.valueOf(normalized);
+    }
+
+    static String format(Object s, String space, ValueViewType viewType) {
+        ValueViewType vt = viewType == null ? ValueViewType.AUTO : viewType;
         var sb = new StringBuilder();
         if (s instanceof List<?> list) {
             if (list.size() == 1) {
-                return String.valueOf(list.getFirst());
+                return format(list.getFirst(), space, vt);
             }
             for (int i = 0; i < list.size(); i++) {
                 var item = list.get(i);
                 if (item instanceof List<?> itemList) {
-                    sb.append(space).append(i + 1).append(" ) ").append("\n").append(format(itemList, "  " + space));
+                    sb.append(space).append(i + 1).append(" ) ").append("\n").append(format(itemList, "  " + space, vt));
                 } else if (item instanceof byte[] bytes) {
-                    sb.append(space).append(i + 1).append(" ) ").append(RedisValueCodec.encode(bytes, ValueViewType.AUTO)).append("\n");
+                    sb.append(space).append(i + 1).append(" ) ").append(RedisValueCodec.encode(bytes, vt)).append("\n");
                 } else {
                     sb.append(space).append(i + 1).append(" ) ").append(item).append("\n");
                 }
             }
         } else if (s instanceof byte[] bytes) {
-            sb.append(RedisValueCodec.encode(bytes, ValueViewType.AUTO));
+            sb.append(RedisValueCodec.encode(bytes, vt));
         } else {
             sb.append(s);
         }
