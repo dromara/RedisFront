@@ -48,7 +48,7 @@ public class RedisFrontTerminal extends AbstractTerminal {
                 println(DateUtil.formatDateTime(new Date()) + " - ".concat("redis PING failed!"));
             }
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Redis PING error", e);
             println(DateUtil.formatDateTime(new Date()) + " - ".concat(e.getMessage()));
         }
     }
@@ -98,6 +98,7 @@ public class RedisFrontTerminal extends AbstractTerminal {
                 });
             }
         } catch (Exception e) {
+            log.error("Terminal command error: {}", inputText, e);
             print(e.getMessage());
         }
     }

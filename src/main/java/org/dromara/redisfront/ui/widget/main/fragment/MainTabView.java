@@ -46,6 +46,7 @@ public class MainTabView extends JTabbedPane {
                 pageScaffold.onClose();
             }
         }
+        redisInfoView.stop();
     }
 
     public MainTabView(RedisFrontWidget owner, RedisConnectContext redisConnectContext) {
