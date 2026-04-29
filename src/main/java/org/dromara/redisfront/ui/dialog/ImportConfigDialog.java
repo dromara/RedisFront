@@ -84,14 +84,15 @@ public class ImportConfigDialog extends QSDialog<RedisFrontWidget> {
         if (result == JFileChooser.APPROVE_OPTION) {
             var configFile = fileChooser.getSelectedFile();
             var fileReader = new FileReader(configFile);
-            if (!StrUtil.isBlankIfStr(fileReader.readString()) && JSONUtil.isTypeJSON(fileReader.readString())) {
+            String configText = fileReader.readString();
+            if (!StrUtil.isBlankIfStr(configText) && JSONUtil.isTypeJSON(configText)) {
                 if ("导入RedisFront配置".equals(selectedItem)) {
                     try {
-                        if (JSONUtil.isTypeJSONObject(fileReader.readString())) {
-                            var connectInfo = JSONUtil.toBean(fileReader.readString(), RedisConnectContext.class);
+                        if (JSONUtil.isTypeJSONObject(configText)) {
+                            var connectInfo = JSONUtil.toBean(configText, RedisConnectContext.class);
 //                            ConnectDetailDao.DAO.save(connectInfo);
                         } else {
-                            var connectInfos = JSONUtil.toList(fileReader.readString(), RedisConnectContext.class);
+                            var connectInfos = JSONUtil.toList(configText, RedisConnectContext.class);
                             for (RedisConnectContext redisConnectContext : connectInfos) {
 //                                ConnectDetailDao.DAO.save(connectInfo);
                             }
@@ -104,8 +105,8 @@ public class ImportConfigDialog extends QSDialog<RedisFrontWidget> {
                     }
                 } else if ("导入RDM配置".equals(selectedItem)) {
                     try {
-                        if (JSONUtil.isTypeJSONArray(fileReader.readString())) {
-                            var array = JSONUtil.parseArray(fileReader.readString());
+                        if (JSONUtil.isTypeJSONArray(configText)) {
+                            var array = JSONUtil.parseArray(configText);
                             for (Object o : array) {
                                 var data = (JSONObject) o;
                                 if (RedisFrontUtils.isNotNull(data.getRaw().get("type"))) {

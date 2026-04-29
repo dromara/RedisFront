@@ -27,7 +27,7 @@ public class FutureUtils {
     }
 
     public static CompletableFuture<Void> runAsync(Runnable runnable) {
-        return CompletableFuture.runAsync(runnable);
+        return CompletableFuture.runAsync(runnable, executorService);
     }
 
     public static void runAsync(Runnable runnable, Consumer<Throwable> consumer) {

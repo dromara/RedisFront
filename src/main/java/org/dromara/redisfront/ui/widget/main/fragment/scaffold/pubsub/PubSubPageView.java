@@ -3,10 +3,11 @@ package org.dromara.redisfront.ui.widget.main.fragment.scaffold.pubsub;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import io.lettuce.core.AbstractRedisClient;
 import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
 import io.lettuce.core.cluster.pubsub.RedisClusterPubSubListener;
+import io.lettuce.core.cluster.pubsub.StatefulRedisClusterPubSubConnection;
 import io.lettuce.core.pubsub.RedisPubSubListener;
+import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.pubsub.api.async.RedisPubSubAsyncCommands;
 import org.dromara.quickswing.ui.app.page.QSPageItem;
 import org.dromara.redisfront.commons.enums.KeyTypeEnum;
@@ -39,7 +40,8 @@ import java.util.function.Consumer;
 public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements RedisPubSubListener<String, String>, RedisClusterPubSubListener<String, String> {
 
     private RedisPubSubAsyncCommands<String, String> pubsub;
-    private AbstractRedisClient redisClient;
+    private StatefulRedisClusterPubSubConnection<String, String> clusterPubSubConnection;
+    private StatefulRedisPubSubConnection<String, String> pubSubConnection;
     private JPanel rootPanel;
     private JToggleButton enableSubscribe;
     private JTextField channelField;
@@ -84,6 +86,9 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
             }
         });
         enableSubscribe.addItemListener(ignore -> {
+            if (pubsub == null) {
+                return;
+            }
             var channel = subscribeChannel.getText();
             if (!enableSubscribe.isSelected()) {
                 subscribeChannel.setFocusable(true);
@@ -126,23 +131,38 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
         }
         if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
             FutureUtils.runAsync(() -> {
-                var connection = RedisConnectionPoolManager.getClusterConnectPubSub(redisConnectContext);
-                pubsub = connection.async();
-            }).thenRun(() -> pubsub.getStatefulConnection().addListener(this));
+                clusterPubSubConnection = RedisConnectionPoolManager.getClusterConnectPubSub(redisConnectContext);
+                pubsub = clusterPubSubConnection.async();
+            }).thenRun(() -> {
+                if (pubsub != null) {
+                    pubsub.getStatefulConnection().addListener(this);
+                }
+            });
         } else {
             FutureUtils.runAsync(() -> {
-                var connection = RedisConnectionPoolManager.getConnectPubSub(redisConnectContext);
-                pubsub = connection.async();
-            }).thenRun(() -> pubsub.getStatefulConnection().addListener(this));
+                pubSubConnection = RedisConnectionPoolManager.getConnectPubSub(redisConnectContext);
+                pubsub = pubSubConnection.async();
+            }).thenRun(() -> {
+                if (pubsub != null) {
+                    pubsub.getStatefulConnection().addListener(this);
+                }
+            });
         }
     }
 
     public void disConnection() {
         enableSubscribe.setSelected(false);
-        if (RedisFrontUtils.isNotNull(pubsub)) {
-            pubsub.getStatefulConnection().closeAsync().thenRun(() -> redisClient.shutdownAsync().thenRun(() -> {
-                pubsub = null;
-            }));
+        if (pubsub != null) {
+            pubsub.getStatefulConnection().removeListener(this);
+            pubsub = null;
+        }
+        if (clusterPubSubConnection != null) {
+            RedisConnectionPoolManager.closeConnection(redisConnectContext, clusterPubSubConnection);
+            clusterPubSubConnection = null;
+        }
+        if (pubSubConnection != null) {
+            RedisConnectionPoolManager.closeConnection(redisConnectContext, pubSubConnection);
+            pubSubConnection = null;
         }
     }
 

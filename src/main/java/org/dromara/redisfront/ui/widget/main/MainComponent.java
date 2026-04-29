@@ -198,6 +198,7 @@ public class MainComponent extends JPanel {
                     mode.setText(owner.$tr(redisConnectContext.getRedisMode().modeName));
                     mode.setToolTipText(redisConnectContext.getHost() + " | " + owner.$tr(redisConnectContext.getRedisMode().modeName));
                 });
+                this.currentRedisConnectContext = redisConnectContext;
                 executorServiceMap.computeIfAbsent(redisConnectContext.getId(), ignore1 -> {
                     RedisMonitor monitor = new RedisMonitor(owner, redisConnectContext);
                     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -205,7 +206,8 @@ public class MainComponent extends JPanel {
                         try {
                             RedisUsageInfo usage = monitor.getUsageInfo();
                             log.debug("[Redis {} - {} ] 使用：{}\n", redisConnectContext.getTitle(), redisConnectContext.getHost(), usage);
-                            if (currentRedisConnectContext.getId() == redisConnectContext.getId()) {
+                            if (currentRedisConnectContext != null
+                                    && java.util.Objects.equals(currentRedisConnectContext.getId(), redisConnectContext.getId())) {
                                 SwingUtilities.invokeLater(() -> {
                                     memory.setText(usage.getMemory());
                                     memory.setToolTipText(redisConnectContext.getHost() + " | Memory Usage => " + usage.getMemory());
@@ -223,7 +225,6 @@ public class MainComponent extends JPanel {
                     }, 1, 3, TimeUnit.SECONDS);
                     return scheduler;
                 });
-                this.currentRedisConnectContext = redisConnectContext;
             }
 
         });

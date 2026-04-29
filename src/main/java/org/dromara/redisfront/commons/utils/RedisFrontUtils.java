@@ -96,30 +96,13 @@ public class RedisFrontUtils {
     }
 
     public static int getByteSize(Object data) {
-        if (data instanceof String) {
-            return ((String) data).getBytes(StandardCharsets.UTF_8).length;
-        }
-        if (data instanceof byte[] bytes) {
-            return bytes.length;
-        }
-        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-             ObjectOutputStream outputStream = new ObjectOutputStream(byteArrayOutputStream)) {
-            outputStream.writeObject(data);
-            outputStream.flush();
-            return byteArrayOutputStream.size();
-        } catch (Exception e) {
-            return 0;
-        }
-        if (data instanceof byte[] bytes) {
-            return bytes.length;
-        }
-        if (data instanceof ByteBuffer byteBuffer) {
-            return byteBuffer.remaining();
-        }
-        if (data instanceof String str) {
-            return str.getBytes(StandardCharsets.UTF_8).length;
-        }
-        return String.valueOf(data).getBytes(StandardCharsets.UTF_8).length;
+        return switch (data) {
+            case null -> 0;
+            case byte[] bytes -> bytes.length;
+            case ByteBuffer byteBuffer -> byteBuffer.remaining();
+            case String str -> str.getBytes(StandardCharsets.UTF_8).length;
+            default -> String.valueOf(data).getBytes(StandardCharsets.UTF_8).length;
+        };
     }
 
     public static String getDataSize(String str) {

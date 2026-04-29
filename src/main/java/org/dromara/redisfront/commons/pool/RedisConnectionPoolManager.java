@@ -37,7 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RedisConnectionPoolManager {
 
     private static final int MAX_TOTAL = 5;
-    private static final int MAX_IDLE = 10;
+    private static final int MAX_IDLE = 5;
     private static final int MIN_IDLE = 2;
     private static final long MAX_WAIT_MILLIS = 5000;
 
@@ -104,6 +104,10 @@ public class RedisConnectionPoolManager {
         });
     }
 
+    static String commandLogInfo(String type, String commandString) {
+        return type;
+    }
+
     private static void publishCommandEvent(CommandStartedEvent event, RedisConnectContext context) {
         if (LogStatusHolder.getIgnoredLog() == null) {
             String type = event.getCommand().getType().toString();
@@ -112,7 +116,7 @@ public class RedisConnectionPoolManager {
             LogInfo logInfo = new LogInfo();
             logInfo.setIp(context.getHost());
             logInfo.setDate(LocalDateTime.now());
-            logInfo.setInfo(type + " " + commandString);
+            logInfo.setInfo(commandLogInfo(type, commandString));
             RedisFrontContext.publishEvent(new CommandExecuteEvent(logInfo, context.getId()));
         }
     }

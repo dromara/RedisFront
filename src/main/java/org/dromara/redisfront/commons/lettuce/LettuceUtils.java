@@ -94,34 +94,31 @@ public class LettuceUtils {
                         .fixedTimeout(Duration.ofSeconds(30))
                         .build())
                 .build();
-        if (redisConnectContext.getEnableSsl()) {
-            if (redisConnectContext.getSslInfo() != null
-                    && RedisFrontUtils.isNotEmpty(redisConnectContext.getSslInfo().getPassword())
-                    || RedisFrontUtils.isNotEmpty(redisConnectContext.getSslInfo().getPublicKeyFilePath())) {
-                clusterClientOptions = clusterClientOptions
-                        .mutate()
-                        .sslOptions(SslOptions.builder()
-                                .jdkSslProvider()
-                                .truststore(new File(redisConnectContext.getSslInfo().getPublicKeyFilePath()),
-                                        redisConnectContext.getSslInfo().getPassword())
-                                .build())
-                        .build();
-            }
+        if (redisConnectContext.getEnableSsl()
+                && redisConnectContext.getSslInfo() != null
+                && RedisFrontUtils.isNotEmpty(redisConnectContext.getSslInfo().getPublicKeyFilePath())) {
+            clusterClientOptions = clusterClientOptions
+                    .mutate()
+                    .sslOptions(SslOptions.builder()
+                            .jdkSslProvider()
+                            .truststore(new File(redisConnectContext.getSslInfo().getPublicKeyFilePath()),
+                                    redisConnectContext.getSslInfo().getPassword())
+                            .build())
+                    .build();
         }
         redisClient.setOptions(clusterClientOptions);
     }
 
     private static void configureOptions(RedisClient redisClient, RedisConnectContext redisConnectContext) {
-        if (redisConnectContext.getEnableSsl()) {
-            if (RedisFrontUtils.isNotEmpty(redisConnectContext.getSslInfo().getPassword())
-                    || RedisFrontUtils.isNotEmpty(redisConnectContext.getSslInfo().getPublicKeyFilePath())) {
-                var sslOptions = SslOptions.builder()
-                        .jdkSslProvider()
-                        .truststore(new File(redisConnectContext.getSslInfo().getPublicKeyFilePath()),
-                                redisConnectContext.getSslInfo().getPassword())
-                        .build();
-                redisClient.setOptions(ClientOptions.builder().sslOptions(sslOptions).build());
-            }
+        if (redisConnectContext.getEnableSsl()
+                && redisConnectContext.getSslInfo() != null
+                && RedisFrontUtils.isNotEmpty(redisConnectContext.getSslInfo().getPublicKeyFilePath())) {
+            var sslOptions = SslOptions.builder()
+                    .jdkSslProvider()
+                    .truststore(new File(redisConnectContext.getSslInfo().getPublicKeyFilePath()),
+                            redisConnectContext.getSslInfo().getPassword())
+                    .build();
+            redisClient.setOptions(ClientOptions.builder().sslOptions(sslOptions).build());
         }
     }
 
@@ -162,75 +159,82 @@ public class LettuceUtils {
     }
 
     public static void clusterRun(RedisConnectContext redisConnectContext, Consumer<RedisAdvancedClusterCommands<String, byte[]>> consumer) {
+        StatefulRedisClusterConnection<String, byte[]> connection = null;
         try {
-            StatefulRedisClusterConnection<String, byte[]> connection = RedisConnectionPoolManager.getClusterConnection(redisConnectContext);
+            connection = RedisConnectionPoolManager.getClusterConnection(redisConnectContext);
             consumer.accept(connection.sync());
-            RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
         } catch (Exception exception) {
             log.error("redis连接失败！", exception);
             throw exception;
+        } finally {
+            RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
         }
     }
 
     public static <T> T clusterExec(RedisConnectContext redisConnectContext, Function<RedisAdvancedClusterCommands<String, byte[]>, T> function) {
+        StatefulRedisClusterConnection<String, byte[]> connection = null;
         try {
-            StatefulRedisClusterConnection<String, byte[]> connection = RedisConnectionPoolManager.getClusterConnection(redisConnectContext);
-            T apply = function.apply(connection.sync());
-            RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
-            return apply;
+            connection = RedisConnectionPoolManager.getClusterConnection(redisConnectContext);
+            return function.apply(connection.sync());
         } catch (Exception exception) {
             log.error("redis连接失败！", exception);
             throw exception;
+        } finally {
+            RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
         }
     }
 
     public static void sentinelRun(RedisConnectContext redisConnectContext,
                                    Consumer<RedisSentinelCommands<String, String>> consumer) {
+        StatefulRedisSentinelConnection<String, String> connection = null;
         try {
-            StatefulRedisSentinelConnection<String, String> connection = RedisConnectionPoolManager
-                    .getSentinelConnection(redisConnectContext);
+            connection = RedisConnectionPoolManager.getSentinelConnection(redisConnectContext);
             consumer.accept(connection.sync());
-            RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
         } catch (Exception exception) {
             log.error("redis连接失败！", exception);
             throw exception;
+        } finally {
+            RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
         }
     }
 
     public static <T> T sentinelExec(RedisConnectContext redisConnectContext,
                                      Function<RedisSentinelCommands<String, String>, T> function) {
+        StatefulRedisSentinelConnection<String, String> connection = null;
         try {
-            StatefulRedisSentinelConnection<String, String> connection = RedisConnectionPoolManager
-                    .getSentinelConnection(redisConnectContext);
-            T apply = function.apply(connection.sync());
-            RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
-            return apply;
+            connection = RedisConnectionPoolManager.getSentinelConnection(redisConnectContext);
+            return function.apply(connection.sync());
         } catch (Exception exception) {
             log.error("redis连接失败！", exception);
             throw exception;
+        } finally {
+            RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
         }
     }
 
     public static void run(RedisConnectContext redisConnectContext, Consumer<RedisCommands<String, byte[]>> consumer) {
+        StatefulRedisConnection<String, byte[]> connection = null;
         try {
-            StatefulRedisConnection<String, byte[]> connection = RedisConnectionPoolManager.getConnection(redisConnectContext);
+            connection = RedisConnectionPoolManager.getConnection(redisConnectContext);
             consumer.accept(connection.sync());
-            RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
         } catch (Exception exception) {
             log.error("redis连接失败！", exception);
             throw exception;
+        } finally {
+            RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
         }
     }
 
     public static <T> T exec(RedisConnectContext redisConnectContext, Function<RedisCommands<String, byte[]>, T> function) {
+        StatefulRedisConnection<String, byte[]> connection = null;
         try {
-            StatefulRedisConnection<String, byte[]> connection = RedisConnectionPoolManager.getConnection(redisConnectContext);
-            T apply = function.apply(connection.sync());
-            RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
-            return apply;
+            connection = RedisConnectionPoolManager.getConnection(redisConnectContext);
+            return function.apply(connection.sync());
         } catch (Exception exception) {
             log.error("redis连接失败！", exception);
             throw exception;
+        } finally {
+            RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
         }
     }
 
