@@ -487,17 +487,14 @@ public class LeftSearchFragment {
 
                                 if (typeEnum.equals(KeyTypeEnum.LIST)) {
                                     var len = RedisListService.service.llen(redisConnectContext, treeNodeInfo.key());
-                                    var start = 0;
-                                    var dataList = new ArrayList<>();
-                                    while (start >= len) {
-                                        var stop = start + (1000 - 1);
-                                        var values = RedisListService.service.lrange(redisConnectContext, treeNodeInfo.key(), start, stop);
+                                    var dataList = new ArrayList<byte[]>();
+                                    for (long[] range : listPageRanges(len, 1000)) {
+                                        var values = RedisListService.service.lrange(redisConnectContext, treeNodeInfo.key(), range[0], range[1]);
                                         dataList.addAll(values);
-                                        start += 1000;
                                     }
                                     if (RedisFrontUtils.isNotEmpty(dataList)) {
                                         SwingUtilities.invokeLater(() -> {
-                                            treeNodeInfo.setMemorySize(dataList.stream().map(e -> ((byte[]) e).length).reduce(Integer::sum).orElse(0));
+                                            treeNodeInfo.setMemorySize(dataList.stream().map(e -> e.length).reduce(Integer::sum).orElse(0));
                                             keyTree.updateUI();
                                         });
                                     }
@@ -868,6 +865,23 @@ public class LeftSearchFragment {
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPanel;
+    }
+
+    static java.util.List<long[]> listPageRanges(long len, int pageSize) {
+        if (len <= 0) {
+            return java.util.List.of();
+        }
+        if (pageSize <= 0) {
+            throw new IllegalArgumentException("pageSize must be > 0");
+        }
+        java.util.List<long[]> ranges = new ArrayList<>();
+        long start = 0;
+        while (start < len) {
+            long stop = Math.min(start + pageSize - 1L, len - 1L);
+            ranges.add(new long[]{start, stop});
+            start += pageSize;
+        }
+        return ranges;
     }
 
 }

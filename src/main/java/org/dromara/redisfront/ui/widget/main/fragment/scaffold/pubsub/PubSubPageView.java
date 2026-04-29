@@ -125,6 +125,11 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
         openConnection();
     }
 
+    @Override
+    public void onClose() {
+        disConnection();
+    }
+
     public void openConnection() {
         if (pubsub != null) {
             return;

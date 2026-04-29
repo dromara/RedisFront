@@ -121,7 +121,10 @@ public class RedisFrontComponent extends Background {
         redisConnectContext.setRedisMode(redisModeEnum);
         if (RedisMode.SENTINEL == redisConnectContext.getRedisMode()) {
             var masterList = LettuceUtils.sentinelExec(redisConnectContext, RedisSentinelCommands::masters);
-            var master = masterList.stream().findAny().orElseThrow();
+            if (masterList == null || masterList.isEmpty()) {
+                throw new RedisFrontException("Sentinel masters is empty");
+            }
+            var master = masterList.stream().findFirst().orElseThrow();
             String ip = master.get("ip");
             if (StrUtil.equals(ip, redisConnectContext.getHost())) {
                 redisConnectContext.setHost(ip);
