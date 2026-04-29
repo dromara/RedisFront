@@ -21,6 +21,7 @@ import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.commons.codec.Utf8KeyByteArrayValueCodec;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.lettuce.LettuceUtils;
+import org.dromara.redisfront.commons.utils.ExceptionMessageUtils;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.LogInfo;
 import org.dromara.redisfront.model.context.RedisConnectContext;
@@ -157,7 +158,8 @@ public class RedisConnectionPoolManager {
                 Throwable causedBy = ExceptionUtil.getCausedBy(e, RedisCommandExecutionException.class);
                 throw new RedisFrontException(causedBy.getMessage());
             } else {
-                throw new RedisFrontException("Get connection failed", e, false);
+                String msg = ExceptionMessageUtils.bestMessage(e);
+                throw new RedisFrontException(msg, e, false, false, false);
             }
         }
     }

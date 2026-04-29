@@ -16,6 +16,7 @@ import io.netty.util.internal.StringUtil;
 import org.dromara.redisfront.commons.enums.ConnectType;
 import org.dromara.redisfront.commons.pool.RedisConnectionPoolManager;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
+import org.dromara.redisfront.commons.utils.ExceptionMessageUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -164,7 +165,8 @@ public class LettuceUtils {
             connection = RedisConnectionPoolManager.getClusterConnection(redisConnectContext);
             consumer.accept(connection.sync());
         } catch (Exception exception) {
-            log.error("redis连接失败！", exception);
+            log.error("redis连接失败：{}", ExceptionMessageUtils.bestMessage(exception));
+            log.debug("redis连接失败堆栈", exception);
             throw exception;
         } finally {
             RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
@@ -177,7 +179,8 @@ public class LettuceUtils {
             connection = RedisConnectionPoolManager.getClusterConnection(redisConnectContext);
             return function.apply(connection.sync());
         } catch (Exception exception) {
-            log.error("redis连接失败！", exception);
+            log.error("redis连接失败：{}", ExceptionMessageUtils.bestMessage(exception));
+            log.debug("redis连接失败堆栈", exception);
             throw exception;
         } finally {
             RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
@@ -191,7 +194,8 @@ public class LettuceUtils {
             connection = RedisConnectionPoolManager.getSentinelConnection(redisConnectContext);
             consumer.accept(connection.sync());
         } catch (Exception exception) {
-            log.error("redis连接失败！", exception);
+            log.error("redis连接失败：{}", ExceptionMessageUtils.bestMessage(exception));
+            log.debug("redis连接失败堆栈", exception);
             throw exception;
         } finally {
             RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
@@ -205,7 +209,8 @@ public class LettuceUtils {
             connection = RedisConnectionPoolManager.getSentinelConnection(redisConnectContext);
             return function.apply(connection.sync());
         } catch (Exception exception) {
-            log.error("redis连接失败！", exception);
+            log.error("redis连接失败：{}", ExceptionMessageUtils.bestMessage(exception));
+            log.debug("redis连接失败堆栈", exception);
             throw exception;
         } finally {
             RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
@@ -218,7 +223,8 @@ public class LettuceUtils {
             connection = RedisConnectionPoolManager.getConnection(redisConnectContext);
             consumer.accept(connection.sync());
         } catch (Exception exception) {
-            log.error("redis连接失败！", exception);
+            log.error("redis连接失败：{}", ExceptionMessageUtils.bestMessage(exception));
+            log.debug("redis连接失败堆栈", exception);
             throw exception;
         } finally {
             RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
@@ -231,7 +237,8 @@ public class LettuceUtils {
             connection = RedisConnectionPoolManager.getConnection(redisConnectContext);
             return function.apply(connection.sync());
         } catch (Exception exception) {
-            log.error("redis连接失败！", exception);
+            log.error("redis连接失败：{}", ExceptionMessageUtils.bestMessage(exception));
+            log.debug("redis连接失败堆栈", exception);
             throw exception;
         } finally {
             RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
