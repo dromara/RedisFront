@@ -50,7 +50,6 @@ import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.awt.event.*;
 import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -193,44 +192,49 @@ public class RightViewFragment {
                 var row = dataTable.getSelectedRow();
                 if (e.getButton() == MouseEvent.BUTTON1 && row != -1) {
                     tableDelBtn.setEnabled(true);
-                    if (dataTable.getModel() instanceof SortedSetTableModel) {
-                        var value = (RedisValueItem) dataTable.getValueAt(row, 2);
-                        var score = dataTable.getValueAt(row, 1);
-                        RedisFrontUtils.runEDT(() -> {
-                            keyLabel.setText(owner.$tr("DataViewForm.keyLabel.score.title"));
-                            fieldOrScoreField.setText(String.valueOf(score));
-                            setCurrentValue(value);
-                        });
-                    } else if (dataTable.getModel() instanceof HashTableModel) {
-                        var value = (RedisValueItem) dataTable.getValueAt(row, 1);
-                        var key = dataTable.getValueAt(row, 0);
-                        RedisFrontUtils.runEDT(() -> {
-                            keyLabel.setText(owner.$tr("DataViewForm.keyLabel.title"));
-                            fieldOrScoreField.setText(String.valueOf(key));
-                            setCurrentValue(value);
-                        });
-                    } else if (dataTable.getModel() instanceof StreamTableModel) {
-                        valueUpdateSaveBtn.setEnabled(true);
-                        var value = dataTable.getValueAt(row, 2);
-                        RedisFrontUtils.runEDT(() -> {
-                            currentRawValue = null;
-                            if (valueViewComboBox != null) {
-                                valueViewComboBox.setEnabled(false);
-                            }
-                            textEditor.setEditable(true);
-                            try {
-                                String prettyStr = JSONUtil.toJsonPrettyStr(value);
-                                textEditor.setText(prettyStr);
-                            } catch (Exception ex) {
-                                //json格式化异常
-                                textEditor.setText(String.valueOf(value));
-                            }
-                        });
-                    } else {
-                        var value = (RedisValueItem) dataTable.getValueAt(row, 1);
-                        RedisFrontUtils.runEDT(() -> {
-                            setCurrentValue(value);
-                        });
+                    switch (dataTable.getModel()) {
+                        case SortedSetTableModel ignored -> {
+                            var value = (RedisValueItem) dataTable.getValueAt(row, 2);
+                            var score = dataTable.getValueAt(row, 1);
+                            RedisFrontUtils.runEDT(() -> {
+                                keyLabel.setText(owner.$tr("DataViewForm.keyLabel.score.title"));
+                                fieldOrScoreField.setText(String.valueOf(score));
+                                setCurrentValue(value);
+                            });
+                        }
+                        case HashTableModel ignored -> {
+                            var value = (RedisValueItem) dataTable.getValueAt(row, 1);
+                            var key = dataTable.getValueAt(row, 0);
+                            RedisFrontUtils.runEDT(() -> {
+                                keyLabel.setText(owner.$tr("DataViewForm.keyLabel.title"));
+                                fieldOrScoreField.setText(String.valueOf(key));
+                                setCurrentValue(value);
+                            });
+                        }
+                        case StreamTableModel ignored -> {
+                            valueUpdateSaveBtn.setEnabled(true);
+                            var value = dataTable.getValueAt(row, 2);
+                            RedisFrontUtils.runEDT(() -> {
+                                currentRawValue = null;
+                                if (valueViewComboBox != null) {
+                                    valueViewComboBox.setEnabled(false);
+                                }
+                                textEditor.setEditable(true);
+                                try {
+                                    String prettyStr = JSONUtil.toJsonPrettyStr(value);
+                                    textEditor.setText(prettyStr);
+                                } catch (Exception ex) {
+                                    //json格式化异常
+                                    textEditor.setText(String.valueOf(value));
+                                }
+                            });
+                        }
+                        case null, default -> {
+                            var value = (RedisValueItem) dataTable.getValueAt(row, 1);
+                            RedisFrontUtils.runEDT(() -> {
+                                setCurrentValue(value);
+                            });
+                        }
                     }
                 } else if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2) {
                     tableDelBtn.setEnabled(true);
@@ -1117,6 +1121,9 @@ public class RightViewFragment {
 
     private static Method $$$cachedGetBundleMethod$$$ = null;
 
+    /**
+     * @noinspection ALL
+     */
     private String $$$getMessageFromBundle$$$(String path, String key) {
         ResourceBundle bundle;
         try {
