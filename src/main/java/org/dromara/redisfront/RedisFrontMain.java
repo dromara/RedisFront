@@ -18,7 +18,6 @@ public class RedisFrontMain {
             application.setLocationRelativeTo(null);
             application.setVisible(true);
         });
-        log.info("RedisFront started");
     }
 
 }

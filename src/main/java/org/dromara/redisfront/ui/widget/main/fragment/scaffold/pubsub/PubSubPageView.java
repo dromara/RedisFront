@@ -216,6 +216,9 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
 
     private static Method $$$cachedGetBundleMethod$$$ = null;
 
+    /**
+     * @noinspection ALL
+     */
     private String $$$getMessageFromBundle$$$(String path, String key) {
         ResourceBundle bundle;
         try {

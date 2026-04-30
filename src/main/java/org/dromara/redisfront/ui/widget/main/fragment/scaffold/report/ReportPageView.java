@@ -73,9 +73,9 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
         button.setTabUnderlineHeight(2);
         button.putClientProperty(STYLE,
                 "tab.underlineHeight:1;" +
-                "[dark]tab.selectedForeground:$ToggleButton.tab.underlineColor;"
-                + "[light]tab.selectedForeground:$RedisFront.main.background;"
-                + "[light]tab.underlineColor:$RedisFront.main.background;"
+                        "[dark]tab.selectedForeground:$ToggleButton.tab.underlineColor;"
+                        + "[light]tab.selectedForeground:$RedisFront.main.background;"
+                        + "[light]tab.underlineColor:$RedisFront.main.background;"
         );
     }
 
@@ -213,6 +213,9 @@ public class ReportPageView extends QSPageItem<RedisFrontWidget> {
 
     private static Method $$$cachedGetBundleMethod$$$ = null;
 
+    /**
+     * @noinspection ALL
+     */
     private String $$$getMessageFromBundle$$$(String path, String key) {
         ResourceBundle bundle;
         try {
