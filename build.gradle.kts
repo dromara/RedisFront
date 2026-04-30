@@ -19,7 +19,7 @@ buildscript {
     repositories {
         mavenLocal()
         dependencies {
-            classpath("io.github.fvarrui:javapackager:1.7.5")
+            classpath("io.github.fvarrui:javapackager:1.7.6")
         }
     }
 }
@@ -90,6 +90,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.32")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.9.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
     implementation("io.lettuce:lettuce-core:${lettuceVersion}")
     implementation("org.jfree:jfreechart:1.5.3")
