@@ -59,7 +59,7 @@ public class MainComponent extends JPanel {
     private final JLabel network = new JLabel(Icons.WIFI_ICON);
     private JTabbedPane topTabbedPane;
     private FlatToolBar toolBar;
-    private RedisConnectContext currentRedisConnectContext;
+    private volatile RedisConnectContext currentRedisConnectContext;
     @Setter
     private Consumer<Integer> tabCloseEvent;
     private JLabel mode;
@@ -204,20 +204,22 @@ public class MainComponent extends JPanel {
                     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                     scheduler.scheduleAtFixedRate(() -> {
                         try {
+                            // 仅轮询当前选中的 Tab，后台 Tab 不产生 Redis 请求
+                            if (currentRedisConnectContext == null
+                                    || !java.util.Objects.equals(currentRedisConnectContext.getId(), redisConnectContext.getId())) {
+                                return;
+                            }
                             RedisUsageInfo usage = monitor.getUsageInfo();
                             log.debug("[Redis {} - {} ] 使用：{}\n", redisConnectContext.getTitle(), redisConnectContext.getHost(), usage);
-                            if (currentRedisConnectContext != null
-                                    && java.util.Objects.equals(currentRedisConnectContext.getId(), redisConnectContext.getId())) {
-                                SwingUtilities.invokeLater(() -> {
-                                    memory.setText(usage.getMemory());
-                                    memory.setToolTipText(redisConnectContext.getHost() + " | Memory Usage => " + usage.getMemory());
-                                    cpu.setText(usage.getCpu());
-                                    cpu.setToolTipText(redisConnectContext.getHost() + " | Cpu Usage => " + usage.getCpu());
-                                    String networkRate = String.format("%.2fKB/s｜%.2fKB/s", usage.getNetwork().inputRate() / 1024, usage.getNetwork().outputRate() / 1024);
-                                    network.setText(networkRate);
-                                    network.setToolTipText(redisConnectContext.getHost() + " | NetWork Usage => " + usage.getNetwork());
-                                });
-                            }
+                            SwingUtilities.invokeLater(() -> {
+                                memory.setText(usage.getMemory());
+                                memory.setToolTipText(redisConnectContext.getHost() + " | Memory Usage => " + usage.getMemory());
+                                cpu.setText(usage.getCpu());
+                                cpu.setToolTipText(redisConnectContext.getHost() + " | Cpu Usage => " + usage.getCpu());
+                                String networkRate = String.format("%.2fKB/s｜%.2fKB/s", usage.getNetwork().inputRate() / 1024, usage.getNetwork().outputRate() / 1024);
+                                network.setText(networkRate);
+                                network.setToolTipText(redisConnectContext.getHost() + " | NetWork Usage => " + usage.getNetwork());
+                            });
                         } catch (Exception e) {
                             log.error("获取Redis使用信息失败", e);
                         }

@@ -53,38 +53,34 @@ public class RedisMonitor {
         }
     }
 
+    /**
+     * 一次 INFO 采集全部指标，替代原先按 section 拆分的多次网络往返
+     */
     public RedisUsageInfo getUsageInfo() {
+        Map<String, Object> info = fetchInfo();
+        RedisUsageInfo redisUsageInfo = new RedisUsageInfo();
+        redisUsageInfo.setCpu(String.format("%.2f", calculateCpuUsage(info)) + "%");
+        redisUsageInfo.setMemory(memoryInfo(info));
+        redisUsageInfo.setNetwork(calculateNetworkRate(info));
+        redisUsageInfo.setConnectedClients(Integer.valueOf(info.get("connected_clients").toString()));
+        redisUsageInfo.setCommandsProcessed(Long.valueOf(info.get("total_commands_processed").toString()));
+        return redisUsageInfo;
+    }
+
+    private Map<String, Object> fetchInfo() {
         try {
-            RedisUsageInfo redisUsageInfo = new RedisUsageInfo();
-            redisUsageInfo.setCpu(String.format("%.2f", calculateCpuUsage()) + "%");
-            redisUsageInfo.setMemory(memoryInfo());
-            redisUsageInfo.setNetwork(calculateNetworkRate());
             LogStatusHolder.ignoredLog();
-            Object object = RedisBasicService.service.getClientInfo(context).get("connected_clients");
-            LogStatusHolder.clear();
-            redisUsageInfo.setConnectedClients(Integer.valueOf(object.toString()));
-            LogStatusHolder.ignoredLog();
-            object = RedisBasicService.service.getStatInfo(context).get("total_commands_processed");
-            LogStatusHolder.clear();
-            redisUsageInfo.setCommandsProcessed(Long.valueOf(object.toString()));
-            return redisUsageInfo;
+            return RedisBasicService.service.getInfo(context);
         } finally {
             LogStatusHolder.clear();
         }
     }
 
-    private String memoryInfo() {
-        try {
-            LogStatusHolder.ignoredLog();
-            Map<String, Object> memoryInfo = RedisBasicService.service.getMemoryInfo(context);
-            LogStatusHolder.clear();
-            if (RedisFrontUtils.isEmpty(memoryInfo)) {
-                return "00M";
-            }
-            return memoryInfo.get("used_memory_human").toString();
-        } finally {
-            LogStatusHolder.clear();
+    private String memoryInfo(Map<String, Object> info) {
+        if (RedisFrontUtils.isEmpty(info)) {
+            return "00M";
         }
+        return info.get("used_memory_human").toString();
     }
 
     public RedisUsageInfo.MemoryUsage memoryUsageInfo() {
@@ -107,70 +103,54 @@ public class RedisMonitor {
     }
 
     public RedisUsageInfo.NetworkStats calculateNetworkRate() {
-        try {
-            // 获取当前网络统计
-            LogStatusHolder.ignoredLog();
-            Map<String, Object> currentStats = RedisBasicService.service.getStatInfo(context);
-            LogStatusHolder.clear();
-            double currentInputBytes = Double.parseDouble(currentStats.get("total_net_input_bytes").toString());
-            double currentOutputBytes = Double.parseDouble(currentStats.get("total_net_output_bytes").toString());
-            // 计算时间差（单位：秒）
-            long currentTime = System.nanoTime();
-            double elapsedSeconds = TimeUnit.NANOSECONDS.toSeconds(currentTime - lastIoCheckTime);
+        return calculateNetworkRate(fetchInfo());
+    }
 
-            // 检查时间差是否有效
-            if (elapsedSeconds <= 0) {
-                return new RedisUsageInfo.NetworkStats(0, 0, owner.$tr("RedisUsageInfo.NetworkStats.text"));
-            }
+    private RedisUsageInfo.NetworkStats calculateNetworkRate(Map<String, Object> currentStats) {
+        double currentInputBytes = Double.parseDouble(currentStats.get("total_net_input_bytes").toString());
+        double currentOutputBytes = Double.parseDouble(currentStats.get("total_net_output_bytes").toString());
+        long currentTime = System.nanoTime();
+        double elapsedSeconds = TimeUnit.NANOSECONDS.toSeconds(currentTime - lastIoCheckTime);
 
-            // 计算字节数差值
-            double inputDelta = currentInputBytes - lastInputBytes;
-            double outputDelta = currentOutputBytes - lastOutputBytes;
-
-            // 计算速率（字节/秒）
-            double inputRate = inputDelta / elapsedSeconds;
-            double outputRate = outputDelta / elapsedSeconds;
-
-            // 保存当前值
-            lastInputBytes = currentInputBytes;
-            lastOutputBytes = currentOutputBytes;
-
-            return new RedisUsageInfo.NetworkStats(inputRate, outputRate, owner.$tr("RedisUsageInfo.NetworkStats.text"));
-        } finally {
-            LogStatusHolder.clear();
+        if (elapsedSeconds <= 0) {
+            return new RedisUsageInfo.NetworkStats(0, 0, owner.$tr("RedisUsageInfo.NetworkStats.text"));
         }
+
+        double inputDelta = currentInputBytes - lastInputBytes;
+        double outputDelta = currentOutputBytes - lastOutputBytes;
+        double inputRate = inputDelta / elapsedSeconds;
+        double outputRate = outputDelta / elapsedSeconds;
+
+        lastInputBytes = currentInputBytes;
+        lastOutputBytes = currentOutputBytes;
+
+        return new RedisUsageInfo.NetworkStats(inputRate, outputRate, owner.$tr("RedisUsageInfo.NetworkStats.text"));
     }
 
     protected double calculateCpuUsage() {
-        try {
-            LogStatusHolder.ignoredLog();
-            Map<String, Object> currentCpu = RedisBasicService.service.getCpuInfo(context);
-            LogStatusHolder.clear();
-            double currentUser = Double.parseDouble(currentCpu.get("used_cpu_user").toString());
-            double currentSys = Double.parseDouble(currentCpu.get("used_cpu_sys").toString());
+        return calculateCpuUsage(fetchInfo());
+    }
 
-            // 计算时间差（单位：秒）
-            long currentTime = System.nanoTime();
-            double elapsedSeconds = TimeUnit.NANOSECONDS.toSeconds(currentTime - lastCpuCheckTime);
+    private double calculateCpuUsage(Map<String, Object> currentCpu) {
+        double currentUser = Double.parseDouble(currentCpu.get("used_cpu_user").toString());
+        double currentSys = Double.parseDouble(currentCpu.get("used_cpu_sys").toString());
 
-            if (elapsedSeconds <= 0) {
-                return 0.0;
-            }
+        long currentTime = System.nanoTime();
+        double elapsedSeconds = TimeUnit.NANOSECONDS.toSeconds(currentTime - lastCpuCheckTime);
 
-            // 计算CPU时间差
-            double userDelta = currentUser - lastUserCpu;
-            double sysDelta = currentSys - lastSysCpu;
-            double totalDelta = userDelta + sysDelta;
-
-            // 保存当前值
-            lastUserCpu = currentUser;
-            lastSysCpu = currentSys;
-            lastCpuCheckTime = currentTime;
-
-            // 计算CPU使用率（假设单核）
-            return (totalDelta / elapsedSeconds) * 100;
-        } finally {
-            LogStatusHolder.clear();
+        if (elapsedSeconds <= 0) {
+            return 0.0;
         }
+
+        double userDelta = currentUser - lastUserCpu;
+        double sysDelta = currentSys - lastSysCpu;
+        double totalDelta = userDelta + sysDelta;
+
+        lastUserCpu = currentUser;
+        lastSysCpu = currentSys;
+        lastCpuCheckTime = currentTime;
+
+        // 计算CPU使用率（假设单核）
+        return (totalDelta / elapsedSeconds) * 100;
     }
 }
