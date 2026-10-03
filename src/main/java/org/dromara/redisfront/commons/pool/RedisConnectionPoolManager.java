@@ -5,6 +5,7 @@ import cn.hutool.core.exceptions.ExceptionUtil;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisCommandExecutionException;
 import io.lettuce.core.RedisURI;
+import io.lettuce.core.api.StatefulConnection;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.cluster.RedisClusterClient;
 import io.lettuce.core.cluster.api.StatefulRedisClusterConnection;
@@ -153,7 +154,8 @@ public class RedisConnectionPoolManager {
             return pool.borrowObject();
 
         } catch (Exception e) {
-            cleanupContextPool(context);
+            // 仅回收出错的这一类池，避免连带关闭 Pub/Sub 等长连接池导致订阅静默丢失
+            cleanPoolMap(poolMap, poolKey);
             if (ExceptionUtil.isCausedBy(e, RedisCommandExecutionException.class)) {
                 Throwable causedBy = ExceptionUtil.getCausedBy(e, RedisCommandExecutionException.class);
                 throw new RedisFrontException(causedBy.getMessage());
@@ -190,8 +192,29 @@ public class RedisConnectionPoolManager {
     }
 
     private static <T> void returnConnection(GenericObjectPool<T> pool, T connection) {
-        if (pool != null && connection != null) {
+        if (connection == null) {
+            return;
+        }
+        if (pool == null || pool.isClosed()) {
+            closeAbandoned(connection);
+            return;
+        }
+        try {
             pool.returnObject(connection);
+        } catch (Exception e) {
+            log.warn("Return connection to pool failed, close it directly: {}", e.getMessage());
+            closeAbandoned(connection);
+        }
+    }
+
+    private static void closeAbandoned(Object connection) {
+        if (connection instanceof StatefulConnection<?, ?> statefulConnection) {
+            try {
+                statefulConnection.flushCommands();
+                statefulConnection.close();
+            } catch (Exception e) {
+                log.debug("Close abandoned connection failed", e);
+            }
         }
     }
 
@@ -213,22 +236,17 @@ public class RedisConnectionPoolManager {
             Map<String, GenericObjectPool<T>> poolMap,
             String specificKey) {
 
-        GenericObjectPool<T> pool = poolMap.get(specificKey);
+        // 先从 map 移除再关闭，缩小归还线程拿到已关闭池的窗口
+        GenericObjectPool<T> pool = poolMap.remove(specificKey);
         if (pool != null) {
-            closeAndRemove(poolMap, specificKey, pool);
+            closePool(pool, specificKey);
         }
     }
 
-    private static <T> void closeAndRemove(
-            Map<String, GenericObjectPool<T>> poolMap,
-            String key,
-            GenericObjectPool<T> pool) {
-
+    private static <T> void closePool(GenericObjectPool<T> pool, String key) {
         try {
             if (!pool.isClosed()) {
                 pool.close();
-                pool.clear();
-                poolMap.remove(key);
                 log.info("Closed connection pool: {}", key);
             }
         } catch (Exception e) {
