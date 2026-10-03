@@ -14,6 +14,7 @@ import io.lettuce.core.sentinel.api.StatefulRedisSentinelConnection;
 import io.lettuce.core.sentinel.api.sync.RedisSentinelCommands;
 import io.netty.util.internal.StringUtil;
 import org.dromara.redisfront.commons.enums.ConnectType;
+import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.commons.pool.RedisConnectionPoolManager;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.utils.ExceptionMessageUtils;
@@ -243,6 +244,23 @@ public class LettuceUtils {
         } finally {
             RedisConnectionPoolManager.closeConnection(redisConnectContext, connection);
         }
+    }
+
+    /**
+     * 根据 redisMode 分派到集群或单机连接执行命令
+     *
+     * @param redisConnectContext 连接信息
+     * @param standaloneFn 单机命令函数
+     * @param clusterFn    集群命令函数
+     * @return T
+     */
+    public static <T> T execByMode(RedisConnectContext redisConnectContext,
+            Function<RedisCommands<String, byte[]>, T> standaloneFn,
+            Function<RedisAdvancedClusterCommands<String, byte[]>, T> clusterFn) {
+        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
+            return clusterExec(redisConnectContext, clusterFn);
+        }
+        return exec(redisConnectContext, standaloneFn);
     }
 
     public static void close(RedisConnectContext context) {

@@ -6,7 +6,6 @@ import io.lettuce.core.ScanCursor;
 import io.lettuce.core.StreamScanCursor;
 import io.lettuce.core.api.sync.BaseRedisCommands;
 import io.lettuce.core.api.sync.RedisServerCommands;
-import io.lettuce.core.cluster.api.sync.RedisAdvancedClusterCommands;
 import io.lettuce.core.cluster.api.sync.RedisClusterCommands;
 import io.lettuce.core.output.KeyStreamingChannel;
 import org.dromara.redisfront.commons.enums.RedisMode;
@@ -28,137 +27,107 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public String flushdb(RedisConnectContext redisConnectContext) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, RedisAdvancedClusterCommands::flushdb);
-        } else {
-            return LettuceUtils.exec(redisConnectContext, RedisServerCommands::flushdb);
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.flushdb(),
+                commands -> commands.flushdb());
     }
 
     @Override
     public Map<String, String> configGet(RedisConnectContext redisConnectContext, String... keys) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.configGet(keys));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.configGet(keys));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                redisCommands -> redisCommands.configGet(keys),
+                redisCommands -> redisCommands.configGet(keys));
     }
 
     @Override
     public String flushall(RedisConnectContext redisConnectContext) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, RedisAdvancedClusterCommands::flushall);
-        } else {
-            return LettuceUtils.exec(redisConnectContext, RedisServerCommands::flushall);
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.flushall(),
+                commands -> commands.flushall());
     }
 
     @Override
     public KeyScanCursor<String> scan(RedisConnectContext redisConnectContext, ScanArgs scanArgs) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.scan(scanArgs));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.scan(scanArgs));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                redisCommands -> redisCommands.scan(scanArgs),
+                redisCommands -> redisCommands.scan(scanArgs));
     }
 
     @Override
     public KeyScanCursor<String> scan(RedisConnectContext redisConnectContext, ScanCursor scanCursor, ScanArgs scanArgs) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.scan(scanCursor, scanArgs));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.scan(scanCursor, scanArgs));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                redisCommands -> redisCommands.scan(scanCursor, scanArgs),
+                redisCommands -> redisCommands.scan(scanCursor, scanArgs));
     }
 
     @Override
     public KeyScanCursor<String> scan(RedisConnectContext redisConnectContext, ScanCursor scanCursor) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.scan(scanCursor));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.scan(scanCursor));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                redisCommands -> redisCommands.scan(scanCursor),
+                redisCommands -> redisCommands.scan(scanCursor));
     }
 
     @Override
     public StreamScanCursor scan(RedisConnectContext redisConnectContext, KeyStreamingChannel<String> channel) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.scan(channel));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.scan(channel));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                redisCommands -> redisCommands.scan(channel),
+                redisCommands -> redisCommands.scan(channel));
     }
 
     @Override
     public StreamScanCursor scan(RedisConnectContext redisConnectContext, KeyStreamingChannel<String> channel, ScanArgs scanArgs) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.scan(channel, scanArgs));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.scan(channel, scanArgs));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                redisCommands -> redisCommands.scan(channel, scanArgs),
+                redisCommands -> redisCommands.scan(channel, scanArgs));
     }
 
     @Override
     public StreamScanCursor scan(RedisConnectContext redisConnectContext, KeyStreamingChannel<String> channel, ScanCursor scanCursor, ScanArgs scanArgs) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.scan(channel, scanCursor, scanArgs));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.scan(channel, scanCursor, scanArgs));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                redisCommands -> redisCommands.scan(channel, scanCursor, scanArgs),
+                redisCommands -> redisCommands.scan(channel, scanCursor, scanArgs));
     }
 
     @Override
     public StreamScanCursor scan(RedisConnectContext redisConnectContext, KeyStreamingChannel<String> channel, ScanCursor scanCursor) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.scan(channel, scanCursor));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.scan(channel, scanCursor));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                redisCommands -> redisCommands.scan(channel, scanCursor),
+                redisCommands -> redisCommands.scan(channel, scanCursor));
     }
 
     @Override
     public Long del(RedisConnectContext redisConnectContext, String key) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.del(key));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.del(key));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                redisCommands -> redisCommands.del(key),
+                redisCommands -> redisCommands.del(key));
     }
 
     @Override
     public String rename(RedisConnectContext redisConnectContext, String key, String newKey) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.rename(key, newKey));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.rename(key, newKey));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                redisCommands -> redisCommands.rename(key, newKey),
+                redisCommands -> redisCommands.rename(key, newKey));
     }
 
     @Override
     public Boolean expire(RedisConnectContext redisConnectContext, String key, Long ttl) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.expire(key, ttl));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.expire(key, ttl));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                redisCommands -> redisCommands.expire(key, ttl),
+                redisCommands -> redisCommands.expire(key, ttl));
     }
 
     @Override
     public String type(RedisConnectContext redisConnectContext, String key) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.type(key));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.type(key));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                redisCommands -> redisCommands.type(key),
+                redisCommands -> redisCommands.type(key));
     }
 
     @Override
     public Long ttl(RedisConnectContext redisConnectContext, String key) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, redisCommands -> redisCommands.ttl(key));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, redisCommands -> redisCommands.ttl(key));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                redisCommands -> redisCommands.ttl(key),
+                redisCommands -> redisCommands.ttl(key));
     }
 
     @Override
@@ -254,11 +223,9 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
     @Override
     public Long dbSize(RedisConnectContext redisConnectContext) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, RedisAdvancedClusterCommands::dbsize);
-        } else {
-            return LettuceUtils.exec(redisConnectContext, RedisServerCommands::dbsize);
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.dbsize(),
+                commands -> commands.dbsize());
     }
 
 

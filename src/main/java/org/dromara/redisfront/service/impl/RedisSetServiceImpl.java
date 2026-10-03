@@ -3,9 +3,7 @@ package org.dromara.redisfront.service.impl;
 import io.lettuce.core.ScanArgs;
 import io.lettuce.core.ScanCursor;
 import io.lettuce.core.ValueScanCursor;
-import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.commons.lettuce.LettuceUtils;
-import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.RedisSetService;
 
@@ -20,173 +18,134 @@ import java.util.Set;
 public class RedisSetServiceImpl implements RedisSetService {
     @Override
     public Long sadd(RedisConnectContext redisConnectContext, String key, byte[]... members) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.sadd(key, members));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.sadd(key, members));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.sadd(key, members),
+                commands -> commands.sadd(key, members));
     }
 
     @Override
     public Long scard(RedisConnectContext redisConnectContext, String key) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.scard(key));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.scard(key));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.scard(key),
+                commands -> commands.scard(key));
     }
 
     @Override
     public Set<byte[]> sdiff(RedisConnectContext redisConnectContext, String... keys) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.sdiff(keys));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.sdiff(keys));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.sdiff(keys),
+                commands -> commands.sdiff(keys));
     }
 
     @Override
     public Long sdiffstore(RedisConnectContext redisConnectContext, String destination, String... keys) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.sdiffstore(destination, keys));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.sdiffstore(destination, keys));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.sdiffstore(destination, keys),
+                commands -> commands.sdiffstore(destination, keys));
     }
 
     @Override
     public Set<byte[]> sinter(RedisConnectContext redisConnectContext, String... keys) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.sinter(keys));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.sinter(keys));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.sinter(keys),
+                commands -> commands.sinter(keys));
     }
 
     @Override
     public Long sinterstore(RedisConnectContext redisConnectContext, String destination, String... keys) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.sinterstore(destination, keys));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.sinterstore(destination, keys));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.sinterstore(destination, keys),
+                commands -> commands.sinterstore(destination, keys));
     }
 
     @Override
     public Boolean sismember(RedisConnectContext redisConnectContext, String key, byte[] member) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.sismember(key, member));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.sismember(key, member));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.sismember(key, member),
+                commands -> commands.sismember(key, member));
     }
 
     @Override
     public Set<byte[]> smembers(RedisConnectContext redisConnectContext, String key) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.smembers(key));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.smembers(key));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.smembers(key),
+                commands -> commands.smembers(key));
     }
 
     @Override
     public List<Boolean> smismember(RedisConnectContext redisConnectContext, String key, byte[]... members) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.smismember(key, members));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.smismember(key, members));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.smismember(key, members),
+                commands -> commands.smismember(key, members));
     }
 
     @Override
     public Boolean smove(RedisConnectContext redisConnectContext, String source, String destination, byte[] member) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.smove(source, destination, member));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.smove(source, destination, member));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.smove(source, destination, member),
+                commands -> commands.smove(source, destination, member));
     }
 
     @Override
     public byte[] spop(RedisConnectContext redisConnectContext, String key) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.spop(key));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.spop(key));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.spop(key),
+                commands -> commands.spop(key));
     }
 
     @Override
     public Set<byte[]> spop(RedisConnectContext redisConnectContext, String key, long count) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.spop(key, count));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.spop(key, count));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.spop(key, count),
+                commands -> commands.spop(key, count));
     }
 
     @Override
     public byte[] srandmember(RedisConnectContext redisConnectContext, String key) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.srandmember(key));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.srandmember(key));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.srandmember(key),
+                commands -> commands.srandmember(key));
     }
 
     @Override
     public List<byte[]> srandmember(RedisConnectContext redisConnectContext, String key, long count) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.srandmember(key, count));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.srandmember(key, count));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.srandmember(key, count),
+                commands -> commands.srandmember(key, count));
     }
 
     @Override
     public Long srem(RedisConnectContext redisConnectContext, String key, byte[]... members) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.srem(key, members));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.srem(key, members));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.srem(key, members),
+                commands -> commands.srem(key, members));
     }
 
     @Override
     public Set<byte[]> sunion(RedisConnectContext redisConnectContext, String... keys) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.sunion(keys));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.sunion(keys));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.sunion(keys),
+                commands -> commands.sunion(keys));
     }
 
     @Override
     public ValueScanCursor<byte[]> sscan(RedisConnectContext redisConnectContext, String key) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.sscan(key));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.sscan(key));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.sscan(key),
+                commands -> commands.sscan(key));
     }
 
     @Override
     public ValueScanCursor<byte[]> sscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor, ScanArgs scanArgs) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.sscan(key, scanCursor, scanArgs));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.sscan(key, scanCursor, scanArgs));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.sscan(key, scanCursor, scanArgs),
+                commands -> commands.sscan(key, scanCursor, scanArgs));
     }
 
     @Override
     public ValueScanCursor<byte[]> sscan(RedisConnectContext redisConnectContext, String key, ScanCursor scanCursor) {
-
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.sscan(key, scanCursor));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.sscan(key, scanCursor));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.sscan(key, scanCursor),
+                commands -> commands.sscan(key, scanCursor));
     }
 }

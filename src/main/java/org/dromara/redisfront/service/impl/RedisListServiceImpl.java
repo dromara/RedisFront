@@ -1,13 +1,9 @@
 package org.dromara.redisfront.service.impl;
 
-import org.dromara.redisfront.commons.enums.RedisMode;
 import org.dromara.redisfront.commons.lettuce.LettuceUtils;
-import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
-import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.service.RedisListService;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -18,91 +14,71 @@ import java.util.List;
 public class RedisListServiceImpl implements RedisListService {
     @Override
     public List<byte[]> lrange(RedisConnectContext redisConnectContext, String key, long start, long stop) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.lrange(key, start, stop));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.lrange(key, start, stop));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.lrange(key, start, stop),
+                commands -> commands.lrange(key, start, stop));
     }
 
     @Override
     public Long lrem(RedisConnectContext redisConnectContext, String key, long count, byte[] value) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.lrem(key, count, value));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.lrem(key, count, value));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.lrem(key, count, value),
+                commands -> commands.lrem(key, count, value));
     }
 
     @Override
     public Long llen(RedisConnectContext redisConnectContext, String key) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.llen(key));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.llen(key));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.llen(key),
+                commands -> commands.llen(key));
     }
 
     @Override
     public byte[] lpop(RedisConnectContext redisConnectContext, String key) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.lpop(key));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.lpop(key));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.lpop(key),
+                commands -> commands.lpop(key));
     }
 
     @Override
     public List<byte[]> lpop(RedisConnectContext redisConnectContext, String key, long count) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.lpop(key, count));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.lpop(key, count));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.lpop(key, count),
+                commands -> commands.lpop(key, count));
     }
 
     @Override
     public Long lpush(RedisConnectContext redisConnectContext, String key, byte[]... values) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.lpush(key, values));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.lpush(key, values));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.lpush(key, values),
+                commands -> commands.lpush(key, values));
     }
 
     @Override
     public String lset(RedisConnectContext redisConnectContext, String key, long index, byte[] value) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.lset(key, index, value));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.lset(key, index, value));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.lset(key, index, value),
+                commands -> commands.lset(key, index, value));
     }
 
     @Override
     public byte[] rpop(RedisConnectContext redisConnectContext, String key) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.rpop(key));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.rpop(key));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.rpop(key),
+                commands -> commands.rpop(key));
     }
 
     @Override
     public List<byte[]> rpop(RedisConnectContext redisConnectContext, String key, long count) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.rpop(key, count));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.rpop(key, count));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.rpop(key, count),
+                commands -> commands.rpop(key, count));
     }
 
     @Override
     public Long rpush(RedisConnectContext redisConnectContext, String key, byte[]... values) {
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            return LettuceUtils.clusterExec(redisConnectContext, commands -> commands.rpush(key, values));
-        } else {
-            return LettuceUtils.exec(redisConnectContext, commands -> commands.rpush(key, values));
-        }
+        return LettuceUtils.execByMode(redisConnectContext,
+                commands -> commands.rpush(key, values),
+                commands -> commands.rpush(key, values));
     }
 }
