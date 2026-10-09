@@ -141,6 +141,9 @@ public class RedisBasicServiceImpl implements RedisBasicService {
         Map<String, Object> server = getServerInfo(redisConnectContext);
         String redisMode = (String) server.get("redis_mode");
         log.debug("获取到Redis [ {}:{} ] 服务类型 - {}", redisConnectContext.getHost(), redisConnectContext.getPort(), redisMode);
+        if (redisMode == null) {
+            return RedisMode.STANDALONE;
+        }
         return RedisMode.valueOf(redisMode.toUpperCase());
     }
 
