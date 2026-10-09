@@ -25,7 +25,10 @@ public class StreamTableModel extends DefaultTableModel {
         var dataVector = new Object[dataList.size()][4];
         for (var i = 0; i < dataList.size(); i++) {
             var map = new LinkedHashMap<String, String>();
-            dataList.get(i).getBody().forEach((k, v) -> map.put(k, RedisValueCodec.encode(v, ValueViewType.AUTO)));
+            var body = dataList.get(i).getBody();
+            if (body != null) {
+                body.forEach((k, v) -> map.put(k, RedisValueCodec.encode(v, ValueViewType.AUTO)));
+            }
             dataVector[i][0] = i + 1;
             dataVector[i][1] = dataList.get(i).getId();
             dataVector[i][2] = JSONUtil.toJsonStr(map) ;
