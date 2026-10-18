@@ -130,7 +130,7 @@ public class MainTabView extends JTabbedPane {
 
     private @NotNull JButton getInfoButton() {
         JButton button = new JButton(Icons.REDIS_INFO_ICON_24x24);
-        button.setToolTipText("More Info");
+        button.setToolTipText(owner.$tr("MainTabView.moreInfo.tooltip.text"));
         JDialog infoDialog = new JDialog(owner, redisConnectContext.getHost());
         button.addActionListener(ignore -> {
             redisInfoView.refreshInfo();

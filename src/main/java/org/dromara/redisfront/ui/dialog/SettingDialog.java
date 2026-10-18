@@ -11,6 +11,7 @@ import org.dromara.quickswing.ui.app.QSDialog;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
+import raven.toast.Notifications;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -188,9 +189,11 @@ public class SettingDialog extends QSDialog<RedisFrontWidget> {
         var oldLanguage = preferences.get(Constants.KEY_LANGUAGE, Locale.SIMPLIFIED_CHINESE.toLanguageTag());
         assert newLanguage != null;
         if (RedisFrontUtils.notEqual(newLanguage.getValue(), oldLanguage)) {
-            Locale.setDefault(Locale.forLanguageTag((String) newLanguage.getValue()));
+            // 只写偏好，启动时由 RedisFrontContext 统一恢复默认 Locale。
+            // 这里不要再改 Locale：它只对之后新建的对话框生效，已打开的界面不会重读
+            // ResourceBundle，改了反而造成同一窗口两种语言混排。
             preferences.put(Constants.KEY_LANGUAGE, (String) newLanguage.getValue());
-            FlatLaf.updateUI();
+            Notifications.getInstance().show(Notifications.Type.INFO, getOwner().$tr("SettingDialog.languageRestart.message"));
         }
         dispose();
     }

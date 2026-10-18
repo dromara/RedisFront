@@ -190,7 +190,8 @@ public class AddKeyDialog extends QSDialog<RedisFrontWidget> {
         }
 
         if (RedisFrontUtils.startWith(keyNameField.getText(), redisConnectContext.getSetting().getKeySeparator()) || RedisFrontUtils.endsWith(keyNameField.getText(), redisConnectContext.getSetting().getKeySeparator())) {
-            throw new RedisFrontException("key不能以 ’" + redisConnectContext.getSetting().getKeySeparator() + "' 开头或结尾！", keyNameField);
+            throw new RedisFrontException(String.format(getOwner().$tr("AddKeyDialog.requireSeparator.text"),
+                    redisConnectContext.getSetting().getKeySeparator()), keyNameField);
         }
 
         if (RedisFrontUtils.equal(KeyTypeEnum.HASH.typeName(), selectItem) && RedisFrontUtils.isEmpty(hashKeyField.getText())) {
@@ -226,7 +227,7 @@ public class AddKeyDialog extends QSDialog<RedisFrontWidget> {
                 var redisVersion = serverInfo.get("redis_version");
                 var x = redisVersion.toString().split("\\.")[0];
                 if (Integer.parseInt(x) < 5) {
-                    throw new RedisFrontException("Redis版本过低，不支持Stream - [ 当前版本：" + redisVersion + " ]");
+                    throw new RedisFrontException(String.format(getOwner().$tr("AddKeyDialog.redisVersion.text"), redisVersion));
                 } else if (JSONUtil.isTypeJSON(value)) {
                     HashMap<String, byte[]> bodyMap = new HashMap<>();
                     JSONUtil.parseObj(value).forEach((key1, value1) -> bodyMap.put(key1, RedisValueCodec.decode(value1.toString(), ValueViewType.AUTO)));
@@ -236,7 +237,7 @@ public class AddKeyDialog extends QSDialog<RedisFrontWidget> {
                         RedisStreamService.service.xadd(redisConnectContext, streamField.getText(), key, bodyMap);
                     }
                 } else {
-                    RedisFrontException redisFrontException = new RedisFrontException("stream 请输入JSON格式数据！");
+                    RedisFrontException redisFrontException = new RedisFrontException(getOwner().$tr("AddKeyDialog.requireType.text"));
                     redisFrontException.setComponent(this.keyValueField);
                     throw redisFrontException;
                 }

@@ -26,6 +26,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.sql.SQLException;
+import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -97,6 +98,12 @@ public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, Redi
 
     @Override
     protected void performBeforeInitialization(RedisFrontPrefs preferences) {
+        // 设置对话框切换语言时只写入了偏好并临时改了默认 Locale，这里必须在任何
+        // ResourceBundle 加载之前恢复，否则重启后仍按操作系统语言取值，语言设置等于没保存
+        String languageTag = preferences.getState().get(Constants.KEY_LANGUAGE,
+                Locale.SIMPLIFIED_CHINESE.toLanguageTag());
+        Locale.setDefault(Locale.forLanguageTag(languageTag));
+
         String dbPath = preferences.getDataPath() + File.separator + preferences.getDbFileName() + ";";
         if (!preferences.getDBInitialized() || !FileUtil.exist(dbPath)) {
             DataSource datasource = getDatabaseManager().getDatasource();

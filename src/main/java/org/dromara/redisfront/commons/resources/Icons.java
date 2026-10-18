@@ -42,6 +42,8 @@ public class Icons {
     public static final Icon DELETE_A_ICON = new FlatSVGIcon("icons/delete_a.svg",16,16);
     public static final Icon SAVE_ICON = new FlatSVGIcon("icons/save.svg",16,16);
     public static final Icon SAVE_A_ICON = new FlatSVGIcon("icons/save_a.svg",16,16);
+    public static final Icon COPY_A_ICON = new FlatSVGIcon("icons/copy_a.svg",16,16);
+    public static final Icon JSON_FORMAT_ICON = new FlatSVGIcon("icons/json_format.svg",16,16);
     public static final Icon CONTENT_TAB_DATA_ICON = new FlatSVGIcon("icons/table.svg",24,24);
     public static final Icon CONTENT_TAB_COMMAND_ICON = new FlatSVGIcon("icons/db_cli2.svg",24,24);
     public static final Icon CONTENT_TAB_INFO_ICON = new FlatSVGIcon("icons/db_report2.svg",24,24);
@@ -50,6 +52,8 @@ public class Icons {
     public static final Icon STATUS_ERROR = new FlatSVGIcon("icons/status_error.svg",14,14);
     public static final Icon MATCH_SELECTED = new FlatSVGIcon("icons/regexSelected.svg",14,14);
     public static final Icon MATCH_UNSELECTED  = new FlatSVGIcon("icons/regex.svg",14,14);
+    public static final Icon WRAP_SELECTED = new FlatSVGIcon("icons/wrapSelected.svg",14,14);
+    public static final Icon WRAP_UNSELECTED = new FlatSVGIcon("icons/wrap.svg",14,14);
     public static final FlatSVGIcon NONE  = new FlatSVGIcon("icons/none.svg",64,64);
 
 }

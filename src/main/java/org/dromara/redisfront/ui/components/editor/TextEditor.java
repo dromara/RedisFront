@@ -78,6 +78,14 @@ public class TextEditor extends JPanel {
         this.textArea.setSyntaxEditingStyle(style);
     }
 
+    /**
+     * 切换自动换行。关闭时长行靠横向滚动查看，打开后按单词边界折行。
+     */
+    public void setLineWrap(boolean wrap) {
+        this.textArea.setLineWrap(wrap);
+        this.textArea.setWrapStyleWord(wrap);
+    }
+
     public TextEditor() {
         this.textArea = new RSyntaxTextArea() {
             {

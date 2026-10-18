@@ -5,6 +5,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONException;
 import cn.hutool.json.JSONUtil;
 import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.extras.components.FlatButton;
+import com.formdev.flatlaf.extras.components.FlatToggleButton;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.formdev.flatlaf.ui.FlatEmptyBorder;
 import com.formdev.flatlaf.util.StringUtils;
@@ -48,6 +50,7 @@ import javax.swing.table.TableModel;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.StyleContext;
 import java.awt.*;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -95,6 +98,9 @@ public class RightViewFragment {
     private JTextField fieldOrScoreField;
     private JComboBox<String> jComboBox;
     private JComboBox<ValueViewType> valueViewComboBox;
+    private FlatToggleButton wrapToggleBtn;
+    private AnimateButton copyBtn;
+    private AnimateButton jsonFormatBtn;
 
     private final RedisConnectContext redisConnectContext;
     private final TreeNodeInfo treeNodeInfo;
@@ -111,6 +117,8 @@ public class RightViewFragment {
     private Long lastKeyTTL;
     private KeyTypeEnum keyTypeEnum;
     private String lastSyntaxStyle;
+    /** 语法下拉框改写过编辑器内容时置位，保存前据此弹确认；重新加载或切换编码视图时复位 */
+    private boolean syntaxComboRewroteContent;
     private ValueViewType lastValueViewType = ValueViewType.AUTO;
     private byte[] currentRawValue;
     private boolean ignoreSyntaxComboEvent;
@@ -284,6 +292,7 @@ public class RightViewFragment {
     private void setCurrentValue(RedisValueItem valueItem) {
         if (valueItem == null) {
             currentRawValue = null;
+            syntaxComboRewroteContent = false;
             if (valueViewComboBox != null) {
                 valueViewComboBox.setEnabled(false);
             }
@@ -298,7 +307,22 @@ public class RightViewFragment {
         refreshEditorByView();
     }
 
+    /**
+     * 让编辑器语法高亮跟随下拉框选择。此前高亮从未与下拉框联动，
+     * 编辑器始终按 JSON 着色，「文本」选项形同虚设。
+     */
+    private void applySyntaxStyle() {
+        if (jComboBox == null) {
+            return;
+        }
+        var style = jComboBox.getSelectedItem();
+        textEditor.setSyntaxEditingStyle(style instanceof String s
+                ? s : SyntaxConstants.SYNTAX_STYLE_NONE);
+    }
+
     private void refreshEditorByView() {
+        // 缓冲将按原始字节重新生成，此前语法下拉框的改写随之失效
+        syntaxComboRewroteContent = false;
         if (currentRawValue == null) {
             textEditor.setText("");
             refreshSaveButtonByView();
@@ -318,6 +342,7 @@ public class RightViewFragment {
             jComboBox.setSelectedIndex(0);
             ignoreSyntaxComboEvent = false;
             jComboBox.setEnabled(false);
+            applySyntaxStyle();
             textEditor.setText(RedisValueCodec.encode(currentRawValue, viewType));
             refreshSaveButtonByView();
             return;
@@ -327,11 +352,13 @@ public class RightViewFragment {
             ignoreSyntaxComboEvent = true;
             jComboBox.setSelectedIndex(0);
             ignoreSyntaxComboEvent = false;
+            applySyntaxStyle();
             textEditor.setText(RedisValueCodec.encode(currentRawValue, viewType));
             refreshSaveButtonByView();
             return;
         }
         jsonValueFormat(RedisValueCodec.encode(currentRawValue, viewType));
+        applySyntaxStyle();
         refreshSaveButtonByView();
     }
 
@@ -341,6 +368,10 @@ public class RightViewFragment {
         }
         boolean enabled = currentRawValue != null && lastValueViewType != ValueViewType.ESCAPED;
         valueUpdateSaveBtn.setEnabled(enabled);
+        if (copyBtn != null) {
+            // 复制与编码视图无关，只要当前有值就可用
+            copyBtn.setEnabled(currentRawValue != null);
+        }
     }
 
     public JPanel contentPanel() {
@@ -523,27 +554,44 @@ public class RightViewFragment {
         jComboBox = new JComboBox<>();
         jComboBox.addItem(SyntaxConstants.SYNTAX_STYLE_NONE);
         jComboBox.addItem(SyntaxConstants.SYNTAX_STYLE_JSON);
+        // 选项原来直接显示 text/plain / application/json 两个 MIME 常量，
+        // 用户无从得知切换会改写编辑器内容，这里翻译成行为描述并加 tooltip 说明
+        jComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (SyntaxConstants.SYNTAX_STYLE_JSON.equals(value)) {
+                    setText(owner.$tr("DataViewForm.syntaxCombo.json"));
+                } else if (SyntaxConstants.SYNTAX_STYLE_NONE.equals(value)) {
+                    setText(owner.$tr("DataViewForm.syntaxCombo.text"));
+                }
+                return this;
+            }
+        });
+        jComboBox.setToolTipText(owner.$tr("DataViewForm.syntaxCombo.tooltip.text"));
         jComboBox.addActionListener(ignore -> {
             if (ignoreSyntaxComboEvent) {
                 return;
             }
+            applySyntaxStyle();
             var item = jComboBox.getSelectedItem();
             String value = textEditor.getText();
             if (item instanceof String itemValue) {
                 if (RedisFrontUtils.equal(itemValue, SyntaxConstants.SYNTAX_STYLE_JSON)) {
                     this.lastSyntaxStyle = SyntaxConstants.SYNTAX_STYLE_JSON;
-                    try {
-                        if (JSONUtil.isTypeJSON(value)) {
-                            String prettyStr = JSONUtil.toJsonPrettyStr(value);
-                            textEditor.setText(prettyStr);
-                        } else {
+                    // 切 JSON 只换解读方式，不再美化排版（格式化交给旁边的格式化按钮）；
+                    // 仅当值是 JSON 字符串字面量（string-in-string）时解一层引号展示内层
+                    if (!JSONUtil.isTypeJSON(value)) {
+                        try {
                             value = gson.fromJson(value, String.class);
-                            if (JSONUtil.isTypeJSON(value)) {
-                                textEditor.setText(JSONUtil.toJsonPrettyStr(value));
-                            }
+                        } catch (RuntimeException e) {
+                            // 不是 JSON 字符串字面量，按原样展示
+                            return;
                         }
-                    } catch (JSONException e) {
-                        textEditor.setText(value);
+                        if (JSONUtil.isTypeJSON(value)) {
+                            textEditor.setText(value);
+                            syntaxComboRewroteContent = true;
+                        }
                     }
                 } else {
                     if (StringUtils.isEmpty(value)) {
@@ -555,12 +603,17 @@ public class RightViewFragment {
                             value = gson.toJson(value);
                         }
                         textEditor.setText(value);
+                        // 包引号把值变成 string-in-string，是改动最大的一条路径，必须与解引号一样留痕
+                        syntaxComboRewroteContent = true;
                     }
                     this.lastSyntaxStyle = null;
                 }
             }
         });
         jComboBox.setBackground(UIManager.getColor("FlatEditorPane.background"));
+        var syntaxLabel = new JLabel(owner.$tr("DataViewForm.syntaxCombo.label"));
+        syntaxLabel.setBorder(new EmptyBorder(0, 2, 0, 2));
+        jToolBar.add(syntaxLabel);
         jToolBar.add(jComboBox);
 
         valueViewComboBox = new JComboBox<>();
@@ -580,7 +633,100 @@ public class RightViewFragment {
                 refreshEditorByView();
             }
         });
+        var encodingLabel = new JLabel(owner.$tr("DataViewForm.valueView.label"));
+        encodingLabel.setBorder(new EmptyBorder(0, 2, 0, 2));
+        jToolBar.add(encodingLabel);
         jToolBar.add(valueViewComboBox);
+
+        // 值编辑器换行开关：长 JSON 默认关（横向滚动），点开按单词边界折行
+        wrapToggleBtn = new FlatToggleButton() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setToolTipText(owner.$tr("DataViewForm.wrapToggle.tooltip.text"));
+                setIcon(Icons.WRAP_UNSELECTED);
+                setSelectedIcon(Icons.WRAP_SELECTED);
+            }
+        };
+        wrapToggleBtn.setButtonType(FlatButton.ButtonType.tab);
+        wrapToggleBtn.setTabUnderlineHeight(0);
+        wrapToggleBtn.setFocusable(false);
+        wrapToggleBtn.addActionListener(ignore -> textEditor.setLineWrap(wrapToggleBtn.isSelected()));
+        jToolBar.add(wrapToggleBtn);
+
+        copyBtn = new AnimateButton() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(owner.$tr("DataViewForm.copyBtn.title"));
+                setToolTipText(owner.$tr("DataViewForm.copyBtn.tooltip.text"));
+                setBackground(UIManager.getColor("RedisFront.animateButton.background"));
+            }
+        };
+        copyBtn.setText(owner.$tr("DataViewForm.copyBtn.title"));
+        copyBtn.setIcon(Icons.COPY_A_ICON);
+        copyBtn.setEffectColor(Color.BLUE);
+        copyBtn.setBackground(UIManager.getColor("RedisFront.animateButton.background"));
+        copyBtn.setBorder(new EmptyBorder(5, 5, 5, 5));
+        copyBtn.setArcHeight(10);
+        copyBtn.setArcWidth(10);
+        copyBtn.addActionListener(ignore -> {
+            if (currentRawValue == null) {
+                return;
+            }
+            // 复制解码后的原始值而不是编辑器文本：ESCAPED/BASE64 视图下看到的不是原文
+            var clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clipboard.setContents(new StringSelection(
+                    RedisValueCodec.encode(currentRawValue, ValueViewType.AUTO)), null);
+            Notifications.getInstance().show(Notifications.Type.INFO, owner.$tr("DataViewForm.copyBtn.success.message"));
+        });
+        jToolBar.add(copyBtn);
+
+        jsonFormatBtn = new AnimateButton() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(owner.$tr("DataViewForm.jsonFormatBtn.title"));
+                setToolTipText(owner.$tr("DataViewForm.jsonFormatBtn.tooltip.text"));
+                setBackground(UIManager.getColor("RedisFront.animateButton.background"));
+            }
+        };
+        jsonFormatBtn.setText(owner.$tr("DataViewForm.jsonFormatBtn.title"));
+        jsonFormatBtn.setIcon(Icons.JSON_FORMAT_ICON);
+        jsonFormatBtn.setEffectColor(Color.ORANGE);
+        jsonFormatBtn.setBackground(UIManager.getColor("RedisFront.animateButton.background"));
+        jsonFormatBtn.setBorder(new EmptyBorder(5, 5, 5, 5));
+        jsonFormatBtn.setArcHeight(10);
+        jsonFormatBtn.setArcWidth(10);
+        jsonFormatBtn.addActionListener(ignore -> {
+            var text = textEditor.getText();
+            if (RedisFrontUtils.isEmpty(text)) {
+                return;
+            }
+            var trimmed = text.strip();
+            if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
+                Notifications.getInstance().show(Notifications.Type.ERROR, owner.$tr("DataViewForm.jsonFormatBtn.invalid.message"));
+                return;
+            }
+            try {
+                // 合法 JSON 的字符串内部不允许裸换行（必须是 \n 转义），文本里的裸换行
+                // 只可能来自格式化空白。值加载时 jsonValueFormat 已经格式化过 JSON，
+                // 所以这里是对当前态取反：已格式化 → 压缩，压缩态 → 格式化
+                boolean pretty = !text.contains("\n");
+                String formatted;
+                if (pretty) {
+                    formatted = JSONUtil.toJsonPrettyStr(text);
+                } else if (trimmed.startsWith("{")) {
+                    formatted = JSONUtil.parseObj(text).toString();
+                } else {
+                    formatted = JSONUtil.parseArray(text).toString();
+                }
+                textEditor.setText(formatted);
+            } catch (JSONException e) {
+                Notifications.getInstance().show(Notifications.Type.ERROR, owner.$tr("DataViewForm.jsonFormatBtn.invalid.message"));
+            }
+        });
+        jToolBar.add(jsonFormatBtn);
 
         valueUpdateSaveBtn = new AnimateButton() {
             @Override
@@ -611,14 +757,14 @@ public class RightViewFragment {
         valueUpdateSaveBtn.setIcon(Icons.SAVE_ICON);
         valueUpdateSaveBtn.addActionListener(ignore -> {
             if (lastValueViewType == ValueViewType.ESCAPED) {
-                Notifications.getInstance().show(Notifications.Type.ERROR, "只读模式");
+                Notifications.getInstance().show(Notifications.Type.ERROR, owner.$tr("DataViewForm.readOnly.message"));
                 return;
             }
             var keyType = keyTypeLabel.getText();
             KeyTypeEnum typeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
             var key = keyField.getText();
             var newValue = textEditor.getText();
-            if (StrUtil.isNotEmpty(lastSyntaxStyle)) {
+            if (syntaxComboRewroteContent) {
                 int i = JOptionPane.showConfirmDialog(owner, owner.$tr("DataViewForm.valueUpdateSaveBtn.syntaxStyleTip"), owner.$tr("DataViewForm.valueUpdateSaveBtn.syntaxStyleTipTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (i == JOptionPane.CANCEL_OPTION) {
                     return;
@@ -670,7 +816,7 @@ public class RightViewFragment {
                 }
                 String msg = e.getMessage();
                 if (RedisFrontUtils.isEmpty(msg)) {
-                    msg = "同步失败";
+                    msg = owner.$tr("DataViewForm.updateFail.message");
                 }
                 Notifications.getInstance().show(Notifications.Type.ERROR, msg);
             });
@@ -768,7 +914,7 @@ public class RightViewFragment {
                             owner.getContext().getEventBus().publish(new KeyDeleteSuccessEvent(key, redisConnectContext.getId()));
                             return;
                         }
-                        Notifications.getInstance().show(Notifications.Type.ERROR, "key删除失败！");
+                        Notifications.getInstance().show(Notifications.Type.ERROR, owner.$tr("DataViewForm.keyDeleteFail.message"));
                     });
         });
 
@@ -825,7 +971,7 @@ public class RightViewFragment {
                 if (e == null) {
                     reloadAllActionPerformed();
                 } else {
-                    Notifications.getInstance().show(Notifications.Type.ERROR, "key保存失败！");
+                    Notifications.getInstance().show(Notifications.Type.ERROR, owner.$tr("DataViewForm.keySaveFail.message"));
                 }
             });
         });

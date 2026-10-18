@@ -95,7 +95,9 @@ public class RedisInfoView extends JPanel implements Runnable {
         this.textArea1.setLineWrap(true);
         this.textArea2.setLineWrap(true);
         this.initTabbedPane();
-        this.refreshInfo();
+        // 这里不要预加载 refreshInfo()：面板只有在用户点 More Info 时才会挂到对话框上，
+        // 而点击处理器会再调一次 refreshInfo()，预加载的结果从未展示过，
+        // 却让每次打开连接都要白跑一轮 INFO 采集（集群 + SSH 还要做完整拓扑发现）并弹加载框。
     }
 
     private String format(LogInfo logInfo) {
@@ -159,7 +161,7 @@ public class RedisInfoView extends JPanel implements Runnable {
 
     public void refreshInfo() {
         SyncLoadingDialog
-                .builder(owner, "load info data")
+                .builder(owner, owner.$tr("RedisInfoView.loading.message"))
                 .showSyncLoadingDialog(() -> {
                             Turbo2<String, Set<LogInfoData>> turbo2 = new Turbo2<>();
                             String sshInfoFormated = "";
@@ -241,12 +243,6 @@ public class RedisInfoView extends JPanel implements Runnable {
     private void updateTableModel(DefaultTableModel model, Map<String, Object> data) {
         model.setRowCount(0);
         data.forEach((key, value) -> model.addRow(new Object[]{key, value}));
-    }
-
-    private void addRefreshButton() {
-        JButton refreshButton = new JButton("刷新");
-        refreshButton.addActionListener(ignore -> refreshInfo());
-        add(refreshButton, BorderLayout.NORTH);
     }
 
     @Override
