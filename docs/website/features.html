@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="zh" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>功能矩阵 - RedisFront</title>
+  <meta name="description" content="RedisFront 在单机、哨兵、集群三种部署形态下的功能支持矩阵。">
+  <link rel="icon" href="assets/img/logo.png">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html"><img src="assets/img/logo.png" alt=""><span>RedisFront</span></a>
+    <div class="nav-links">
+      <a href="index.html#features"><span class="zh">特性</span><span class="en">Features</span></a>
+      <a class="active" href="features.html"><span class="zh">功能矩阵</span><span class="en">Matrix</span></a>
+      <a href="download.html"><span class="zh">下载</span><span class="en">Download</span></a>
+      <a href="community.html"><span class="zh">社区</span><span class="en">Community</span></a>
+    </div>
+    <div class="nav-right">
+      <a class="icon-btn" href="https://github.com/dromara/RedisFront" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+      </a>
+      <button id="lang-toggle" class="icon-btn" type="button">EN</button>
+      <button id="theme-toggle" class="icon-btn" type="button">🌙</button>
+      <a class="btn btn-primary btn-sm" href="download.html"><span class="zh">下载</span><span class="en">Download</span></a>
+    </div>
+  </div>
+</nav>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Feature Matrix</div>
+      <h2><span class="zh">功能矩阵</span><span class="en">Feature matrix</span></h2>
+      <p><span class="zh">三种部署形态下的能力对照，全部来自代码实际实现，可逐项验证。</span><span class="en">What works in each deployment mode — every row reflects the actual implementation.</span></p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th><span class="zh">功能</span><span class="en">Feature</span></th>
+            <th>Standalone</th>
+            <th>Sentinel</th>
+            <th>Cluster</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="zh">自动模式识别</span><span class="en">Auto mode detection</span></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td>Key <span class="zh">浏览（增量 SCAN）</span><span class="en">browsing (incremental SCAN)</span></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td><span class="zh">七种数据类型增删改查</span><span class="en">CRUD for 7 data types</span></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td>TTL <span class="zh">查看与修改</span><span class="en">view &amp; update</span></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td><span class="zh">内存占用分析</span><span class="en">Memory usage analysis</span></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td>SSH <span class="zh">隧道</span><span class="en">tunnel</span></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓ <span class="zh">（分片独立转发）</span><span class="en">(per-shard)</span></td></tr>
+          <tr><td>SSL / <span class="zh">自定义信任库</span><span class="en">custom truststore</span></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td><span class="zh">哨兵主节点自动重定向</span><span class="en">Sentinel master redirect</span></td><td class="no">—</td><td class="yes">✓</td><td class="no">—</td></tr>
+          <tr><td><span class="zh">集群拓扑发现与分片映射</span><span class="en">Cluster topology &amp; shard mapping</span></td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td></tr>
+          <tr><td><span class="zh">多数据库切换</span><span class="en">Multiple database switch</span></td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td></tr>
+          <tr><td><span class="zh">命令行终端</span><span class="en">Command terminal</span></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td>Pub / Sub</td><td class="yes">✓</td><td class="no">—</td><td class="yes">✓</td></tr>
+          <tr><td><span class="zh">四类实时监控图表</span><span class="en">4 live monitoring charts</span></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td>INFO <span class="zh">全量信息查看</span><span class="en">full info viewer</span></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td>flushdb / flushall</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note" style="margin-top:12px">
+      <span class="zh">注：集群模式下 Redis 本身不区分 database，因此多数据库切换仅在单机与哨兵模式可用。</span>
+      <span class="en">Note: Redis Cluster has no logical databases, so multi-db switching applies to standalone and sentinel only.</span>
+    </p>
+  </div>
+</section>
+
+<section class="section alt">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Encoding Views</div>
+      <h2><span class="zh">八种值编码视图</span><span class="en">Eight value encoding views</span></h2>
+      <p><span class="zh">同一份数据，随时切换观察方式；除 Escaped 外全部支持写回。</span><span class="en">Switch how you look at the same bytes; all but Escaped can be written back.</span></p>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <h3>AUTO</h3>
+        <p><span class="zh">默认视图：先按 UTF-8 严格校验，合法则直接展示，非法字节自动转为转义序列，兼容一切二进制。</span><span class="en">Default view: strict UTF-8 validation first, then automatic escaping for invalid bytes — safe for any binary payload.</span></p>
+      </div>
+      <div class="card">
+        <h3>UTF-8 / GBK / GB18030 / Latin-1</h3>
+        <p><span class="zh">按指定字符集编解码，读写双向；适合处理历史遗留的非 UTF-8 数据。</span><span class="en">Explicit charset decoding and encoding, both ways — for legacy non-UTF-8 data.</span></p>
+      </div>
+      <div class="card">
+        <h3>Escaped</h3>
+        <p><span class="zh">把控制字符与不可见字节转义展示，只读视图，用于排查协议层问题。</span><span class="en">Escapes control and invisible bytes; read-only, for protocol-level debugging.</span></p>
+      </div>
+      <div class="card">
+        <h3>Base64 / Hex</h3>
+        <p><span class="zh">面向序列化对象与二进制协议的标准展示，写回时自动解码为原始字节。</span><span class="en">Standard views for serialized objects and binary protocols; decoded back to raw bytes on save.</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Connections</div>
+      <h2><span class="zh">连接管理</span><span class="en">Connection management</span></h2>
+    </div>
+    <div class="grid-3">
+      <div class="card">
+        <div class="ico">🗂</div>
+        <h3><span class="zh">分组与拖拽</span><span class="en">Groups &amp; drag &amp; drop</span></h3>
+        <p><span class="zh">连接按分组管理，支持拖拽改组、批量整理，配置存于本地 SQLite。</span><span class="en">Organize connections in groups, re-group by drag &amp; drop, stored in a local SQLite database.</span></p>
+      </div>
+      <div class="card">
+        <div class="ico">📤</div>
+        <h3><span class="zh">导入导出</span><span class="en">Import &amp; export</span></h3>
+        <p><span class="zh">连接配置可导出为 JSON 与团队共享，也支持从 RDM 配置迁移。</span><span class="en">Export connections as JSON to share with your team, or migrate from RDM configuration.</span></p>
+      </div>
+      <div class="card">
+        <div class="ico">🔍</div>
+        <h3><span class="zh">测试连接</span><span class="en">Test connection</span></h3>
+        <p><span class="zh">保存前一键测试，SSH、SSL 与认证参数一次校验到位。</span><span class="en">One-click test before saving — SSH, SSL and credentials validated in one go.</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-bottom" style="margin-top:0;border-top:none;padding-top:0">
+      <span>Copyright © 2022–<span id="year">2026</span> RedisFront · <a href="https://www.dromara.org" target="_blank" rel="noopener">Dromara</a></span>
+      <span><a href="index.html"><span class="zh">返回首页</span><span class="en">Back to home</span></a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>

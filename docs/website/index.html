@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="zh" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RedisFront - 跨平台 Redis 桌面客户端</title>
+  <meta name="description" content="RedisFront 是一款开源跨平台 Redis GUI 客户端，支持单机、哨兵、集群自动识别，内置 SSH 隧道与 SSL，提供数据管理、实时监控、命令行与 Pub/Sub。">
+  <meta property="og:title" content="RedisFront - 跨平台 Redis 桌面客户端">
+  <meta property="og:description" content="一个客户端，管好单机、哨兵、集群——还能穿透 SSH 隧道。">
+  <meta property="og:image" content="assets/img/2025.1-dark-1.png">
+  <link rel="icon" href="assets/img/logo.png">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <img src="assets/img/logo.png" alt="">
+      <span>RedisFront</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html#features"><span class="zh">特性</span><span class="en">Features</span></a>
+      <a href="features.html"><span class="zh">功能矩阵</span><span class="en">Matrix</span></a>
+      <a href="download.html"><span class="zh">下载</span><span class="en">Download</span></a>
+      <a href="community.html"><span class="zh">社区</span><span class="en">Community</span></a>
+    </div>
+    <div class="nav-right">
+      <a class="icon-btn" href="https://github.com/dromara/RedisFront" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+      </a>
+      <button id="lang-toggle" class="icon-btn" type="button">EN</button>
+      <button id="theme-toggle" class="icon-btn" type="button">🌙</button>
+      <a class="btn btn-primary btn-sm" href="download.html"><span class="zh">下载</span><span class="en">Download</span></a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <h1>
+        <span class="zh">一个客户端，管好<span class="accent">单机、哨兵、集群</span><br>还能穿透 SSH 隧道</span>
+        <span class="en">One client for <span class="accent">Standalone, Sentinel &amp; Cluster</span><br>through SSH tunnels</span>
+      </h1>
+      <p class="lead">
+        <span class="zh">RedisFront 是 Dromara 开源社区旗下的跨平台 Redis 桌面客户端，自动识别部署形态，内置 SSH 隧道与 SSL，覆盖数据管理、实时监控、命令行与 Pub/Sub。</span>
+        <span class="en">RedisFront is a cross-platform Redis GUI from the Dromara community. It auto-detects your deployment topology, ships with SSH tunneling and SSL, and covers data management, live monitoring, a command terminal and Pub/Sub.</span>
+      </p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="download.html"><span class="zh">免费下载</span><span class="en">Download Free</span></a>
+        <a class="btn btn-ghost" href="https://github.com/dromara/RedisFront" target="_blank" rel="noopener">GitHub</a>
+        <a class="btn btn-ghost" href="https://gitee.com/dromara/RedisFront" target="_blank" rel="noopener">Gitee</a>
+      </div>
+      <div class="hero-meta">
+        <span class="badge"><span class="dot"></span>v2026.1</span>
+        <span><span class="zh">Apache 2.0 开源协议</span><span class="en">Apache 2.0</span></span>
+        <span>Windows · macOS · Linux</span>
+        <span><span class="zh">内置 JRE，无需安装 Java</span><span class="en">Bundled JRE, no Java required</span></span>
+      </div>
+    </div>
+    <div class="shot carousel">
+      <img class="active" src="assets/img/2025.1-dark-1.png" alt="data browser">
+      <img src="assets/img/2025.1-dark-2.png" alt="terminal">
+      <img src="assets/img/2025.1-dark-3.png" alt="pub/sub">
+      <img src="assets/img/2025.1-dark-4.png" alt="monitoring">
+      <img src="assets/img/2025.1-dark-5.png" alt="connection settings">
+    </div>
+  </div>
+</header>
+
+<section class="section alt" id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Features</div>
+      <h2><span class="zh">为日常运维与开发调试而生</span><span class="en">Built for daily ops and debugging</span></h2>
+      <p><span class="zh">每个能力都来自真实的 Redis 运维场景，而非功能清单的堆砌。</span><span class="en">Every capability comes from real-world Redis operations, not checkbox-driven design.</span></p>
+    </div>
+    <div class="grid-3">
+      <div class="card">
+        <div class="ico">⚡</div>
+        <h3><span class="zh">多模式自动识别</span><span class="en">Auto topology detection</span></h3>
+        <p><span class="zh">连接时自动判定单机、哨兵或集群；哨兵自动重定向到 Master，集群自动发现全部分片节点，无需手工配置。</span><span class="en">Detects standalone, sentinel or cluster on connect. Sentinel redirects to the master automatically; cluster discovers every shard without manual setup.</span></p>
+      </div>
+      <div class="card">
+        <div class="ico">🔒</div>
+        <h3><span class="zh">SSH 隧道 + SSL</span><span class="en">SSH tunnel + SSL</span></h3>
+        <p><span class="zh">内置 SSH 端口转发，支持密码与私钥认证；集群模式下每个分片独立建立转发。SSL 支持自定义信任库。</span><span class="en">Built-in SSH port forwarding with password or private key auth. In cluster mode every shard gets its own tunnel. SSL supports custom truststores.</span></p>
+      </div>
+      <div class="card">
+        <div class="ico">🗂</div>
+        <h3><span class="zh">全类型数据管理</span><span class="en">Full data-type support</span></h3>
+        <p><span class="zh">String、Hash、List、Set、ZSet、Stream、JSON 全覆盖，增量 SCAN 浏览、分页加载、TTL 管理、JSON 格式化与语法高亮。</span><span class="en">String, Hash, List, Set, ZSet, Stream and JSON — with incremental SCAN, paged loading, TTL management, JSON formatting and syntax highlighting.</span></p>
+      </div>
+      <div class="card">
+        <div class="ico">🔤</div>
+        <h3><span class="zh">8 种编码视图</span><span class="en">8 encoding views</span></h3>
+        <p><span class="zh">AUTO / UTF-8 / GBK / GB18030 / Latin-1 / Escaped / Base64 / Hex，读写双向支持，中文乱码不再是谜题。</span><span class="en">AUTO / UTF-8 / GBK / GB18030 / Latin-1 / Escaped / Base64 / Hex — supported in both directions, so mojibake stops being a mystery.</span></p>
+      </div>
+      <div class="card">
+        <div class="ico">📊</div>
+        <h3><span class="zh">实时监控</span><span class="en">Live monitoring</span></h3>
+        <p><span class="zh">网络吞吐、内存与碎片率、客户端连接数、命令执行数 / QPS 四类实时曲线；单次 INFO 采集，后台页签不轮询。</span><span class="en">Four live charts — network I/O, memory &amp; fragmentation, client connections, commands / QPS. One INFO round-trip per sample, no polling on background tabs.</span></p>
+      </div>
+      <div class="card">
+        <div class="ico">🛠</div>
+        <h3><span class="zh">命令行 + Pub/Sub</span><span class="en">Terminal + Pub/Sub</span></h3>
+        <p><span class="zh">终端直接派发任意 Redis 命令，支持补全、历史与输出编码切换；Pub/Sub 面板支持集群订阅与消息发布。</span><span class="en">Dispatch any Redis command from the terminal with completion, history and output encoding switch. Pub/Sub panel works on cluster too.</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section alt">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">SSH Tunnel</div>
+      <h2><span class="zh">内网 Redis，也可以直连</span><span class="en">Reach intranet Redis directly</span></h2>
+      <p><span class="zh">Redis 无法公网访问？配一台跳板机就够了，隧道建立后所有功能与直连无异。</span><span class="en">Redis not reachable from your network? One jump host is enough — once the tunnel is up, everything works as if local.</span></p>
+    </div>
+    <div class="tunnel">
+      <div class="node">RedisFront<br><span class="note">127.0.0.1</span></div>
+      <div class="link">━━━ <span class="zh">SSH 隧道</span><span class="en">SSH tunnel</span> ━━━▸</div>
+      <div class="node"><span class="zh">跳板机</span><span class="en">Jump host</span><br><span class="note">ssh://host:22</span></div>
+      <div class="link">━━━▸</div>
+      <div class="node">Redis<br><span class="note">host:6379</span></div>
+    </div>
+    <p class="note" style="text-align:center">
+      <span class="zh">集群 + SSH 时，客户端会为每个分片分配独立本地端口并自动映射拓扑，Address Mapping 对上层透明。</span>
+      <span class="en">For cluster over SSH, each shard gets its own local port and the topology is mapped automatically — transparent to every feature above.</span>
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Download</div>
+      <h2><span class="zh">三个平台，开箱即用</span><span class="en">Three platforms, ready to run</span></h2>
+      <p><span class="zh">安装包内置裁剪版 JRE，无需预装 Java。</span><span class="en">Installers bundle a trimmed JRE — no Java installation required.</span></p>
+    </div>
+    <div class="grid-3">
+      <div class="card dl-card">
+        <div class="os">🪟</div>
+        <h3>Windows</h3>
+        <div class="files">.exe · .msi · .zip</div>
+        <a class="btn btn-primary" href="download.html"><span class="zh">前往下载</span><span class="en">Get it</span></a>
+      </div>
+      <div class="card dl-card">
+        <div class="os">🍎</div>
+        <h3>macOS</h3>
+        <div class="files">.dmg (arm64 / x86_64)</div>
+        <a class="btn btn-primary" href="download.html"><span class="zh">前往下载</span><span class="en">Get it</span></a>
+      </div>
+      <div class="card dl-card">
+        <div class="os">🐧</div>
+        <h3>Linux</h3>
+        <div class="files">.deb · .rpm · .tar.gz</div>
+        <a class="btn btn-primary" href="download.html"><span class="zh">前往下载</span><span class="en">Get it</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div style="max-width:340px">
+        <div class="brand" style="margin-bottom:10px"><img src="assets/img/logo.png" alt=""><span>RedisFront</span></div>
+        <p class="note"><span class="zh">Dromara 开源社区旗下的跨平台 Redis 桌面客户端，基于 Apache 2.0 协议开源。</span><span class="en">A cross-platform Redis desktop client from the Dromara community, licensed under Apache 2.0.</span></p>
+      </div>
+      <div>
+        <h4><span class="zh">项目</span><span class="en">Project</span></h4>
+        <ul>
+          <li><a href="features.html"><span class="zh">功能矩阵</span><span class="en">Feature matrix</span></a></li>
+          <li><a href="download.html"><span class="zh">下载</span><span class="en">Download</span></a></li>
+          <li><a href="https://github.com/dromara/RedisFront/releases" target="_blank" rel="noopener"><span class="zh">更新日志</span><span class="en">Releases</span></a></li>
+        </ul>
+      </div>
+      <div>
+        <h4><span class="zh">社区</span><span class="en">Community</span></h4>
+        <ul>
+          <li><a href="https://github.com/dromara/RedisFront" target="_blank" rel="noopener">GitHub</a></li>
+          <li><a href="https://gitee.com/dromara/RedisFront" target="_blank" rel="noopener">Gitee</a></li>
+          <li><a href="https://www.dromara.org" target="_blank" rel="noopener">Dromara</a></li>
+          <li><a href="community.html"><span class="zh">交流群</span><span class="en">Chat groups</span></a></li>
+        </ul>
+      </div>
+      <div class="qr">
+        <img src="assets/img/weixin.jpg" alt="WeChat">
+        <div class="note"><span class="zh">微信群 capf4xj</span><span class="en">WeChat: capf4xj</span></div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>Copyright © 2022–<span id="year">2026</span> RedisFront · <a href="https://www.dromara.org" target="_blank" rel="noopener">Dromara</a></span>
+      <span>Apache License 2.0</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>
