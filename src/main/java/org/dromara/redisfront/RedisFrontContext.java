@@ -129,6 +129,6 @@ public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, Redi
     }
 
     public String version() {
-        return "2025.1";
+        return "2026.1";
     }
 }
