@@ -31,6 +31,8 @@ import org.dromara.redisfront.ui.event.CommandExecuteEvent;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -219,28 +221,47 @@ public class RedisConnectionPoolManager {
     }
 
     public static void cleanupContextPool(RedisConnectContext context) {
-        String poolKey = context.key();
-        cleanupPools(poolKey);
+        // 同一连接在生命周期内可能换过 host/port/database，key() 会随之变化，
+        // 所以按前缀整组回收，而不是只回收当前这一个 key
+        cleanupPools(context.keyPrefix());
         LettuceUtils.close(context);
     }
 
-    private static void cleanupPools(String specificKey) {
-        cleanPoolMap(CLUSTER_POOLS, specificKey);
-        cleanPoolMap(CLUSTER_PUB_POOLS, specificKey);
-        cleanPoolMap(SENTINEL_POOLS, specificKey);
-        cleanPoolMap(NORMAL_POOLS, specificKey);
-        cleanPoolMap(NORMAL_PUB_POOLS, specificKey);
+    private static void cleanupPools(String keyPrefix) {
+        cleanPoolMapByPrefix(CLUSTER_POOLS, keyPrefix);
+        cleanPoolMapByPrefix(CLUSTER_PUB_POOLS, keyPrefix);
+        cleanPoolMapByPrefix(SENTINEL_POOLS, keyPrefix);
+        cleanPoolMapByPrefix(NORMAL_POOLS, keyPrefix);
+        cleanPoolMapByPrefix(NORMAL_PUB_POOLS, keyPrefix);
     }
 
-    private static <T> void cleanPoolMap(
+    /**
+     * 仅回收出错的那一类池，避免连带关闭 Pub/Sub 等长连接池导致订阅静默丢失
+     */
+    static <T> void cleanPoolMap(
             Map<String, GenericObjectPool<T>> poolMap,
             String specificKey) {
 
-        // 先从 map 移除再关闭，缩小归还线程拿到已关闭池的窗口
         GenericObjectPool<T> pool = poolMap.remove(specificKey);
         if (pool != null) {
             closePool(pool, specificKey);
         }
+    }
+
+    private static <T> void cleanPoolMapByPrefix(
+            Map<String, GenericObjectPool<T>> poolMap,
+            String keyPrefix) {
+
+        List<GenericObjectPool<T>> matched = new ArrayList<>();
+        poolMap.entrySet().removeIf(entry -> {
+            if (entry.getKey().startsWith(keyPrefix)) {
+                matched.add(entry.getValue());
+                return true;
+            }
+            return false;
+        });
+        // 先从 map 移除再关闭，缩小归还线程拿到已关闭池的窗口
+        matched.forEach(pool -> closePool(pool, keyPrefix));
     }
 
     private static <T> void closePool(GenericObjectPool<T> pool, String key) {

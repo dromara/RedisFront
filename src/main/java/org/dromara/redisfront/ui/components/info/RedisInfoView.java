@@ -1,6 +1,7 @@
 package org.dromara.redisfront.ui.components.info;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import cn.hutool.core.collection.CollUtil;
 import io.lettuce.core.cluster.models.partitions.Partitions;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -26,6 +27,7 @@ import java.awt.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -169,8 +171,11 @@ public class RedisInfoView extends JPanel implements Runnable {
                                     sshInfoFormated = clusterPartitions.stream().map(clusterNode -> {
                                         var uri = clusterNode.getUri();
                                         Map<String, Integer> clusterLocalPort = redisConnectContext.getClusterLocalPort();
+                                        // 映射 key 是 host:port；拓扑可能在建映射之后变化，取不到就显示占位符
+                                        Integer localPort = CollUtil.isEmpty(clusterLocalPort) ? null
+                                                : clusterLocalPort.get(RedisConnectContext.clusterAddress(uri.getHost(), uri.getPort()));
                                         return String.format(SSH_MAPPING, localHost,
-                                                clusterLocalPort.get(String.valueOf(uri.getPort())).toString(),
+                                                localPort == null ? "-" : localPort,
                                                 uri.getHost(),
                                                 uri.getPort(),
                                                 clusterNode.getFlags()
@@ -203,7 +208,7 @@ public class RedisInfoView extends JPanel implements Runnable {
                                     redisConnectContext.getPort(),
                                     redisConnectContext.getRedisMode(),
                                     redisConnectContext.getConnectTypeMode(),
-                                    serverInfo.get("redis_version").toString(),
+                                    Objects.toString(serverInfo.get("redis_version"), ""),
                                     sshInfoFormated
                             ));
 

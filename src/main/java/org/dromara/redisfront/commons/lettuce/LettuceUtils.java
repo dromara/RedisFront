@@ -24,7 +24,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -264,17 +266,28 @@ public class LettuceUtils {
     }
 
     public static void close(RedisConnectContext context) {
-        String key = context.key();
-        try (RedisClient redisClient = CLIENT_CACHE.remove(key)) {
-            if (redisClient != null) {
-                redisClient.shutdown();
+        String keyPrefix = context.keyPrefix();
+        // key() 后半段会随 host/port/database 变化，客户端也要按前缀整组关闭
+        shutdownClients(CLIENT_CACHE, keyPrefix);
+        shutdownClients(CLUSTER_CLIENT_CACHE, keyPrefix);
+    }
+
+    private static <T extends AutoCloseable> void shutdownClients(Map<String, T> clientCache, String keyPrefix) {
+        List<T> matched = new ArrayList<>();
+        clientCache.entrySet().removeIf(entry -> {
+            if (entry.getKey().startsWith(keyPrefix)) {
+                matched.add(entry.getValue());
+                return true;
             }
-        }
-        try (RedisClusterClient redisClusterClient = CLUSTER_CLIENT_CACHE.remove(key)) {
-            if (redisClusterClient != null) {
-                redisClusterClient.shutdown();
+            return false;
+        });
+        matched.forEach(client -> {
+            try {
+                client.close();
+            } catch (Exception e) {
+                log.debug("关闭 redis client 失败", e);
             }
-        }
+        });
     }
 
 }

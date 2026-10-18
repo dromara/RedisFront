@@ -19,7 +19,7 @@ public class AddressMappingResolver extends SocketAddressResolver {
     public SocketAddress resolve(RedisURI redisURI) {
         if (redisConnectContext.getSshInfo() != null
                 && CollUtil.isNotEmpty(redisConnectContext.getClusterLocalPort())) {
-            String key = redisURI.getHost() + ":" + redisURI.getPort();
+            String key = RedisConnectContext.clusterAddress(redisURI.getHost(), redisURI.getPort());
             Integer port = redisConnectContext.getClusterLocalPort().get(key);
             if (port != null) {
                 return new InetSocketAddress("127.0.0.1", port);
