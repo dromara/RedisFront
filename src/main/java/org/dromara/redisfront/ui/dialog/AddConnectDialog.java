@@ -293,9 +293,12 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             ConnectDetailEntity connectDetailEntity = connectContext.toEntity();
             connectDetailEntity.setGroupId(groupId);
             if (null == detailId) {
-                ConnectDetailDao.newInstance(this.context.getDatabaseManager().getDatasource()).save(connectDetailEntity);
+                // 回填自增主键，connectContext.id 在此之前一直是 0
+                connectContext.setId(ConnectDetailDao.newInstance(this.context.getDatabaseManager().getDatasource())
+                        .save(connectDetailEntity).intValue());
             } else {
                 ConnectDetailDao.newInstance(this.context.getDatabaseManager().getDatasource()).update(detailId, connectDetailEntity);
+                connectContext.setId(detailId);
             }
             this.context.getEventBus().publish(new RefreshConnectTreeEvent(connectContext));
             dispose();
@@ -316,8 +319,11 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
                 ConnectDetailEntity connectDetailEntity = redisConnectContext.toEntity();
                 connectDetailEntity.setGroupId(groupId);
                 if (null == detailId) {
-                    ConnectDetailDao.newInstance(this.context.getDatabaseManager().getDatasource()).save(connectDetailEntity);
-                    redisConnectContext.setId(redisConnectContext.getId());
+                    // 必须回填自增主键：id 是连接身份，标签页去重、事件路由、
+                    // SSH 会话表、状态栏线程池都以它为 key，停在 0 会互相串台
+                    Long generatedId = ConnectDetailDao.newInstance(this.context.getDatabaseManager().getDatasource())
+                            .save(connectDetailEntity);
+                    redisConnectContext.setId(generatedId.intValue());
                 } else {
                     ConnectDetailDao.newInstance(this.context.getDatabaseManager().getDatasource()).update(detailId, connectDetailEntity);
                     redisConnectContext.setId(detailId);

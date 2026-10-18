@@ -3,7 +3,6 @@ package org.dromara.redisfront.ui.widget.sidebar.tree;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.Entity;
 import cn.hutool.json.JSONUtil;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.util.SystemInfo;
@@ -439,11 +438,13 @@ public class RedisConnectTree extends JXTree {
                             List<ConnectDetailEntity> detailEntities = exportData.getDetails();
                             if (CollUtil.isNotEmpty(groupEntityList)) {
                                 for (ConnectGroupEntity connectGroupEntity : groupEntityList) {
-                                    Entity entity = ConnectGroupDao.newInstance(datasource).save(connectGroupEntity.getGroupName());
+                                    // save 返回新分组的自增主键，必须用它关联分组下的连接，
+                                    // 否则 group_id 为 null，导入的连接会全部掉到根级别
+                                    Long newGroupId = ConnectGroupDao.newInstance(datasource).save(connectGroupEntity.getGroupName());
                                     List<ConnectDetailEntity> entities = detailEntities.stream().filter(s -> s.getGroupId().equals(connectGroupEntity.getGroupId())).toList();
                                     for (ConnectDetailEntity connectDetailEntity : entities) {
                                         connectDetailEntity.setId(null);
-                                        connectDetailEntity.setGroupId(entity.getInt("id"));
+                                        connectDetailEntity.setGroupId(newGroupId.intValue());
                                         ConnectDetailDao.newInstance(datasource).save(connectDetailEntity);
                                         detailEntities.remove(connectDetailEntity);
                                     }
