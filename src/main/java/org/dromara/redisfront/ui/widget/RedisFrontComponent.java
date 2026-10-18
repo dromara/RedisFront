@@ -139,12 +139,8 @@ public class RedisFrontComponent extends Background {
                 }
             }
             redisConnectContext.setPort(Integer.valueOf(master.get("port")));
-        }
-        if (RedisMode.CLUSTER == redisConnectContext.getRedisMode()) {
-            JschManager.MANAGER.openClusterSession(redisConnectContext);
-        }
-        if (RedisMode.SENTINEL == redisConnectContext.getRedisMode()) {
-            JschManager.MANAGER.openSession(redisConnectContext);
+            // host/port 已切换为 master，SSH 隧道要跟着指向新目标；非 SSH 连接无会话，方法内部自动跳过
+            JschManager.MANAGER.redirectSession(redisConnectContext);
             try {
                 LettuceUtils.exec(redisConnectContext, BaseRedisCommands::ping);
             } catch (Exception e) {
@@ -159,6 +155,8 @@ public class RedisFrontComponent extends Background {
                     throw e;
                 }
             }
+        } else if (RedisMode.CLUSTER == redisConnectContext.getRedisMode()) {
+            JschManager.MANAGER.openClusterSession(redisConnectContext);
         }
     }
 
