@@ -6,8 +6,36 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
+import java.util.Set;
 
 public class JschManagerTest {
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void closingOneMonitorLeavesOtherOwnersPortsReserved() throws Exception {
+        var context = new RedisConnectContext();
+        context.setId(-9071);
+        var forwardsField = JschManager.class.getDeclaredField("NODE_FORWARDS");
+        forwardsField.setAccessible(true);
+        var forwards = (Map<String, Map<String, Integer>>) forwardsField.get(null);
+        var portsField = JschManager.class.getDeclaredField("PORT_SET");
+        portsField.setAccessible(true);
+        var ports = (Set<Integer>) portsField.get(null);
+        forwards.put("-9071:older", Map.of("host:7000", 32710));
+        forwards.put("-9071:newer", Map.of("host:7000", 32711));
+        ports.add(32710);ports.add(32711);
+        try {
+            JschManager.MANAGER.closeNodeForwardings(context, "older");
+            Assertions.assertFalse(ports.contains(32710));
+            Assertions.assertTrue(ports.contains(32711));
+            Assertions.assertTrue(forwards.containsKey("-9071:newer"));
+            JschManager.MANAGER.releaseLocalPort(context);
+            Assertions.assertFalse(ports.contains(32711));
+            Assertions.assertFalse(forwards.containsKey("-9071:newer"));
+        } finally {
+            JschManager.MANAGER.releaseLocalPort(context);
+        }
+    }
 
     private static RedisConnectContext clusterContext(Map<String, Integer> clusterLocalPort) {
         RedisConnectContext context = new RedisConnectContext();

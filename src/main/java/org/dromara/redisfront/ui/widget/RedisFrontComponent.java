@@ -125,6 +125,11 @@ public class RedisFrontComponent extends Background {
                 throw new RedisFrontException("Sentinel masters is empty");
             }
             var master = masterList.stream().findFirst().orElseThrow();
+            redisConnectContext.setSentinelHost(redisConnectContext.getHost());
+            redisConnectContext.setSentinelPort(redisConnectContext.getPort());
+            redisConnectContext.setSentinelMasterName(master.get("name"));
+            redisConnectContext.setSentinelUsername(redisConnectContext.getUsername());
+            redisConnectContext.setSentinelPassword(redisConnectContext.getPassword());
             String ip = master.get("ip");
             if (StrUtil.equals(ip, redisConnectContext.getHost())) {
                 redisConnectContext.setHost(ip);

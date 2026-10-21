@@ -42,6 +42,12 @@ public class RedisConnectContext implements Serializable, Cloneable {
     private SslInfo sslInfo;
     private SshInfo sshInfo;
     private Map<String, Integer> clusterLocalPort;
+    // Original Sentinel endpoint and credentials, retained after redirecting to its master.
+    private String sentinelHost;
+    private Integer sentinelPort;
+    private String sentinelMasterName;
+    private String sentinelUsername;
+    private String sentinelPassword;
 
     /**
      * 每次“打开连接”的唯一标识。clone() 是浅拷贝，会原样带上该值，

@@ -233,26 +233,7 @@ public class RedisBasicServiceImpl implements RedisBasicService {
 
 
     private List<ClusterNode> strToClusterNodes(String str) {
-        List<ClusterNode> clusterNodes = new ArrayList<>();
-        for (var s : str.split("\n")) {
-            if (RedisFrontUtils.startWith(s, "#") && RedisFrontUtils.isNotEmpty(s)) {
-                var v = s.split(" ");
-                var clusterNode = new ClusterNode()
-                        .setId(v[0])
-                        .setIpAndPort(v[1])
-                        .setFlags(v[2])
-                        .setMaster(v[3])
-                        .setPing(v[4])
-                        .setPong(v[5])
-                        .setEpoch(v[6])
-                        .setState(v[7])
-                        .setSlot(v.length == 9 ? v[8] : null)
-                        .setHost(v[1].split("@")[0].split(":")[0])
-                        .setPort(Integer.valueOf(v[1].split("@")[0].split(":")[1]));
-                clusterNodes.add(clusterNode);
-            }
-        }
-        return clusterNodes;
+        return org.dromara.redisfront.commons.lettuce.RedisTopologyParser.parseClusterNodes(str);
     }
 
 }

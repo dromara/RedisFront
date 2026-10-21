@@ -1,96 +1,109 @@
 package org.dromara.redisfront.ui.components.chart;
 
-import lombok.Getter;
 import org.dromara.redisfront.model.context.RedisConnectContext;
-import org.jfree.chart.ChartFactory;
+import org.dromara.redisfront.ui.components.monitor.RedisMetricSampler;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.StandardChartTheme;
+import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.block.BlockBorder;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.ui.RectangleInsets;
-
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.RangeType;
+import org.jfree.data.time.TimeSeriesCollection;
 import javax.swing.*;
 import java.awt.*;
+import java.text.SimpleDateFormat;
 
-@Getter
 public abstract class AbstractRedisChart extends JPanel {
     protected final RedisConnectContext redisConnectContext;
-    protected Timer timer = new Timer(2000, ignore -> updateDataset());
+    private JFreeChart chart;
+    private int historyMinutes = 1;
 
-    protected AbstractRedisChart(RedisConnectContext redisConnectContext) {
-        this.redisConnectContext = redisConnectContext;
-        this.setLayout(new BorderLayout());
+    protected AbstractRedisChart(RedisConnectContext context) {
+        this.redisConnectContext = context;
+        setLayout(new BorderLayout());
     }
 
-    public void stopUpdateData() {
-        timer.stop();
-        clearDataset();
-    }
-
-    public void startUpdateData() {
-        timer.start();
-    }
+    public JFreeChart getChart() { return chart; }
+    public void resetData() { clearDataset(); }
+    public abstract void acceptSample(RedisMetricSampler.Sample sample);
 
     protected void setChart(JFreeChart chart) {
-        Color flatBackground = UIManager.getColor("Panel.background");
-        chart.setBackgroundPaint(flatBackground);
-
+        this.chart = chart;
+        Color background = UIManager.getColor("Panel.background");
+        Color foreground = UIManager.getColor("Label.foreground");
+        Font font = UIManager.getFont("Label.font");
+        Color grid = new Color((background.getRed()*4+foreground.getRed())/5,
+                (background.getGreen()*4+foreground.getGreen())/5,
+                (background.getBlue()*4+foreground.getBlue())/5);
+        chart.setBackgroundPaint(background);
         if (chart.getLegend() != null) {
-            chart.getLegend().setBackgroundPaint(flatBackground);
+            chart.getLegend().setBackgroundPaint(background);
+            chart.getLegend().setItemPaint(foreground);
+            chart.getLegend().setItemFont(font);
             chart.getLegend().setFrame(BlockBorder.NONE);
         }
-
-        XYPlot plot = chart.getXYPlot();
-        plot.setBackgroundPaint(flatBackground);
-        plot.setDomainGridlinePaint(new Color(220, 220, 220));
-        plot.setRangeGridlinePaint(new Color(220, 220, 220));
+        var plot = chart.getXYPlot();
+        plot.setBackgroundPaint(background);
+        plot.setDomainGridlinePaint(grid);
+        plot.setRangeGridlinePaint(grid);
         plot.setOutlineVisible(false);
-        plot.setDomainZeroBaselinePaint(new Color(220, 220, 220));
-        plot.setRangeZeroBaselinePaint(new Color(220, 220, 220));
-
-        plot.getRenderer().setSeriesPaint(0, new Color(0x3A8FD8));
-        plot.getRenderer().setSeriesPaint(1, new Color(0xD83A8F));
-
-        ChartPanel chartPanel = new ChartPanel(chart);
-        chartPanel.setPreferredSize(new Dimension(800, 400));
-        chartPanel.setBackground(flatBackground);
-        chartPanel.setOpaque(true);
-        chartPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        add(chartPanel, BorderLayout.CENTER);
+        for (int i=0;i<plot.getDomainAxisCount();i++) styleAxis(plot.getDomainAxis(i), foreground, font);
+        for (int i=0;i<plot.getRangeAxisCount();i++) styleAxis(plot.getRangeAxis(i), foreground, font);
+        if (plot.getDomainAxis() instanceof DateAxis date) date.setDateFormatOverride(new SimpleDateFormat("HH:mm:ss"));
+        for (int i=0;i<plot.getRendererCount();i++) {
+            var renderer=plot.getRenderer(i);
+            if (renderer!=null) {
+                renderer.setSeriesPaint(0, new Color(i==0?0x3A8FD8:0x00AE57));
+                renderer.setSeriesPaint(1, new Color(0xD83A8F));
+                renderer.setDefaultStroke(new BasicStroke(1.8f));
+                if (renderer instanceof XYLineAndShapeRenderer lines) {
+                    lines.setDefaultShapesVisible(true);
+                    lines.setDefaultShape(new java.awt.geom.Ellipse2D.Double(-1.5,-1.5,3,3));
+                }
+            }
+        }
+        setHistoryMinutes(historyMinutes);
+        var panel = new ChartPanel(chart);
+        panel.setBackground(background);
+        panel.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
+        add(panel, BorderLayout.CENTER);
     }
 
-    private void applyTheme() {
-        StandardChartTheme flatTheme = new StandardChartTheme("Flat");
-        Font baseFont = UIManager.getFont("Label.font");
-        Color foreground = UIManager.getColor("Label.foreground");
-        Color background = UIManager.getColor("Panel.background");
-        flatTheme.setExtraLargeFont(baseFont);
-        flatTheme.setLargeFont(baseFont);
-        flatTheme.setRegularFont(baseFont);
-        flatTheme.setTitlePaint(foreground);
-        flatTheme.setChartBackgroundPaint(background);
-        flatTheme.setPlotBackgroundPaint(background);
-        flatTheme.setLegendBackgroundPaint(background);
-        flatTheme.setDomainGridlinePaint(new Color(220, 220, 220));
-        flatTheme.setRangeGridlinePaint(new Color(220, 220, 220));
-        flatTheme.setAxisOffset(new RectangleInsets(5, 5, 5, 5));
-        flatTheme.setShadowVisible(false);
-        ChartFactory.setChartTheme(flatTheme);
+    private void styleAxis(ValueAxis axis, Color foreground, Font font) {
+        if (axis==null) return;
+        axis.setLabelPaint(foreground);
+        axis.setTickLabelPaint(foreground);
+        axis.setAxisLinePaint(foreground);
+        axis.setTickMarkPaint(foreground);
+        axis.setLabelFont(font);
+        axis.setTickLabelFont(font);
+        if (axis instanceof NumberAxis number) {
+            number.setRangeType(RangeType.POSITIVE);
+            number.setAutoRangeMinimumSize(1.0);
+        }
+    }
+
+    public void setHistoryMinutes(int minutes) {
+        historyMinutes=minutes;
+        if (chart==null) return;
+        var plot=chart.getXYPlot();
+        if (plot.getDomainAxis() instanceof DateAxis axis) axis.setFixedAutoRange(minutes*60_000.0);
+        // Keep 15 minutes even when the visible window is shorter.
+        for(int i=0;i<plot.getDatasetCount();i++) {
+            if(plot.getDataset(i) instanceof TimeSeriesCollection data) {
+                for(int j=0;j<data.getSeriesCount();j++) data.getSeries(j).setMaximumItemCount(450);
+            }
+        }
     }
 
     public void refreshUI() {
-        this.applyTheme();
-        this.removeAll();
-        this.rebuildUI();
-        this.revalidate();
-        this.repaint();
+        removeAll();
+        rebuildUI();
+        revalidate();
+        repaint();
     }
-
     protected abstract void rebuildUI();
-
-    protected abstract void updateDataset();
-
     protected abstract void clearDataset();
-
 }

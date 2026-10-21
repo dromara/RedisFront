@@ -179,7 +179,7 @@ public interface RedisBasicService {
         String[] tokens = str.split("\r\n");
         for (String token : tokens) {
             if (!RedisFrontUtils.startWith(token, "#") && RedisFrontUtils.isNotEmpty(token)) {
-                String[] values = token.split(":");
+                String[] values = token.split(":", 2);
                 if (values.length > 1) {
                     result.put(values[0], values[1]);
                 } else {

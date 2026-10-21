@@ -28,6 +28,7 @@ import java.net.Socket;
 @Slf4j
 public class JschManager {
     private static final Map<Integer, Session> SESSION_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, Map<String, Integer>> NODE_FORWARDS = new ConcurrentHashMap<>();
     private static final ConcurrentSkipListSet<Integer> PORT_SET = new ConcurrentSkipListSet<>();
     private static final int MIN_PORT = Integer.parseInt(System.getProperty("jsch.min.port", "32768"));
     private static final int MAX_PORT = Integer.parseInt(System.getProperty("jsch.max.port", "65535"));
@@ -109,6 +110,54 @@ public class JschManager {
                     ignore -> getTempLocalPort());
         }
         return clusterLocalPort;
+    }
+
+    /** Fixed-target monitoring forwards must not rebind the editor's seed/master tunnel. */
+    public int openNodeForwarding(RedisConnectContext context, String host, int port, String owner) {
+        Session session = SESSION_MAP.get(context.getId());
+        if (session == null || !session.isConnected()) {
+            throw new RedisFrontException("SSH session is disconnected");
+        }
+        synchronized (session) {
+            if (!session.isConnected()) throw new RedisFrontException("SSH session is disconnected");
+            var forwards = NODE_FORWARDS.computeIfAbsent(context.getId() + ":" + owner, ignored -> new HashMap<>());
+            String address = RedisConnectContext.clusterAddress(host, port);
+            Integer existing = forwards.get(address);
+            if (existing != null && isForwarding(session, existing, address)) return existing;
+            int localPort = existing == null ? getTempLocalPort() : existing;
+            try {
+                bindForward(session, localPort, host, port);
+                forwards.put(address, localPort);
+                return localPort;
+            } catch (RuntimeException e) {
+                PORT_SET.remove(localPort);
+                forwards.remove(address);
+                throw e;
+            }
+        }
+    }
+
+    public void closeNodeForwardings(RedisConnectContext context, String owner) {
+        Session session = SESSION_MAP.get(context.getId());
+        if (session != null) {
+            synchronized (session) {
+                releaseNodeForwardings(context, session, owner);
+            }
+        } else {
+            releaseNodeForwardings(context, null, owner);
+        }
+    }
+
+    private void releaseNodeForwardings(RedisConnectContext context, Session session, String owner) {
+        String prefix = context.getId() + ":";
+        for (String key : NODE_FORWARDS.keySet()) {
+            if (!key.startsWith(prefix) || owner != null && !key.equals(prefix + owner)) continue;
+            var forwards = NODE_FORWARDS.remove(key);
+            if (forwards != null) forwards.values().forEach(port -> {
+                if (session != null && session.isConnected()) unbindForward(session, port);
+                PORT_SET.remove(port);
+            });
+        }
     }
 
     private void createSession(RedisConnectContext redisConnectContext) {
@@ -222,6 +271,7 @@ public class JschManager {
      * 保证下次 openSession 重新分配而不是复用已随会话断开而释放的端口。
      */
     void releaseLocalPort(RedisConnectContext redisConnectContext) {
+        closeNodeForwardings(redisConnectContext, null);
         Map<String, Integer> clusterLocalPort = redisConnectContext.getClusterLocalPort();
         if (CollUtil.isNotEmpty(clusterLocalPort)) {
             clusterLocalPort.values().forEach(PORT_SET::remove);

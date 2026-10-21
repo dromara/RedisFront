@@ -154,12 +154,14 @@ public class LettuceUtils {
     }
 
     public static RedisClient getRedisClient(RedisConnectContext redisConnectContext) {
-        return CLIENT_CACHE.computeIfAbsent(redisConnectContext.key(), k -> {
-            var redisURI = createRedisURI(redisConnectContext);
-            var redisClient = RedisClient.create(redisURI);
-            configureOptions(redisClient, redisConnectContext);
-            return redisClient;
-        });
+        return CLIENT_CACHE.computeIfAbsent(redisConnectContext.key(), k -> createUncachedClient(redisConnectContext));
+    }
+
+    /** A dedicated client whose lifecycle is owned by a background monitor. */
+    public static RedisClient createUncachedClient(RedisConnectContext context) {
+        var client = RedisClient.create(createRedisURI(context));
+        configureOptions(client, context);
+        return client;
     }
 
     public static void clusterRun(RedisConnectContext redisConnectContext, Consumer<RedisAdvancedClusterCommands<String, byte[]>> consumer) {
