@@ -5,12 +5,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONException;
 import cn.hutool.json.JSONUtil;
 import com.formdev.flatlaf.FlatClientProperties;
-import com.formdev.flatlaf.extras.components.FlatButton;
-import com.formdev.flatlaf.extras.components.FlatToggleButton;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.formdev.flatlaf.ui.FlatEmptyBorder;
-import com.formdev.flatlaf.util.StringUtils;
-import com.google.gson.Gson;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -34,9 +30,9 @@ import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
 import org.dromara.redisfront.ui.components.scanner.core.*;
 import org.dromara.redisfront.ui.components.scanner.model.ScanDataResult;
 import org.dromara.redisfront.ui.dialog.AddOrUpdateValueDialog;
+import org.dromara.redisfront.ui.dialog.ValueChangesDialog;
 import org.dromara.redisfront.ui.event.KeyDeleteSuccessEvent;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
-import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import raven.toast.Notifications;
@@ -96,11 +92,11 @@ public class RightViewFragment {
     private JButton loadMoreBtn;
     private TextEditor textEditor;
     private JTextField fieldOrScoreField;
-    private JComboBox<String> jComboBox;
     private JComboBox<ValueViewType> valueViewComboBox;
-    private FlatToggleButton wrapToggleBtn;
+    private JCheckBox lineWrapCheckBox;
     private AnimateButton copyBtn;
     private AnimateButton jsonFormatBtn;
+    private JButton viewChangesBtn;
 
     private final RedisConnectContext redisConnectContext;
     private final TreeNodeInfo treeNodeInfo;
@@ -112,16 +108,11 @@ public class RightViewFragment {
     private final ZSetRedisDataScanner zSetDataFetcher;
     private final ListRedisDataScanner listDataFetcher;
     private final StreamRedisDataScanner streamDataFetcher;
-    private final Gson gson = new Gson();
     private String lastKeyName;
     private Long lastKeyTTL;
     private KeyTypeEnum keyTypeEnum;
-    private String lastSyntaxStyle;
-    /** 语法下拉框改写过编辑器内容时置位，保存前据此弹确认；重新加载或切换编码视图时复位 */
-    private boolean syntaxComboRewroteContent;
     private ValueViewType lastValueViewType = ValueViewType.AUTO;
     private byte[] currentRawValue;
-    private boolean ignoreSyntaxComboEvent;
 
 
     public RightViewFragment(RedisConnectContext redisConnectContext, TreeNodeInfo treeNodeInfo, RedisFrontWidget owner) {
@@ -142,7 +133,34 @@ public class RightViewFragment {
         this.streamDataFetcher = new StreamRedisDataScanner(redisConnectContext, treeNodeInfo.key(), this::refreshTableUI, owner.getResourceBundle());
 
         $$$setupUI$$$();
+        configureEditorHeader();
         this.initialize();
+    }
+
+    private void configureEditorHeader() {
+        // Keep the designer's fields, but let only the key input grow with the window.
+        basicPanel.removeAll();
+        basicPanel.setLayout(new BorderLayout(8, 0));
+        basicPanel.setBorder(new EmptyBorder(0, 0, 6, 0));
+        var keyIdentity = new JPanel(new BorderLayout(8, 0));
+        keyIdentity.add(keyTypeLabel, BorderLayout.WEST);
+        keyIdentity.add(keyField, BorderLayout.CENTER);
+        basicPanel.add(keyIdentity, BorderLayout.CENTER);
+
+        ttlField.setColumns(7);
+        var keyActions = new JPanel(new FlowLayout(FlowLayout.TRAILING, 6, 0));
+        keyActions.add(ttlField);
+        keyActions.add(delBtn);
+        keyActions.add(refBtn);
+        keyActions.add(saveBtn);
+        basicPanel.add(keyActions, BorderLayout.EAST);
+
+        var valueInfo = new JPanel(new FlowLayout(FlowLayout.TRAILING, 10, 3));
+        lengthLabel.putClientProperty(FlatClientProperties.STYLE, "foreground: $Label.disabledForeground");
+        keySizeLabel.putClientProperty(FlatClientProperties.STYLE, "foreground: $Label.disabledForeground");
+        valueInfo.add(lengthLabel);
+        valueInfo.add(keySizeLabel);
+        valueViewPanel.add(valueInfo, BorderLayout.SOUTH);
     }
 
     private void refreshStringUI(Turbo2<Long, RedisValueItem> turbo) {
@@ -230,10 +248,10 @@ public class RightViewFragment {
                                 textEditor.setEditable(true);
                                 try {
                                     String prettyStr = JSONUtil.toJsonPrettyStr(value);
-                                    textEditor.setText(prettyStr);
+                                    textEditor.loadText(prettyStr);
                                 } catch (Exception ex) {
                                     //json格式化异常
-                                    textEditor.setText(String.valueOf(value));
+                                    textEditor.loadText(String.valueOf(value));
                                 }
                             });
                         }
@@ -272,31 +290,15 @@ public class RightViewFragment {
         });
     }
 
-    private void jsonValueFormat(String value) {
-        if (JSONUtil.isTypeJSON(value)) {
-            try {
-                String prettyStr = JSONUtil.toJsonPrettyStr(value);
-                textEditor.setText(prettyStr);
-                ignoreSyntaxComboEvent = true;
-                jComboBox.setSelectedIndex(1);
-                ignoreSyntaxComboEvent = false;
-            } catch (JSONException e) {
-                //json格式化异常
-                textEditor.setText(value);
-            }
-        } else {
-            textEditor.setText(value);
-        }
-    }
-
     private void setCurrentValue(RedisValueItem valueItem) {
         if (valueItem == null) {
             currentRawValue = null;
-            syntaxComboRewroteContent = false;
             if (valueViewComboBox != null) {
                 valueViewComboBox.setEnabled(false);
             }
-            textEditor.setText("");
+            textEditor.loadText("");
+            textEditor.setSyntaxHighlightingSupported(false);
+            jsonFormatBtn.setEnabled(false);
             refreshSaveButtonByView();
             return;
         }
@@ -307,24 +309,11 @@ public class RightViewFragment {
         refreshEditorByView();
     }
 
-    /**
-     * 让编辑器语法高亮跟随下拉框选择。此前高亮从未与下拉框联动，
-     * 编辑器始终按 JSON 着色，「文本」选项形同虚设。
-     */
-    private void applySyntaxStyle() {
-        if (jComboBox == null) {
-            return;
-        }
-        var style = jComboBox.getSelectedItem();
-        textEditor.setSyntaxEditingStyle(style instanceof String s
-                ? s : SyntaxConstants.SYNTAX_STYLE_NONE);
-    }
-
     private void refreshEditorByView() {
-        // 缓冲将按原始字节重新生成，此前语法下拉框的改写随之失效
-        syntaxComboRewroteContent = false;
         if (currentRawValue == null) {
-            textEditor.setText("");
+            textEditor.loadText("");
+            textEditor.setSyntaxHighlightingSupported(false);
+            jsonFormatBtn.setEnabled(false);
             refreshSaveButtonByView();
             return;
         }
@@ -335,31 +324,33 @@ public class RightViewFragment {
                 || viewType == ValueViewType.GB18030;
         boolean editable = viewType != ValueViewType.ESCAPED;
         textEditor.setEditable(editable);
-        jComboBox.setEnabled(syntaxSupported);
-        if (!editable) {
-            lastSyntaxStyle = null;
-            ignoreSyntaxComboEvent = true;
-            jComboBox.setSelectedIndex(0);
-            ignoreSyntaxComboEvent = false;
-            jComboBox.setEnabled(false);
-            applySyntaxStyle();
-            textEditor.setText(RedisValueCodec.encode(currentRawValue, viewType));
-            refreshSaveButtonByView();
-            return;
-        }
-        if (!syntaxSupported) {
-            lastSyntaxStyle = null;
-            ignoreSyntaxComboEvent = true;
-            jComboBox.setSelectedIndex(0);
-            ignoreSyntaxComboEvent = false;
-            applySyntaxStyle();
-            textEditor.setText(RedisValueCodec.encode(currentRawValue, viewType));
-            refreshSaveButtonByView();
-            return;
-        }
-        jsonValueFormat(RedisValueCodec.encode(currentRawValue, viewType));
-        applySyntaxStyle();
+        textEditor.setSyntaxHighlightingSupported(syntaxSupported);
+        jsonFormatBtn.setEnabled(syntaxSupported);
+        textEditor.loadText(RedisValueCodec.encode(currentRawValue, viewType));
         refreshSaveButtonByView();
+        refreshValueChangesButton();
+    }
+
+    private void refreshValueChangesButton() {
+        if (viewChangesBtn == null) {
+            return;
+        }
+        boolean changed = false;
+        if (currentRawValue != null) {
+            try {
+                var view = lastValueViewType == null ? ValueViewType.AUTO : lastValueViewType;
+                changed = view != ValueViewType.ESCAPED
+                        && !Arrays.equals(currentRawValue, RedisValueCodec.decode(textEditor.getText(), view));
+            } catch (IllegalArgumentException e) {
+                changed = true;
+            }
+        }
+        viewChangesBtn.setVisible(changed);
+    }
+
+    private void copyValue(String value) {
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(value), null);
+        Notifications.getInstance().show(Notifications.Type.INFO, owner.$tr("DataViewForm.copyBtn.success.message"));
     }
 
     private void refreshSaveButtonByView() {
@@ -537,7 +528,12 @@ public class RightViewFragment {
         };
 
         var jToolBar = new JToolBar();
-        jToolBar.setBorder(new EmptyBorder(5, 0, 0, 10));
+        jToolBar.setFloatable(false);
+        jToolBar.setBorder(BorderFactory.createEmptyBorder());
+        textEditor = TextEditor.newInstance();
+        textEditor.installSyntaxHighlightingMenu(owner::$tr);
+        textEditor.installEditingTools(owner::$tr);
+        textEditor.addTextChangeListener(this::refreshValueChangesButton);
 
         fieldOrScoreField = new JTextField();
         keyLabel = new JLabel() {
@@ -549,74 +545,13 @@ public class RightViewFragment {
         };
         keyLabel.setBorder(new EmptyBorder(0, 2, 0, 2));
         fieldOrScoreField.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, keyLabel);
-        jToolBar.add(fieldOrScoreField);
 
-        jComboBox = new JComboBox<>();
-        jComboBox.addItem(SyntaxConstants.SYNTAX_STYLE_NONE);
-        jComboBox.addItem(SyntaxConstants.SYNTAX_STYLE_JSON);
-        // 选项原来直接显示 text/plain / application/json 两个 MIME 常量，
-        // 用户无从得知切换会改写编辑器内容，这里翻译成行为描述并加 tooltip 说明
-        jComboBox.setRenderer(new DefaultListCellRenderer() {
+        valueViewComboBox = new JComboBox<>() {
             @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                if (SyntaxConstants.SYNTAX_STYLE_JSON.equals(value)) {
-                    setText(owner.$tr("DataViewForm.syntaxCombo.json"));
-                } else if (SyntaxConstants.SYNTAX_STYLE_NONE.equals(value)) {
-                    setText(owner.$tr("DataViewForm.syntaxCombo.text"));
-                }
-                return this;
+            public Dimension getMaximumSize() {
+                return getPreferredSize();
             }
-        });
-        jComboBox.setToolTipText(owner.$tr("DataViewForm.syntaxCombo.tooltip.text"));
-        jComboBox.addActionListener(ignore -> {
-            if (ignoreSyntaxComboEvent) {
-                return;
-            }
-            applySyntaxStyle();
-            var item = jComboBox.getSelectedItem();
-            String value = textEditor.getText();
-            if (item instanceof String itemValue) {
-                if (RedisFrontUtils.equal(itemValue, SyntaxConstants.SYNTAX_STYLE_JSON)) {
-                    this.lastSyntaxStyle = SyntaxConstants.SYNTAX_STYLE_JSON;
-                    // 切 JSON 只换解读方式，不再美化排版（格式化交给旁边的格式化按钮）；
-                    // 仅当值是 JSON 字符串字面量（string-in-string）时解一层引号展示内层
-                    if (!JSONUtil.isTypeJSON(value)) {
-                        try {
-                            value = gson.fromJson(value, String.class);
-                        } catch (RuntimeException e) {
-                            // 不是 JSON 字符串字面量，按原样展示
-                            return;
-                        }
-                        if (JSONUtil.isTypeJSON(value)) {
-                            textEditor.setText(value);
-                            syntaxComboRewroteContent = true;
-                        }
-                    }
-                } else {
-                    if (StringUtils.isEmpty(value)) {
-                        return;
-                    }
-                    if (RedisFrontUtils.equal(this.lastSyntaxStyle, SyntaxConstants.SYNTAX_STYLE_JSON)) {
-                        if (JSONUtil.isTypeJSON(value)) {
-                            value = JSONUtil.parse(value).toJSONString(0);
-                            value = gson.toJson(value);
-                        }
-                        textEditor.setText(value);
-                        // 包引号把值变成 string-in-string，是改动最大的一条路径，必须与解引号一样留痕
-                        syntaxComboRewroteContent = true;
-                    }
-                    this.lastSyntaxStyle = null;
-                }
-            }
-        });
-        jComboBox.setBackground(UIManager.getColor("FlatEditorPane.background"));
-        var syntaxLabel = new JLabel(owner.$tr("DataViewForm.syntaxCombo.label"));
-        syntaxLabel.setBorder(new EmptyBorder(0, 2, 0, 2));
-        jToolBar.add(syntaxLabel);
-        jToolBar.add(jComboBox);
-
-        valueViewComboBox = new JComboBox<>();
+        };
         valueViewComboBox.addItem(ValueViewType.AUTO);
         valueViewComboBox.addItem(ValueViewType.UTF8);
         valueViewComboBox.addItem(ValueViewType.GBK);
@@ -637,33 +572,56 @@ public class RightViewFragment {
         encodingLabel.setBorder(new EmptyBorder(0, 2, 0, 2));
         jToolBar.add(encodingLabel);
         jToolBar.add(valueViewComboBox);
+        jToolBar.addSeparator();
 
-        // 值编辑器换行开关：长 JSON 默认关（横向滚动），点开按单词边界折行
-        wrapToggleBtn = new FlatToggleButton() {
+        lineWrapCheckBox = new JCheckBox() {
             @Override
             public void updateUI() {
                 super.updateUI();
+                setText(owner.$tr("DataViewForm.wrapToggle.title"));
                 setToolTipText(owner.$tr("DataViewForm.wrapToggle.tooltip.text"));
-                setIcon(Icons.WRAP_UNSELECTED);
-                setSelectedIcon(Icons.WRAP_SELECTED);
             }
         };
-        wrapToggleBtn.setButtonType(FlatButton.ButtonType.tab);
-        wrapToggleBtn.setTabUnderlineHeight(0);
-        wrapToggleBtn.setFocusable(false);
-        wrapToggleBtn.addActionListener(ignore -> textEditor.setLineWrap(wrapToggleBtn.isSelected()));
-        jToolBar.add(wrapToggleBtn);
+        lineWrapCheckBox.setOpaque(false);
+        lineWrapCheckBox.setFocusable(false);
+        lineWrapCheckBox.addActionListener(ignore -> textEditor.setLineWrap(lineWrapCheckBox.isSelected()));
+        jToolBar.add(lineWrapCheckBox);
+        jToolBar.addSeparator();
+
+        var findButton = new JButton() {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setText(owner.$tr("DataViewForm.search.title"));
+                setToolTipText(owner.$tr("DataViewForm.search.tooltip"));
+            }
+        };
+        findButton.setIcon(new FlatSearchIcon());
+        findButton.setFocusable(false);
+        findButton.addActionListener(e -> textEditor.showSearch(false));
+        jToolBar.add(findButton);
+        var undoButton = new JButton(textEditor.getUndoAction());
+        undoButton.setHideActionText(true);
+        undoButton.setIcon(Icons.UNDO_ICON);
+        undoButton.setFocusable(false);
+        jToolBar.add(undoButton);
+        var redoButton = new JButton(textEditor.getRedoAction());
+        redoButton.setHideActionText(true);
+        redoButton.setIcon(Icons.REDO_ICON);
+        redoButton.setFocusable(false);
+        jToolBar.add(redoButton);
+        jToolBar.addSeparator();
 
         copyBtn = new AnimateButton() {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setText(owner.$tr("DataViewForm.copyBtn.title"));
+                setText(owner.$tr("DataViewForm.copyBtn.title") + " ▾");
                 setToolTipText(owner.$tr("DataViewForm.copyBtn.tooltip.text"));
                 setBackground(UIManager.getColor("RedisFront.animateButton.background"));
             }
         };
-        copyBtn.setText(owner.$tr("DataViewForm.copyBtn.title"));
+        copyBtn.setText(owner.$tr("DataViewForm.copyBtn.title") + " ▾");
         copyBtn.setIcon(Icons.COPY_A_ICON);
         copyBtn.setEffectColor(Color.BLUE);
         copyBtn.setBackground(UIManager.getColor("RedisFront.animateButton.background"));
@@ -674,11 +632,14 @@ public class RightViewFragment {
             if (currentRawValue == null) {
                 return;
             }
-            // 复制解码后的原始值而不是编辑器文本：ESCAPED/BASE64 视图下看到的不是原文
-            var clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-            clipboard.setContents(new StringSelection(
-                    RedisValueCodec.encode(currentRawValue, ValueViewType.AUTO)), null);
-            Notifications.getInstance().show(Notifications.Type.INFO, owner.$tr("DataViewForm.copyBtn.success.message"));
+            var menu = new JPopupMenu();
+            var current = new JMenuItem(owner.$tr("DataViewForm.copyBtn.current"));
+            current.addActionListener(e -> copyValue(textEditor.getText()));
+            menu.add(current);
+            var original = new JMenuItem(owner.$tr("DataViewForm.copyBtn.original"));
+            original.addActionListener(e -> copyValue(RedisValueCodec.encode(currentRawValue, ValueViewType.AUTO)));
+            menu.add(original);
+            menu.show(copyBtn, 0, copyBtn.getHeight());
         });
         jToolBar.add(copyBtn);
 
@@ -709,9 +670,7 @@ public class RightViewFragment {
                 return;
             }
             try {
-                // 合法 JSON 的字符串内部不允许裸换行（必须是 \n 转义），文本里的裸换行
-                // 只可能来自格式化空白。值加载时 jsonValueFormat 已经格式化过 JSON，
-                // 所以这里是对当前态取反：已格式化 → 压缩，压缩态 → 格式化
+                // 根据当前排版切换：单行 JSON 格式化，多行 JSON 压缩。
                 boolean pretty = !text.contains("\n");
                 String formatted;
                 if (pretty) {
@@ -764,12 +723,6 @@ public class RightViewFragment {
             KeyTypeEnum typeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
             var key = keyField.getText();
             var newValue = textEditor.getText();
-            if (syntaxComboRewroteContent) {
-                int i = JOptionPane.showConfirmDialog(owner, owner.$tr("DataViewForm.valueUpdateSaveBtn.syntaxStyleTip"), owner.$tr("DataViewForm.valueUpdateSaveBtn.syntaxStyleTipTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
-                if (i == JOptionPane.CANCEL_OPTION) {
-                    return;
-                }
-            }
             SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
                 var newValueBytes = RedisValueCodec.decode(newValue, lastValueViewType == null ? ValueViewType.AUTO : lastValueViewType);
                 if (typeEnum.equals(KeyTypeEnum.STRING)) {
@@ -808,9 +761,12 @@ public class RightViewFragment {
                         }
                     }
                 }
-                return null;
-            }, (ignore1, e) -> {
+                return newValueBytes;
+            }, (savedBytes, e) -> {
                 if (e == null) {
+                    currentRawValue = savedBytes;
+                    textEditor.loadText(newValue);
+                    refreshValueChangesButton();
                     Notifications.getInstance().show(Notifications.Type.INFO, owner.$tr("DataViewForm.showInformationDialog.updateSuccess.message"));
                     return;
                 }
@@ -821,19 +777,26 @@ public class RightViewFragment {
                 Notifications.getInstance().show(Notifications.Type.ERROR, msg);
             });
         });
-        jToolBar.add(valueUpdateSaveBtn);
-
-        valueViewPanel.add(new JPanel() {
+        jToolBar.add(Box.createHorizontalGlue());
+        viewChangesBtn = new JButton() {
             @Override
             public void updateUI() {
                 super.updateUI();
-                setLayout(new BorderLayout());
-                setBorder(new FlatEmptyBorder(0, 0, 5, 0));
-                add(jToolBar, BorderLayout.SOUTH);
+                setText(owner.$tr("DataViewForm.changes.button"));
             }
-        }, BorderLayout.NORTH);
+        };
+        viewChangesBtn.setVisible(false);
+        viewChangesBtn.addActionListener(e -> ValueChangesDialog.showDialog(owner, keyField.getText(),
+                RedisValueCodec.encode(currentRawValue, lastValueViewType), textEditor.getText(), owner::$tr));
+        jToolBar.add(viewChangesBtn);
+        jToolBar.add(valueUpdateSaveBtn);
 
-        textEditor = TextEditor.newInstance();
+        var editorHeader = new JPanel(new BorderLayout(0, 6));
+        editorHeader.setBorder(new EmptyBorder(2, 0, 6, 0));
+        editorHeader.add(fieldOrScoreField, BorderLayout.NORTH);
+        editorHeader.add(jToolBar, BorderLayout.CENTER);
+        valueViewPanel.add(editorHeader, BorderLayout.NORTH);
+
         valueViewPanel.add(new JPanel() {
             {
                 setLayout(new BorderLayout());

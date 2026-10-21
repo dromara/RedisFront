@@ -44,6 +44,8 @@ public class Icons {
     public static final Icon SAVE_A_ICON = new FlatSVGIcon("icons/save_a.svg",16,16);
     public static final Icon COPY_A_ICON = new FlatSVGIcon("icons/copy_a.svg",16,16);
     public static final Icon JSON_FORMAT_ICON = new FlatSVGIcon("icons/json_format.svg",16,16);
+    public static final Icon UNDO_ICON = new FlatSVGIcon("icons/undo.svg",16,16);
+    public static final Icon REDO_ICON = new FlatSVGIcon("icons/redo.svg",16,16);
     public static final Icon CONTENT_TAB_DATA_ICON = new FlatSVGIcon("icons/table.svg",24,24);
     public static final Icon CONTENT_TAB_COMMAND_ICON = new FlatSVGIcon("icons/db_cli2.svg",24,24);
     public static final Icon CONTENT_TAB_INFO_ICON = new FlatSVGIcon("icons/db_report2.svg",24,24);
