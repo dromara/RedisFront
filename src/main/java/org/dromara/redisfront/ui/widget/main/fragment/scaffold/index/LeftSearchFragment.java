@@ -526,14 +526,13 @@ public class LeftSearchFragment {
 
         };
 
-        //邮件菜单
+        // Detached popup items are not visited when the main window changes theme.
         keyTree.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (MouseEvent.BUTTON3 == e.getButton() && keyTree.getSelectionCount() > 0) {
+                    SwingUtilities.updateComponentTreeUI(popupMenu);
                     popupMenu.show(keyTree, e.getX(), e.getY());
-                    popupMenu.setVisible(true);
-                    popupMenu.pack();
                 }
             }
         });

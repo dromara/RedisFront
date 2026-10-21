@@ -136,9 +136,9 @@ public class RedisConnectTree extends JXTree {
     public void updateUI() {
         super.updateUI();
         if (treePopupMenu != null && treeNodePopupMenu != null && treeNodeGroupPopupMenu != null) {
-            treePopupMenu.updateUI();
-            treeNodePopupMenu.updateUI();
-            treeNodeGroupPopupMenu.updateUI();
+            SwingUtilities.updateComponentTreeUI(treePopupMenu);
+            SwingUtilities.updateComponentTreeUI(treeNodePopupMenu);
+            SwingUtilities.updateComponentTreeUI(treeNodeGroupPopupMenu);
         }
     }
 
@@ -232,8 +232,6 @@ public class RedisConnectTree extends JXTree {
 
     private void initTreeNodeGroupPopupMenu(RedisFrontContext context, DataSource datasource) {
         treeNodeGroupPopupMenu = new JPopupMenu();
-        treeNodeGroupPopupMenu.putClientProperty(FlatClientProperties.STYLE,
-                "[dark]background:darken(#FFFFFF,30%);");
         JMenuItem addConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.addConnect")) {
             {
                 addActionListener(ignore -> {
@@ -313,8 +311,6 @@ public class RedisConnectTree extends JXTree {
 
     private void initTreeNodePopupMenu(RedisFrontContext context, DataSource datasource) {
         treeNodePopupMenu = new JPopupMenu();
-        treeNodePopupMenu.putClientProperty(FlatClientProperties.STYLE,
-                "[dark]background:darken(#FFFFFF,30%);");
 
         JMenuItem openConnectMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.openConnect")) {
             {
@@ -377,8 +373,6 @@ public class RedisConnectTree extends JXTree {
 
     private void initTreePopupMenu(RedisFrontContext context, DataSource datasource) {
         treePopupMenu = new JPopupMenu();
-        treePopupMenu.putClientProperty(FlatClientProperties.STYLE,
-                "[dark]background:darken(#FFFFFF,30%);");
         JMenuItem addConnectGroupMenuItem = new JMenuItem(owner.$tr("RedisConnectTree.popupMenu.addConnectGroup")) {
             {
                 addActionListener(ignore -> context.taskExecute(() -> ConnectGroupDao.newInstance(datasource).count(), (count, exp) -> {
