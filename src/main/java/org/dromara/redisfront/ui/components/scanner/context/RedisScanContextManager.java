@@ -14,4 +14,11 @@ public class RedisScanContextManager<T> {
         contexts.put(key, new RedisScanContext<>());
     }
 
+    public void rename(String oldKey, String newKey) {
+        if (oldKey.equals(newKey)) return;
+        RedisScanContext<T> context = contexts.remove(oldKey);
+        contexts.remove(newKey);
+        if (context != null) contexts.put(newKey, context);
+    }
+
 }

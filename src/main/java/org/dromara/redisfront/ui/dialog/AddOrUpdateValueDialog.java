@@ -9,7 +9,6 @@ import org.dromara.redisfront.commons.codec.RedisValueCodec;
 import org.dromara.redisfront.commons.codec.ValueViewType;
 import org.dromara.redisfront.commons.enums.KeyTypeEnum;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
-import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.service.*;
 import org.dromara.redisfront.ui.components.loading.SyncLoadingDialog;
@@ -31,14 +30,14 @@ public class AddOrUpdateValueDialog extends QSDialog<RedisFrontWidget> {
     private JLabel nameLabel;
     private JLabel valueLabel;
     private final KeyTypeEnum typeEnum;
-    private final String fieldOrScore;
-    private final String value;
+    private final RedisEditService.Target original;
+    private final ValueViewType editingValueType;
     private final String key;
     private final RedisConnectContext redisConnectContext;
     private final Runnable runnable;
 
-    public static void showDialog(RedisFrontWidget redisFrontWidget, String title, String key, String fieldOrScore, String value, RedisConnectContext redisConnectContext, KeyTypeEnum typeEnum, Runnable runnable) {
-        var addOrUpdateItemDialog = new AddOrUpdateValueDialog(redisFrontWidget, title, key, fieldOrScore, value, redisConnectContext, typeEnum, runnable);
+    public static void showDialog(RedisFrontWidget redisFrontWidget, String title, String key, String fieldOrScore, RedisEditService.Target original, RedisConnectContext redisConnectContext, KeyTypeEnum typeEnum, Runnable runnable) {
+        var addOrUpdateItemDialog = new AddOrUpdateValueDialog(redisFrontWidget, title, key, fieldOrScore, original, redisConnectContext, typeEnum, runnable);
         addOrUpdateItemDialog.setResizable(false);
         addOrUpdateItemDialog.setLocationRelativeTo(redisFrontWidget);
         addOrUpdateItemDialog.pack();
@@ -46,7 +45,7 @@ public class AddOrUpdateValueDialog extends QSDialog<RedisFrontWidget> {
     }
 
 
-    public AddOrUpdateValueDialog(RedisFrontWidget redisFrontWidget, String title, String key, String fieldOrScore, String value, RedisConnectContext redisConnectContext, KeyTypeEnum typeEnum, Runnable runnable) {
+    public AddOrUpdateValueDialog(RedisFrontWidget redisFrontWidget, String title, String key, String fieldOrScore, RedisEditService.Target original, RedisConnectContext redisConnectContext, KeyTypeEnum typeEnum, Runnable runnable) {
         super(redisFrontWidget, title, true);
         this.runnable = runnable;
         this.setContentPane(contentPane);
@@ -54,12 +53,12 @@ public class AddOrUpdateValueDialog extends QSDialog<RedisFrontWidget> {
         this.typeEnum = typeEnum;
         this.key = key;
         this.redisConnectContext = redisConnectContext;
-        this.value = value;
-        this.fieldOrScore = fieldOrScore;
+        this.original = original;
+        var display = original == null ? new RedisValueCodec.EditorValue("", ValueViewType.UTF8)
+                : RedisValueCodec.forEditing(original.value(), ValueViewType.AUTO);
+        this.editingValueType = display.effectiveType();
 
-        if (RedisFrontUtils.isNotEmpty(value)) {
-            this.valueTextArea.setText(value);
-        }
+        this.valueTextArea.setText(display.text());
 
         if (typeEnum.equals(KeyTypeEnum.ZSET) || typeEnum.equals(KeyTypeEnum.HASH)) {
             this.nameField.setText(fieldOrScore);
@@ -97,66 +96,27 @@ public class AddOrUpdateValueDialog extends QSDialog<RedisFrontWidget> {
     }
 
     private void onOK() {
-        if (typeEnum.equals(KeyTypeEnum.ZSET) || typeEnum.equals(KeyTypeEnum.HASH)) {
-            if (RedisFrontUtils.isEmpty(nameField.getText())) {
-                nameField.requestFocus();
-            }
-        }
-
-        if (RedisFrontUtils.isEmpty(valueTextArea.getText())) {
-            valueTextArea.requestFocus();
-        }
-
+        String text = valueTextArea.getText();
+        String identity = nameField.getText();
         SyncLoadingDialog.builder(getOwner()).showSyncLoadingDialog(() -> {
-            var newValueBytes = RedisValueCodec.decode(valueTextArea.getText(), ValueViewType.AUTO);
-            if (typeEnum.equals(KeyTypeEnum.ZSET)) {
-                if (RedisFrontUtils.isNotEmpty(value)) {
-                    RedisZSetService.service.zrem(redisConnectContext, key, RedisValueCodec.decode(value, ValueViewType.AUTO));
-                }
-                RedisZSetService.service.zadd(redisConnectContext, key, Double.parseDouble(nameField.getText()), newValueBytes);
-            }
-
-            if (typeEnum.equals(KeyTypeEnum.HASH)) {
-                if (RedisFrontUtils.isNotEmpty(fieldOrScore)) {
-                    RedisHashService.service.hdel(redisConnectContext, key, fieldOrScore);
-                }
-                RedisHashService.service.hset(redisConnectContext, key, nameField.getText(), newValueBytes);
-            }
-
-            if (typeEnum.equals(KeyTypeEnum.LIST)) {
-                if (RedisFrontUtils.isNotEmpty(value)) {
-                    RedisListService.service.lrem(redisConnectContext, key, 1, RedisValueCodec.decode(value, ValueViewType.AUTO));
-                }
-                RedisListService.service.lpush(redisConnectContext, key, newValueBytes);
-            }
-
-            if (typeEnum.equals(KeyTypeEnum.SET)) {
-                if (RedisFrontUtils.isNotEmpty(value)) {
-                    RedisSetService.service.srem(redisConnectContext, key, RedisValueCodec.decode(value, ValueViewType.AUTO));
-                }
-                RedisSetService.service.sadd(redisConnectContext, key, newValueBytes);
-            }
-
-            if (typeEnum.equals(KeyTypeEnum.STREAM)) {
-                if (JSONUtil.isTypeJSON(valueTextArea.getText())) {
-                    HashMap<String, byte[]> bodyMap = new HashMap<>();
-                    JSONUtil.parseObj(valueTextArea.getText()).forEach((k, v) -> bodyMap.put(k, RedisValueCodec.decode(v.toString(), ValueViewType.AUTO)));
-                    RedisStreamService.service.xadd(redisConnectContext, key, bodyMap);
-                } else {
-                    throw new RedisFrontException("stream 请输入JSON - {key:value} 格式数据！", valueTextArea);
-                }
+            byte[] value = RedisValueCodec.decode(text, editingValueType);
+            if (original != null) {
+                RedisEditService.service.save(redisConnectContext, original, value, identity);
+            } else if (typeEnum == KeyTypeEnum.STREAM) {
+                if (!JSONUtil.isTypeJSON(text)) throw new RedisFrontException("stream 请输入 JSON - {key:value} 格式数据！", valueTextArea);
+                HashMap<String, byte[]> body = new HashMap<>();
+                JSONUtil.parseObj(text).forEach((k, v) -> body.put(k, RedisValueCodec.decode(v.toString(), ValueViewType.AUTO)));
+                RedisStreamService.service.xadd(redisConnectContext, key, body);
+            } else {
+                RedisEditService.service.add(redisConnectContext, typeEnum, key, value, identity);
             }
             return 0;
-        }, (ignore, e) -> {
-            if (e == null) {
-                this.runnable.run();
-                this.setVisible(false);
-                this.dispose();
+        }, (result, error) -> {
+            if (error == null) {
+                runnable.run();
+                dispose();
             } else {
-                if (e instanceof RedisFrontException redisFrontException) {
-                    redisFrontException.getComponent().requestFocus();
-                }
-                this.getOwner().displayException(e);
+                getOwner().displayException(error);
             }
         });
     }

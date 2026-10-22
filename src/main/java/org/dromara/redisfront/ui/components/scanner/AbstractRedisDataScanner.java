@@ -57,4 +57,8 @@ public abstract class AbstractRedisDataScanner<T, M extends TableModel> implemen
         redisScanContextManager.reset(key);
     }
 
+    public void renameContext(String oldKey, String newKey) {
+        redisScanContextManager.rename(oldKey, newKey);
+    }
+
 }

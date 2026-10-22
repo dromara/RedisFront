@@ -33,6 +33,7 @@ import org.dromara.redisfront.ui.components.scanner.context.RedisScanContext;
 import org.dromara.redisfront.ui.dialog.AddKeyDialog;
 import org.dromara.redisfront.ui.event.AddKeySuccessEvent;
 import org.dromara.redisfront.ui.event.ClickKeyTreeNodeEvent;
+import org.dromara.redisfront.ui.event.KeyRenameSuccessEvent;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import org.jdesktop.swingx.JXTree;
 import org.jdesktop.swingx.tree.DefaultXTreeCellRenderer;
@@ -153,6 +154,15 @@ public class LeftSearchFragment {
                         scanKeysAndUpdateScanInfo();
                     }
                 }
+            }
+        });
+
+        owner.getEventListener().bind(redisConnectContext.getId(), KeyRenameSuccessEvent.class, event -> {
+            if (event instanceof KeyRenameSuccessEvent renamed && renamed.getId() == redisConnectContext.getId()) {
+                RedisFrontUtils.runEDT(() -> {
+                    scanKeysContextMap.put(redisConnectContext.getDatabase(), new RedisScanContext<>());
+                    scanKeysAndUpdateScanInfo();
+                });
             }
         });
 

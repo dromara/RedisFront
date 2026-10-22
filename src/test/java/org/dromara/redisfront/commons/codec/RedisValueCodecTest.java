@@ -11,6 +11,19 @@ import static org.junit.jupiter.api.Assertions.*;
 class RedisValueCodecTest {
 
     @Test
+    void auto_should_preserve_whitespace_and_control_bytes() {
+        String value = "\u0000 \thello\r\n ";
+        assertArrayEquals(value.getBytes(StandardCharsets.UTF_8), RedisValueCodec.decode(value, ValueViewType.AUTO));
+    }
+
+    @Test
+    void auto_should_preserve_literal_encoding_prefixes() {
+        for (String text : new String[]{"0x4142", "hex:4142", "base64:QUI=", "base64:not-valid!", " 0x4142 "}) {
+            assertArrayEquals(text.getBytes(StandardCharsets.UTF_8), RedisValueCodec.decode(text, ValueViewType.AUTO), text);
+        }
+    }
+
+    @Test
     void auto_should_roundtrip_utf8() {
         byte[] raw = "hello".getBytes(StandardCharsets.UTF_8);
         String text = RedisValueCodec.encode(raw, ValueViewType.AUTO);
@@ -21,9 +34,29 @@ class RedisValueCodecTest {
     @Test
     void auto_should_roundtrip_binary_as_base64_prefixed() {
         byte[] raw = new byte[]{0x00, 0x01, 0x7F, (byte) 0xFF};
-        String text = RedisValueCodec.encode(raw, ValueViewType.AUTO);
-        assertTrue(text.startsWith("base64:"));
-        assertArrayEquals(raw, RedisValueCodec.decode(text, ValueViewType.AUTO));
+        var view = RedisValueCodec.forEditing(raw, ValueViewType.AUTO);
+        assertTrue(view.text().startsWith("base64:"));
+        assertEquals(ValueViewType.BASE64, view.effectiveType());
+        assertArrayEquals(raw, RedisValueCodec.decode(view.text(), view.effectiveType()));
+    }
+
+    @Test
+    void editing_view_should_keep_literal_prefixes_as_utf8() {
+        for (String text : new String[]{"0x4142", "hex:4142", "base64:QUI=", " \thello\r\n"}) {
+            byte[] raw = text.getBytes(StandardCharsets.UTF_8);
+            var view = RedisValueCodec.forEditing(raw, ValueViewType.AUTO);
+            assertEquals(ValueViewType.UTF8, view.effectiveType());
+            assertArrayEquals(raw, RedisValueCodec.decode(view.text(), view.effectiveType()));
+        }
+    }
+
+    @Test
+    void editing_view_should_roundtrip_every_explicit_editable_encoding() {
+        byte[] raw = new byte[]{0, 1, (byte) 0xff, (byte) 0xc3, 0x28};
+        for (ValueViewType type : new ValueViewType[]{ValueViewType.AUTO, ValueViewType.BASE64, ValueViewType.HEX, ValueViewType.LATIN1}) {
+            var view = RedisValueCodec.forEditing(raw, type);
+            assertArrayEquals(raw, RedisValueCodec.decode(view.text(), view.effectiveType()), type.name());
+        }
     }
 
     @Test

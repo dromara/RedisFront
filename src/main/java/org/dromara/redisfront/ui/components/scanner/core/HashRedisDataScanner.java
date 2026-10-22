@@ -18,7 +18,8 @@ import java.util.ResourceBundle;
 import java.util.Map;
 
 public class HashRedisDataScanner extends AbstractRedisDataScanner<Map.Entry<String, byte[]>, HashTableModel> {
-    private final String key;
+    @lombok.Setter
+    private String key;
 
     public HashRedisDataScanner(RedisConnectContext redisConnectContext, String key, ScanDataRefreshHandler<ScanDataResult<HashTableModel>> consumer, ResourceBundle tr) {
         super(redisConnectContext, tr, consumer);

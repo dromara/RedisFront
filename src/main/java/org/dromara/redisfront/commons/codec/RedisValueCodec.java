@@ -10,6 +10,15 @@ import java.util.Base64;
 
 public final class RedisValueCodec {
 
+    public record EditorValue(String text, ValueViewType effectiveType) { }
+
+    /** AUTO chooses a display; its actual decoder is retained independently of the text. */
+    public static EditorValue forEditing(byte[] value, ValueViewType requested) {
+        ValueViewType effective = requested == ValueViewType.AUTO
+                ? (isValidUtf8(value) ? ValueViewType.UTF8 : ValueViewType.BASE64) : requested;
+        return new EditorValue(encode(value, requested), effective);
+    }
+
     private static final String BASE64_PREFIX = "base64:";
     private static final String HEX_PREFIX = "hex:";
     private static final Charset GBK = Charset.forName("GBK");
@@ -39,7 +48,7 @@ public final class RedisValueCodec {
             return new byte[0];
         }
         return switch (type) {
-            case AUTO -> decodeAuto(text);
+            case AUTO -> text.getBytes(StandardCharsets.UTF_8);
             case UTF8 -> text.getBytes(StandardCharsets.UTF_8);
             case GBK -> text.getBytes(GBK);
             case GB18030 -> text.getBytes(GB18030);
@@ -95,20 +104,6 @@ public final class RedisValueCodec {
             }
         }
         return sb.toString();
-    }
-
-    private static byte[] decodeAuto(String text) {
-        String trimmed = text.trim();
-        if (trimmed.regionMatches(true, 0, BASE64_PREFIX, 0, BASE64_PREFIX.length())) {
-            return decodeBase64(trimmed.substring(BASE64_PREFIX.length()).trim());
-        }
-        if (trimmed.regionMatches(true, 0, HEX_PREFIX, 0, HEX_PREFIX.length())) {
-            return decodeHex(trimmed.substring(HEX_PREFIX.length()).trim());
-        }
-        if (trimmed.regionMatches(true, 0, "0x", 0, 2)) {
-            return decodeHex(trimmed.substring(2).trim());
-        }
-        return trimmed.getBytes(StandardCharsets.UTF_8);
     }
 
     private static byte[] decodeBase64(String text) {
