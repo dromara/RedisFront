@@ -25,6 +25,10 @@ public class IndexPageView extends QSPageItem<RedisFrontWidget> {
     private final RedisFrontContext context;
     private final LeftSearchFragment leftSearchFragment;
     private TreeNodeInfo selectTreeNode;
+    private RightViewFragment rightView;
+
+    public boolean confirmDiscardChanges() { return rightView == null || rightView.confirmDiscardChanges(); }
+    public void disposeSearch() { leftSearchFragment.disposeSearch(); }
 
     public IndexPageView(RedisConnectContext redisConnectContext, RedisFrontWidget owner) {
         this.owner = owner;
@@ -32,6 +36,10 @@ public class IndexPageView extends QSPageItem<RedisFrontWidget> {
         this.redisConnectContext = redisConnectContext;
         this.splitPane = new JSplitPane();
         this.leftSearchFragment = new LeftSearchFragment(owner, redisConnectContext);
+        leftSearchFragment.setDatabaseChangeGuard(() -> {
+            if (!confirmDiscardChanges()) return false;
+            rightView = null;selectTreeNode = null;splitPane.setRightComponent(new BorderNonePanel());return true;
+        });
         this.setupUI();
 
     }
@@ -49,18 +57,21 @@ public class IndexPageView extends QSPageItem<RedisFrontWidget> {
                 int dividerLocation = this.splitPane.getDividerLocation();
                 Object message = clickKeyTreeNodeEvent.getMessage();
                 if (message instanceof TreeNodeInfo treeNodeInfo) {
-                    selectTreeNode = treeNodeInfo;
+                    if (!confirmDiscardChanges()) { leftSearchFragment.restoreKeySelection(selectTreeNode);return; }
+                    RightViewFragment candidate = new RightViewFragment(redisConnectContext, treeNodeInfo, owner);
                     SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
-                        RightViewFragment rightViewFragment = new RightViewFragment(redisConnectContext, treeNodeInfo, owner);
-                        rightViewFragment.fetchDataActionPerformed();
-                        return rightViewFragment;
+                        candidate.fetchDataActionPerformed();
+                        return candidate;
                     }, (rightViewFragment, e) -> {
                         if (e == null) {
+                            rightView = rightViewFragment;
+                            selectTreeNode = treeNodeInfo;
                             this.splitPane.setDividerSize(5);
                             this.splitPane.setDividerLocation(dividerLocation);
                             this.splitPane.setRightComponent(new WrapperPanel(rightViewFragment.contentPanel()));
                             rightViewFragment.refreshUI();
                         } else {
+                            leftSearchFragment.restoreKeySelection(selectTreeNode);
                             owner.displayException(ExceptionUtil.unwrap(e));
                         }
                     });
@@ -74,6 +85,7 @@ public class IndexPageView extends QSPageItem<RedisFrontWidget> {
                     return;
                 }
                 this.splitPane.setDividerSize(0);
+                rightView = null;selectTreeNode = null;
                 this.splitPane.setRightComponent(new BorderNonePanel());
                 leftSearchFragment.getRefreshBtn().doClick();
             }

@@ -118,6 +118,13 @@ public class RightViewFragment {
     private byte[] currentRawValue;
     private ValueViewType editingValueType = ValueViewType.UTF8;
     private boolean tableListenersInstalled;
+    private int loadedRow = -1;
+    private boolean restoringSelection;
+    private String editingField;
+    private Double editingScore;
+    private JPanel previewControls;
+    private JLabel previewStatus;
+    private JButton previousChunk, nextChunk, loadFull;
 
 
     public RightViewFragment(RedisConnectContext redisConnectContext, TreeNodeInfo treeNodeInfo, RedisFrontWidget owner) {
@@ -165,7 +172,55 @@ public class RightViewFragment {
         keySizeLabel.putClientProperty(FlatClientProperties.STYLE, "foreground: $Label.disabledForeground");
         valueInfo.add(lengthLabel);
         valueInfo.add(keySizeLabel);
-        valueViewPanel.add(valueInfo, BorderLayout.SOUTH);
+        previewControls = new JPanel(new BorderLayout(8, 0));
+        previewStatus = new JLabel();
+        previousChunk = new JButton(owner.$tr("Safety.previous"));
+        nextChunk = new JButton(owner.$tr("Safety.next"));
+        loadFull = new JButton(owner.$tr("Safety.loadFull"));
+        previousChunk.addActionListener(e -> loadStringChunk(Math.max(0, stringDataFetcher.getSnapshot().offset() - RedisValueLoader.CHUNK_SIZE), false));
+        nextChunk.addActionListener(e -> loadStringChunk(stringDataFetcher.getSnapshot().offset() + RedisValueLoader.CHUNK_SIZE, false));
+        loadFull.addActionListener(e -> loadStringChunk(0, true));
+        var chunkActions = new JPanel(new FlowLayout(FlowLayout.TRAILING, 4, 0));
+        chunkActions.add(previousChunk);
+        chunkActions.add(nextChunk);
+        chunkActions.add(loadFull);
+        previewControls.add(previewStatus, BorderLayout.CENTER);
+        previewControls.add(chunkActions, BorderLayout.EAST);
+        previewControls.setVisible(false);
+        var footer = new JPanel(new BorderLayout(0, 3));
+        footer.add(previewControls, BorderLayout.CENTER);
+        footer.add(valueInfo, BorderLayout.SOUTH);
+        valueViewPanel.add(footer, BorderLayout.SOUTH);
+    }
+
+    private void loadStringChunk(long offset, boolean full) {
+        if (full && JOptionPane.showConfirmDialog(owner, owner.$tr("Safety.fullConfirm"),
+                owner.$tr("Safety.loadFull"), JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) return;
+        SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
+            stringDataFetcher.fetchChunk(lastKeyName, offset, full);
+            return 0;
+        }, (result, error) -> {
+            if (error != null) owner.displayException(error);
+            else stringDataFetcher.refreshUI();
+        });
+    }
+
+    private boolean isPartialPreview() {
+        return keyTypeEnum == KeyTypeEnum.STRING && stringDataFetcher.getSnapshot() != null && stringDataFetcher.getSnapshot().partial();
+    }
+
+    public boolean hasUnsavedChanges() {
+        return hasValueChanges() || lastKeyName != null && (!lastKeyName.equals(keyField.getText())
+                || lastKeyTTL != null && !lastKeyTTL.toString().equals(ttlField.getText()));
+    }
+
+    public boolean confirmDiscardChanges() {
+        return confirmDiscard(hasUnsavedChanges());
+    }
+
+    protected boolean confirmDiscard(boolean dirty) {
+        return !dirty || JOptionPane.showConfirmDialog(owner, owner.$tr("Safety.discard"),
+                owner.$tr("Safety.unsaved"), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION;
     }
 
     private void refreshStringUI(Turbo2<Long, RedisValueItem> turbo) {
@@ -174,6 +229,14 @@ public class RightViewFragment {
         keySizeLabel.setText("Size: " + DataSizeUtil.format(turbo.getT2().byteLength()));
         dataSplitPanel.setDividerSize(0);
         setCurrentValue(turbo.getT2());
+        var snapshot = stringDataFetcher.getSnapshot();
+        if (snapshot != null) {
+            previewControls.setVisible(snapshot.partial());
+            previewStatus.setText(String.format(owner.$tr("Safety.preview"), snapshot.offset(), snapshot.offset() + snapshot.value().length, snapshot.total()));
+            previousChunk.setEnabled(snapshot.offset() > 0);
+            nextChunk.setEnabled(snapshot.offset() + snapshot.value().length < snapshot.total());
+            loadFull.setEnabled(snapshot.total() <= RedisValueLoader.FULL_LIMIT);
+        }
     }
 
     private <T extends TableModel> void refreshTableUI(ScanDataResult<T> scanData) {
@@ -221,7 +284,18 @@ public class RightViewFragment {
         if (tableListenersInstalled) return;
         tableListenersInstalled = true;
         dataTable.getSelectionModel().addListSelectionListener(event -> {
-            if (!event.getValueIsAdjusting()) loadSelectedTableValue();
+            if (event.getValueIsAdjusting() || restoringSelection || dataTable.getSelectedRow() == loadedRow) return;
+            if (!confirmDiscard(hasValueChanges())) {
+                restoringSelection = true;
+                try {
+                    if (loadedRow >= 0 && loadedRow < dataTable.getRowCount())
+                        dataTable.setRowSelectionInterval(loadedRow, loadedRow);
+                } finally {
+                    restoringSelection = false;
+                }
+                return;
+            }
+            loadSelectedTableValue();
         });
         dataTable.addMouseListener(new MouseAdapter() {
             @Override
@@ -229,8 +303,7 @@ public class RightViewFragment {
                 int row = dataTable.getSelectedRow();
                 if (e.getButton() == MouseEvent.BUTTON1 && row >= 0) {
                     tableDelBtn.setEnabled(true);
-                    loadSelectedTableValue();
-                    if (e.getClickCount() == 2) updateValueActionPerformed();
+                    if (e.getClickCount() == 2 && confirmDiscard(hasValueChanges())) updateValueActionPerformed();
                 } else {
                     tableDelBtn.setEnabled(false);
                 }
@@ -256,17 +329,20 @@ public class RightViewFragment {
 
     private void loadSelectedTableValue() {
         int row = dataTable.getSelectedRow();
+        loadedRow = row;
         if (row < 0) {
             setCurrentValue(null);
             return;
         }
         switch (dataTable.getModel()) {
             case SortedSetTableModel ignored -> {
+                editingScore = ((Number) dataTable.getValueAt(row, 1)).doubleValue();
                 keyLabel.setText(owner.$tr("DataViewForm.keyLabel.score.title"));
                 fieldOrScoreField.setText(String.valueOf(dataTable.getValueAt(row, 1)));
                 setCurrentValue((RedisValueItem) dataTable.getValueAt(row, 2));
             }
             case HashTableModel ignored -> {
+                editingField = String.valueOf(dataTable.getValueAt(row, 0));
                 keyLabel.setText(owner.$tr("DataViewForm.keyLabel.title"));
                 fieldOrScoreField.setText(String.valueOf(dataTable.getValueAt(row, 0)));
                 setCurrentValue((RedisValueItem) dataTable.getValueAt(row, 1));
@@ -319,10 +395,10 @@ public class RightViewFragment {
         editingValueType = display.effectiveType();
         boolean syntaxSupported = editingValueType == ValueViewType.UTF8
                 || editingValueType == ValueViewType.GBK || editingValueType == ValueViewType.GB18030;
-        boolean editable = viewType != ValueViewType.ESCAPED;
+        boolean editable = viewType != ValueViewType.ESCAPED && !isPartialPreview();
         textEditor.setEditable(editable);
         textEditor.setSyntaxHighlightingSupported(syntaxSupported);
-        jsonFormatBtn.setEnabled(syntaxSupported);
+        jsonFormatBtn.setEnabled(syntaxSupported && !isPartialPreview());
         textEditor.loadText(display.text());
         valueViewComboBox.setToolTipText(viewType == ValueViewType.AUTO
                 ? String.format(owner.$tr("DataEdit.autoView"), editingValueType.name()) : null);
@@ -335,7 +411,7 @@ public class RightViewFragment {
     }
 
     private boolean hasValueChanges() {
-        if (currentRawValue == null || lastValueViewType == ValueViewType.ESCAPED) return false;
+        if (currentRawValue == null || lastValueViewType == ValueViewType.ESCAPED || isPartialPreview()) return false;
         try {
             if (!Arrays.equals(currentRawValue, RedisValueCodec.decode(textEditor.getText(), editingValueType)))
                 return true;
@@ -351,16 +427,16 @@ public class RightViewFragment {
     }
 
     private String originalFieldOrScore() {
-        int row = dataTable.getSelectedRow();
-        if (row < 0 || keyTypeEnum == null) return null;
+        if (loadedRow < 0 || keyTypeEnum == null) return null;
         return switch (keyTypeEnum) {
-            case HASH -> String.valueOf(dataTable.getValueAt(row, 0));
-            case ZSET -> String.valueOf(dataTable.getValueAt(row, 1));
+            case HASH -> editingField;
+            case ZSET -> String.valueOf(editingScore);
             default -> null;
         };
     }
 
     private RedisEditService.Target captureEditTarget() {
+        if (isPartialPreview()) throw new IllegalStateException(owner.$tr("Safety.partialReadOnly"));
         if (!keyField.getText().equals(lastKeyName))
             throw new IllegalArgumentException(owner.$tr("DataEdit.keyPending"));
         if (currentRawValue == null) throw new RedisEditService.EditException(RedisEditService.Reason.MISSING);
@@ -369,7 +445,7 @@ public class RightViewFragment {
             throw new RedisEditService.EditException(RedisEditService.Reason.MISSING);
         return new RedisEditService.Target(keyTypeEnum, lastKeyName, currentRawValue,
                 keyTypeEnum == KeyTypeEnum.HASH ? originalFieldOrScore() : null,
-                keyTypeEnum == KeyTypeEnum.ZSET ? ((Number) dataTable.getValueAt(row, 1)).doubleValue() : null,
+                keyTypeEnum == KeyTypeEnum.ZSET ? editingScore : null,
                 keyTypeEnum == KeyTypeEnum.LIST ? ((Number) dataTable.getValueAt(row, 0)).longValue() - 1 : null);
     }
 
@@ -404,6 +480,28 @@ public class RightViewFragment {
         ValueChangesDialog.showDialog(owner, keyField.getText(), before, after, owner::$tr);
     }
 
+    private void offerConflictComparison(Throwable error, RedisEditService.Target target, String draft, String identity) {
+        Throwable cause = error;
+        while (cause != null && !(cause instanceof RedisEditService.EditException)) cause = cause.getCause();
+        if (!(cause instanceof RedisEditService.EditException edit) || edit.reason() != RedisEditService.Reason.CONFLICT)
+            return;
+        if (JOptionPane.showConfirmDialog(owner, owner.$tr("Safety.compareConflict"), owner.$tr("Safety.unsaved"),
+                JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) return;
+        ValueViewType view = lastValueViewType;
+        SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> RedisEditService.service.currentValue(redisConnectContext, target), (remote, failure) -> {
+            if (failure != null) {
+                owner.displayException(failure);
+                return;
+            }
+            String before = remote.value() == null ? owner.$tr("DataEdit.MISSING") : RedisValueCodec.encode(remote.value(), view);
+            if (remote.identity() != null) before = remote.identity() + "\n" + before;
+            if (remote.partial()) before = owner.$tr("Safety.partialReadOnly") + "\n" + before;
+            String after = target.type() == KeyTypeEnum.HASH || target.type() == KeyTypeEnum.ZSET ? identity + "\n" + draft : draft;
+            ValueChangesDialog.showDialog(owner, target.key(), owner.$tr("Safety.serverValue") + "\n" + before,
+                    owner.$tr("Safety.localValue") + "\n" + after, owner::$tr);
+        });
+    }
+
     private void acceptMetadataUpdate(String oldKey, String newKey, Long requestedTtl) {
         lastKeyName = newKey;
         keyField.setText(newKey);
@@ -434,7 +532,7 @@ public class RightViewFragment {
         if (valueUpdateSaveBtn == null) {
             return;
         }
-        boolean enabled = currentRawValue != null && lastValueViewType != ValueViewType.ESCAPED;
+        boolean enabled = currentRawValue != null && lastValueViewType != ValueViewType.ESCAPED && !isPartialPreview();
         valueUpdateSaveBtn.setEnabled(enabled);
         if (copyBtn != null) {
             // 复制与编码视图无关，只要当前有值就可用
@@ -634,6 +732,11 @@ public class RightViewFragment {
         valueViewComboBox.addActionListener(ignore -> {
             Object item = valueViewComboBox.getSelectedItem();
             if (item instanceof ValueViewType valueViewType) {
+                if (valueViewType == lastValueViewType) return;
+                if (!confirmDiscard(hasValueChanges())) {
+                    valueViewComboBox.setSelectedItem(lastValueViewType);
+                    return;
+                }
                 lastValueViewType = valueViewType;
                 refreshEditorByView();
             }
@@ -797,6 +900,7 @@ public class RightViewFragment {
             }
             String newText = textEditor.getText();
             String identity = fieldOrScoreField.getText();
+            String ttlDraft = ttlField.getText().equals(String.valueOf(lastKeyTTL)) ? null : ttlField.getText();
             ValueViewType decoder = editingValueType;
             SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
                 byte[] value = RedisValueCodec.decode(newText, decoder);
@@ -805,16 +909,22 @@ public class RightViewFragment {
             }, (savedBytes, e) -> {
                 if (e != null) {
                     Notifications.getInstance().show(Notifications.Type.ERROR, ExceptionMessageUtils.bestMessage(e));
+                    offerConflictComparison(e, target, newText, identity);
                     return;
                 }
                 currentRawValue = savedBytes;
                 refreshEditorByView();
                 Notifications.getInstance().show(Notifications.Type.SUCCESS, owner.$tr("DataViewForm.showInformationDialog.updateSuccess.message"));
                 if (target.type() == KeyTypeEnum.STRING) {
-                    reloadAllActionPerformed();
+                    reloadTableDataActionPerformed(true, () -> {
+                        if (ttlDraft != null) ttlField.setText(ttlDraft);
+                    });
                 } else {
                     setCurrentValue(null);
-                    reloadTableDataActionPerformed(true, () -> restoreSavedSelection(target, savedBytes, identity));
+                    reloadTableDataActionPerformed(true, () -> {
+                        restoreSavedSelection(target, savedBytes, identity);
+                        if (ttlDraft != null) ttlField.setText(ttlDraft);
+                    });
                 }
             });
         });
@@ -849,7 +959,7 @@ public class RightViewFragment {
         loadMoreBtn = new JButton();
         loadMoreBtn.setIcon(Icons.LOAD_MORE_ICON);
         loadMoreBtn.addActionListener((ignore) -> {
-            if (loadMoreBtn.isEnabled()) {
+            if (loadMoreBtn.isEnabled() && confirmDiscardChanges()) {
                 loadMoreBtn.setEnabled(false);
                 reloadTableDataActionPerformed(false);
             }
@@ -909,7 +1019,8 @@ public class RightViewFragment {
         delBtn.setArcHeight(10);
         delBtn.setArcWidth(10);
         delBtn.addActionListener(ignore -> {
-            var key = keyField.getText();
+            if (!confirmDiscardChanges()) return;
+            var key = lastKeyName;
             SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() ->
                             RedisBasicService.service.del(redisConnectContext, key),
                     (ignore1, e) -> {
@@ -937,7 +1048,9 @@ public class RightViewFragment {
         refBtn.setArcHeight(10);
         refBtn.setArcWidth(10);
         refBtn.setBorder(new EmptyBorder(5, 5, 5, 5));
-        refBtn.addActionListener(ignore -> reloadAllActionPerformed());
+        refBtn.addActionListener(ignore -> {
+            if (confirmDiscardChanges()) reloadAllActionPerformed();
+        });
 
         saveBtn = new AnimateButton() {
             @Override
@@ -994,10 +1107,13 @@ public class RightViewFragment {
         };
 
         var searchBtn = new JButton(new FlatSearchIcon());
-        searchBtn.addActionListener(ignore -> reloadTableDataActionPerformed(true));
+        searchBtn.addActionListener(ignore -> {
+            if (confirmDiscardChanges()) reloadTableDataActionPerformed(true);
+        });
         tableSearchField.putClientProperty(FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchBtn);
         tableSearchField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         tableSearchField.putClientProperty(FlatClientProperties.TEXT_FIELD_CLEAR_CALLBACK, (Consumer<JTextComponent>) ignore -> {
+            if (!confirmDiscardChanges()) return;
             tableSearchField.setText("");
             reloadTableDataActionPerformed(true);
         });
@@ -1010,6 +1126,10 @@ public class RightViewFragment {
         };
 
         tableAddBtn.addActionListener((ignore) -> {
+            if (!keyField.getText().equals(lastKeyName)) {
+                Notifications.getInstance().show(Notifications.Type.ERROR, owner.$tr("DataEdit.keyPending"));
+                return;
+            }
             var keyType = keyTypeLabel.getText();
             KeyTypeEnum keyTypeEnum = KeyTypeEnum.valueOf(keyType.toUpperCase());
             String key = keyField.getText();
@@ -1112,7 +1232,7 @@ public class RightViewFragment {
         };
 
         tableRefreshBtn.addActionListener(ignore -> {
-            reloadTableDataActionPerformed(true);
+            if (confirmDiscardChanges()) reloadTableDataActionPerformed(true);
         });
 
         var pageNumLabel = new JLabel() {

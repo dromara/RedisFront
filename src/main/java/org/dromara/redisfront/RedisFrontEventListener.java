@@ -39,24 +39,13 @@ public class RedisFrontEventListener extends QSEventListener<RedisFrontWidget> {
 
     public void bind(int id, Class<? extends QSEvent> clazz, Consumer<QSEvent> consumer) {
         String name = clazz.getName();
-        if (listener.containsKey(id)) {
-            EventConsumer eventConsumer = listener.get(id);
-            if (!eventConsumer.containsKey(name)) {
-                eventConsumer.put(name, consumer);
-            }
-        } else {
-            listener.put(id, new EventConsumer(name, consumer));
-        }
+        listener.computeIfAbsent(id, ignored -> new EventConsumer()).putIfAbsent(name, consumer);
     }
 
     public void unbind(int id) {
         listener.remove(id);
     }
 
-    private static class EventConsumer extends HashMap<String, Consumer<QSEvent>> {
-        public EventConsumer(String name, Consumer<QSEvent> consumer) {
-            this.put(name, consumer);
-        }
-    }
+    private static class EventConsumer extends ConcurrentHashMap<String, Consumer<QSEvent>> { }
 
 }

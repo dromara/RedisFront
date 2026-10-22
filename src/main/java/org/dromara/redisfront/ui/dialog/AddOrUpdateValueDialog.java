@@ -122,6 +122,13 @@ public class AddOrUpdateValueDialog extends QSDialog<RedisFrontWidget> {
     }
 
     private void onCancel() {
+        String initial = original == null ? "" : RedisValueCodec.forEditing(original.value(), ValueViewType.AUTO).text();
+        String initialIdentity = original == null ? "" : original.type() == KeyTypeEnum.HASH ? original.field()
+                : original.type() == KeyTypeEnum.ZSET ? String.valueOf(original.score()) : "";
+        boolean changed = !initial.equals(valueTextArea.getText()) || (typeEnum == KeyTypeEnum.HASH || typeEnum == KeyTypeEnum.ZSET)
+                && !initialIdentity.equals(nameField.getText());
+        if (changed && JOptionPane.showConfirmDialog(this, getOwner().$tr("Safety.discard"), getOwner().$tr("Safety.unsaved"),
+                JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) return;
         this.dispose();
     }
 

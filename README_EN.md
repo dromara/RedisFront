@@ -2,7 +2,7 @@
 
 -------
 
-![JDK](https://img.shields.io/badge/JDK-22-blue.svg)
+![JDK](https://img.shields.io/badge/JDK-21+-blue.svg)
 ![Apache 2.0](https://img.shields.io/badge/Apache-2.0-4green.svg)
 ![Release](https://img.shields.io/badge/Release-2026.1-green.svg)
 

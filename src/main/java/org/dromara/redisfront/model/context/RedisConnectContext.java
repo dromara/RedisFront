@@ -111,13 +111,23 @@ public class RedisConnectContext implements Serializable, Cloneable {
 
     @Getter
     @Setter
-    @AllArgsConstructor
+    @NoArgsConstructor
     public static class SettingInfo implements Serializable {
+        private volatile boolean readOnly;
+        private String sentinelEndpoints;
         private Integer loadKeyNum;
         private String keySeparator;
         private Integer redisTimeout;
         private Integer sshTimeout;
         private Integer defaultDatabase;
+
+        public SettingInfo(Integer loadKeyNum, String keySeparator, Integer redisTimeout, Integer sshTimeout, Integer defaultDatabase) {
+            this.loadKeyNum = loadKeyNum;
+            this.keySeparator = keySeparator;
+            this.redisTimeout = redisTimeout;
+            this.sshTimeout = sshTimeout;
+            this.defaultDatabase = defaultDatabase;
+        }
 
         public SettingInfo(Integer loadKeyNum, String keySeparator, Integer redisTimeout, Integer sshTimeout) {
             this(loadKeyNum, keySeparator, redisTimeout, sshTimeout, 0);

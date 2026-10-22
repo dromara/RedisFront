@@ -43,6 +43,7 @@ public class LettuceUtils {
     private static final Logger log = LoggerFactory.getLogger(LettuceUtils.class);
     private static final Map<String, RedisClient> CLIENT_CACHE = new ConcurrentHashMap<>();
     private static final Map<String, RedisClusterClient> CLUSTER_CLIENT_CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, ClientResources> CLUSTER_RESOURCES = new ConcurrentHashMap<>();
 
     private LettuceUtils() {
     }
@@ -128,15 +129,17 @@ public class LettuceUtils {
 
     public static Set<Integer> getRedisClusterPartitionPorts(RedisConnectContext redisConnectContext) {
         Set<Integer> ports = new HashSet<>();
-        var redisURI = createRedisURI(redisConnectContext);
-        try (var clusterClient = RedisClusterClient.create(redisURI)) {
-            clusterClient.getPartitions().forEach(redisClusterNode -> ports.add(redisClusterNode.getUri().getPort()));
-        }
+        getRedisClusterPartitions(redisConnectContext).forEach(node -> ports.add(node.getUri().getPort()));
         return ports;
     }
 
     public static Partitions getRedisClusterPartitions(RedisConnectContext redisConnectContext) {
         var redisURI = createRedisURI(redisConnectContext);
+        if (redisConnectContext.getConnectTypeMode() == ConnectType.SSH) {
+            var resources = ClientResources.builder().socketAddressResolver(new AddressMappingResolver(redisConnectContext)).build();
+            try (var clusterClient = RedisClusterClient.create(resources, redisURI)) { return clusterClient.getPartitions(); }
+            finally { resources.shutdown(); }
+        }
         try (var clusterClient = RedisClusterClient.create(redisURI)) {
             return clusterClient.getPartitions();
         }
@@ -145,11 +148,12 @@ public class LettuceUtils {
     public static RedisClusterClient getRedisClusterClient(RedisURI redisURI, RedisConnectContext redisConnectContext) {
         return CLUSTER_CLIENT_CACHE.computeIfAbsent(redisConnectContext.key(), k -> {
             AddressMappingResolver mappingResolver = new AddressMappingResolver(redisConnectContext);
-            var clusterClient = RedisClusterClient.create(ClientResources.builder()
-                    .socketAddressResolver(mappingResolver)
-                    .build(), redisURI);
-            configureOptions(clusterClient, redisConnectContext);
-            return clusterClient;
+            var resources = ClientResources.builder().socketAddressResolver(mappingResolver).build();
+            try {
+                var clusterClient = RedisClusterClient.create(resources, redisURI);
+                configureOptions(clusterClient, redisConnectContext);
+                CLUSTER_RESOURCES.put(k, resources);return clusterClient;
+            } catch (RuntimeException failure) { resources.shutdown();throw failure; }
         });
     }
 
@@ -167,8 +171,9 @@ public class LettuceUtils {
     public static void clusterRun(RedisConnectContext redisConnectContext, Consumer<RedisAdvancedClusterCommands<String, byte[]>> consumer) {
         StatefulRedisClusterConnection<String, byte[]> connection = null;
         try {
+            ConnectionRecovery.prepare(redisConnectContext);
             connection = RedisConnectionPoolManager.getClusterConnection(redisConnectContext);
-            consumer.accept(connection.sync());
+            consumer.accept(ReadOnlyCommands.wrap(redisConnectContext, connection.sync(), RedisAdvancedClusterCommands.class));
         } catch (Exception exception) {
             log.error("redis连接失败：{}", ExceptionMessageUtils.bestMessage(exception));
             log.debug("redis连接失败堆栈", exception);
@@ -181,8 +186,9 @@ public class LettuceUtils {
     public static <T> T clusterExec(RedisConnectContext redisConnectContext, Function<RedisAdvancedClusterCommands<String, byte[]>, T> function) {
         StatefulRedisClusterConnection<String, byte[]> connection = null;
         try {
+            ConnectionRecovery.prepare(redisConnectContext);
             connection = RedisConnectionPoolManager.getClusterConnection(redisConnectContext);
-            return function.apply(connection.sync());
+            return function.apply(ReadOnlyCommands.wrap(redisConnectContext, connection.sync(), RedisAdvancedClusterCommands.class));
         } catch (Exception exception) {
             log.error("redis连接失败：{}", ExceptionMessageUtils.bestMessage(exception));
             log.debug("redis连接失败堆栈", exception);
@@ -197,7 +203,7 @@ public class LettuceUtils {
         StatefulRedisSentinelConnection<String, String> connection = null;
         try {
             connection = RedisConnectionPoolManager.getSentinelConnection(redisConnectContext);
-            consumer.accept(connection.sync());
+            consumer.accept(ReadOnlyCommands.wrap(redisConnectContext, connection.sync(), RedisSentinelCommands.class));
         } catch (Exception exception) {
             log.error("redis连接失败：{}", ExceptionMessageUtils.bestMessage(exception));
             log.debug("redis连接失败堆栈", exception);
@@ -212,7 +218,7 @@ public class LettuceUtils {
         StatefulRedisSentinelConnection<String, String> connection = null;
         try {
             connection = RedisConnectionPoolManager.getSentinelConnection(redisConnectContext);
-            return function.apply(connection.sync());
+            return function.apply(ReadOnlyCommands.wrap(redisConnectContext, connection.sync(), RedisSentinelCommands.class));
         } catch (Exception exception) {
             log.error("redis连接失败：{}", ExceptionMessageUtils.bestMessage(exception));
             log.debug("redis连接失败堆栈", exception);
@@ -225,8 +231,9 @@ public class LettuceUtils {
     public static void run(RedisConnectContext redisConnectContext, Consumer<RedisCommands<String, byte[]>> consumer) {
         StatefulRedisConnection<String, byte[]> connection = null;
         try {
+            ConnectionRecovery.prepare(redisConnectContext);
             connection = RedisConnectionPoolManager.getConnection(redisConnectContext);
-            consumer.accept(connection.sync());
+            consumer.accept(ReadOnlyCommands.wrap(redisConnectContext, connection.sync(), RedisCommands.class));
         } catch (Exception exception) {
             log.error("redis连接失败：{}", ExceptionMessageUtils.bestMessage(exception));
             log.debug("redis连接失败堆栈", exception);
@@ -239,8 +246,9 @@ public class LettuceUtils {
     public static <T> T exec(RedisConnectContext redisConnectContext, Function<RedisCommands<String, byte[]>, T> function) {
         StatefulRedisConnection<String, byte[]> connection = null;
         try {
+            ConnectionRecovery.prepare(redisConnectContext);
             connection = RedisConnectionPoolManager.getConnection(redisConnectContext);
-            return function.apply(connection.sync());
+            return function.apply(ReadOnlyCommands.wrap(redisConnectContext, connection.sync(), RedisCommands.class));
         } catch (Exception exception) {
             log.error("redis连接失败：{}", ExceptionMessageUtils.bestMessage(exception));
             log.debug("redis连接失败堆栈", exception);
@@ -272,6 +280,10 @@ public class LettuceUtils {
         // key() 后半段会随 host/port/database 变化，客户端也要按前缀整组关闭
         shutdownClients(CLIENT_CACHE, keyPrefix);
         shutdownClients(CLUSTER_CLIENT_CACHE, keyPrefix);
+        CLUSTER_RESOURCES.entrySet().removeIf(entry -> {
+            if (!entry.getKey().startsWith(keyPrefix)) return false;
+            entry.getValue().shutdown();return true;
+        });
     }
 
     private static <T extends AutoCloseable> void shutdownClients(Map<String, T> clientCache, String keyPrefix) {

@@ -52,18 +52,23 @@ public class RedisConnectionPoolManager {
     private static final Map<String, GenericObjectPool<StatefulRedisSentinelConnection<String, String>>> SENTINEL_POOLS = new ConcurrentHashMap<>();
     private static final Map<String, GenericObjectPool<StatefulRedisConnection<String, byte[]>>> NORMAL_POOLS = new ConcurrentHashMap<>();
     private static final Map<String, GenericObjectPool<StatefulRedisPubSubConnection<String, String>>> NORMAL_PUB_POOLS = new ConcurrentHashMap<>();
+    private static final java.util.Set<io.lettuce.core.AbstractRedisClient> OBSERVED_CLIENTS = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
+
+    private static void observeClient(io.lettuce.core.AbstractRedisClient client, RedisConnectContext context) {
+        synchronized (OBSERVED_CLIENTS) {
+            if (!OBSERVED_CLIENTS.add(client)) return;
+            client.addListener(new CommandListener() {
+                @Override public void commandStarted(CommandStartedEvent event) { publishCommandEvent(event, context); }
+            });
+        }
+    }
 
     public static StatefulRedisClusterPubSubConnection<String, String> getClusterConnectPubSub(
             RedisConnectContext context) {
         return getConnection(CLUSTER_PUB_POOLS, context, () -> {
             RedisURI uri = LettuceUtils.createRedisURI(context);
             RedisClusterClient client = LettuceUtils.getRedisClusterClient(uri, context);
-            client.addListener(new CommandListener() {
-                @Override
-                public void commandStarted(CommandStartedEvent event) {
-                    publishCommandEvent(event, context);
-                }
-            });
+            observeClient(client, context);
             return client.connectPubSub();
         });
     }
@@ -72,12 +77,7 @@ public class RedisConnectionPoolManager {
         return getConnection(CLUSTER_POOLS, context, () -> {
             RedisURI uri = LettuceUtils.createRedisURI(context);
             RedisClusterClient client = LettuceUtils.getRedisClusterClient(uri, context);
-            client.addListener(new CommandListener() {
-                @Override
-                public void commandStarted(CommandStartedEvent event) {
-                    publishCommandEvent(event, context);
-                }
-            });
+            observeClient(client, context);
             return client.connect(UTF8_KEY_BYTE_ARRAY_VALUE_CODEC);
         });
     }
@@ -85,12 +85,7 @@ public class RedisConnectionPoolManager {
     public static StatefulRedisSentinelConnection<String, String> getSentinelConnection(RedisConnectContext context) {
         return getConnection(SENTINEL_POOLS, context, () -> {
             RedisClient client = LettuceUtils.getRedisClient(context);
-            client.addListener(new CommandListener() {
-                @Override
-                public void commandStarted(CommandStartedEvent event) {
-                    publishCommandEvent(event, context);
-                }
-            });
+            observeClient(client, context);
             return client.connectSentinel();
         });
     }
@@ -98,12 +93,7 @@ public class RedisConnectionPoolManager {
     public static StatefulRedisConnection<String, byte[]> getConnection(RedisConnectContext context) {
         return getConnection(NORMAL_POOLS, context, () -> {
             RedisClient client = LettuceUtils.getRedisClient(context);
-            client.addListener(new CommandListener() {
-                @Override
-                public void commandStarted(CommandStartedEvent event) {
-                    publishCommandEvent(event, context);
-                }
-            });
+            observeClient(client, context);
             return client.connect(UTF8_KEY_BYTE_ARRAY_VALUE_CODEC);
         });
     }
@@ -115,12 +105,10 @@ public class RedisConnectionPoolManager {
     private static void publishCommandEvent(CommandStartedEvent event, RedisConnectContext context) {
         if (LogStatusHolder.getIgnoredLog() == null) {
             String type = event.getCommand().getType().toString();
-            CommandArgs<Object, Object> args = event.getCommand().getArgs();
-            String commandString = RedisFrontUtils.isNotNull(args) ? args.toCommandString() : "";
             LogInfo logInfo = new LogInfo();
             logInfo.setIp(context.getHost());
             logInfo.setDate(LocalDateTime.now());
-            logInfo.setInfo(commandLogInfo(type, commandString));
+            logInfo.setInfo(commandLogInfo(type, ""));
             RedisFrontContext.publishEvent(new CommandExecuteEvent(logInfo, context.getId()));
         }
     }
@@ -128,12 +116,7 @@ public class RedisConnectionPoolManager {
     public static StatefulRedisPubSubConnection<String, String> getConnectPubSub(RedisConnectContext context) {
         return getConnection(NORMAL_PUB_POOLS, context, () -> {
             RedisClient client = LettuceUtils.getRedisClient(context);
-            client.addListener(new CommandListener() {
-                @Override
-                public void commandStarted(CommandStartedEvent event) {
-                    publishCommandEvent(event, context);
-                }
-            });
+            observeClient(client, context);
             return client.connectPubSub();
         });
     }

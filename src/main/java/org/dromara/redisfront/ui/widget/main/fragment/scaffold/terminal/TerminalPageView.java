@@ -33,6 +33,8 @@ public class TerminalPageView extends QSPageItem<RedisFrontWidget> {
         super.onChange();
     }
 
+    public void disposeTerminal() { if (terminal != null) terminal.close(); }
+
     @Override
     public RedisFrontWidget getApp() {
         return owner;

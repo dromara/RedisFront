@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /** Opt-in live Redis contract checks. All fixtures are uniquely namespaced and cleaned up. */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestMethodOrder(MethodOrderer.MethodName.class)
 @EnabledIfEnvironmentVariable(named = "REDISFRONT_TEST_HOST", matches = ".+")
 class RedisEditIntegrationTest {
     private final String prefix = "redisfront:safety:" + UUID.randomUUID() + ":";
@@ -52,7 +53,10 @@ class RedisEditIntegrationTest {
             JschManager.MANAGER.openSession(context);
         }
         if (context.getRedisMode() == RedisMode.SENTINEL) {
+            context.setSentinelHost(context.getHost());context.setSentinelPort(context.getPort());
+            context.setSentinelUsername(context.getUsername());context.setSentinelPassword(context.getPassword());
             var master = LettuceUtils.sentinelExec(context, c -> c.masters()).getFirst();
+            context.setSentinelMasterName(master.get("name"));
             context.setHost(master.get("ip"));context.setPort(Integer.parseInt(master.get("port")));
             if (context.getConnectTypeMode() == ConnectType.SSH) JschManager.MANAGER.redirectSession(context);
         } else if (context.getRedisMode() == RedisMode.CLUSTER && context.getConnectTypeMode() == ConnectType.SSH) {
@@ -86,6 +90,7 @@ class RedisEditIntegrationTest {
         if (context != null) {
             if (context.getConnectTypeMode() == ConnectType.SSH) JschManager.MANAGER.closeSession(context);
             RedisConnectionPoolManager.cleanupContextPool(context);LettuceUtils.close(context);
+            org.dromara.redisfront.commons.lettuce.ConnectionRecovery.close(context);
         }
         LogStatusHolder.clear();
     }
@@ -100,12 +105,45 @@ class RedisEditIntegrationTest {
         }
     }
 
+    @Test void memoryAnalysisUsesServerAllocationsForAllCoreTypesWithoutChangingData() {
+        String text = key("memory-string"), empty = key("memory-empty"), hash = key("memory-hash"), set = key("memory-set"),
+                list = key("memory-list"), zset = key("memory-zset"), stream = key("memory-stream"), missing = key("memory-missing");
+        byte[] payload = b("x".repeat(94));string(text, payload);string(empty, new byte[0]);
+        RedisHashService.service.hset(context, hash, "field", b("value"));
+        RedisSetService.service.sadd(context, set, b("member"));
+        RedisListService.service.rpush(context, list, b("first"), b("second"));
+        RedisZSetService.service.zadd(context, zset, 1.5, b("member"));
+        LettuceUtils.execByMode(context, c -> c.xadd(stream, Map.of("field", b("value"))), c -> c.xadd(stream, Map.of("field", b("value"))));
+        expire(text);long ttlBefore = ttl(text);
+        var updates = new LinkedHashMap<String, org.dromara.redisfront.model.MemoryUsageResult>();
+        context.getSetting().setReadOnly(true);
+        try {
+            var summary = RedisMemoryService.analyze(context, List.of(text, empty, hash, set, list, zset, stream, missing), () -> false,
+                    update -> updates.put(update.key(), update.result()));
+            assertEquals(8, summary.processed());assertEquals(7, summary.measured());assertEquals(1, summary.missing());
+            assertEquals(0, summary.failed());assertEquals(0, summary.unsupported());
+            assertTrue(updates.get(text).bytes() > payload.length, "String measurement must include allocation overhead, not just payload length");
+            assertTrue(updates.get(empty).bytes() > 0, "Empty values still have allocation overhead");
+            for (String key : List.of(hash, set, list, zset, stream)) assertTrue(updates.get(key).bytes() > 0);
+            assertNull(updates.get(missing).bytes());assertArrayEquals(payload, get(text));keptTtl(text, ttlBefore);
+        } finally { context.getSetting().setReadOnly(false); }
+    }
+
+    @Test void memoryAnalysisCancellationPreservesItsCompletedNativeMeasurement() {
+        String first = key("memory-cancel-a"), second = key("memory-cancel-b");string(first, b("a"));string(second, b("b"));
+        var cancelled = new java.util.concurrent.atomic.AtomicBoolean();
+        var summary = RedisMemoryService.analyze(context, List.of(first, second), cancelled::get, update -> cancelled.set(true));
+        assertEquals(1, summary.processed());assertEquals(1, summary.measured());assertTrue(summary.cancelled());
+        assertTrue(summary.bytes() > 0);assertArrayEquals(b("a"), get(first));assertArrayEquals(b("b"), get(second));
+    }
+
     @Test void stringEditPreservesTtlAndRejectsConcurrentChanges() {
         String key = key("string");string(key, b("old"));long before = ttl(key);
         var original = target(KeyTypeEnum.STRING, key, b("old"), null, null, null);
         edits.save(context, original, b("new"), "");assertArrayEquals(b("new"), get(key));keptTtl(key, before);
         failure(RedisEditService.Reason.CONFLICT, () -> edits.save(context, original, b("stale"), ""));
         assertArrayEquals(b("new"), get(key));
+        assertArrayEquals(b("new"), edits.currentValue(context, original).value());
         RedisBasicService.service.del(context, key);
         failure(RedisEditService.Reason.MISSING, () -> edits.save(context, original, b("resurrect"), ""));
         assertNull(get(key));
@@ -213,6 +251,7 @@ class RedisEditIntegrationTest {
             assertArrayEquals(b("old"), get(string));assertNull(get(renamed));
         } finally {
             RedisConnectionPoolManager.cleanupContextPool(restricted);LettuceUtils.close(restricted);
+            org.dromara.redisfront.commons.lettuce.ConnectionRecovery.close(restricted);
             LettuceUtils.exec(context, c -> c.aclDeluser(user));
         }
     }
@@ -241,5 +280,175 @@ class RedisEditIntegrationTest {
             int upper = Integer.parseInt(bounds[bounds.length - 1]);if (slot >= lower && slot <= upper) return true;
         }
         return false;
+    }
+
+    @Test void keySearchContainsTreatsGlobSymbolsAndWhitespaceLiterally() {
+        String literal = own(prefix + " 中文:*?[]\\ "), plain = own(prefix + " 中文:plain ");
+        string(literal, b("literal"));string(plain, b("plain"));
+        var query = new RedisKeySearchService.Query(KeySearchMode.CONTAINS, prefix + " 中文:*?[]\\ ");
+        var found = RedisKeySearchService.start(context, query).readPage(100, () -> false, p -> { });
+        assertEquals(List.of(literal), found.keys());assertTrue(found.progress().complete());
+    }
+
+    @Test void keySearchGlobSupportsWildcardsRangesAndQuestionMarks() {
+        String a = own(prefix + "user:a:01"), b = own(prefix + "user:b:02"), c = own(prefix + "user:c:03"), longer = own(prefix + "user:a:123");
+        for (String key : List.of(a, b, c, longer)) string(key, b("value"));
+        var strict = RedisKeySearchService.start(context, new RedisKeySearchService.Query(KeySearchMode.GLOB, prefix + "user:[ab]:??"));
+        assertEquals(Set.of(a, b), new HashSet<>(strict.readPage(100, () -> false, p -> { }).keys()));
+        var surrounded = RedisKeySearchService.start(context, new RedisKeySearchService.Query(KeySearchMode.GLOB, "*" + prefix + "user:[ab]:??*"));
+        assertEquals(Set.of(a, b, longer), new HashSet<>(surrounded.readPage(100, () -> false, p -> { }).keys()));
+        var ranges = RedisKeySearchService.start(context, new RedisKeySearchService.Query(KeySearchMode.GLOB, prefix + "user:*:[0-9][0-9]"));
+        assertEquals(Set.of(a, b, c), new HashSet<>(ranges.readPage(100, () -> false, p -> { }).keys()));
+    }
+
+    @Test void keySearchExactFindsTheLiteralKeyWithoutScanning() {
+        String literal = own(prefix + "literal:*?[]\\"), other = own(prefix + "literal:abc");string(literal, b("one"));string(other, b("two"));
+        var found = RedisKeySearchService.start(context, new RedisKeySearchService.Query(KeySearchMode.EXACT, literal))
+                .readPage(100, () -> false, p -> { });
+        assertEquals(List.of(literal), found.keys());assertTrue(found.progress().complete());assertEquals(0, found.progress().batches());
+        var absent = RedisKeySearchService.start(context, new RedisKeySearchService.Query(KeySearchMode.EXACT, prefix + "missing"))
+                .readPage(100, () -> false, p -> { });
+        assertTrue(absent.keys().isEmpty());assertTrue(absent.progress().complete());
+    }
+
+    @Test void keySearchPaginationAndCancellationRetainAllMatchesAcrossNodes() {
+        var expected = new LinkedHashSet<String>();
+        if (context.getRedisMode() == RedisMode.CLUSTER) {
+            for (var master : RedisBasicService.service.getClusterNodes(context).stream().filter(n -> Arrays.asList(n.flags().split(",")).contains("master")).toList()) {
+                String key;
+                do { key = key("search-node"); } while (!owns(master.slot(), SlotHash.getSlot(key)));
+                string(key, b("value"));expected.add(key);
+            }
+        } else {
+            for (int i = 0; i < 4; i++) { String key = key("search-page");string(key, b("value"));expected.add(key); }
+        }
+        var session = RedisKeySearchService.start(context, new RedisKeySearchService.Query(KeySearchMode.CONTAINS, prefix));
+        var cancelled = new java.util.concurrent.atomic.AtomicBoolean();
+        session.readPage(1, cancelled::get, p -> cancelled.set(true));
+        cancelled.set(false);
+        for (int page = 0; page < 100 && !session.progress().complete(); page++) session.readPage(1, cancelled::get, p -> { });
+        assertTrue(session.progress().complete());assertEquals(expected, new HashSet<>(session.snapshot().keys()));
+    }
+
+    @Test void keySearchEmptyInputBrowsesAllKeysWhileMissingGlobCompletesEmpty() {
+        String fixture = key("search-browse");string(fixture, b("keep"));
+        var absent = RedisKeySearchService.start(context, new RedisKeySearchService.Query(KeySearchMode.GLOB, prefix + "absent:*"))
+                .readPage(10, () -> false, p -> { });
+        assertTrue(absent.progress().complete());assertTrue(absent.keys().isEmpty());
+        var all = RedisKeySearchService.start(context, new RedisKeySearchService.Query(KeySearchMode.CONTAINS, ""));
+        for (int page = 0; page < 100 && !all.progress().complete() && !all.snapshot().keys().contains(fixture); page++) all.readPage(1000, () -> false, p -> { });
+        assertTrue(all.snapshot().keys().contains(fixture));
+    }
+
+    @Test void largeValuePreviewAndExplicitFullLoadPreserveBytes() {
+        String key = key("large-value");byte[] value = new byte[RedisValueLoader.AUTO_LIMIT + 129];Arrays.fill(value, (byte) 'x');
+        RedisStringService.service.set(context, key, value);expire(key);
+        var preview = RedisValueLoader.load(context, key, 0, false);
+        assertTrue(preview.partial());assertEquals(RedisValueLoader.CHUNK_SIZE, preview.value().length);
+        var next = RedisValueLoader.load(context, key, RedisValueLoader.CHUNK_SIZE, false);
+        assertTrue(next.partial());assertEquals(RedisValueLoader.CHUNK_SIZE, next.offset());
+        var complete = RedisValueLoader.load(context, key, 0, true);
+        assertFalse(complete.partial());assertArrayEquals(value, complete.value());
+    }
+
+    @Test void readOnlyModeRejectsEditorAndRawWritesWithoutChangingData() {
+        String key = key("read-only");string(key, b("keep"));context.getSetting().setReadOnly(true);
+        try {
+            assertArrayEquals(b("keep"), get(key));
+            assertThrows(IllegalStateException.class, () -> RedisStringService.service.set(context, key, b("blocked")));
+            assertThrows(IllegalStateException.class, () -> edits.save(context, target(KeyTypeEnum.STRING, key, b("keep"), null, null, null), b("blocked"), ""));
+            assertThrows(IllegalStateException.class, () -> RedisBasicService.service.del(context, key));
+            assertThrows(IllegalStateException.class, () -> RedisPubSubService.service.publish(context, prefix + "private-channel", "blocked"));
+            assertNotNull(RedisDiagnosticsService.commandStats(context));
+            assertNotNull(RedisDiagnosticsService.slowlog(context));
+            assertArrayEquals(b("keep"), get(key));
+        } finally { context.getSetting().setReadOnly(false); }
+    }
+
+    @Test void boundedBatchDeletionStopsBeforeTheSecondKey() {
+        String first = key("batch-first"), second = key("batch-second");string(first, b("one"));string(second, b("two"));
+        var cancelled = new java.util.concurrent.atomic.AtomicBoolean();
+        var result = RedisDiagnosticsService.unlink(context, List.of(first, second), cancelled::get, progress -> cancelled.set(true));
+        assertEquals(1, result.removed());assertTrue(result.cancelled());assertNull(get(first));assertArrayEquals(b("two"), get(second));
+    }
+
+    @Test void diagnosticSamplingReportsOnlyFixtureKeysAndTheirMemory() {
+        String string = key("memory-string"), hash = key("memory-hash");string(string, b("value"));
+        RedisHashService.service.hset(context, hash, "field", b("value"));expire(hash);
+        var results = RedisDiagnosticsService.largeKeys(context, prefix + "*", () -> false, ignored -> { });
+        assertEquals(Set.of(string, hash), results.stream().map(RedisDiagnosticsService.LargeKey::key).collect(java.util.stream.Collectors.toSet()));
+        assertTrue(results.stream().allMatch(item -> item.bytes() > 0 && item.ttl() > 0));
+    }
+
+    @Test void publishUsesTheManagedCommandConnectionWithoutLeavingAPubsubBorrow() {
+        assertEquals(0L, RedisPubSubService.service.publish(context, prefix + "private-channel", "isolated-test-message"));
+    }
+
+    @Test void sshSessionLossRecreatesForwardingsBeforeTheNextCommand() throws Exception {
+        Assumptions.assumeTrue(context.getConnectTypeMode() == ConnectType.SSH);
+        String key = key("reconnect");string(key, b("keep"));
+        var sessionsField = JschManager.class.getDeclaredField("SESSION_MAP");sessionsField.setAccessible(true);
+        @SuppressWarnings("unchecked") var sessions = (Map<Integer, com.jcraft.jsch.Session>) sessionsField.get(null);
+        sessions.get(context.getId()).disconnect();
+        assertFalse(JschManager.MANAGER.isConnected(context));assertArrayEquals(b("keep"), get(key));
+        assertTrue(JschManager.MANAGER.isConnected(context));
+    }
+
+    @Test void clusterAdvertisedNodeWithoutAPreallocatedPortGetsANewSshForward() {
+        Assumptions.assumeTrue(context.getRedisMode() == RedisMode.CLUSTER && context.getConnectTypeMode() == ConnectType.SSH);
+        var master = RedisBasicService.service.getClusterNodes(context).stream()
+                .filter(n -> Arrays.asList(n.flags().split(",")).contains("master") && n.port() != context.getPort()).findFirst().orElseThrow();
+        String key;
+        do { key = key("dynamic-forward"); } while (!owns(master.slot(), SlotHash.getSlot(key)));
+        string(key, b("tunnel-only"));
+        var original = new HashMap<>(context.getClusterLocalPort());
+        var withoutNode = new HashMap<>(original);withoutNode.remove(RedisConnectContext.clusterAddress(master.host(), master.port()));
+        RedisConnectionPoolManager.cleanupContextPool(context);LettuceUtils.close(context);context.setClusterLocalPort(withoutNode);
+        try { assertArrayEquals(b("tunnel-only"), get(key)); }
+        finally { context.setClusterLocalPort(original); }
+    }
+
+    @Test void sentinelUsesABackupWhenTheFirstEndpointIsUnavailable() {
+        Assumptions.assumeTrue(context.getRedisMode() == RedisMode.SENTINEL);
+        org.dromara.redisfront.commons.lettuce.ConnectionRecovery.prepare(context);
+        var backup = org.dromara.redisfront.commons.lettuce.ConnectionRecovery.sentinels(context).stream()
+                .filter(e -> e.port() != context.getSentinelPort()).findFirst().orElseThrow();
+        String key = key("sentinel-backup");string(key, b("keep"));
+        var fallback = context.clone();fallback.setUid(UUID.randomUUID().toString());fallback.setSentinelPort(1);
+        var settings = new RedisConnectContext.SettingInfo(1000, ":", 2000, 10000);
+        settings.setSentinelEndpoints(backup.host() + ":" + backup.port());fallback.setSetting(settings);
+        try { assertArrayEquals(b("keep"), RedisStringService.service.get(fallback, key)); }
+        finally {
+            RedisConnectionPoolManager.cleanupContextPool(fallback);LettuceUtils.close(fallback);
+            org.dromara.redisfront.commons.lettuce.ConnectionRecovery.close(fallback);
+        }
+    }
+
+    @Test
+    @EnabledIfEnvironmentVariable(named = "REDISFRONT_TEST_FAILOVER", matches = "true")
+    void zzSentinelFailoverMovesAnOpenEditorConnectionToTheNewMaster() throws Exception {
+        Assumptions.assumeTrue(context.getRedisMode() == RedisMode.SENTINEL);
+        String key = key("sentinel-failover");string(key, b("keep"));
+        assertEquals(2L, LettuceUtils.<Long>exec(context, c -> c.waitForReplication(2, 5000)).longValue());
+        int originalPort = context.getPort();
+        var sentinelContext = context.clone();sentinelContext.setHost(context.getSentinelHost());sentinelContext.setPort(context.getSentinelPort());
+        sentinelContext.setUsername(context.getSentinelUsername());sentinelContext.setPassword(context.getSentinelPassword());sentinelContext.setDatabase(0);
+        if (context.getConnectTypeMode() == ConnectType.SSH) sentinelContext.setLocalPort(JschManager.MANAGER.openNodeForwarding(context,
+                sentinelContext.getHost(), sentinelContext.getPort(), "failover-test"));
+        try (var client = LettuceUtils.createUncachedClient(sentinelContext);var sentinel = client.connectSentinel()) {
+            assertEquals("OK", sentinel.sync().failover(context.getSentinelMasterName()));
+        }
+        long deadline = System.nanoTime() + 45_000_000_000L;
+        while (System.nanoTime() < deadline) {
+            org.dromara.redisfront.commons.lettuce.ConnectionRecovery.invalidate(context);
+            try {
+                if (context.getPort() != originalPort && Arrays.equals(b("keep"), get(key))) break;
+                get(key);
+            } catch (RuntimeException transitioning) { }
+            Thread.sleep(500);
+        }
+        assertNotEquals(originalPort, context.getPort());assertArrayEquals(b("keep"), get(key));
+        edits.save(context, target(KeyTypeEnum.STRING, key, b("keep"), null, null, null), b("new-primary"), "");
+        assertArrayEquals(b("new-primary"), get(key));
     }
 }

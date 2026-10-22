@@ -23,7 +23,6 @@ import org.dromara.redisfront.ui.widget.main.fragment.scaffold.index.IndexPageVi
 import org.dromara.redisfront.ui.widget.main.fragment.scaffold.pubsub.PubSubPageView;
 import org.dromara.redisfront.ui.widget.main.fragment.scaffold.report.ReportPageView;
 import org.dromara.redisfront.ui.widget.main.fragment.scaffold.terminal.TerminalPageView;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.plaf.TabbedPaneUI;
@@ -39,8 +38,18 @@ public class MainTabView extends JTabbedPane {
     private final RedisConnectContext redisConnectContext;
     private final RedisInfoView redisInfoView;
     private PageScaffold lastPageScaffold;
+    private final IndexPageView indexPage;
+    private final TerminalPageView terminalPage;
+    private JDialog infoDialog;
+    private boolean disposed;
+    private final org.dromara.redisfront.ui.components.diagnostics.RedisDiagnosticsPanel diagnostics;
+
+    public boolean confirmDiscardChanges() { return indexPage.confirmDiscardChanges(); }
 
     public void clearUp(){
+        if (disposed) return;
+        disposed = true;
+        indexPage.disposeSearch();
         for (int i = 0; i < getTabCount(); i++) {
             Component tabComponentAt = getComponentAt(i);
             if (tabComponentAt instanceof PageScaffold pageScaffold) {
@@ -48,6 +57,9 @@ public class MainTabView extends JTabbedPane {
             }
         }
         redisInfoView.stop();
+        terminalPage.disposeTerminal();
+        diagnostics.close();
+        if (infoDialog != null) infoDialog.dispose();
     }
 
     public MainTabView(RedisFrontWidget owner, RedisConnectContext redisConnectContext) {
@@ -60,19 +72,21 @@ public class MainTabView extends JTabbedPane {
         //tab 切换事件
         this.addChangeListener(e -> {
             var tabbedPane = (JTabbedPane) e.getSource();
+            if (lastPageScaffold != null && tabbedPane.getSelectedComponent() != lastPageScaffold) {
+                lastPageScaffold.onClose();lastPageScaffold = null;
+            }
             if (tabbedPane.getSelectedComponent() instanceof PageScaffold pageScaffold) {
                 pageScaffold.onChange();
-                if (lastPageScaffold != null) {
-                    lastPageScaffold.onClose();
-                }
                 lastPageScaffold = pageScaffold;
             }
         });
-        PageScaffold pageScaffold = new PageScaffold(new IndexPageView(redisConnectContext, owner));
+        indexPage = new IndexPageView(redisConnectContext, owner);
+        terminalPage = new TerminalPageView(redisConnectContext, owner);
+        PageScaffold pageScaffold = new PageScaffold(indexPage);
         //主窗口
         this.addTab(owner.$tr("MainTabView.pageScaffold.home"), Icons.CONTENT_TAB_DATA_ICON, pageScaffold);
         //命令窗口
-        pageScaffold = new PageScaffold(new TerminalPageView(redisConnectContext, owner));
+        pageScaffold = new PageScaffold(terminalPage);
         this.addTab(owner.$tr("MainTabView.pageScaffold.cmd"), Icons.CONTENT_TAB_COMMAND_ICON, pageScaffold);
         //订阅窗口
         pageScaffold = new PageScaffold(new PubSubPageView(redisConnectContext, owner));
@@ -80,6 +94,8 @@ public class MainTabView extends JTabbedPane {
         //数据窗口
         pageScaffold = new PageScaffold(new ReportPageView(redisConnectContext, owner));
         this.addTab(owner.$tr("MainTabView.pageScaffold.chart"), Icons.CONTENT_TAB_INFO_ICON, pageScaffold);
+        diagnostics = new org.dromara.redisfront.ui.components.diagnostics.RedisDiagnosticsPanel(redisConnectContext, owner);
+        this.addTab(owner.$tr("Diagnostics.title"), Icons.CONTENT_TAB_INFO_ICON, diagnostics);
 
         this.eventListener.bind(redisConnectContext.getId(), DrawerChangeEvent.class, qsEvent -> {
             if (qsEvent instanceof DrawerChangeEvent drawerChangeEvent) {
@@ -121,25 +137,22 @@ public class MainTabView extends JTabbedPane {
         this.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, FlatClientProperties.TABBED_PANE_ALIGN_LEADING);
         this.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_WIDTH_MODE, FlatClientProperties.TABBED_PANE_TAB_WIDTH_MODE_COMPACT);
         this.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, true);
-        FlatToolBar settingToolBar = new FlatToolBar();
+        var settingToolBar = new FlatToolBar();
         settingToolBar.setLayout(new MigLayout(new LC().align("center", "bottom")));
-        JButton button = getInfoButton();
-        settingToolBar.add(button);
+        var infoButton = new JButton(Icons.REDIS_INFO_ICON_24x24);
+        infoButton.setToolTipText(owner.$tr("MainTabView.moreInfo.tooltip.text"));
+        infoButton.addActionListener(ignore -> showInfoDialog());
+        settingToolBar.add(infoButton);
         this.putClientProperty(FlatClientProperties.TABBED_PANE_TRAILING_COMPONENT, settingToolBar);
     }
 
-    private @NotNull JButton getInfoButton() {
-        JButton button = new JButton(Icons.REDIS_INFO_ICON_24x24);
-        button.setToolTipText(owner.$tr("MainTabView.moreInfo.tooltip.text"));
-        JDialog infoDialog = new JDialog(owner, redisConnectContext.getHost());
-        button.addActionListener(ignore -> {
-            redisInfoView.refreshInfo();
-            infoDialog.setContentPane(redisInfoView);
-            infoDialog.setSize(800, 600);
-            infoDialog.setLocationRelativeTo(null);
-            infoDialog.setVisible(true);
-        });
-        return button;
+    private void showInfoDialog() {
+        if (infoDialog == null) infoDialog = new JDialog(owner, redisConnectContext.getHost());
+        redisInfoView.refreshInfo();
+        infoDialog.setContentPane(redisInfoView);
+        infoDialog.setSize(800, 600);
+        infoDialog.setLocationRelativeTo(null);
+        infoDialog.setVisible(true);
     }
 
     @Override

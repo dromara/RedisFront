@@ -17,11 +17,11 @@ plugins {
 
 buildscript {
     repositories {
+        mavenCentral()
+        gradlePluginPortal()
         mavenLocal()
-        dependencies {
-            classpath("io.github.fvarrui:javapackager:1.7.6")
-        }
     }
+    dependencies { classpath("io.github.fvarrui:javapackager:1.7.6") }
 }
 plugins.apply("io.github.fvarrui.javapackager.plugin")
 
@@ -29,6 +29,7 @@ allprojects {
     val repoUsername = "662c9a1d2df38b0129acf288"
     val repoPassword = "pub-user"
     repositories {
+        mavenCentral()
         maven {
             url = uri("https://packages.aliyun.com/maven/repository/2048752-snapshot-C7TcE7")
             credentials {

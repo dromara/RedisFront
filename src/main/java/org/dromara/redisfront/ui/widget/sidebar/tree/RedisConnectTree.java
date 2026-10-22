@@ -18,6 +18,8 @@ import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 import org.dromara.redisfront.model.entity.ConnectGroupEntity;
 import org.dromara.redisfront.model.tree.TreeNodeInfo;
 import org.dromara.redisfront.ui.dialog.AddConnectDialog;
+import org.dromara.redisfront.ui.dialog.BackupPasswordDialog;
+import org.dromara.redisfront.service.ConnectionExportService;
 import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
 import org.dromara.redisfront.ui.handler.ConnectHandler;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
@@ -426,8 +428,13 @@ public class RedisConnectTree extends JXTree {
                 if (FileUtil.exist(selectedFile)) {
                     try {
 
+                        String importedText = FileUtil.readUtf8String(selectedFile);
+                        char[] backupPassword = ConnectionExportService.encrypted(importedText) ? BackupPasswordDialog.ask(owner, false) : new char[0];
+                        if (backupPassword == null) return;
                         context.taskExecute(() -> {
-                            ExportData exportData = JSONUtil.toBean(FileUtil.readUtf8String(selectedFile), ExportData.class);
+                            ExportData exportData;
+                            try { exportData = ConnectionExportService.read(importedText, backupPassword); }
+                            finally { java.util.Arrays.fill(backupPassword, '\0'); }
                             List<ConnectGroupEntity> groupEntityList = exportData.getGroups();
                             List<ConnectDetailEntity> detailEntities = exportData.getDetails();
                             if (CollUtil.isNotEmpty(groupEntityList)) {
@@ -479,13 +486,24 @@ public class RedisConnectTree extends JXTree {
                 File selectedFile = fileChooser.getSelectedFile();
                 if (FileUtil.exist(selectedFile)) {
                     try {
+                        String[] choices = {owner.$tr("Safety.exportSafe"), owner.$tr("Safety.encryptedBackup")};
+                        int choice = JOptionPane.showOptionDialog(owner, owner.$tr("Safety.exportChoice"), owner.$tr("RedisConnectTree.popupMenu.exportConnect"),
+                                JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, choices, choices[0]);
+                        if (choice < 0) return;
+                        char[] backupPassword = choice == 1 ? BackupPasswordDialog.ask(owner, true) : new char[0];
+                        if (backupPassword == null) return;
                         List<ConnectGroupEntity> groupEntityList = ConnectGroupDao.newInstance(context.getDatabaseManager().getDatasource()).loadAll();
                         List<ConnectDetailEntity> detailEntities = ConnectDetailDao.newInstance(context.getDatabaseManager().getDatasource()).loadAll();
                         ExportData exportData = new ExportData();
                         exportData.setGroups(groupEntityList);
                         exportData.setDetails(detailEntities);
-                        FileUtil.writeUtf8String(JSONUtil.toJsonStr(exportData), selectedFile.getAbsolutePath() + File.separator + "RedisFront.json");
-                    } catch (SQLException ex) {
+                        String exported;
+                        try { exported = choice == 1 ? ConnectionExportService.encrypt(exportData, backupPassword) : ConnectionExportService.withoutSecrets(exportData); }
+                        finally { java.util.Arrays.fill(backupPassword, '\0'); }
+                        File output = new File(selectedFile, "RedisFront.json");
+                        if (output.exists() && JOptionPane.showConfirmDialog(owner, owner.$tr("Safety.overwriteBackup"), output.getName(), JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) return;
+                        FileUtil.writeUtf8String(exported, output);
+                    } catch (Exception ex) {
                         log.error(ex.getMessage());
                         Notifications.getInstance().show(Notifications.Type.ERROR, ex.getMessage());
                     }

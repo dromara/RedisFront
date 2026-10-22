@@ -4,6 +4,7 @@ package org.dromara.redisfront.ui.components.terminal;
 import cn.hutool.core.util.StrUtil;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.model.context.RedisConnectContext;
+import org.dromara.redisfront.commons.utils.CommandRedactor;
 import org.jdesktop.swingx.JXList;
 
 import javax.swing.*;
@@ -18,7 +19,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public abstract class AbstractTerminal extends JPanel implements KeyListener, CaretListener {
+public abstract class AbstractTerminal extends JPanel implements KeyListener, CaretListener, AutoCloseable {
     protected final JTextArea terminal;
     private int lastSelectionStart = 0;
     private int currentCaretPosition = -1;
@@ -27,6 +28,9 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
     private boolean shouldConsumeEvent = false;
     private final ArrayList<String> commandHistory;
     private int commandHistoryIndex;
+    private boolean executing;
+    private volatile boolean closed;
+    private SwingWorker<Void, Void> commandWorker;
 
     private JWindow suggestionWindow;
     private JXList<String> suggestionList;
@@ -97,16 +101,38 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
     }
 
     protected void println(String message) {
+        if (closed) return;
+        if (!SwingUtilities.isEventDispatchThread()) { SwingUtilities.invokeLater(() -> println(message));return; }
         terminal.append(message);
         terminal.append("\n");
         lastSelectionStart = terminal.getText().length();
         terminal.setCaretPosition(lastSelectionStart);
+        trimOutput();
     }
 
     protected void print(String message) {
+        if (closed) return;
+        if (!SwingUtilities.isEventDispatchThread()) { SwingUtilities.invokeLater(() -> print(message));return; }
         terminal.append(message);
         lastSelectionStart = terminal.getText().length();
         terminal.setCaretPosition(lastSelectionStart);
+        trimOutput();
+    }
+
+    private void trimOutput() {
+        int excess = terminal.getDocument().getLength() - 1_000_000;
+        if (excess <= 0) return;
+        try {
+            int cut = terminal.getLineEndOffset(terminal.getLineOfOffset(excess));
+            terminal.getDocument().remove(0, cut);
+            lastSelectionStart = Math.max(0, lastSelectionStart - cut);
+        } catch (javax.swing.text.BadLocationException ignored) { }
+    }
+
+    @Override public void close() {
+        closed = true;
+        if (commandWorker != null) commandWorker.cancel(true);
+        commandHistory.clear();suggestionWindow.dispose();
     }
 
     protected void printConnectedSuccessMessage() {
@@ -118,6 +144,7 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
 
     @Override
     public void keyTyped(KeyEvent e) {
+        if (closed || executing) { e.consume();return; }
         if (shouldConsumeEvent) {
             e.consume();
             return;
@@ -140,11 +167,25 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
                         input = input.concat("\n");
                     }
                     String text = input.replace("\n", "");
-                    if (RedisFrontUtils.isNotEmpty(text)) {
+                    if (RedisFrontUtils.isNotEmpty(text) && !CommandRedactor.sensitive(text)) {
                         commandHistory.add(text);
+                        if (commandHistory.size() > 200) commandHistory.removeFirst();
                         commandHistoryIndex = commandHistory.size();
                     }
-                    this.inputProcessHandler(input.trim());
+                    String command = input.trim();
+                    if (CommandRedactor.sensitive(command)) {
+                        terminal.replaceRange(CommandRedactor.commandName(command) + " ******\n", subStartLength, terminal.getDocument().getLength());
+                    }
+                    executing = true;terminal.setEditable(false);
+                    commandWorker = new SwingWorker<>() {
+                        @Override protected Void doInBackground() { inputProcessHandler(command);return null; }
+                        @Override protected void done() {
+                            executing = false;
+                            if (!closed) { terminal.setEditable(true);print("\n");print(buildPrompt()); }
+                        }
+                    };
+                    commandWorker.execute();
+                    e.consume();return;
                 }
             }
             this.print("\n");

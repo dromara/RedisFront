@@ -1,6 +1,5 @@
 package org.dromara.redisfront;
 
-import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.db.DbUtil;
 import com.formdev.flatlaf.FlatLaf;
@@ -16,6 +15,7 @@ import org.dromara.quickswing.ui.app.QSWidget;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.utils.FutureUtils;
+import org.dromara.redisfront.commons.utils.ExceptionMessageUtils;
 import org.dromara.redisfront.commons.utils.UpgradeUtils;
 import org.dromara.redisfront.ui.widget.RedisFrontWidget;
 import raven.popup.GlassPanePopup;
@@ -42,13 +42,17 @@ public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, Redi
 
     public final static QSTaskExecutor TASK_EXECUTOR = new QSTaskExecutor(Executors.newVirtualThreadPerTaskExecutor());
     private static QSEventBus eventBus;
+    private static final java.util.concurrent.ThreadPoolExecutor COMMAND_EVENTS = new java.util.concurrent.ThreadPoolExecutor(
+            1, 1, 0, java.util.concurrent.TimeUnit.SECONDS, new java.util.concurrent.ArrayBlockingQueue<>(1000), task -> {
+                var thread = new Thread(task, "RedisFrontCommandEvents");thread.setDaemon(true);return thread;
+            }, new java.util.concurrent.ThreadPoolExecutor.DiscardOldestPolicy());
 
     public RedisFrontContext() {
         RedisFrontContext.eventBus = super.getEventBus();
     }
 
     public static void publishEvent(QSEvent event) {
-        FutureUtils.runAsync(() -> eventBus.publish(event));
+        if (eventBus != null) COMMAND_EVENTS.execute(() -> eventBus.publish(event));
     }
 
     @Override
@@ -127,7 +131,9 @@ public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, Redi
         GlassPanePopup.install(application);
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             if (throwable instanceof RedisFrontException redisFrontException) {
-                Notifications.getInstance().show(Notifications.Type.ERROR, ExceptionUtil.getRootCauseMessage(redisFrontException));
+                log.error("Thread {}", thread.getName(), throwable);
+                SwingUtilities.invokeLater(() -> Notifications.getInstance().show(Notifications.Type.ERROR,
+                        ExceptionMessageUtils.userMessage(redisFrontException, application::$tr)));
             } else {
                 log.error("Thread {}", thread.getName(), throwable);
             }

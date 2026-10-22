@@ -36,6 +36,11 @@ public class JschManager {
     public final static JschManager MANAGER = new JschManager();
     private final Lock portLock = new ReentrantLock();
 
+    public boolean isConnected(RedisConnectContext context) {
+        Session session = SESSION_MAP.get(context.getId());
+        return session != null && session.isConnected();
+    }
+
     /**
      * 确保 SSH 会话就绪，并把本地端口指向当前的 host:port。
      * <p>
@@ -50,6 +55,7 @@ public class JschManager {
         Session session = SESSION_MAP.get(redisConnectContext.getId());
         if (RedisFrontUtils.isNull(session) || !session.isConnected()) {
             this.createSession(redisConnectContext);
+            this.rebindSession(redisConnectContext);
         } else {
             this.rebindSession(redisConnectContext);
         }
@@ -207,8 +213,8 @@ public class JschManager {
         Map<String, Integer> clusterLocalPort = redisConnectContext.getClusterLocalPort();
         if (isClusterBinding(redisConnectContext)) {
             clusterLocalPort.forEach((address, localPort) -> {
-                String[] parts = address.split(":");
-                bindForward(session, localPort, parts[0], Integer.parseInt(parts[1]));
+                int separator = address.lastIndexOf(':');
+                bindForward(session, localPort, address.substring(0, separator), Integer.parseInt(address.substring(separator + 1)));
             });
             return;
         }

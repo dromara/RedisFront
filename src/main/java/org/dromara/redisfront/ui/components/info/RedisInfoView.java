@@ -42,7 +42,7 @@ public class RedisInfoView extends JPanel implements Runnable {
 
     private final Map<String, DefaultTableModel> tableModels = new WeakHashMap<>();
 
-    private final LinkedBlockingQueue<LogInfo> queue = new LinkedBlockingQueue<>();
+    private final LinkedBlockingQueue<LogInfo> queue = new LinkedBlockingQueue<>(1000);
 
     private final RedisConnectContext redisConnectContext;
     private final RedisFrontContext redisFrontContext;
@@ -79,12 +79,14 @@ public class RedisInfoView extends JPanel implements Runnable {
     }
 
     public void appendLog(LogInfo logInfo) {
-        queue.add(logInfo);
+        if (!running) return;
+        if (!queue.offer(logInfo)) { queue.poll();queue.offer(logInfo); }
     }
 
     public void stop() {
         running = false;
         worker.interrupt();
+        queue.clear();
     }
 
     private void initUI() {
@@ -250,8 +252,16 @@ public class RedisInfoView extends JPanel implements Runnable {
         while (running) {
             try {
                 LogInfo logInfo = queue.take();
-                String format = format(logInfo);
-                RedisFrontUtils.runEDT(() -> textArea1.append(format));
+                var batch = new java.util.ArrayList<LogInfo>();batch.add(logInfo);queue.drainTo(batch, 199);
+                String format = batch.stream().map(this::format).collect(Collectors.joining());
+                SwingUtilities.invokeAndWait(() -> {
+                    if (!running) return;
+                    textArea1.append(format);
+                    if (textArea1.getDocument().getLength() > 500_000) {
+                        try { textArea1.getDocument().remove(0, textArea1.getDocument().getLength() - 400_000); }
+                        catch (javax.swing.text.BadLocationException ignored) { }
+                    }
+                });
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 break;

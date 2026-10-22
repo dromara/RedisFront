@@ -105,7 +105,8 @@ public class TreeUtils {
                     convertTreeNodeInfoSet(value, fullKeyName, delim).forEach(node::add);
                     return node;
                 })
-                .sorted(Comparator.comparing(TreeNodeInfo::key))
+                .sorted(Comparator.comparing((TreeNodeInfo node) -> Boolean.TRUE.equals(node.getIsLeafNode()))
+                        .thenComparing(TreeNodeInfo::key))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 

@@ -6,6 +6,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import io.lettuce.core.RedisConnectionException;
+import net.miginfocom.swing.MigLayout;
 import org.dromara.quickswing.ui.app.QSDialog;
 import org.dromara.redisfront.RedisFrontContext;
 import org.dromara.redisfront.commons.enums.ConnectType;
@@ -16,6 +17,7 @@ import org.dromara.redisfront.dao.ConnectDetailDao;
 import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.model.entity.ConnectDetailEntity;
 import org.dromara.redisfront.service.RedisBasicService;
+import org.dromara.redisfront.ui.components.connection.ConnectionSafetySettingsPanel;
 import org.dromara.redisfront.commons.jsch.JschManager;
 import org.dromara.redisfront.ui.event.OpenRedisConnectEvent;
 import org.dromara.redisfront.ui.event.RefreshConnectTreeEvent;
@@ -26,6 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
@@ -85,6 +89,8 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
     private JLabel redisTimeoutLabel;
     private JLabel sshTimeoutLabel;
     private JSpinner defaultDatabaseSpinner;
+    private ConnectionSafetySettingsPanel safetySettings;
+    private boolean sentinelSupplementOffered;
 
     public static AddConnectDialog getInstance(RedisFrontWidget app) {
         return new AddConnectDialog(app);
@@ -136,6 +142,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
     }
 
     private void initializeComponents() {
+        initializeConnectionSettings();
         // SSL 面板与测试按钮的文案在生成的 $$$setupUI$$$ 里写死了中文，这里按当前语言覆盖
         testBtn.setText($tr("AddConnectDialog.testBtn.Title"));
         publicKeyFileBtn.setText($tr("AddConnectDialog.sslPublicKeyFileBtn.Title"));
@@ -244,24 +251,55 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         testBtn.addActionListener(ignore -> testConnect());
     }
 
+    private void initializeConnectionSettings() {
+        // Reuse the designer's fields; a compact form leaves room for connection-specific options.
+        redisPanel.removeAll();
+        redisPanel.setLayout(new MigLayout("insets 0, fillx, aligny top, wrap 2", "[][grow,fill]", "[]6[]6[]6[]10[]6[]"));
+        redisPanel.add(loadNumLabel);
+        redisPanel.add(keyMaxLoadNum, "wmin 0");
+        redisPanel.add(keySeparatorLabel);
+        redisPanel.add(keySeparatorField, "wmin 0");
+        redisPanel.add(redisTimeoutLabel);
+        redisPanel.add(redisTimeoutTextField, "wmin 0");
+        redisPanel.add(sshTimeoutLabel);
+        redisPanel.add(sshTimeoutTextField, "wmin 0");
+        redisPanel.add(new JSeparator(), "span 2, growx");
+        safetySettings = new ConnectionSafetySettingsPanel(this::$tr);
+        redisPanel.add(safetySettings, "span 2, growx, wmin 0");
+        var addressListener = new DocumentListener() {
+            private void changed() { invalidateConnectionType(); }
+            @Override public void insertUpdate(DocumentEvent e) { changed(); }
+            @Override public void removeUpdate(DocumentEvent e) { changed(); }
+            @Override public void changedUpdate(DocumentEvent e) { changed(); }
+        };
+        hostField.getDocument().addDocumentListener(addressListener);
+        sshHostField.getDocument().addDocumentListener(addressListener);
+        portField.addChangeListener(e -> invalidateConnectionType());
+        sshPortField.addChangeListener(e -> invalidateConnectionType());
+        enableSSHBtn.addActionListener(e -> invalidateConnectionType());
+        enableSSLBtn.addActionListener(e -> invalidateConnectionType());
+    }
+
+    private void invalidateConnectionType() {
+        safetySettings.setDetectedMode(null);
+        sentinelSupplementOffered = false;
+    }
+
     private Boolean testConnect() {
         var connectSuccess = false;
         try {
             var redisConnectContext = validGetConnectInfo();
+            safetySettings.setDetectedMode(null);
             if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
                 JschManager.MANAGER.openSession(redisConnectContext);
             }
             try {
                 if (RedisBasicService.service.ping(redisConnectContext)) {
                     RedisMode redisModeEnum = RedisBasicService.service.getRedisModeEnum(redisConnectContext);
-                    if (RedisMode.CLUSTER.equals(redisModeEnum) || RedisMode.SENTINEL.equals(redisModeEnum)) {
-//                        var res = JOptionPane.showConfirmDialog(getOwner(),
-//                                "是否重写集群地址？",
-//                                "重写地址", JOptionPane.YES_NO_OPTION);
-//                        if (res == JOptionPane.YES_OPTION) {
-//                            redisConnectContext.getSetting().setRewriteHost(true);
-//                        }
-                        getOwner().displayMessage($tr("AddConnectDialog.test.success.title"), $tr("AddConnectDialog.test.success.message"));
+                    safetySettings.setDetectedMode(redisModeEnum);
+                    if (RedisMode.SENTINEL.equals(redisModeEnum) && !sentinelSupplementOffered) {
+                        safetySettings.promptSentinelEndpoints(this);
+                        sentinelSupplementOffered = true;
                     } else {
                         getOwner().displayMessage($tr("AddConnectDialog.test.success.title"), $tr("AddConnectDialog.test.success.message"));
                     }
@@ -315,8 +353,9 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
 
 
     private void openActionPerformed(ActionEvent actionEvent) {
-        var redisConnectContext = validGetConnectInfo();
         if (testConnect()) {
+            // The successful Sentinel test may add endpoints; save and open the completed profile.
+            var redisConnectContext = validGetConnectInfo();
             if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
                 JschManager.MANAGER.openSession(redisConnectContext);
             }
@@ -407,13 +446,20 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         } catch (Exception e) {
             log.error("defaultDatabaseSpinner value error", e);
         }
-        return new RedisConnectContext.SettingInfo(
+        var setting = new RedisConnectContext.SettingInfo(
                 keyMaxLoadNum,
                 keySeparator,
                 redisTimeoutNum,
                 sshTimeoutNum,
                 defaultDatabase
         );
+        try {
+            safetySettings.applyTo(setting);
+        } catch (RedisFrontException error) {
+            tabbedPane1.setSelectedIndex(1);
+            throw error;
+        }
+        return setting;
     }
 
     private @NotNull RedisConnectContext getSslConnectInfo(String title) {
@@ -494,6 +540,10 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
                 defaultDatabaseSpinner.setValue(redisConnectContext.getSetting().getDefaultDatabase());
             }
         }
+        safetySettings.load(redisConnectContext.getSetting());
+        sentinelSupplementOffered = redisConnectContext.getSetting() != null
+                && redisConnectContext.getSetting().getSentinelEndpoints() != null
+                && !redisConnectContext.getSetting().getSentinelEndpoints().isBlank();
     }
 
     private void createUIComponents() {

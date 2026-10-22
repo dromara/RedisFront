@@ -75,6 +75,7 @@ public final class RedisTopologyMonitor implements AutoCloseable {
 
     public Snapshot collect(String selectedAddress) {
         if (closed) throw new IllegalStateException("Monitor is closed");
+        org.dromara.redisfront.commons.lettuce.ConnectionRecovery.prepare(base);
         var status = new LinkedHashMap<String, String>();
         List<Node> nodes;
         if (base.getRedisMode() == RedisMode.CLUSTER) {
@@ -119,10 +120,16 @@ public final class RedisTopologyMonitor implements AutoCloseable {
     }
 
     private List<Node> sentinelNodes(Map<String, String> status) {
-        if (sentinel == null || !sentinel.isOpen()) {
-            var uri = uri(base.getSentinelHost(), base.getSentinelPort(), true);
-            sentinel = client.connectSentinel(StringCodec.UTF8, uri);
+        RuntimeException failure = null;
+        for (var endpoint : org.dromara.redisfront.commons.lettuce.ConnectionRecovery.sentinels(base)) {
+            try {
+                if (sentinel != null) sentinel.close();
+                var uri = uri(endpoint.host(), endpoint.port(), true);
+                sentinel = client.connectSentinel(StringCodec.UTF8, uri);
+                sentinel.sync().ping();failure = null;break;
+            } catch (RuntimeException error) { failure = error; }
         }
+        if (failure != null) throw failure;
         var commands = sentinel.sync();
         String name = base.getSentinelMasterName();
         if (name == null) name = commands.masters().getFirst().get("name");

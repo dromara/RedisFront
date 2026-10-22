@@ -153,6 +153,7 @@ public class MainComponent extends JPanel {
         topTabbedPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (BiConsumer<JTabbedPane, Integer>) (tabbedPane, tabIndex) -> {
             Component component = tabbedPane.getComponentAt(tabIndex);
             if (component instanceof MainTabView mainTabView) {
+                if (!mainTabView.confirmDiscardChanges()) return;
                 //清理资源
                 mainTabView.clearUp();
                 //关闭线程池
@@ -163,6 +164,8 @@ public class MainComponent extends JPanel {
                 }
                 //关闭连接池
                 RedisConnectionPoolManager.cleanupContextPool(redisConnectContext);
+                LettuceUtils.close(redisConnectContext);
+                org.dromara.redisfront.commons.lettuce.ConnectionRecovery.close(redisConnectContext);
                 //关闭ssh会话
                 if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
                     JschManager.MANAGER.closeSession(redisConnectContext);
@@ -300,6 +303,7 @@ public class MainComponent extends JPanel {
                 )
                 .findFirst();
         if (matchedPanel.isPresent()) {
+            mainTabView.clearUp();
             topTabbedPane.setSelectedComponent(matchedPanel.get());
             return;
         }
@@ -310,6 +314,35 @@ public class MainComponent extends JPanel {
         topTabbedPane.setTabComponentAt(tabIndex, tabComponent);
         topTabbedPane.setSelectedComponent(mainTabView);
 
+    }
+
+    public boolean selectExisting(int id) {
+        for (int i = 0; i < topTabbedPane.getTabCount(); i++) {
+            if (topTabbedPane.getComponentAt(i) instanceof MainTabView tab && tab.getRedisConnectContext().getId() == id) {
+                topTabbedPane.setSelectedComponent(tab);return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean confirmCloseAll() {
+        for (int i = 0; i < topTabbedPane.getTabCount(); i++) {
+            if (topTabbedPane.getComponentAt(i) instanceof MainTabView tab && !tab.confirmDiscardChanges()) return false;
+        }
+        return true;
+    }
+
+    public void closeAll() {
+        executorServiceMap.values().forEach(java.util.concurrent.ExecutorService::shutdownNow);
+        executorServiceMap.clear();
+        for (int i = 0; i < topTabbedPane.getTabCount(); i++) if (topTabbedPane.getComponentAt(i) instanceof MainTabView tab) {
+            tab.clearUp();
+            var connection = tab.getRedisConnectContext();
+            owner.getEventListener().unbind(connection.getId());
+            org.dromara.redisfront.commons.lettuce.ConnectionRecovery.close(connection);
+            RedisConnectionPoolManager.cleanupContextPool(connection);LettuceUtils.close(connection);
+            if (connection.getConnectTypeMode() == ConnectType.SSH) JschManager.MANAGER.closeSession(connection);
+        }
     }
 
     private JPanel createCustomTabComponent(String title, JTabbedPane tabbedPane, int index) {

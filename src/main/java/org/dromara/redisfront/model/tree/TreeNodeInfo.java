@@ -3,13 +3,14 @@ package org.dromara.redisfront.model.tree;
 import cn.hutool.core.io.unit.DataSizeUtil;
 import lombok.Getter;
 import org.dromara.quickswing.tree.QSTreeNode;
-import org.dromara.redisfront.commons.utils.RedisFrontUtils;
+import org.dromara.redisfront.model.MemoryUsageResult;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import java.util.Comparator;
-import java.util.Enumeration;
 import java.util.Objects;
+import java.util.ResourceBundle;
 
 /**
  * NodeInfo
@@ -22,8 +23,8 @@ public class TreeNodeInfo extends DefaultMutableTreeNode implements Comparator<T
 
     private String title;
     private String key;
-    private Integer memorySize;
-    private String formattedMemory;
+    private MemoryUsageResult memoryUsage = MemoryUsageResult.state(MemoryUsageResult.Status.UNANALYZED);
+    private transient MemoryStats cachedMemoryStats;
     private Boolean isLeafNode;
 
     public TreeNodeInfo() {
@@ -36,9 +37,8 @@ public class TreeNodeInfo extends DefaultMutableTreeNode implements Comparator<T
         this.isLeafNode = isLeafNode;
     }
 
-    public Integer memorySize() {
-        return RedisFrontUtils.isNull(memorySize) ? 0 : memorySize;
-    }
+    public long memorySize() { return memoryUsage.bytes() == null ? 0 : memoryUsage.bytes(); }
+    public Long getMemorySize() { return memoryUsage.bytes(); }
 
     public String title() {
         return title;
@@ -72,51 +72,82 @@ public class TreeNodeInfo extends DefaultMutableTreeNode implements Comparator<T
         return Objects.hash(key, title);
     }
 
-    public void setMemorySize(Integer memorySize) {
-        this.memorySize = memorySize;
-        this.formattedMemory = memorySize != null ? DataSizeUtil.format(memorySize) : "";
+    public void setMemorySize(long memorySize) { setMemoryUsage(MemoryUsageResult.measured(memorySize)); }
+
+    public void setMemoryUsage(MemoryUsageResult result) {
+        memoryUsage = Objects.requireNonNull(result);
+        invalidateMemoryStats();
     }
 
-    private void traverseChildren(TreeNode node, int[] result) {
-        Enumeration<? extends TreeNode> children = node.children();
-        while (children.hasMoreElements()) {
-            TreeNodeInfo child = (TreeNodeInfo) children.nextElement();
-            if (child.getChildCount() > 0) {
-                traverseChildren(child, result);
-            } else {
-                result[0] += child.memorySize();
-                result[1]++;
-            }
+    private void invalidateMemoryStats() {
+        for (TreeNodeInfo node = this; node != null; node = node.getParent() instanceof TreeNodeInfo parent ? parent : null) {
+            node.cachedMemoryStats = null;
         }
     }
 
     @Override
-    public String toString() {
-        int childCount = getChildCount();
-        int level = getLevel();
+    public void insert(MutableTreeNode child, int index) {
+        super.insert(child, index);
+        invalidateMemoryStats();
+    }
 
-        if (childCount == 0) {
-            return baseTitleWithMemory();
+    @Override
+    public void remove(int index) {
+        super.remove(index);
+        invalidateMemoryStats();
+    }
+
+    @Override
+    public void removeAllChildren() {
+        super.removeAllChildren();
+        invalidateMemoryStats();
+    }
+
+    public record MemoryStats(long bytes, int keys, int measured, int missing, int failed, int unsupported,
+                              int cancelled, int pending, long timestamp) {
+        private MemoryStats plus(MemoryStats other) {
+            return new MemoryStats(Math.addExact(bytes, other.bytes), keys + other.keys, measured + other.measured,
+                    missing + other.missing, failed + other.failed, unsupported + other.unsupported,
+                    cancelled + other.cancelled, pending + other.pending, Math.max(timestamp, other.timestamp));
         }
-        int[] stats = calculateChildStats();
-        return buildTitleString(level, childCount, stats);
+        public int unfinished() { return keys - measured - missing - failed - unsupported; }
     }
 
-    private String baseTitleWithMemory() {
-        return title + (memorySize() == 0 ? "" : " [ " + formattedMemory + " ]  ");
+    public MemoryStats memoryStats() {
+        if (cachedMemoryStats != null) return cachedMemoryStats;
+        var state = memoryUsage.status();
+        boolean keyNode = Boolean.TRUE.equals(isLeafNode);
+        var stats = new MemoryStats(keyNode ? memorySize() : 0, keyNode ? 1 : 0,
+                keyNode && state == MemoryUsageResult.Status.COMPLETE ? 1 : 0,
+                keyNode && state == MemoryUsageResult.Status.MISSING ? 1 : 0,
+                keyNode && state == MemoryUsageResult.Status.FAILED ? 1 : 0,
+                keyNode && state == MemoryUsageResult.Status.UNSUPPORTED ? 1 : 0,
+                keyNode && state == MemoryUsageResult.Status.CANCELLED ? 1 : 0,
+                keyNode && state == MemoryUsageResult.Status.ANALYZING ? 1 : 0, keyNode ? memoryUsage.timestamp() : 0);
+        for (int i = 0; i < getChildCount(); i++) stats = stats.plus(((TreeNodeInfo) getChildAt(i)).memoryStats());
+        return cachedMemoryStats = stats;
     }
 
-    private int[] calculateChildStats() {
-        int[] result = new int[2];
-        traverseChildren(this, result);
-        return result;
+    @Override
+    public String toString() {
+        if (getChildCount() == 0 && Boolean.TRUE.equals(isLeafNode)) {
+            return switch (memoryUsage.status()) {
+                case UNANALYZED -> title;
+                case COMPLETE -> title + " [ " + formatMemorySize(memorySize()) + " ]";
+                case ANALYZING -> title + " [ … ]";
+                default -> title + " [ " + ResourceBundle.getBundle("org.dromara.redisfront.RedisFront")
+                        .getString("Memory.state." + memoryUsage.status()) + " ]";
+            };
+        }
+        var stats = memoryStats();
+        String size = stats.measured() > 0 ? " [ " + formatMemorySize(stats.bytes())
+                + (stats.measured() < stats.keys() ? " · " + stats.measured() + "/" + stats.keys() : "") + " ]"
+                : stats.pending() > 0 ? " [ … ]" : stats.missing() + stats.failed() + stats.unsupported() + stats.cancelled() > 0
+                ? " [ — · 0/" + stats.keys() + " ]" : "";
+        return title + " (" + stats.keys() + ")" + size;
     }
 
-    private String buildTitleString(int level, int directChildren, int[] stats) {
-        String countInfo = (level > 1 ? directChildren : stats[1]) + "";
-        String memoryInfo = stats[0] == 0 ? "" : " [ " + DataSizeUtil.format(stats[0]) + " ]  ";
-        return String.format("%s (%s) %s", title, countInfo, memoryInfo);
-    }
+    public static String formatMemorySize(long bytes) { return bytes == 0 ? "0 B" : DataSizeUtil.format(bytes); }
 
     @Override
     public String id() {

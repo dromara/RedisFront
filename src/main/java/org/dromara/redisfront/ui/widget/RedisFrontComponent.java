@@ -37,6 +37,16 @@ public class RedisFrontComponent extends Background {
     private final RedisFrontWidget owner;
     private JPanel mainLeftPanel;
     private JPanel mainRightPane;
+    private final java.util.Set<Integer> opening = new java.util.HashSet<>();
+
+    public boolean confirmCloseAll() {
+        for (Component component : mainRightPane.getComponents()) if (component instanceof MainComponent main && !main.confirmCloseAll()) return false;
+        return true;
+    }
+
+    public void closeAll() {
+        for (Component component : mainRightPane.getComponents()) if (component instanceof MainComponent main) main.closeAll();
+    }
 
     public RedisFrontComponent(RedisFrontWidget owner) {
         this.owner = owner;
@@ -60,23 +70,26 @@ public class RedisFrontComponent extends Background {
         var drawerAnimationAction = new DrawerAnimationAction(owner, drawerHandler);
 
         ConnectHandler connectHandler = redisConnectContext -> {
+            for (Component component : mainRightPane.getComponents()) {
+                if (component instanceof MainComponent main && main.selectExisting(redisConnectContext.getId())) return;
+            }
+            if (!opening.add(redisConnectContext.getId())) return;
             Component[] components = mainRightPane.getComponents();
             if (ArrayUtil.isNotEmpty(components)) {
                 Arrays.stream(components)
                         .findFirst()
                         .ifPresent(component -> {
-                            if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
-                                JschManager.MANAGER.openSession(redisConnectContext);
-                            }
                             if (component instanceof MainComponent mainRightTabbedPanel) {
                                 SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
                                     fetchRedisMode(redisConnectContext);
-                                    return new MainTabView(owner, redisConnectContext);
+                                    return redisConnectContext;
                                 }, (o, e) -> {
+                                    opening.remove(redisConnectContext.getId());
                                     if (e == null) {
-                                        mainRightTabbedPanel.addTab(redisConnectContext.getTitle(), o);
+                                        mainRightTabbedPanel.addTab(redisConnectContext.getTitle(), new MainTabView(owner, o));
                                     } else {
-                                        owner.displayException(e);
+                                        org.dromara.redisfront.commons.pool.RedisConnectionPoolManager.cleanupContextPool(redisConnectContext);LettuceUtils.close(redisConnectContext);
+                                        owner.displayException(String.format(owner.$tr("Error.connectionTitle"), redisConnectContext.getHost(), redisConnectContext.getPort()), e);
                                         if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
                                             JschManager.MANAGER.closeSession(redisConnectContext);
                                         }
@@ -85,16 +98,18 @@ public class RedisFrontComponent extends Background {
                             } else {
                                 SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
                                     fetchRedisMode(redisConnectContext);
-                                    MainComponent mainTabbedPanel = createMainTabbedPanel(drawerAnimationAction);
-                                    mainTabbedPanel.addTab(redisConnectContext.getTitle(), new MainTabView(owner, redisConnectContext));
-                                    return mainTabbedPanel;
-                                }, (mainComponent, e) -> {
+                                    return redisConnectContext;
+                                }, (connected, e) -> {
+                                    opening.remove(redisConnectContext.getId());
                                     if (e == null) {
+                                        MainComponent mainComponent = createMainTabbedPanel(drawerAnimationAction);
+                                        mainComponent.addTab(connected.getTitle(), new MainTabView(owner, connected));
                                         mainRightPane.remove(component);
                                         mainRightPane.add(mainComponent, BorderLayout.CENTER);
                                         FlatLaf.updateUI();
                                     } else {
-                                        owner.displayException(e);
+                                        org.dromara.redisfront.commons.pool.RedisConnectionPoolManager.cleanupContextPool(redisConnectContext);LettuceUtils.close(redisConnectContext);
+                                        owner.displayException(String.format(owner.$tr("Error.connectionTitle"), redisConnectContext.getHost(), redisConnectContext.getPort()), e);
                                         if (RedisFrontUtils.equal(redisConnectContext.getConnectTypeMode(), ConnectType.SSH)) {
                                             JschManager.MANAGER.closeSession(redisConnectContext);
                                         }
@@ -107,7 +122,7 @@ public class RedisFrontComponent extends Background {
         owner.getEventListener().bind(-1, OpenRedisConnectEvent.class, qsEvent -> {
             if (qsEvent instanceof OpenRedisConnectEvent openRedisConnectEvent) {
                 Object message = openRedisConnectEvent.getMessage();
-                connectHandler.accept((RedisConnectContext) message);
+                RedisFrontUtils.runEDT(() -> connectHandler.accept((RedisConnectContext) message));
             }
         });
         SidebarComponent sidebarComponent = new SidebarComponent(owner, connectHandler, drawerAnimationAction);
@@ -117,6 +132,7 @@ public class RedisFrontComponent extends Background {
     }
 
     private void fetchRedisMode(RedisConnectContext redisConnectContext) {
+        if (redisConnectContext.getConnectTypeMode() == ConnectType.SSH) JschManager.MANAGER.openSession(redisConnectContext);
         RedisMode redisModeEnum = RedisBasicService.service.getRedisModeEnum(redisConnectContext);
         redisConnectContext.setRedisMode(redisModeEnum);
         if (RedisMode.SENTINEL == redisConnectContext.getRedisMode()) {

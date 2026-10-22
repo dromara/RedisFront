@@ -12,6 +12,7 @@ import io.lettuce.core.pubsub.api.async.RedisPubSubAsyncCommands;
 import org.dromara.quickswing.ui.app.page.QSPageItem;
 import org.dromara.redisfront.commons.enums.KeyTypeEnum;
 import org.dromara.redisfront.commons.enums.RedisMode;
+import org.dromara.redisfront.commons.lettuce.ConnectionRecovery;
 import org.dromara.redisfront.commons.pool.RedisConnectionPoolManager;
 import org.dromara.redisfront.commons.resources.Icons;
 import org.dromara.redisfront.commons.utils.FutureUtils;
@@ -24,12 +25,16 @@ import raven.toast.Notifications;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 /**
@@ -56,6 +61,12 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
     private final RedisConnectContext redisConnectContext;
     private final RedisFrontWidget owner;
     private Integer messageCount = 0;
+    private volatile long connectionGeneration;
+    private volatile boolean active;
+    private boolean connecting;
+    private final LinkedBlockingQueue<String> pendingMessages = new LinkedBlockingQueue<>(1000);
+    private final AtomicLong receivedMessages = new AtomicLong();
+    private final Timer messageTimer = new Timer(100, e -> drainMessages());
 
     public PubSubPageView(RedisConnectContext redisConnectContext, RedisFrontWidget owner) {
         this.owner = owner;
@@ -111,13 +122,16 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
                 enableSubscribe.setToolTipText(owner.$tr("PubSubPageView.enableSubscribe.disableMessage"));
             }
         });
-        publishBtn.addActionListener(ignore -> FutureUtils.runAsync(() -> {
-            RedisPubSubService.service.publish(redisConnectContext, channelField.getText(), messageField.getText());
-            SwingUtilities.invokeLater(() -> {
-                messageField.setText("");
-                Notifications.getInstance().show(Notifications.Type.SUCCESS, owner.$tr("PubSubPageView.publishBtn.sendMessageSuccess"));
-            });
-        }));
+        publishBtn.addActionListener(ignore -> {
+            String channel = channelField.getText(), message = messageField.getText();
+            FutureUtils.runAsync(() -> {
+                RedisPubSubService.service.publish(redisConnectContext, channel, message);
+                SwingUtilities.invokeLater(() -> {
+                    messageField.setText("");
+                    Notifications.getInstance().show(Notifications.Type.SUCCESS, owner.$tr("PubSubPageView.publishBtn.sendMessageSuccess"));
+                });
+            }, error -> SwingUtilities.invokeLater(() -> owner.displayException(error)));
+        });
     }
 
     @Override
@@ -131,31 +145,47 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
     }
 
     public void openConnection() {
-        if (pubsub != null) {
-            return;
-        }
-        if (RedisFrontUtils.equal(redisConnectContext.getRedisMode(), RedisMode.CLUSTER)) {
-            FutureUtils.runAsync(() -> {
-                clusterPubSubConnection = RedisConnectionPoolManager.getClusterConnectPubSub(redisConnectContext);
-                pubsub = clusterPubSubConnection.async();
-            }).thenRun(() -> {
-                if (pubsub != null) {
-                    pubsub.getStatefulConnection().addListener(this);
-                }
-            });
-        } else {
-            FutureUtils.runAsync(() -> {
-                pubSubConnection = RedisConnectionPoolManager.getConnectPubSub(redisConnectContext);
-                pubsub = pubSubConnection.async();
-            }).thenRun(() -> {
-                if (pubsub != null) {
-                    pubsub.getStatefulConnection().addListener(this);
-                }
-            });
+        active = true;
+        messageTimer.start();
+        if (pubsub != null || connecting) return;
+        connecting = true;
+        long generation = ++connectionGeneration;
+        FutureUtils.supplyAsync(() -> {
+            ConnectionRecovery.prepare(redisConnectContext);
+            return redisConnectContext.getRedisMode() == RedisMode.CLUSTER
+                    ? new Opened(RedisConnectionPoolManager.getClusterConnectPubSub(redisConnectContext), null)
+                    : new Opened(null, RedisConnectionPoolManager.getConnectPubSub(redisConnectContext));
+        }).whenComplete((opened, error) -> SwingUtilities.invokeLater(() -> {
+            if (!active || generation != connectionGeneration) {
+                if (opened != null) opened.release(redisConnectContext);
+                return;
+            }
+            connecting = false;
+            if (error != null) {
+                owner.displayException(error);
+                return;
+            }
+            clusterPubSubConnection = opened.cluster();
+            pubSubConnection = opened.normal();
+            pubsub = clusterPubSubConnection != null ? clusterPubSubConnection.async() : pubSubConnection.async();
+            pubsub.getStatefulConnection().addListener(this);
+        }));
+    }
+
+    private record Opened(StatefulRedisClusterPubSubConnection<String, String> cluster,
+                          StatefulRedisPubSubConnection<String, String> normal) {
+        void release(RedisConnectContext context) {
+            if (cluster != null) RedisConnectionPoolManager.closeConnection(context, cluster);
+            if (normal != null) RedisConnectionPoolManager.closeConnection(context, normal);
         }
     }
 
     public void disConnection() {
+        active = false;
+        connectionGeneration++;
+        connecting = false;
+        messageTimer.stop();
+        pendingMessages.clear();
         enableSubscribe.setSelected(false);
         if (pubsub != null) {
             pubsub.getStatefulConnection().removeListener(this);
@@ -326,19 +356,34 @@ public class PubSubPageView extends QSPageItem<RedisFrontWidget> implements Redi
 
     @Override
     public void message(String channel, String message) {
+        if (!active) return;
         String sb = "----------------------------------" + "\n" +
                 owner.$tr("PubSubPageView.message.time") + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + " " + "\n" + owner.$tr("PubSubPageView.message.channel") + channel + " " + "\n" +
                 owner.$tr("PubSubPageView.message.body") + message + "\n" + "\n";
-        messageCount++;
-        SwingUtilities.invokeLater(() -> {
-            numLabel.setText(String.format(owner.$tr("PubSubPageView.numLabel.messageCount"), messageCount));
-            messageList.append(sb);
-        });
+        receivedMessages.incrementAndGet();
+        if (!pendingMessages.offer(sb)) {
+            pendingMessages.poll();
+            pendingMessages.offer(sb);
+        }
+    }
+
+    private void drainMessages() {
+        var batch = new ArrayList<String>();
+        pendingMessages.drainTo(batch, 100);
+        if (batch.isEmpty()) return;
+        messageList.append(String.join("", batch));
+        if (messageList.getDocument().getLength() > 500_000) {
+            try {
+                messageList.getDocument().remove(0, messageList.getDocument().getLength() - 400_000);
+            } catch (BadLocationException ignored) {
+            }
+        }
+        numLabel.setText(String.format(owner.$tr("PubSubPageView.numLabel.messageCount"), receivedMessages.get()));
     }
 
     @Override
     public void message(String pattern, String channel, String message) {
-        System.out.println("channel:" + channel + "  " + message);
+        message(channel, message);
     }
 
     @Override

@@ -13,6 +13,7 @@ import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
 import org.dromara.redisfront.commons.utils.RedisFrontUtils;
 import org.dromara.redisfront.commons.lettuce.LettuceUtils;
+import org.dromara.redisfront.commons.utils.CommandRedactor;
 import org.dromara.redisfront.service.RedisBasicService;
 import org.dromara.redisfront.ui.components.terminal.AbstractTerminal;
 import org.slf4j.Logger;
@@ -73,7 +74,7 @@ public class RedisFrontTerminal extends AbstractTerminal {
             var commandType = Arrays.stream(CommandType.values())
                     .filter(e -> RedisFrontUtils.equal(e.name(), commandList.getFirst().toUpperCase()))
                     .findAny()
-                    .orElseThrow(() -> new RedisFrontException("ERR unknown command '" + inputText + "'", false));
+                    .orElseThrow(() -> new RedisFrontException("ERR unknown command '" + CommandRedactor.commandName(inputText) + "'", false));
             commandList.removeFirst();
 
             if (RedisFrontUtils.equal(connectInfo().getRedisMode(), RedisMode.CLUSTER)) {
@@ -81,16 +82,13 @@ public class RedisFrontTerminal extends AbstractTerminal {
                     var res = redisCommands.dispatch(commandType, new ArrayOutput<>(CODEC), new CommandArgs<>(CODEC).addKeys(commandList));
                     println(format(res, "", outputViewType));
                 });
-            } else if (RedisFrontUtils.equal(connectInfo().getRedisMode(), RedisMode.SENTINEL)) {
+            } else if (RedisFrontUtils.equal(connectInfo().getRedisMode(), RedisMode.SENTINEL) && commandType == CommandType.SENTINEL) {
                 LettuceUtils.sentinelRun(connectInfo(), redisCommands -> {
                     var res = redisCommands.dispatch(commandType, new ArrayOutput<>(new StringCodec()), new CommandArgs<>(new StringCodec()).addKeys(commandList));
                     println(format(res, "", outputViewType));
                 });
             } else {
                 LettuceUtils.run(connectInfo(), redisCommands -> {
-                    if (CommandType.SELECT.equals(commandType)) {
-                        redisConnectContext.setDatabase(Integer.valueOf(commandList.getFirst()));
-                    }
                     if (CommandType.PUBLISH.equals(commandType)) {
                         //监听后期完善
                         var newCommandList = new ArrayList<String>();
@@ -102,14 +100,15 @@ public class RedisFrontTerminal extends AbstractTerminal {
                         println(format(res, "", outputViewType));
                     } else {
                         var res = redisCommands.dispatch(commandType, new ArrayOutput<>(CODEC), new CommandArgs<>(CODEC).addKeys(commandList));
+                        if (CommandType.SELECT.equals(commandType)) redisConnectContext.setDatabase(Integer.valueOf(commandList.getFirst()));
                         println(format(res, "", outputViewType));
                     }
 
                 });
             }
         } catch (Exception e) {
-            log.error("Terminal command error: {}", inputText, e);
-            print(e.getMessage());
+            log.warn("Terminal command failed: {}", CommandRedactor.commandName(inputText));
+            print(CommandRedactor.sensitive(inputText) ? "ERR " + CommandRedactor.commandName(inputText) + " failed" : e.getMessage());
         }
     }
 

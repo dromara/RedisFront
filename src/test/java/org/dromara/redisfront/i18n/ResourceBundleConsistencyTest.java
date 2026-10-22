@@ -87,7 +87,8 @@ public class ResourceBundleConsistencyTest {
                 "AddKeyDialog.requireSeparator.text",
                 "AddConnectDialog.title0",
                 "AddConnectDialog.title1",
-                "PubSubPageView.numLabel.messageCount"
+                "PubSubPageView.numLabel.messageCount", "Error.connectionTitle", "Memory.running", "Memory.complete",
+                "Memory.cancelled", "Memory.stopped", "Memory.scope", "Memory.bytes", "Memory.counts", "Memory.timestamp"
         );
 
         for (String key : formattedKeys) {

@@ -178,6 +178,29 @@ public final class RedisEditService {
         }
     }
 
+    public record RemoteValue(byte[] value, String identity, boolean partial) { }
+
+    /** A fresh comparison only; this never replaces the optimistic snapshot used by save. */
+    public RemoteValue currentValue(RedisConnectContext context, Target target) {
+        if (target.type() == KeyTypeEnum.STRING) {
+            var current = RedisValueLoader.load(context, target.key(), 0, false);
+            return new RemoteValue(current.value(), null, current.partial());
+        }
+        return LettuceUtils.execByMode(context, c -> switch (target.type()) {
+            case HASH -> new RemoteValue(c.hget(target.key(), target.field()), target.field(), false);
+            case LIST -> new RemoteValue(c.lindex(target.key(), target.index()), null, false);
+            case SET -> new RemoteValue(c.sismember(target.key(), target.value()) ? target.value() : null, null, false);
+            case ZSET -> { Double score = c.zscore(target.key(), target.value());yield new RemoteValue(score == null ? null : target.value(), String.valueOf(score), false); }
+            default -> throw new IllegalArgumentException("Unsupported comparison type");
+        }, c -> switch (target.type()) {
+            case HASH -> new RemoteValue(c.hget(target.key(), target.field()), target.field(), false);
+            case LIST -> new RemoteValue(c.lindex(target.key(), target.index()), null, false);
+            case SET -> new RemoteValue(c.sismember(target.key(), target.value()) ? target.value() : null, null, false);
+            case ZSET -> { Double score = c.zscore(target.key(), target.value());yield new RemoteValue(score == null ? null : target.value(), String.valueOf(score), false); }
+            default -> throw new IllegalArgumentException("Unsupported comparison type");
+        });
+    }
+
     public void updateMetadata(RedisConnectContext context, String oldKey, String newKey, Long ttlSeconds) {
         if (newKey == null || newKey.isEmpty()) throw new EditException(Reason.INVALID_KEY);
         validateTtl(ttlSeconds);
