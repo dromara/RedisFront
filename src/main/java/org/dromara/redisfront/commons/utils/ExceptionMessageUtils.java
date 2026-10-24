@@ -8,6 +8,7 @@ import java.net.ConnectException;
 import java.net.NoRouteToHostException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
@@ -34,6 +35,11 @@ public class ExceptionMessageUtils {
                 .map(message -> EXCEPTION_PREFIX.matcher(message.strip()).replaceFirst("")).toList();
         String combined = String.join("\n", messages).toLowerCase(Locale.ROOT);
         boolean ssh = causes.stream().anyMatch(JSchException.class::isInstance);
+        boolean missingAlgorithm = causes.stream().anyMatch(cause -> cause instanceof NoSuchAlgorithmException
+                || cause.getMessage() != null && cause.getMessage().contains("NoSuchAlgorithmException"));
+        if (missingAlgorithm && (ssh || combined.contains("ssh") || combined.contains("ecdh") || combined.contains("ec keypairgenerator"))) {
+            return tr.apply("Error.sshCryptoUnavailable");
+        }
         if (combined.matches("(?s).*(?:^|\\n)(?:wrongpass|noauth)(?:\\s.*|$)")) return tr.apply("Error.redisAuthentication");
         if (ssh && (combined.contains("auth fail") || combined.contains("auth cancel"))) return tr.apply("Error.sshAuthentication");
         if (combined.matches("(?s).*(?:^|\\n)noperm(?:\\s.*|$)")) return tr.apply("Error.permission");

@@ -10,6 +10,7 @@ import org.dromara.redisfront.commons.exception.RedisFrontException;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletionException;
@@ -44,6 +45,16 @@ public class ExceptionMessageUtilsTest {
         Assertions.assertEquals(chinese.getString("Error.redisAuthentication"), message(error));
         Assertions.assertEquals(chinese.getString("Error.redisAuthentication"), message(new RedisFrontException("NOAUTH Authentication required.")));
         Assertions.assertEquals(chinese.getString("Error.sshAuthentication"), message(new JSchException("Auth fail for methods 'publickey,password'")));
+    }
+
+    @Test
+    void missing_ssh_algorithms_should_explain_how_to_repair_the_runtime() {
+        String expected = chinese.getString("Error.sshCryptoUnavailable");
+        var cause = new NoSuchAlgorithmException("Algorithm ECDH not available");
+        Assertions.assertEquals(expected, message(new ExecutionException(new JSchException("SSH handshake failed", cause))));
+        Assertions.assertEquals(expected, message(cause));
+        Assertions.assertEquals(expected, message(new JSchException("java.security.NoSuchAlgorithmException: Algorithm ECDH not available")));
+        Assertions.assertEquals(expected, message(new NoSuchAlgorithmException("EC KeyPairGenerator not available")));
     }
 
     @Test

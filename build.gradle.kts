@@ -68,7 +68,8 @@ val requireModules = listOf(
     "java.logging",
     "java.sql",
     "java.management",
-    "java.naming"
+    "java.naming",
+    "jdk.crypto.ec"
 )
 
 if (JavaVersion.current() < JavaVersion.VERSION_21)
