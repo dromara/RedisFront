@@ -6,7 +6,7 @@ name: Release
 #
 # 平台与 Gradle 任务的对应关系（见 build.gradle.kts）：
 #   windows-latest  -> packageForWindows   (zip + Inno Setup 安装程序)
-#   ubuntu-latest   -> packageForLinux     (tar.gz + deb + rpm，jdeb/redline 纯 Java 生成，无需额外系统工具)
+#   ubuntu-24.04     -> packageForLinux     (tar.gz + deb + rpm，jdeb/redline 纯 Java 生成，无需额外系统工具)
 #   macos-15-intel   -> packageForMac_x86   (Intel dmg；macos-13 已退役，注意 macos-15 无后缀是 ARM)
 #   macos-latest     -> packageForMac_arm   (Apple Silicon dmg)
 #
@@ -40,7 +40,7 @@ jobs:
             task: packageForWindows
             arch: x86_64
           - name: linux-x86_64
-            os: ubuntu-latest
+            os: ubuntu-24.04
             task: packageForLinux
             arch: x86_64
           - name: macos-x86_64
@@ -53,10 +53,10 @@ jobs:
             arch: arm64
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up JDK 21 (Temurin)
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "21"   # build.gradle.kts 强制要求 JDK 21+
@@ -122,7 +122,7 @@ jobs:
         run: ls -lh build/ || true
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: redisfront-${{ matrix.name }}
           path: |
@@ -142,13 +142,13 @@ jobs:
     needs: package
     # 仅在推送 tag 时发布；workflow_dispatch 手动触发只产出构建工件
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Resolve version from tag
         run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
 
       - name: Download all platform artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: redisfront-*
           path: dist
@@ -162,7 +162,7 @@ jobs:
           cat SHA256SUMS.txt
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
