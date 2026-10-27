@@ -63,22 +63,47 @@ jobs:
           cache: gradle        # 缓存 ~/.gradle（含 wrapper 发行版与依赖）
 
       # javapackager 通过调用 PATH 上的 iscc 生成 Windows 安装程序。
-      # GitHub Windows 镜像已预装 Inno Setup 6，但不在 PATH 上，这里补上；缺失时回退用 choco 安装。
-      # 若最终仍找不到 iscc，javapackager 只会跳过安装程序并告警，zip 产物不受影响。
+      # GitHub Windows 镜像已预装 Inno Setup，但不在 PATH 上，这里补上；找不到时回退用 choco 安装。
       - name: Ensure Inno Setup on PATH (Windows)
         if: runner.os == 'Windows'
         shell: bash
         run: |
-          if [ ! -f "/c/Program Files (x86)/Inno Setup 6/ISCC.exe" ]; then
-            choco install innosetup -y --no-progress
-          fi
-          echo 'C:\Program Files (x86)\Inno Setup 6' >> "$GITHUB_PATH"
+          set -e
+          for d in "/c/Program Files (x86)/Inno Setup 6" "/c/Program Files/Inno Setup 6" \
+                   "/c/Program Files (x86)/Inno Setup 7" "/c/Program Files/Inno Setup 7"; do
+            if [ -f "$d/ISCC.exe" ]; then
+              echo "$d" >> "$GITHUB_PATH"
+              echo "found ISCC.exe in $d"
+              exit 0
+            fi
+          done
+          echo "未找到 ISCC.exe，改用 choco 安装"
+          choco install innosetup -y --no-progress
+          for d in "/c/Program Files (x86)/Inno Setup 6" "/c/Program Files/Inno Setup 6"; do
+            if [ -f "$d/ISCC.exe" ]; then echo "$d" >> "$GITHUB_PATH"; fi
+          done
 
       # -x test：打包任务依赖 build，而部分测试（如 RedisEditIntegrationTest）需要真实 Redis，
       # 打包流水线中跳过测试；测试由 ci.yml 在带 Redis 服务的环境中执行。
       - name: Package with javapackager
         shell: bash
         run: ./gradlew ${{ matrix.task }} -x test --no-daemon --stacktrace
+
+      # javapackager 对安装程序生成失败只是告警后继续：iscc 找不到时构建依然成功，
+      # 只是不产出 exe，而 upload-artifact 的通配列表里有 zip 等其它产物兜底，不会报错。
+      # 这里显式校验，避免发布出缺少安装程序的包。
+      - name: Verify Windows installer (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          set -e
+          shopt -s nullglob
+          exes=(build/*.exe)
+          if [ ${#exes[@]} -eq 0 ]; then
+            echo "::error::未生成安装程序 (*.exe)，请检查 iscc 是否可用"
+            exit 1
+          fi
+          ls -lh "${exes[@]}"
 
       # 两个 macOS 任务的 dmg 产物同名，追加架构后缀避免 Release 附件重名
       - name: Rename DMG with arch suffix (macOS)
