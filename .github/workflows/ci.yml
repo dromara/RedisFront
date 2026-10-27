@@ -1,0 +1,74 @@
+name: CI
+
+# 日常多平台编译验证：
+#   - compile：在 Windows / Linux / macOS 上执行 assemble，验证三个平台都能正常编译
+#   - test：在 ubuntu 上带真实 Redis 服务运行测试套件（部分集成测试需要连接 Redis，
+#     通过 REDISFRONT_TEST_HOST / REDISFRONT_TEST_PORT 环境变量指向服务容器）
+
+on:
+  push:
+    branches:
+      - master
+      - "20*"   # 2026.1 这类版本分支
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compile:
+    name: Compile (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - windows-latest
+          - ubuntu-latest
+          - macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Assemble
+        shell: bash
+        run: ./gradlew assemble --no-daemon --stacktrace
+
+  test:
+    name: Unit tests (ubuntu + redis)
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Run tests
+        shell: bash
+        env:
+          REDISFRONT_TEST_HOST: localhost
+          REDISFRONT_TEST_PORT: "6379"
+        run: ./gradlew test --no-daemon --stacktrace

@@ -1,0 +1,147 @@
+name: Release
+
+# 多平台打包与发布流水线：
+#   - 推送形如 2026.1 / v2026.1 的 tag 时，在四个平台上并行打包并创建 GitHub Release
+#   - 也可通过 Actions 页面手动触发（workflow_dispatch），此时只产出构建工件，不创建 Release
+#
+# 平台与 Gradle 任务的对应关系（见 build.gradle.kts）：
+#   windows-latest  -> packageForWindows   (zip + Inno Setup 安装程序)
+#   ubuntu-latest   -> packageForLinux     (tar.gz + deb + rpm，jdeb/redline 纯 Java 生成，无需额外系统工具)
+#   macos-13        -> packageForMac_x86   (Intel dmg)
+#   macos-latest    -> packageForMac_arm   (Apple Silicon dmg)
+#
+# 注意：build.gradle.kts 中 packagingJdk 使用的是运行构建的 JDK（jlink 裁剪运行时），
+#       因此每个平台必须在对应的 runner 上原生构建，无法交叉编译。
+
+on:
+  push:
+    tags:
+      - "20*"   # 2026.1 这类版本号 tag
+      - "v*"    # v2026.1 这类 tag
+  workflow_dispatch:
+
+permissions:
+  contents: write   # 创建 Release 所需
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    name: Package ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false   # 单个平台失败不影响其他平台继续打包
+      matrix:
+        include:
+          - name: windows-x86_64
+            os: windows-latest
+            task: packageForWindows
+            arch: x86_64
+          - name: linux-x86_64
+            os: ubuntu-latest
+            task: packageForLinux
+            arch: x86_64
+          - name: macos-x86_64
+            os: macos-13      # Intel Mac runner
+            task: packageForMac_x86
+            arch: x86_64
+          - name: macos-arm64
+            os: macos-latest  # Apple Silicon runner
+            task: packageForMac_arm
+            arch: arm64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"   # build.gradle.kts 强制要求 JDK 21+
+          cache: gradle        # 缓存 ~/.gradle（含 wrapper 发行版与依赖）
+
+      # javapackager 通过调用 PATH 上的 iscc 生成 Windows 安装程序。
+      # GitHub Windows 镜像已预装 Inno Setup 6，但不在 PATH 上，这里补上；缺失时回退用 choco 安装。
+      # 若最终仍找不到 iscc，javapackager 只会跳过安装程序并告警，zip 产物不受影响。
+      - name: Ensure Inno Setup on PATH (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          if [ ! -f "/c/Program Files (x86)/Inno Setup 6/ISCC.exe" ]; then
+            choco install innosetup -y --no-progress
+          fi
+          echo 'C:\Program Files (x86)\Inno Setup 6' >> "$GITHUB_PATH"
+
+      # -x test：打包任务依赖 build，而部分测试（如 RedisEditIntegrationTest）需要真实 Redis，
+      # 打包流水线中跳过测试；测试由 ci.yml 在带 Redis 服务的环境中执行。
+      - name: Package with javapackager
+        shell: bash
+        run: ./gradlew ${{ matrix.task }} -x test --no-daemon --stacktrace
+
+      # 两个 macOS 任务的 dmg 产物同名，追加架构后缀避免 Release 附件重名
+      - name: Rename DMG with arch suffix (macOS)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -e
+          for f in build/*.dmg; do
+            [ -e "$f" ] || continue
+            base=$(basename "$f" .dmg)
+            mv "$f" "build/${base}-${{ matrix.arch }}.dmg"
+          done
+
+      - name: List build artifacts
+        shell: bash
+        run: ls -lh build/ || true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: redisfront-${{ matrix.name }}
+          path: |
+            build/*.zip
+            build/*.exe
+            build/*.dmg
+            build/*.pkg
+            build/*.deb
+            build/*.rpm
+            build/*.tar.gz
+            build/*-runnable.jar
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    name: Publish GitHub Release
+    needs: package
+    # 仅在推送 tag 时发布；workflow_dispatch 手动触发只产出构建工件
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve version from tag
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+
+      - name: Download all platform artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: redisfront-*
+          path: dist
+          merge-multiple: true
+
+      - name: Generate SHA256 checksums
+        run: |
+          cd dist
+          find . -maxdepth 1 -type f ! -name 'SHA256SUMS.txt' -print0 | xargs -0 sha256sum > SHA256SUMS.txt
+          sed -i 's|\*\./|*|' SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: RedisFront ${{ env.VERSION }}
+          generate_release_notes: true   # 依据 PR/提交自动生成更新说明，可发布后手动编辑
+          files: dist/*
+          fail_on_unmatched_files: true
