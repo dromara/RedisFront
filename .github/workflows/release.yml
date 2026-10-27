@@ -80,20 +80,6 @@ jobs:
         shell: bash
         run: ./gradlew ${{ matrix.task }} -x test --no-daemon --stacktrace
 
-      # redline-rpm 实际产出 RedisFront-2026.1-1.x86_64.rpm，而 javapackager 期望的是
-      # 首字母大写的架构名（Architecture.X86_64.toString()），大小写不匹配导致它认为
-      # RPM 未生成、不做重命名。这里统一改成与 deb 一致的 RedisFront_<version>.rpm。
-      - name: Normalize RPM name (Linux)
-        if: runner.os == 'Linux'
-        shell: bash
-        run: |
-          set -e
-          for f in build/RedisFront-*-1.*.rpm; do
-            [ -e "$f" ] || continue
-            version=$(basename "$f" | sed -E 's/^RedisFront-(.*)-1\..*\.rpm$/\1/')
-            mv "$f" "build/RedisFront_${version}.rpm"
-          done
-
       # 两个 macOS 任务的 dmg 产物同名，追加架构后缀避免 Release 附件重名
       - name: Rename DMG with arch suffix (macOS)
         if: runner.os == 'macOS'

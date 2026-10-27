@@ -1,10 +1,10 @@
 @file:Suppress("UNCHECKED_CAST")
 
 import groovy.lang.Closure
-import io.github.fvarrui.javapackager.gradle.PackagePluginExtension
-import io.github.fvarrui.javapackager.gradle.PackageTask
-import io.github.fvarrui.javapackager.model.*
-import io.github.fvarrui.javapackager.model.Platform
+import io.github.javapackager.gradle.PackagePluginExtension
+import io.github.javapackager.gradle.PackageTask
+import io.github.javapackager.model.*
+import io.github.javapackager.model.Platform
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import java.time.LocalDateTime
@@ -21,9 +21,9 @@ buildscript {
         gradlePluginPortal()
         mavenLocal()
     }
-    dependencies { classpath("io.github.fvarrui:javapackager:1.7.6") }
+    dependencies { classpath("io.github.javapackager:javapackager:2.0.0") }
 }
-plugins.apply("io.github.fvarrui.javapackager.plugin")
+plugins.apply("io.github.javapackager")
 
 allprojects {
     val repoUsername = "662c9a1d2df38b0129acf288"
@@ -193,7 +193,7 @@ tasks.register<PackageTask>("packageForWindows") {
     organizationUrl = supportUrl
 
     platform = Platform.windows
-    isCreateZipball = false
+    createZipball = true
     winConfig(closureOf<WindowsConfig> {
         headerType = HeaderType.gui
         originalFilename = applicationName
@@ -203,7 +203,6 @@ tasks.register<PackageTask>("packageForWindows") {
         fileVersion = version
         isGenerateSetup = true
         setupLanguages = languages
-        isCreateZipball = true
         isGenerateMsi = false
         isGenerateMsm = false
         msiUpgradeCode = version
@@ -217,6 +216,7 @@ tasks.register<PackageTask>("packageForWindows") {
 tasks.register<PackageTask>("packageForLinux") {
     description = "package For Linux"
     platform = Platform.linux
+    createTarball = true
 
     organizationName = organization
     organizationUrl = supportUrl
@@ -225,9 +225,8 @@ tasks.register<PackageTask>("packageForLinux") {
         closureOf<LinuxConfig> {
             isGenerateDeb = true
             isGenerateRpm = true
-            isCreateTarball = true
-            // LinuxConfig 默认 generateAppImage=true，会去下载 appimagetool；
-            // 该外部下载地址已 404，且会拖慢打包，显式关闭。
+            // LinuxConfig 默认 generateAppImage=true，会在打包时额外下载 appimagetool；
+            // 我们的发布产物是 deb/rpm/tar.gz，不需要 AppImage，显式关闭以免引入外部网络依赖。
             isGenerateAppImage = false
             categories = listOf("Office")
         } as Closure<LinuxConfig>
