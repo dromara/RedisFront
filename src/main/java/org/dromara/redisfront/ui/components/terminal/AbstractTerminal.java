@@ -35,7 +35,7 @@ public abstract class AbstractTerminal extends JPanel implements KeyListener, Ca
     private JWindow suggestionWindow;
     private JXList<String> suggestionList;
     private DefaultListModel<String> suggestionModel;
-    private final String[] redisCommands = {
+    private static final String[] redisCommands = {
             "PING", "ECHO", "AUTH", "SELECT",
             "INFO", "CLIENT", "CONFIG", "SLOWLOG",
             "DBSIZE", "KEYS", "SCAN", "TYPE", "TTL", "PTTL", "EXPIRE", "PEXPIRE", "PERSIST", "RENAME", "RENAMENX",

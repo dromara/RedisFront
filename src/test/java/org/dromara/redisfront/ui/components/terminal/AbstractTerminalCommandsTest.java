@@ -1,6 +1,5 @@
 package org.dromara.redisfront.ui.components.terminal;
 
-import org.dromara.redisfront.model.context.RedisConnectContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -13,25 +12,10 @@ public class AbstractTerminalCommandsTest {
 
     @Test
     void redisCommands_should_contain_common_commands() throws Exception {
-        AbstractTerminal terminal = new AbstractTerminal() {
-            @Override
-            protected void inputProcessHandler(String input) {
-            }
-
-            @Override
-            protected RedisConnectContext connectInfo() {
-                return new RedisConnectContext();
-            }
-
-            @Override
-            protected String databaseName() {
-                return "0";
-            }
-        };
-
+        // 按类读静态字段即可：不要实例化 AbstractTerminal，其构造函数会创建 JWindow，无显示环境会抛 HeadlessException
         Field field = AbstractTerminal.class.getDeclaredField("redisCommands");
         field.setAccessible(true);
-        String[] cmds = (String[]) field.get(terminal);
+        String[] cmds = (String[]) field.get(null);
 
         Set<String> set = Arrays.stream(cmds).collect(Collectors.toSet());
         Assertions.assertTrue(set.contains("SCAN"));
@@ -48,4 +32,3 @@ public class AbstractTerminalCommandsTest {
         Assertions.assertTrue(set.contains(":VIEW"));
     }
 }
-
