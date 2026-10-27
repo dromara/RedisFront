@@ -63,25 +63,31 @@ jobs:
           cache: gradle        # 缓存 ~/.gradle（含 wrapper 发行版与依赖）
 
       # javapackager 通过调用 PATH 上的 iscc 生成 Windows 安装程序。
-      # GitHub Windows 镜像已预装 Inno Setup，但不在 PATH 上，这里补上；找不到时回退用 choco 安装。
+      # GitHub Windows 镜像预装了 Inno Setup，但不在 PATH 上，这里补上；找不到时回退用 choco 安装。
       - name: Ensure Inno Setup on PATH (Windows)
         if: runner.os == 'Windows'
         shell: bash
         run: |
           set -e
-          for d in "/c/Program Files (x86)/Inno Setup 6" "/c/Program Files/Inno Setup 6" \
-                   "/c/Program Files (x86)/Inno Setup 7" "/c/Program Files/Inno Setup 7"; do
-            if [ -f "$d/ISCC.exe" ]; then
-              echo "$d" >> "$GITHUB_PATH"
-              echo "found ISCC.exe in $d"
-              exit 0
-            fi
-          done
-          echo "未找到 ISCC.exe，改用 choco 安装"
-          choco install innosetup -y --no-progress
-          for d in "/c/Program Files (x86)/Inno Setup 6" "/c/Program Files/Inno Setup 6"; do
-            if [ -f "$d/ISCC.exe" ]; then echo "$d" >> "$GITHUB_PATH"; fi
-          done
+          locate() {
+            find "/c/Program Files" "/c/Program Files (x86)" "/c/ProgramData/chocolatey" \
+                 -maxdepth 3 -iname ISCC.exe 2>/dev/null | head -1
+          }
+          found=$(locate)
+          if [ -z "$found" ]; then
+            echo "未找到 ISCC.exe，改用 choco 安装 Inno Setup"
+            choco install innosetup -y --no-progress
+            found=$(locate)
+          fi
+          if [ -z "$found" ]; then
+            echo "::error::安装后仍找不到 ISCC.exe"
+            exit 1
+          fi
+          # GITHUB_PATH 里必须写 Windows 风格路径：/c/... 这类 MSYS 路径
+          # 后续步骤里的原生 Windows 进程（gradlew.bat、iscc）解析不了
+          win=$(cygpath -w "$(dirname "$found")")
+          echo "$win" >> "$GITHUB_PATH"
+          echo "found ISCC.exe: $found -> PATH += $win"
 
       # -x test：打包任务依赖 build，而部分测试（如 RedisEditIntegrationTest）需要真实 Redis，
       # 打包流水线中跳过测试；测试由 ci.yml 在带 Redis 服务的环境中执行。
@@ -100,7 +106,10 @@ jobs:
           shopt -s nullglob
           exes=(build/*.exe)
           if [ ${#exes[@]} -eq 0 ]; then
-            echo "::error::未生成安装程序 (*.exe)，请检查 iscc 是否可用"
+            echo "::error::未生成安装程序 (*.exe)"
+            echo "--- which iscc ---"; command -v iscc || echo "iscc 不在 PATH"
+            echo "--- PATH 中的 Inno Setup ---"; echo "$PATH" | tr ':' '\n' | grep -i inno || echo "无"
+            echo "--- build 目录 ---"; ls -lh build/ | head -20
             exit 1
           fi
           ls -lh "${exes[@]}"
