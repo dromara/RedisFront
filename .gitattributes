@@ -1,0 +1,3 @@
+# Inno Setup 语言文件：保持 LF，避免 core.autocrlf 在 Windows 上检出成 CRLF
+# 后与上游文件产生无意义的 diff
+assets/windows/Languages/*.isl text eol=lf

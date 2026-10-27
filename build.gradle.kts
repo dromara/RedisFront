@@ -184,7 +184,12 @@ configure<PackagePluginExtension> {
 tasks.register<PackageTask>("packageForWindows") {
 
     val languages = LinkedHashMap<String, String>()
-    languages["Chinese"] = "compiler:Languages\\ChineseSimplified.isl"
+    // ChineseSimplified.isl 属于 Inno Setup 的非官方翻译（位于其源码的
+    // Files/Languages/Unofficial/ 下），标准安装包并不包含它——GitHub Windows
+    // runner 上预装的 6.7.1 就没有这个文件，用 compiler: 前缀必然编译失败。
+    // 因此随仓库分发，用绝对路径引用。
+    languages["Chinese"] = layout.projectDirectory
+        .file("assets/windows/Languages/ChineseSimplified.isl").asFile.absolutePath
     languages["English"] = "compiler:Default.isl"
 
     description = "package For Windows"
