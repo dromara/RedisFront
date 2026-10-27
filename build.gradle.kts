@@ -226,7 +226,6 @@ tasks.register<PackageTask>("packageForLinux") {
             isGenerateDeb = true
             isGenerateRpm = true
             isCreateTarball = true
-            isGenerateInstaller = true
             categories = listOf("Office")
         } as Closure<LinuxConfig>
     )
