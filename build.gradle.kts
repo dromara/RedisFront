@@ -226,6 +226,9 @@ tasks.register<PackageTask>("packageForLinux") {
             isGenerateDeb = true
             isGenerateRpm = true
             isCreateTarball = true
+            // LinuxConfig 默认 generateAppImage=true，会去下载 appimagetool；
+            // 该外部下载地址已 404，且会拖慢打包，显式关闭。
+            isGenerateAppImage = false
             categories = listOf("Office")
         } as Closure<LinuxConfig>
     )
