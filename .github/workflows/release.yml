@@ -63,7 +63,9 @@ jobs:
           cache: gradle        # 缓存 ~/.gradle（含 wrapper 发行版与依赖）
 
       # javapackager 通过调用 PATH 上的 iscc 生成 Windows 安装程序。
-      # GitHub Windows 镜像预装了 Inno Setup，但不在 PATH 上，这里补上；找不到时回退用 choco 安装。
+      # Inno Setup 虽预装在镜像里但不在 PATH 上，且镜像内容会随版本退役而变
+      # （macos-13 刚退役过），所以不假设它一定在：自己定位并补 PATH，
+      # 找不到才用 choco 装，装完再找一次。
       - name: Ensure Inno Setup on PATH (Windows)
         if: runner.os == 'Windows'
         shell: bash
@@ -86,8 +88,16 @@ jobs:
           # GITHUB_PATH 里必须写 Windows 风格路径：/c/... 这类 MSYS 路径
           # 后续步骤里的原生 Windows 进程（gradlew.bat、iscc）解析不了
           win=$(cygpath -w "$(dirname "$found")")
+          case "$win" in
+            /*) echo "::error::PATH 条目仍是 MSYS 路径: $win"; exit 1 ;;
+          esac
           echo "$win" >> "$GITHUB_PATH"
           echo "found ISCC.exe: $found -> PATH += $win"
+          # 自检：确认该目录下确实能定位到 iscc
+          export PATH="$(dirname "$found"):$PATH"
+          command -v iscc > /dev/null 2>&1 \
+            && echo "iscc 自检通过: $(command -v iscc)" \
+            || { echo "::error::iscc 自检未通过"; exit 1; }
 
       # -x test：打包任务依赖 build，而部分测试（如 RedisEditIntegrationTest）需要真实 Redis，
       # 打包流水线中跳过测试；测试由 ci.yml 在带 Redis 服务的环境中执行。
