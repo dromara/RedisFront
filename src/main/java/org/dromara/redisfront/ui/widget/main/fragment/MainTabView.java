@@ -95,7 +95,7 @@ public class MainTabView extends JTabbedPane {
         pageScaffold = new PageScaffold(new ReportPageView(redisConnectContext, owner));
         this.addTab(owner.$tr("MainTabView.pageScaffold.chart"), Icons.CONTENT_TAB_INFO_ICON, pageScaffold);
         diagnostics = new org.dromara.redisfront.ui.components.diagnostics.RedisDiagnosticsPanel(redisConnectContext, owner);
-        this.addTab(owner.$tr("Diagnostics.title"), Icons.CONTENT_TAB_INFO_ICON, diagnostics);
+        this.addTab(owner.$tr("Diagnostics.title"), Icons.CONTENT_TAB_DIAGNOSTICS_ICON, diagnostics);
 
         this.eventListener.bind(redisConnectContext.getId(), DrawerChangeEvent.class, qsEvent -> {
             if (qsEvent instanceof DrawerChangeEvent drawerChangeEvent) {

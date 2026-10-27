@@ -49,6 +49,7 @@ public class Icons {
     public static final Icon CONTENT_TAB_DATA_ICON = new FlatSVGIcon("icons/table.svg",24,24);
     public static final Icon CONTENT_TAB_COMMAND_ICON = new FlatSVGIcon("icons/db_cli2.svg",24,24);
     public static final Icon CONTENT_TAB_INFO_ICON = new FlatSVGIcon("icons/db_report2.svg",24,24);
+    public static final Icon CONTENT_TAB_DIAGNOSTICS_ICON = new FlatSVGIcon("icons/diagnostics.svg",24,24);
     public static final Icon DRAWER_SHOW_OR_CLOSE_ICON = new FlatSVGIcon("icons/listFiles.svg",24,24);
     public static final Icon STATUS_OK = new FlatSVGIcon("icons/status_ok.svg",14,14);
     public static final Icon STATUS_ERROR = new FlatSVGIcon("icons/status_error.svg",14,14);
