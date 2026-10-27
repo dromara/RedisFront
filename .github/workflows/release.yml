@@ -7,8 +7,8 @@ name: Release
 # 平台与 Gradle 任务的对应关系（见 build.gradle.kts）：
 #   windows-latest  -> packageForWindows   (zip + Inno Setup 安装程序)
 #   ubuntu-latest   -> packageForLinux     (tar.gz + deb + rpm，jdeb/redline 纯 Java 生成，无需额外系统工具)
-#   macos-13        -> packageForMac_x86   (Intel dmg)
-#   macos-latest    -> packageForMac_arm   (Apple Silicon dmg)
+#   macos-15-intel   -> packageForMac_x86   (Intel dmg；macos-13 已退役，注意 macos-15 无后缀是 ARM)
+#   macos-latest     -> packageForMac_arm   (Apple Silicon dmg)
 #
 # 注意：build.gradle.kts 中 packagingJdk 使用的是运行构建的 JDK（jlink 裁剪运行时），
 #       因此每个平台必须在对应的 runner 上原生构建，无法交叉编译。
@@ -44,7 +44,7 @@ jobs:
             task: packageForLinux
             arch: x86_64
           - name: macos-x86_64
-            os: macos-13      # Intel Mac runner
+            os: macos-15-intel  # Intel Mac runner（macos-13 已退役；注意 macos-15 无后缀是 ARM）
             task: packageForMac_x86
             arch: x86_64
           - name: macos-arm64
