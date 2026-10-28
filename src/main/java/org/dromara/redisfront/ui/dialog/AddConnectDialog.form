@@ -47,7 +47,7 @@
                           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
-                          <text value="证书"/>
+                          <text resource-bundle="org/dromara/redisfront/RedisFront" key="AddConnectDialog.sslCertLabel.Title"/>
                         </properties>
                       </component>
                       <component id="6a10e" class="javax.swing.JTextField" binding="publicKeyField">
@@ -63,7 +63,7 @@
                           <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
-                          <text value="选择文件"/>
+                          <text resource-bundle="org/dromara/redisfront/RedisFront" key="AddConnectDialog.sslPublicKeyFileBtn.Title"/>
                         </properties>
                       </component>
                       <hspacer id="6295f">
@@ -76,7 +76,7 @@
                           <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
-                          <text value="密码"/>
+                          <text resource-bundle="org/dromara/redisfront/RedisFront" key="AddConnectDialog.sslPasswordLabel.Title"/>
                         </properties>
                       </component>
                       <component id="c93bd" class="javax.swing.JPasswordField" binding="sslPasswordField" custom-create="true">
@@ -92,7 +92,7 @@
                           <grid row="1" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
-                          <text value="显示密码"/>
+                          <text resource-bundle="org/dromara/redisfront/RedisFront" key="AddConnectDialog.showSslPassword.Title"/>
                         </properties>
                       </component>
                     </children>
