@@ -18,7 +18,7 @@ public class Constants {
     public static final String APP_RESOURCE_BUNDLE = "org.dromara.redisfront.RedisFront";
 
     public static final String SQL_CREATE_CONNECT_DETAIL = """
-            create table connect_detail
+            create table if not exists connect_detail
             (
                 id           integer not null
                     constraint connect_detail_pk
@@ -38,7 +38,7 @@ public class Constants {
             );
             """;
     public static final String SQL_CREATE_CONNECT_GROUP = """
-            create table connect_group
+            create table if not exists connect_group
             (
                 group_id   integer not null
                     constraint connect_group_pk

@@ -2,15 +2,18 @@ package org.dromara.redisfront;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.db.DbUtil;
+import cn.hutool.db.ds.simple.SimpleDataSource;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import com.formdev.flatlaf.util.SystemInfo;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.quickswing.database.QSDbManager;
 import org.dromara.quickswing.events.QSEvent;
 import org.dromara.quickswing.events.QSEventBus;
 import org.dromara.quickswing.excutor.QSTaskExecutor;
 import org.dromara.quickswing.ui.app.QSContext;
+import org.dromara.quickswing.ui.app.QSPrefs;
 import org.dromara.quickswing.ui.app.QSWidget;
 import org.dromara.redisfront.commons.constant.Constants;
 import org.dromara.redisfront.commons.exception.RedisFrontException;
@@ -51,6 +54,9 @@ public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, Redi
         RedisFrontContext.eventBus = super.getEventBus();
     }
 
+    private RedisFrontPrefs preferences;
+    private volatile QSDbManager databaseManager;
+
     public static void publishEvent(QSEvent event) {
         if (eventBus != null) COMMAND_EVENTS.execute(() -> eventBus.publish(event));
     }
@@ -77,7 +83,36 @@ public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, Redi
 
     @Override
     protected RedisFrontPrefs loadPreferences(String[] args) {
-        return new RedisFrontPrefs(FileUtil.getUserHomePath());
+        this.preferences = new RedisFrontPrefs(FileUtil.getUserHomePath());
+        return preferences;
+    }
+
+    /**
+     * quick-swing 的 SqliteDbManager 拼 JDBC URL 时会在文件名末尾追加 ';'，sqlite-jdbc 把它当成了
+     * 文件名的一部分，数据库文件因此被创建成 "redis-front.db;"。这里覆写为自建数据源，使用规范文件名，
+     * 历史文件在 {@link #performBeforeInitialization} 中一次性迁移。
+     */
+    @Override
+    public QSDbManager getDatabaseManager() {
+        if (databaseManager == null) {
+            synchronized (this) {
+                if (databaseManager == null) {
+                    var datasource = new SimpleDataSource("jdbc:sqlite:" + preferences.getDataPath()
+                            + File.separator + preferences.getDbFileName(), null, null, "org.sqlite.JDBC");
+                    databaseManager = new QSDbManager() {
+                        @Override
+                        public void initialize(QSPrefs prefs) {
+                        }
+
+                        @Override
+                        public DataSource getDatasource() {
+                            return datasource;
+                        }
+                    };
+                }
+            }
+        }
+        return databaseManager;
     }
 
     @Override
@@ -108,7 +143,18 @@ public class RedisFrontContext extends QSContext<QSWidget<RedisFrontPrefs>, Redi
                 Locale.SIMPLIFIED_CHINESE.toLanguageTag());
         Locale.setDefault(Locale.forLanguageTag(languageTag));
 
-        String dbPath = preferences.getDataPath() + File.separator + preferences.getDbFileName() + ";";
+        String dbPath = preferences.getDataPath() + File.separator + preferences.getDbFileName();
+        //历史版本受上述框架 URL 问题影响，数据库文件名末尾带着 ';'，先迁移为规范文件名
+        File legacyDbFile = new File(dbPath + ";");
+        if (!FileUtil.exist(dbPath) && FileUtil.exist(legacyDbFile.getPath())) {
+            try {
+                FileUtil.move(legacyDbFile, new File(dbPath), true);
+                log.info("历史数据库文件已迁移: {} -> {}", legacyDbFile.getName(), preferences.getDbFileName());
+            } catch (Exception e) {
+                log.error("数据库文件迁移失败.", e);
+                JOptionPane.showMessageDialog(null, e.getMessage(), "数据库初始化失败", JOptionPane.ERROR_MESSAGE);
+            }
+        }
         if (!preferences.getDBInitialized() || !FileUtil.exist(dbPath)) {
             DataSource datasource = getDatabaseManager().getDatasource();
             try {
