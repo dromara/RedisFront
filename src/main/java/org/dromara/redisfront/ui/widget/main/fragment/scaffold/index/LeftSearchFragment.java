@@ -87,7 +87,7 @@ public class LeftSearchFragment {
     private boolean searchDisposed;
     private KeyMemoryAnalysisController memoryAnalysis;
     private final RedisConnectContext redisConnectContext;
-    private boolean rebuildingDatabases, restoringKeySelection;
+    private boolean rebuildingDatabases, restoringKeySelection, pruningDeletedNodes;
     private BooleanSupplier databaseChangeGuard = () -> true;
 
     public void setDatabaseChangeGuard(BooleanSupplier guard) {
@@ -342,7 +342,7 @@ public class LeftSearchFragment {
             }
         });
         keyTree.addTreeSelectionListener(ignore -> {
-            if (restoringKeySelection) return;
+            if (restoringKeySelection || pruningDeletedNodes) return;
             var selectNode = keyTree.getLastSelectedPathComponent();
             if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
                 if (treeNodeInfo.getChildCount() == 0) {
@@ -429,25 +429,27 @@ public class LeftSearchFragment {
                         return;
                     }
 
-                    DefaultTreeModel treeModel = (DefaultTreeModel) keyTree.getModel();
                     var selectionPaths = keyTree.getSelectionModel().getSelectionPaths();
-                    if (RedisFrontUtils.isNotEmpty(selectionPaths)) {
+                    if (RedisFrontUtils.isEmpty(selectionPaths)) {
+                        return;
+                    }
+                    SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
+                        var deletedPaths = new ArrayList<TreePath>();
                         for (TreePath selectionPath : selectionPaths) {
                             if (selectionPath.getLastPathComponent() instanceof TreeNodeInfo treeNodeInfo) {
-                                var title = treeNodeInfo.title();
-                                treeNodeInfo.setTitle(title.concat(" ").concat(owner.$tr("DataSearchForm.treeNodeInfo.del.doing.message")));
-                                keyTree.updateUI();
-                                SyncLoadingDialog.builder(owner).showSyncLoadingDialog(() -> {
-                                    deleteKeysActionPerformed(treeNodeInfo);
-                                    return findTreeNodeParent(treeNodeInfo);
-                                }, (e, ex) -> {
-                                    if (ex == null) {
-                                        treeModel.removeNodeFromParent(e);
-                                    }
-                                });
+                                deleteKeysActionPerformed(treeNodeInfo);
+                                deletedPaths.add(selectionPath);
                             }
                         }
-                    }
+                        return deletedPaths;
+                    }, (deletedPaths, ex) -> {
+                        if (deletedPaths != null) {
+                            pruneDeletedNodes(deletedPaths);
+                        }
+                        if (ex != null) {
+                            owner.displayException(ex);
+                        }
+                    });
                 });
                 return delMenuItem;
             }
@@ -733,17 +735,6 @@ public class LeftSearchFragment {
     }
 
 
-    public void deleteKeysActionPerformed() {
-        var treeModel = (DefaultTreeModel) keyTree.getModel();
-        var selectNode = keyTree.getLastSelectedPathComponent();
-        if (selectNode instanceof TreeNodeInfo treeNodeInfo) {
-            if (treeNodeInfo.getParent() != null) {
-                RedisBasicService.service.del(redisConnectContext, treeNodeInfo.key());
-                treeModel.removeNodeFromParent(treeNodeInfo);
-            }
-        }
-    }
-
     public void deleteKeysActionPerformed(TreeNodeInfo treeNodeInfo) {
         if (treeNodeInfo.getChildCount() > 0) {
             for (int i = 0; i < treeNodeInfo.getChildCount(); i++) {
@@ -761,6 +752,36 @@ public class LeftSearchFragment {
             return treeNodeInfo;
         }
         return findTreeNodeParent(parent);
+    }
+
+    private void pruneDeletedNodes(List<TreePath> deletedPaths) {
+        var treeModel = (DefaultTreeModel) keyTree.getModel();
+        var removeRoots = new LinkedHashSet<TreeNodeInfo>();
+        for (TreePath deletedPath : deletedPaths) {
+            if (deletedPath.getLastPathComponent() instanceof TreeNodeInfo treeNodeInfo) {
+                var removeRoot = findTreeNodeParent(treeNodeInfo);
+                boolean coveredByExisting = false;
+                for (TreeNodeInfo existingRoot : removeRoots) {
+                    if (existingRoot.isNodeAncestor(removeRoot)) {
+                        coveredByExisting = true;
+                        break;
+                    }
+                }
+                if (!coveredByExisting) {
+                    removeRoots.removeIf(existingRoot -> removeRoot.isNodeAncestor(existingRoot));
+                    removeRoots.add(removeRoot);
+                }
+            }
+        }
+        //移除节点会让 JTree 把选中态挪到相邻节点上，屏蔽选中监听，避免去加载刚删除的 key
+        pruningDeletedNodes = true;
+        try {
+            for (TreeNodeInfo removeRoot : removeRoots) {
+                treeModel.removeNodeFromParent(removeRoot);
+            }
+        } finally {
+            pruningDeletedNodes = false;
+        }
     }
 
     private void changeDatabaseActionPerformed(int selectedIndex) {
