@@ -163,6 +163,10 @@ public class RedisConnectContext implements Serializable, Cloneable {
         private String publicKeyFilePath;
         private String grantFilePath;
         private String password;
+        /**
+         * 证书校验模式，取值 DEFAULT/NONE/CA；缺省或 DEFAULT 均按驱动默认行为校验
+         */
+        private String verifyMode;
 
         @Override
         public String toString() {

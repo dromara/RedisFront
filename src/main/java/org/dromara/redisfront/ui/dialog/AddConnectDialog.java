@@ -73,6 +73,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
     private JButton testBtn;
     private JPasswordField sslPasswordField;
     private JCheckBox showSslPassword;
+    private JComboBox<String> sslVerifyModeComboBox;
     private JLabel titleLabel;
     private JLabel sshHostLabel;
     private JLabel sshUserLabel;
@@ -141,12 +142,29 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         this.initializeComponents();
     }
 
+    /**
+     * 与下拉框选项顺序一一对应：默认校验 / 信任所有 / 仅校验CA
+     */
+    private static final String[] SSL_VERIFY_MODES = {"DEFAULT", "NONE", "CA"};
+
+    private static int sslVerifyModeIndex(String verifyMode) {
+        for (int i = 0; i < SSL_VERIFY_MODES.length; i++) {
+            if (SSL_VERIFY_MODES[i].equals(verifyMode)) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
     private void initializeComponents() {
         initializeConnectionSettings();
         // SSL 面板与测试按钮的文案在生成的 $$$setupUI$$$ 里写死了中文，这里按当前语言覆盖
         testBtn.setText($tr("AddConnectDialog.testBtn.Title"));
         publicKeyFileBtn.setText($tr("AddConnectDialog.sslPublicKeyFileBtn.Title"));
         showSslPassword.setText($tr("AddConnectDialog.showSslPassword.Title"));
+        sslVerifyModeComboBox.addItem($tr("AddConnectDialog.sslVerifyModeDefault.Title"));
+        sslVerifyModeComboBox.addItem($tr("AddConnectDialog.sslVerifyModeNone.Title"));
+        sslVerifyModeComboBox.addItem($tr("AddConnectDialog.sslVerifyModeCa.Title"));
 
         this.contentPane.registerKeyboardAction(ignore -> dispose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         this.sshPrivateKeyFile.setVisible(enableSshPrivateKey.isSelected());
@@ -197,16 +215,16 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
             sshPanel.setVisible(false);
             sslPanel.setVisible(enableSSLBtn.isSelected());
             if (enableSSLBtn.isSelected()) {
-                setSize(new Dimension(getWidth(), getHeight() + 80));
+                setSize(new Dimension(getWidth(), getHeight() + 105));
             } else {
-                setSize(new Dimension(getWidth(), getHeight() - 80));
+                setSize(new Dimension(getWidth(), getHeight() - 105));
             }
         });
 
         enableSSHBtn.addActionListener(ignore -> {
             if (enableSSLBtn.isSelected()) {
                 enableSSLBtn.setSelected(false);
-                setSize(new Dimension(getWidth(), getHeight() - 130));
+                setSize(new Dimension(getWidth(), getHeight() - 160));
             }
             sslPanel.setVisible(false);
             sshPanel.setVisible(enableSSHBtn.isSelected());
@@ -481,7 +499,8 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
                 null,
                 publicKeyField.getText(),
                 null,
-                String.valueOf(sslPasswordField.getPassword())
+                String.valueOf(sslPasswordField.getPassword()),
+                SSL_VERIFY_MODES[Math.max(sslVerifyModeComboBox.getSelectedIndex(), 0)]
         );
         RedisConnectContext redisConnectContext = new RedisConnectContext();
         redisConnectContext.setTitle(title);
@@ -528,10 +547,11 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         this.enableSSLBtn.setSelected(redisConnectContext.getEnableSsl());
         this.enableSSHBtn.setSelected(ConnectType.SSH.equals(redisConnectContext.getConnectTypeMode()));
         if (enableSSLBtn.isSelected()) {
-            setSize(new Dimension(getWidth(), getHeight() - 130));
+            setSize(new Dimension(getWidth(), getHeight() - 160));
             sslPanel.setVisible(true);
             sslPasswordField.setText(redisConnectContext.getSslInfo().getPassword());
             publicKeyField.setText(redisConnectContext.getSslInfo().getPublicKeyFilePath());
+            sslVerifyModeComboBox.setSelectedIndex(sslVerifyModeIndex(redisConnectContext.getSslInfo().getVerifyMode()));
         }
         if (enableSSHBtn.isSelected()) {
             setSize(new Dimension(getWidth(), getHeight() + 140));
@@ -573,6 +593,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         passwordField.setEchoChar('*');
         sslPasswordField = new JPasswordField();
         sslPasswordField.setEchoChar('*');
+        sslVerifyModeComboBox = new JComboBox<>();
         portField = new JSpinner();
         portField.setEditor(new JSpinner.NumberEditor(portField, "####"));
         portField.setValue(6379);
@@ -634,7 +655,7 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridLayoutManager(3, 1, new Insets(0, 0, 0, 10), -1, -1));
         panel1.add(panel2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        sslPanel.setLayout(new GridLayoutManager(2, 4, new Insets(0, 0, 0, 0), -1, -1));
+        sslPanel.setLayout(new GridLayoutManager(3, 4, new Insets(0, 0, 0, 0), -1, -1));
         panel2.add(sslPanel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JLabel label1 = new JLabel();
         this.$$$loadLabelText$$$(label1, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "AddConnectDialog.sslCertLabel.Title"));
@@ -653,6 +674,10 @@ public class AddConnectDialog extends QSDialog<RedisFrontWidget> {
         showSslPassword = new JCheckBox();
         this.$$$loadButtonText$$$(showSslPassword, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "AddConnectDialog.showSslPassword.Title"));
         sslPanel.add(showSslPassword, new GridConstraints(1, 2, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label3 = new JLabel();
+        this.$$$loadLabelText$$$(label3, this.$$$getMessageFromBundle$$$("org/dromara/redisfront/RedisFront", "AddConnectDialog.sslVerifyModeLabel.Title"));
+        sslPanel.add(label3, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        sslPanel.add(sslVerifyModeComboBox, new GridConstraints(2, 1, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         sshPanel.setLayout(new GridLayoutManager(5, 5, new Insets(0, 0, 0, 0), -1, -1));
         panel2.add(sshPanel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         sshHostLabel = new JLabel();

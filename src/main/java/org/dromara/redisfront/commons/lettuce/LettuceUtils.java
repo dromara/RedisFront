@@ -23,6 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -78,7 +81,20 @@ public class LettuceUtils {
             var staticCredentialsProvider = new StaticCredentialsProvider(null, password.toCharArray());
             redisURI.setCredentialsProvider(staticCredentialsProvider);
         }
+        applyVerifyMode(redisURI, redisConnectContext);
         return redisURI;
+    }
+
+    /**
+     * 云厂商托管 Redis（如亚马逊 ElastiCache）的服务端证书不在 JDK 默认信任库中，
+     * 由用户显式选择校验模式：NONE 信任所有证书，CA 跳过主机名校验，缺省不干预。
+     */
+    private static void applyVerifyMode(RedisURI redisURI, RedisConnectContext redisConnectContext) {
+        var sslInfo = redisConnectContext.getSslInfo();
+        var verifyMode = sslInfo != null ? sslInfo.getVerifyMode() : null;
+        if (SslVerifyMode.NONE.name().equals(verifyMode) || SslVerifyMode.CA.name().equals(verifyMode)) {
+            redisURI.setVerifyPeer(SslVerifyMode.valueOf(verifyMode));
+        }
     }
 
     private static void configureOptions(RedisClusterClient redisClient, RedisConnectContext redisConnectContext) {
@@ -104,11 +120,7 @@ public class LettuceUtils {
                 && RedisFrontUtils.isNotEmpty(redisConnectContext.getSslInfo().getPublicKeyFilePath())) {
             clusterClientOptions = clusterClientOptions
                     .mutate()
-                    .sslOptions(SslOptions.builder()
-                            .jdkSslProvider()
-                            .truststore(new File(redisConnectContext.getSslInfo().getPublicKeyFilePath()),
-                                    redisConnectContext.getSslInfo().getPassword())
-                            .build())
+                    .sslOptions(buildSslOptions(redisConnectContext))
                     .build();
         }
         redisClient.setOptions(clusterClientOptions);
@@ -118,12 +130,30 @@ public class LettuceUtils {
         if (redisConnectContext.getEnableSsl()
                 && redisConnectContext.getSslInfo() != null
                 && RedisFrontUtils.isNotEmpty(redisConnectContext.getSslInfo().getPublicKeyFilePath())) {
-            var sslOptions = SslOptions.builder()
-                    .jdkSslProvider()
-                    .truststore(new File(redisConnectContext.getSslInfo().getPublicKeyFilePath()),
-                            redisConnectContext.getSslInfo().getPassword())
-                    .build();
-            redisClient.setOptions(ClientOptions.builder().sslOptions(sslOptions).build());
+            redisClient.setOptions(ClientOptions.builder().sslOptions(buildSslOptions(redisConnectContext)).build());
+        }
+    }
+
+    /**
+     * PEM 证书集合（如亚马逊 CA 包）走 netty 的 trustManager 直接解析，JKS/PKCS12 仍走 truststore，
+     * 兼容存量连接的证书文件
+     */
+    private static SslOptions buildSslOptions(RedisConnectContext redisConnectContext) {
+        var sslOptionsBuilder = SslOptions.builder().jdkSslProvider();
+        var certFile = new File(redisConnectContext.getSslInfo().getPublicKeyFilePath());
+        if (isPemCertificate(certFile)) {
+            sslOptionsBuilder.trustManager(certFile);
+        } else {
+            sslOptionsBuilder.truststore(certFile, redisConnectContext.getSslInfo().getPassword());
+        }
+        return sslOptionsBuilder.build();
+    }
+
+    private static boolean isPemCertificate(File file) {
+        try (var input = Files.newInputStream(file.toPath())) {
+            return new String(input.readNBytes(2048), StandardCharsets.US_ASCII).contains("-----BEGIN");
+        } catch (IOException e) {
+            return false;
         }
     }
 
