@@ -16,11 +16,16 @@ RedisFront is a cross-platform Redis client tool developed with Java Swing, comp
 
 * **Real-time Monitoring**: Displays critical metrics like memory usage, connection counts, and command statistics for performance optimization
 
-![RedisFront](screenshot/2026.1/2026.1-dark.png)
-![RedisFront](screenshot/2026.1/2026.1-dark_1.png)
-![RedisFront](screenshot/2026.1/2026.1-dark_2.png)
-![RedisFront](screenshot/2026.1/2026.1-dark_3.png)
-![RedisFront](screenshot/2026.1/2026.1-dark_4.png)
+<table>
+  <tr>
+    <td><img src="screenshot/2026.1/2026.1-dark.png"/></td>
+    <td><img src="screenshot/2026.1/2026.1-dark_1.png"/></td>
+  </tr>
+  <tr>
+    <td><img src="screenshot/2026.1/2026.1-dark_2.png"/></td>
+    <td><img src="screenshot/2026.1/2026.1-dark_3.png"/></td>
+  </tr>
+</table>
 
 ### 🌱 Download
 
