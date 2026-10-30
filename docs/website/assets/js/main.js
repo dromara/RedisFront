@@ -91,4 +91,33 @@
   /* ---------- 年份 ---------- */
   var year = document.getElementById("year");
   if (year) { year.textContent = new Date().getFullYear(); }
+
+  /* ---------- 二维码弹窗：点击切换，点空白处或按 Esc 关闭 ---------- */
+  var qrTriggers = document.querySelectorAll(".qr-trigger");
+  var qrPops = document.querySelectorAll(".qr-pop");
+  function closeAllQr() {
+    for (var j = 0; j < qrPops.length; j++) { qrPops[j].classList.remove("open"); }
+    for (var k = 0; k < qrTriggers.length; k++) {
+      qrTriggers[k].setAttribute("aria-expanded", "false");
+    }
+  }
+  for (var i = 0; i < qrTriggers.length; i++) {
+    (function (trigger) {
+      var pop = document.getElementById(trigger.getAttribute("data-target"));
+      if (!pop) { return; }
+      trigger.addEventListener("click", function (e) {
+        e.stopPropagation();
+        var wasOpen = pop.classList.contains("open");
+        closeAllQr();
+        if (!wasOpen) {
+          pop.classList.add("open");
+          trigger.setAttribute("aria-expanded", "true");
+        }
+      });
+    })(qrTriggers[i]);
+  }
+  document.addEventListener("click", closeAllQr);
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") { closeAllQr(); }
+  });
 })();

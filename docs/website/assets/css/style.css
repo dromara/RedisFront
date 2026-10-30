@@ -95,7 +95,8 @@ html.zh .en, html.en .zh { display: none; }
   display: inline-flex; align-items: center; gap: 8px;
   padding: 11px 22px; border-radius: 10px;
   font-size: 15px; font-weight: 600; border: 1px solid transparent;
-  cursor: pointer; transition: transform .15s, box-shadow .15s, background .15s;
+  cursor: pointer; white-space: nowrap;
+  transition: transform .15s, box-shadow .15s, background .15s;
 }
 .btn:hover { transform: translateY(-2px); }
 .btn-primary { background: var(--brand); color: #fff; box-shadow: 0 4px 14px rgba(179, 4, 4, .35); }
@@ -113,22 +114,23 @@ html.zh .en, html.en .zh { display: none; }
 }
 .hero-grid {
   display: grid;
-  grid-template-columns: minmax(0, 600px) minmax(0, 1fr);
-  gap: 48px;
+  grid-template-columns: minmax(0, 480px) minmax(0, 1fr);
+  gap: 32px;
   align-items: center;
-  /* Hero 用比正文更宽的专属容器：图比正文区大，但有硬上限，不会随屏幕无限放大 */
-  max-width: 1600px;
+  /* 与全站 1200px 内容列同宽同边，截图不超出内容区 */
+  max-width: var(--max-w);
   margin: 0 auto;
   padding: 0 24px;
 }
 .hero h1 {
-  font-size: clamp(30px, 4.4vw, 46px); line-height: 1.22;
+  font-size: clamp(26px, 3.1vw, 36px); line-height: 1.22;
   margin: 0 0 18px; letter-spacing: -.5px;
+  text-wrap: balance;
 }
 .hero h1 .accent { color: var(--brand); }
-.hero .lead { color: var(--muted); font-size: 17.5px; margin: 0 0 30px; max-width: 34em; }
+.hero .lead { color: var(--muted); font-size: 16px; margin: 0 0 30px; max-width: 34em; }
 .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 22px; }
-.hero-meta { display: flex; gap: 16px; flex-wrap: wrap; color: var(--muted); font-size: 13.5px; }
+.hero-meta { display: flex; gap: 10px; flex-wrap: wrap; color: var(--muted); font-size: 12.5px; }
 .hero-meta span { display: inline-flex; align-items: center; gap: 6px; }
 
 /* ---------- 截图：不加任何框、圆角与投影，原样展示 ---------- */
@@ -200,15 +202,44 @@ tbody tr:hover { background: var(--bg-subtle); }
 .dl-card { text-align: center; }
 .dl-card .os { font-size: 30px; }
 .dl-card h3 { margin: 10px 0 4px; }
-.dl-card .files { color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+.dl-card .files { color: var(--muted); font-size: 13px; }
+/* 卡片内无按钮时，文件行即卡片末尾，不再留按钮间距 */
+.dl-card .files:last-child { margin-bottom: 0; }
+
+/* ---------- 下载分区：国际 / 国内 ---------- */
+.dl-zone + .dl-zone { margin-top: 48px; }
+.dl-zone-head { text-align: center; margin: 0 0 26px; }
+.dl-zone-head h3 { margin: 0 0 6px; font-size: 18px; }
+.dl-zone-head h3 .badge { margin-left: 10px; }
+.dl-zone-head p { margin: 0; }
+.dl-zone-cta { text-align: center; margin: 30px 0 0; }
 
 /* ---------- 页脚 ---------- */
 footer { border-top: 1px solid var(--border); padding: 40px 0; color: var(--muted); font-size: 14px; }
-.foot-grid { display: flex; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
+/* 品牌列靠左，链接列组靠右收拢；取消 space-between 避免中部出现大空洞 */
+.foot-grid { display: flex; gap: 64px; flex-wrap: wrap; }
+.foot-grid > :first-child { margin-right: auto; }
 .foot-grid h4 { color: var(--text); font-size: 14px; margin: 0 0 12px; }
 .foot-grid ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .foot-grid a:hover { color: var(--brand); }
 .foot-bottom { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+/* ---------- 二维码弹窗按钮 ---------- */
+/* 两个弹窗都锚定本容器同一点弹出，互斥显示，不会互相遮挡也不会盖住另一个按钮 */
+.qr-btns { position: relative; display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+.qr-pop {
+  display: none;
+  position: absolute; bottom: calc(100% + 10px); left: 0;
+  z-index: 60; width: 200px; padding: 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.qr-pop img { width: 100%; height: auto; display: block; border-radius: var(--radius-s); }
+.qr-pop .note { margin: 8px 0 0; font-size: 12px; line-height: 1.5; }
+.qr-pop.open { display: block; }
 
 /* ---------- 其它 ---------- */
 .qr { text-align: center; }
@@ -218,8 +249,12 @@ footer { border-top: 1px solid var(--border); padding: 40px 0; color: var(--mute
 .tunnel .link { color: var(--brand); font-weight: 600; }
 .note { color: var(--muted); font-size: 13.5px; }
 
-@media (max-width: 900px) {
+/* hero 双列需要完整的 1200px 内容列，更窄一律单列堆叠 */
+@media (max-width: 1199px) {
   .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+}
+
+@media (max-width: 900px) {
   .grid-3 { grid-template-columns: 1fr; }
   .grid-2 { grid-template-columns: 1fr; }
   .nav-links { display: none; }
